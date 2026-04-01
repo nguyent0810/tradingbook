@@ -12,6 +12,7 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 export const prisma =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   globalForPrisma.prisma ?? new PrismaClient({ adapter } as any);
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

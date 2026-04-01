@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import {
   createTrade,
   updateTrade,
@@ -222,7 +223,31 @@ export function TradeForm({ trade }: TradeFormProps) {
         </div>
       </div>
 
-      {/* Row 5: Notes */}
+      {/* Row 5: Strategy */}
+      <div>
+        <label htmlFor="strategy" className="label">
+          Strategy{" "}
+          <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+        </label>
+        <input
+          id="strategy"
+          name="strategy"
+          type="text"
+          placeholder="e.g. Breakout, Pullback"
+          defaultValue={trade?.strategy || ""}
+          className="input"
+          list="preset-strategies"
+        />
+        <datalist id="preset-strategies">
+          <option value="Breakout" />
+          <option value="Pullback" />
+          <option value="Mean Reversion" />
+          <option value="Scalp" />
+          <option value="Swing" />
+        </datalist>
+      </div>
+
+      {/* Row 6: Notes */}
       <div>
         <label htmlFor="notes" className="label">
           Notes{" "}
@@ -267,9 +292,9 @@ export function TradeForm({ trade }: TradeFormProps) {
           )}
         </button>
 
-        <a href="/trades" className="btn btn-secondary">
+        <Link href="/trades" className="btn btn-secondary">
           Cancel
-        </a>
+        </Link>
       </div>
     </form>
   );

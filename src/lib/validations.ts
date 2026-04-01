@@ -18,6 +18,7 @@ export const TradeFormSchema = z.object({
     .or(z.literal("")),
   quantity: z.coerce.number().positive("Quantity must be positive."),
   fees: z.coerce.number().min(0, "Fees cannot be negative.").default(0),
+  strategy: z.string().trim().optional(),
   notes: z.string().max(2000, "Notes too long.").optional().default(""),
 });
 

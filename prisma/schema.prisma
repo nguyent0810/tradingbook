@@ -36,6 +36,7 @@ model Trade {
   fees       Float  @default(0)
 
   realizedPnl Float? @map("realized_pnl")
+  strategy    String?
   notes       String? @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
