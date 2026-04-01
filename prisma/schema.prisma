@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  trades Trade[]
+
+  @@map("users")
+}
+
+model Trade {
+  id        String      @id @default(cuid())
+  userId    String      @map("user_id")
+  symbol    String
+  direction Direction
+  status    TradeStatus @default(PLANNED)
+
+  entryDate  DateTime  @map("entry_date")
+  exitDate   DateTime? @map("exit_date")
+
+  entryPrice Float @map("entry_price")
+  exitPrice  Float? @map("exit_price")
+  quantity   Float
+  fees       Float  @default(0)
+
+  realizedPnl Float? @map("realized_pnl")
+  notes       String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([symbol])
+  @@index([status])
+  @@index([entryDate])
+  @@map("trades")
+}
+
+enum Direction {
+  LONG
+  SHORT
+}
+
+enum TradeStatus {
+  PLANNED
+  OPEN
+  CLOSED
+  CANCELLED
+}
