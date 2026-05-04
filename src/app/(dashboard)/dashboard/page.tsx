@@ -3,13 +3,18 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { EquityCurveChart } from "@/components/equity-curve-chart";
+import { DashboardKpiBand } from "@/components/dashboard-kpi-band";
+import { EquityPanel } from "@/components/equity-panel";
+import { PerformanceEdgeGrid } from "@/components/performance-edge-grid";
+import { TradePreviewTable } from "@/components/trade-preview-table";
 import { formatVND } from "@/lib/formatters";
 import {
   computeAdvancedMetrics,
   computeEquityCurve,
   computePlaybookPerformance,
 } from "@/lib/analytics";
+import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
+import { RegimePanel } from "@/components/regime-panel";
 
 export const metadata: Metadata = {
   title: "Dashboard — TradeLog",
@@ -20,7 +25,6 @@ export default async function DashboardPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  // Fetch all of user's trades
   const trades = await prisma.trade.findMany({
     where: { userId: session.userId },
     orderBy: { entryDate: "asc" },
@@ -43,9 +47,14 @@ export default async function DashboardPage() {
   const playbookData = computePlaybookPerformance(trades);
   const openTrades = trades.filter((t) => t.status === "OPEN").length;
 
+  const recentTrades = [...trades]
+    .sort((a, b) => b.entryDate.getTime() - a.entryDate.getTime())
+    .slice(0, 10);
+
+  const regime = await getMarketRegimeFromDb("VNINDEX");
+
   return (
-    <div className="page-container animate-in space-y-8 pb-12">
-      {/* Header */}
+    <div className="page-container animate-in space-y-6 pb-10">
       <div className="flex items-center justify-between">
         <div>
           <h1
@@ -55,7 +64,7 @@ export default async function DashboardPage() {
             Dashboard
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
-            Advanced analytical breakdown of your performance edge.
+            Closed-trade KPIs, equity, and recent ledger activity.
           </p>
         </div>
 
@@ -76,118 +85,44 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Main Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <div className="metric-card">
-          <div className="metric-label">Closed Trades</div>
-          <div className="metric-value">{totalTrades}</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-label">Open Positions</div>
-          <div className="metric-value">{openTrades}</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-label">Win Rate</div>
-          <div className="metric-value">
-            {totalTrades > 0 ? winRate : "—"}
-            {totalTrades > 0 && (
-              <span
-                className="ml-1 text-sm font-normal"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                %
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-label">Cumulative P&L</div>
-          <div
-            className="metric-value"
-            style={{
-              color:
-                totalPnl === 0
-                  ? "var(--text-primary)"
-                  : totalPnl > 0
-                    ? "var(--pnl-positive)"
-                    : "var(--danger)",
-            }}
-          >
-            {totalPnl > 0 ? "+" : ""}{formatVND(totalPnl, true)}
-          </div>
-        </div>
+      <RegimePanel
+        symbol={regime.symbol}
+        level={regime.level}
+        reasons={regime.reasons}
+        evaluatedBarsCount={regime.evaluatedBarsCount}
+        storedBarsCount={regime.storedBarsCount}
+        latestBar={regime.latestBar}
+        checkedAt={regime.checkedAt}
+      />
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-stretch">
+        <DashboardKpiBand
+          className="lg:col-span-5"
+          totalTrades={totalTrades}
+          openTrades={openTrades}
+          winRate={winRate}
+          totalPnl={totalPnl}
+        />
+        <EquityPanel className="lg:col-span-7" data={equityData} />
       </div>
 
-      {/* Equity Curve */}
-      <div className="space-y-4">
-        <div>
-          <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-            Equity Curve
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-tertiary)" }}>
-            Cumulative progression of closed realized P&L.
-          </p>
-        </div>
-        <EquityCurveChart data={equityData} />
-      </div>
+      <TradePreviewTable trades={recentTrades} />
 
-      {/* Advanced Performance Metrics */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-          Performance Edge
-        </h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-7">
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Expectancy</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--pnl-positive)]">
-              {formatVND(expectancy, true)}
-            </div>
-          </div>
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Profit Factor</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--text-primary)]">
-              {profitFactor > 0 ? profitFactor : "—"}
-            </div>
-          </div>
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Max Drawdown</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--danger)]">
-              {formatVND(maxDrawdown, true)}
-            </div>
-          </div>
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Avg Winner</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--pnl-positive)]">
-              {formatVND(averageWinner, true)}
-            </div>
-          </div>
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Avg Loser</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--danger)]">
-              {formatVND(-averageLoser, true)}
-            </div>
-          </div>
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Largest Win</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--pnl-positive)]">
-              {formatVND(largestWinner, true)}
-            </div>
-          </div>
-          <div className="card p-4">
-            <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Largest Loss</div>
-            <div className="mt-2 text-xl font-semibold text-[var(--danger)]">
-              {formatVND(largestLoser, true)}
-            </div>
-          </div>
-        </div>
-      </div>
+      <PerformanceEdgeGrid
+        expectancy={expectancy}
+        profitFactor={profitFactor}
+        maxDrawdown={maxDrawdown}
+        averageWinner={averageWinner}
+        averageLoser={averageLoser}
+        largestWinner={largestWinner}
+        largestLoser={largestLoser}
+      />
 
-      {/* Playbook analytics */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
           Playbook Performance
         </h2>
-        
+
         {playbookData.length === 0 ? (
           <div className="flex h-[150px] items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-sm text-[var(--text-muted)]">
             Close trades to see playbook-level metrics here.
@@ -201,24 +136,30 @@ export default async function DashboardPage() {
                     <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Playbook</th>
                     <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Count</th>
                     <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Win Rate</th>
-                    <th className="px-6 py-3 font-medium text-[var(--text-secondary)] text-right">Net P&L</th>
+                    <th className="px-6 py-3 text-right font-medium text-[var(--text-secondary)]">
+                      Net P&L
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-color)]">
                   {playbookData.map((s) => (
-                    <tr key={s.playbook} className="hover:bg-[var(--bg-primary)] transition-colors">
+                    <tr
+                      key={s.playbook}
+                      className="transition-colors hover:bg-[var(--bg-primary)]"
+                    >
                       <td className="px-6 py-4 font-medium text-[var(--text-primary)]">
                         {s.label}
                       </td>
-                      <td className="px-6 py-4 text-[var(--text-secondary)]">
-                        {s.totalTrades}
-                      </td>
-                      <td className="px-6 py-4 text-[var(--text-secondary)]">
-                        {s.winRate}%
-                      </td>
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">{s.totalTrades}</td>
+                      <td className="px-6 py-4 text-[var(--text-secondary)]">{s.winRate}%</td>
                       <td className="px-6 py-4 text-right font-medium">
-                        <span style={{ color: s.totalPnl >= 0 ? "var(--pnl-positive)" : "var(--danger)" }}>
-                          {s.totalPnl > 0 ? "+" : ""}{formatVND(s.totalPnl, true)}
+                        <span
+                          style={{
+                            color: s.totalPnl >= 0 ? "var(--pnl-positive)" : "var(--danger)",
+                          }}
+                        >
+                          {s.totalPnl > 0 ? "+" : ""}
+                          {formatVND(s.totalPnl, true)}
                         </span>
                       </td>
                     </tr>
@@ -230,12 +171,20 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Quick Actions */}
       {trades.length === 0 && (
-        <div className="card mt-8">
+        <div className="card mt-4">
           <div className="empty-state">
             <div className="empty-state-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 <polyline points="16 7 22 7 22 13" />
               </svg>

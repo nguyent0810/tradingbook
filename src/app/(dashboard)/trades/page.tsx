@@ -137,10 +137,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th>Playbook</th>
                 <th>Status</th>
                 <th>Entry Date</th>
-                <th>Entry Price</th>
-                <th>Exit Price</th>
-                <th>Qty</th>
-                <th>P&L</th>
+                <th className="table-num">Entry Price</th>
+                <th className="table-num">Exit Price</th>
+                <th className="table-num">Qty</th>
+                <th className="table-num">P&L</th>
                 <th></th>
               </tr>
             </thead>
@@ -179,14 +179,14 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     </span>
                   </td>
                   <td className="mono">{formatDate(trade.entryDate)}</td>
-                  <td className="mono">{formatVND(trade.entryPrice, false)}</td>
-                  <td className="mono">
+                  <td className="mono table-num">{formatVND(trade.entryPrice, false)}</td>
+                  <td className="mono table-num">
                     {trade.exitPrice !== null
                       ? formatVND(trade.exitPrice, false)
                       : "—"}
                   </td>
-                  <td className="mono">{trade.quantity}</td>
-                  <td>
+                  <td className="mono table-num">{trade.quantity}</td>
+                  <td className="table-num">
                     {trade.realizedPnl !== null ? (
                       <span
                         className="mono font-medium"

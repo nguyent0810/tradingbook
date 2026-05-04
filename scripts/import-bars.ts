@@ -4,9 +4,9 @@
  * Usage: npx tsx scripts/import-bars.ts [path/to/bars.json]
  * Default path: data/vnindex.json
  *
- * Requires DATABASE_URL in .env
+ * Requires DATABASE_URL (see scripts/load-env.ts: `.env` + `.env.local`)
  */
-import "dotenv/config";
+import "./load-env";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { prisma } from "../src/lib/prisma";

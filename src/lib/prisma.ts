@@ -1,8 +1,20 @@
 import { PrismaClient } from "@/generated/prisma/client";
+import { describeDatabaseUrl } from "@/lib/database-url-fingerprint";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const connectionString = process.env.DATABASE_URL;
+
+if (process.env.NODE_ENV === "development" && typeof globalThis !== "undefined") {
+  const g = globalThis as { __tradingLogDbTarget?: boolean };
+  if (!g.__tradingLogDbTarget) {
+    g.__tradingLogDbTarget = true;
+    console.log(
+      "[prisma] (next dev / server) DATABASE_URL →",
+      describeDatabaseUrl()
+    );
+  }
+}
 
 if (!connectionString) {
   throw new Error(

@@ -49,6 +49,9 @@
   /* Transitions */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout — sticky tables stay below dashboard layout header (h-14) */
+  --app-header-height: 3.5rem;
 }
 
 @theme inline {
@@ -316,9 +319,16 @@ body {
   font-size: 14px;
 }
 
+.table thead th {
+  position: sticky;
+  top: var(--app-header-height);
+  z-index: 5;
+  box-shadow: 0 1px 0 var(--border-primary);
+}
+
 .table th {
   text-align: left;
-  padding: 12px 16px;
+  padding: 10px 14px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-tertiary);
@@ -329,9 +339,14 @@ body {
 }
 
 .table td {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border-primary);
   color: var(--text-secondary);
+}
+
+.table th.table-num,
+.table td.table-num {
+  text-align: right;
 }
 
 .table tr:last-child td {
@@ -410,7 +425,7 @@ body {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-lg);
-  padding: 24px;
+  padding: 18px 20px;
   transition: border-color var(--transition-fast);
 }
 
@@ -426,7 +441,7 @@ body {
 }
 
 .metric-value {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
@@ -453,7 +468,7 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 24px 24px;
 }
 
 @media (max-width: 768px) {
