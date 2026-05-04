@@ -1,4 +1,5 @@
 import { Trade } from "@/generated/prisma/client";
+import { formatPlaybookLabel } from "@/lib/playbook-config";
 
 export type AdvancedMetrics = {
   totalTrades: number;
@@ -19,8 +20,9 @@ export type EquityDataPoint = {
   cumulativePnl: number;
 };
 
-export type StrategyPerformance = {
-  strategy: string;
+export type PlaybookPerformance = {
+  playbook: string;
+  label: string;
   totalTrades: number;
   winRate: number;
   totalPnl: number;
@@ -137,30 +139,33 @@ export function computeEquityCurve(trades: Trade[]): EquityDataPoint[] {
   });
 }
 
-export function computeStrategyPerformance(trades: Trade[]): StrategyPerformance[] {
+export function computePlaybookPerformance(trades: Trade[]): PlaybookPerformance[] {
   const closedTrades = trades.filter((t) => t.status === "CLOSED" && t.realizedPnl !== null);
-  
+
   const groups: Record<string, { count: number; wins: number; pnl: number }> = {};
 
   for (const t of closedTrades) {
-    const strategy = t.strategy?.trim() || "Uncategorized";
-    if (!groups[strategy]) {
-      groups[strategy] = { count: 0, wins: 0, pnl: 0 };
+    const playbook = t.playbook;
+    if (!groups[playbook]) {
+      groups[playbook] = { count: 0, wins: 0, pnl: 0 };
     }
-    groups[strategy].count++;
-    groups[strategy].pnl += t.realizedPnl!;
+    groups[playbook].count++;
+    groups[playbook].pnl += t.realizedPnl!;
     if (t.realizedPnl! > 0) {
-      groups[strategy].wins++;
+      groups[playbook].wins++;
     }
   }
 
-  return Object.keys(groups).map((strategy) => {
-    const g = groups[strategy];
-    return {
-      strategy,
-      totalTrades: g.count,
-      winRate: parseFloat(((g.wins / g.count) * 100).toFixed(2)),
-      totalPnl: parseFloat(g.pnl.toFixed(2)),
-    };
-  }).sort((a, b) => b.totalPnl - a.totalPnl);
+  return Object.keys(groups)
+    .map((playbook) => {
+      const g = groups[playbook];
+      return {
+        playbook,
+        label: formatPlaybookLabel(playbook),
+        totalTrades: g.count,
+        winRate: parseFloat(((g.wins / g.count) * 100).toFixed(2)),
+        totalPnl: parseFloat(g.pnl.toFixed(2)),
+      };
+    })
+    .sort((a, b) => b.totalPnl - a.totalPnl);
 }

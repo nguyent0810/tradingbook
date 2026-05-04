@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TradeLog (Vietnam Market Edition)
 
-## Getting Started
+A high-performance trading journal designed explicitly for the Vietnam stock market, built with Next.js 14, TailwindCSS, and Prisma.
 
-First, run the development server:
+## Phase 1 Overview
+This project is currently functionally complete up to Phase 1, which includes:
+- Secure authentication system (JWT via jose implementation).
+- Complete Trade Form logging with symbol, entries, exits, limits, and dynamic strategy tracking.
+- Real-time performance dashboard featuring Equity Curves, Profit Factor, Expectancy, and Strategy breakdowns.
+- Localized Vietnam Market formatting (`₫`) for maximum visual clarity across high-integer financial data.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Environment Variable Requirements
+Before starting, create a `.env` file in the root based on `.env.example` (or use the following):
+
+```env
+# Database Configuration
+# Local environment uses local PostgreSQL
+DATABASE_URL="postgresql://postgres:secret@localhost:5432/trading?schema=public"
+
+# Vercel / Production environment uses Neon or similar hosted DB
+# DATABASE_URL="postgresql://<user>:<password>@<host>/<database>?sslmode=require"
+
+# JWT Authentication Secret (Must be 32+ characters)
+SESSION_SECRET="your-ultra-secure-32-character-jwt-secret-key"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 💻 Local Development Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Initialize Database**
+   Ensure your local PostgreSQL service is running, then run:
+   ```bash
+   npx prisma migrate dev
+   ```
+   *Note: This strictly executes Prisma's versioned workflow against your local DB and safely synchronizes the schema locally.*
 
-## Learn More
+3. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:3000` to begin.
 
-To learn more about Next.js, take a look at the following resources:
+## 🏗️ Vercel Deployment Instructions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Deploying this app is completely automated toward Vercel logic.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Create a new project in Vercel and link your GitHub repository.
+2. In the Vercel Environment Variables UI, add exactly two variables:
+   - `DATABASE_URL` (Pointing to your production/Neon Postgres DB)
+   - `SESSION_SECRET` (Secure random string)
+3. **Build Command Verification:** Our `package.json` relies on `"build": "prisma migrate deploy && next build"`. This strictly ensures that Prisma pushes physical database migrations safely *before* Next.js static generation binds to the Prisma Client. You do not need a custom build command.
+4. Deploy!
 
-## Deploy on Vercel
+### Database Caveats / Notes
+- **Custom Prisma Output:** The Prisma generator creates its client inside `src/generated/prisma`. If you run into a `PrismaClientValidationError` in the local development environment, it is highly likely that Next.js aggressively cached the stale Prisma client in its `.next` folder. Stop the server, run `npx prisma generate` and `rm -rf .next`, then restart `npm run dev`.
+- **Formatting Constraints:** Vietnam Market P&L involves incredibly large integers (millions/billions). We strictly map rendering outputs using `formatVND(value, compact: boolean)` to preserve layout flexbox boundaries.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚦 Known Phase 1 Limitations
+- **Partial Exits:** Currently, tracking multiple exits from the same position (scaling out) requires separate individual trade entries. Advanced fractional trade batching will be addressed in a future phase.
+- **R-Multiples**: Risk-adjusted returns algorithms (R-multiples) are scheduled for Phase 3 logic.

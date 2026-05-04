@@ -8,6 +8,7 @@ import {
   type TradeActionState,
 } from "@/app/actions/trades";
 import type { Trade } from "@/generated/prisma/client";
+import { formatPlaybookLabel } from "@/lib/playbook-config";
 
 interface TradeFormProps {
   trade?: Trade;
@@ -103,6 +104,17 @@ export function TradeForm({ trade }: TradeFormProps) {
         </div>
       </div>
 
+      <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm">
+        <span className="font-medium text-[var(--text-primary)]">Playbook</span>
+        <span className="mx-2 text-[var(--text-muted)]">·</span>
+        <span className="text-[var(--text-secondary)]">
+          {formatPlaybookLabel(trade?.playbook ?? "BREAKOUT_PULLBACK")}
+        </span>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">
+          This journal is locked to the Breakout → Pullback playbook only.
+        </p>
+      </div>
+
       {/* Row 2: Entry/Exit Date */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
@@ -149,9 +161,9 @@ export function TradeForm({ trade }: TradeFormProps) {
             id="entryPrice"
             name="entryPrice"
             type="number"
-            step="0.01"
+            step="any"
             required
-            placeholder="0.00"
+            placeholder="0"
             defaultValue={trade?.entryPrice || ""}
             className="input"
           />
@@ -171,8 +183,8 @@ export function TradeForm({ trade }: TradeFormProps) {
             id="exitPrice"
             name="exitPrice"
             type="number"
-            step="0.01"
-            placeholder="0.00"
+            step="any"
+            placeholder="0"
             defaultValue={trade?.exitPrice ?? ""}
             className="input"
           />
@@ -194,7 +206,7 @@ export function TradeForm({ trade }: TradeFormProps) {
             id="quantity"
             name="quantity"
             type="number"
-            step="0.01"
+            step="any"
             required
             placeholder="0"
             defaultValue={trade?.quantity || ""}
@@ -215,36 +227,12 @@ export function TradeForm({ trade }: TradeFormProps) {
             id="fees"
             name="fees"
             type="number"
-            step="0.01"
-            placeholder="0.00"
+            step="any"
+            placeholder="0"
             defaultValue={trade?.fees || 0}
             className="input"
           />
         </div>
-      </div>
-
-      {/* Row 5: Strategy */}
-      <div>
-        <label htmlFor="strategy" className="label">
-          Strategy{" "}
-          <span style={{ color: "var(--text-muted)" }}>(optional)</span>
-        </label>
-        <input
-          id="strategy"
-          name="strategy"
-          type="text"
-          placeholder="e.g. Breakout, Pullback"
-          defaultValue={trade?.strategy || ""}
-          className="input"
-          list="preset-strategies"
-        />
-        <datalist id="preset-strategies">
-          <option value="Breakout" />
-          <option value="Pullback" />
-          <option value="Mean Reversion" />
-          <option value="Scalp" />
-          <option value="Swing" />
-        </datalist>
       </div>
 
       {/* Row 6: Notes */}

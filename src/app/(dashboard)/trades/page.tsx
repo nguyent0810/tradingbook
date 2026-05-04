@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { TradeFilters } from "./trade-filters";
+import { formatVND } from "@/lib/formatters";
+import { formatPlaybookLabel } from "@/lib/playbook-config";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -49,10 +51,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       day: "numeric",
       year: "numeric",
     });
-  };
-
-  const formatCurrency = (value: number) => {
-    return `$${value.toFixed(2)}`;
   };
 
   return (
@@ -136,6 +134,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               <tr>
                 <th>Symbol</th>
                 <th>Direction</th>
+                <th>Playbook</th>
                 <th>Status</th>
                 <th>Entry Date</th>
                 <th>Entry Price</th>
@@ -168,6 +167,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     </span>
                   </td>
                   <td>
+                    <span className="px-2 py-1 text-xs rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                      {formatPlaybookLabel(trade.playbook)}
+                    </span>
+                  </td>
+                  <td>
                     <span
                       className={`badge badge-${trade.status.toLowerCase()}`}
                     >
@@ -175,10 +179,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     </span>
                   </td>
                   <td className="mono">{formatDate(trade.entryDate)}</td>
-                  <td className="mono">{formatCurrency(trade.entryPrice)}</td>
+                  <td className="mono">{formatVND(trade.entryPrice, false)}</td>
                   <td className="mono">
                     {trade.exitPrice !== null
-                      ? formatCurrency(trade.exitPrice)
+                      ? formatVND(trade.exitPrice, false)
                       : "—"}
                   </td>
                   <td className="mono">{trade.quantity}</td>
@@ -193,8 +197,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                               : "var(--pnl-negative)",
                         }}
                       >
-                        {trade.realizedPnl >= 0 ? "+" : ""}
-                        {formatCurrency(trade.realizedPnl)}
+                        {trade.realizedPnl > 0 ? "+" : ""}
+                        {formatVND(trade.realizedPnl, false)}
                       </span>
                     ) : (
                       <span style={{ color: "var(--text-muted)" }}>—</span>

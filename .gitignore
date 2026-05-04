@@ -42,4 +42,7 @@ next-env.d.ts
 
 /src/generated/prisma
 
+# Fetched market data (regenerate with scripts/fetch_vnindex.py)
+/data/vnindex.json
+
 local.env

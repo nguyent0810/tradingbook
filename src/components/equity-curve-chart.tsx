@@ -10,6 +10,7 @@ import {
   CartesianGrid
 } from "recharts";
 import type { EquityDataPoint } from "@/lib/analytics";
+import { formatVND } from "@/lib/formatters";
 
 export function EquityCurveChart({ data }: { data: EquityDataPoint[] }) {
   if (!data || data.length === 0) {
@@ -56,9 +57,10 @@ export function EquityCurveChart({ data }: { data: EquityDataPoint[] }) {
             tick={{ fill: "var(--text-muted)", fontSize: 12 }}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(val) => `$${val}`}
+            tickFormatter={(val) => formatVND(val, true)}
           />
           <Tooltip
+            formatter={(value: number | string | readonly (number | string)[] | undefined) => [formatVND(Number(Array.isArray(value) ? value[0] : value) || 0), "Cumulative P&L"]}
             contentStyle={{
               backgroundColor: "var(--bg-primary)",
               borderColor: "var(--border-color)",

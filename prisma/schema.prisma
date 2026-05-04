@@ -36,8 +36,11 @@ model Trade {
   fees       Float  @default(0)
 
   realizedPnl Float? @map("realized_pnl")
-  strategy    String?
-  notes       String? @db.Text
+
+  /// Locked product playbook — only `BREAKOUT_PULLBACK` is supported.
+  playbook Playbook @default(BREAKOUT_PULLBACK) @map("playbook")
+
+  notes String? @db.Text
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -61,4 +64,26 @@ enum TradeStatus {
   OPEN
   CLOSED
   CANCELLED
+}
+
+enum Playbook {
+  BREAKOUT_PULLBACK
+}
+
+model IndexDailyBar {
+  id        String   @id @default(cuid())
+  symbol    String
+  date      DateTime
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float
+  source    String   @default("vnstock:VCI")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([symbol, date])
+  @@index([symbol])
+  @@map("index_daily_bars")
 }

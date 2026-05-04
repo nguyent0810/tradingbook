@@ -4,6 +4,8 @@ import { getSession } from "@/lib/session";
 import { redirect, notFound } from "next/navigation";
 import { TradeForm } from "@/components/trade-form";
 import { DeleteTradeButton } from "./delete-button";
+import { formatVND } from "@/lib/formatters";
+import { formatPlaybookLabel } from "@/lib/playbook-config";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -46,19 +48,21 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                 {trade.symbol}
               </span>{" "}
               · {trade.direction.toLowerCase()} · {trade.status.toLowerCase()}
+              {" · "}
+              {formatPlaybookLabel(trade.playbook)}
               {trade.realizedPnl !== null && (
                 <>
                   {" · "}
                   <span
                     style={{
                       color:
-                        trade.realizedPnl >= 0
+                        trade.realizedPnl > 0
                           ? "var(--pnl-positive)"
                           : "var(--pnl-negative)",
                     }}
                   >
-                    {trade.realizedPnl >= 0 ? "+" : ""}$
-                    {trade.realizedPnl.toFixed(2)}
+                    {trade.realizedPnl > 0 ? "+" : ""}
+                    {formatVND(trade.realizedPnl, true)}
                   </span>
                 </>
               )}

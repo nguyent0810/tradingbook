@@ -4,10 +4,11 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { EquityCurveChart } from "@/components/equity-curve-chart";
+import { formatVND } from "@/lib/formatters";
 import {
   computeAdvancedMetrics,
   computeEquityCurve,
-  computeStrategyPerformance,
+  computePlaybookPerformance,
 } from "@/lib/analytics";
 
 export const metadata: Metadata = {
@@ -39,7 +40,7 @@ export default async function DashboardPage() {
   } = computeAdvancedMetrics(trades);
 
   const equityData = computeEquityCurve(trades);
-  const strategyData = computeStrategyPerformance(trades);
+  const playbookData = computePlaybookPerformance(trades);
   const openTrades = trades.filter((t) => t.status === "OPEN").length;
 
   return (
@@ -112,7 +113,7 @@ export default async function DashboardPage() {
                     : "var(--danger)",
             }}
           >
-            {totalPnl >= 0 ? "+" : ""}${totalPnl.toFixed(2)}
+            {totalPnl > 0 ? "+" : ""}{formatVND(totalPnl, true)}
           </div>
         </div>
       </div>
@@ -139,7 +140,7 @@ export default async function DashboardPage() {
           <div className="card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Expectancy</div>
             <div className="mt-2 text-xl font-semibold text-[var(--pnl-positive)]">
-              ${expectancy.toFixed(2)}
+              {formatVND(expectancy, true)}
             </div>
           </div>
           <div className="card p-4">
@@ -151,45 +152,45 @@ export default async function DashboardPage() {
           <div className="card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Max Drawdown</div>
             <div className="mt-2 text-xl font-semibold text-[var(--danger)]">
-              ${maxDrawdown.toFixed(2)}
+              {formatVND(maxDrawdown, true)}
             </div>
           </div>
           <div className="card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Avg Winner</div>
             <div className="mt-2 text-xl font-semibold text-[var(--pnl-positive)]">
-              ${averageWinner.toFixed(2)}
+              {formatVND(averageWinner, true)}
             </div>
           </div>
           <div className="card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Avg Loser</div>
             <div className="mt-2 text-xl font-semibold text-[var(--danger)]">
-              -${averageLoser.toFixed(2)}
+              {formatVND(-averageLoser, true)}
             </div>
           </div>
           <div className="card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Largest Win</div>
             <div className="mt-2 text-xl font-semibold text-[var(--pnl-positive)]">
-              ${largestWinner.toFixed(2)}
+              {formatVND(largestWinner, true)}
             </div>
           </div>
           <div className="card p-4">
             <div className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">Largest Loss</div>
             <div className="mt-2 text-xl font-semibold text-[var(--danger)]">
-              ${largestLoser.toFixed(2)}
+              {formatVND(largestLoser, true)}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Strategy Analytics */}
+      {/* Playbook analytics */}
       <div className="space-y-4">
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-          Strategy Breakdown
+          Playbook Performance
         </h2>
         
-        {strategyData.length === 0 ? (
+        {playbookData.length === 0 ? (
           <div className="flex h-[150px] items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-sm text-[var(--text-muted)]">
-            Tag your trades with strategies to see performance metrics here.
+            Close trades to see playbook-level metrics here.
           </div>
         ) : (
           <div className="overflow-hidden rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]">
@@ -197,17 +198,17 @@ export default async function DashboardPage() {
               <table className="w-full text-left text-sm">
                 <thead className="border-b border-[var(--border-color)] bg-[var(--bg-primary)]">
                   <tr>
-                    <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Strategy Tag</th>
+                    <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Playbook</th>
                     <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Count</th>
                     <th className="px-6 py-3 font-medium text-[var(--text-secondary)]">Win Rate</th>
                     <th className="px-6 py-3 font-medium text-[var(--text-secondary)] text-right">Net P&L</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border-color)]">
-                  {strategyData.map((s) => (
-                    <tr key={s.strategy} className="hover:bg-[var(--bg-primary)] transition-colors">
+                  {playbookData.map((s) => (
+                    <tr key={s.playbook} className="hover:bg-[var(--bg-primary)] transition-colors">
                       <td className="px-6 py-4 font-medium text-[var(--text-primary)]">
-                        {s.strategy}
+                        {s.label}
                       </td>
                       <td className="px-6 py-4 text-[var(--text-secondary)]">
                         {s.totalTrades}
@@ -217,7 +218,7 @@ export default async function DashboardPage() {
                       </td>
                       <td className="px-6 py-4 text-right font-medium">
                         <span style={{ color: s.totalPnl >= 0 ? "var(--pnl-positive)" : "var(--danger)" }}>
-                          {s.totalPnl >= 0 ? "+" : ""}${s.totalPnl.toFixed(2)}
+                          {s.totalPnl > 0 ? "+" : ""}{formatVND(s.totalPnl, true)}
                         </span>
                       </td>
                     </tr>

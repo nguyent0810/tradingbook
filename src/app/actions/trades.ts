@@ -5,6 +5,7 @@ import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { TradeFormSchema, computePnl } from "@/lib/validations";
+import { DEFAULT_PLAYBOOK } from "@/lib/playbook-config";
 
 // ─── Types ───
 
@@ -67,7 +68,7 @@ export async function createTrade(
       exitPrice: exitPriceNum,
       quantity: data.quantity,
       fees: data.fees,
-      strategy: data.strategy || null,
+      playbook: DEFAULT_PLAYBOOK,
       realizedPnl,
       notes: data.notes || null,
     },
@@ -132,7 +133,7 @@ export async function updateTrade(
       exitPrice: exitPriceNum,
       quantity: data.quantity,
       fees: data.fees,
-      strategy: data.strategy || null,
+      playbook: DEFAULT_PLAYBOOK,
       realizedPnl,
       notes: data.notes || null,
     },

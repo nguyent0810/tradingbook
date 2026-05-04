@@ -2,7 +2,14 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-const connectionString = `${process.env.DATABASE_URL}`;
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error(
+    "DATABASE_URL environment variable is not set. " +
+    "Please set it in .env (local) or Vercel environment variables (production)."
+  );
+}
 
 const pool = new Pool({ connectionString });
 const adapter = new PrismaPg(pool);
