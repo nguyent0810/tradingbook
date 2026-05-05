@@ -211,3 +211,58 @@ Execution date: 2026-05-05 (local)
   - `--ramp-target=200` -> `Active symbols in DB: 200`
   - `--ramp-target=300` -> `Active symbols in DB: 300`
 
+## Post-Universe-Fix Ramp Results
+
+Execution date: 2026-05-05 (local)
+
+### Ramp 100
+
+- Active symbols: `100`
+- Active with bars: `100`
+- Active with latest-session bars: `63`
+- Scanner summary:
+  - scanned: `100`
+  - failed: `0`
+  - setupCandidatesCreated: `0`
+- Notes:
+  - import completed for all 100 symbols
+  - no runtime scanner failures or aborts
+
+### Ramp 200
+
+- Active symbols: `200`
+- Active with bars: `200`
+- Active with latest-session bars: `117`
+- Scanner summary:
+  - scanned: `200`
+  - failed: `0`
+  - setupCandidatesCreated: `0`
+- Notes:
+  - import completed for all 200 symbols
+  - scanner remained stable with per-symbol isolation
+
+### Ramp 300
+
+- Active symbols: `300`
+- Active with bars: `300`
+- Active with latest-session bars: `177`
+- Scanner summary:
+  - scanned: `300`
+  - failed: `0`
+  - setupCandidatesCreated: `0`
+- Notes:
+  - import completed for all 300 symbols
+  - one transient provider DNS warning appeared during fetch, but output remained complete and scanner run was unaffected
+
+### Failures / anomalies
+
+- **Scanner reliability:** no failures (`failedCount = 0`) across 100/200/300.
+- **Data freshness gap:** latest-session coverage is partial (63%, 58.5%, 59.0% respectively), which drives high tradability filtering via stale-session checks.
+- **Setup supply:** `setupCandidatesCreated` stayed `0` in all three runs (current market + tradability + Gate 2 conditions).
+
+### Recommended current steady-state
+
+1. Keep scan universe at `300` (runtime stability validated).
+2. Prioritize improving latest-session data freshness coverage before further universe expansion.
+3. Continue daily run monitoring with the same summary fields (`scanned`, `failed`, `setupCandidatesCreated`) and investigate setup scarcity as a market-condition/data-freshness issue, not a scanner stability issue.
+
