@@ -133,3 +133,61 @@ Repeat with 200, then 300.
 - Keep guest-rate pacing from fetch script (`--sleep >= 3.0`).
 - Avoid aggressive jumps from 100 to 300+ in one run if fetch failures spike.
 
+## Ramp Execution Results
+
+Execution date: 2026-05-05 (local)
+
+### 100 target
+
+- Command: `npx tsx scripts/seed-stock-symbols.ts --ramp-target=100`
+- Seed result:
+  - provider listing unavailable, static fallback used
+  - active symbols after ramp: `39` (not 100)
+- Coverage check:
+  - active with any bars: `39/39`
+  - active with latest session bar: `39/39`
+- Scanner result:
+  - `Scanned 39/39 symbols · 0 setups found · 0 failed`
+  - `setupCandidatesCreated = 0`
+  - `startedAt` and `finishedAt` populated
+
+### 200 target
+
+- Command: `npx tsx scripts/seed-stock-symbols.ts --ramp-target=200`
+- Seed result:
+  - static fallback used
+  - active symbols after ramp: `39` (universe cap unchanged)
+- Scanner result:
+  - `Scanned 39/39 symbols · 0 setups found · 0 failed`
+  - `setupCandidatesCreated = 0`
+  - run completed without early abort
+
+### 300 target
+
+- Command: `npx tsx scripts/seed-stock-symbols.ts --ramp-target=300`
+- Seed result:
+  - static fallback used
+  - active symbols after ramp: `39` (universe cap unchanged)
+- Scanner result:
+  - `Scanned 39/39 symbols · 0 setups found · 0 failed`
+  - `setupCandidatesCreated = 0`
+  - run completed without early abort
+
+### Observed anomalies
+
+- Universe cap blocker:
+  - current symbol source available to seed path yields only `39` symbols
+  - because of this, 100/200/300 effective ramps cannot be realized yet
+- Setup supply blocker:
+  - all runs completed cleanly, but surfaced setup count stayed `0` in this market/regime snapshot
+  - this is a market-condition/scanner-output issue, not a runtime stability failure
+
+### Final recommended steady-state ramp (current environment)
+
+1. Keep scanner running on full currently available universe (`39`) while maintaining daily stability checks.
+2. Unblock symbol universe expansion first:
+   - restore provider listing path or refresh static symbol source to >300 symbols.
+3. After universe source is expanded, rerun the same validated ramp sequence:
+   - 100 -> 200 -> 300 with identical checks (`scanned`, `failed`, `setupCandidatesCreated`, no early abort).
+4. Keep provider fetch throttling conservative during expansion (`--sleep >= 3.0`).
+
