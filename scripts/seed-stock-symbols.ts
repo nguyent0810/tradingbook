@@ -11,14 +11,15 @@
  *   npx tsx scripts/seed-stock-symbols.ts --ramp-target=100
  */
 import { spawnSync } from "child_process";
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from "fs";
 import { join } from "path";
 import "./load-env";
 import { prisma } from "../src/lib/prisma";
 
-const STATIC_PATH = join(process.cwd(), "data", "vn-symbols.json");
+const STATIC_PATH = join(process.cwd(), "data", "vn-symbols-seed.json");
 const LIST_SCRIPT = join(process.cwd(), "scripts", "list_vn_symbols.py");
 const ACTIVE_KEYS_OUT = join(process.cwd(), "data", "active-symbol-keys.json");
+const PROVIDER_TMP_OUT = join(process.cwd(), "data", "vn-symbols.provider.tmp.json");
 
 type SeedRow = {
   symbol: string;
@@ -92,7 +93,14 @@ function loadStaticFile(): SeedRow[] {
 
 function tryLoadFromProvider(): SeedRow[] | null {
   const py = process.platform === "win32" ? "python" : "python3";
-  const r = spawnSync(py, [LIST_SCRIPT], {
+  if (existsSync(PROVIDER_TMP_OUT)) {
+    try {
+      unlinkSync(PROVIDER_TMP_OUT);
+    } catch {
+      // Ignore stale temp cleanup errors.
+    }
+  }
+  const r = spawnSync(py, [LIST_SCRIPT, "--output", PROVIDER_TMP_OUT], {
     encoding: "utf-8",
     maxBuffer: 64 * 1024 * 1024,
     timeout: 120_000,
@@ -100,10 +108,30 @@ function tryLoadFromProvider(): SeedRow[] | null {
     stdio: ["ignore", "pipe", "pipe"],
   });
   if (r.status !== 0 || !r.stdout) {
-    console.error("[seed-stock-symbols] Provider listing unavailable, using static file.");
+    const err = (r.stderr ?? "").trim();
+    if (err) {
+      const lines = err.split(/\r?\n/).slice(-4);
+      console.error(`[seed-stock-symbols] Provider listing unavailable: ${lines.join(" | ")}`);
+    } else {
+      console.error("[seed-stock-symbols] Provider listing unavailable, using static file.");
+    }
     return null;
   }
-  return parseProviderStdout(r.stdout);
+  try {
+    const parsed = readJsonFile(PROVIDER_TMP_OUT);
+    if (!Array.isArray(parsed) || parsed.length === 0) return null;
+    return parseProviderStdout(JSON.stringify(parsed));
+  } catch {
+    return null;
+  } finally {
+    if (existsSync(PROVIDER_TMP_OUT)) {
+      try {
+        unlinkSync(PROVIDER_TMP_OUT);
+      } catch {
+        // Ignore temp file cleanup errors.
+      }
+    }
+  }
 }
 
 async function main(): Promise<void> {

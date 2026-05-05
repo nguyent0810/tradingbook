@@ -191,3 +191,23 @@ Execution date: 2026-05-05 (local)
    - 100 -> 200 -> 300 with identical checks (`scanned`, `failed`, `setupCandidatesCreated`, no early abort).
 4. Keep provider fetch throttling conservative during expansion (`--sleep >= 3.0`).
 
+## Universe Blocker Resolution (2026-05-05)
+
+- Root cause:
+  - `Listing(source="VCI")` was intermittently failing.
+  - `list_vn_symbols.py` output path used stdout JSON, but vnstock emitted extra banner/log text to stdout in this environment.
+  - This polluted provider JSON parsing in `seed-stock-symbols.ts`, forcing static fallback.
+  - Historical fallback file only had 39 symbols, so ramp targets 100/200/300 collapsed to 39.
+
+- Fix applied:
+  - `list_vn_symbols.py` now uses provider fallback: `VCI -> KBS -> MSN`.
+  - Added `--output` mode writing UTF-8 JSON file directly.
+  - `seed-stock-symbols.ts` now calls provider script with `--output` temp file and reads JSON from file (robust against stdout noise).
+  - Added tracked fallback seed file `data/vn-symbols-seed.json` with a vetted larger universe (`1536` symbols).
+  - Logging now explicitly shows provider vs fallback source and provider failure context.
+
+- Validation:
+  - `--ramp-target=100` -> `Active symbols in DB: 100`
+  - `--ramp-target=200` -> `Active symbols in DB: 200`
+  - `--ramp-target=300` -> `Active symbols in DB: 300`
+

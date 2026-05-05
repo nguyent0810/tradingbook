@@ -46,7 +46,7 @@ def _safe_exc_text(err: BaseException) -> str:
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = ROOT / "data" / "stock-bars.json"
 ACTIVE_KEYS = ROOT / "data" / "active-symbol-keys.json"
-STATIC_SYMBOLS = ROOT / "data" / "vn-symbols.json"
+STATIC_SYMBOLS = ROOT / "data" / "vn-symbols-seed.json"
 
 
 def date_to_utc_midnight_ms(dt: datetime) -> int:
