@@ -80,6 +80,12 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   const latestOutcome = trade.setupOutcomes[0] ?? null;
   const showWritebackCard =
     trade.status === "OPEN" || trade.status === "CLOSED";
+  const now = new Date();
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(now);
+  dayEnd.setHours(23, 59, 59, 999);
+  let hasCheckpointToday = false;
   let healthLogsDesc: TradeHealthLogRow[] = [];
   try {
     const raw = await prisma.$queryRawUnsafe<
@@ -111,9 +117,14 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
       structureStatus: r.structure_status,
       recommendedAction: r.recommended_action,
     }));
+    hasCheckpointToday = raw.some((r) => {
+      const d = new Date(r.checked_at);
+      return d >= dayStart && d <= dayEnd;
+    });
   } catch {
     // Keep read-only UI resilient if logs table/model isn't present in this environment yet.
     healthLogsDesc = [];
+    hasCheckpointToday = false;
   }
   const healthLogs = [...healthLogsDesc].reverse();
 
@@ -294,6 +305,15 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         </div>
 
         {trade.status === "OPEN" ? (
+          <>
+            <div className="card mb-4 p-4">
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                {hasCheckpointToday
+                  ? "Health checkpoint recorded today."
+                  : "Record today’s health checkpoint before market close."}
+              </p>
+            </div>
+
           <div className="card mb-4 p-4">
             <div
               className="text-xs font-semibold uppercase tracking-wide"
@@ -355,6 +375,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               </div>
             </form>
           </div>
+          </>
         ) : null}
 
         <div className="card p-6">

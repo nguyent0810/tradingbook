@@ -43,7 +43,41 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const trades = await prisma.trade.findMany({
     where,
     orderBy: { entryDate: sortOrder },
+    include: {
+      setupCandidate: {
+        select: {
+          id: true,
+          setupType: true,
+          quality: true,
+        },
+      },
+    },
   });
+
+  const now = new Date();
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(now);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  const openTradeIds = trades
+    .filter((t) => t.status === "OPEN")
+    .map((t) => t.id);
+
+  const checkedTodayTradeIds = new Set<string>();
+  if (openTradeIds.length > 0) {
+    const rows = await prisma.$queryRawUnsafe<Array<{ trade_id: string }>>(
+      `SELECT DISTINCT trade_id
+       FROM trade_health_logs
+       WHERE trade_id = ANY($1)
+         AND checked_at >= $2
+         AND checked_at <= $3`,
+      openTradeIds,
+      dayStart,
+      dayEnd
+    );
+    rows.forEach((r) => checkedTodayTradeIds.add(r.trade_id));
+  }
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -133,9 +167,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             <thead>
               <tr>
                 <th>Symbol</th>
+                <th>Setup</th>
                 <th>Direction</th>
                 <th>Playbook</th>
                 <th>Status</th>
+                <th>EOD</th>
                 <th>Entry Date</th>
                 <th className="table-num">Entry Price</th>
                 <th className="table-num">Exit Price</th>
@@ -154,6 +190,15 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     >
                       {trade.symbol}
                     </span>
+                  </td>
+                  <td>
+                    {trade.setupCandidate ? (
+                      <span className="px-2 py-1 text-xs rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
+                        {trade.setupCandidate.quality} · {trade.setupCandidate.setupType}
+                      </span>
+                    ) : (
+                      <span style={{ color: "var(--text-muted)" }}>Manual</span>
+                    )}
                   </td>
                   <td>
                     <span
@@ -177,6 +222,35 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     >
                       {trade.status}
                     </span>
+                  </td>
+                  <td>
+                    {trade.status === "OPEN" ? (
+                      checkedTodayTradeIds.has(trade.id) ? (
+                        <span
+                          className="px-2 py-1 text-xs rounded-md border"
+                          style={{
+                            borderColor: "color-mix(in srgb, #22c55e 35%, var(--border-color))",
+                            backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)",
+                            color: "#166534",
+                          }}
+                        >
+                          Checked today
+                        </span>
+                      ) : (
+                        <span
+                          className="px-2 py-1 text-xs rounded-md border"
+                          style={{
+                            borderColor: "color-mix(in srgb, #eab308 40%, var(--border-color))",
+                            backgroundColor: "color-mix(in srgb, #eab308 12%, transparent)",
+                            color: "#854d0e",
+                          }}
+                        >
+                          Needs EOD check
+                        </span>
+                      )
+                    ) : (
+                      <span style={{ color: "var(--text-muted)" }}>—</span>
+                    )}
                   </td>
                   <td className="mono">{formatDate(trade.entryDate)}</td>
                   <td className="mono table-num">{formatVND(trade.entryPrice, false)}</td>
