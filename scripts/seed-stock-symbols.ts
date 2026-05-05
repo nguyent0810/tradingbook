@@ -6,7 +6,9 @@
  *
  * Also writes `data/active-symbol-keys.json` for `fetch_stock_bars.py`.
  *
- * Usage: npx tsx scripts/seed-stock-symbols.ts
+ * Usage:
+ *   npx tsx scripts/seed-stock-symbols.ts
+ *   npx tsx scripts/seed-stock-symbols.ts --ramp-target=100
  */
 import { spawnSync } from "child_process";
 import { readFileSync, writeFileSync } from "fs";
@@ -23,6 +25,18 @@ type SeedRow = {
   exchange?: string | null;
   name?: string | null;
 };
+
+function parseRampTargetArg(argv: string[]): number | null {
+  const arg = argv.find((x) => x.startsWith("--ramp-target="));
+  if (!arg) return null;
+  const raw = arg.slice("--ramp-target=".length).trim();
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error("--ramp-target must be a positive integer.");
+  }
+  return parsed;
+}
 
 function readJsonFile(path: string): unknown {
   return JSON.parse(readFileSync(path, "utf-8")) as unknown;
@@ -93,6 +107,7 @@ function tryLoadFromProvider(): SeedRow[] | null {
 }
 
 async function main(): Promise<void> {
+  const rampTarget = parseRampTargetArg(process.argv.slice(2));
   let rows = tryLoadFromProvider();
   if (!rows) {
     console.error(`[seed-stock-symbols] Using static seed: ${STATIC_PATH}`);
@@ -101,23 +116,44 @@ async function main(): Promise<void> {
     console.error(`[seed-stock-symbols] Using provider list (${rows.length} symbols).`);
   }
 
+  const dedupedRows = [...rows]
+    .sort((a, b) => a.symbol.localeCompare(b.symbol))
+    .filter((row, idx, all) => idx === 0 || all[idx - 1]!.symbol !== row.symbol);
+  const rampUniverse = rampTarget
+    ? new Set(dedupedRows.slice(0, Math.min(rampTarget, dedupedRows.length)).map((r) => r.symbol))
+    : null;
+
+  if (rampUniverse) {
+    console.error(
+      `[seed-stock-symbols] Ramp mode enabled: activating first ${rampUniverse.size} symbols (sorted alphabetically), deactivating others.`
+    );
+  }
+
   let upserted = 0;
-  for (const row of rows) {
+  for (const row of dedupedRows) {
+    const active = rampUniverse ? rampUniverse.has(row.symbol) : true;
     await prisma.stockSymbol.upsert({
       where: { symbol: row.symbol },
       create: {
         symbol: row.symbol,
         exchange: row.exchange ?? undefined,
         name: row.name ?? undefined,
-        active: true,
+        active,
       },
       update: {
         exchange: row.exchange ?? undefined,
         name: row.name ?? undefined,
-        active: true,
+        active,
       },
     });
     upserted++;
+  }
+
+  if (rampUniverse) {
+    await prisma.stockSymbol.updateMany({
+      where: { symbol: { notIn: [...rampUniverse] } },
+      data: { active: false },
+    });
   }
 
   const active = await prisma.stockSymbol.findMany({
@@ -132,6 +168,9 @@ async function main(): Promise<void> {
   console.error("=== seed-stock-symbols summary ===");
   console.error(`Rows upserted: ${upserted}`);
   console.error(`Active symbols in DB: ${keys.length}`);
+  if (rampTarget) {
+    console.error(`Ramp target requested: ${rampTarget}`);
+  }
   console.error(`Wrote ${ACTIVE_KEYS_OUT}`);
 }
 

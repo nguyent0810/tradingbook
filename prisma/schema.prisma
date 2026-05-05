@@ -23,6 +23,7 @@ model User {
 model Trade {
   id        String      @id @default(cuid())
   userId    String      @map("user_id")
+  setupId   String?     @map("setup_id")
   symbol    String
   direction Direction
   status    TradeStatus @default(PLANNED)
@@ -36,9 +37,24 @@ model Trade {
   fees       Float  @default(0)
 
   realizedPnl Float? @map("realized_pnl")
+  rMultiple  Float?  @map("r_multiple")
+  outcome    TradeOutcome?
 
   /// Locked product playbook — only `BREAKOUT_PULLBACK` is supported.
   playbook Playbook @default(BREAKOUT_PULLBACK) @map("playbook")
+
+  entryReason         TradeEntryReason?         @map("entry_reason")
+  entryLocationVsZone TradeEntryLocationVsZone? @map("entry_location_vs_zone")
+  healthLevelAtEntry  SetupHealthLevel?         @map("health_level_at_entry")
+  healthScoreAtEntry  Int?                      @map("health_score_at_entry")
+  stopLoss            Float?                    @map("stop_loss")
+  takeProfit          Float?                    @map("take_profit")
+  positionSize        Float?                    @map("position_size")
+  setupSnapshot       Json?                     @map("setup_snapshot")
+  exitReason          TradeExitReason?          @map("exit_reason")
+  exitDiscipline      TradeExitDiscipline?      @map("exit_discipline")
+  entryNote           String?                   @map("entry_note") @db.Text
+  exitNote            String?                   @map("exit_note") @db.Text
 
   notes String? @db.Text
 
@@ -46,8 +62,11 @@ model Trade {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  setupCandidate SetupCandidate? @relation(fields: [setupId], references: [id], onDelete: SetNull)
+  setupOutcomes SetupOutcome[]
 
   @@index([userId])
+  @@index([setupId])
   @@index([symbol])
   @@index([status])
   @@index([entryDate])
@@ -90,6 +109,62 @@ enum ScanQuality {
   B
 }
 
+enum SetupLifecycleStatus {
+  NEW
+  WATCHING
+  READY
+  TRIGGERED
+  EXPIRED
+  INVALID
+}
+
+enum SetupHealthLevel {
+  HEALTHY
+  WARNING
+  AT_RISK
+  DEAD
+}
+
+enum TradeEntryReason {
+  ZONE_RETEST
+  BREAKOUT_CONFIRM
+  PULLBACK_ENTRY
+  STRUCTURE_CONTINUATION
+  MOMENTUM_CONFIRM
+  READY_ON_OPEN
+  READY_INTRADAY
+  LATE_CHASE
+}
+
+enum TradeExitReason {
+  TAKE_PROFIT_HIT
+  STOP_LOSS_HIT
+  ZONE_INVALIDATED
+  STRUCTURE_BROKEN
+  HEALTH_DEGRADED_EOD
+  TIME_STOP
+  MANUAL_RULE_BASED_EXIT
+}
+
+enum TradeExitDiscipline {
+  FOLLOWED_PLAN
+  EARLY_EXIT_RULE_BASED
+  EMOTIONAL_EXIT
+  RULE_VIOLATION
+}
+
+enum TradeEntryLocationVsZone {
+  IN_ZONE
+  ABOVE_ZONE
+  BELOW_ZONE
+}
+
+enum TradeOutcome {
+  WIN
+  LOSS
+  BREAKEVEN
+}
+
 model IndexDailyBar {
   id        String   @id @default(cuid())
   symbol    String
@@ -119,7 +194,8 @@ model StockSymbol {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   bars              StockDailyBar[]
-  setupCandidates SetupCandidate[]
+  setupCandidates   SetupCandidate[]
+  setupWatchItems   SetupWatchItem[]
 
   @@map("stock_symbols")
 }
@@ -145,14 +221,19 @@ model StockDailyBar {
 model DailyScanRun {
   id                          String              @id @default(cuid())
   runAt                       DateTime            @default(now()) @map("run_at")
+  startedAt                   DateTime?           @map("started_at")
+  finishedAt                  DateTime?           @map("finished_at")
   gate1Level                  Gate1ScanLevel      @map("gate1_level")
   status                      DailyScanRunStatus
   symbolCountTotal            Int                 @map("symbol_count_total")
+  symbolCountScanned          Int                 @default(0) @map("symbol_count_scanned")
+  symbolCountFailed           Int                 @default(0) @map("symbol_count_failed")
   symbolCountAfterTradability Int                 @map("symbol_count_after_tradability")
   symbolCountFilteredOut      Int                 @map("symbol_count_filtered_out")
   candidateCountA             Int                 @map("candidate_count_a")
   candidateCountB             Int                 @map("candidate_count_b")
   candidateCountSurfaced      Int                 @map("candidate_count_surfaced")
+  setupCandidatesCreated      Int                 @default(0) @map("setup_candidates_created")
   tradabilityBreakdown        Json?               @map("tradability_breakdown")
   /// Optional Gate 2 rejection diagnostics when surfacing 0 candidates (JSON).
   notes                       Json?               @map("notes")
@@ -181,7 +262,65 @@ model SetupCandidate {
   rankScore        Float         @map("rank_score")
   barDate          DateTime      @map("bar_date") @db.Date
 
+  trades   Trade[]
+  outcomes SetupOutcome[]
+
   @@index([scanRunId])
   @@index([symbolId])
   @@map("setup_candidates")
+}
+
+model SetupOutcome {
+  id                  String                   @id @default(cuid())
+  setupId             String                   @map("setup_id")
+  setup               SetupCandidate           @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  tradeId             String                   @unique @map("trade_id")
+  trade               Trade                    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  setupType           ScanSetupType            @map("setup_type")
+  setupTierAtEntry    ScanQuality              @map("setup_tier_at_entry")
+  entryReason         TradeEntryReason?        @map("entry_reason")
+  entryLocationVsZone TradeEntryLocationVsZone? @map("entry_location_vs_zone")
+  healthLevelAtEntry  SetupHealthLevel?        @map("health_level_at_entry")
+  healthLevelAtExit   SetupHealthLevel?        @map("health_level_at_exit")
+  exitReason          TradeExitReason?         @map("exit_reason")
+  exitDiscipline      TradeExitDiscipline?     @map("exit_discipline")
+  rMultiple           Float?                   @map("r_multiple")
+  pnl                 Float?                   @map("pnl")
+  outcome             TradeOutcome?
+  createdAt           DateTime                 @default(now()) @map("created_at")
+
+  @@index([setupId])
+  @@index([setupType, setupTierAtEntry])
+  @@map("setup_outcomes")
+}
+
+/// Durable watch row for scanner setups — health overlay only in this phase (no lifecycle FSM).
+model SetupWatchItem {
+  id        String @id @default(cuid())
+  symbolId  String @map("symbol_id")
+  symbol    StockSymbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  setupType ScanSetupType @map("setup_type")
+  quality   ScanQuality
+
+  lifecycleStatus SetupLifecycleStatus @default(WATCHING) @map("lifecycle_status")
+
+  breakoutLevel    Float @map("breakout_level")
+  pullbackZoneLow  Float @map("pullback_zone_low")
+  pullbackZoneHigh Float @map("pullback_zone_high")
+
+  firstSeenBarDate DateTime @map("first_seen_bar_date") @db.Date
+  lastSeenScanRunId String? @map("last_seen_scan_run_id")
+
+  healthFlags           Json?             @map("health_flags")
+  healthScore           Int?              @map("health_score")
+  healthLevel           SetupHealthLevel? @map("health_level")
+  lastHealthEvaluatedAt DateTime?         @map("last_health_evaluated_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([symbolId, setupType])
+  @@index([healthLevel])
+  @@index([lifecycleStatus])
+  @@map("setup_watch_items")
 }

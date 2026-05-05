@@ -15,14 +15,26 @@ import { describeDatabaseUrl } from "./load-env";
 import { getMarketRegimeFromDb } from "../src/lib/playbook/get-market-regime";
 import { prisma } from "../src/lib/prisma";
 import type { Gate1Level } from "../src/lib/scanner/gate2/types";
-import { collectGate2SetupCandidatesWithStats } from "../src/lib/scanner/gate2/collect-candidates";
-import { toDailyScanGate2Notes } from "../src/lib/scanner/gate2-scan-diagnostics";
+import { evaluateBreakoutPullbackCandidate } from "../src/lib/scanner/gate2";
+import {
+  buildGate2ScanDiagnosticsSummary,
+  toDailyScanGate2Notes,
+  type Gate2DiagnosticEvaluationRow,
+} from "../src/lib/scanner/gate2-scan-diagnostics";
 import { getExpectedLatestSessionFromIndexBars } from "../src/lib/scanner/expected-session";
 import {
   computeDailyTradingDecision,
   toPersistedDailyDecision,
 } from "../src/lib/scanner/trading-decision";
-import { evaluateTradabilityForAllActiveSymbols } from "../src/lib/scanner/tradability";
+import {
+  aggregateTradabilityResults,
+  evaluateTradabilityForSymbolId,
+} from "../src/lib/scanner/tradability";
+import {
+  evaluateAndPersistHealthForActiveWatchItems,
+  syncWatchItemsFromSurfacedCandidates,
+} from "../src/lib/setup-health";
+import type { SetupCandidate } from "../src/lib/scanner/gate2/types";
 
 function toGate1ScanLevel(level: string): Gate1ScanLevel {
   switch (level) {
@@ -39,19 +51,31 @@ function toGate1ScanLevel(level: string): Gate1ScanLevel {
 
 async function main() {
   console.log("run-daily-scanner.ts → DATABASE_URL:", describeDatabaseUrl());
+  const startedAt = new Date();
+  const scanLimitRaw = process.env.SCAN_SYMBOL_LIMIT?.trim();
+  const scanLimit =
+    scanLimitRaw && Number.isFinite(Number(scanLimitRaw)) && Number(scanLimitRaw) > 0
+      ? Math.floor(Number(scanLimitRaw))
+      : 0;
 
   const expectedLatestSession = await getExpectedLatestSessionFromIndexBars(prisma);
   if (!expectedLatestSession) {
+    const finishedAt = new Date();
     await prisma.dailyScanRun.create({
       data: {
+        startedAt,
+        finishedAt,
         gate1Level: Gate1ScanLevel.WARNING,
         status: DailyScanRunStatus.FAILED,
         symbolCountTotal: 0,
+        symbolCountScanned: 0,
+        symbolCountFailed: 0,
         symbolCountAfterTradability: 0,
         symbolCountFilteredOut: 0,
         candidateCountA: 0,
         candidateCountB: 0,
         candidateCountSurfaced: 0,
+        setupCandidatesCreated: 0,
         errorSummary:
           "No VNINDEX IndexDailyBar rows — cannot resolve expected latest session.",
         notes: {
@@ -79,22 +103,94 @@ async function main() {
 
   const regime = await getMarketRegimeFromDb();
   const gate1Level = toGate1ScanLevel(regime.level);
+  const symbols = await prisma.stockSymbol.findMany({
+    where: { active: true },
+    select: { id: true, symbol: true },
+    orderBy: { symbol: "asc" },
+  });
+  const symbolsToScan = scanLimit > 0 ? symbols.slice(0, scanLimit) : symbols;
+  const totalSymbols = symbolsToScan.length;
+  const tradItems: Array<{ symbolId: string; symbolKey: string; result: { passed: boolean; reasons: string[] } }> =
+    [];
+  const failedSymbolKeys = new Set<string>();
+  const failedSymbolErrors: Array<{ symbol: string; stage: "tradability" | "gate2"; error: string }> = [];
 
-  const { aggregate, tradableSymbolIds, items: tradItems } =
-    await evaluateTradabilityForAllActiveSymbols(prisma, expectedLatestSession);
+  for (const symbol of symbolsToScan) {
+    try {
+      const result = await evaluateTradabilityForSymbolId(prisma, symbol.id, expectedLatestSession);
+      tradItems.push({
+        symbolId: symbol.id,
+        symbolKey: symbol.symbol,
+        result,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failedSymbolKeys.add(symbol.symbol);
+      failedSymbolErrors.push({ symbol: symbol.symbol, stage: "tradability", error: message });
+    }
+  }
+
+  const aggregate = aggregateTradabilityResults(
+    tradItems.map((item) => ({ symbolKey: item.symbolKey, result: item.result }))
+  );
+  const tradableSymbolIds = tradItems.filter((item) => item.result.passed).map((item) => item.symbolId);
 
   const symbolKeyById = new Map(
     tradItems.map((t) => [t.symbolId, t.symbolKey] as const)
   );
 
-  const { candidateCountA, candidateCountB, surfaced, diagnostics } =
-    await collectGate2SetupCandidatesWithStats(
-      prisma,
-      tradableSymbolIds,
-      regime.level,
-      expectedLatestSession,
-      symbolKeyById
-    );
+  let candidateCountA = 0;
+  let candidateCountB = 0;
+  const surfaced: SetupCandidate[] = [];
+  const diagnosticRows: Gate2DiagnosticEvaluationRow[] = [];
+
+  for (const symbolId of tradableSymbolIds) {
+    const symbolKey = symbolKeyById.get(symbolId) ?? symbolId;
+    try {
+      const rows = await prisma.stockDailyBar.findMany({
+        where: { symbolId },
+        orderBy: { date: "asc" },
+        select: {
+          date: true,
+          open: true,
+          high: true,
+          low: true,
+          close: true,
+          volume: true,
+        },
+      });
+      const ev = evaluateBreakoutPullbackCandidate(rows, expectedLatestSession);
+      diagnosticRows.push({
+        symbol: symbolKey,
+        symbolId,
+        evaluation: ev,
+      });
+      if (ev.quality === "INVALID") continue;
+      if (ev.quality === "A") candidateCountA++;
+      else candidateCountB++;
+      if (regime.level === "FAIL") continue;
+      if (regime.level === "WARNING" && ev.quality !== "A") continue;
+
+      surfaced.push({
+        symbolId,
+        quality: ev.quality,
+        close: ev.close,
+        rankScore: ev.rankScore,
+        breakoutLevel: ev.breakoutLevel,
+        pullbackZoneLow: ev.pullbackZoneLow,
+        pullbackZoneHigh: ev.pullbackZoneHigh,
+        stopLevel: ev.stopLevel,
+        reasons: ev.reasons,
+        barDate: ev.barDate,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failedSymbolKeys.add(symbolKey);
+      failedSymbolErrors.push({ symbol: symbolKey, stage: "gate2", error: message });
+    }
+  }
+
+  const diagnostics = buildGate2ScanDiagnosticsSummary(diagnosticRows);
 
   const tradingDecision = computeDailyTradingDecision({
     gate1Level: regime.level as Gate1Level,
@@ -106,18 +202,26 @@ async function main() {
     ...toDailyScanGate2Notes(diagnostics),
     decision: toPersistedDailyDecision(tradingDecision),
   };
+  const failedCount = failedSymbolKeys.size;
+  const scannedCount = Math.max(0, totalSymbols - failedCount);
+  const finishedAt = new Date();
 
   const summary = await prisma.$transaction(async (tx) => {
     const run = await tx.dailyScanRun.create({
       data: {
+        startedAt,
+        finishedAt,
         gate1Level,
         status: DailyScanRunStatus.COMPLETED,
-        symbolCountTotal: aggregate.totalSymbols,
+        symbolCountTotal: totalSymbols,
+        symbolCountScanned: scannedCount,
+        symbolCountFailed: failedCount,
         symbolCountAfterTradability: tradableSymbolIds.length,
         symbolCountFilteredOut: aggregate.filteredOut,
         candidateCountA,
         candidateCountB,
         candidateCountSurfaced: surfaced.length,
+        setupCandidatesCreated: surfaced.length,
         tradabilityBreakdown: aggregate.breakdownByReason,
         notes: scanNotes,
       },
@@ -147,18 +251,31 @@ async function main() {
     return { run, candidatesInserted };
   });
 
+  if (surfaced.length > 0) {
+    await syncWatchItemsFromSurfacedCandidates(prisma, summary.run.id, surfaced);
+  }
+  await evaluateAndPersistHealthForActiveWatchItems(prisma, expectedLatestSession);
+
+  const failedPreview = [...failedSymbolKeys].slice(0, 10);
   const out = {
     scanRunId: summary.run.id,
     runAt: summary.run.runAt.toISOString(),
+    startedAt: startedAt.toISOString(),
+    finishedAt: finishedAt.toISOString(),
+    scanSymbolLimit: scanLimit > 0 ? scanLimit : null,
     expectedLatestSession: expectedLatestSession.toISOString(),
     gate1Level: regime.level,
     tradability: {
-      totalSymbols: aggregate.totalSymbols,
+      totalSymbols,
+      scannedCount,
+      failedCount,
       passedTradability: tradableSymbolIds.length,
       filteredOut: aggregate.filteredOut,
       breakdownByReason: aggregate.breakdownByReason,
     },
-    symbolCountTotal: aggregate.totalSymbols,
+    symbolCountTotal: totalSymbols,
+    symbolCountScanned: scannedCount,
+    symbolCountFailed: failedCount,
     symbolCountAfterTradability: tradableSymbolIds.length,
     symbolCountFilteredOut: aggregate.filteredOut,
     candidateCountA,
@@ -166,6 +283,14 @@ async function main() {
     candidateCountSurfaced: surfaced.length,
     setupCandidatesInserted: summary.candidatesInserted,
     tradabilityBreakdown: aggregate.breakdownByReason,
+    failedSymbols:
+      failedPreview.length > 0
+        ? {
+            preview: failedPreview,
+            omitted: Math.max(0, failedCount - failedPreview.length),
+          }
+        : null,
+    failedSymbolErrorsPreview: failedSymbolErrors.slice(0, 5),
     gate2RejectionSummary: {
       invalidCountByCategory: diagnostics.invalidCountByCategory,
       topRejectionCategories: diagnostics.topRejectionCategories,
@@ -178,6 +303,7 @@ async function main() {
     persistedNotesKeys: Object.keys(scanNotes),
   };
 
+  console.log(`Scanned ${scannedCount}/${totalSymbols} symbols · ${surfaced.length} setups found · ${failedCount} failed`);
   console.log(JSON.stringify(out, null, 2));
 }
 
