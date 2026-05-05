@@ -128,7 +128,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           </div>
         </div>
       ) : (
-        <div className="table-container mt-4">
+        <div className="table-container table-sticky mt-4">
           <table className="table">
             <thead>
               <tr>

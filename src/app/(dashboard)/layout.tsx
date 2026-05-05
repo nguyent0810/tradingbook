@@ -49,6 +49,7 @@ export default async function DashboardLayout({
 
             <nav className="hidden items-center gap-1 sm:flex">
               <NavLink href="/dashboard">Dashboard</NavLink>
+              <NavLink href="/setups">Setups</NavLink>
               <NavLink href="/trades">Trades</NavLink>
             </nav>
           </div>
@@ -76,6 +77,9 @@ export default async function DashboardLayout({
       >
         <NavLink href="/dashboard" mobile>
           Dashboard
+        </NavLink>
+        <NavLink href="/setups" mobile>
+          Setups
         </NavLink>
         <NavLink href="/trades" mobile>
           Trades

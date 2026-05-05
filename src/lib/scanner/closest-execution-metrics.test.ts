@@ -1,0 +1,115 @@
+import { describe, expect, it } from "vitest";
+import {
+  closestExecutionActionHint,
+  computeClosestExecutionStatus,
+  computeDistanceAboveBreakoutFrac,
+  computeDistanceToPullbackZoneFrac,
+  compareClosestRowsExecutionOrder,
+  computeRiskToStopFrac,
+  pullbackProximityLabel,
+} from "./closest-execution-metrics";
+
+describe("computeDistanceToPullbackZoneFrac", () => {
+  it("returns 0 inside zone", () => {
+    expect(computeDistanceToPullbackZoneFrac(100, 95, 105)).toBe(0);
+    expect(computeDistanceToPullbackZoneFrac(95, 95, 105)).toBe(0);
+  });
+
+  it("above zoneHigh uses (close - zoneHigh) / close", () => {
+    expect(computeDistanceToPullbackZoneFrac(110, 95, 100)).toBeCloseTo((110 - 100) / 110);
+  });
+
+  it("below zoneLow uses (zoneLow - close) / close", () => {
+    expect(computeDistanceToPullbackZoneFrac(90, 95, 100)).toBeCloseTo((95 - 90) / 90);
+  });
+
+  it("returns NaN for invalid inputs", () => {
+    expect(computeDistanceToPullbackZoneFrac(0, 1, 2)).toBeNaN();
+    expect(computeDistanceToPullbackZoneFrac(100, 102, 98)).toBeNaN();
+    expect(computeDistanceToPullbackZoneFrac(100, 0, 0)).toBeNaN();
+  });
+});
+
+describe("computeDistanceAboveBreakoutFrac", () => {
+  it("computes extension vs breakout", () => {
+    expect(computeDistanceAboveBreakoutFrac(103.2, 100)).toBeCloseTo(0.032);
+  });
+
+  it("returns NaN when breakout missing", () => {
+    expect(computeDistanceAboveBreakoutFrac(100, 0)).toBeNaN();
+  });
+});
+
+describe("computeRiskToStopFrac", () => {
+  it("computes (close - stop) / close", () => {
+    expect(computeRiskToStopFrac(100, 97.9)).toBeCloseTo(0.021);
+  });
+});
+
+describe("computeClosestExecutionStatus", () => {
+  it("READY when close in zone", () => {
+    expect(computeClosestExecutionStatus("pullback_zone_interaction", 100, 98, 102)).toBe("READY");
+  });
+
+  it("INVALID when category breaks structure", () => {
+    expect(computeClosestExecutionStatus("breakout_not_holding", 110, 98, 102)).toBe("INVALID");
+  });
+
+  it("WAIT when above zone but not broken", () => {
+    expect(computeClosestExecutionStatus("pullback_zone_interaction", 110, 98, 102)).toBe("WAIT");
+  });
+});
+
+describe("pullbackProximityLabel", () => {
+  it("maps bands per UX spec", () => {
+    expect(pullbackProximityLabel(0)).toBe("Very close");
+    expect(pullbackProximityLabel(0.009)).toBe("Very close");
+    expect(pullbackProximityLabel(0.01)).toBe("Near");
+    expect(pullbackProximityLabel(0.032)).toBe("Near");
+    expect(pullbackProximityLabel(0.039)).toBe("Near");
+    expect(pullbackProximityLabel(0.04)).toBe("Moderate");
+    expect(pullbackProximityLabel(0.06)).toBe("Moderate");
+    expect(pullbackProximityLabel(0.061)).toBe("Far");
+  });
+
+  it("returns null for non-finite inputs", () => {
+    expect(pullbackProximityLabel(Number.NaN)).toBeNull();
+  });
+});
+
+describe("closestExecutionActionHint", () => {
+  it("returns fixed copy per status", () => {
+    expect(closestExecutionActionHint("READY")).toContain("Monitor");
+    expect(closestExecutionActionHint("WAIT")).toContain("pullback");
+    expect(closestExecutionActionHint("INVALID")).toContain("Do not consider");
+  });
+});
+
+describe("compareClosestRowsExecutionOrder", () => {
+  it("sorts by distance to zone then rankScore", () => {
+    const rows = [
+      {
+        rankScore: 50,
+        close: 120,
+        pullbackZoneLow: 110,
+        pullbackZoneHigh: 115,
+      },
+      {
+        rankScore: 90,
+        close: 112,
+        pullbackZoneLow: 110,
+        pullbackZoneHigh: 115,
+      },
+      {
+        rankScore: 10,
+        close: 113,
+        pullbackZoneLow: 110,
+        pullbackZoneHigh: 115,
+      },
+    ];
+    const sorted = [...rows].sort(compareClosestRowsExecutionOrder);
+    expect(sorted[0]!.close).toBe(112);
+    expect(sorted[1]!.close).toBe(113);
+    expect(sorted[2]!.close).toBe(120);
+  });
+});

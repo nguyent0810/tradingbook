@@ -14,7 +14,17 @@ import {
   computePlaybookPerformance,
 } from "@/lib/analytics";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
+import { buildRegimePanelCopy } from "@/lib/playbook/regime-display";
 import { RegimePanel } from "@/components/regime-panel";
+import { SetupsScanPreview } from "@/components/setups-scan-preview";
+import {
+  bottleneckShortLabel,
+  parseDailyScanGate2Notes,
+} from "@/lib/scanner/parse-daily-scan-notes";
+import {
+  getLatestDailyScanRun,
+  toCandidateRows,
+} from "@/lib/scanner/setups-queries";
 
 export const metadata: Metadata = {
   title: "Dashboard — TradeLog",
@@ -52,6 +62,13 @@ export default async function DashboardPage() {
     .slice(0, 10);
 
   const regime = await getMarketRegimeFromDb("VNINDEX");
+  const regimeCopy = buildRegimePanelCopy(regime);
+
+  const latestScan = await getLatestDailyScanRun();
+  const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
+  const bottleneckKey = scanNotes?.recommendation.likelyBottleneck ?? "none_obvious";
+  const bottleneckLabel = bottleneckShortLabel(bottleneckKey);
+  const setupCandidatesPreview = toCandidateRows(latestScan);
 
   return (
     <div className="page-container animate-in space-y-6 pb-10">
@@ -88,11 +105,19 @@ export default async function DashboardPage() {
       <RegimePanel
         symbol={regime.symbol}
         level={regime.level}
-        reasons={regime.reasons}
+        primarySummary={regimeCopy.primarySummary}
+        actionGuidance={regimeCopy.actionGuidance}
+        technicalReasons={regimeCopy.technicalReasons}
         evaluatedBarsCount={regime.evaluatedBarsCount}
         storedBarsCount={regime.storedBarsCount}
         latestBar={regime.latestBar}
         checkedAt={regime.checkedAt}
+      />
+
+      <SetupsScanPreview
+        candidates={setupCandidatesPreview}
+        bottleneckKey={bottleneckKey}
+        bottleneckLabel={bottleneckLabel}
       />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-stretch">

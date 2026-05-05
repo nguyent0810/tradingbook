@@ -1,13 +1,19 @@
 import type { Bar } from "@/lib/market/types";
 import { sma } from "./indicators";
 
+export type RegimeTrend = "bullish" | "bearish" | "neutral";
+export type RegimeMomentum = "up" | "down" | "neutral";
+
 export type MarketRegime = {
   level: "PASS" | "WARNING" | "FAIL";
   reasons: string[];
+  /** Present when MA50 and momentum were computed (not returned on insufficient bars / MA failure). */
+  trend?: RegimeTrend;
+  momentum?: RegimeMomentum;
 };
 
-type Trend = "bullish" | "bearish" | "neutral";
-type Momentum = "up" | "down" | "neutral";
+type Trend = RegimeTrend;
+type Momentum = RegimeMomentum;
 
 function closesFromBars(bars: readonly Bar[]): number[] {
   return bars.map((b) => b.close);
@@ -66,12 +72,12 @@ export function evaluateMarketRegime(bars: Bar[]): MarketRegime {
   );
 
   if (trend === "bullish" && momentum === "up") {
-    return { level: "PASS", reasons };
+    return { level: "PASS", reasons, trend, momentum };
   }
 
   if (trend === "bearish" && momentum === "down") {
-    return { level: "FAIL", reasons };
+    return { level: "FAIL", reasons, trend, momentum };
   }
 
-  return { level: "WARNING", reasons };
+  return { level: "WARNING", reasons, trend, momentum };
 }

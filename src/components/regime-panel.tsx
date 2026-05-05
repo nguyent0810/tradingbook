@@ -3,7 +3,12 @@ export type RegimeLevel = "PASS" | "WARNING" | "FAIL";
 export type RegimePanelProps = {
   symbol: string;
   level: RegimeLevel;
-  reasons: string[];
+  /** Decision-focused headline (not raw Gate 1 strings). */
+  primarySummary: string;
+  /** Behavior guidance; omit when not applicable (e.g. data unavailable). */
+  actionGuidance: string | null;
+  /** Original Gate 1 reasons for advanced users (shown muted). */
+  technicalReasons: string[];
   /** Bars used for Gate 1 (evaluation window). */
   evaluatedBarsCount?: number;
   /** Total rows in DB for the symbol. If omitted, strip omits the “stored” segment. */
@@ -61,16 +66,18 @@ function formatBarCountLine(
 export function RegimePanel({
   symbol,
   level,
-  reasons,
+  primarySummary,
+  actionGuidance,
+  technicalReasons,
   evaluatedBarsCount,
   storedBarsCount,
   latestBar,
   checkedAt,
 }: RegimePanelProps) {
   const accent = accentForLevel(level);
-  const shownReasons = reasons.slice(0, 2);
-  const extraReasonCount = Math.max(0, reasons.length - 2);
   const barLine = formatBarCountLine(evaluatedBarsCount, storedBarsCount);
+  const techShown = technicalReasons.slice(0, 2);
+  const techExtra = Math.max(0, technicalReasons.length - 2);
 
   return (
     <div
@@ -107,16 +114,34 @@ export function RegimePanel({
           </span>
         </div>
 
-        <div className="space-y-0.5" style={{ color: "var(--text-secondary)" }}>
-          {shownReasons.map((r, i) => (
-            <p key={i} className="text-xs leading-snug sm:text-sm">
-              {r}
-              {i === shownReasons.length - 1 && extraReasonCount > 0
-                ? ` · +${extraReasonCount}`
-                : null}
-            </p>
-          ))}
-        </div>
+        <p
+          className="text-sm font-medium leading-snug"
+          style={{ color: "var(--text-primary)" }}
+        >
+          {primarySummary}
+        </p>
+
+        {actionGuidance !== null ? (
+          <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            {actionGuidance}
+          </p>
+        ) : null}
+
+        {technicalReasons.length > 0 ? (
+          <div
+            className="border-t border-[var(--border-primary)] pt-2 text-[11px] leading-snug"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <span className="font-medium uppercase tracking-wide">Details </span>
+            {techShown.map((t, i) => (
+              <span key={i}>
+                {i > 0 ? " · " : ""}
+                {t}
+                {i === techShown.length - 1 && techExtra > 0 ? ` · +${techExtra}` : ""}
+              </span>
+            ))}
+          </div>
+        ) : null}
 
         {latestBar ? (
           <p className="text-xs tabular-nums" style={{ color: "var(--text-tertiary)" }}>

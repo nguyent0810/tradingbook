@@ -319,7 +319,8 @@ body {
   font-size: 14px;
 }
 
-.table thead th {
+/* Sticky thead only when opted in (full ledger). Short / embedded tables must not cover body rows. */
+.table-container.table-sticky thead th {
   position: sticky;
   top: var(--app-header-height);
   z-index: 5;
@@ -360,6 +361,23 @@ body {
 .table .mono {
   font-family: var(--font-mono, monospace);
   font-size: 13px;
+}
+
+/* Native <details> disclosure markers (hide default triangle where custom chevrons are used) */
+.details-disclosure > summary {
+  list-style: none;
+}
+
+.details-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.details-disclosure:not([open]) > summary .details-marker-open {
+  display: none !important;
+}
+
+.details-disclosure[open] > summary .details-marker-closed {
+  display: none !important;
 }
 
 /* Empty state */

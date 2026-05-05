@@ -70,6 +70,26 @@ enum Playbook {
   BREAKOUT_PULLBACK
 }
 
+enum DailyScanRunStatus {
+  COMPLETED
+  FAILED
+}
+
+enum Gate1ScanLevel {
+  PASS
+  WARNING
+  FAIL
+}
+
+enum ScanSetupType {
+  BREAKOUT_PULLBACK
+}
+
+enum ScanQuality {
+  A
+  B
+}
+
 model IndexDailyBar {
   id        String   @id @default(cuid())
   symbol    String
@@ -86,4 +106,82 @@ model IndexDailyBar {
   @@unique([symbol, date])
   @@index([symbol])
   @@map("index_daily_bars")
+}
+
+/// Equity symbols for multi-symbol EOD data (scanner / tradability).
+model StockSymbol {
+  id        String   @id @default(cuid())
+  symbol    String   @unique
+  exchange  String?
+  name      String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  bars              StockDailyBar[]
+  setupCandidates SetupCandidate[]
+
+  @@map("stock_symbols")
+}
+
+model StockDailyBar {
+  id       String      @id @default(cuid())
+  symbolId String      @map("symbol_id")
+  symbol   StockSymbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  date     DateTime    @db.Date
+  open     Float
+  high     Float
+  low      Float
+  close    Float
+  volume   Float
+  source   String      @default("vnstock:VCI")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+
+  @@unique([symbolId, date])
+  @@index([symbolId, date(sort: Desc)])
+  @@map("stock_daily_bars")
+}
+
+model DailyScanRun {
+  id                          String              @id @default(cuid())
+  runAt                       DateTime            @default(now()) @map("run_at")
+  gate1Level                  Gate1ScanLevel      @map("gate1_level")
+  status                      DailyScanRunStatus
+  symbolCountTotal            Int                 @map("symbol_count_total")
+  symbolCountAfterTradability Int                 @map("symbol_count_after_tradability")
+  symbolCountFilteredOut      Int                 @map("symbol_count_filtered_out")
+  candidateCountA             Int                 @map("candidate_count_a")
+  candidateCountB             Int                 @map("candidate_count_b")
+  candidateCountSurfaced      Int                 @map("candidate_count_surfaced")
+  tradabilityBreakdown        Json?               @map("tradability_breakdown")
+  /// Optional Gate 2 rejection diagnostics when surfacing 0 candidates (JSON).
+  notes                       Json?               @map("notes")
+  errorSummary                String?             @map("error_summary") @db.Text
+
+  candidates SetupCandidate[]
+
+  @@index([runAt(sort: Desc)])
+  @@map("daily_scan_runs")
+}
+
+model SetupCandidate {
+  id               String        @id @default(cuid())
+  scanRunId        String        @map("scan_run_id")
+  scanRun          DailyScanRun  @relation(fields: [scanRunId], references: [id], onDelete: Cascade)
+  symbolId         String        @map("symbol_id")
+  symbol           StockSymbol   @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  setupType        ScanSetupType @map("setup_type")
+  quality          ScanQuality
+  close            Float
+  breakoutLevel    Float         @map("breakout_level")
+  pullbackZoneLow  Float         @map("pullback_zone_low")
+  pullbackZoneHigh Float         @map("pullback_zone_high")
+  stopLevel        Float         @map("stop_level")
+  reasons          Json
+  rankScore        Float         @map("rank_score")
+  barDate          DateTime      @map("bar_date") @db.Date
+
+  @@index([scanRunId])
+  @@index([symbolId])
+  @@map("setup_candidates")
 }

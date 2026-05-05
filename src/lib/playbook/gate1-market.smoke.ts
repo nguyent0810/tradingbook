@@ -1,5 +1,5 @@
 /**
- * Temporary smoke script — run: `npx tsx src/lib/playbook/gate1-market.test.ts`
+ * Smoke script — run: `npx tsx src/lib/playbook/gate1-market.smoke.ts`
  */
 import type { Bar } from "@/lib/market/types";
 import { evaluateMarketRegime } from "./gate1-market";

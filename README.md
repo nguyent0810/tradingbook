@@ -44,6 +44,53 @@ SESSION_SECRET="your-ultra-secure-32-character-jwt-secret-key"
    ```
    Open `http://localhost:3000` to begin.
 
+## VNINDEX daily import (GitHub Actions)
+
+Production VNINDEX bars are loaded **outside Vercel**: a workflow runs **Python (vnstock)** on GitHub-hosted runners, then **`import-bars.ts`** writes to Postgres using **`DATABASE_URL`**.
+
+### Manual trigger
+
+1. Open the repo on GitHub → **Actions**.
+2. Select **VNINDEX daily import**.
+3. Click **Run workflow** → choose branch (usually `main`) → **Run workflow**.
+
+Logs appear under the run’s steps; the import step prints a **`=== import-bars summary ===`** block (imported count, skipped breakdown, date range, latest close).
+
+### Scheduled runs
+
+The workflow uses a **UTC cron** (weekdays). To change the schedule, edit **`.github/workflows/vnindex-daily-import.yml`** → `on.schedule.cron`. GitHub only supports UTC; adjust if Vietnam market close + data lag require a different time.
+
+### Required secret
+
+| Secret           | Description                                      |
+|------------------|--------------------------------------------------|
+| **`DATABASE_URL`** | Production Postgres URL (e.g. Neon), same as Vercel DB. **Do not** echo it in workflow logs. |
+
+Add it under **Settings → Secrets and variables → Actions**. The workflow never prints `DATABASE_URL`.
+
+### Notes
+
+- Fetch output is written only to the runner temp directory — **not** `data/vnindex.json` in the repo (that path stays gitignored for local runs).
+- To run the same steps locally: `python scripts/fetch_vnindex.py` then `npx tsx scripts/import-bars.ts` (see `scripts/`).
+
+## Tradability filter (scanner) & expected session
+
+The **tradability** layer (`src/lib/scanner/`) compares each stock’s latest daily bar to an **expected last EOD session** date. **Do not** use the server’s current calendar date (`new Date()`): Vietnam **holidays**, **weekends**, and **import lag** would incorrectly mark data as stale.
+
+- Use **`getExpectedLatestSessionFromIndexBars(prisma)`** so the expected date comes from the **latest `IndexDailyBar` for `VNINDEX`**, i.e. the same session your daily index import just wrote.
+- After **`import-bars`** (or equivalent) has run, that index date is the single source of truth for “last market close in the database.”
+
+Run unit tests: `npm test` (Vitest).
+
+## Local UI verification (`/setups`)
+
+Do **not** mark `/setups` manual QA as **pass** until all of the following are done (after optional demo seed: `npx tsx scripts/seed-demo-setup-candidate.ts`):
+
+1. **Diagnostics:** Click **each** diagnostics bucket row and confirm it **expands** (native disclosure). Expanded content must show **What it means**, **Wait for**, **Symbols in this bucket**, and **Show more / Show fewer** when the symbol list exceeds the initial cap.
+2. **Surfaced candidates table:** Confirm the **first candidate data row** (symbol, quality, numeric columns) is **fully readable** with **no overlap** from the table header. If anything looks clipped or hidden under the header, treat as **fail**.
+3. **Position sizing:** Scroll as needed and confirm the sizing block **below** the candidate remains visible and usable.
+4. **Evidence:** Keep **at least one screenshot** with a diagnostics row **expanded**, and **one screenshot** of the surfaced candidates table showing the candidate row clearly.
+
 ## 🏗️ Vercel Deployment Instructions
 
 Deploying this app is completely automated toward Vercel logic.
