@@ -7,6 +7,7 @@ import { TradeForm } from "@/components/trade-form";
 import { DeleteTradeButton } from "./delete-button";
 import { formatVND } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
+import { addTradeHealthCheckpoint } from "@/app/actions/trades";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -291,6 +292,70 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
             </ul>
           )}
         </div>
+
+        {trade.status === "OPEN" ? (
+          <div className="card mb-4 p-4">
+            <div
+              className="text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              Add Health Checkpoint
+            </div>
+            <form
+              action={addTradeHealthCheckpoint.bind(null, trade.id)}
+              className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2"
+            >
+              <div>
+                <label htmlFor="healthLevel" className="label">
+                  Health Level
+                </label>
+                <select id="healthLevel" name="healthLevel" className="select" required>
+                  <option value="">Select level</option>
+                  <option value="HEALTHY">HEALTHY</option>
+                  <option value="WARNING">WARNING</option>
+                  <option value="AT_RISK">AT_RISK</option>
+                  <option value="DEAD">DEAD</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="healthScore" className="label">
+                  Health Score <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
+                <input
+                  id="healthScore"
+                  name="healthScore"
+                  type="number"
+                  min={0}
+                  max={100}
+                  className="input"
+                />
+              </div>
+              <div>
+                <label htmlFor="priceVsZone" className="label">
+                  Price vs Zone <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
+                <input id="priceVsZone" name="priceVsZone" type="text" className="input" />
+              </div>
+              <div>
+                <label htmlFor="structureStatus" className="label">
+                  Structure Status <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
+                <input id="structureStatus" name="structureStatus" type="text" className="input" />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="recommendedAction" className="label">
+                  Recommended Action <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
+                <input id="recommendedAction" name="recommendedAction" type="text" className="input" />
+              </div>
+              <div className="sm:col-span-2">
+                <button type="submit" className="btn btn-secondary btn-sm">
+                  Save checkpoint
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : null}
 
         <div className="card p-6">
           <TradeForm trade={trade} />
