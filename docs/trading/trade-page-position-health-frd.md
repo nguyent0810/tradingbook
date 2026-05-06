@@ -74,18 +74,25 @@ If \(E \leq 0\) or \(C\) unavailable: **null** → **`—`**.
 
 Derived display only — **not persisted**.
 
-**Definition:** Whole **UTC calendar days** elapsed from the **`entryDate` UTC calendar day** through **today’s UTC calendar day**, inclusive of entry day as day 0:
+Let \(D_{\text{entry}}\) = UTC calendar-day anchor for **`entryDate`** (UTC midnight of that calendar day). Let \(D_{\text{end}}\) be the **end anchor** for the trade’s status (below). Whole **UTC calendar days**:
 
 \[
-\text{holdingDays} = \max\left(0,\ \left\lfloor \frac{D_{\text{today UTC}} - D_{\text{entry UTC}}}{1\ \text{day}} \right\rfloor\right)
+\text{holdingDays} = \max\left(0,\ \left\lfloor \frac{D_{\text{end}} - D_{\text{entry}}}{1\ \text{day}} \right\rfloor\right)
 \]
 
-Where \(D_{\text{entry UTC}}\) / \(D_{\text{today UTC}}\) are UTC midnight anchors derived from `entryDate` and server “now” at render time.
+**End anchor \(D_{\text{end}}\) by status** (server **“now”** at render time for live statuses):
+
+| Status | \(D_{\text{end}}\) | Notes |
+|--------|-------------------|--------|
+| **OPEN** | UTC calendar day of **now** | Days since entry through today. |
+| **PLANNED** | UTC calendar day of **now** | Same as OPEN — planned rows age from entry for continuity. |
+| **CLOSED** | UTC calendar day of **`exitDate`** | **Holding period** while the trade was open (entry → exit). If **`exitDate`** is null / unusable → **`holdingDays`** is undefined → display **`—`**. |
+| **CANCELLED** | *(omit)* | Do **not** compute or emphasize **`holdingDays`** for product UX: **trades table** shows **`—`** (no meaningful aging); **trade detail** subtitle does **not** append “Held **N** days”. |
 
 **Display**
 
-- **Trades table:** column **Hold / Days** (or **Age**) showing **`holdingDays`** for all statuses where useful; at minimum **OPEN** + **CLOSED** (optional **`—`** for **CANCELLED** if product prefers).
-- **Trade detail:** same value inline near entry metadata (“Held **N** days”).
+- **Trades table:** column **Hold / Days** — **`holdingDays`** per status rules above; **`—`** when undefined (**CLOSED** without **`exitDate`**, **CANCELLED**).
+- **Trade detail:** subtitle **“Held **N** days”** only when **`holdingDays`** is defined (**OPEN**, **PLANNED**, **CLOSED** with **`exitDate`**); omit for **CANCELLED**.
 
 ### 2.4 R multiple (open, vs stop — Phase 2)
 
@@ -167,7 +174,7 @@ Use existing stored **`realizedPnl`** (and **`exitPrice`**) — **no overwrite**
 | **Symbol** | `Trade.symbol` |
 | **Direction** | LONG / SHORT |
 | **Status** | PLANNED / OPEN / CLOSED / CANCELLED |
-| **Hold / Days** | **`holdingDays`** (§2.3); **`—`** if `entryDate` unusable |
+| **Hold / Days** | **`holdingDays`** (§2.3): **OPEN**/**PLANNED** → entry→now; **CLOSED** → entry→**`exitDate`** or **`—`**; **CANCELLED** → **`—`** (omitted semantically) |
 | **Entry Price** | Formatted entry |
 | **Latest / Exit Price** | OPEN: latest close + session date; CLOSED: exit; PLANNED/CANCELLED: per PRD (typically **`—`** or N/A) |
 | **Quantity** | `quantity` |
@@ -198,7 +205,7 @@ Matches PRD §3 **UI hierarchy**:
 ### CLOSED
 
 - Show **stored** realized P&L (and exit price).
-- Show **`holdingDays`** (holding period for the trade).
+- Show **`holdingDays`** as **entry → `exitDate`** when **`exitDate`** is present; otherwise **`—`** (§2.3).
 - Label: **Realized**.
 - Do **not** show unrealized metrics.
 
@@ -206,6 +213,7 @@ Matches PRD §3 **UI hierarchy**:
 
 - No live mark requirement in MVP unless PRD extends; default **`—`** for unrealized block.
 - EOD Status **`—`** or **N/A**.
+- **`holdingDays`:** **PLANNED** shows entry→now (§2.3). **CANCELLED** — omit from detail subtitle; table cell **`—`**.
 
 ### Missing data
 
@@ -226,6 +234,8 @@ Matches PRD §3 **UI hierarchy**:
 | Bad `stopLoss` vs entry | R null; show **explicit invalid-stop message** (§2.4); suppress near-stop hint |
 | Quantity missing / invalid | P&L amount **`—`**; show **%** if \(E,C\) OK |
 | Invalid trade state | Render row if DB returns it; derived fields defensive null |
+| **CLOSED** missing **`exitDate`** | **`holdingDays`** **`—`** |
+| **CANCELLED** | **`holdingDays`** not shown in detail subtitle; table **`—`** |
 
 ---
 

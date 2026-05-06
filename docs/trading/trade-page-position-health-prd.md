@@ -66,7 +66,7 @@ Unrealized gain must **not** use celebratory emphasis ahead of unresolved discip
 1. **Morning / post-market review** — User opens Trades, filters or scans **OPEN** positions; **first** sees checkpoint / stale / risk posture (per hierarchy), then **holding age**, latest close vs entry, then unrealized metrics.
 2. **Hold vs reduce vs exit** — User uses **health timeline**, **distance-to-stop** (when available), and **risk hints** to decide whether the thesis is intact—not whether green/red “feels good”.
 3. **Discipline audit** — User verifies **checkpoint streak**, missing stops, or stale data warnings **without** exporting spreadsheets.
-4. **Closed trade review** — User sees **realized** economics, **`holdingDays`** (holding period), and preserved history; no fake “live” metrics on **CLOSED** rows.
+4. **Closed trade review** — User sees **realized** economics, **`holdingDays`** as **holding period** (**entry → exit** when **`exitDate`** exists), and preserved history; no fake “live” metrics on **CLOSED** rows. **CANCELLED** trades do not surface **`holdingDays`** in the detail subtitle.
 
 ---
 
@@ -79,7 +79,7 @@ Unrealized gain must **not** use celebratory emphasis ahead of unresolved discip
 - Show **latest daily close** per open symbol (from `StockDailyBar`).
 - Show **unrealized P&L** (amount when quantity valid) and **unrealized %** (visually tertiary).
 - Show **latest bar date** (session date; timezone rules per FRD).
-- Show **position aging**: **`holdingDays`** derived from `entryDate` vs current date (exact formula in FRD).
+- Show **position aging**: **`holdingDays`** per status — **OPEN** / **PLANNED**: **`entryDate` → now**; **CLOSED**: **`entryDate` → `exitDate`** (or **`—`** if exit missing); **CANCELLED**: omitted from detail subtitle; table **`—`** (FRD §2.3).
 - **Stale data warning** using **VNINDEX latest session only** as benchmark (FRD §1 — no ambiguous fallback).
 
 ### Phase 2
@@ -129,7 +129,7 @@ Unrealized gain must **not** use celebratory emphasis ahead of unresolved discip
 3. Implement **unrealized P&L / %** and **latest bar date** per FRD formulas.
 4. Add **stale bar** rule + copy — **VNINDEX-only** benchmark (FRD §1); message when index missing.
 5. **UX copy pass**: hierarchy audit (risk/health above P&L); Unrealized / Realized labels; invalid-stop explanation; no “signal” language.
-6. **QA matrix**: OPEN / CLOSED / PLANNED; LONG / SHORT; missing bar / stale bar / missing qty / missing stop / invalid stop / **holdingDays**.
+6. **QA matrix**: OPEN / CLOSED / PLANNED / **CANCELLED** (`holdingDays` omit); LONG / SHORT; missing bar / stale bar / missing qty / missing stop / invalid stop / **holdingDays** (incl. CLOSED without **`exitDate`**).
 
 ---
 
