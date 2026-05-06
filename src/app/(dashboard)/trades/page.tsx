@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
@@ -7,21 +8,20 @@ import { redirect } from "next/navigation";
 import { TradeFilters } from "./trade-filters";
 import { formatVND } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
+import { formatSignedPct } from "@/lib/trades/unrealized-from-close";
 import {
-  computeUnrealizedFromLatestClose,
-  formatSignedPct,
-} from "@/lib/trades/unrealized-from-close";
-import {
-  computeDisplayHoldingDaysUtc,
-  equityBarStaleVsBenchmark,
   loadOpenPositionMarks,
   VNINDEX_FRESHNESS_UNAVAILABLE,
 } from "@/lib/trades/position-health";
+import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
   description: "View and manage your trades.",
 };
+
+/** Ledger routes must not statically omit streamed row payloads (filters use `useSearchParams`). */
+export const dynamic = "force-dynamic";
 
 interface TradesPageProps {
   searchParams: Promise<{
@@ -36,6 +36,17 @@ function formatQuantityCell(q: number): string {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 4,
   }).format(q);
+}
+
+/** Mirrors filters layout — Suspense fallback while client filters hydrate (`useSearchParams`). */
+function TradeFiltersSkeleton() {
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="skeleton h-10 flex-1 rounded-lg sm:max-w-xs" />
+      <div className="skeleton h-10 w-36 rounded-lg" />
+      <div className="skeleton h-10 w-36 rounded-lg" />
+    </div>
+  );
 }
 
 export default async function TradesPage({ searchParams }: TradesPageProps) {
@@ -163,11 +174,13 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         </Link>
       </div>
 
-      <TradeFilters
-        currentSearch={search}
-        currentStatus={statusFilter}
-        currentSort={params.sort || "newest"}
-      />
+      <Suspense fallback={<TradeFiltersSkeleton />}>
+        <TradeFilters
+          currentSearch={search}
+          currentStatus={statusFilter}
+          currentSort={params.sort || "newest"}
+        />
+      </Suspense>
 
       {showFreshnessBanner ? (
         <div
@@ -253,38 +266,25 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             </thead>
             <tbody>
               {trades.map((trade) => {
-                const symKey = trade.symbol.trim().toUpperCase();
-                const latestBar =
-                  trade.status === "OPEN"
-                    ? latestCloseBySymbol.get(symKey) ?? null
-                    : null;
-                const unrealized =
-                  latestBar != null
-                    ? computeUnrealizedFromLatestClose({
-                        direction: trade.direction,
-                        entryPrice: trade.entryPrice,
-                        quantity: trade.quantity,
-                        latestClose: latestBar.close,
-                      })
-                    : null;
-
-                const staleState =
-                  trade.status === "OPEN" && latestBar != null
-                    ? equityBarStaleVsBenchmark(
-                        latestBar.date,
-                        expectedSessionDate
-                      )
-                    : null;
-
-                const holdingDays =
-                  trade.status === "CANCELLED"
-                    ? null
-                    : computeDisplayHoldingDaysUtc({
-                        status: trade.status,
-                        entryDate: trade.entryDate,
-                        exitDate: trade.exitDate,
-                        now,
-                      });
+                const { latestBar, unrealized, staleState, holdingDays } =
+                  deriveTradesLedgerRowFields(
+                    {
+                      id: trade.id,
+                      symbol: trade.symbol,
+                      status: trade.status,
+                      direction: trade.direction,
+                      entryPrice: trade.entryPrice,
+                      quantity: trade.quantity,
+                      entryDate: trade.entryDate,
+                      exitDate: trade.exitDate,
+                    },
+                    {
+                      latestCloseBySymbol,
+                      expectedSessionDate,
+                      checkedTodayTradeIds,
+                      now,
+                    }
+                  );
 
                 return (
                   <tr key={trade.id}>
