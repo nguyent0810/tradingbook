@@ -5,7 +5,7 @@ Fetch daily OHLCV for active Vietnam stocks via vnstock (VCI), write grouped JSO
 Reads symbol list from (in order):
   --symbols-file PATH
   else data/active-symbol-keys.json (from seed-stock-symbols.ts)
-  else data/vn-symbols.json
+  else data/vn-symbols-seed.json (fallback)
 
 Output default: data/stock-bars.json (override with --output).
 
@@ -161,9 +161,25 @@ def main() -> None:
         default=0,
         help="Max symbols (0 = all)",
     )
+    parser.add_argument(
+        "--end-date",
+        type=str,
+        default="",
+        help=(
+            "Inclusive history end as YYYY-MM-DD (UTC calendar day). "
+            "Defaults to UTC today. Prefer matching latest VNINDEX session date "
+            "(see: npx tsx scripts/report-bar-coverage.ts)."
+        ),
+    )
     args = parser.parse_args()
 
-    end = datetime.now(timezone.utc).date()
+    if args.end_date.strip():
+        try:
+            end = datetime.strptime(args.end_date.strip(), "%Y-%m-%d").date()
+        except ValueError as e:
+            raise SystemExit(f"Invalid --end-date {args.end_date!r}; use YYYY-MM-DD.") from e
+    else:
+        end = datetime.now(timezone.utc).date()
     start = end - timedelta(days=max(args.calendar_days, 180))
     start_s = start.isoformat()
     end_s = end.isoformat()
