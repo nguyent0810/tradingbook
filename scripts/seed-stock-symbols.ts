@@ -9,6 +9,9 @@
  * Usage:
  *   npx tsx scripts/seed-stock-symbols.ts
  *   npx tsx scripts/seed-stock-symbols.ts --ramp-target=100
+ *
+ * For DB activation based on bar freshness / tradability (explicit, opt-in), see
+ * `scripts/curate-active-symbols.ts` (dry-run unless `--apply`).
  */
 import { spawnSync } from "child_process";
 import { readFileSync, writeFileSync, existsSync, unlinkSync } from "fs";
