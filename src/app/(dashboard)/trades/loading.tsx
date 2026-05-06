@@ -24,7 +24,7 @@ export default function TradesLoading() {
           className="flex gap-4 px-4 py-3"
           style={{ background: "var(--bg-secondary)" }}
         >
-          {[80, 70, 70, 90, 80, 80, 50, 70, 50].map((w, i) => (
+          {[72, 64, 64, 88, 64, 96, 40, 72, 64, 88, 40, 56, 48].map((w, i) => (
             <div key={i} className="skeleton h-3" style={{ width: `${w}px` }} />
           ))}
         </div>
@@ -36,7 +36,7 @@ export default function TradesLoading() {
             className="flex gap-4 border-t px-4 py-3"
             style={{ borderColor: "var(--border-primary)" }}
           >
-            {[60, 50, 60, 80, 70, 70, 40, 60, 40].map((w, j) => (
+            {[56, 52, 52, 76, 52, 84, 36, 60, 52, 76, 36, 48, 44].map((w, j) => (
               <div
                 key={j}
                 className="skeleton h-4"

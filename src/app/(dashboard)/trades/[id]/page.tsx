@@ -10,9 +10,14 @@ import { formatPlaybookLabel } from "@/lib/playbook-config";
 import { addTradeHealthCheckpoint } from "@/app/actions/trades";
 import {
   computeUnrealizedFromLatestClose,
-  fetchLatestCloseByTradeSymbols,
   formatSignedPct,
 } from "@/lib/trades/unrealized-from-close";
+import {
+  computeDisplayHoldingDaysUtc,
+  equityBarStaleVsBenchmark,
+  loadOpenPositionMarks,
+  VNINDEX_FRESHNESS_UNAVAILABLE,
+} from "@/lib/trades/position-health";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -82,11 +87,17 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
     notFound();
   }
 
+  const now = new Date();
+
+  const symKey = trade.symbol.trim().toUpperCase();
+  const positionMarks =
+    trade.status === "OPEN"
+      ? await loadOpenPositionMarks(prisma, [symKey])
+      : null;
+
   const latestCloseSnap =
     trade.status === "OPEN"
-      ? (
-          await fetchLatestCloseByTradeSymbols(prisma, [trade.symbol])
-        ).get(trade.symbol.trim().toUpperCase()) ?? null
+      ? positionMarks?.latestCloseBySymbol.get(symKey) ?? null
       : null;
   const unrealizedLive =
     latestCloseSnap != null
@@ -98,10 +109,26 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         })
       : null;
 
+  const expectedSessionDate =
+    trade.status === "OPEN" ? positionMarks?.expectedSessionDate ?? null : null;
+  const barStaleState =
+    trade.status === "OPEN" && latestCloseSnap != null
+      ? equityBarStaleVsBenchmark(latestCloseSnap.date, expectedSessionDate)
+      : null;
+
+  const holdingDaysDisplay =
+    trade.status === "CANCELLED"
+      ? null
+      : computeDisplayHoldingDaysUtc({
+          status: trade.status,
+          entryDate: trade.entryDate,
+          exitDate: trade.exitDate,
+          now,
+        });
+
   const latestOutcome = trade.setupOutcomes[0] ?? null;
   const showWritebackCard =
     trade.status === "OPEN" || trade.status === "CLOSED";
-  const now = new Date();
   const dayStart = new Date(now);
   dayStart.setHours(0, 0, 0, 0);
   const dayEnd = new Date(now);
@@ -149,6 +176,9 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   }
   const healthLogs = [...healthLogsDesc].reverse();
 
+  const showOpenFreshnessBanner =
+    trade.status === "OPEN" && expectedSessionDate === null;
+
   return (
     <div className="page-container animate-in">
       <div className="mx-auto max-w-2xl">
@@ -170,6 +200,15 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               · {trade.direction.toLowerCase()} · {trade.status.toLowerCase()}
               {" · "}
               {formatPlaybookLabel(trade.playbook)}
+              {holdingDaysDisplay != null ? (
+                <>
+                  {" · "}
+                  <span style={{ color: "var(--text-secondary)" }}>
+                    Held {holdingDaysDisplay}{" "}
+                    {holdingDaysDisplay === 1 ? "day" : "days"}
+                  </span>
+                </>
+              ) : null}
               {trade.setupCandidate ? (
                 <>
                   {" · "}
@@ -197,6 +236,35 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
 
           <DeleteTradeButton tradeId={trade.id} />
         </div>
+
+        {showOpenFreshnessBanner ? (
+          <div
+            role="alert"
+            className="card mb-4 border px-4 py-3"
+            style={{
+              borderColor:
+                "color-mix(in srgb, #eab308 45%, var(--border-color))",
+              backgroundColor:
+                "color-mix(in srgb, #eab308 8%, var(--bg-secondary))",
+            }}
+          >
+            <p className="text-sm font-medium" style={{ color: "#854d0e" }}>
+              {VNINDEX_FRESHNESS_UNAVAILABLE}
+            </p>
+          </div>
+        ) : null}
+
+        {trade.status === "OPEN" && positionMarks?.barsLoadFailed ? (
+          <div
+            role="status"
+            className="card mb-4 border px-4 py-3"
+            style={{ borderColor: "var(--border-color)" }}
+          >
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              Latest close could not be loaded for this symbol.
+            </p>
+          </div>
+        ) : null}
 
         {showWritebackCard ? (
           <div className="card mb-4 p-4">
@@ -253,16 +321,106 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-tertiary)" }}
             >
-              Live mark (latest daily close)
+              Open position (daily bars)
             </div>
             <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-              Unrealized figures are derived from stored bars only—not saved to this trade.
+              Derived marks only — not saved on this trade. Diagnostic context,
+              not an entry signal.
             </p>
-            <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+
+            <div
+              className="mt-4 flex flex-wrap gap-2 rounded-md border px-3 py-2"
+              style={{
+                borderColor: "var(--border-primary)",
+                backgroundColor: "var(--bg-tertiary)",
+              }}
+            >
+              {hasCheckpointToday ? (
+                <span
+                  className="px-2 py-1 text-xs rounded-md border font-medium"
+                  style={{
+                    borderColor:
+                      "color-mix(in srgb, #22c55e 35%, var(--border-color))",
+                    backgroundColor:
+                      "color-mix(in srgb, #22c55e 12%, transparent)",
+                    color: "#166534",
+                  }}
+                >
+                  EOD: Checked today
+                </span>
+              ) : (
+                <span
+                  className="px-2 py-1 text-xs rounded-md border font-medium"
+                  style={{
+                    borderColor:
+                      "color-mix(in srgb, #eab308 40%, var(--border-color))",
+                    backgroundColor:
+                      "color-mix(in srgb, #eab308 12%, transparent)",
+                    color: "#854d0e",
+                  }}
+                >
+                  EOD: Needs check today
+                </span>
+              )}
+              {latestCloseSnap ? (
+                barStaleState === true ? (
+                  <span
+                    className="px-2 py-1 text-xs rounded-md border font-medium"
+                    style={{
+                      borderColor:
+                        "color-mix(in srgb, #f97316 45%, var(--border-color))",
+                      backgroundColor:
+                        "color-mix(in srgb, #f97316 14%, transparent)",
+                      color: "#9a3412",
+                    }}
+                  >
+                    Stale data (bar before index session)
+                  </span>
+                ) : barStaleState === "unknown" ? (
+                  <span
+                    className="px-2 py-1 text-xs rounded-md border"
+                    style={{
+                      borderColor: "var(--border-color)",
+                      color: "var(--text-secondary)",
+                    }}
+                    title={VNINDEX_FRESHNESS_UNAVAILABLE}
+                  >
+                    Bar freshness unverified
+                  </span>
+                ) : (
+                  <span
+                    className="px-2 py-1 text-xs rounded-md border"
+                    style={{
+                      borderColor: "var(--border-color)",
+                      color: "var(--text-muted)",
+                    }}
+                  >
+                    Bar synced to VNINDEX session
+                  </span>
+                )
+              ) : (
+                <span
+                  className="text-xs"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  No equity bar — cannot assess freshness
+                </span>
+              )}
+            </div>
+
+            <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Holding (UTC days)</dt>
+                <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
+                  {holdingDaysDisplay != null ? holdingDaysDisplay : "—"}
+                </dd>
+              </div>
               <div>
                 <dt style={{ color: "var(--text-muted)" }}>Entry price</dt>
                 <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
-                  {formatVND(trade.entryPrice, false)}
+                  {Number.isFinite(trade.entryPrice) && trade.entryPrice > 0
+                    ? formatVND(trade.entryPrice, false)
+                    : "—"}
                 </dd>
               </div>
               <div>
@@ -270,11 +428,11 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                 <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
                   {latestCloseSnap
                     ? formatVND(latestCloseSnap.close, false)
-                    : "No latest close"}
+                    : "—"}
                 </dd>
               </div>
               {latestCloseSnap ? (
-                <div className="sm:col-span-2">
+                <div>
                   <dt style={{ color: "var(--text-muted)" }}>Latest bar date (UTC)</dt>
                   <dd style={{ color: "var(--text-secondary)" }}>
                     {latestCloseSnap.date.toLocaleDateString("en-US", {
@@ -286,46 +444,63 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                   </dd>
                 </div>
               ) : null}
-              <div>
-                <dt style={{ color: "var(--text-muted)" }}>Unrealized P&amp;L</dt>
-                <dd
-                  className="mono font-medium"
-                  style={{
-                    color:
-                      unrealizedLive?.pnlAmount != null
-                        ? unrealizedLive.pnlAmount >= 0
-                          ? "var(--pnl-positive)"
-                          : "var(--pnl-negative)"
-                        : "var(--text-muted)",
-                  }}
-                >
-                  {unrealizedLive?.pnlAmount != null ? (
-                    <>
-                      {unrealizedLive.pnlAmount > 0 ? "+" : ""}
-                      {formatVND(unrealizedLive.pnlAmount, false)}
-                    </>
-                  ) : (
-                    "—"
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt style={{ color: "var(--text-muted)" }}>Unrealized %</dt>
-                <dd
-                  className="mono font-medium"
-                  style={{
-                    color:
-                      unrealizedLive?.pnlPct != null
-                        ? unrealizedLive.pnlPct >= 0
-                          ? "var(--pnl-positive)"
-                          : "var(--pnl-negative)"
-                        : "var(--text-muted)",
-                  }}
-                >
-                  {formatSignedPct(unrealizedLive?.pnlPct ?? null)}
-                </dd>
-              </div>
             </dl>
+
+            <div
+              className="mt-4 border-t pt-3 text-[13px]"
+              style={{
+                borderColor: "var(--border-primary)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              <div
+                className="text-[10px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Unrealized
+              </div>
+              <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div>
+                  <dt style={{ color: "var(--text-muted)" }}>Unrealized P&amp;L</dt>
+                  <dd
+                    className="mono font-normal"
+                    style={{
+                      color:
+                        unrealizedLive?.pnlAmount != null
+                          ? unrealizedLive.pnlAmount >= 0
+                            ? "var(--pnl-positive)"
+                            : "var(--pnl-negative)"
+                          : "var(--text-muted)",
+                    }}
+                  >
+                    {unrealizedLive?.pnlAmount != null ? (
+                      <>
+                        {unrealizedLive.pnlAmount > 0 ? "+" : ""}
+                        {formatVND(unrealizedLive.pnlAmount, false)}
+                      </>
+                    ) : (
+                      "—"
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt style={{ color: "var(--text-muted)" }}>Unrealized %</dt>
+                  <dd
+                    className="mono font-normal"
+                    style={{
+                      color:
+                        unrealizedLive?.pnlPct != null
+                          ? unrealizedLive.pnlPct >= 0
+                            ? "var(--pnl-positive)"
+                            : "var(--pnl-negative)"
+                          : "var(--text-muted)",
+                    }}
+                  >
+                    {formatSignedPct(unrealizedLive?.pnlPct ?? null)}
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </div>
         ) : null}
 

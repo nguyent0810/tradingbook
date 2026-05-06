@@ -9,9 +9,14 @@ import { formatVND } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
 import {
   computeUnrealizedFromLatestClose,
-  fetchLatestCloseByTradeSymbols,
   formatSignedPct,
 } from "@/lib/trades/unrealized-from-close";
+import {
+  computeDisplayHoldingDaysUtc,
+  equityBarStaleVsBenchmark,
+  loadOpenPositionMarks,
+  VNINDEX_FRESHNESS_UNAVAILABLE,
+} from "@/lib/trades/position-health";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -26,6 +31,13 @@ interface TradesPageProps {
   }>;
 }
 
+function formatQuantityCell(q: number): string {
+  if (!Number.isFinite(q) || q <= 0) return "—";
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 4,
+  }).format(q);
+}
+
 export default async function TradesPage({ searchParams }: TradesPageProps) {
   const session = await getSession();
   if (!session) redirect("/login");
@@ -35,7 +47,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const statusFilter = params.status || "";
   const sortOrder = params.sort === "oldest" ? "asc" : "desc";
 
-  // Build where clause
   const where: Record<string, unknown> = { userId: session.userId };
 
   if (search) {
@@ -78,10 +89,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         .filter(Boolean)
     ),
   ];
-  const latestCloseBySymbol = await fetchLatestCloseByTradeSymbols(
-    prisma,
-    openSymbols
-  );
+
+  const marks = await loadOpenPositionMarks(prisma, openSymbols);
+  const { latestCloseBySymbol: latestCloseBySymbol, expectedSessionDate } =
+    marks;
 
   let checkedTodayTradeIds = new Set<string>();
   if (openTradeIds.length > 0) {
@@ -116,9 +127,12 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       timeZone: "UTC",
     });
 
+  const hasOpenTrades = trades.some((t) => t.status === "OPEN");
+  const showFreshnessBanner =
+    hasOpenTrades && expectedSessionDate === null;
+
   return (
     <div className="page-container animate-in">
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1
@@ -149,14 +163,41 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         </Link>
       </div>
 
-      {/* Filters */}
       <TradeFilters
         currentSearch={search}
         currentStatus={statusFilter}
         currentSort={params.sort || "newest"}
       />
 
-      {/* Trade Table */}
+      {showFreshnessBanner ? (
+        <div
+          role="alert"
+          className="card mt-4 border px-4 py-3"
+          style={{
+            borderColor: "color-mix(in srgb, #eab308 45%, var(--border-color))",
+            backgroundColor:
+              "color-mix(in srgb, #eab308 8%, var(--bg-secondary))",
+          }}
+        >
+          <p className="text-sm font-medium" style={{ color: "#854d0e" }}>
+            {VNINDEX_FRESHNESS_UNAVAILABLE}
+          </p>
+        </div>
+      ) : null}
+
+      {marks.barsLoadFailed && hasOpenTrades ? (
+        <div
+          role="status"
+          className="card mt-4 border px-4 py-3"
+          style={{ borderColor: "var(--border-color)" }}
+        >
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            Latest closes could not be loaded. Open-position marks may be
+            incomplete until bars load.
+          </p>
+        </div>
+      ) : null}
+
       {trades.length === 0 ? (
         <div className="card mt-4">
           <div className="empty-state">
@@ -200,10 +241,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th>Direction</th>
                 <th>Playbook</th>
                 <th>Status</th>
-                <th>EOD</th>
+                <th>EOD / bar freshness</th>
+                <th className="table-num">Hold</th>
                 <th>Entry Date</th>
                 <th className="table-num">Entry Price</th>
-                <th className="table-num">Exit / Latest</th>
+                <th className="table-num">Latest / Exit</th>
                 <th className="table-num">Qty</th>
                 <th className="table-num">P&amp;L</th>
                 <th></th>
@@ -226,188 +268,269 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       })
                     : null;
 
-                return (
-                <tr key={trade.id}>
-                  <td>
-                    <span
-                      className="mono font-semibold"
-                      style={{ color: "var(--text-primary)" }}
-                    >
-                      {trade.symbol}
-                    </span>
-                  </td>
-                  <td>
-                    {trade.setupCandidate ? (
-                      <span className="px-2 py-1 text-xs rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
-                        {trade.setupCandidate.quality} · {trade.setupCandidate.setupType}
-                      </span>
-                    ) : (
-                      <span style={{ color: "var(--text-muted)" }}>Manual</span>
-                    )}
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        trade.direction === "LONG"
-                          ? "badge-long"
-                          : "badge-short"
-                      }`}
-                    >
-                      {trade.direction}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="px-2 py-1 text-xs rounded-md bg-[var(--bg-tertiary)] border border-[var(--border-color)] text-[var(--text-secondary)]">
-                      {formatPlaybookLabel(trade.playbook)}
-                    </span>
-                  </td>
-                  <td>
-                    <span
-                      className={`badge badge-${trade.status.toLowerCase()}`}
-                    >
-                      {trade.status}
-                    </span>
-                  </td>
-                  <td>
-                    {trade.status === "OPEN" ? (
-                      checkedTodayTradeIds.has(trade.id) ? (
-                        <span
-                          className="px-2 py-1 text-xs rounded-md border"
-                          style={{
-                            borderColor: "color-mix(in srgb, #22c55e 35%, var(--border-color))",
-                            backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)",
-                            color: "#166534",
-                          }}
-                        >
-                          Checked today
-                        </span>
-                      ) : (
-                        <span
-                          className="px-2 py-1 text-xs rounded-md border"
-                          style={{
-                            borderColor: "color-mix(in srgb, #eab308 40%, var(--border-color))",
-                            backgroundColor: "color-mix(in srgb, #eab308 12%, transparent)",
-                            color: "#854d0e",
-                          }}
-                        >
-                          Needs EOD check
-                        </span>
+                const staleState =
+                  trade.status === "OPEN" && latestBar != null
+                    ? equityBarStaleVsBenchmark(
+                        latestBar.date,
+                        expectedSessionDate
                       )
-                    ) : (
-                      <span style={{ color: "var(--text-muted)" }}>—</span>
-                    )}
-                  </td>
-                  <td className="mono">{formatDate(trade.entryDate)}</td>
-                  <td className="mono table-num">{formatVND(trade.entryPrice, false)}</td>
-                  <td className="mono table-num">
-                    {trade.status === "OPEN" ? (
-                      latestBar ? (
-                        <div className="flex flex-col items-end gap-0.5">
-                          <span>
-                            Latest close: {formatVND(latestBar.close, false)}
-                          </span>
-                          <span
-                            className="text-[11px] font-normal normal-case"
-                            style={{ color: "var(--text-muted)" }}
-                          >
-                            {formatBarSessionDate(latestBar.date)}
-                          </span>
-                        </div>
+                    : null;
+
+                const holdingDays =
+                  trade.status === "CANCELLED"
+                    ? null
+                    : computeDisplayHoldingDaysUtc({
+                        status: trade.status,
+                        entryDate: trade.entryDate,
+                        exitDate: trade.exitDate,
+                        now,
+                      });
+
+                return (
+                  <tr key={trade.id}>
+                    <td>
+                      <span
+                        className="mono font-semibold"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {trade.symbol}
+                      </span>
+                    </td>
+                    <td>
+                      {trade.setupCandidate ? (
+                        <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)]">
+                          {trade.setupCandidate.quality} ·{" "}
+                          {trade.setupCandidate.setupType}
+                        </span>
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>
-                          No latest close
+                          Manual
                         </span>
-                      )
-                    ) : trade.exitPrice !== null ? (
-                      formatVND(trade.exitPrice, false)
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td className="mono table-num">{trade.quantity}</td>
-                  <td className="table-num">
-                    {trade.status === "OPEN" ? (
-                      latestBar ? (
+                      )}
+                    </td>
+                    <td>
+                      <span
+                        className={`badge ${
+                          trade.direction === "LONG"
+                            ? "badge-long"
+                            : "badge-short"
+                        }`}
+                      >
+                        {trade.direction}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)]">
+                        {formatPlaybookLabel(trade.playbook)}
+                      </span>
+                    </td>
+                    <td>
+                      <span
+                        className={`badge badge-${trade.status.toLowerCase()}`}
+                      >
+                        {trade.status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="flex max-w-[11rem] flex-col gap-1">
+                        {trade.status === "OPEN" ? (
+                          <>
+                            {checkedTodayTradeIds.has(trade.id) ? (
+                              <span
+                                className="w-fit px-2 py-1 text-xs rounded-md border"
+                                style={{
+                                  borderColor:
+                                    "color-mix(in srgb, #22c55e 35%, var(--border-color))",
+                                  backgroundColor:
+                                    "color-mix(in srgb, #22c55e 12%, transparent)",
+                                  color: "#166534",
+                                }}
+                              >
+                                Checked today
+                              </span>
+                            ) : (
+                              <span
+                                className="w-fit px-2 py-1 text-xs rounded-md border"
+                                style={{
+                                  borderColor:
+                                    "color-mix(in srgb, #eab308 40%, var(--border-color))",
+                                  backgroundColor:
+                                    "color-mix(in srgb, #eab308 12%, transparent)",
+                                  color: "#854d0e",
+                                }}
+                              >
+                                Needs EOD check
+                              </span>
+                            )}
+                            {latestBar ? (
+                              staleState === true ? (
+                                <span
+                                  className="w-fit px-2 py-1 text-xs font-medium rounded-md border"
+                                  style={{
+                                    borderColor:
+                                      "color-mix(in srgb, #f97316 45%, var(--border-color))",
+                                    backgroundColor:
+                                      "color-mix(in srgb, #f97316 14%, transparent)",
+                                    color: "#9a3412",
+                                  }}
+                                >
+                                  Stale data
+                                </span>
+                              ) : staleState === "unknown" ? (
+                                <span
+                                  className="text-[11px]"
+                                  style={{ color: "var(--text-muted)" }}
+                                  title={VNINDEX_FRESHNESS_UNAVAILABLE}
+                                >
+                                  Freshness unverified
+                                </span>
+                              ) : (
+                                <span
+                                  className="text-[11px]"
+                                  style={{ color: "var(--text-muted)" }}
+                                >
+                                  Bar synced to index session
+                                </span>
+                              )
+                            ) : (
+                              <span
+                                className="text-[11px]"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                No equity bar
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)" }}>—</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="mono table-num">
+                      {holdingDays != null ? holdingDays : "—"}
+                    </td>
+                    <td className="mono">{formatDate(trade.entryDate)}</td>
+                    <td className="mono table-num">
+                      {Number.isFinite(trade.entryPrice) &&
+                      trade.entryPrice > 0 ? (
+                        formatVND(trade.entryPrice, false)
+                      ) : (
+                        <span style={{ color: "var(--text-muted)" }}>—</span>
+                      )}
+                    </td>
+                    <td className="mono table-num">
+                      {trade.status === "OPEN" ? (
+                        latestBar ? (
+                          <div className="flex flex-col items-end gap-0.5">
+                            <span>
+                              Close {formatVND(latestBar.close, false)}
+                            </span>
+                            <span
+                              className="text-[11px] font-normal normal-case"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {formatBarSessionDate(latestBar.date)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)" }}>—</span>
+                        )
+                      ) : trade.exitPrice !== null &&
+                        Number.isFinite(trade.exitPrice) ? (
+                        formatVND(trade.exitPrice, false)
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="mono table-num">
+                      {formatQuantityCell(trade.quantity)}
+                    </td>
+                    <td className="table-num align-top">
+                      {trade.status === "OPEN" ? (
+                        latestBar ? (
+                          <div
+                            className="flex flex-col items-end gap-0.5 text-[13px] font-normal opacity-95"
+                            style={{ color: "var(--text-secondary)" }}
+                          >
+                            <span
+                              className="text-[10px] font-semibold uppercase tracking-wide"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Unrealized
+                            </span>
+                            {unrealized?.pnlAmount != null ? (
+                              <span
+                                className="mono"
+                                style={{
+                                  color:
+                                    unrealized.pnlAmount >= 0
+                                      ? "var(--pnl-positive)"
+                                      : "var(--pnl-negative)",
+                                }}
+                              >
+                                {unrealized.pnlAmount > 0 ? "+" : ""}
+                                {formatVND(unrealized.pnlAmount, false)}
+                              </span>
+                            ) : (
+                              <span
+                                className="mono"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                —
+                              </span>
+                            )}
+                            <span
+                              className="mono text-[12px]"
+                              style={{
+                                color:
+                                  unrealized?.pnlPct != null
+                                    ? unrealized.pnlPct >= 0
+                                      ? "var(--pnl-positive)"
+                                      : "var(--pnl-negative)"
+                                    : "var(--text-muted)",
+                              }}
+                            >
+                              {formatSignedPct(unrealized?.pnlPct ?? null)}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)" }}>—</span>
+                        )
+                      ) : trade.realizedPnl !== null ? (
                         <div className="flex flex-col items-end gap-0.5">
                           <span
                             className="text-[10px] font-semibold uppercase tracking-wide"
                             style={{ color: "var(--text-muted)" }}
                           >
-                            Unrealized
+                            Realized
                           </span>
-                          {unrealized?.pnlAmount != null ? (
-                            <span
-                              className="mono font-medium"
-                              style={{
-                                color:
-                                  unrealized.pnlAmount >= 0
-                                    ? "var(--pnl-positive)"
-                                    : "var(--pnl-negative)",
-                              }}
-                            >
-                              {unrealized.pnlAmount > 0 ? "+" : ""}
-                              {formatVND(unrealized.pnlAmount, false)}
-                            </span>
-                          ) : (
-                            <span
-                              className="mono text-sm"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              —
-                            </span>
-                          )}
                           <span
-                            className="mono text-[12px]"
+                            className="mono font-medium text-sm"
                             style={{
                               color:
-                                unrealized?.pnlPct != null
-                                  ? unrealized.pnlPct >= 0
-                                    ? "var(--pnl-positive)"
-                                    : "var(--pnl-negative)"
-                                  : "var(--text-muted)",
+                                trade.realizedPnl >= 0
+                                  ? "var(--pnl-positive)"
+                                  : "var(--pnl-negative)",
                             }}
                           >
-                            {formatSignedPct(unrealized?.pnlPct ?? null)}
+                            {trade.realizedPnl > 0 ? "+" : ""}
+                            {formatVND(trade.realizedPnl, false)}
                           </span>
                         </div>
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>—</span>
-                      )
-                    ) : trade.realizedPnl !== null ? (
-                      <div className="flex flex-col items-end gap-0.5">
-                        <span
-                          className="text-[10px] font-semibold uppercase tracking-wide"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          Realized
-                        </span>
-                        <span
-                          className="mono font-medium"
-                          style={{
-                            color:
-                              trade.realizedPnl >= 0
-                                ? "var(--pnl-positive)"
-                                : "var(--pnl-negative)",
-                          }}
-                        >
-                          {trade.realizedPnl > 0 ? "+" : ""}
-                          {formatVND(trade.realizedPnl, false)}
-                        </span>
-                      </div>
-                    ) : (
-                      <span style={{ color: "var(--text-muted)" }}>—</span>
-                    )}
-                  </td>
-                  <td>
-                    <Link
-                      href={`/trades/${trade.id}`}
-                      className="btn btn-ghost btn-sm"
-                    >
-                      Edit
-                    </Link>
-                  </td>
-                </tr>
-              );
+                      )}
+                    </td>
+                    <td>
+                      <Link
+                        href={`/trades/${trade.id}`}
+                        className="btn btn-ghost btn-sm"
+                      >
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                );
               })}
             </tbody>
           </table>
