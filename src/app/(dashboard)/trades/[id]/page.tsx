@@ -13,6 +13,7 @@ import {
   formatSignedPct,
 } from "@/lib/trades/unrealized-from-close";
 import {
+  computeOpenPhase2Metrics,
   computeDisplayHoldingDaysUtc,
   equityBarStaleVsBenchmark,
   loadOpenPositionMarks,
@@ -22,6 +23,16 @@ import {
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
 };
+
+function formatSignedVnd(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value > 0 ? "+" : ""}${formatVND(value, false)}`;
+}
+
+function formatRMultiple(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)}R`;
+}
 
 interface TradeDetailPageProps {
   params: Promise<{ id: string }>;
@@ -125,6 +136,14 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
           exitDate: trade.exitDate,
           now,
         });
+
+  const phase2Metrics = computeOpenPhase2Metrics({
+    direction: trade.direction,
+    entryPrice: trade.entryPrice,
+    latestClose: latestCloseSnap?.close ?? null,
+    stopLoss: trade.stopLoss,
+    takeProfit: trade.takeProfit,
+  });
 
   const latestOutcome = trade.setupOutcomes[0] ?? null;
   const showWritebackCard =
@@ -444,6 +463,24 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                   </dd>
                 </div>
               ) : null}
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>R multiple</dt>
+                <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
+                  {formatRMultiple(phase2Metrics.rMultiple)}
+                </dd>
+              </div>
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Distance to stop</dt>
+                <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
+                  {formatSignedVnd(phase2Metrics.distanceToStop)}
+                </dd>
+              </div>
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Distance to take profit</dt>
+                <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
+                  {formatSignedVnd(phase2Metrics.distanceToTakeProfit)}
+                </dd>
+              </div>
             </dl>
 
             <div

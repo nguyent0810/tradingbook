@@ -1,7 +1,9 @@
 import type { TradeStatus } from "@/generated/prisma/client";
 import {
+  computeOpenPhase2Metrics,
   computeDisplayHoldingDaysUtc,
   equityBarStaleVsBenchmark,
+  type StopValidity,
 } from "@/lib/trades/position-health";
 import {
   computeUnrealizedFromLatestClose,
@@ -15,6 +17,8 @@ export type LedgerTradeShape = {
   direction: "LONG" | "SHORT";
   entryPrice: number;
   quantity: number;
+  stopLoss: number | null;
+  takeProfit: number | null;
   entryDate: Date;
   exitDate: Date | null;
 };
@@ -32,6 +36,10 @@ export type TradesLedgerDerivedFields = {
   unrealized: ReturnType<typeof computeUnrealizedFromLatestClose> | null;
   staleState: boolean | "unknown" | null;
   holdingDays: number | null;
+  rMultiple: number | null;
+  distanceToStop: number | null;
+  distanceToTakeProfit: number | null;
+  stopValidity: StopValidity;
 };
 
 /** Fallback when derivation fails — still renders a table row. */
@@ -50,6 +58,10 @@ export function fallbackLedgerDerivedFields(
     unrealized: null,
     staleState: null,
     holdingDays: null,
+    rMultiple: null,
+    distanceToStop: null,
+    distanceToTakeProfit: null,
+    stopValidity: "missing",
   };
 }
 
@@ -95,12 +107,32 @@ export function deriveTradesLedgerRowFields(
             now: supplemental.now,
           });
 
+    const phase2 =
+      trade.status === "OPEN"
+        ? computeOpenPhase2Metrics({
+            direction: trade.direction,
+            entryPrice: trade.entryPrice,
+            latestClose: latestBar?.close ?? null,
+            stopLoss: trade.stopLoss,
+            takeProfit: trade.takeProfit,
+          })
+        : {
+            rMultiple: null,
+            distanceToStop: null,
+            distanceToTakeProfit: null,
+            stopValidity: "missing" as const,
+          };
+
     return {
       symKey,
       latestBar,
       unrealized,
       staleState,
       holdingDays,
+      rMultiple: phase2.rMultiple,
+      distanceToStop: phase2.distanceToStop,
+      distanceToTakeProfit: phase2.distanceToTakeProfit,
+      stopValidity: phase2.stopValidity,
     };
   } catch (err) {
     console.error("[trades] ledger row derivation failed", trade.id, err);

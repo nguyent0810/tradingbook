@@ -50,6 +50,74 @@ export function computeDisplayHoldingDaysUtc(params: {
   return Math.max(0, diffDays);
 }
 
+export type StopValidity = "missing" | "invalid" | "valid";
+
+export type OpenPhase2Metrics = {
+  rMultiple: number | null;
+  distanceToStop: number | null;
+  distanceToTakeProfit: number | null;
+  stopValidity: StopValidity;
+};
+
+/**
+ * Phase 2 structural metrics for OPEN trades. Never throws.
+ * - `rMultiple` and `distanceToStop` require a valid stop and latest close.
+ * - `distanceToTakeProfit` requires latest close and take-profit.
+ */
+export function computeOpenPhase2Metrics(params: {
+  direction: "LONG" | "SHORT";
+  entryPrice: number;
+  latestClose: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+}): OpenPhase2Metrics {
+  const { direction, entryPrice, latestClose, stopLoss, takeProfit } = params;
+
+  const latestOk = latestClose != null && Number.isFinite(latestClose);
+  const entryOk = Number.isFinite(entryPrice) && entryPrice > 0;
+  const stopMissing = stopLoss == null;
+  const stopFinite = stopLoss != null && Number.isFinite(stopLoss);
+  const stopValid =
+    stopFinite &&
+    entryOk &&
+    (direction === "LONG" ? stopLoss < entryPrice : stopLoss > entryPrice);
+
+  const stopValidity: StopValidity = stopMissing
+    ? "missing"
+    : stopValid
+      ? "valid"
+      : "invalid";
+
+  let distanceToStop: number | null = null;
+  let rMultiple: number | null = null;
+  if (latestOk && stopValid) {
+    const riskPerShare =
+      direction === "LONG" ? entryPrice - stopLoss : stopLoss - entryPrice;
+    distanceToStop =
+      direction === "LONG" ? latestClose - stopLoss : stopLoss - latestClose;
+    if (riskPerShare > 0) {
+      rMultiple =
+        direction === "LONG"
+          ? (latestClose - entryPrice) / riskPerShare
+          : (entryPrice - latestClose) / riskPerShare;
+    }
+  }
+
+  let distanceToTakeProfit: number | null = null;
+  const tpOk = takeProfit != null && Number.isFinite(takeProfit);
+  if (latestOk && tpOk) {
+    distanceToTakeProfit =
+      direction === "LONG" ? takeProfit - latestClose : latestClose - takeProfit;
+  }
+
+  return {
+    rMultiple,
+    distanceToStop,
+    distanceToTakeProfit,
+    stopValidity,
+  };
+}
+
 export type PositionMarksContext = {
   latestCloseBySymbol: Map<string, LatestCloseBar>;
   expectedSessionDate: Date | null;

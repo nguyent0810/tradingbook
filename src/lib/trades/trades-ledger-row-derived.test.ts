@@ -16,6 +16,8 @@ describe("deriveTradesLedgerRowFields", () => {
         direction: "LONG",
         entryPrice: 12,
         quantity: 100,
+        stopLoss: null,
+        takeProfit: null,
         entryDate: new Date("2026-01-01T00:00:00.000Z"),
         exitDate: null,
       },
@@ -31,6 +33,9 @@ describe("deriveTradesLedgerRowFields", () => {
     expect(row.unrealized).toBeNull();
     expect(row.staleState).toBeNull();
     expect(row.holdingDays).toBe(9);
+    expect(row.rMultiple).toBeNull();
+    expect(row.distanceToStop).toBeNull();
+    expect(row.distanceToTakeProfit).toBeNull();
   });
 
   it("fallbackLedgerDerivedFields is stable", () => {

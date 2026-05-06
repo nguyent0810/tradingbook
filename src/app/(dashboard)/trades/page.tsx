@@ -38,6 +38,16 @@ function formatQuantityCell(q: number): string {
   }).format(q);
 }
 
+function formatSignedVnd(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value > 0 ? "+" : ""}${formatVND(value, false)}`;
+}
+
+function formatRMultiple(value: number | null): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value > 0 ? "+" : ""}${value.toFixed(2)}R`;
+}
+
 /** Mirrors filters layout — Suspense fallback while client filters hydrate (`useSearchParams`). */
 function TradeFiltersSkeleton() {
   return (
@@ -260,13 +270,24 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th className="table-num">Entry Price</th>
                 <th className="table-num">Latest / Exit</th>
                 <th className="table-num">Qty</th>
+                <th className="table-num">R</th>
+                <th className="table-num">Stop Dist</th>
+                <th className="table-num">TP Dist</th>
                 <th className="table-num">P&amp;L</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {trades.map((trade) => {
-                const { latestBar, unrealized, staleState, holdingDays } =
+                const {
+                  latestBar,
+                  unrealized,
+                  staleState,
+                  holdingDays,
+                  rMultiple,
+                  distanceToStop,
+                  distanceToTakeProfit,
+                } =
                   deriveTradesLedgerRowFields(
                     {
                       id: trade.id,
@@ -275,6 +296,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       direction: trade.direction,
                       entryPrice: trade.entryPrice,
                       quantity: trade.quantity,
+                      stopLoss: trade.stopLoss,
+                      takeProfit: trade.takeProfit,
                       entryDate: trade.entryDate,
                       exitDate: trade.exitDate,
                     },
@@ -444,6 +467,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     </td>
                     <td className="mono table-num">
                       {formatQuantityCell(trade.quantity)}
+                    </td>
+                    <td className="mono table-num">
+                      {trade.status === "OPEN" ? formatRMultiple(rMultiple) : "—"}
+                    </td>
+                    <td className="mono table-num">
+                      {trade.status === "OPEN"
+                        ? formatSignedVnd(distanceToStop)
+                        : "—"}
+                    </td>
+                    <td className="mono table-num">
+                      {trade.status === "OPEN"
+                        ? formatSignedVnd(distanceToTakeProfit)
+                        : "—"}
                     </td>
                     <td className="table-num align-top">
                       {trade.status === "OPEN" ? (

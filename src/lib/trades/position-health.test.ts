@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeOpenPhase2Metrics,
   computeDisplayHoldingDaysUtc,
   equityBarStaleVsBenchmark,
   utcCalendarDayMs,
@@ -69,5 +70,76 @@ describe("computeDisplayHoldingDaysUtc", () => {
         now: new Date("2024-01-05T00:00:00.000Z"),
       })
     ).toBeNull();
+  });
+});
+
+describe("computeOpenPhase2Metrics", () => {
+  it("computes LONG metrics with valid stop and TP", () => {
+    const got = computeOpenPhase2Metrics({
+      direction: "LONG",
+      entryPrice: 100,
+      latestClose: 110,
+      stopLoss: 90,
+      takeProfit: 120,
+    });
+    expect(got.stopValidity).toBe("valid");
+    expect(got.rMultiple).toBeCloseTo(1);
+    expect(got.distanceToStop).toBeCloseTo(20);
+    expect(got.distanceToTakeProfit).toBeCloseTo(10);
+  });
+
+  it("computes SHORT metrics with valid stop and TP", () => {
+    const got = computeOpenPhase2Metrics({
+      direction: "SHORT",
+      entryPrice: 100,
+      latestClose: 92,
+      stopLoss: 110,
+      takeProfit: 85,
+    });
+    expect(got.stopValidity).toBe("valid");
+    expect(got.rMultiple).toBeCloseTo(0.8);
+    expect(got.distanceToStop).toBeCloseTo(18);
+    expect(got.distanceToTakeProfit).toBeCloseTo(7);
+  });
+
+  it("returns null R and stop-distance when stop is missing", () => {
+    const got = computeOpenPhase2Metrics({
+      direction: "LONG",
+      entryPrice: 100,
+      latestClose: 103,
+      stopLoss: null,
+      takeProfit: 110,
+    });
+    expect(got.stopValidity).toBe("missing");
+    expect(got.rMultiple).toBeNull();
+    expect(got.distanceToStop).toBeNull();
+    expect(got.distanceToTakeProfit).toBeCloseTo(7);
+  });
+
+  it("marks invalid stop and keeps phase-2 stop metrics null", () => {
+    const got = computeOpenPhase2Metrics({
+      direction: "LONG",
+      entryPrice: 100,
+      latestClose: 103,
+      stopLoss: 101,
+      takeProfit: 110,
+    });
+    expect(got.stopValidity).toBe("invalid");
+    expect(got.rMultiple).toBeNull();
+    expect(got.distanceToStop).toBeNull();
+  });
+
+  it("returns all derived null when latest close missing", () => {
+    const got = computeOpenPhase2Metrics({
+      direction: "SHORT",
+      entryPrice: 100,
+      latestClose: null,
+      stopLoss: 105,
+      takeProfit: 90,
+    });
+    expect(got.stopValidity).toBe("valid");
+    expect(got.rMultiple).toBeNull();
+    expect(got.distanceToStop).toBeNull();
+    expect(got.distanceToTakeProfit).toBeNull();
   });
 });
