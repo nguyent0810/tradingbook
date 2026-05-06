@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TradeFiltersProps {
   currentSearch: string;
@@ -16,6 +16,20 @@ export function TradeFilters({
 }: TradeFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const [searchInput, setSearchInput] = useState(currentSearch);
+
+  useEffect(() => {
+    setSearchInput(currentSearch);
+  }, [currentSearch]);
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, []);
 
   const updateParam = useCallback(
     (key: string, value: string) => {
@@ -51,12 +65,12 @@ export function TradeFilters({
         <input
           type="text"
           placeholder="Search by ticker…"
-          defaultValue={currentSearch}
+          value={searchInput}
           onChange={(e) => {
-            // Debounce the search
             const value = e.target.value;
-            const timeout = setTimeout(() => updateParam("search", value), 300);
-            return () => clearTimeout(timeout);
+            setSearchInput(value);
+            if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+            searchDebounceRef.current = setTimeout(() => updateParam("search", value), 300);
           }}
           className="input"
           style={{ paddingLeft: "36px" }}

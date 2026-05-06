@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
@@ -64,19 +65,21 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     .filter((t) => t.status === "OPEN")
     .map((t) => t.id);
 
-  const checkedTodayTradeIds = new Set<string>();
+  let checkedTodayTradeIds = new Set<string>();
   if (openTradeIds.length > 0) {
-    const rows = await prisma.$queryRawUnsafe<Array<{ trade_id: string }>>(
-      `SELECT DISTINCT trade_id
-       FROM trade_health_logs
-       WHERE trade_id = ANY($1)
-         AND checked_at >= $2
-         AND checked_at <= $3`,
-      openTradeIds,
-      dayStart,
-      dayEnd
-    );
-    rows.forEach((r) => checkedTodayTradeIds.add(r.trade_id));
+    try {
+      const rows = await prisma.$queryRaw<Array<{ trade_id: string }>>`
+        SELECT DISTINCT trade_id
+        FROM trade_health_logs
+        WHERE trade_id IN (${Prisma.join(openTradeIds)})
+          AND checked_at >= ${dayStart}
+          AND checked_at <= ${dayEnd}
+      `;
+      checkedTodayTradeIds = new Set(rows.map((r) => r.trade_id));
+    } catch (e) {
+      console.error("[trades] trade_health_logs batch query skipped:", e);
+      checkedTodayTradeIds = new Set();
+    }
   }
 
   const formatDate = (date: Date) => {
