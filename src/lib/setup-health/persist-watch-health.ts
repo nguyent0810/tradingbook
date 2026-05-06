@@ -1,0 +1,125 @@
+import type { PrismaClient } from "@/generated/prisma/client";
+import { ScanQuality, ScanSetupType, SetupHealthLevel, SetupLifecycleStatus } from "@/generated/prisma/client";
+import { evaluateWatchHealth } from "./evaluate-watch-health";
+import type { OhlcvBar } from "./types";
+
+export type SurfacedCandidateLike = {
+  symbolId: string;
+  quality: "A" | "B";
+  close: number;
+  breakoutLevel: number;
+  pullbackZoneLow: number;
+  pullbackZoneHigh: number;
+  barDate: Date;
+};
+
+function scanQuality(q: "A" | "B"): ScanQuality {
+  return q === "A" ? ScanQuality.A : ScanQuality.B;
+}
+
+/**
+ * Upsert watch rows from surfaced scanner candidates (health overlay sync).
+ * Does not write lifecycle transitions — `lifecycleStatus` stays schema-default / existing FSM only.
+ */
+export async function syncWatchItemsFromSurfacedCandidates(
+  prisma: PrismaClient,
+  scanRunId: string,
+  surfaced: SurfacedCandidateLike[]
+): Promise<void> {
+  for (const c of surfaced) {
+    await prisma.setupWatchItem.upsert({
+      where: {
+        symbolId_setupType: {
+          symbolId: c.symbolId,
+          setupType: ScanSetupType.BREAKOUT_PULLBACK,
+        },
+      },
+      create: {
+        symbolId: c.symbolId,
+        setupType: ScanSetupType.BREAKOUT_PULLBACK,
+        quality: scanQuality(c.quality),
+        breakoutLevel: c.breakoutLevel,
+        pullbackZoneLow: c.pullbackZoneLow,
+        pullbackZoneHigh: c.pullbackZoneHigh,
+        firstSeenBarDate: c.barDate,
+        lastSeenScanRunId: scanRunId,
+      },
+      update: {
+        quality: scanQuality(c.quality),
+        breakoutLevel: c.breakoutLevel,
+        pullbackZoneLow: c.pullbackZoneLow,
+        pullbackZoneHigh: c.pullbackZoneHigh,
+        lastSeenScanRunId: scanRunId,
+      },
+    });
+  }
+}
+
+export async function evaluateAndPersistHealthForActiveWatchItems(
+  prisma: PrismaClient,
+  evalBarDate: Date,
+  now: Date = new Date()
+): Promise<{ updated: number }> {
+  const watches = await prisma.setupWatchItem.findMany({
+    where: {
+      lifecycleStatus: {
+        notIn: [
+          SetupLifecycleStatus.TRIGGERED,
+          SetupLifecycleStatus.EXPIRED,
+          SetupLifecycleStatus.INVALID,
+        ],
+      },
+    },
+  });
+
+  let updated = 0;
+
+  for (const w of watches) {
+    const rows = await prisma.stockDailyBar.findMany({
+      where: {
+        symbolId: w.symbolId,
+        date: { lte: evalBarDate },
+      },
+      orderBy: { date: "asc" },
+      select: {
+        date: true,
+        open: true,
+        high: true,
+        low: true,
+        close: true,
+        volume: true,
+      },
+    });
+
+    const barsAsc: OhlcvBar[] = rows.map((r) => ({
+      date: r.date,
+      open: r.open,
+      high: r.high,
+      low: r.low,
+      close: r.close,
+      volume: r.volume,
+    }));
+
+    const { flags, score, level } = evaluateWatchHealth({
+      breakoutLevel: w.breakoutLevel,
+      pullbackZoneLow: w.pullbackZoneLow,
+      pullbackZoneHigh: w.pullbackZoneHigh,
+      firstSeenBarDate: w.firstSeenBarDate,
+      evalBarDate,
+      barsAscThroughEval: barsAsc,
+    });
+
+    await prisma.setupWatchItem.update({
+      where: { id: w.id },
+      data: {
+        healthFlags: flags,
+        healthScore: score,
+        healthLevel: level as SetupHealthLevel,
+        lastHealthEvaluatedAt: now,
+      },
+    });
+    updated++;
+  }
+
+  return { updated };
+}
