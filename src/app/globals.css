@@ -319,6 +319,15 @@ body {
   font-size: 14px;
 }
 
+/*
+ * Sticky thead + `border-collapse: collapse` makes Chromium/WebKit paint the first tbody row
+ * underneath the header (overlap). Use separated borders with zero spacing instead.
+ */
+.table-container.table-sticky .table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 /* Sticky thead only when opted in (full ledger). Short / embedded tables must not cover body rows. */
 .table-container.table-sticky thead th {
   position: sticky;
@@ -370,6 +379,13 @@ body {
 
 .details-disclosure > summary::-webkit-details-marker {
   display: none;
+}
+
+/* Entire row must elevate above later <li> blocks; inner z-index alone cannot beat sibling list items. */
+.setups-diagnostics-buckets > li.diagnostics-bucket-open {
+  position: relative;
+  z-index: 100;
+  isolation: isolate;
 }
 
 .details-disclosure:not([open]) > summary .details-marker-open {
