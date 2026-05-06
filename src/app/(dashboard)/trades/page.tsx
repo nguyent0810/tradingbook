@@ -256,7 +256,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         </div>
       ) : (
         <div className="table-container table-sticky mt-4">
-          <table className="table">
+          <table className="table min-w-[1680px]">
             <thead>
               <tr>
                 <th>Symbol</th>
@@ -342,8 +342,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                         {trade.direction}
                       </span>
                     </td>
-                    <td>
-                      <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)]">
+                    <td className="whitespace-nowrap">
+                      <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)] whitespace-nowrap">
                         {formatPlaybookLabel(trade.playbook)}
                       </span>
                     </td>
@@ -468,15 +468,15 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     <td className="mono table-num">
                       {formatQuantityCell(trade.quantity)}
                     </td>
-                    <td className="mono table-num">
+                    <td className="mono table-num text-xs">
                       {trade.status === "OPEN" ? formatRMultiple(rMultiple) : "—"}
                     </td>
-                    <td className="mono table-num">
+                    <td className="mono table-num text-xs">
                       {trade.status === "OPEN"
                         ? formatSignedVnd(distanceToStop)
                         : "—"}
                     </td>
-                    <td className="mono table-num">
+                    <td className="mono table-num text-xs">
                       {trade.status === "OPEN"
                         ? formatSignedVnd(distanceToTakeProfit)
                         : "—"}
