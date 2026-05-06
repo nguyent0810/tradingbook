@@ -47,6 +47,8 @@ npx tsx scripts/audit-gate2-sensitivity.ts
 npx tsx scripts/audit-gate2-sensitivity.ts --near-miss-limit=40
 ```
 
+Operational watchlist output (same INVALID ordering, read-only): see [near-miss-watchlist.md](./near-miss-watchlist.md) and `npm run scanner:near-miss`.
+
 ## Snapshot results (local run, curated universe)
 
 Captured from `audit-gate2-sensitivity.ts` with **67** tradable symbols, **`gate1Level`: `"WARNING"`**:

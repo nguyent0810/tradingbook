@@ -5,6 +5,7 @@
  * Usage:
  *   npx tsx scripts/audit-gate2-sensitivity.ts
  *   npx tsx scripts/audit-gate2-sensitivity.ts --near-miss-limit=30
+ *   npx tsx scripts/audit-gate2-sensitivity.ts --watchlist-only --near-miss-limit=20
  */
 import "./load-env";
 import { sma } from "../src/lib/playbook/indicators";
@@ -26,9 +27,10 @@ import type {
   Gate1Level,
 } from "../src/lib/scanner/gate2/types";
 import {
-  computeDistanceToPullbackZoneFrac,
-  computeRiskToStopFrac,
-} from "../src/lib/scanner/closest-execution-metrics";
+  invalidGate2EvaluationToWatchlistRow,
+  NEAR_MISS_WATCHLIST_DISCLAIMER,
+  type BarRow,
+} from "../src/lib/scanner/near-miss-watchlist";
 import { getExpectedLatestSessionFromIndexBars } from "../src/lib/scanner/expected-session";
 import { evaluateTradabilityForSymbolId } from "../src/lib/scanner/tradability";
 import { describeDatabaseUrl } from "./load-env";
@@ -40,6 +42,10 @@ function parseNearMissLimit(argv: string[]): number {
   if (!raw) return 25;
   const n = Number.parseInt(raw.slice("--near-miss-limit=".length), 10);
   return Number.isFinite(n) && n > 0 ? Math.min(n, 200) : 25;
+}
+
+function hasFlag(argv: string[], flag: string): boolean {
+  return argv.includes(flag);
 }
 
 /** Roll up terminal categories into audit-facing buckets (diagnostic labels only). */
@@ -77,20 +83,7 @@ function auditBucketForTerminal(cat: TerminalCategory): string {
   }
 }
 
-/** Gate 2 INVALID paths often clear pullback zone fields; recover bounds from reason text when present. */
-function tryExtractPullbackZoneFromReason(reason: string): {
-  low: number;
-  high: number;
-} | null {
-  const m = reason.match(/\(([0-9]+\.?[0-9]*)\s*[–—\-]\s*([0-9]+\.?[0-9]*)\)/);
-  if (!m) return null;
-  const a = Number.parseFloat(m[1]!);
-  const b = Number.parseFloat(m[2]!);
-  if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
-  return { low: Math.min(a, b), high: Math.max(a, b) };
-}
-
-function maAtLastBar(bars: Parameters<typeof sortDedupeGate2Bars>[0]): {
+function masAtLastForAudit(bars: readonly BarRow[]): {
   ma20: number | null;
   ma50: number | null;
 } {
@@ -110,82 +103,59 @@ function maAtLastBar(bars: Parameters<typeof sortDedupeGate2Bars>[0]): {
   };
 }
 
-type BarRow = {
-  date: Date;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-};
-
 function enrichNearMiss(params: {
   symbol: string;
   ev: BreakoutPullbackEvaluation;
   bars: readonly BarRow[];
 }): Record<string, unknown> {
-  const { symbol, ev } = params;
-  const rows = params.bars;
+  const { symbol, ev, bars } = params;
   const term = terminalGate2Reason(ev);
-  const { category: terminalCategory, stageRank } = categorizeTerminalReason(term);
-  const auditBucket = auditBucketForTerminal(terminalCategory);
-  const { ma20, ma50 } = maAtLastBar(rows);
+  const { category } = categorizeTerminalReason(term);
 
-  const zoneFromEv =
-    ev.pullbackZoneLow > 0 && ev.pullbackZoneHigh > 0
-      ? { low: ev.pullbackZoneLow, high: ev.pullbackZoneHigh }
-      : tryExtractPullbackZoneFromReason(term);
+  if (ev.quality !== "INVALID") {
+    const { ma20, ma50 } = masAtLastForAudit(bars);
+    const maRelationship =
+      ma20 != null && ma50 != null
+        ? ma20 >= ma50
+          ? "ma20_gte_ma50"
+          : "ma20_lt_ma50"
+        : "unknown";
+    return {
+      symbol,
+      setupType: SETUP_TYPE_LABEL,
+      gate2Quality: ev.quality,
+      terminalCategory: category,
+      auditBucket: auditBucketForTerminal(category),
+      terminalReason: term,
+      failedReasons: ev.reasons,
+      close: ev.close,
+      ma20,
+      ma50,
+      maRelationship,
+      breakoutLevel: ev.breakoutLevel,
+      pullbackZoneLow: ev.pullbackZoneLow,
+      pullbackZoneHigh: ev.pullbackZoneHigh,
+      stopLevel: ev.stopLevel,
+      rankScore: ev.rankScore,
+      reasonLineCount: ev.reasons.length,
+    };
+  }
 
-  const riskToStopFrac =
-    ev.stopLevel > 0 ? computeRiskToStopFrac(ev.close, ev.stopLevel) : null;
-  const distToZoneFrac =
-    zoneFromEv != null
-      ? computeDistanceToPullbackZoneFrac(
-          ev.close,
-          zoneFromEv.low,
-          zoneFromEv.high
-        )
-      : null;
-
-  const maRelationship =
-    ma20 != null && ma50 != null
-      ? ma20 >= ma50
-        ? "ma20_gte_ma50"
-        : "ma20_lt_ma50"
-      : "unknown";
-
+  const wl = invalidGate2EvaluationToWatchlistRow(params);
   return {
-    symbol,
+    ...wl,
     setupType: SETUP_TYPE_LABEL,
     gate2Quality: ev.quality,
-    terminalCategory,
-    auditBucket,
-    stageRank,
-    failedReasons: ev.reasons,
+    auditBucket: auditBucketForTerminal(category),
     terminalReason: term,
-    close: ev.close,
-    ma20,
-    ma50,
-    maRelationship,
-    breakoutLevel: ev.breakoutLevel,
-    pullbackZoneLow: zoneFromEv?.low ?? ev.pullbackZoneLow,
-    pullbackZoneHigh: zoneFromEv?.high ?? ev.pullbackZoneHigh,
-    stopLevel: ev.stopLevel,
-    riskToStopFrac:
-      riskToStopFrac != null && Number.isFinite(riskToStopFrac)
-        ? Number(riskToStopFrac.toFixed(6))
-        : null,
-    distanceToPullbackZoneFrac:
-      distToZoneFrac != null && Number.isFinite(distToZoneFrac)
-        ? Number(distToZoneFrac.toFixed(6))
-        : null,
-    rankScore: ev.rankScore,
     reasonLineCount: ev.reasons.length,
   };
 }
 
 async function main(): Promise<void> {
-  const nearMissLimit = parseNearMissLimit(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  const nearMissLimit = parseNearMissLimit(argv);
+  const watchlistOnly = hasFlag(argv, "--watchlist-only");
 
   console.error("audit-gate2-sensitivity.ts → DATABASE_URL:", describeDatabaseUrl());
 
@@ -211,17 +181,7 @@ async function main(): Promise<void> {
   }
 
   const diagnosticRows: Gate2DiagnosticEvaluationRow[] = [];
-  const barsBySymbol = new Map<
-    string,
-    Array<{
-      date: Date;
-      open: number;
-      high: number;
-      low: number;
-      close: number;
-      volume: number;
-    }>
-  >();
+  const barsBySymbol = new Map<string, BarRow[]>();
 
   for (const t of tradable) {
     const rows = await prisma.stockDailyBar.findMany({
@@ -301,6 +261,26 @@ async function main(): Promise<void> {
       })
     );
 
+  const topNearMissesByPipelineDepth = nearMissLimitFn(deepestInvalid);
+
+  if (watchlistOnly) {
+    console.log(
+      JSON.stringify(
+        {
+          disclaimer: NEAR_MISS_WATCHLIST_DISCLAIMER,
+          generatedAt: new Date().toISOString(),
+          expectedLatestSession: expectedLatestSession.toISOString(),
+          sortedBy: "pipelineStageRankDesc",
+          tradabilityPassedCount: tradable.length,
+          topNearMisses: topNearMissesByPipelineDepth,
+        },
+        null,
+        2
+      )
+    );
+    return;
+  }
+
   const surfacedUnderGate1 =
     gate1Level === "FAIL"
       ? 0
@@ -317,17 +297,21 @@ async function main(): Promise<void> {
       tierA: countA,
       tierB: countB,
       invalid: countInvalid,
-      /** Candidates that would surface given Gate 1-only filtering (same as scanner surfacing rules). */
       surfacedCandidateCountUnderCurrentGate1: surfacedUnderGate1,
     },
     rejectionBucketsTerminal: summary.invalidCountByCategory,
     rejectionBucketsAuditAggregate: auditBucketCounts,
     diagnosticsRecommendation: summary.recommendation,
+    nearMissWatchlist: {
+      disclaimer: NEAR_MISS_WATCHLIST_DISCLAIMER,
+      sortedBy: "pipelineStageRankDesc",
+      topNearMisses: topNearMissesByPipelineDepth,
+    },
     nearMiss: {
       tierBQuietBlockedByGate1Warning: tierBNear,
       tierAFlat: tierANear,
       invalidSingleReasonLineOnly: nearMissLimitFn(singleCheckpointFails),
-      invalidClosestToPassingByPipelineDepth: nearMissLimitFn(deepestInvalid),
+      invalidClosestToPassingByPipelineDepth: topNearMissesByPipelineDepth,
     },
     notes: {
       setupType: SETUP_TYPE_LABEL,
@@ -335,6 +319,8 @@ async function main(): Promise<void> {
         "Audit aggregates map Gate 2 terminal categories into coarse buckets: weak_ma20_ma50=trend_ma20_below_ma50; no_pullback_* = breakout_recency vs digestion; pullback_structure_zone = breakout hold / zone / mid-pullback failures; volatility_* = volume/extension/depth caps; poor_risk_reward_stop_structure = stop/R validation.",
       gate1WarningNote:
         "When gate1Level is WARNING, Tier B evaluations exist but are not persisted as SetupCandidates — check tierBQuietBlockedByGate1Warning.",
+      watchlistCli:
+        "npm run scanner:near-miss (table) or scanner-near-miss.ts --json; audit --watchlist-only for JSON slice.",
     },
   };
 
