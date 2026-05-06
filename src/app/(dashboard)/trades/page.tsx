@@ -7,6 +7,11 @@ import { redirect } from "next/navigation";
 import { TradeFilters } from "./trade-filters";
 import { formatVND } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
+import {
+  computeUnrealizedFromLatestClose,
+  fetchLatestCloseByTradeSymbols,
+  formatSignedPct,
+} from "@/lib/trades/unrealized-from-close";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -65,6 +70,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     .filter((t) => t.status === "OPEN")
     .map((t) => t.id);
 
+  const openSymbols = [
+    ...new Set(
+      trades
+        .filter((t) => t.status === "OPEN")
+        .map((t) => t.symbol.trim().toUpperCase())
+        .filter(Boolean)
+    ),
+  ];
+  const latestCloseBySymbol = await fetchLatestCloseByTradeSymbols(
+    prisma,
+    openSymbols
+  );
+
   let checkedTodayTradeIds = new Set<string>();
   if (openTradeIds.length > 0) {
     try {
@@ -89,6 +107,14 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       year: "numeric",
     });
   };
+
+  const formatBarSessionDate = (date: Date) =>
+    new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "UTC",
+    });
 
   return (
     <div className="page-container animate-in">
@@ -177,14 +203,30 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th>EOD</th>
                 <th>Entry Date</th>
                 <th className="table-num">Entry Price</th>
-                <th className="table-num">Exit Price</th>
+                <th className="table-num">Exit / Latest</th>
                 <th className="table-num">Qty</th>
-                <th className="table-num">P&L</th>
+                <th className="table-num">P&amp;L</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {trades.map((trade) => (
+              {trades.map((trade) => {
+                const symKey = trade.symbol.trim().toUpperCase();
+                const latestBar =
+                  trade.status === "OPEN"
+                    ? latestCloseBySymbol.get(symKey) ?? null
+                    : null;
+                const unrealized =
+                  latestBar != null
+                    ? computeUnrealizedFromLatestClose({
+                        direction: trade.direction,
+                        entryPrice: trade.entryPrice,
+                        quantity: trade.quantity,
+                        latestClose: latestBar.close,
+                      })
+                    : null;
+
+                return (
                 <tr key={trade.id}>
                   <td>
                     <span
@@ -258,25 +300,100 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                   <td className="mono">{formatDate(trade.entryDate)}</td>
                   <td className="mono table-num">{formatVND(trade.entryPrice, false)}</td>
                   <td className="mono table-num">
-                    {trade.exitPrice !== null
-                      ? formatVND(trade.exitPrice, false)
-                      : "—"}
+                    {trade.status === "OPEN" ? (
+                      latestBar ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span>
+                            Latest close: {formatVND(latestBar.close, false)}
+                          </span>
+                          <span
+                            className="text-[11px] font-normal normal-case"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            {formatBarSessionDate(latestBar.date)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: "var(--text-muted)" }}>
+                          No latest close
+                        </span>
+                      )
+                    ) : trade.exitPrice !== null ? (
+                      formatVND(trade.exitPrice, false)
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td className="mono table-num">{trade.quantity}</td>
                   <td className="table-num">
-                    {trade.realizedPnl !== null ? (
-                      <span
-                        className="mono font-medium"
-                        style={{
-                          color:
-                            trade.realizedPnl >= 0
-                              ? "var(--pnl-positive)"
-                              : "var(--pnl-negative)",
-                        }}
-                      >
-                        {trade.realizedPnl > 0 ? "+" : ""}
-                        {formatVND(trade.realizedPnl, false)}
-                      </span>
+                    {trade.status === "OPEN" ? (
+                      latestBar ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span
+                            className="text-[10px] font-semibold uppercase tracking-wide"
+                            style={{ color: "var(--text-muted)" }}
+                          >
+                            Unrealized
+                          </span>
+                          {unrealized?.pnlAmount != null ? (
+                            <span
+                              className="mono font-medium"
+                              style={{
+                                color:
+                                  unrealized.pnlAmount >= 0
+                                    ? "var(--pnl-positive)"
+                                    : "var(--pnl-negative)",
+                              }}
+                            >
+                              {unrealized.pnlAmount > 0 ? "+" : ""}
+                              {formatVND(unrealized.pnlAmount, false)}
+                            </span>
+                          ) : (
+                            <span
+                              className="mono text-sm"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              —
+                            </span>
+                          )}
+                          <span
+                            className="mono text-[12px]"
+                            style={{
+                              color:
+                                unrealized?.pnlPct != null
+                                  ? unrealized.pnlPct >= 0
+                                    ? "var(--pnl-positive)"
+                                    : "var(--pnl-negative)"
+                                  : "var(--text-muted)",
+                            }}
+                          >
+                            {formatSignedPct(unrealized?.pnlPct ?? null)}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ color: "var(--text-muted)" }}>—</span>
+                      )
+                    ) : trade.realizedPnl !== null ? (
+                      <div className="flex flex-col items-end gap-0.5">
+                        <span
+                          className="text-[10px] font-semibold uppercase tracking-wide"
+                          style={{ color: "var(--text-muted)" }}
+                        >
+                          Realized
+                        </span>
+                        <span
+                          className="mono font-medium"
+                          style={{
+                            color:
+                              trade.realizedPnl >= 0
+                                ? "var(--pnl-positive)"
+                                : "var(--pnl-negative)",
+                          }}
+                        >
+                          {trade.realizedPnl > 0 ? "+" : ""}
+                          {formatVND(trade.realizedPnl, false)}
+                        </span>
+                      </div>
                     ) : (
                       <span style={{ color: "var(--text-muted)" }}>—</span>
                     )}
@@ -290,7 +407,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     </Link>
                   </td>
                 </tr>
-              ))}
+              );
+              })}
             </tbody>
           </table>
         </div>

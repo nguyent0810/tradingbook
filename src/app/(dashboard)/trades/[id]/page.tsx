@@ -8,6 +8,11 @@ import { DeleteTradeButton } from "./delete-button";
 import { formatVND } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
 import { addTradeHealthCheckpoint } from "@/app/actions/trades";
+import {
+  computeUnrealizedFromLatestClose,
+  fetchLatestCloseByTradeSymbols,
+  formatSignedPct,
+} from "@/lib/trades/unrealized-from-close";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -76,6 +81,22 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   if (!trade) {
     notFound();
   }
+
+  const latestCloseSnap =
+    trade.status === "OPEN"
+      ? (
+          await fetchLatestCloseByTradeSymbols(prisma, [trade.symbol])
+        ).get(trade.symbol.trim().toUpperCase()) ?? null
+      : null;
+  const unrealizedLive =
+    latestCloseSnap != null
+      ? computeUnrealizedFromLatestClose({
+          direction: trade.direction,
+          entryPrice: trade.entryPrice,
+          quantity: trade.quantity,
+          latestClose: latestCloseSnap.close,
+        })
+      : null;
 
   const latestOutcome = trade.setupOutcomes[0] ?? null;
   const showWritebackCard =
@@ -223,6 +244,88 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                 Manual trade — no setup learning link.
               </p>
             )}
+          </div>
+        ) : null}
+
+        {trade.status === "OPEN" ? (
+          <div className="card mb-4 p-4">
+            <div
+              className="text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              Live mark (latest daily close)
+            </div>
+            <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+              Unrealized figures are derived from stored bars only—not saved to this trade.
+            </p>
+            <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Entry price</dt>
+                <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
+                  {formatVND(trade.entryPrice, false)}
+                </dd>
+              </div>
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Latest close</dt>
+                <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
+                  {latestCloseSnap
+                    ? formatVND(latestCloseSnap.close, false)
+                    : "No latest close"}
+                </dd>
+              </div>
+              {latestCloseSnap ? (
+                <div className="sm:col-span-2">
+                  <dt style={{ color: "var(--text-muted)" }}>Latest bar date (UTC)</dt>
+                  <dd style={{ color: "var(--text-secondary)" }}>
+                    {latestCloseSnap.date.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      timeZone: "UTC",
+                    })}
+                  </dd>
+                </div>
+              ) : null}
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Unrealized P&amp;L</dt>
+                <dd
+                  className="mono font-medium"
+                  style={{
+                    color:
+                      unrealizedLive?.pnlAmount != null
+                        ? unrealizedLive.pnlAmount >= 0
+                          ? "var(--pnl-positive)"
+                          : "var(--pnl-negative)"
+                        : "var(--text-muted)",
+                  }}
+                >
+                  {unrealizedLive?.pnlAmount != null ? (
+                    <>
+                      {unrealizedLive.pnlAmount > 0 ? "+" : ""}
+                      {formatVND(unrealizedLive.pnlAmount, false)}
+                    </>
+                  ) : (
+                    "—"
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt style={{ color: "var(--text-muted)" }}>Unrealized %</dt>
+                <dd
+                  className="mono font-medium"
+                  style={{
+                    color:
+                      unrealizedLive?.pnlPct != null
+                        ? unrealizedLive.pnlPct >= 0
+                          ? "var(--pnl-positive)"
+                          : "var(--pnl-negative)"
+                        : "var(--text-muted)",
+                  }}
+                >
+                  {formatSignedPct(unrealizedLive?.pnlPct ?? null)}
+                </dd>
+              </div>
+            </dl>
           </div>
         ) : null}
 
