@@ -12,9 +12,24 @@ import { formatPlaybookLabel } from "@/lib/playbook-config";
 
 interface TradeFormProps {
   trade?: Trade;
+  initialValues?: Partial<{
+    setupId: string;
+    symbol: string;
+    direction: "LONG" | "SHORT";
+    entryPrice: number;
+    stopLoss: number;
+    takeProfit: number;
+    positionSize: number;
+    entryReason: string;
+    entryLocationVsZone: string;
+    healthLevelAtEntry: string;
+    healthScoreAtEntry: number;
+    setupSnapshot: string;
+  }>;
+  setupContextLabel?: string | null;
 }
 
-export function TradeForm({ trade }: TradeFormProps) {
+export function TradeForm({ trade, initialValues, setupContextLabel }: TradeFormProps) {
   const isEditing = !!trade;
 
   const action = isEditing
@@ -58,7 +73,7 @@ export function TradeForm({ trade }: TradeFormProps) {
             type="text"
             required
             placeholder="AAPL"
-            defaultValue={trade?.symbol || ""}
+            defaultValue={trade?.symbol || initialValues?.symbol || ""}
             className="input"
             style={{ textTransform: "uppercase" }}
           />
@@ -77,7 +92,7 @@ export function TradeForm({ trade }: TradeFormProps) {
             id="direction"
             name="direction"
             required
-            defaultValue={trade?.direction || "LONG"}
+            defaultValue={trade?.direction || initialValues?.direction || "LONG"}
             className="select"
           >
             <option value="LONG">Long</option>
@@ -113,7 +128,15 @@ export function TradeForm({ trade }: TradeFormProps) {
         <p className="mt-1 text-xs text-[var(--text-muted)]">
           This journal is locked to the Breakout → Pullback playbook only.
         </p>
+        {setupContextLabel ? (
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
+            Linked setup: {setupContextLabel}
+          </p>
+        ) : null}
       </div>
+
+      <input type="hidden" name="setupId" value={trade?.setupId ?? initialValues?.setupId ?? ""} />
+      <input type="hidden" name="setupSnapshot" value={initialValues?.setupSnapshot ?? ""} />
 
       {/* Row 2: Entry/Exit Date */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -164,7 +187,7 @@ export function TradeForm({ trade }: TradeFormProps) {
             step="any"
             required
             placeholder="0"
-            defaultValue={trade?.entryPrice || ""}
+            defaultValue={trade?.entryPrice || initialValues?.entryPrice || ""}
             className="input"
           />
           {state?.errors?.entryPrice && (
@@ -231,6 +254,182 @@ export function TradeForm({ trade }: TradeFormProps) {
             placeholder="0"
             defaultValue={trade?.fees || 0}
             className="input"
+          />
+        </div>
+      </div>
+
+      {/* Row 5: Setup execution context */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="stopLoss" className="label">
+            Stop Loss <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+          </label>
+          <input
+            id="stopLoss"
+            name="stopLoss"
+            type="number"
+            step="any"
+            defaultValue={trade?.stopLoss ?? initialValues?.stopLoss ?? ""}
+            className="input"
+          />
+        </div>
+        <div>
+          <label htmlFor="takeProfit" className="label">
+            Take Profit <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+          </label>
+          <input
+            id="takeProfit"
+            name="takeProfit"
+            type="number"
+            step="any"
+            defaultValue={trade?.takeProfit ?? initialValues?.takeProfit ?? ""}
+            className="input"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="positionSize" className="label">
+            Position Size <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+          </label>
+          <input
+            id="positionSize"
+            name="positionSize"
+            type="number"
+            step="any"
+            defaultValue={trade?.positionSize ?? initialValues?.positionSize ?? ""}
+            className="input"
+          />
+        </div>
+        <div>
+          <label htmlFor="healthScoreAtEntry" className="label">
+            Health Score at Entry <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+          </label>
+          <input
+            id="healthScoreAtEntry"
+            name="healthScoreAtEntry"
+            type="number"
+            min={0}
+            max={100}
+            defaultValue={trade?.healthScoreAtEntry ?? initialValues?.healthScoreAtEntry ?? ""}
+            className="input"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div>
+          <label htmlFor="entryReason" className="label">Entry Reason</label>
+          <select
+            id="entryReason"
+            name="entryReason"
+            defaultValue={trade?.entryReason ?? initialValues?.entryReason ?? ""}
+            className="select"
+          >
+            <option value="">Select reason</option>
+            <option value="ZONE_RETEST">Zone retest</option>
+            <option value="BREAKOUT_CONFIRM">Breakout confirm</option>
+            <option value="PULLBACK_ENTRY">Pullback entry</option>
+            <option value="STRUCTURE_CONTINUATION">Structure continuation</option>
+            <option value="MOMENTUM_CONFIRM">Momentum confirm</option>
+            <option value="READY_ON_OPEN">Ready on open</option>
+            <option value="READY_INTRADAY">Ready intraday</option>
+            <option value="LATE_CHASE">Late chase</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="entryLocationVsZone" className="label">Entry vs Zone</label>
+          <select
+            id="entryLocationVsZone"
+            name="entryLocationVsZone"
+            defaultValue={trade?.entryLocationVsZone ?? initialValues?.entryLocationVsZone ?? ""}
+            className="select"
+          >
+            <option value="">Select location</option>
+            <option value="IN_ZONE">In zone</option>
+            <option value="ABOVE_ZONE">Above zone</option>
+            <option value="BELOW_ZONE">Below zone</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="healthLevelAtEntry" className="label">Health at Entry</label>
+          <select
+            id="healthLevelAtEntry"
+            name="healthLevelAtEntry"
+            defaultValue={trade?.healthLevelAtEntry ?? initialValues?.healthLevelAtEntry ?? ""}
+            className="select"
+          >
+            <option value="">Select health</option>
+            <option value="HEALTHY">Healthy</option>
+            <option value="WARNING">Warning</option>
+            <option value="AT_RISK">At risk</option>
+            <option value="DEAD">Dead</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="exitReason" className="label">Exit Reason</label>
+          <select
+            id="exitReason"
+            name="exitReason"
+            defaultValue={trade?.exitReason ?? ""}
+            className="select"
+          >
+            <option value="">Select reason</option>
+            <option value="TAKE_PROFIT_HIT">Take profit hit</option>
+            <option value="STOP_LOSS_HIT">Stop loss hit</option>
+            <option value="ZONE_INVALIDATED">Zone invalidated</option>
+            <option value="STRUCTURE_BROKEN">Structure broken</option>
+            <option value="HEALTH_DEGRADED_EOD">Health degraded EOD</option>
+            <option value="TIME_STOP">Time stop</option>
+            <option value="MANUAL_RULE_BASED_EXIT">Manual rule-based exit</option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="exitDiscipline" className="label">Exit Discipline</label>
+          <select
+            id="exitDiscipline"
+            name="exitDiscipline"
+            defaultValue={trade?.exitDiscipline ?? ""}
+            className="select"
+          >
+            <option value="">Select discipline</option>
+            <option value="FOLLOWED_PLAN">Followed plan</option>
+            <option value="EARLY_EXIT_RULE_BASED">Early exit (rule-based)</option>
+            <option value="EMOTIONAL_EXIT">Emotional exit</option>
+            <option value="RULE_VIOLATION">Rule violation</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="entryNote" className="label">
+            Entry Note <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+          </label>
+          <textarea
+            id="entryNote"
+            name="entryNote"
+            rows={2}
+            defaultValue={trade?.entryNote ?? ""}
+            className="input"
+            style={{ resize: "vertical", minHeight: "64px" }}
+          />
+        </div>
+        <div>
+          <label htmlFor="exitNote" className="label">
+            Exit Note <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+          </label>
+          <textarea
+            id="exitNote"
+            name="exitNote"
+            rows={2}
+            defaultValue={trade?.exitNote ?? ""}
+            className="input"
+            style={{ resize: "vertical", minHeight: "64px" }}
           />
         </div>
       </div>

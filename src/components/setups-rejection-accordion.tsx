@@ -13,6 +13,13 @@ export type SetupsRejectionAccordionItem = {
 
 const INITIAL_SYMBOLS = 5;
 
+function syncDiagnosticsLiOpenClass(detailsEl: HTMLDetailsElement | null) {
+  if (!detailsEl) return;
+  const li = detailsEl.closest("li");
+  if (!li) return;
+  li.classList.toggle("diagnostics-bucket-open", detailsEl.open);
+}
+
 export function SetupsRejectionAccordion({
   items,
   sectionTitle = "Diagnostics",
@@ -44,17 +51,27 @@ export function SetupsRejectionAccordion({
         {sectionIntro ?? defaultIntro}
       </p>
 
-      <ul className="mt-5 space-y-2">
+      <ul className="setups-diagnostics-buckets mt-5 space-y-2">
         {sorted.map((row) => {
           const defaultCap = Math.min(INITIAL_SYMBOLS, row.symbols.length);
           const cap = visibleCapByKey[row.categoryKey] ?? defaultCap;
           const visible = row.symbols.slice(0, cap);
           const canExpandList = row.symbols.length > INITIAL_SYMBOLS;
           const showingAll = cap >= row.symbols.length;
+          const bucketSymbolsId = `diagnostics-bucket-symbols-${row.categoryKey.replace(/[^a-zA-Z0-9_-]/g, "_")}`;
 
           return (
             <li key={row.categoryKey}>
-              <details className="details-disclosure overflow-hidden rounded-lg border border-[var(--border-primary)] bg-[var(--bg-primary)]">
+              <details
+                className="details-disclosure overflow-hidden rounded-lg border border-[var(--border-primary)] bg-[var(--bg-primary)]"
+                ref={(el) => {
+                  if (!el) return;
+                  syncDiagnosticsLiOpenClass(el);
+                  queueMicrotask(() => syncDiagnosticsLiOpenClass(el));
+                  requestAnimationFrame(() => syncDiagnosticsLiOpenClass(el));
+                }}
+                onToggle={(e) => syncDiagnosticsLiOpenClass(e.currentTarget)}
+              >
                 <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-[var(--bg-secondary)]">
                   <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
                     {row.label}
@@ -100,7 +117,7 @@ export function SetupsRejectionAccordion({
                     </p>
                   ) : (
                     <>
-                      <div className="mt-2 flex flex-wrap gap-2">
+                      <div id={bucketSymbolsId} className="mt-2 flex flex-wrap gap-2">
                         {visible.map((sym) => (
                           <span
                             key={sym}
@@ -119,16 +136,26 @@ export function SetupsRejectionAccordion({
                           {!showingAll ? (
                             <button
                               type="button"
-                              className="text-sm font-medium text-[var(--accent-text)] hover:underline"
-                              onClick={() => bumpCap(row.categoryKey, row.symbols.length)}
+                              className="btn btn-secondary btn-sm"
+                              aria-expanded={showingAll}
+                              aria-controls={bucketSymbolsId}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                bumpCap(row.categoryKey, row.symbols.length);
+                              }}
                             >
                               Show more
                             </button>
                           ) : (
                             <button
                               type="button"
-                              className="text-sm font-medium text-[var(--accent-text)] hover:underline"
-                              onClick={() => bumpCap(row.categoryKey, INITIAL_SYMBOLS)}
+                              className="btn btn-secondary btn-sm"
+                              aria-expanded={showingAll}
+                              aria-controls={bucketSymbolsId}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                bumpCap(row.categoryKey, INITIAL_SYMBOLS);
+                              }}
                             >
                               Show fewer
                             </button>
