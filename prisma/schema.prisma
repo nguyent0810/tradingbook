@@ -125,6 +125,12 @@ enum SetupHealthLevel {
   DEAD
 }
 
+enum TacticalSymbolStatus {
+  ACTIVE
+  EXPIRED
+  REMOVED
+}
+
 enum TradeEntryReason {
   ZONE_RETEST
   BREAKOUT_CONFIRM
@@ -198,6 +204,30 @@ model StockSymbol {
   setupWatchItems   SetupWatchItem[]
 
   @@map("stock_symbols")
+}
+
+/// Additive tactical symbol intake (dormant foundation; not merged into scanner yet).
+model TacticalSymbol {
+  id               String               @id @default(cuid())
+  symbol           String
+  source           String
+  reasonNote       String?              @map("reason_note") @db.Text
+  activeForScanner Boolean              @default(true) @map("active_for_scanner")
+  status           TacticalSymbolStatus @default(ACTIVE)
+  expiresAt        DateTime             @map("expires_at")
+  importedBarsAt   DateTime?            @map("imported_bars_at")
+  lastEvaluatedAt  DateTime?            @map("last_evaluated_at")
+  addedBy          String?              @map("added_by")
+  addedAt          DateTime             @default(now()) @map("added_at")
+  updatedAt        DateTime             @updatedAt @map("updated_at")
+
+  @@unique([symbol, status])
+  @@index([symbol])
+  @@index([status])
+  @@index([activeForScanner])
+  @@index([expiresAt])
+  @@index([status, activeForScanner, expiresAt])
+  @@map("tactical_symbols")
 }
 
 model StockDailyBar {
