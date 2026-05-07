@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildActiveTacticalSymbolWhere,
+  computeEffectiveScanUniverse,
   isTacticalSymbolActiveNow,
   normalizeTacticalSymbolInput,
 } from "./tactical-universe";
@@ -78,5 +79,82 @@ describe("buildActiveTacticalSymbolWhere", () => {
       activeForScanner: true,
       expiresAt: { gt: now },
     });
+  });
+});
+
+describe("computeEffectiveScanUniverse", () => {
+  it("returns core-only universe when no tactical rows", () => {
+    const r = computeEffectiveScanUniverse({
+      coreRows: [
+        { id: "s1", symbol: "AAA" },
+        { id: "s2", symbol: "BBB" },
+      ],
+      tacticalRows: [],
+    });
+    expect(r.symbols).toEqual([
+      { symbolId: "s1", symbol: "AAA", universeSource: "CORE" },
+      { symbolId: "s2", symbol: "BBB", universeSource: "CORE" },
+    ]);
+    expect(r.stats).toMatchObject({
+      coreCount: 2,
+      tacticalCount: 0,
+      overlapCount: 0,
+      effectiveCount: 2,
+      tacticalMissingStockSymbolCount: 0,
+    });
+  });
+
+  it("includes tactical-only symbols and marks source TACTICAL", () => {
+    const r = computeEffectiveScanUniverse({
+      coreRows: [{ id: "s1", symbol: "AAA" }],
+      tacticalRows: [
+        {
+          tacticalId: "t1",
+          tacticalSymbol: " gex ",
+          stockSymbolId: "s9",
+        },
+      ],
+    });
+    expect(r.symbols).toEqual([
+      { symbolId: "s1", symbol: "AAA", universeSource: "CORE" },
+      { symbolId: "s9", symbol: "GEX", universeSource: "TACTICAL" },
+    ]);
+    expect(r.includedTacticalIds).toEqual(["t1"]);
+  });
+
+  it("marks overlap as BOTH and evaluates once", () => {
+    const r = computeEffectiveScanUniverse({
+      coreRows: [{ id: "s1", symbol: "AAA" }],
+      tacticalRows: [
+        {
+          tacticalId: "t1",
+          tacticalSymbol: "aaa",
+          stockSymbolId: "s1",
+        },
+      ],
+    });
+    expect(r.symbols).toEqual([
+      { symbolId: "s1", symbol: "AAA", universeSource: "BOTH" },
+    ]);
+    expect(r.stats.overlapCount).toBe(1);
+    expect(r.stats.effectiveCount).toBe(1);
+  });
+
+  it("excludes tactical rows missing stock symbol mapping", () => {
+    const r = computeEffectiveScanUniverse({
+      coreRows: [{ id: "s1", symbol: "AAA" }],
+      tacticalRows: [
+        {
+          tacticalId: "t1",
+          tacticalSymbol: "GEX",
+          stockSymbolId: null,
+        },
+      ],
+    });
+    expect(r.symbols).toEqual([
+      { symbolId: "s1", symbol: "AAA", universeSource: "CORE" },
+    ]);
+    expect(r.stats.tacticalMissingStockSymbolCount).toBe(1);
+    expect(r.includedTacticalIds).toEqual([]);
   });
 });

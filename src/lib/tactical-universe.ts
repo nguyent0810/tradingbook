@@ -48,6 +48,33 @@ export type ActiveTacticalSymbolRow = {
   activeForScanner: boolean;
 };
 
+export type UniverseSource = "CORE" | "TACTICAL" | "BOTH";
+
+export type UniverseSymbolRow = {
+  symbolId: string;
+  symbol: string;
+  universeSource: UniverseSource;
+};
+
+export type EffectiveUniverseStats = {
+  coreCount: number;
+  tacticalCount: number;
+  overlapCount: number;
+  effectiveCount: number;
+  tacticalMissingStockSymbolCount: number;
+};
+
+type CoreStockRowInput = {
+  id: string;
+  symbol: string;
+};
+
+type TacticalStockMatchInput = {
+  tacticalId: string;
+  tacticalSymbol: string;
+  stockSymbolId: string | null;
+};
+
 /**
  * Dormant read path: active tactical rows only.
  * Intentionally not merged into scanner runtime in this slice.
@@ -68,4 +95,66 @@ export async function listActiveTacticalSymbols(
       activeForScanner: true,
     },
   });
+}
+
+export function computeEffectiveScanUniverse(params: {
+  coreRows: ReadonlyArray<CoreStockRowInput>;
+  tacticalRows: ReadonlyArray<TacticalStockMatchInput>;
+}): {
+  symbols: UniverseSymbolRow[];
+  stats: EffectiveUniverseStats;
+  includedTacticalIds: string[];
+} {
+  const { coreRows, tacticalRows } = params;
+  const bySymbol = new Map<string, UniverseSymbolRow>();
+  const includedTacticalIds = new Set<string>();
+
+  for (const row of coreRows) {
+    const symbol = normalizeTacticalSymbolInput(row.symbol);
+    bySymbol.set(symbol, {
+      symbolId: row.id,
+      symbol,
+      universeSource: "CORE",
+    });
+  }
+
+  let overlapCount = 0;
+  let tacticalMissingStockSymbolCount = 0;
+  for (const t of tacticalRows) {
+    const tacticalSymbol = normalizeTacticalSymbolInput(t.tacticalSymbol);
+    if (!t.stockSymbolId) {
+      tacticalMissingStockSymbolCount++;
+      continue;
+    }
+    const existing = bySymbol.get(tacticalSymbol);
+    if (existing) {
+      if (existing.universeSource !== "BOTH") {
+        existing.universeSource = "BOTH";
+        overlapCount++;
+      }
+    } else {
+      bySymbol.set(tacticalSymbol, {
+        symbolId: t.stockSymbolId,
+        symbol: tacticalSymbol,
+        universeSource: "TACTICAL",
+      });
+    }
+    includedTacticalIds.add(t.tacticalId);
+  }
+
+  const symbols = [...bySymbol.values()].sort((a, b) =>
+    a.symbol.localeCompare(b.symbol)
+  );
+
+  return {
+    symbols,
+    stats: {
+      coreCount: coreRows.length,
+      tacticalCount: tacticalRows.length,
+      overlapCount,
+      effectiveCount: symbols.length,
+      tacticalMissingStockSymbolCount,
+    },
+    includedTacticalIds: [...includedTacticalIds],
+  };
 }

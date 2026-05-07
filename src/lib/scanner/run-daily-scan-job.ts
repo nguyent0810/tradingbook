@@ -27,6 +27,11 @@ import {
   evaluateAndPersistHealthForActiveWatchItems,
   syncWatchItemsFromSurfacedCandidates,
 } from "@/lib/setup-health";
+import {
+  computeEffectiveScanUniverse,
+  listActiveTacticalSymbols,
+  type UniverseSource,
+} from "@/lib/tactical-universe";
 
 function toGate1ScanLevel(level: string): Gate1ScanLevel {
   switch (level) {
@@ -120,17 +125,59 @@ export async function runDailyScanJob(
 
     const regime = await getMarketRegimeFromDb();
     const gate1Level = toGate1ScanLevel(regime.level);
-    const symbols = await prisma.stockSymbol.findMany({
+    const coreSymbols = await prisma.stockSymbol.findMany({
       where: { active: true },
       select: { id: true, symbol: true },
       orderBy: { symbol: "asc" },
     });
+    const tacticalSymbols = await listActiveTacticalSymbols(prisma, startedAt);
+    const tacticalSymbolKeys = [
+      ...new Set(tacticalSymbols.map((t) => t.symbol.trim().toUpperCase())),
+    ];
+    const tacticalStockRows =
+      tacticalSymbolKeys.length === 0
+        ? []
+        : await prisma.stockSymbol.findMany({
+            where: { symbol: { in: tacticalSymbolKeys } },
+            select: { id: true, symbol: true },
+          });
+    const stockIdBySymbol = new Map(
+      tacticalStockRows.map((s) => [s.symbol.trim().toUpperCase(), s.id] as const)
+    );
+    const tacticalMatches = tacticalSymbols.map((t) => ({
+      tacticalId: t.id,
+      tacticalSymbol: t.symbol,
+      stockSymbolId: stockIdBySymbol.get(t.symbol.trim().toUpperCase()) ?? null,
+    }));
+
+    const effectiveUniverse = computeEffectiveScanUniverse({
+      coreRows: coreSymbols,
+      tacticalRows: tacticalMatches,
+    });
     const symbolsToScan =
-      scanLimit > 0 ? symbols.slice(0, scanLimit) : symbols;
+      scanLimit > 0
+        ? effectiveUniverse.symbols.slice(0, scanLimit)
+        : effectiveUniverse.symbols;
     const totalSymbols = symbolsToScan.length;
+
+    const selectedSourceCounts = symbolsToScan.reduce(
+      (acc, row) => {
+        acc[row.universeSource] = (acc[row.universeSource] ?? 0) + 1;
+        return acc;
+      },
+      { CORE: 0, TACTICAL: 0, BOTH: 0 } as Record<UniverseSource, number>
+    );
+
+    console.info("[runDailyScanJob] universe_merge", {
+      ...effectiveUniverse.stats,
+      selectedForScanCount: totalSymbols,
+      selectedSourceCounts,
+      scanSymbolLimit: scanLimit > 0 ? scanLimit : null,
+    });
     const tradItems: Array<{
       symbolId: string;
       symbolKey: string;
+      universeSource: UniverseSource;
       result: { passed: boolean; reasons: string[] };
     }> = [];
     const failedSymbolKeys = new Set<string>();
@@ -144,12 +191,13 @@ export async function runDailyScanJob(
       try {
         const result = await evaluateTradabilityForSymbolId(
           prisma,
-          symbol.id,
+          symbol.symbolId,
           expectedLatestSession
         );
         tradItems.push({
-          symbolId: symbol.id,
+          symbolId: symbol.symbolId,
           symbolKey: symbol.symbol,
+          universeSource: symbol.universeSource,
           result,
         });
       } catch (error) {
@@ -248,6 +296,13 @@ export async function runDailyScanJob(
     const scannedCount = Math.max(0, totalSymbols - failedCount);
     const finishedAt = new Date();
 
+    const selectedSymbolSet = new Set(
+      symbolsToScan.map((s) => s.symbol.trim().toUpperCase())
+    );
+    const selectedTacticalIds = tacticalSymbols
+      .filter((t) => selectedSymbolSet.has(t.symbol.trim().toUpperCase()))
+      .map((t) => t.id);
+
     const summary = await prisma.$transaction(async (tx) => {
       const run = await tx.dailyScanRun.create({
         data: {
@@ -290,6 +345,18 @@ export async function runDailyScanJob(
         candidatesInserted = result.count;
       }
 
+      if (selectedTacticalIds.length > 0) {
+        await tx.tacticalSymbol.updateMany({
+          where: {
+            id: { in: selectedTacticalIds },
+            status: "ACTIVE",
+            activeForScanner: true,
+            expiresAt: { gt: startedAt },
+          },
+          data: { lastEvaluatedAt: finishedAt },
+        });
+      }
+
       return { run, candidatesInserted };
     });
 
@@ -313,6 +380,11 @@ export async function runDailyScanJob(
       finishedAt: finishedAt.toISOString(),
       scanSymbolLimit: scanLimit > 0 ? scanLimit : null,
       expectedLatestSession: expectedLatestSession.toISOString(),
+      universeMerge: {
+        ...effectiveUniverse.stats,
+        selectedForScanCount: totalSymbols,
+        selectedSourceCounts,
+      },
       gate1Level: regime.level,
       tradability: {
         totalSymbols,

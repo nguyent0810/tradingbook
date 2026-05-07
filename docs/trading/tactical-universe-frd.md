@@ -246,3 +246,20 @@ Recommended smallest safe vertical slices:
 7. **Hardening**
    - metrics, alerting, and runbook updates before broader usage.
 
+## 12. Implementation note — Slice 2 (read-only scanner merge)
+
+Status: implemented as a read-path integration only.
+
+- Scanner effective universe now merges:
+  - core active `stock_symbols`,
+  - tactical rows where `status=ACTIVE`, `activeForScanner=true`, `expiresAt > now`.
+- Merge dedupes by normalized symbol and labels source:
+  - `CORE`
+  - `TACTICAL`
+  - `BOTH`
+- `SCAN_SYMBOL_LIMIT` is applied **after merge** on the effective universe.
+- Tactical symbols still go through unchanged tradability and Gate 2 checks.
+- Scanner scoring, setup logic, and surfacing rules remain unchanged.
+- Tactical rows included in a scan update `lastEvaluatedAt`.
+- No intake UI, no fetch/import lane, and no automatic tactical row creation in this slice.
+
