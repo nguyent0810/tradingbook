@@ -9,6 +9,8 @@
  *   npx tsx scripts/fresh-breakout-audit.ts --json
  *   npx tsx scripts/fresh-breakout-audit.ts --limit=40
  *   npx tsx scripts/fresh-breakout-audit.ts --symbols=GEX,GEE
+ *   npx tsx scripts/fresh-breakout-audit.ts --tradable-only --limit=30
+ *   npx tsx scripts/fresh-breakout-audit.ts --include-failed-risk
  */
 import "./load-env";
 import { prisma } from "../src/lib/prisma";
@@ -23,7 +25,11 @@ import { evaluateTradability } from "../src/lib/scanner/tradability";
 import {
   FRESH_BREAKOUT_AUDIT_DISCLAIMER,
   classifyFreshBreakout,
+  compareFreshBreakoutRows,
   computeFreshBreakoutMetrics,
+  determineFreshBreakoutGroup,
+  shouldIncludeFreshBreakoutRow,
+  type FreshBreakoutAuditGroup,
 } from "../src/lib/scanner/fresh-breakout-audit";
 
 type Row = {
@@ -46,6 +52,7 @@ type Row = {
   labels: string[];
   riskAnnotations: string[];
   notes: string[];
+  group: FreshBreakoutAuditGroup;
 };
 
 function parseLimit(argv: string[]): number {
@@ -74,6 +81,10 @@ function parseSymbols(argv: string[]): string[] {
 
 function hasJsonFlag(argv: string[]): boolean {
   return argv.includes("--json");
+}
+
+function hasFlag(argv: string[], flag: string): boolean {
+  return argv.includes(flag);
 }
 
 function fmtNum(n: number | null, digits = 2): string {
@@ -112,10 +123,27 @@ function printTable(rows: Row[]): void {
   }
 }
 
+function groupRows(rows: Row[]): Record<FreshBreakoutAuditGroup, Row[]> {
+  return rows.reduce(
+    (acc, row) => {
+      acc[row.group].push(row);
+      return acc;
+    },
+    {
+      ACTIONABLE_WATCH: [],
+      EXTENDED_WATCH_ONLY: [],
+      AVOID_RISK: [],
+      COVERAGE_TRADABILITY_BLOCKED: [],
+    } as Record<FreshBreakoutAuditGroup, Row[]>
+  );
+}
+
 async function main(): Promise<void> {
   const argv = process.argv.slice(2);
   const limit = parseLimit(argv);
   const asJson = hasJsonFlag(argv);
+  const tradableOnly = hasFlag(argv, "--tradable-only");
+  const includeFailedRisk = hasFlag(argv, "--include-failed-risk");
   const filterSymbols = new Set(parseSymbols(argv));
   const now = new Date();
 
@@ -155,9 +183,9 @@ async function main(): Promise<void> {
     tacticalRows: tacticalMatches,
   });
 
-  const selectedUniverse = effectiveUniverse.symbols
-    .filter((row) => (filterSymbols.size === 0 ? true : filterSymbols.has(row.symbol)))
-    .slice(0, limit);
+  const selectedUniverse = effectiveUniverse.symbols.filter((row) =>
+    filterSymbols.size === 0 ? true : filterSymbols.has(row.symbol)
+  );
 
   const rows: Row[] = [];
 
@@ -202,8 +230,28 @@ async function main(): Promise<void> {
       labels: classification.labels,
       riskAnnotations: classification.riskAnnotations,
       notes: classification.notes,
+      group: determineFreshBreakoutGroup({
+        tradabilityPassed: tradability.passed,
+        staleSession: metrics.staleSession,
+        labels: classification.labels,
+      }),
     });
   }
+
+  const filteredRows = rows
+    .filter((r) =>
+      shouldIncludeFreshBreakoutRow(
+        {
+          labels: r.labels,
+          tradabilityPassed: r.tradabilityPassed,
+          staleSession: r.staleSession,
+        },
+        { includeFailedRisk, tradableOnly }
+      )
+    )
+    .sort(compareFreshBreakoutRows)
+    .slice(0, limit);
+  const grouped = groupRows(filteredRows);
 
   if (asJson) {
     console.log(
@@ -215,9 +263,21 @@ async function main(): Promise<void> {
           params: {
             limit,
             symbolsFilter: [...filterSymbols],
+            tradableOnly,
+            includeFailedRisk,
           },
           universeMerge: effectiveUniverse.stats,
-          rows,
+          summary: {
+            totalRowsEvaluated: rows.length,
+            rowsReturned: filteredRows.length,
+            groupCounts: {
+              ACTIONABLE_WATCH: grouped.ACTIONABLE_WATCH.length,
+              EXTENDED_WATCH_ONLY: grouped.EXTENDED_WATCH_ONLY.length,
+              AVOID_RISK: grouped.AVOID_RISK.length,
+              COVERAGE_TRADABILITY_BLOCKED: grouped.COVERAGE_TRADABILITY_BLOCKED.length,
+            },
+          },
+          rows: filteredRows,
         },
         null,
         2
@@ -227,9 +287,21 @@ async function main(): Promise<void> {
   }
 
   console.log("");
-  printTable(rows);
+  const sections: Array<{ group: FreshBreakoutAuditGroup; title: string }> = [
+    { group: "ACTIONABLE_WATCH", title: "Actionable Watch (diagnostic)" },
+    { group: "EXTENDED_WATCH_ONLY", title: "Extended / Watch-only" },
+    { group: "AVOID_RISK", title: "Avoid / Risk" },
+    { group: "COVERAGE_TRADABILITY_BLOCKED", title: "Coverage / Tradability Blocked" },
+  ];
+  for (const section of sections) {
+    const bucket = grouped[section.group];
+    if (bucket.length === 0) continue;
+    console.log(`== ${section.title} ==`);
+    printTable(bucket);
+    console.log("");
+  }
   console.log("");
-  console.log(`Rows shown: ${rows.length}`);
+  console.log(`Rows shown: ${filteredRows.length} (evaluated: ${rows.length})`);
   console.log(
     "Interpretation: labels/risks are diagnostic watchlist signals only. They are not validated core setups."
   );

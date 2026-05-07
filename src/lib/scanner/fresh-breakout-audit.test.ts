@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  compareFreshBreakoutRows,
   classifyFreshBreakout,
   computeFreshBreakoutMetrics,
+  determineFreshBreakoutGroup,
+  shouldIncludeFreshBreakoutRow,
 } from "@/lib/scanner/fresh-breakout-audit";
 
 function makeBars(closes: number[], volume = 1_000_000): Array<{
@@ -78,5 +81,62 @@ describe("fresh breakout audit helpers", () => {
 
     expect(out.riskAnnotations).toContain("LOW_LIQUIDITY");
     expect(out.riskAnnotations).toContain("STALE_DATA");
+  });
+
+  it("groups and filters rows for focused watchlist output", () => {
+    expect(
+      determineFreshBreakoutGroup({
+        tradabilityPassed: true,
+        staleSession: false,
+        labels: ["FRESH_BREAKOUT"],
+      })
+    ).toBe("ACTIONABLE_WATCH");
+
+    expect(
+      determineFreshBreakoutGroup({
+        tradabilityPassed: true,
+        staleSession: false,
+        labels: ["FAILED_BREAKOUT_RISK"],
+      })
+    ).toBe("AVOID_RISK");
+
+    expect(
+      shouldIncludeFreshBreakoutRow(
+        { labels: ["FAILED_BREAKOUT_RISK"], tradabilityPassed: true, staleSession: false },
+        { includeFailedRisk: false }
+      )
+    ).toBe(false);
+
+    expect(
+      shouldIncludeFreshBreakoutRow(
+        { labels: ["FAILED_BREAKOUT_RISK"], tradabilityPassed: true, staleSession: false },
+        { includeFailedRisk: true }
+      )
+    ).toBe(true);
+  });
+
+  it("ranks tradable actionable rows before risk-only rows", () => {
+    const rows = [
+      {
+        symbol: "ZZZ",
+        tradabilityPassed: true,
+        staleSession: false,
+        labels: ["FAILED_BREAKOUT_RISK"],
+        riskAnnotations: ["LOW_LIQUIDITY"],
+        volumeRatio20: 3,
+        breakoutExtensionPct: null,
+      },
+      {
+        symbol: "AAA",
+        tradabilityPassed: true,
+        staleSession: false,
+        labels: ["FRESH_BREAKOUT", "MOMENTUM_IGNITION"],
+        riskAnnotations: ["STOP_FAR"],
+        volumeRatio20: 1.8,
+        breakoutExtensionPct: 2.2,
+      },
+    ];
+    rows.sort(compareFreshBreakoutRows);
+    expect(rows[0]?.symbol).toBe("AAA");
   });
 });

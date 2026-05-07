@@ -50,6 +50,18 @@ Combine flags:
 npx tsx scripts/fresh-breakout-audit.ts --symbols=GEX,GEE --limit=20 --json
 ```
 
+Tradability-focused output:
+
+```bash
+npx tsx scripts/fresh-breakout-audit.ts --tradable-only --limit=30 --json
+```
+
+Include risk-only failed breakout rows:
+
+```bash
+npx tsx scripts/fresh-breakout-audit.ts --include-failed-risk --limit=30
+```
+
 ## Universe scope
 
 The script evaluates the effective scan universe using the same merge concept as production scanner:
@@ -57,6 +69,37 @@ The script evaluates the effective scan universe using the same merge concept as
 - `CORE`
 - `TACTICAL`
 - `BOTH`
+
+## Default filtering and ranking
+
+The CLI now evaluates the merged universe first, then ranks/filter rows before `--limit` is applied.
+
+Default behavior is intentionally focused:
+
+- hides empty-label rows,
+- hides `FAILED_BREAKOUT_RISK`-only rows unless `--include-failed-risk` is set,
+- keeps diagnostics read-only and non-executional.
+
+Ranking order (deterministic):
+
+1. Group priority:
+   - `ACTIONABLE_WATCH`
+   - `EXTENDED_WATCH_ONLY`
+   - `AVOID_RISK`
+   - `COVERAGE_TRADABILITY_BLOCKED`
+2. Tradability pass first
+3. Label priority:
+   - `FRESH_BREAKOUT`
+   - `MOMENTUM_IGNITION`
+   - `RECLAIM_THRUST`
+   - `EXTENDED_NO_PULLBACK`
+   - `FAILED_BREAKOUT_RISK`
+4. Lower risk annotation count
+5. Higher volume ratio
+6. More reasonable extension bucket
+7. Symbol as final tie-break
+
+Use `--tradable-only` to suppress coverage/liquidity-blocked rows.
 
 ## Current diagnostics (MVP)
 
@@ -92,6 +135,11 @@ Per-symbol latest-session diagnostics include:
 - Labels indicate structural/momentum behavior observed by this audit lane.
 - Risk annotations highlight why the behavior is not automatically actionable under core setup discipline.
 - Rows in this report are **watchlist diagnostics**, not setup approvals.
+- Group meanings:
+  - `ACTIONABLE_WATCH`: strongest diagnostic watch rows under this lane.
+  - `EXTENDED_WATCH_ONLY`: momentum present but extended/no-pullback context.
+  - `AVOID_RISK`: mainly defensive/risk labels.
+  - `COVERAGE_TRADABILITY_BLOCKED`: stale or tradability-blocked context.
 
 ## Guardrails
 

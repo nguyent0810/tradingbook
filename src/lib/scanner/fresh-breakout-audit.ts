@@ -44,6 +44,30 @@ export type FreshBreakoutClassification = {
   notes: string[];
 };
 
+export type FreshBreakoutAuditGroup =
+  | "ACTIONABLE_WATCH"
+  | "EXTENDED_WATCH_ONLY"
+  | "AVOID_RISK"
+  | "COVERAGE_TRADABILITY_BLOCKED";
+
+export type FreshBreakoutRowLike = {
+  symbol: string;
+  tradabilityPassed: boolean;
+  staleSession: boolean;
+  labels: string[];
+  riskAnnotations: string[];
+  volumeRatio20: number | null;
+  breakoutExtensionPct: number | null;
+};
+
+const LABEL_PRIORITY: Record<FreshBreakoutLabel, number> = {
+  FRESH_BREAKOUT: 0,
+  MOMENTUM_IGNITION: 1,
+  RECLAIM_THRUST: 2,
+  EXTENDED_NO_PULLBACK: 3,
+  FAILED_BREAKOUT_RISK: 4,
+};
+
 function mean(nums: readonly number[]): number | null {
   if (nums.length === 0) return null;
   return nums.reduce((a, b) => a + b, 0) / nums.length;
@@ -216,4 +240,89 @@ export function classifyFreshBreakout(params: {
     riskAnnotations: [...risks],
     notes,
   };
+}
+
+export function primaryLabelPriority(labels: readonly string[]): number {
+  let best = 9;
+  for (const label of labels) {
+    const pr = LABEL_PRIORITY[label as FreshBreakoutLabel];
+    if (pr != null && pr < best) best = pr;
+  }
+  return best;
+}
+
+function extensionPenalty(extPct: number | null): number {
+  if (extPct == null) return 1;
+  if (extPct >= 0 && extPct <= 6) return 0;
+  if (extPct > 6 && extPct <= 10) return 1;
+  return 2;
+}
+
+export function determineFreshBreakoutGroup(
+  row: Pick<FreshBreakoutRowLike, "tradabilityPassed" | "staleSession" | "labels">
+): FreshBreakoutAuditGroup {
+  if (!row.tradabilityPassed || row.staleSession) {
+    return "COVERAGE_TRADABILITY_BLOCKED";
+  }
+  if (row.labels.includes("FRESH_BREAKOUT") || row.labels.includes("MOMENTUM_IGNITION") || row.labels.includes("RECLAIM_THRUST")) {
+    return "ACTIONABLE_WATCH";
+  }
+  if (row.labels.includes("EXTENDED_NO_PULLBACK")) {
+    return "EXTENDED_WATCH_ONLY";
+  }
+  return "AVOID_RISK";
+}
+
+export function shouldIncludeFreshBreakoutRow(
+  row: Pick<FreshBreakoutRowLike, "labels" | "tradabilityPassed" | "staleSession">,
+  opts?: { includeFailedRisk?: boolean; tradableOnly?: boolean }
+): boolean {
+  const includeFailedRisk = opts?.includeFailedRisk ?? false;
+  const tradableOnly = opts?.tradableOnly ?? false;
+  if (tradableOnly && !row.tradabilityPassed) return false;
+  if (row.staleSession && !includeFailedRisk) return false;
+  if (row.labels.length === 0) return false;
+  if (!includeFailedRisk && row.labels.every((l) => l === "FAILED_BREAKOUT_RISK")) {
+    return false;
+  }
+  return true;
+}
+
+function groupOrder(group: FreshBreakoutAuditGroup): number {
+  switch (group) {
+    case "ACTIONABLE_WATCH":
+      return 0;
+    case "EXTENDED_WATCH_ONLY":
+      return 1;
+    case "AVOID_RISK":
+      return 2;
+    case "COVERAGE_TRADABILITY_BLOCKED":
+      return 3;
+  }
+}
+
+export function compareFreshBreakoutRows(a: FreshBreakoutRowLike, b: FreshBreakoutRowLike): number {
+  const ga = groupOrder(determineFreshBreakoutGroup(a));
+  const gb = groupOrder(determineFreshBreakoutGroup(b));
+  if (ga !== gb) return ga - gb;
+
+  if (a.tradabilityPassed !== b.tradabilityPassed) return a.tradabilityPassed ? -1 : 1;
+
+  const la = primaryLabelPriority(a.labels);
+  const lb = primaryLabelPriority(b.labels);
+  if (la !== lb) return la - lb;
+
+  if (a.riskAnnotations.length !== b.riskAnnotations.length) {
+    return a.riskAnnotations.length - b.riskAnnotations.length;
+  }
+
+  const va = a.volumeRatio20 ?? -1;
+  const vb = b.volumeRatio20 ?? -1;
+  if (va !== vb) return vb - va;
+
+  const ea = extensionPenalty(a.breakoutExtensionPct);
+  const eb = extensionPenalty(b.breakoutExtensionPct);
+  if (ea !== eb) return ea - eb;
+
+  return a.symbol.localeCompare(b.symbol);
 }
