@@ -2,6 +2,8 @@
 
 Short checklist after deploying scanner/cron or DB migrations. **Read-only** diagnostics unless you explicitly run seed/import/curation against production.
 
+To **expand or realign** the production **`StockSymbol.active`** universe (e.g. stuck at ~39 symbols while cron is healthy), use **[production-data-alignment-runbook.md](./production-data-alignment-runbook.md)**.
+
 ## Safety
 
 - **Never commit** production `DATABASE_URL`, `CRON_SECRET`, API keys, or copied `.env` files into git.
