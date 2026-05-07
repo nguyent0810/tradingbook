@@ -53,7 +53,7 @@ test.describe("/trades table layout", () => {
     expect(rb).toBeTruthy();
     expect(
       rb!.y,
-      "First body row must sit below thead bottom (no sticky overlap)"
+      "First body row must sit below thead bottom (no header overlap)"
     ).toBeGreaterThanOrEqual(hb!.y + hb!.height - 1);
 
     for (let i = 0; i < 2; i++) {

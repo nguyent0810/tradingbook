@@ -259,10 +259,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           </div>
         </div>
       ) : (
-        <div
-          className="table-container table-sticky mt-4"
-          data-testid="trades-scroll-container"
-        >
+        <div className="table-container mt-4" data-testid="trades-scroll-container">
           <table className="table min-w-[1680px]" data-testid="trades-table">
             <thead data-testid="trades-table-header">
               <tr>
