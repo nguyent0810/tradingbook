@@ -42,9 +42,20 @@ async function main(): Promise<void> {
   const activeSymbols = await prisma.stockSymbol.count({ where: { active: true } });
   const totalTrades = await prisma.trade.count();
 
+  const scanLimitRaw = process.env.SCAN_SYMBOL_LIMIT?.trim();
+  const scanSymbolLimitParsed =
+    scanLimitRaw && Number.isFinite(Number(scanLimitRaw))
+      ? Number(scanLimitRaw)
+      : null;
+
   const out = {
     generatedAt: new Date().toISOString(),
     databaseUrlHint: describeDatabaseUrl(),
+    scanSymbolLimitEnv: scanLimitRaw || null,
+    scanSymbolLimitParsed:
+      scanSymbolLimitParsed && scanSymbolLimitParsed > 0
+        ? scanSymbolLimitParsed
+        : null,
     latestDailyScanRun: latest,
     activeSymbolsCount: activeSymbols,
     totalTradesInDb: totalTrades,
@@ -59,6 +70,11 @@ async function main(): Promise<void> {
     console.log(JSON.stringify(out, null, 2));
   } else {
     console.log("verify-deployment-health.ts →", describeDatabaseUrl());
+    console.log("");
+    console.log(
+      "SCAN_SYMBOL_LIMIT:",
+      scanLimitRaw || "(unset — scan uses full active universe)"
+    );
     console.log("");
     console.log("Active StockSymbol (active=true):", activeSymbols);
     console.log("Total Trade rows:", totalTrades);
