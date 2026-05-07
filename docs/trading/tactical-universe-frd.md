@@ -141,3 +141,108 @@ Out of scope:
 - Tactical rows auto-expire and stop influencing scans after expiration.
 - Scanner reliability and runtime stay within current operational envelope.
 
+## 11. Implementation readiness checklist
+
+This section is pre-implementation planning only (no code changes).
+
+### 11.1 Migration order
+
+- [ ] Create `tactical_symbols` table first (no runtime dependencies yet).
+- [ ] Add required indexes:
+  - [ ] `symbol`
+  - [ ] `status`
+  - [ ] `activeForScanner`
+  - [ ] `expiresAt`
+  - [ ] composite index supporting active tactical scan query.
+- [ ] Enforce expiration semantics in schema/API contract:
+  - [ ] `expiresAt` required for ACTIVE tactical rows.
+  - [ ] status transition path (`ACTIVE -> EXPIRED/REMOVED`) defined.
+- [ ] Backward-safe deployment:
+  - [ ] migration deploy before app reads/writes tactical rows.
+  - [ ] no scanner behavior change until runtime merge flag is enabled.
+
+### 11.2 Runtime ownership
+
+- [ ] **Fetch/import trigger owner** decided:
+  - [ ] manual trigger from intake action,
+  - [ ] scheduled worker/cron follow-up,
+  - [ ] or hybrid (manual immediate + cron reconciliation).
+- [ ] **Cron vs manual responsibility** documented:
+  - [ ] cron handles routine scan cadence,
+  - [ ] manual action handles urgent tactical intake/update.
+- [ ] **Universe merge owner** defined in scanner runtime:
+  - [ ] one module computes effective universe (`core U tactical`).
+- [ ] **Cleanup owner** defined:
+  - [ ] periodic job marks expired tactical rows,
+  - [ ] optional stale tactical bar refresh ownership.
+
+### 11.3 Tactical fetch strategy
+
+- [ ] Priority ordering policy set (deterministic):
+  - [ ] newest intake first, or
+  - [ ] earliest expiry first, or
+  - [ ] explicit user priority field.
+- [ ] Batch limits configured (MVP conservative default).
+- [ ] Provider throttling defaults set:
+  - [ ] sleep interval >= current safe baseline,
+  - [ ] max symbols per fetch batch.
+- [ ] Retry/backoff policy defined:
+  - [ ] bounded retries,
+  - [ ] exponential backoff,
+  - [ ] circuit/cooldown after repeated provider failures.
+- [ ] Tactical-first behavior clarified:
+  - [ ] tactical symbols fetch before non-urgent universe refresh jobs.
+
+### 11.4 Universe merge safeguards
+
+- [ ] Dedupe order fixed and tested (symbol normalization before merge).
+- [ ] Overlap handling explicit:
+  - [ ] symbol in both core+tactical is evaluated once,
+  - [ ] source label persisted as `BOTH`.
+- [ ] Tactical expiry handling explicit:
+  - [ ] expired tactical symbols excluded before scan starts.
+- [ ] Stale tactical symbol handling defined:
+  - [ ] stale/no-latest tactical remains labeled and blocked by tradability,
+  - [ ] does not silently bypass freshness gates.
+
+### 11.5 Operational guardrails
+
+- [ ] Max tactical symbol count cap configured (hard limit).
+- [ ] Max intake rate configured (per user/day or per system window).
+- [ ] Optional cooldown defined for repeated failed intakes.
+- [ ] Failure isolation confirmed:
+  - [ ] tactical fetch/import failures do not break core scan run,
+  - [ ] scanner still persists run with tactical failure diagnostics.
+
+### 11.6 UI rollout order
+
+- [ ] Backend data model + APIs first.
+- [ ] Diagnostics source labels (`CORE`, `TACTICAL`, `BOTH`) next.
+- [ ] Filter controls (`All/Core/Tactical`) after labels.
+- [ ] Badges in list/detail views after filters.
+- [ ] Intake UI last (once backend guardrails/observability are stable).
+
+### 11.7 Suggested MVP implementation sequence
+
+Recommended smallest safe vertical slices:
+
+1. **Schema + read path only**
+   - add `tactical_symbols` table + indexes + expiry fields,
+   - add read query for active tactical rows,
+   - no scanner merge yet.
+2. **Scanner merge (read-only tactical integration)**
+   - effective universe merge with dedupe + source labeling,
+   - keep intake disabled; seed with controlled test rows only.
+3. **Fetch/import integration**
+   - tactical-priority batched fetch/import with throttling + retries,
+   - persist `importedBarsAt` and failure diagnostics.
+4. **Expiration + cleanup job**
+   - automatic ACTIVE -> EXPIRED transition,
+   - enforce exclusion of expired rows at merge time.
+5. **Minimal diagnostics surfacing**
+   - show tactical source labels and blocked reasons.
+6. **Manual intake UI/API**
+   - enable user add/remove with max count/rate guardrails.
+7. **Hardening**
+   - metrics, alerting, and runbook updates before broader usage.
+
