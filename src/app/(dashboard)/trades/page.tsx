@@ -162,7 +162,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           >
             Trades
           </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
+          <p
+            className="mt-1 text-sm"
+            style={{ color: "var(--text-tertiary)" }}
+            data-testid="trades-header-count"
+          >
             {trades.length} trade{trades.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -255,9 +259,12 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           </div>
         </div>
       ) : (
-        <div className="table-container table-sticky mt-4">
-          <table className="table min-w-[1680px]">
-            <thead>
+        <div
+          className="table-container table-sticky mt-4"
+          data-testid="trades-scroll-container"
+        >
+          <table className="table min-w-[1680px]" data-testid="trades-table">
+            <thead data-testid="trades-table-header">
               <tr>
                 <th>Symbol</th>
                 <th>Setup</th>
@@ -310,7 +317,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                   );
 
                 return (
-                  <tr key={trade.id}>
+                  <tr key={trade.id} data-testid="trades-table-row">
                     <td>
                       <span
                         className="mono font-semibold"
