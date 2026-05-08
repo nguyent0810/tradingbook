@@ -6,6 +6,7 @@ import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { formatVND } from "@/lib/formatters";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
+import { MomentumWatchSection } from "@/components/momentum-watch-section";
 import {
   parseDailyScanGate2Notes,
 } from "@/lib/scanner/parse-daily-scan-notes";
@@ -192,9 +193,14 @@ export default async function DashboardPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-          Best Setups
-        </h2>
+        <div>
+          <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+            Best Setups
+          </h2>
+          <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
+            Đủ điều kiện — core scanner Tier A/B only
+          </p>
+        </div>
         {topSetups.length === 0 ? (
           <div className="card p-5 text-sm" style={{ color: "var(--text-secondary)" }}>
             No surfaced candidates in the latest run.
@@ -283,6 +289,8 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      <MomentumWatchSection />
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>

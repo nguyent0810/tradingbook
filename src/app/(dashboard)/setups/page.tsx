@@ -9,6 +9,7 @@ import {
 } from "@/components/setups-rejection-accordion";
 import { SetupsCandidatePositionSizing } from "@/components/setups-candidate-position-sizing";
 import { SetupsClosestSymbolsSection } from "@/components/setups-closest-symbols";
+import { MomentumWatchSection } from "@/components/momentum-watch-section";
 import { SetupsTodaysActionBlock } from "@/components/setups-todays-action-block";
 import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health-strip";
 import { prisma } from "@/lib/prisma";
@@ -235,33 +236,36 @@ export default async function SetupsPage() {
       </div>
 
       {!latest ? (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                <polyline points="16 7 22 7 22 13" />
-              </svg>
-            </div>
-            <div className="empty-state-title">No scanner runs yet</div>
-            <div className="empty-state-description">
-              Run{" "}
-              <code className="rounded bg-[var(--bg-secondary)] px-1 py-0.5 text-xs">
-                npx tsx scripts/run-daily-scanner.ts
-              </code>{" "}
-              after importing bars.
+        <>
+          <div className="card">
+            <div className="empty-state">
+              <div className="empty-state-icon">
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              </div>
+              <div className="empty-state-title">No scanner runs yet</div>
+              <div className="empty-state-description">
+                Run{" "}
+                <code className="rounded bg-[var(--bg-secondary)] px-1 py-0.5 text-xs">
+                  npx tsx scripts/run-daily-scanner.ts
+                </code>{" "}
+                after importing bars.
+              </div>
             </div>
           </div>
-        </div>
+          <MomentumWatchSection />
+        </>
       ) : (
         <>
           {tradingDecision ? <SetupsTodaysActionBlock decision={tradingDecision} /> : null}
@@ -324,7 +328,16 @@ export default async function SetupsPage() {
           ) : null}
 
           {candidates.length === 0 ? (
-            <div className="card">
+            <section className="space-y-3">
+              <div>
+                <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+                  Surfaced candidates
+                </h2>
+                <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
+                  Đủ điều kiện — core scanner Tier A/B only
+                </p>
+              </div>
+              <div className="card">
               <div className="empty-state">
                 <div className="empty-state-icon">
                   <svg
@@ -347,11 +360,17 @@ export default async function SetupsPage() {
                 </div>
               </div>
             </div>
+            </section>
           ) : (
             <section className="space-y-3">
-              <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-                Surfaced candidates ({candidates.length})
-              </h2>
+              <div>
+                <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+                  Surfaced candidates ({candidates.length})
+                </h2>
+                <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
+                  Đủ điều kiện — core scanner Tier A/B only
+                </p>
+              </div>
               <div className="table-container">
                 <table className="table min-w-[760px]">
                   <thead>
@@ -468,6 +487,8 @@ export default async function SetupsPage() {
               </div>
             </section>
           )}
+
+          <MomentumWatchSection />
 
           {closestRows.length > 0 ? <SetupsClosestSymbolsSection rows={closestRows} /> : null}
 
