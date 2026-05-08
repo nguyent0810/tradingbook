@@ -19,7 +19,11 @@ import {
   formatDecisionLevelForDisplay,
 } from "@/lib/scanner/trading-decision";
 import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health-strip";
-import { prepareSurfacedCandidatesHealthView } from "@/lib/setup-health";
+import {
+  prepareSurfacedCandidatesHealthView,
+  type SurfacedCandidateHealthView,
+  type SetupHealthLevelValue,
+} from "@/lib/setup-health";
 import { distanceToZonePct, healthLevelActionHint } from "@/lib/setup-health";
 import { rejectionBucketLabel, rejectionBucketTraderGuide } from "@/lib/scanner/setups-trader-copy";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
@@ -60,13 +64,49 @@ export default async function DashboardPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const trades = await prisma.trade.findMany({
-    where: { userId: session.userId },
-    orderBy: { entryDate: "asc" },
-  });
+  type DashboardTradeRow = {
+    status: string;
+    entryPrice: number;
+    quantity: number;
+  };
+
+  type DashboardWatchRow = {
+    id: string;
+    symbolId: string;
+    lifecycleStatus: SetupLifecycleStatus;
+    healthLevel: SetupHealthLevelValue | null;
+    pullbackZoneLow: number;
+    pullbackZoneHigh: number;
+    symbol: { symbol: string };
+  };
+
+  type LatestBarRow = { symbolId: string; close: number };
+
+  let dbLoadError: string | null = null;
+
+  let trades: DashboardTradeRow[] = [];
+  try {
+    trades = await prisma.trade.findMany({
+      where: { userId: session.userId },
+      orderBy: { entryDate: "asc" },
+    });
+  } catch (e) {
+    dbLoadError = "Database temporarily unavailable (trade history).";
+    console.error("[dashboard] trades query failed:", e);
+    trades = [];
+  }
 
   const regime = await getMarketRegimeFromDb("VNINDEX");
-  const latestScan = await getLatestDailyScanRun();
+
+  let latestScan = null as Awaited<ReturnType<typeof getLatestDailyScanRun>>;
+  try {
+    latestScan = await getLatestDailyScanRun();
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (latest scan).";
+    console.error("[dashboard] latest scan query failed:", e);
+    latestScan = null;
+  }
+
   const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
   const rawCandidates = toCandidateRows(latestScan);
   const evalDate =
@@ -76,10 +116,21 @@ export default async function DashboardPage() {
           rawCandidates[0]!.barDate
         )
       : latestScan?.runAt ?? new Date();
-  const candidatesWithHealth =
-    rawCandidates.length > 0
-      ? await prepareSurfacedCandidatesHealthView(prisma, rawCandidates, evalDate)
-      : [];
+  let candidatesWithHealth: SurfacedCandidateHealthView[] = [];
+  try {
+    candidatesWithHealth =
+      rawCandidates.length > 0
+        ? await prepareSurfacedCandidatesHealthView(
+            prisma,
+            rawCandidates,
+            evalDate
+          )
+        : [];
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (candidate health).";
+    console.error("[dashboard] candidate health query failed:", e);
+    candidatesWithHealth = [];
+  }
   const topSetups = candidatesWithHealth.slice(0, 5);
 
   const decision =
@@ -101,29 +152,46 @@ export default async function DashboardPage() {
   const maxPortfolioPct = pctFromRangeText(decision.allocation);
   const perTradeGuidance = decision.level === "PROBE" ? "10-15%" : "10-20%";
 
-  const activeWatchItems = await prisma.setupWatchItem.findMany({
-    where: {
-      lifecycleStatus: {
-        in: [SetupLifecycleStatus.NEW, SetupLifecycleStatus.WATCHING, SetupLifecycleStatus.READY],
+  let activeWatchItems: DashboardWatchRow[] = [];
+  try {
+    activeWatchItems = await prisma.setupWatchItem.findMany({
+      where: {
+        lifecycleStatus: {
+          in: [
+            SetupLifecycleStatus.NEW,
+            SetupLifecycleStatus.WATCHING,
+            SetupLifecycleStatus.READY,
+          ],
+        },
       },
-    },
-    orderBy: [{ lifecycleStatus: "asc" }, { updatedAt: "desc" }],
-    take: 20,
-    include: {
-      symbol: { select: { symbol: true } },
-    },
-  });
+      orderBy: [{ lifecycleStatus: "asc" }, { updatedAt: "desc" }],
+      take: 20,
+      include: {
+        symbol: { select: { symbol: true } },
+      },
+    });
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (watchlist).";
+    console.error("[dashboard] watch items query failed:", e);
+    activeWatchItems = [];
+  }
 
   const watchSymbolIds = [...new Set(activeWatchItems.map((w) => w.symbolId))];
-  const latestBars =
-    watchSymbolIds.length > 0
-      ? await prisma.stockDailyBar.findMany({
-          where: { symbolId: { in: watchSymbolIds } },
-          orderBy: [{ symbolId: "asc" }, { date: "desc" }],
-          distinct: ["symbolId"],
-          select: { symbolId: true, close: true },
-        })
-      : [];
+  let latestBars: LatestBarRow[] = [];
+  if (watchSymbolIds.length > 0) {
+    try {
+      latestBars = await prisma.stockDailyBar.findMany({
+        where: { symbolId: { in: watchSymbolIds } },
+        orderBy: [{ symbolId: "asc" }, { date: "desc" }],
+        distinct: ["symbolId"],
+        select: { symbolId: true, close: true },
+      });
+    } catch (e) {
+      dbLoadError ??= "Database temporarily unavailable (latest closes).";
+      console.error("[dashboard] latest bars query failed:", e);
+      latestBars = [];
+    }
+  }
   const latestCloseBySymbol = new Map(latestBars.map((b) => [b.symbolId, b.close]));
 
   const rejectionBuckets = Object.entries(scanNotes?.topRejectionCategories ?? {})
@@ -161,6 +229,20 @@ export default async function DashboardPage() {
           Log Trade
         </Link>
       </div>
+
+      {dbLoadError ? (
+        <div
+          role="alert"
+          className="rounded-lg border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--border-primary)",
+            background: "var(--bg-secondary)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          {dbLoadError}
+        </div>
+      ) : null}
 
       <section className="card space-y-3 p-5">
         <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>

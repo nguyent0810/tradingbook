@@ -127,13 +127,38 @@ export default async function SetupsPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const latest = await getLatestDailyScanRun();
+  let dbLoadError: string | null = null;
+
+  let latest = null as Awaited<ReturnType<typeof getLatestDailyScanRun>>;
+  try {
+    latest = await getLatestDailyScanRun();
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (scanner data).";
+    console.error("[setups] getLatestDailyScanRun failed:", e);
+    latest = null;
+  }
+
   const notes = parseDailyScanGate2Notes(latest?.notes ?? null);
 
-  const expectedLatestSession = latest ? await getExpectedLatestSessionFromIndexBars(prisma) : null;
-  const breakdown = expectedLatestSession
-    ? await fetchGate2InvalidBreakdown(prisma, expectedLatestSession)
-    : [];
+  let expectedLatestSession = null;
+  try {
+    expectedLatestSession = latest ? await getExpectedLatestSessionFromIndexBars(prisma) : null;
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (Gate 2 diagnostics).";
+    console.error("[setups] expectedLatestSession lookup failed:", e);
+    expectedLatestSession = null;
+  }
+
+  let breakdown: Gate2CategoryBreakdownRow[] = [];
+  try {
+    breakdown = expectedLatestSession
+      ? await fetchGate2InvalidBreakdown(prisma, expectedLatestSession)
+      : [];
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (Gate 2 diagnostics).";
+    console.error("[setups] fetchGate2InvalidBreakdown failed:", e);
+    breakdown = [];
+  }
 
   const dominantCategoryKey =
     (breakdown[0]?.categoryKey as string | undefined) ??
@@ -155,28 +180,47 @@ export default async function SetupsPage() {
         )
       : null);
 
-  const candidatesWithHealth =
-    candidates.length === 0 || !evalBarDateForHealth
-      ? []
-      : await prepareSurfacedCandidatesHealthView(prisma, candidates, evalBarDateForHealth);
-  const setupPerfRows = await prisma.$queryRaw<
-    Array<{
-      setup_type: ScanSetupType;
-      setup_tier_at_entry: ScanQuality;
-      trade_count: bigint | number;
-      win_count: bigint | number;
-      avg_r: number | null;
-    }>
-  >`
-    SELECT
-      setup_type,
-      setup_tier_at_entry,
-      COUNT(*) AS trade_count,
-      SUM(CASE WHEN outcome = 'WIN' THEN 1 ELSE 0 END) AS win_count,
-      AVG(r_multiple) AS avg_r
-    FROM setup_outcomes
-    GROUP BY setup_type, setup_tier_at_entry
-  `;
+  let candidatesWithHealth: Awaited<
+    ReturnType<typeof prepareSurfacedCandidatesHealthView>
+  > = [];
+  if (candidates.length > 0 && evalBarDateForHealth) {
+    try {
+      candidatesWithHealth = await prepareSurfacedCandidatesHealthView(
+        prisma,
+        candidates,
+        evalBarDateForHealth
+      );
+    } catch (e) {
+      dbLoadError ??= "Database temporarily unavailable (candidate health).";
+      console.error("[setups] prepareSurfacedCandidatesHealthView failed:", e);
+      candidatesWithHealth = [];
+    }
+  }
+
+  type SetupPerfRow = {
+    setup_type: ScanSetupType;
+    setup_tier_at_entry: ScanQuality;
+    trade_count: bigint | number;
+    win_count: bigint | number;
+    avg_r: number | null;
+  };
+  let setupPerfRows: SetupPerfRow[] = [];
+  try {
+    setupPerfRows = await prisma.$queryRaw<SetupPerfRow[]>`
+      SELECT
+        setup_type,
+        setup_tier_at_entry,
+        COUNT(*) AS trade_count,
+        SUM(CASE WHEN outcome = 'WIN' THEN 1 ELSE 0 END) AS win_count,
+        AVG(r_multiple) AS avg_r
+      FROM setup_outcomes
+      GROUP BY setup_type, setup_tier_at_entry
+    `;
+  } catch (e) {
+    dbLoadError ??= "Database temporarily unavailable (setup performance).";
+    console.error("[setups] setupPerfRows query failed:", e);
+    setupPerfRows = [];
+  }
   const setupPerfMap = new Map<string, SetupPerfHint>();
   for (const r of setupPerfRows) {
     const tradeCount = Number(r.trade_count);
@@ -234,6 +278,20 @@ export default async function SetupsPage() {
           ← Dashboard
         </Link>
       </div>
+
+      {dbLoadError ? (
+        <div
+          role="alert"
+          className="card border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--border-primary)",
+            background: "var(--bg-secondary)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          {dbLoadError}
+        </div>
+      ) : null}
 
       {!latest ? (
         <>

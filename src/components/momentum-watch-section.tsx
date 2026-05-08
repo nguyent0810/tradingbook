@@ -22,11 +22,19 @@ function riskEmphasisClass(code: string): string {
 }
 
 export async function MomentumWatchSection() {
-  const rows = await getMomentumWatchRowsForPhase1(prisma, {
-    limit: 20,
-    includeExtendedWatchOnly: true,
-    includeFailedRisk: false,
-  });
+  let rows: Awaited<ReturnType<typeof getMomentumWatchRowsForPhase1>> = [];
+  let dbError: unknown = null;
+  try {
+    rows = await getMomentumWatchRowsForPhase1(prisma, {
+      limit: 20,
+      includeExtendedWatchOnly: true,
+      includeFailedRisk: false,
+    });
+  } catch (e) {
+    dbError = e;
+    console.error("[momentum-watch] failed to load rows:", e);
+    rows = [];
+  }
 
   return (
     <section className="space-y-3 rounded-lg border border-dashed p-4 md:p-5" id="momentum-watch" style={{ borderColor: "var(--border-primary)", background: "var(--bg-secondary)" }}>
@@ -55,7 +63,7 @@ export async function MomentumWatchSection() {
           className="rounded-md border border-dashed px-4 py-5 text-sm"
           style={{ color: "var(--text-secondary)", borderColor: "var(--border-primary)" }}
         >
-          No momentum watch names today.
+          {dbError ? "Momentum watch temporarily unavailable." : "No momentum watch names today."}
         </div>
       ) : (
         <div className="overflow-hidden rounded-md border p-0" style={{ borderColor: "var(--border-primary)", background: "var(--bg-primary)" }}>

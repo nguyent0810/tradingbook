@@ -78,19 +78,29 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     where.status = statusFilter;
   }
 
-  const trades = await prisma.trade.findMany({
-    where,
-    orderBy: { entryDate: sortOrder },
-    include: {
-      setupCandidate: {
-        select: {
-          id: true,
-          setupType: true,
-          quality: true,
+  let dbLoadError: string | null = null;
+
+  const trades = await (async () => {
+    try {
+      return await prisma.trade.findMany({
+        where,
+        orderBy: { entryDate: sortOrder },
+        include: {
+          setupCandidate: {
+            select: {
+              id: true,
+              setupType: true,
+              quality: true,
+            },
+          },
         },
-      },
-    },
-  });
+      });
+    } catch (e) {
+      dbLoadError = "Database temporarily unavailable (trades).";
+      console.error("[trades] trade list query failed:", e);
+      return [];
+    }
+  })();
 
   const now = new Date();
   const dayStart = new Date(now);
@@ -111,7 +121,20 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     ),
   ];
 
-  const marks = await loadOpenPositionMarks(prisma, openSymbols);
+  const marks = await (async () => {
+    try {
+      return await loadOpenPositionMarks(prisma, openSymbols);
+    } catch (e) {
+      dbLoadError ??= "Database temporarily unavailable (position marks).";
+      console.error("[trades] loadOpenPositionMarks failed:", e);
+      return {
+        latestCloseBySymbol: new Map(),
+        expectedSessionDate: null,
+        benchmarkLoadFailed: true,
+        barsLoadFailed: true,
+      };
+    }
+  })();
   const { latestCloseBySymbol: latestCloseBySymbol, expectedSessionDate } =
     marks;
 
@@ -187,6 +210,20 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           Log Trade
         </Link>
       </div>
+
+      {dbLoadError ? (
+        <div
+          role="alert"
+          className="card mt-4 border px-4 py-3 text-sm"
+          style={{
+            borderColor: "var(--border-primary)",
+            background: "var(--bg-secondary)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          {dbLoadError}
+        </div>
+      ) : null}
 
       <Suspense fallback={<TradeFiltersSkeleton />}>
         <TradeFilters
