@@ -44,6 +44,35 @@ function selectRuntimeConnectionString(): string {
 
 const connectionString = selectRuntimeConnectionString();
 
+// Minimal diagnostics: helps confirm we are NOT feeding `prisma://` or a pooler host
+// into the runtime `pg` pool. Avoid logging credentials.
+if (process.env.NODE_ENV === "production") {
+  try {
+    const directUrlRaw = process.env.DIRECT_URL?.trim() ?? "";
+    const databaseUrlRaw = process.env.DATABASE_URL?.trim() ?? "";
+
+    const pickedIsDirect =
+      !!directUrlRaw &&
+      connectionString === normalizePostgresUrl(directUrlRaw);
+
+    const schemeWasNormalized = /^prisma:\/\//i.test(databaseUrlRaw) || /^prisma:\/\//i.test(directUrlRaw);
+
+    const u = new URL(connectionString.replace(/^postgresql:\/\//i, "http://"));
+    const host = u.hostname;
+    const pooler = host.includes("-pooler");
+
+    const connectTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
+    const statementTimeoutMs = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
+    const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
+
+    console.log(
+      `[prisma runtime] urlSource=${pickedIsDirect ? "DIRECT_URL" : "DATABASE_URL"} host=${host} pooler=${pooler} schemeNormalizedFromPrisma=${schemeWasNormalized} poolMax=${poolMax} connectTimeoutMs=${connectTimeoutMs} statementTimeoutMs=${statementTimeoutMs}`
+    );
+  } catch {
+    console.log("[prisma runtime] url diagnostics unavailable");
+  }
+}
+
 if (process.env.NODE_ENV === "development" && typeof globalThis !== "undefined") {
   const g = globalThis as { __tradingLogDbTarget?: boolean };
   if (!g.__tradingLogDbTarget) {
