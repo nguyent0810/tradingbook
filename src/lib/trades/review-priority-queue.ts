@@ -218,7 +218,7 @@ export function buildReviewQueueModel(
   };
 }
 
-const MAX_MEMORY_LINES = 3;
+const MAX_MEMORY_LINES = 2;
 
 export function buildReviewMemoryLines(params: {
   reviewedToday: boolean;

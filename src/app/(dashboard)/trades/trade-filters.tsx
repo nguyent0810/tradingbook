@@ -7,12 +7,14 @@ interface TradeFiltersProps {
   currentSearch: string;
   currentStatus: string;
   currentSort: string;
+  currentCompactReview: boolean;
 }
 
 export function TradeFilters({
   currentSearch,
   currentStatus,
   currentSort,
+  currentCompactReview,
 }: TradeFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -106,6 +108,23 @@ export function TradeFilters({
         <option value="newest">Newest First</option>
         <option value="oldest">Oldest First</option>
       </select>
+
+      <label
+        className="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        <input
+          type="checkbox"
+          className="rounded border"
+          style={{ borderColor: "var(--border-color)" }}
+          checked={currentCompactReview}
+          onChange={(e) =>
+            updateParam("compactReview", e.target.checked ? "1" : "")
+          }
+          id="compact-review-toggle"
+        />
+        Compact review
+      </label>
     </div>
   );
 }

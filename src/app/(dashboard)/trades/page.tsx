@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { Suspense } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -40,11 +39,13 @@ import {
   classifyReviewPriorityTier,
   compareOpenLedgerReviewOrder,
   deterioratedVsLastReviewBar,
-  reviewPriorityTraderLabel,
   type ReviewPriorityTier,
   type ReviewQueueSymbol,
   type WeeklyReviewChecklistAgg,
 } from "@/lib/trades/review-priority-queue";
+import { buildSessionBriefing } from "@/lib/trades/session-briefing";
+import { deriveEscalationCues } from "@/lib/trades/review-escalation-cues";
+import { OpenPositionReviewCell } from "./open-position-review-cell";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -59,38 +60,8 @@ interface TradesPageProps {
     search?: string;
     status?: string;
     sort?: string;
+    compactReview?: string;
   }>;
-}
-
-function openReviewBadgeSkin(
-  tone: OpenPositionReviewDto["badges"][number]["tone"]
-): CSSProperties {
-  switch (tone) {
-    case "danger":
-      return {
-        borderColor: "color-mix(in srgb, #ef4444 45%, var(--border-color))",
-        backgroundColor: "color-mix(in srgb, #ef4444 12%, transparent)",
-        color: "#991b1b",
-      };
-    case "warn":
-      return {
-        borderColor: "color-mix(in srgb, #eab308 40%, var(--border-color))",
-        backgroundColor: "color-mix(in srgb, #eab308 12%, transparent)",
-        color: "#854d0e",
-      };
-    case "ok":
-      return {
-        borderColor: "color-mix(in srgb, #22c55e 35%, var(--border-color))",
-        backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)",
-        color: "#166534",
-      };
-    default:
-      return {
-        borderColor: "var(--border-color)",
-        backgroundColor: "var(--bg-tertiary)",
-        color: "var(--text-secondary)",
-      };
-  }
 }
 
 function formatQuantityCell(q: number): string {
@@ -108,35 +79,6 @@ function formatSignedVnd(value: number | null): string {
 function formatRMultiple(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return "—";
   return `${value > 0 ? "+" : ""}${value.toFixed(2)}R`;
-}
-
-function priorityTierBadgeStyle(tier: ReviewPriorityTier): CSSProperties {
-  switch (tier) {
-    case "urgent":
-      return {
-        borderColor: "color-mix(in srgb, #ea580c 42%, var(--border-color))",
-        backgroundColor: "color-mix(in srgb, #ea580c 11%, transparent)",
-        color: "#9a3412",
-      };
-    case "high_attention":
-      return {
-        borderColor: "color-mix(in srgb, #ca8a04 38%, var(--border-color))",
-        backgroundColor: "color-mix(in srgb, #eab308 10%, transparent)",
-        color: "#854d0e",
-      };
-    case "routine_review":
-      return {
-        borderColor: "color-mix(in srgb, #64748b 35%, var(--border-color))",
-        backgroundColor: "var(--bg-tertiary)",
-        color: "var(--text-secondary)",
-      };
-    default:
-      return {
-        borderColor: "var(--border-color)",
-        backgroundColor: "var(--bg-tertiary)",
-        color: "var(--text-muted)",
-      };
-  }
 }
 
 function ReviewQueueSymbolLinks({ items }: { items: ReviewQueueSymbol[] }) {
@@ -182,6 +124,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const search = params.search || "";
   const statusFilter = params.status || "";
   const sortOrder = params.sort === "oldest" ? "asc" : "desc";
+  const compactReview =
+    params.compactReview === "1" || params.compactReview === "true";
 
   const where: Record<string, unknown> = { userId: session.userId };
 
@@ -415,6 +359,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     priorityTier: ReviewPriorityTier;
     sortKey: ReturnType<typeof buildOpenLedgerReviewOrder>;
     memoryLines: string[];
+    escalationCues: string[];
   };
   const openRowPackByTradeId = new Map<string, OpenRowPack>();
   const ledgerCtx = {
@@ -504,12 +449,25 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       lastCheckpointAt: latestLog?.checkedAt ?? null,
     });
 
+    const escalationCues = deriveEscalationCues({
+      priorityTier,
+      stopBand: reviewDto.stopBand,
+      surface: reviewDto.surface,
+      marketDataStale: reviewDto.marketDataStale,
+      reviewedToday,
+      deterioratedVsReview: deteriorated,
+      failedBreakoutHold: reviewDto.structureHints.includes(
+        "failed_breakout_hold"
+      ),
+    });
+
     openRowPackByTradeId.set(trade.id, {
       derived,
       reviewDto,
       priorityTier,
       sortKey,
       memoryLines,
+      escalationCues,
     });
   }
 
@@ -590,6 +548,36 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const showFreshnessBanner =
     hasOpenTrades && expectedSessionDate === null;
 
+  let largestRiskPosition: { symbol: string; amount: number } | null = null;
+  for (const t of trades) {
+    if (t.status !== "OPEN") continue;
+    const pk = openRowPackByTradeId.get(t.id);
+    const amt = pk?.reviewDto.plannedCapitalAtRisk;
+    if (amt == null || !Number.isFinite(amt)) continue;
+    if (!largestRiskPosition || amt > largestRiskPosition.amount) {
+      largestRiskPosition = {
+        symbol: t.symbol.trim().toUpperCase(),
+        amount: amt,
+      };
+    }
+  }
+
+  const sessionBriefing =
+    portfolioStrip && reviewQueueModel
+      ? buildSessionBriefing({
+          activeOpenCount: portfolioStrip.activeOpenCount,
+          urgentCount: reviewQueueModel.urgent.length,
+          underPressureCount: portfolioStrip.underPressureCount,
+          staleMarketOpenCount: portfolioStrip.staleMarketOpenCount,
+          reviewsLoggedTodayCount:
+            portfolioStrip.activeOpenCount -
+            portfolioStrip.reviewsPendingTodayCount,
+          plannedCapitalAtRiskTotal: portfolioStrip.plannedCapitalAtRiskTotal,
+          partialRiskFigures: portfolioStrip.positionsPartialRiskFigures,
+          largestRiskPosition,
+        })
+      : null;
+
   return (
     <div className="page-container animate-in">
       <div className="mb-6 flex items-center justify-between">
@@ -625,6 +613,37 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           Log Trade
         </Link>
       </div>
+
+      {sessionBriefing && hasOpenTrades ? (
+        <div
+          className="card mt-4 border px-4 py-3"
+          data-testid="trades-session-briefing"
+          style={{ borderColor: "var(--border-color)" }}
+        >
+          <div
+            className="text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Today&apos;s briefing
+          </div>
+          <ul
+            className="mt-2 list-none space-y-1 text-[13px] leading-snug"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {sessionBriefing.lines.map((line, bi) => (
+              <li key={`brief-${bi}-${line.slice(0, 24)}`}>{line}</li>
+            ))}
+          </ul>
+          {sessionBriefing.partialRiskFigures ? (
+            <p
+              className="mt-2 text-[10px] leading-snug"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Risk sum excludes rows without a valid planned stop.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {reviewQueueModel && hasOpenTrades ? (
         <div
@@ -710,107 +729,23 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               Nothing flagged in the queue — quick-scan open rows below.
             </p>
           ) : null}
-          <p
-            className="mt-2 text-[10px] leading-snug"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Open rows sort for review: stop urgency · proximity to stress · drift
-            vs last checkpoint · stale data or pending log · planned capital at
-            risk · symbol.
-          </p>
-        </div>
-      ) : null}
-
-      {portfolioStrip && hasOpenTrades ? (
-        <div
-          className="card mt-4 border px-4 py-3"
-          data-testid="trades-portfolio-review-strip"
-          style={{ borderColor: "var(--border-color)" }}
-        >
-          <div
-            className="text-[10px] font-semibold uppercase tracking-wide"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            Open portfolio · daily bar context
-          </div>
-          <div
-            className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-[13px]"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            <span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {portfolioStrip.activeOpenCount}
-              </span>{" "}
-              active
-            </span>
-            <span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {portfolioStrip.underPressureCount}
-              </span>{" "}
-              under pressure
-            </span>
-            <span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {portfolioStrip.reviewsPendingTodayCount}
-              </span>{" "}
-              reviews pending today
-            </span>
-            <span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {portfolioStrip.staleMarketOpenCount}
-              </span>{" "}
-              stale market data
-            </span>
-            <span>
-              <span
-                className="font-semibold tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {portfolioStrip.stopViolationsCount}
-              </span>{" "}
-              stop violations (daily close)
-            </span>
-            <span>
-              Planned capital at risk (sum):{" "}
-              <span
-                className="mono font-semibold tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {portfolioStrip.plannedCapitalAtRiskTotal != null ? (
-                  formatVND(portfolioStrip.plannedCapitalAtRiskTotal, false)
-                ) : (
-                  <span style={{ color: "var(--text-muted)" }}>—</span>
-                )}
-              </span>
-            </span>
-          </div>
-          {portfolioStrip.positionsPartialRiskFigures ? (
+          {!compactReview ? (
             <p
               className="mt-2 text-[10px] leading-snug"
               style={{ color: "var(--text-muted)" }}
             >
-              Sum counts positions with a valid planned stop only; some open
-              rows omit stop-based figures.
+              Open rows sort for review: stop urgency · proximity to stress · drift
+              vs last checkpoint · stale data or pending log · planned capital at
+              risk · symbol.
             </p>
-          ) : null}
-          <p
-            className="mt-1 text-[10px] leading-snug"
-            style={{ color: "var(--text-muted)" }}
-          >
-            End-of-day checkpoints only — not intraday execution advice.
-          </p>
+          ) : (
+            <p
+              className="mt-2 text-[10px] leading-snug"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Same sort as briefing — expand filters for full legend.
+            </p>
+          )}
         </div>
       ) : null}
 
@@ -833,6 +768,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           currentSearch={search}
           currentStatus={statusFilter}
           currentSort={params.sort || "newest"}
+          currentCompactReview={compactReview}
         />
       </Suspense>
 
@@ -1003,203 +939,21 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                         {displayTradeStatus(trade.status)}
                       </span>
                     </td>
-                    <td>
-                      <div className="flex max-w-[17rem] flex-col gap-1.5">
-                        {trade.status === "OPEN" && reviewDto ? (
-                          <>
-                            <div className="flex flex-wrap items-center gap-1">
-                              <span
-                                className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-md border"
-                                style={priorityTierBadgeStyle(
-                                  openPack!.priorityTier
-                                )}
-                              >
-                                {reviewPriorityTraderLabel(
-                                  openPack!.priorityTier
-                                )}
-                              </span>
-                            </div>
-                            {openPack!.memoryLines.length > 0 ? (
-                              <div className="flex flex-col gap-0.5">
-                                {openPack!.memoryLines.map((line, mi) => (
-                                  <div
-                                    key={`m-${mi}-${line.slice(0, 24)}`}
-                                    className="text-[10px] leading-snug"
-                                    style={{ color: "var(--text-muted)" }}
-                                  >
-                                    {line}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : null}
-                            <div className="flex flex-wrap gap-1">
-                              {reviewDto.badges.map((b) => (
-                                <span
-                                  key={b.key}
-                                  className="w-fit px-2 py-0.5 text-[11px] font-medium rounded-md border"
-                                  style={openReviewBadgeSkin(b.tone)}
-                                >
-                                  {b.label}
-                                </span>
-                              ))}
-                            </div>
-                            {reviewDto.focusHints.length > 0 ? (
-                              <ul
-                                className="list-disc space-y-0.5 pl-3.5 text-[10px] leading-snug"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                {reviewDto.focusHints.map((h, hi) => (
-                                  <li key={`${hi}-${h.slice(0, 32)}`}>{h}</li>
-                                ))}
-                              </ul>
-                            ) : null}
-                            {reviewDto.sessionDeltaLine ? (
-                              <div
-                                className="text-[10px] leading-snug"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                {reviewDto.sessionDeltaLine}
-                              </div>
-                            ) : null}
-                            {reviewDto.sinceReviewDeltaLine ? (
-                              <div
-                                className="text-[10px] leading-snug"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                {reviewDto.sinceReviewDeltaLine}
-                              </div>
-                            ) : null}
-                            {reviewDto.latestChecklist ? (
-                              <div className="flex flex-col gap-1">
-                                {reviewDto.checklistSummaryLine ? (
-                                  <div
-                                    className="text-[10px] tabular-nums"
-                                    style={{ color: "var(--text-muted)" }}
-                                  >
-                                    {reviewDto.checklistSummaryLine}
-                                  </div>
-                                ) : null}
-                                <div className="flex flex-wrap gap-1">
-                                  {reviewDto.latestChecklist.stopReviewed ? (
-                                    <span
-                                      className="rounded border px-1.5 py-0.5 text-[10px]"
-                                      style={{
-                                        borderColor: "var(--border-color)",
-                                        color: "var(--text-secondary)",
-                                      }}
-                                    >
-                                      Stop reviewed
-                                    </span>
-                                  ) : null}
-                                  {reviewDto.latestChecklist.structureReviewed ? (
-                                    <span
-                                      className="rounded border px-1.5 py-0.5 text-[10px]"
-                                      style={{
-                                        borderColor: "var(--border-color)",
-                                        color: "var(--text-secondary)",
-                                      }}
-                                    >
-                                      Structure reviewed
-                                    </span>
-                                  ) : null}
-                                  {reviewDto.latestChecklist.sizingReviewed ? (
-                                    <span
-                                      className="rounded border px-1.5 py-0.5 text-[10px]"
-                                      style={{
-                                        borderColor: "var(--border-color)",
-                                        color: "var(--text-secondary)",
-                                      }}
-                                    >
-                                      Sizing reviewed
-                                    </span>
-                                  ) : null}
-                                  {reviewDto.latestChecklist.exitPlanReviewed ? (
-                                    <span
-                                      className="rounded border px-1.5 py-0.5 text-[10px]"
-                                      style={{
-                                        borderColor: "var(--border-color)",
-                                        color: "var(--text-secondary)",
-                                      }}
-                                    >
-                                      Exit plan reviewed
-                                    </span>
-                                  ) : null}
-                                </div>
-                              </div>
-                            ) : null}
-                            <div
-                              className="text-[11px] leading-snug"
-                              style={{ color: "var(--text-secondary)" }}
-                            >
-                              <span
-                                className="font-medium"
-                                style={{ color: "var(--text-primary)" }}
-                              >
-                                {reviewDto.stopBandLabel}
-                              </span>
-                              {reviewDto.cushionPctDisplay ? (
-                                <>
-                                  {" · "}
-                                  <span className="tabular-nums">
-                                    {reviewDto.cushionPctDisplay}
-                                  </span>
-                                </>
-                              ) : null}
-                            </div>
-                            {reviewDto.plannedCapitalAtRisk != null ? (
-                              <div
-                                className="text-[11px] leading-snug"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                Planned capital at risk:{" "}
-                                <span
-                                  className="mono font-medium"
-                                  style={{ color: "var(--text-secondary)" }}
-                                >
-                                  {formatVND(reviewDto.plannedCapitalAtRisk, false)}
-                                </span>
-                              </div>
-                            ) : null}
-                            {reviewDto.setupValidityLine ? (
-                              <div
-                                className="text-[11px] leading-snug"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                Setup snapshot: {reviewDto.setupValidityLine}
-                              </div>
-                            ) : null}
-                            <p
-                              className="text-[10px] leading-snug line-clamp-3"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              {reviewDto.headline}
-                            </p>
-                            {latestBar ? (
-                              <div
-                                className="text-[10px]"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                Latest bar: {formatBarSessionDate(latestBar.date)}
-                              </div>
-                            ) : (
-                              <div
-                                className="text-[10px]"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                No equity bar loaded.
-                              </div>
-                            )}
-                            <div
-                              className="text-[9px] uppercase tracking-wide"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              Daily bar only · not intraday execution advice
-                            </div>
-                          </>
-                        ) : (
-                          <span style={{ color: "var(--text-muted)" }}>—</span>
-                        )}
-                      </div>
+                    <td className="align-top">
+                      {trade.status === "OPEN" && reviewDto && openPack ? (
+                        <OpenPositionReviewCell
+                          compact={compactReview}
+                          priorityTier={openPack.priorityTier}
+                          escalationCues={openPack.escalationCues}
+                          memoryLines={openPack.memoryLines}
+                          reviewDto={reviewDto}
+                          reviewedToday={checkedTodayTradeIds.has(trade.id)}
+                          latestBar={latestBar ?? null}
+                          formatBarSessionDate={formatBarSessionDate}
+                        />
+                      ) : (
+                        <span style={{ color: "var(--text-muted)" }}>—</span>
+                      )}
                     </td>
                     <td className="mono table-num">
                       {holdingDays != null ? holdingDays : "—"}
