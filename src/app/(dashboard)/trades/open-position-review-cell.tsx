@@ -192,11 +192,11 @@ export function OpenPositionReviewCell({
               </span>
             ) : null}
           </div>
-        ) : (
+        ) : reviewDto.checklistSummaryLine ? (
           <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-            Checklist on latest checkpoint — expand notes for detail.
+            {reviewDto.checklistSummaryLine}
           </div>
-        )}
+        ) : null}
       </div>
     ) : null;
 
