@@ -100,14 +100,114 @@ export type BookOperatingContextInput = {
   concentration: PlannedRiskConcentration;
 };
 
+/** Stable keys for snapshot streaks / trend logic — mirrors headline rule stack. */
+export type BookOperatingHeadlineTag =
+  | "no_open"
+  | "elevated_pressure"
+  | "stale_data"
+  | "review_heavy"
+  | "defensive_developing"
+  | "stable"
+  | "mixed";
+
 export type BookOperatingContext = {
   headline: string;
+  headlineTag: BookOperatingHeadlineTag;
   detailLines: string[];
   sessionNarrative: string;
+  /** Same thresholds as headline derivation — for snapshots and trends. */
+  staleHeavyCondition: boolean;
+};
+
+export type BookOperatingClassification = {
+  headline: string;
+  headlineTag: BookOperatingHeadlineTag;
+  staleHeavyCondition: boolean;
+  pressuring: boolean;
+  reviewHeavy: boolean;
+  defensiveDeveloping: boolean;
+  stableMajority: boolean;
 };
 
 function pct(n: number): string {
   return `${Math.round(n * 100)}%`;
+}
+
+export function classifyBookOperatingHeadline(
+  input: BookOperatingContextInput
+): BookOperatingClassification {
+  const {
+    activeOpenCount,
+    postureCounts,
+    urgentQueueCount,
+    highAttentionQueueCount,
+    stopViolationsCount,
+    pendingCheckpointCount,
+    staleMarketOpenCount,
+  } = input;
+
+  const pressuring =
+    urgentQueueCount + highAttentionQueueCount >= 3 ||
+    urgentQueueCount >= 2;
+  const staleHeavyCondition =
+    activeOpenCount > 0 &&
+    staleMarketOpenCount >= Math.max(2, Math.ceil(activeOpenCount * 0.25));
+  const reviewHeavy =
+    activeOpenCount >= 2 &&
+    pendingCheckpointCount >= Math.ceil(activeOpenCount * 0.5);
+  const defensiveDeveloping =
+    postureCounts.defensive >= 2 ||
+    postureCounts.defensive + postureCounts.high_attention >= 3;
+  const stableMajority =
+    activeOpenCount > 0 &&
+    postureCounts.stable >= Math.ceil(activeOpenCount * 0.55) &&
+    urgentQueueCount === 0 &&
+    stopViolationsCount === 0;
+
+  let headline = "Mixed book operating context";
+  let headlineTag: BookOperatingHeadlineTag = "mixed";
+
+  if (activeOpenCount === 0) {
+    return {
+      headline: "No open positions",
+      headlineTag: "no_open",
+      staleHeavyCondition: false,
+      pressuring,
+      reviewHeavy,
+      defensiveDeveloping,
+      stableMajority,
+    };
+  }
+
+  if (stopViolationsCount >= 1 || urgentQueueCount >= 1) {
+    headline = "Elevated review pressure";
+    headlineTag = "elevated_pressure";
+  } else if (staleHeavyCondition && pendingCheckpointCount >= 2) {
+    headline = "Stale-data caution";
+    headlineTag = "stale_data";
+  } else if (reviewHeavy) {
+    headline = "Review-heavy session";
+    headlineTag = "review_heavy";
+  } else if (pressuring) {
+    headline = "Elevated review pressure";
+    headlineTag = "elevated_pressure";
+  } else if (defensiveDeveloping) {
+    headline = "Defensive posture developing";
+    headlineTag = "defensive_developing";
+  } else if (stableMajority && pendingCheckpointCount <= 1) {
+    headline = "Stable operating posture";
+    headlineTag = "stable";
+  }
+
+  return {
+    headline,
+    headlineTag,
+    staleHeavyCondition,
+    pressuring,
+    reviewHeavy,
+    defensiveDeveloping,
+    stableMajority,
+  };
 }
 
 /**
@@ -130,63 +230,51 @@ export function deriveBookOperatingContext(
   } = input;
 
   const detailLines: string[] = [];
-  const pressuring =
-    urgentQueueCount + highAttentionQueueCount >= 3 ||
-    urgentQueueCount >= 2;
-  const staleHeavy =
-    activeOpenCount > 0 &&
-    staleMarketOpenCount >= Math.max(2, Math.ceil(activeOpenCount * 0.25));
-  const reviewHeavy =
-    activeOpenCount >= 2 &&
-    pendingCheckpointCount >= Math.ceil(activeOpenCount * 0.5);
-  const defensiveDeveloping =
-    postureCounts.defensive >= 2 ||
-    postureCounts.defensive + postureCounts.high_attention >= 3;
-  const stableMajority =
-    activeOpenCount > 0 &&
-    postureCounts.stable >= Math.ceil(activeOpenCount * 0.55) &&
-    urgentQueueCount === 0 &&
-    stopViolationsCount === 0;
 
-  let headline = "Mixed book operating context";
+  const classified = classifyBookOperatingHeadline(input);
+  const {
+    headline,
+    headlineTag,
+    staleHeavyCondition,
+    pressuring,
+    reviewHeavy,
+    defensiveDeveloping,
+    stableMajority,
+  } = classified;
 
   if (activeOpenCount === 0) {
     return {
-      headline: "No open positions",
+      headline,
+      headlineTag,
       detailLines: [],
       sessionNarrative: "No open book to summarize.",
+      staleHeavyCondition,
     };
   }
 
   if (stopViolationsCount >= 1 || urgentQueueCount >= 1) {
-    headline = "Elevated review pressure";
     detailLines.push(
       stopViolationsCount >= 1
         ? `${stopViolationsCount} open row(s) read stop-violated vs latest daily bar (where data loaded).`
         : `${urgentQueueCount} urgent open row(s) in today’s review queue.`
     );
-  } else if (staleHeavy && pendingCheckpointCount >= 2) {
-    headline = "Stale-data caution";
+  } else if (staleHeavyCondition && pendingCheckpointCount >= 2) {
     detailLines.push(
       `${staleMarketOpenCount} open row(s) show stale market data vs benchmark; ${pendingCheckpointCount} checkpoint(s) still pending today.`
     );
   } else if (reviewHeavy) {
-    headline = "Review-heavy session";
     detailLines.push(
       `${pendingCheckpointCount} of ${activeOpenCount} open position(s) still need today’s checkpoint.`
     );
   } else if (pressuring) {
-    headline = "Elevated review pressure";
     detailLines.push(
       `${urgentQueueCount} urgent and ${highAttentionQueueCount} high-attention name(s) in the daily queue.`
     );
   } else if (defensiveDeveloping) {
-    headline = "Defensive posture developing";
     detailLines.push(
       `${postureCounts.defensive} defensive and ${postureCounts.high_attention} high-attention posture row(s) on the latest scan.`
     );
   } else if (stableMajority && pendingCheckpointCount <= 1) {
-    headline = "Stable operating posture";
     detailLines.push(
       `Most open rows read stable on the latest scan; routine reviews pending: ${routinePendingQueueCount}.`
     );
@@ -236,8 +324,10 @@ export function deriveBookOperatingContext(
 
   return {
     headline,
+    headlineTag,
     detailLines: detailLines.slice(0, 2),
     sessionNarrative,
+    staleHeavyCondition,
   };
 }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -71,6 +72,13 @@ import {
   countOperatingPostures,
   deriveBookOperatingContext,
 } from "@/lib/trades/book-operating-context";
+import {
+  buildNextOperatingSnapshot,
+  deriveOperatingTrendDiscipline,
+  enhanceSessionOperatingNarrative,
+  parseBookOperatingSnapshot,
+} from "@/lib/trades/operating-trend-discipline";
+import { OperatingSnapshotPersist } from "./operating-snapshot-persist";
 import { OpenPositionReviewCell } from "./open-position-review-cell";
 import { FocusReviewWorkspace } from "./focus-review-workspace";
 import { ReviewSessionChrome } from "./review-session-chrome";
@@ -151,6 +159,11 @@ function TradeFiltersSkeleton() {
 export default async function TradesPage({ searchParams }: TradesPageProps) {
   const session = await getSession();
   if (!session) redirect("/login");
+
+  const cookieStore = await cookies();
+  const prevBookOperatingSnapshot = parseBookOperatingSnapshot(
+    cookieStore.get(`tl_book_op_v1_${session.userId}`)?.value
+  );
 
   const params = await searchParams;
   const search = params.search || "";
@@ -706,6 +719,17 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     checkedTodayTradeIds
   );
 
+  const plannedRiskConcentration = computePlannedRiskConcentration(
+    trades
+      .filter((t) => t.status === "OPEN")
+      .map((t) => ({
+        symbol: t.symbol,
+        plannedCapitalAtRisk:
+          openRowPackByTradeId.get(t.id)?.reviewDto.plannedCapitalAtRisk ??
+          null,
+      }))
+  );
+
   const bookOperatingContext =
     portfolioStrip && reviewQueueModel && openRowPackByTradeId.size > 0
       ? deriveBookOperatingContext({
@@ -720,18 +744,65 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           stopViolationsCount: portfolioStrip.stopViolationsCount,
           pendingCheckpointCount: portfolioStrip.reviewsPendingTodayCount,
           partialRiskFigures: portfolioStrip.positionsPartialRiskFigures,
-          concentration: computePlannedRiskConcentration(
-            trades
-              .filter((t) => t.status === "OPEN")
-              .map((t) => ({
-                symbol: t.symbol,
-                plannedCapitalAtRisk:
-                  openRowPackByTradeId.get(t.id)?.reviewDto
-                    .plannedCapitalAtRisk ?? null,
-              }))
-          ),
+          concentration: plannedRiskConcentration,
         })
       : null;
+
+  const operatingTrendMetrics =
+    bookOperatingContext != null &&
+    portfolioStrip != null &&
+    reviewQueueModel != null
+      ? {
+          postureCounts: countOperatingPostures([
+            ...openRowPackByTradeId.values(),
+          ]),
+          activeOpenCount: portfolioStrip.activeOpenCount,
+          urgentQueueCount: reviewQueueModel.urgent.length,
+          highAttentionQueueCount: reviewQueueModel.highAttention.length,
+          staleMarketOpenCount: portfolioStrip.staleMarketOpenCount,
+          pendingCheckpointCount: portfolioStrip.reviewsPendingTodayCount,
+          reviewedTodayOpenCount,
+          headlineTag: bookOperatingContext.headlineTag,
+          staleHeavyCondition: bookOperatingContext.staleHeavyCondition,
+          top1Share: plannedRiskConcentration.top1Share,
+          top2Share: plannedRiskConcentration.top2Share,
+        }
+      : null;
+
+  const operatingTrendDiscipline =
+    operatingTrendMetrics != null
+      ? deriveOperatingTrendDiscipline({
+          previous: prevBookOperatingSnapshot,
+          current: operatingTrendMetrics,
+          urgentPendingCheckpointCount:
+            sessionDashboardCounts.urgentPendingGlobal,
+        })
+      : {
+          trendPhrases: [] as string[],
+          disciplineCues: [] as string[],
+          memoryLines: [] as string[],
+        };
+
+  const enhancedSessionOperatingNarrative =
+    bookOperatingContext != null
+      ? enhanceSessionOperatingNarrative(
+          bookOperatingContext.sessionNarrative,
+          operatingTrendDiscipline
+        )
+      : null;
+
+  const snapshotToPersist =
+    operatingTrendMetrics != null
+      ? buildNextOperatingSnapshot(
+          prevBookOperatingSnapshot,
+          operatingTrendMetrics
+        )
+      : null;
+
+  const sinceLastVisitLines = [
+    ...operatingTrendDiscipline.trendPhrases,
+    ...operatingTrendDiscipline.memoryLines,
+  ].slice(0, 2);
 
   let largestRiskPosition: { symbol: string; amount: number } | null = null;
   for (const t of trades) {
@@ -990,6 +1061,25 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               ))}
             </ul>
           ) : null}
+          {sinceLastVisitLines.length > 0 ? (
+            <>
+              <div
+                className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                Since last ledger visit
+              </div>
+              <ul
+                className="mt-1 list-none space-y-1 text-[11px] leading-snug"
+                style={{ color: "var(--text-muted)" }}
+                data-testid="book-operating-trend-lines"
+              >
+                {sinceLastVisitLines.map((line, li) => (
+                  <li key={`book-trend-${li}-${line.slice(0, 24)}`}>{line}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
         </div>
       ) : null}
 
@@ -1032,9 +1122,9 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
           sessionQuietLines={sessionQuietLines}
           sessionOperatingNarrative={
-            bookOperatingContext
-              ? bookOperatingContext.sessionNarrative
-              : null
+            enhancedSessionOperatingNarrative ??
+              bookOperatingContext?.sessionNarrative ??
+              null
           }
           prevId={sessionPrevId}
           nextId={sessionNextId}
@@ -1518,6 +1608,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           </table>
         </div>
       )}
+      <OperatingSnapshotPersist snapshot={snapshotToPersist} />
     </div>
   );
 }
