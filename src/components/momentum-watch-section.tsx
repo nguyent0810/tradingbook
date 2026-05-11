@@ -3,6 +3,12 @@ import {
   getMomentumWatchRowsForPhase1,
   MOMENTUM_WATCH_UI_DISCLAIMER,
 } from "@/lib/scanner/momentum-watch";
+import {
+  displayMomentumAuditGroup,
+  displayMomentumLabel,
+  displayMomentumRiskAnnotation,
+  displayUniverseSource,
+} from "@/lib/trading-display-labels";
 
 function fmtRatio(n: number | null): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -42,8 +48,8 @@ export async function MomentumWatchSection() {
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
           Momentum Watch
         </h2>
-        <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
-          Có lực / theo dõi
+        <p className="mt-0.5 text-xs font-medium tracking-wide text-[var(--text-tertiary)]">
+          Strong momentum context — watchlist only
         </p>
         <p
           className="mt-1 rounded-md border px-3 py-2 text-sm leading-snug"
@@ -88,13 +94,13 @@ export async function MomentumWatchSection() {
                     <td className="mono font-semibold" style={{ color: "var(--text-primary)" }}>
                       {row.symbol}
                     </td>
-                    <td className="text-xs">{row.universeSource}</td>
-                    <td className="text-xs whitespace-nowrap">{row.group}</td>
+                    <td className="text-xs">{displayUniverseSource(row.universeSource)}</td>
+                    <td className="text-xs whitespace-nowrap">{displayMomentumAuditGroup(row.group)}</td>
                     <td
                       className="max-w-[200px] text-xs leading-snug"
                       style={{ color: "var(--text-secondary)" }}
                     >
-                      {row.labels.join(", ") || "—"}
+                      {row.labels.map(displayMomentumLabel).join(", ") || "—"}
                     </td>
                     <td className="max-w-[180px] text-xs leading-snug">
                       {row.riskAnnotations.length === 0 ? (
@@ -103,7 +109,7 @@ export async function MomentumWatchSection() {
                         <ul className="space-y-0.5">
                           {row.riskAnnotations.map((r) => (
                             <li key={r} className={riskEmphasisClass(r)}>
-                              {r}
+                              {displayMomentumRiskAnnotation(r)}
                             </li>
                           ))}
                         </ul>

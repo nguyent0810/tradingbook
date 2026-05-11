@@ -126,7 +126,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
           {formatPlaybookLabel(trade?.playbook ?? "BREAKOUT_PULLBACK")}
         </span>
         <p className="mt-1 text-xs text-[var(--text-muted)]">
-          This journal is locked to the Breakout → Pullback playbook only.
+          This journal is locked to the Breakout pullback playbook only.
         </p>
         {setupContextLabel ? (
           <p className="mt-1 text-xs text-[var(--text-secondary)]">

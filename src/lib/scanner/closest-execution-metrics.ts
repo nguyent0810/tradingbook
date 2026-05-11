@@ -104,7 +104,17 @@ export type ClosestRowSortInput = {
   close: number;
   pullbackZoneLow: number;
   pullbackZoneHigh: number;
+  /** Deterministic tie-breakers when distance + rankScore tie (avoids stable-sort artifact looking alphabetical). */
+  symbol?: string;
+  partialPipelineScore?: number;
+  stageRank?: number;
+  /** Gate 2 invalid rows: fewer reason lines treated as closer to qualifying when other ties hold. */
+  reasonLineCount?: number;
 };
+
+function tieBreakerNum(v: number | undefined, fallback: number): number {
+  return v !== undefined && Number.isFinite(v) ? v : fallback;
+}
 
 /** Sort: nearest to pullback zone first (lower distance fraction), then higher Gate 2 rankScore. */
 export function compareClosestRowsExecutionOrder(a: ClosestRowSortInput, b: ClosestRowSortInput): number {
@@ -113,5 +123,21 @@ export function compareClosestRowsExecutionOrder(a: ClosestRowSortInput, b: Clos
   const na = Number.isNaN(da) ? Number.POSITIVE_INFINITY : da;
   const nb = Number.isNaN(db) ? Number.POSITIVE_INFINITY : db;
   if (na !== nb) return na - nb;
-  return b.rankScore - a.rankScore;
+  if (a.rankScore !== b.rankScore) return b.rankScore - a.rankScore;
+
+  const pa = tieBreakerNum(a.partialPipelineScore, Number.NEGATIVE_INFINITY);
+  const pb = tieBreakerNum(b.partialPipelineScore, Number.NEGATIVE_INFINITY);
+  if (pa !== pb) return pb - pa;
+
+  const sa = tieBreakerNum(a.stageRank, Number.NEGATIVE_INFINITY);
+  const sb = tieBreakerNum(b.stageRank, Number.NEGATIVE_INFINITY);
+  if (sa !== sb) return sb - sa;
+
+  const ra = tieBreakerNum(a.reasonLineCount, Number.POSITIVE_INFINITY);
+  const rb = tieBreakerNum(b.reasonLineCount, Number.POSITIVE_INFINITY);
+  if (ra !== rb) return ra - rb;
+
+  const syma = a.symbol ?? "";
+  const symb = b.symbol ?? "";
+  return syma.localeCompare(symb);
 }

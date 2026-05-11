@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import type { SetupHealthLevelValue } from "@/lib/setup-health";
+import { displayCandidateLifecycleSortLabel } from "@/lib/trading-display-labels";
 
 type Props = {
   symbolKey: string;
@@ -73,7 +74,7 @@ export function SetupsCandidateHealthStrip({
           {symbolKey}
         </span>
         <span className={pillClassneutral()} style={lifecycleStyles(lifecycleSortLabel)}>
-          {lifecycleSortLabel}
+          {displayCandidateLifecycleSortLabel(lifecycleSortLabel)}
         </span>
         <span className={pillClassneutral()} style={healthLevelStyles(healthLevel)}>
           {healthLevel.replace("_", " ")}

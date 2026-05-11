@@ -14,6 +14,11 @@ import {
   VNINDEX_FRESHNESS_UNAVAILABLE,
 } from "@/lib/trades/position-health";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
+import {
+  displayScanQualityTier,
+  displayTradeDirection,
+  displayTradeStatus,
+} from "@/lib/trading-display-labels";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -305,7 +310,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th>Direction</th>
                 <th>Playbook</th>
                 <th>Status</th>
-                <th>EOD / bar freshness</th>
+                <th>Daily review · data freshness</th>
                 <th className="table-num">Hold</th>
                 <th>Entry Date</th>
                 <th className="table-num">Entry Price</th>
@@ -363,8 +368,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     <td>
                       {trade.setupCandidate ? (
                         <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)]">
-                          {trade.setupCandidate.quality} ·{" "}
-                          {trade.setupCandidate.setupType}
+                          {displayScanQualityTier(trade.setupCandidate.quality)} ·{" "}
+                          {formatPlaybookLabel(trade.setupCandidate.setupType)}
                         </span>
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>
@@ -380,7 +385,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                             : "badge-short"
                         }`}
                       >
-                        {trade.direction}
+                        {displayTradeDirection(trade.direction)}
                       </span>
                     </td>
                     <td className="whitespace-nowrap">
@@ -392,7 +397,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       <span
                         className={`badge badge-${trade.status.toLowerCase()}`}
                       >
-                        {trade.status}
+                        {displayTradeStatus(trade.status)}
                       </span>
                     </td>
                     <td>
@@ -410,7 +415,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                                   color: "#166534",
                                 }}
                               >
-                                Checked today
+                                Daily review logged
                               </span>
                             ) : (
                               <span
@@ -423,7 +428,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                                   color: "#854d0e",
                                 }}
                               >
-                                Needs EOD check
+                                Daily review not logged
                               </span>
                             )}
                             {latestBar ? (
@@ -534,6 +539,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                               style={{ color: "var(--text-muted)" }}
                             >
                               Unrealized
+                            </span>
+                            <span
+                              className="max-w-[14rem] text-right text-[10px] leading-snug"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Long bias: (latest close − entry) × qty. Short bias: (entry − latest
+                              close) × qty. Same price units as entry.
+                              {latestBar ? (
+                                <>
+                                  {" "}
+                                  Session: {formatBarSessionDate(latestBar.date)}.
+                                </>
+                              ) : null}
                             </span>
                             {unrealized?.pnlAmount != null ? (
                               <span

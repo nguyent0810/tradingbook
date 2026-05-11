@@ -9,6 +9,7 @@ import {
   hasExecutableZone,
   pullbackProximityLabel,
 } from "@/lib/scanner/closest-execution-metrics";
+import { displayClosestExecutionStatus } from "@/lib/trading-display-labels";
 
 function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -22,11 +23,11 @@ function fmtPct1FromFrac(frac: number): string {
 function executionHeadline(status: ReturnType<typeof computeClosestExecutionStatus>): string {
   switch (status) {
     case "READY":
-      return "In pullback zone";
+      return "Price is inside the entry zone.";
     case "INVALID":
-      return "Structure broken";
+      return "Structure is no longer valid for this template.";
     default:
-      return "Broke out";
+      return "Price is outside the zone — waiting for a pullback.";
   }
 }
 
@@ -83,9 +84,9 @@ export function SetupsClosestSymbolsSection({ rows }: { rows: Gate2ClosestSymbol
       <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
         Closest to qualifying
       </h2>
-      <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
-        Execution context from the same Gate 2 evaluation — not recommendations. Expand levels for
-        raw prices (k ₫).
+      <p className="mt-1 text-sm leading-snug" style={{ color: "var(--text-tertiary)" }}>
+        Ranked by proximity to a valid entry zone, then scanner quality. Execution context from the
+        same Gate 2 evaluation — not recommendations. Expand levels for prices (k ₫).
       </p>
 
       <ul className="mt-5 space-y-4">
@@ -110,14 +111,14 @@ export function SetupsClosestSymbolsSection({ rows }: { rows: Gate2ClosestSymbol
                   {row.symbol}
                 </span>
                 <span
-                  className="shrink-0 rounded-md border px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
+                  className="shrink-0 rounded-md border px-2.5 py-1 text-xs font-semibold tracking-wide normal-case"
                   style={{
                     background: pill.bg,
                     color: pill.fg,
                     borderColor: pill.border,
                   }}
                 >
-                  [{status}]
+                  {displayClosestExecutionStatus(status)}
                 </span>
               </div>
 

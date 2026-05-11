@@ -27,6 +27,14 @@ import {
 import { distanceToZonePct, healthLevelActionHint } from "@/lib/setup-health";
 import { rejectionBucketLabel, rejectionBucketTraderGuide } from "@/lib/scanner/setups-trader-copy";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
+import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config";
+import {
+  displayCandidateLifecycleSortLabel,
+  displayGate1ScanLevel,
+  displayScanQualityTier,
+  displaySetupHealthLevel,
+  displaySetupLifecycleStatus,
+} from "@/lib/trading-display-labels";
 
 export const metadata: Metadata = {
   title: "Dashboard — TradeLog",
@@ -198,6 +206,8 @@ export default async function DashboardPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
+  const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
+
   return (
     <div className="page-container animate-in space-y-6 pb-10">
       <div className="flex items-center justify-between">
@@ -258,7 +268,8 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-            Gate 1: <span className="font-medium">{regime.level}</span> | Surfaced:{" "}
+            Market backdrop:{" "}
+            <span className="font-medium">{displayGate1ScanLevel(regime.level)}</span> | Surfaced:{" "}
             <span className="font-medium">{latestScan?.candidateCountSurfaced ?? 0}</span>
           </div>
         </div>
@@ -279,8 +290,8 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
             Best Setups
           </h2>
-          <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-[var(--text-tertiary)]">
-            Đủ điều kiện — core scanner Tier A/B only
+          <p className="mt-0.5 text-xs font-medium tracking-wide text-[var(--text-tertiary)]">
+            Qualified setups — core scanner Tier A/B only
           </p>
         </div>
         {topSetups.length === 0 ? (
@@ -318,7 +329,7 @@ export default async function DashboardPage() {
                           compact
                         />
                       </td>
-                      <td className="align-top">{c.lifecycleSortLabel}</td>
+                      <td className="align-top">{displayCandidateLifecycleSortLabel(c.lifecycleSortLabel)}</td>
                       <td className="align-top">{c.healthLevel.replace("_", " ")}</td>
                       <td className="table-num align-top">
                         {c.healthScoreLabel} ({c.healthScore})
@@ -349,8 +360,8 @@ export default async function DashboardPage() {
                               Distance to entry zone:{" "}
                               {(distanceToZonePct(c.close, c.pullbackZoneLow, c.pullbackZoneHigh) * 100).toFixed(1)}%
                             </li>
-                            <li>Quality tier: {c.quality}</li>
-                            <li>Rank score: {c.rankScore.toFixed(2)}</li>
+                            <li>Quality tier: {displayScanQualityTier(c.quality)}</li>
+                            <li>Scanner score: {c.rankScore.toFixed(2)}</li>
                           </ul>
                           {Array.isArray(c.reasons) && c.reasons.length > 0 ? (
                             <ul className="mt-2 list-disc space-y-1 pl-4 leading-snug">
@@ -376,13 +387,20 @@ export default async function DashboardPage() {
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-          Portfolio Risk
+          {portfolioRiskConfigured ? "Exposure overview (guidance only)" : "Exposure snapshot"}
         </h2>
         <div className="card p-5">
+          {!portfolioRiskConfigured ? (
+            <p className="mb-4 rounded-md border px-3 py-2 text-sm leading-snug" style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}>
+              Risk budget is not configured yet. These values are guidance-only. Set{" "}
+              <code className="rounded bg-[var(--bg-tertiary)] px-1 py-0.5 text-xs">TRADING_ACCOUNT_EQUITY_VND</code>{" "}
+              on the server to unlock exposure overview labels that reference your account.
+            </p>
+          ) : null}
           <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
             <div>
               <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Current Exposure
+                Current exposure (entry notional)
               </div>
               <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
                 {formatVND(currentExposure, true)}
@@ -390,17 +408,19 @@ export default async function DashboardPage() {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Remaining Capacity
+                Allocation guidance (not remaining capacity math)
               </div>
               <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {maxPortfolioPct == null
-                  ? "Unavailable (equity baseline required)"
-                  : `Guided by ${decision.allocation} cap`}
+                {!portfolioRiskConfigured
+                  ? "—"
+                  : maxPortfolioPct == null
+                    ? "Unavailable (could not parse allocation text)"
+                    : `${decision.allocation} — qualitative cap from scan only`}
               </div>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Max Per-Trade Exposure
+                Max per-trade exposure (guide)
               </div>
               <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
                 {perTradeGuidance}
@@ -408,7 +428,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Risk Guidance
+                Stance from scan
               </div>
               <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
                 {decision.level === "NO_TRADE"
@@ -419,9 +439,16 @@ export default async function DashboardPage() {
               </div>
             </div>
           </div>
-          <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
-            If account equity is not configured, capacity metrics remain guidance-only placeholders.
-          </p>
+          {!portfolioRiskConfigured ? (
+            <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
+              Allocation percentages below still reflect scanner guidance; they are not validated against your account until equity is configured.
+            </p>
+          ) : (
+            <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
+              Guidance only — not stop-based risk or mark-to-market sizing. Exposure shown uses entry
+              prices × quantity.
+            </p>
+          )}
         </div>
       </section>
 
@@ -454,8 +481,10 @@ export default async function DashboardPage() {
                       <td className="mono font-semibold" style={{ color: "var(--text-primary)" }}>
                         {w.symbol.symbol}
                       </td>
-                      <td>{w.lifecycleStatus}</td>
-                      <td>{w.healthLevel?.replace("_", " ") ?? "N/A"}</td>
+                      <td>{displaySetupLifecycleStatus(w.lifecycleStatus)}</td>
+                      <td>
+                        {w.healthLevel ? displaySetupHealthLevel(w.healthLevel) : "—"}
+                      </td>
                       <td className="table-num">
                         {dist == null ? "N/A" : `${(dist * 100).toFixed(1)}%`}
                       </td>

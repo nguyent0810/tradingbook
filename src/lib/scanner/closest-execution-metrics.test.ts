@@ -112,4 +112,40 @@ describe("compareClosestRowsExecutionOrder", () => {
     expect(sorted[1]!.close).toBe(113);
     expect(sorted[2]!.close).toBe(120);
   });
+
+  it("tie-breaks distance+rankScore with partialPipelineScore then symbol", () => {
+    const base = {
+      rankScore: 80,
+      close: 118,
+      pullbackZoneLow: 110,
+      pullbackZoneHigh: 115,
+      partialPipelineScore: 10,
+      reasonLineCount: 3,
+    };
+    const rows = [
+      { ...base, symbol: "BBB", partialPipelineScore: 10 },
+      { ...base, symbol: "AAA", partialPipelineScore: 12 },
+      { ...base, symbol: "CCC", partialPipelineScore: 10 },
+    ];
+    const sorted = [...rows].sort(compareClosestRowsExecutionOrder);
+    expect(sorted.map((r) => r.symbol)).toEqual(["AAA", "BBB", "CCC"]);
+  });
+
+  it("tie-breaks pipeline score ties with fewer reason lines", () => {
+    const base = {
+      rankScore: 80,
+      close: 118,
+      pullbackZoneLow: 110,
+      pullbackZoneHigh: 115,
+      partialPipelineScore: 10,
+      stageRank: 50,
+    };
+    const rows = [
+      { ...base, symbol: "Z", reasonLineCount: 5 },
+      { ...base, symbol: "Y", reasonLineCount: 2 },
+    ];
+    const sorted = [...rows].sort(compareClosestRowsExecutionOrder);
+    expect(sorted[0]!.symbol).toBe("Y");
+    expect(sorted[1]!.symbol).toBe("Z");
+  });
 });

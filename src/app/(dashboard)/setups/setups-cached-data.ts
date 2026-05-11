@@ -1,0 +1,145 @@
+import "server-only";
+
+import { cache } from "react";
+import { prisma } from "@/lib/prisma";
+import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
+import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
+import {
+  getLatestDailyScanRun,
+  toCandidateRows,
+  type LatestScanWithCandidates,
+} from "@/lib/scanner/setups-queries";
+import type { Gate2CategoryBreakdownRow } from "@/lib/scanner/setups-gate2-breakdown";
+import { fetchGate2InvalidBreakdown } from "@/lib/scanner/setups-gate2-breakdown";
+import { ScanQuality, ScanSetupType } from "@/generated/prisma/client";
+import { prepareSurfacedCandidatesHealthView } from "@/lib/setup-health";
+
+export type SetupsBaseData = {
+  latest: LatestScanWithCandidates | null;
+  notes: ReturnType<typeof parseDailyScanGate2Notes>;
+  expectedSession: Date | null;
+  scanLoadError: string | null;
+  sessionLoadError: string | null;
+};
+
+/** Latest scan + index session in parallel (single flight per request via React cache). */
+export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
+  const [scanRes, sessionRes] = await Promise.all([
+    getLatestDailyScanRun()
+      .then((latest) => ({ latest, error: null as string | null }))
+      .catch((e) => {
+        console.error("[setups] getLatestDailyScanRun failed:", e);
+        return {
+          latest: null,
+          error: "Database temporarily unavailable (scanner data).",
+        };
+      }),
+    getExpectedLatestSessionFromIndexBars(prisma)
+      .then((session) => ({ session, error: null as string | null }))
+      .catch((e) => {
+        console.error("[setups] expectedLatestSession lookup failed:", e);
+        return {
+          session: null,
+          error: "Database temporarily unavailable (benchmark session).",
+        };
+      }),
+  ]);
+
+  const notes = parseDailyScanGate2Notes(scanRes.latest?.notes ?? null);
+
+  return {
+    latest: scanRes.latest,
+    notes,
+    expectedSession: sessionRes.session,
+    scanLoadError: scanRes.error,
+    sessionLoadError: sessionRes.error,
+  };
+});
+
+export const loadGate2BreakdownCached = cache(
+  async (): Promise<{ breakdown: Gate2CategoryBreakdownRow[]; error: string | null }> => {
+    const { expectedSession } = await loadSetupsBaseData();
+    if (!expectedSession) return { breakdown: [], error: null };
+    try {
+      const breakdown = await fetchGate2InvalidBreakdown(prisma, expectedSession);
+      return { breakdown, error: null };
+    } catch (e) {
+      console.error("[setups] fetchGate2InvalidBreakdown failed:", e);
+      return {
+        breakdown: [],
+        error: "Database temporarily unavailable (setup diagnostics).",
+      };
+    }
+  }
+);
+
+export type SetupPerfRowRaw = {
+  setup_type: ScanSetupType;
+  setup_tier_at_entry: ScanQuality;
+  trade_count: bigint | number;
+  win_count: bigint | number;
+  avg_r: number | null;
+};
+
+export const loadSetupPerfRowsCached = cache(
+  async (): Promise<{ rows: SetupPerfRowRaw[]; error: string | null }> => {
+    try {
+      const rows = await prisma.$queryRaw<SetupPerfRowRaw[]>`
+        SELECT
+          setup_type,
+          setup_tier_at_entry,
+          COUNT(*) AS trade_count,
+          SUM(CASE WHEN outcome = 'WIN' THEN 1 ELSE 0 END) AS win_count,
+          AVG(r_multiple) AS avg_r
+        FROM setup_outcomes
+        GROUP BY setup_type, setup_tier_at_entry
+      `;
+      return { rows, error: null };
+    } catch (e) {
+      console.error("[setups] setupPerfRows query failed:", e);
+      return {
+        rows: [],
+        error: "Database temporarily unavailable (setup performance stats).",
+      };
+    }
+  }
+);
+
+export const loadSurfacedCandidatesHealthCached = cache(async () => {
+  const base = await loadSetupsBaseData();
+  if (!base.latest) {
+    return {
+      candidatesWithHealth: [] as Awaited<ReturnType<typeof prepareSurfacedCandidatesHealthView>>,
+      healthError: null as string | null,
+    };
+  }
+
+  const candidates = toCandidateRows(base.latest);
+  const evalBarDateForHealth =
+    base.expectedSession ??
+    (candidates.length > 0
+      ? candidates.reduce(
+          (latestDate, c) => (c.barDate > latestDate ? c.barDate : latestDate),
+          candidates[0]!.barDate
+        )
+      : null);
+
+  if (candidates.length === 0 || !evalBarDateForHealth) {
+    return { candidatesWithHealth: [], healthError: null };
+  }
+
+  try {
+    const candidatesWithHealth = await prepareSurfacedCandidatesHealthView(
+      prisma,
+      candidates,
+      evalBarDateForHealth
+    );
+    return { candidatesWithHealth, healthError: null };
+  } catch (e) {
+    console.error("[setups] prepareSurfacedCandidatesHealthView failed:", e);
+    return {
+      candidatesWithHealth: [],
+      healthError: "Database temporarily unavailable (candidate health).",
+    };
+  }
+});

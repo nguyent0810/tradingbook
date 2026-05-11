@@ -67,7 +67,7 @@ test.describe("/trades table layout", () => {
     const rowOpen = rows.filter({ hasText: "E2EOPEN" }).first();
     await expect(rowOpen.locator("td").nth(COL.symbol)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.symbol)).toContainText("E2EOPEN");
-    await expect(rowOpen.locator("td").nth(COL.status)).toContainText("OPEN");
+    await expect(rowOpen.locator("td").nth(COL.status)).toContainText("Active");
     await expect(rowOpen.locator("td").nth(COL.freshness)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.hold)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.entryPrice)).toBeVisible();
@@ -77,7 +77,7 @@ test.describe("/trades table layout", () => {
       "E2ECLS"
     );
     await expect(rowClosed.locator("td").nth(COL.status)).toContainText(
-      "CLOSED"
+      "Completed"
     );
     await expect(rowClosed.locator("td").nth(COL.freshness)).toBeVisible();
     await expect(rowClosed.locator("td").nth(COL.entryPrice)).toBeVisible();

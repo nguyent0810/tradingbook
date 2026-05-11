@@ -1,9 +1,11 @@
 import type { InsightCopy } from "@/lib/scanner/setups-trader-copy";
+import { displayDailyScanRunStatus } from "@/lib/trading-display-labels";
 
 export type SetupsInsightBlockProps = {
   insight: InsightCopy;
   runAtLabel: string;
-  gate1Label: string;
+  /** Trader-facing regime label (e.g. Favorable / Caution). */
+  gate1DisplayLabel: string;
   status: string;
   tradabilityPassed: number;
   tradabilityTotal: number;
@@ -17,7 +19,7 @@ export type SetupsInsightBlockProps = {
 export function SetupsInsightBlock({
   insight,
   runAtLabel,
-  gate1Label,
+  gate1DisplayLabel,
   status,
   tradabilityPassed,
   tradabilityTotal,
@@ -27,6 +29,8 @@ export function SetupsInsightBlock({
   candidateCountSurfaced,
   errorSummary,
 }: SetupsInsightBlockProps) {
+  const statusDisplay = displayDailyScanRunStatus(status);
+
   return (
     <section className="card p-6 sm:p-7">
       {status === "FAILED" && errorSummary ? (
@@ -69,15 +73,15 @@ export function SetupsInsightBlock({
             {runAtLabel}
           </span>
           {" · "}
-          Status <span className="font-medium">{status}</span>
+          Run status <span className="font-medium">{statusDisplay}</span>
           {" · "}
-          Gate 1{" "}
+          Market backdrop{" "}
           <span className="font-medium" style={{ color: "var(--text-primary)" }}>
-            {gate1Label}
+            {gate1DisplayLabel}
           </span>
         </div>
         <div style={{ color: "var(--text-tertiary)" }}>
-          Tradability{" "}
+          Liquidity &amp; session screen{" "}
           <span className="font-medium" style={{ color: "var(--text-primary)" }}>
             {tradabilityPassed}/{tradabilityTotal}
           </span>{" "}
@@ -85,12 +89,12 @@ export function SetupsInsightBlock({
           {filteredOut > 0 ? (
             <>
               {" "}
-              (<span className="font-medium">{filteredOut}</span> filtered pre–Gate 2)
+              (<span className="font-medium">{filteredOut}</span> removed before setup scoring)
             </>
           ) : null}
         </div>
         <div style={{ color: "var(--text-tertiary)" }}>
-          Gate 2 tiers — A / B / surfaced:{" "}
+          Setup quality tiers — A / B / surfaced:{" "}
           <span className="font-medium" style={{ color: "var(--text-primary)" }}>
             {candidateCountA} / {candidateCountB} / {candidateCountSurfaced}
           </span>

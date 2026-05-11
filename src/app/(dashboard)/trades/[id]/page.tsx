@@ -19,6 +19,11 @@ import {
   loadOpenPositionMarks,
   VNINDEX_FRESHNESS_UNAVAILABLE,
 } from "@/lib/trades/position-health";
+import {
+  displayScanQualityTier,
+  displayTradeDirection,
+  displayTradeStatus,
+} from "@/lib/trading-display-labels";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -216,7 +221,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               <span className="font-mono" style={{ color: "var(--accent-text)" }}>
                 {trade.symbol}
               </span>{" "}
-              · {trade.direction.toLowerCase()} · {trade.status.toLowerCase()}
+              · {displayTradeDirection(trade.direction)} · {displayTradeStatus(trade.status)}
               {" · "}
               {formatPlaybookLabel(trade.playbook)}
               {holdingDaysDisplay != null ? (
@@ -231,7 +236,8 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               {trade.setupCandidate ? (
                 <>
                   {" · "}
-                  setup {trade.setupCandidate.quality}/{trade.setupCandidate.setupType}
+                  setup {displayScanQualityTier(trade.setupCandidate.quality)} /{" "}
+                  {formatPlaybookLabel(trade.setupCandidate.setupType)}
                 </>
               ) : null}
               {trade.realizedPnl !== null && (
@@ -340,7 +346,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-tertiary)" }}
             >
-              Open position (daily bars)
+              Active position (daily bars)
             </div>
             <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
               Derived marks only — not saved on this trade. Diagnostic context,
@@ -365,7 +371,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                     color: "#166534",
                   }}
                 >
-                  EOD: Checked today
+                  Daily review logged today
                 </span>
               ) : (
                 <span
@@ -378,7 +384,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                     color: "#854d0e",
                   }}
                 >
-                  EOD: Needs check today
+                  Daily review not logged yet today
                 </span>
               )}
               {latestCloseSnap ? (
@@ -496,6 +502,23 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               >
                 Unrealized
               </div>
+              <p className="mt-1 text-xs leading-snug" style={{ color: "var(--text-muted)" }}>
+                Long bias: (latest close − entry) × qty. Short bias: (entry − latest close) × qty.
+                Same units as entry price.
+                {latestCloseSnap ? (
+                  <>
+                    {" "}
+                    Session (UTC):{" "}
+                    {new Date(latestCloseSnap.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      timeZone: "UTC",
+                    })}
+                    .
+                  </>
+                ) : null}
+              </p>
               <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
                   <dt style={{ color: "var(--text-muted)" }}>Unrealized P&amp;L</dt>
