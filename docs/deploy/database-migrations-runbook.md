@@ -33,6 +33,13 @@ Run this **before** or **right after** promoting a release that depends on new m
 - Use the **direct** connection string for CLI migrate when the pooled URL misbehaves; `prisma.config.ts` prefers **`DIRECT_URL`** when set.
 - If the database was idle, add **`connect_timeout`** (e.g. `30`) to the URL if connections time out on first wake.
 
+## Runtime vs migrations (`DATABASE_URL` shape)
+
+- **`prisma://` / `prisma+postgres://`** (Prisma Accelerate / Data Proxy): app runtime uses **`withAccelerate()`** — **not** `@prisma/adapter-pg`. CLI migrations still need a **plain Postgres TCP** URL (`postgresql://…`), typically **`DIRECT_URL`** in `prisma.config.ts`.
+- **`postgresql://`**: app runtime uses **`PrismaPg` + `pg`** as before.
+
+Misrouting Accelerate URLs into `PrismaPg` triggers **`DriverAdapterError: Control plane request failed`**.
+
 ## Optional CI patterns
 
 - **GitHub Actions**: workflow step on `main` with secrets `DATABASE_URL` / `DIRECT_URL`, running `npm run db:migrate:deploy` before or after deploy.

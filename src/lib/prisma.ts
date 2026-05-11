@@ -1,26 +1,36 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { describeDatabaseUrl } from "@/lib/database-url-fingerprint";
+import { withAccelerate } from "@prisma/extension-accelerate";
 import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-function normalizePostgresUrl(url: string): string {
-  // Neon can provide `prisma://` URLs (for the serverless driver).
-  // Our runtime uses `pg`, so we coerce the scheme to a standard postgres one.
-  if (/^prisma:\/\//i.test(url)) return `postgresql://${url.slice("prisma://".length)}`;
+/**
+ * Prisma Accelerate / Data Proxy URLs must use `accelerateUrl` + `withAccelerate()` — never `PrismaPg`.
+ * Feeding `prisma://` / `prisma+postgres://` into `@prisma/adapter-pg` (or “normalizing” them to
+ * `postgresql://`) breaks at runtime and surfaces as `DriverAdapterError: Control plane request failed`.
+ * @see https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7
+ */
+function isAccelerateOrDataProxyUrl(url: string): boolean {
+  const t = url.trim();
+  return /^prisma(\+postgres)?:\/\//i.test(t);
+}
+
+/** Canonical `postgres://` → `postgresql://` for TCP URLs only. */
+function normalizeTcpPostgresScheme(url: string): string {
   if (/^postgres:\/\//i.test(url)) return `postgresql://${url.slice("postgres://".length)}`;
   return url;
 }
 
 function hostLooksLikeNeonPooler(url: string): boolean {
   try {
-    const u = new URL(normalizePostgresUrl(url));
+    const u = new URL(normalizeTcpPostgresScheme(url));
     return u.hostname.includes("-pooler");
   } catch {
     return false;
   }
 }
 
-function selectRuntimeConnectionString(): string {
+function selectTcpRuntimeConnectionString(): string {
   const databaseUrlRaw = process.env.DATABASE_URL?.trim();
   const directUrlRaw = process.env.DIRECT_URL?.trim();
 
@@ -30,47 +40,128 @@ function selectRuntimeConnectionString(): string {
     );
   }
 
-  const databaseUrl = databaseUrlRaw ? normalizePostgresUrl(databaseUrlRaw) : "";
-  const directUrl = directUrlRaw ? normalizePostgresUrl(directUrlRaw) : "";
+  if (directUrlRaw && isAccelerateOrDataProxyUrl(directUrlRaw)) {
+    throw new Error(
+      "DIRECT_URL must be a Postgres TCP URL for migrations. Do not point DIRECT_URL at prisma:// / prisma+postgres://."
+    );
+  }
 
-  // Neon pooler can be flaky in some serverless SSR scenarios; for production runtime
-  // reads, prefer the direct endpoint when it is available.
-  if (process.env.NODE_ENV === "production" && directUrl && databaseUrl) {
-    if (hostLooksLikeNeonPooler(databaseUrlRaw!)) return directUrl;
+  if (databaseUrlRaw && isAccelerateOrDataProxyUrl(databaseUrlRaw)) {
+    throw new Error(
+      "DATABASE_URL uses a prisma:// / prisma+postgres:// URL. Remove TCP-only env wiring; Accelerate is handled separately."
+    );
+  }
+
+  const databaseUrl = databaseUrlRaw
+    ? normalizeTcpPostgresScheme(databaseUrlRaw)
+    : "";
+  const directUrl = directUrlRaw ? normalizeTcpPostgresScheme(directUrlRaw) : "";
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    directUrl &&
+    databaseUrl &&
+    databaseUrlRaw &&
+    hostLooksLikeNeonPooler(databaseUrlRaw)
+  ) {
+    return directUrl;
   }
 
   return databaseUrl || directUrl;
 }
 
-const connectionString = selectRuntimeConnectionString();
+function logProductionRuntimeDiagnostics(params: {
+  mode: "accelerate" | "tcp-pg";
+  accelerateScheme?: string;
+  tcpMeta?: {
+    urlSource: "DATABASE_URL" | "DIRECT_URL";
+    host: string;
+    pooler: boolean;
+    poolMax: number;
+    connectTimeoutMs: number;
+    statementTimeoutMs: number;
+  };
+}) {
+  if (
+    process.env.NODE_ENV !== "production" ||
+    process.env.NEXT_PHASE === "phase-production-build"
+  ) {
+    return;
+  }
 
-// Minimal diagnostics: helps confirm we are NOT feeding `prisma://` or a pooler host
-// into the runtime `pg` pool. Avoid logging credentials.
-if (process.env.NODE_ENV === "production") {
+  if (params.mode === "accelerate") {
+    console.log(
+      `[prisma runtime] mode=accelerate scheme=${params.accelerateScheme ?? "prisma"} (no driver adapter)`
+    );
+    return;
+  }
+
+  const m = params.tcpMeta;
+  if (!m) return;
+  console.log(
+    `[prisma runtime] mode=tcp-pg urlSource=${m.urlSource} host=${m.host} pooler=${m.pooler} poolMax=${m.poolMax} connectTimeoutMs=${m.connectTimeoutMs} statementTimeoutMs=${m.statementTimeoutMs}`
+  );
+}
+
+function createPrismaClient(): PrismaClient {
+  const databaseUrlRaw = process.env.DATABASE_URL?.trim() ?? "";
+
+  if (databaseUrlRaw && isAccelerateOrDataProxyUrl(databaseUrlRaw)) {
+    const schemeMatch = databaseUrlRaw.match(/^[^:]+/);
+    logProductionRuntimeDiagnostics({
+      mode: "accelerate",
+      accelerateScheme: schemeMatch?.[0] ?? "prisma",
+    });
+
+    return new PrismaClient({
+      accelerateUrl: databaseUrlRaw,
+    }).$extends(withAccelerate()) as unknown as PrismaClient;
+  }
+
+  const connectionString = selectTcpRuntimeConnectionString();
+
+  const directUrlRaw = process.env.DIRECT_URL?.trim() ?? "";
+  const pickedIsDirect =
+    !!directUrlRaw &&
+    connectionString === normalizeTcpPostgresScheme(directUrlRaw);
+
   try {
-    const directUrlRaw = process.env.DIRECT_URL?.trim() ?? "";
-    const databaseUrlRaw = process.env.DATABASE_URL?.trim() ?? "";
-
-    const pickedIsDirect =
-      !!directUrlRaw &&
-      connectionString === normalizePostgresUrl(directUrlRaw);
-
-    const schemeWasNormalized = /^prisma:\/\//i.test(databaseUrlRaw) || /^prisma:\/\//i.test(directUrlRaw);
-
     const u = new URL(connectionString.replace(/^postgresql:\/\//i, "http://"));
-    const host = u.hostname;
-    const pooler = host.includes("-pooler");
-
     const connectTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
     const statementTimeoutMs = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
     const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
 
-    console.log(
-      `[prisma runtime] urlSource=${pickedIsDirect ? "DIRECT_URL" : "DATABASE_URL"} host=${host} pooler=${pooler} schemeNormalizedFromPrisma=${schemeWasNormalized} poolMax=${poolMax} connectTimeoutMs=${connectTimeoutMs} statementTimeoutMs=${statementTimeoutMs}`
-    );
+    logProductionRuntimeDiagnostics({
+      mode: "tcp-pg",
+      tcpMeta: {
+        urlSource: pickedIsDirect ? "DIRECT_URL" : "DATABASE_URL",
+        host: u.hostname,
+        pooler: u.hostname.includes("-pooler"),
+        poolMax,
+        connectTimeoutMs,
+        statementTimeoutMs,
+      },
+    });
   } catch {
-    console.log("[prisma runtime] url diagnostics unavailable");
+    console.log("[prisma runtime] mode=tcp-pg (host diagnostics unavailable)");
   }
+
+  const connectionTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
+  const statementTimeoutMs = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
+  const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
+  const idleTimeoutMs = Number(process.env.DB_IDLE_TIMEOUT_MS ?? 30_000);
+
+  const pool = new Pool({
+    connectionString,
+    connectionTimeoutMillis: connectionTimeoutMs,
+    max: poolMax,
+    idleTimeoutMillis: idleTimeoutMs,
+    options: `-c statement_timeout=${statementTimeoutMs}`,
+  });
+
+  const adapter = new PrismaPg(pool);
+
+  return new PrismaClient({ adapter }) as unknown as PrismaClient;
 }
 
 if (process.env.NODE_ENV === "development" && typeof globalThis !== "undefined") {
@@ -84,29 +175,11 @@ if (process.env.NODE_ENV === "development" && typeof globalThis !== "undefined")
   }
 }
 
-// Fail fast in production so server-rendered pages don't sit on the route `loading.tsx` skeleton forever.
-const connectionTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
-const statementTimeoutMs = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
-const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
-const idleTimeoutMs = Number(process.env.DB_IDLE_TIMEOUT_MS ?? 30_000);
-
-const pool = new Pool({
-  connectionString,
-  connectionTimeoutMillis: connectionTimeoutMs,
-  max: poolMax,
-  idleTimeoutMillis: idleTimeoutMs,
-  // Applies per-statement on the DB connection.
-  options: `-c statement_timeout=${statementTimeoutMs}`,
-});
-const adapter = new PrismaPg(pool);
-
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 export const prisma =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  globalForPrisma.prisma ?? new PrismaClient({ adapter } as any);
+  globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
