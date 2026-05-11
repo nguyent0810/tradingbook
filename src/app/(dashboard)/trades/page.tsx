@@ -52,7 +52,9 @@ import {
   sessionQueueNeighbors,
   sortTradesForReviewSession,
 } from "@/lib/trades/review-session-queue";
+import { buildReviewContinuityLines } from "@/lib/trades/review-continuity-lines";
 import { OpenPositionReviewCell } from "./open-position-review-cell";
+import { FocusReviewWorkspace } from "./focus-review-workspace";
 import { ReviewSessionChrome } from "./review-session-chrome";
 
 export const metadata: Metadata = {
@@ -234,6 +236,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       checkedTodayTradeIds = new Set();
     }
   }
+
+  const reviewedTodayOpenCount = openTradeIds.filter((id) =>
+    checkedTodayTradeIds.has(id)
+  ).length;
 
   let latestHealthByTradeId = new Map<string, LatestTradeHealthLog>();
   if (openTradeIds.length > 0) {
@@ -634,6 +640,34 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         })
       : null;
 
+  const focusTrade =
+    sessionFocusId != null
+      ? trades.find((t) => t.id === sessionFocusId)
+      : undefined;
+  const focusOpenPack =
+    sessionFocusId != null
+      ? openRowPackByTradeId.get(sessionFocusId)
+      : undefined;
+  const focusContinuityLines =
+    sessionFocusId != null &&
+    focusTrade?.status === "OPEN" &&
+    focusOpenPack != null
+      ? buildReviewContinuityLines({
+          now,
+          checkedToday: checkedTodayTradeIds.has(sessionFocusId),
+          lastCheckpointAt:
+            latestHealthByTradeId.get(sessionFocusId)?.checkedAt ?? null,
+          latestChecklist:
+            latestHealthByTradeId.get(sessionFocusId)?.reviewChecklist ?? null,
+          weekFlags: weeklyFlagsByTradeId.has(sessionFocusId)
+            ? weeklyFlagsByTradeId.get(sessionFocusId)!
+            : undefined,
+        })
+      : [];
+
+  const totalActiveOpenForSession =
+    portfolioStrip?.activeOpenCount ?? openTradeIds.length;
+
   return (
     <div className="page-container animate-in">
       <div className="mb-6 flex items-center justify-between">
@@ -835,9 +869,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           focusOneBased={
             sessionFocusIndex >= 0 ? sessionFocusIndex + 1 : null
           }
-          totalActiveOpen={
-            portfolioStrip?.activeOpenCount ?? openTradeIds.length
-          }
+          totalActiveOpen={totalActiveOpenForSession}
+          reviewedTodayOpenCount={reviewedTodayOpenCount}
           urgentPendingGlobal={sessionDashboardCounts.urgentPendingGlobal}
           pendingCheckpointGlobal={
             sessionDashboardCounts.pendingCheckpointGlobal
@@ -845,6 +878,32 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
           prevId={sessionPrevId}
           nextId={sessionNextId}
+        />
+      ) : null}
+
+      {reviewSessionActive &&
+      hasOpenTrades &&
+      reviewSessionQueue.length > 0 &&
+      sessionFocusId != null &&
+      focusTrade != null &&
+      focusTrade.status === "OPEN" &&
+      focusOpenPack != null ? (
+        <FocusReviewWorkspace
+          tradeId={focusTrade.id}
+          symbol={focusTrade.symbol.trim().toUpperCase()}
+          priorityTier={focusOpenPack.priorityTier}
+          reviewDto={focusOpenPack.reviewDto}
+          reviewedToday={checkedTodayTradeIds.has(sessionFocusId)}
+          continuityLines={focusContinuityLines}
+          memoryLines={focusOpenPack.memoryLines}
+          escalationCues={focusOpenPack.escalationCues}
+          latestBar={focusOpenPack.derived.latestBar ?? null}
+          formatBarSessionDate={formatBarSessionDate}
+          queuePositionOneBased={sessionFocusIndex + 1}
+          queueLength={reviewSessionQueue.length}
+          reviewedTodayOpenCount={reviewedTodayOpenCount}
+          pendingCheckpointGlobal={sessionDashboardCounts.pendingCheckpointGlobal}
+          totalActiveOpen={totalActiveOpenForSession}
         />
       ) : null}
 
@@ -985,6 +1044,18 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                   reviewDto.surface !== "stop_violated" &&
                   reviewDto.stopBand !== "breached";
 
+                const dimNonFocusSessionRow =
+                  reviewSessionActive &&
+                  reviewSessionQueue.length > 0 &&
+                  sessionFocusId != null &&
+                  !isSessionFocusRow;
+
+                const sessionRowOpacity = dimNonFocusSessionRow
+                  ? trade.status === "OPEN"
+                    ? 0.56
+                    : 0.82
+                  : 1;
+
                 return (
                   <tr
                     key={trade.id}
@@ -993,6 +1064,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       isSessionFocusRow ? "true" : undefined
                     }
                     style={{
+                      opacity: sessionRowOpacity,
                       ...(isSessionFocusRow
                         ? {
                             outline:
