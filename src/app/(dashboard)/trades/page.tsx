@@ -62,6 +62,15 @@ import {
   sortTradesForReviewSession,
 } from "@/lib/trades/review-session-queue";
 import { buildReviewContinuityLines } from "@/lib/trades/review-continuity-lines";
+import {
+  expandClusterDividerRows,
+  sortTradesWithBookClusters,
+} from "@/lib/trades/book-clusters";
+import {
+  computePlannedRiskConcentration,
+  countOperatingPostures,
+  deriveBookOperatingContext,
+} from "@/lib/trades/book-operating-context";
 import { OpenPositionReviewCell } from "./open-position-review-cell";
 import { FocusReviewWorkspace } from "./focus-review-workspace";
 import { ReviewSessionChrome } from "./review-session-chrome";
@@ -636,11 +645,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     allOpenTradeIds,
   });
 
-  const tableRows =
-    reviewSessionActive && reviewSessionQueue.length > 0
-      ? sortTradesForReviewSession(displayTrades, reviewSessionQueue)
-      : displayTrades;
-
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -660,6 +664,74 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const hasOpenTrades = trades.some((t) => t.status === "OPEN");
   const showFreshnessBanner =
     hasOpenTrades && expectedSessionDate === null;
+
+  const clusterPackMap = new Map(
+    [...openRowPackByTradeId.entries()].map(([id, pack]) => [
+      id,
+      {
+        operatingPosture: pack.operatingPosture,
+        priorityTier: pack.priorityTier,
+        sortKey: pack.sortKey,
+      },
+    ])
+  );
+
+  const useClusteredLedger =
+    hasOpenTrades &&
+    openRowPackByTradeId.size > 0 &&
+    (reviewSessionActive || openRowPackByTradeId.size >= 5);
+
+  const baseLedgerRows =
+    reviewSessionActive && reviewSessionQueue.length > 0
+      ? sortTradesForReviewSession(displayTrades, reviewSessionQueue)
+      : displayTrades;
+
+  const tableRowsSorted = useClusteredLedger
+    ? sortTradesWithBookClusters(
+        baseLedgerRows,
+        clusterPackMap,
+        checkedTodayTradeIds,
+        {
+          sessionActive:
+            reviewSessionActive && reviewSessionQueue.length > 0,
+          sessionQueue: reviewSessionQueue,
+        }
+      )
+    : baseLedgerRows;
+
+  const ledgerTableItems = expandClusterDividerRows(
+    tableRowsSorted,
+    useClusteredLedger,
+    clusterPackMap,
+    checkedTodayTradeIds
+  );
+
+  const bookOperatingContext =
+    portfolioStrip && reviewQueueModel && openRowPackByTradeId.size > 0
+      ? deriveBookOperatingContext({
+          activeOpenCount: portfolioStrip.activeOpenCount,
+          postureCounts: countOperatingPostures([
+            ...openRowPackByTradeId.values(),
+          ]),
+          urgentQueueCount: reviewQueueModel.urgent.length,
+          highAttentionQueueCount: reviewQueueModel.highAttention.length,
+          routinePendingQueueCount: reviewQueueModel.routinePending.length,
+          staleMarketOpenCount: portfolioStrip.staleMarketOpenCount,
+          stopViolationsCount: portfolioStrip.stopViolationsCount,
+          pendingCheckpointCount: portfolioStrip.reviewsPendingTodayCount,
+          partialRiskFigures: portfolioStrip.positionsPartialRiskFigures,
+          concentration: computePlannedRiskConcentration(
+            trades
+              .filter((t) => t.status === "OPEN")
+              .map((t) => ({
+                symbol: t.symbol,
+                plannedCapitalAtRisk:
+                  openRowPackByTradeId.get(t.id)?.reviewDto
+                    .plannedCapitalAtRisk ?? null,
+              }))
+          ),
+        })
+      : null;
 
   let largestRiskPosition: { symbol: string; amount: number } | null = null;
   for (const t of trades) {
@@ -890,6 +962,37 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         </div>
       ) : null}
 
+      {bookOperatingContext && hasOpenTrades ? (
+        <div
+          className="card mt-4 border px-4 py-3"
+          data-testid="book-operating-context"
+          style={{ borderColor: "var(--border-color)" }}
+        >
+          <div
+            className="text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Book operating context
+          </div>
+          <p
+            className="mt-2 text-[13px] font-medium leading-snug"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {bookOperatingContext.headline}
+          </p>
+          {bookOperatingContext.detailLines.length > 0 ? (
+            <ul
+              className="mt-2 list-none space-y-1 text-[12px] leading-snug"
+              style={{ color: "var(--text-secondary)" }}
+            >
+              {bookOperatingContext.detailLines.map((line, li) => (
+                <li key={`book-ctx-${li}-${line.slice(0, 28)}`}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+
       {dbLoadError ? (
         <div
           role="alert"
@@ -928,6 +1031,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           }
           pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
           sessionQuietLines={sessionQuietLines}
+          sessionOperatingNarrative={
+            bookOperatingContext
+              ? bookOperatingContext.sessionNarrative
+              : null
+          }
           prevId={sessionPrevId}
           nextId={sessionNextId}
         />
@@ -1056,7 +1164,33 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               </tr>
             </thead>
             <tbody>
-              {tableRows.map((trade) => {
+              {ledgerTableItems.map((item, rowIndex) => {
+                if (
+                  item !== null &&
+                  typeof item === "object" &&
+                  "kind" in item &&
+                  item.kind === "divider"
+                ) {
+                  return (
+                    <tr
+                      key={`cluster-divider-${rowIndex}-${item.label}`}
+                      data-testid="trades-cluster-divider"
+                      style={{
+                        backgroundColor: "var(--bg-tertiary)",
+                      }}
+                    >
+                      <td colSpan={16} className="py-1.5 pl-3">
+                        <span
+                          className="text-[10px] font-semibold uppercase tracking-wide"
+                          style={{ color: "var(--text-muted)" }}
+                        >
+                          {item.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                }
+                const trade = item as (typeof trades)[number];
                 const openPack = openRowPackByTradeId.get(trade.id);
                 const ledgerCtxInner = {
                   latestCloseBySymbol,

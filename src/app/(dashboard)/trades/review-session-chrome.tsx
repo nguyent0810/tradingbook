@@ -15,6 +15,8 @@ export type ReviewSessionChromeProps = {
   pendingAheadInQueue: number;
   /** Calm session-level notices (e.g. urgent tier cleared for today). */
   sessionQuietLines: readonly string[];
+  /** One-line book-level summary for this session (deterministic). */
+  sessionOperatingNarrative: string | null;
   prevId: string | null;
   nextId: string | null;
 };
@@ -28,6 +30,7 @@ function ReviewSessionChromeInner({
   pendingCheckpointGlobal,
   pendingAheadInQueue,
   sessionQuietLines,
+  sessionOperatingNarrative,
   prevId,
   nextId,
 }: ReviewSessionChromeProps) {
@@ -84,7 +87,19 @@ function ReviewSessionChromeInner({
         data-testid="trades-review-session-bar"
         style={{ borderColor: "var(--border-color)" }}
       >
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        {sessionOperatingNarrative ? (
+          <p
+            className="text-[12px] leading-snug"
+            style={{ color: "var(--text-secondary)" }}
+            data-testid="trades-review-session-operating-narrative"
+          >
+            {sessionOperatingNarrative}
+          </p>
+        ) : null}
+        <p
+          className={`text-sm ${sessionOperatingNarrative ? "mt-2" : ""}`}
+          style={{ color: "var(--text-secondary)" }}
+        >
           Review session has no queued positions (only stable open rows remain).
           Exit to browse the full ledger.
         </p>
@@ -113,6 +128,15 @@ function ReviewSessionChromeInner({
           >
             Review session
           </div>
+          {sessionOperatingNarrative ? (
+            <p
+              className="mt-2 text-[12px] leading-snug"
+              style={{ color: "var(--text-secondary)" }}
+              data-testid="trades-review-session-operating-narrative"
+            >
+              {sessionOperatingNarrative}
+            </p>
+          ) : null}
           <p
             className="mt-2 text-[13px] leading-relaxed"
             style={{ color: "var(--text-secondary)" }}
