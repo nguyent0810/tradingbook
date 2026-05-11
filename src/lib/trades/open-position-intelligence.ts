@@ -258,6 +258,8 @@ export type OpenPositionReviewDto = {
   checklistSummaryLine: string | null;
   /** True when equity bar is strictly older than benchmark session. */
   marketDataStale: boolean;
+  /** Raw geometry hints used for priority / scanning (LONG-heavy). */
+  structureHints: readonly StructureHint[];
 };
 
 export function buildOpenPositionReviewDto(params: {
@@ -453,5 +455,6 @@ export function buildOpenPositionReviewDto(params: {
     latestChecklist,
     checklistSummaryLine,
     marketDataStale,
+    structureHints: hints,
   };
 }

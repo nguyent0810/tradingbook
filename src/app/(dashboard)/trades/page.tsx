@@ -33,6 +33,18 @@ import {
 } from "@/lib/trading-display-labels";
 import { aggregateOpenPortfolioReviewStrip } from "@/lib/trades/eod-review-workflow";
 import { parseReviewChecklistJson } from "@/lib/trades/trade-health-review-checklist";
+import {
+  buildOpenLedgerReviewOrder,
+  buildReviewMemoryLines,
+  buildReviewQueueModel,
+  classifyReviewPriorityTier,
+  compareOpenLedgerReviewOrder,
+  deterioratedVsLastReviewBar,
+  reviewPriorityTraderLabel,
+  type ReviewPriorityTier,
+  type ReviewQueueSymbol,
+  type WeeklyReviewChecklistAgg,
+} from "@/lib/trades/review-priority-queue";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -96,6 +108,59 @@ function formatSignedVnd(value: number | null): string {
 function formatRMultiple(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return "—";
   return `${value > 0 ? "+" : ""}${value.toFixed(2)}R`;
+}
+
+function priorityTierBadgeStyle(tier: ReviewPriorityTier): CSSProperties {
+  switch (tier) {
+    case "urgent":
+      return {
+        borderColor: "color-mix(in srgb, #ea580c 42%, var(--border-color))",
+        backgroundColor: "color-mix(in srgb, #ea580c 11%, transparent)",
+        color: "#9a3412",
+      };
+    case "high_attention":
+      return {
+        borderColor: "color-mix(in srgb, #ca8a04 38%, var(--border-color))",
+        backgroundColor: "color-mix(in srgb, #eab308 10%, transparent)",
+        color: "#854d0e",
+      };
+    case "routine_review":
+      return {
+        borderColor: "color-mix(in srgb, #64748b 35%, var(--border-color))",
+        backgroundColor: "var(--bg-tertiary)",
+        color: "var(--text-secondary)",
+      };
+    default:
+      return {
+        borderColor: "var(--border-color)",
+        backgroundColor: "var(--bg-tertiary)",
+        color: "var(--text-muted)",
+      };
+  }
+}
+
+function ReviewQueueSymbolLinks({ items }: { items: ReviewQueueSymbol[] }) {
+  if (items.length === 0) return null;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-1">
+      {items.map((s, i) => (
+        <span key={s.tradeId} className="inline-flex items-center gap-1">
+          {i > 0 ? (
+            <span style={{ color: "var(--text-muted)" }} aria-hidden>
+              ·
+            </span>
+          ) : null}
+          <Link
+            href={`/trades/${s.tradeId}`}
+            className="mono font-semibold text-[13px] underline-offset-2 hover:underline"
+            style={{ color: "var(--accent-text)" }}
+          >
+            {s.symbol}
+          </Link>
+        </span>
+      ))}
+    </span>
+  );
 }
 
 /** Mirrors filters layout — Suspense fallback while client filters hydrate (`useSearchParams`). */
@@ -249,6 +314,48 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     }
   }
 
+  let weeklyFlagsByTradeId = new Map<string, WeeklyReviewChecklistAgg>();
+  if (openTradeIds.length > 0) {
+    try {
+      const weekStartUtc = new Date(now);
+      weekStartUtc.setUTCDate(weekStartUtc.getUTCDate() - 7);
+      weekStartUtc.setUTCHours(0, 0, 0, 0);
+
+      const aggRows = await prisma.$queryRaw<
+        Array<{
+          trade_id: string;
+          stop_w: boolean;
+          struct_w: boolean;
+          exit_w: boolean;
+        }>
+      >`
+        SELECT
+          trade_id,
+          BOOL_OR(COALESCE(review_checklist->>'stopReviewed', 'false') = 'true') AS stop_w,
+          BOOL_OR(COALESCE(review_checklist->>'structureReviewed', 'false') = 'true') AS struct_w,
+          BOOL_OR(COALESCE(review_checklist->>'exitPlanReviewed', 'false') = 'true') AS exit_w
+        FROM trade_health_logs
+        WHERE trade_id IN (${Prisma.join(openTradeIds)})
+          AND checked_at >= ${weekStartUtc}
+        GROUP BY trade_id
+      `;
+
+      weeklyFlagsByTradeId = new Map(
+        aggRows.map((r) => [
+          r.trade_id,
+          {
+            stopMarkedThisWeek: Boolean(r.stop_w),
+            structureMarkedThisWeek: Boolean(r.struct_w),
+            exitPlanMarkedThisWeek: Boolean(r.exit_w),
+          },
+        ])
+      );
+    } catch (e) {
+      console.error("[trades] weekly checklist aggregation skipped:", e);
+      weeklyFlagsByTradeId = new Map();
+    }
+  }
+
   let twoBarBySymbol = new Map<string, LatestTwoCloseBars>();
   if (openSymbols.length > 0) {
     try {
@@ -305,6 +412,9 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   type OpenRowPack = {
     derived: ReturnType<typeof deriveTradesLedgerRowFields>;
     reviewDto: OpenPositionReviewDto;
+    priorityTier: ReviewPriorityTier;
+    sortKey: ReturnType<typeof buildOpenLedgerReviewOrder>;
+    memoryLines: string[];
   };
   const openRowPackByTradeId = new Map<string, OpenRowPack>();
   const ledgerCtx = {
@@ -357,7 +467,50 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       priorClose: two?.prior?.close ?? null,
       baselineCloseAtLastReview: baselineCloseByTradeId.get(trade.id) ?? null,
     });
-    openRowPackByTradeId.set(trade.id, { derived, reviewDto });
+
+    const reviewedToday = checkedTodayTradeIds.has(trade.id);
+    const deteriorated = deterioratedVsLastReviewBar({
+      direction: trade.direction,
+      latestClose: derived.latestBar?.close ?? null,
+      baselineClose: baselineCloseByTradeId.get(trade.id) ?? null,
+    });
+
+    const priorityTier = classifyReviewPriorityTier({
+      surface: reviewDto.surface,
+      stopBand: reviewDto.stopBand,
+      structureHints: reviewDto.structureHints,
+      marketDataStale: reviewDto.marketDataStale,
+      reviewedToday,
+      deterioratedVsReview: deteriorated,
+    });
+
+    const sortKey = buildOpenLedgerReviewOrder({
+      tradeId: trade.id,
+      symbol: trade.symbol,
+      surface: reviewDto.surface,
+      stopBand: reviewDto.stopBand,
+      structureHints: reviewDto.structureHints,
+      marketDataStale: reviewDto.marketDataStale,
+      reviewedToday,
+      plannedCapitalAtRisk: reviewDto.plannedCapitalAtRisk,
+      deterioratedVsReview: deteriorated,
+    });
+
+    const latestLog = latestHealthByTradeId.get(trade.id);
+    const memoryLines = buildReviewMemoryLines({
+      reviewedToday,
+      latestChecklist: reviewDto.latestChecklist,
+      weekFlags: weeklyFlagsByTradeId.get(trade.id) ?? null,
+      lastCheckpointAt: latestLog?.checkedAt ?? null,
+    });
+
+    openRowPackByTradeId.set(trade.id, {
+      derived,
+      reviewDto,
+      priorityTier,
+      sortKey,
+      memoryLines,
+    });
   }
 
   const portfolioStrip =
@@ -374,6 +527,48 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           }))
         )
       : null;
+
+  const reviewQueueModel =
+    openRowPackByTradeId.size > 0
+      ? buildReviewQueueModel(
+          [...openRowPackByTradeId.values()].map((pack) => ({
+            sortKey: pack.sortKey,
+            priorityTier: pack.priorityTier,
+            marketDataStale: pack.reviewDto.marketDataStale,
+          }))
+        )
+      : null;
+
+  const displayTrades =
+    trades.length === 0
+      ? trades
+      : trades
+          .map((t, index) => ({ t, index }))
+          .sort((a, b) => {
+            const oa = a.t.status === "OPEN";
+            const ob = b.t.status === "OPEN";
+            if (oa && !ob) return -1;
+            if (!oa && ob) return 1;
+            if (oa && ob) {
+              const pa = openRowPackByTradeId.get(a.t.id);
+              const pb = openRowPackByTradeId.get(b.t.id);
+              if (pa && pb) {
+                const cmp = compareOpenLedgerReviewOrder(
+                  pa.sortKey,
+                  pb.sortKey
+                );
+                if (cmp !== 0) return cmp;
+              } else if (pa && !pb) return -1;
+              else if (!pa && pb) return 1;
+            }
+            const ta = a.t.entryDate.getTime();
+            const tb = b.t.entryDate.getTime();
+            const dateCmp =
+              sortOrder === "asc" ? ta - tb : tb - ta;
+            if (dateCmp !== 0) return dateCmp;
+            return a.index - b.index;
+          })
+          .map((x) => x.t);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -430,6 +625,101 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           Log Trade
         </Link>
       </div>
+
+      {reviewQueueModel && hasOpenTrades ? (
+        <div
+          className="card mt-4 border px-4 py-3"
+          data-testid="trades-review-queue"
+          style={{ borderColor: "var(--border-color)" }}
+        >
+          <div
+            className="text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Review queue · daily bar context
+          </div>
+          <dl className="mt-2 space-y-2 text-[13px]">
+            {reviewQueueModel.urgent.length > 0 ? (
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <dt
+                  className="font-semibold tabular-nums"
+                  style={{ color: "#9a3412" }}
+                >
+                  {reviewQueueModel.urgent.length} urgent
+                </dt>
+                <dd style={{ color: "var(--text-secondary)" }}>
+                  <ReviewQueueSymbolLinks items={reviewQueueModel.urgent} />
+                </dd>
+              </div>
+            ) : null}
+            {reviewQueueModel.highAttention.length > 0 ? (
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <dt
+                  className="font-semibold tabular-nums"
+                  style={{ color: "#854d0e" }}
+                >
+                  {reviewQueueModel.highAttention.length} high attention
+                </dt>
+                <dd style={{ color: "var(--text-secondary)" }}>
+                  <ReviewQueueSymbolLinks
+                    items={reviewQueueModel.highAttention}
+                  />
+                </dd>
+              </div>
+            ) : null}
+            {reviewQueueModel.routinePending.length > 0 ? (
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <dt
+                  className="font-semibold tabular-nums"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {reviewQueueModel.routinePending.length} routine reviews
+                  pending
+                </dt>
+                <dd style={{ color: "var(--text-secondary)" }}>
+                  <ReviewQueueSymbolLinks
+                    items={reviewQueueModel.routinePending}
+                  />
+                </dd>
+              </div>
+            ) : null}
+            {reviewQueueModel.staleMarket.length > 0 ? (
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <dt
+                  className="font-semibold tabular-nums"
+                  style={{ color: "var(--text-secondary)" }}
+                >
+                  {reviewQueueModel.staleMarket.length} stale market data
+                </dt>
+                <dd style={{ color: "var(--text-secondary)" }}>
+                  <ReviewQueueSymbolLinks
+                    items={reviewQueueModel.staleMarket}
+                  />
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+          {!reviewQueueModel.urgent.length &&
+          !reviewQueueModel.highAttention.length &&
+          !reviewQueueModel.routinePending.length &&
+          !reviewQueueModel.staleMarket.length ? (
+            <p
+              className="mt-2 text-[12px]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Nothing flagged in the queue — quick-scan open rows below.
+            </p>
+          ) : null}
+          <p
+            className="mt-2 text-[10px] leading-snug"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Open rows sort for review: stop urgency · proximity to stress · drift
+            vs last checkpoint · stale data or pending log · planned capital at
+            risk · symbol.
+          </p>
+        </div>
+      ) : null}
 
       {portfolioStrip && hasOpenTrades ? (
         <div
@@ -632,7 +922,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               </tr>
             </thead>
             <tbody>
-              {trades.map((trade) => {
+              {displayTrades.map((trade) => {
                 const openPack = openRowPackByTradeId.get(trade.id);
                 const ledgerCtxInner = {
                   latestCloseBySymbol,
@@ -717,6 +1007,31 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       <div className="flex max-w-[17rem] flex-col gap-1.5">
                         {trade.status === "OPEN" && reviewDto ? (
                           <>
+                            <div className="flex flex-wrap items-center gap-1">
+                              <span
+                                className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide rounded-md border"
+                                style={priorityTierBadgeStyle(
+                                  openPack!.priorityTier
+                                )}
+                              >
+                                {reviewPriorityTraderLabel(
+                                  openPack!.priorityTier
+                                )}
+                              </span>
+                            </div>
+                            {openPack!.memoryLines.length > 0 ? (
+                              <div className="flex flex-col gap-0.5">
+                                {openPack!.memoryLines.map((line, mi) => (
+                                  <div
+                                    key={`m-${mi}-${line.slice(0, 24)}`}
+                                    className="text-[10px] leading-snug"
+                                    style={{ color: "var(--text-muted)" }}
+                                  >
+                                    {line}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : null}
                             <div className="flex flex-wrap gap-1">
                               {reviewDto.badges.map((b) => (
                                 <span
