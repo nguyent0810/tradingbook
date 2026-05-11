@@ -13,6 +13,8 @@ export type ReviewSessionChromeProps = {
   urgentPendingGlobal: number;
   pendingCheckpointGlobal: number;
   pendingAheadInQueue: number;
+  /** Calm session-level notices (e.g. urgent tier cleared for today). */
+  sessionQuietLines: readonly string[];
   prevId: string | null;
   nextId: string | null;
 };
@@ -25,6 +27,7 @@ function ReviewSessionChromeInner({
   urgentPendingGlobal,
   pendingCheckpointGlobal,
   pendingAheadInQueue,
+  sessionQuietLines,
   prevId,
   nextId,
 }: ReviewSessionChromeProps) {
@@ -195,6 +198,17 @@ function ReviewSessionChromeInner({
           <p className="mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
             ← → keys move between positions. No intraday execution prompts.
           </p>
+          {sessionQuietLines.length > 0 ? (
+            <ul
+              className="mt-2 list-none space-y-0.5 text-[11px] leading-snug"
+              style={{ color: "var(--text-muted)" }}
+              data-testid="trades-review-session-quiet-lines"
+            >
+              {sessionQuietLines.map((line, i) => (
+                <li key={`quiet-${i}`}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button

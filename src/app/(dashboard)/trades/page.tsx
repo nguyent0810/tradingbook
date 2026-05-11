@@ -31,7 +31,16 @@ import {
   displayTradeStatus,
 } from "@/lib/trading-display-labels";
 import { aggregateOpenPortfolioReviewStrip } from "@/lib/trades/eod-review-workflow";
-import { parseReviewChecklistJson } from "@/lib/trades/trade-health-review-checklist";
+import {
+  deriveOperatingPosture,
+  OPERATING_POSTURE_TRADER_LABEL,
+  type OperatingPosture,
+} from "@/lib/trades/operating-posture";
+import {
+  parseHealthReviewLogPayload,
+  reviewOutcomeTraderLabel,
+  type ReviewOutcomeId,
+} from "@/lib/trades/review-outcome";
 import {
   buildOpenLedgerReviewOrder,
   buildReviewMemoryLines,
@@ -264,15 +273,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         ORDER BY trade_id, checked_at DESC
       `;
       latestHealthByTradeId = new Map(
-        healthRows.map((r) => [
-          r.trade_id,
-          {
-            healthLevel: r.health_level,
-            structureStatus: r.structure_status,
-            checkedAt: r.checked_at,
-            reviewChecklist: parseReviewChecklistJson(r.review_checklist),
-          } satisfies LatestTradeHealthLog,
-        ])
+        healthRows.map((r) => {
+          const payload = parseHealthReviewLogPayload(r.review_checklist);
+          return [
+            r.trade_id,
+            {
+              healthLevel: r.health_level,
+              structureStatus: r.structure_status,
+              checkedAt: r.checked_at,
+              reviewChecklist: payload.checklist,
+              reviewOutcome: payload.reviewOutcome,
+            } satisfies LatestTradeHealthLog,
+          ] as const;
+        })
       );
     } catch (e) {
       console.error("[trades] latest trade_health_logs batch skipped:", e);
@@ -382,6 +395,9 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     sortKey: ReturnType<typeof buildOpenLedgerReviewOrder>;
     memoryLines: string[];
     escalationCues: string[];
+    latestReviewOutcome: ReviewOutcomeId | null;
+    operatingPosture: OperatingPosture;
+    postureExplainLines: string[];
   };
   const openRowPackByTradeId = new Map<string, OpenRowPack>();
   const ledgerCtx = {
@@ -483,6 +499,17 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ),
     });
 
+    const latestOutcome = latestLog?.reviewOutcome ?? null;
+    const { posture: operatingPosture, explainLines: postureExplainLines } =
+      deriveOperatingPosture({
+        stopBand: reviewDto.stopBand,
+        surface: reviewDto.surface,
+        marketDataStale: reviewDto.marketDataStale,
+        reviewedToday,
+        latestReviewOutcome: latestOutcome,
+        escalationCueCount: escalationCues.length,
+      });
+
     openRowPackByTradeId.set(trade.id, {
       derived,
       reviewDto,
@@ -490,6 +517,9 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       sortKey,
       memoryLines,
       escalationCues,
+      latestReviewOutcome: latestOutcome,
+      operatingPosture,
+      postureExplainLines,
     });
   }
 
@@ -518,6 +548,27 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           }))
         )
       : null;
+
+  const urgentAllReviewedToday =
+    reviewQueueModel != null &&
+    reviewQueueModel.urgent.length > 0 &&
+    reviewQueueModel.urgent.every((s) =>
+      checkedTodayTradeIds.has(s.tradeId)
+    );
+
+  const highAttentionAllReviewedToday =
+    reviewQueueModel != null &&
+    reviewQueueModel.highAttention.length > 0 &&
+    reviewQueueModel.highAttention.every((s) =>
+      checkedTodayTradeIds.has(s.tradeId)
+    );
+
+  const sessionQuietLines = [
+    urgentAllReviewedToday ? "Urgent reviews completed for today." : null,
+    highAttentionAllReviewedToday
+      ? "All high-attention positions reviewed today."
+      : null,
+  ].filter((l): l is string => l != null);
 
   const displayTrades =
     trades.length === 0
@@ -876,6 +927,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             sessionDashboardCounts.pendingCheckpointGlobal
           }
           pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
+          sessionQuietLines={sessionQuietLines}
           prevId={sessionPrevId}
           nextId={sessionNextId}
         />
@@ -904,6 +956,17 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           reviewedTodayOpenCount={reviewedTodayOpenCount}
           pendingCheckpointGlobal={sessionDashboardCounts.pendingCheckpointGlobal}
           totalActiveOpen={totalActiveOpenForSession}
+          operatingPostureLabel={
+            OPERATING_POSTURE_TRADER_LABEL[focusOpenPack.operatingPosture]
+          }
+          postureExplainLines={focusOpenPack.postureExplainLines}
+          latestOutcomeLabel={reviewOutcomeTraderLabel(
+            focusOpenPack.latestReviewOutcome
+          )}
+          sessionPendingAheadInQueue={
+            sessionDashboardCounts.pendingAheadInQueue
+          }
+          sessionQuietLines={sessionQuietLines}
         />
       ) : null}
 
@@ -1140,6 +1203,14 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                           formatBarSessionDate={formatBarSessionDate}
                           sessionMode={reviewSessionActive}
                           sessionFocused={Boolean(isSessionFocusRow)}
+                          operatingPostureLabel={
+                            OPERATING_POSTURE_TRADER_LABEL[
+                              openPack.operatingPosture
+                            ]
+                          }
+                          latestOutcomeLabel={reviewOutcomeTraderLabel(
+                            openPack.latestReviewOutcome
+                          )}
                         />
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>—</span>

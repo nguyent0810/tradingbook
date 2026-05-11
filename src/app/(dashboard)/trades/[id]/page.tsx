@@ -25,7 +25,12 @@ import {
   displayTradeStatus,
 } from "@/lib/trading-display-labels";
 import type { EodReviewChecklistState } from "@/lib/trades/trade-health-review-checklist";
-import { parseReviewChecklistJson } from "@/lib/trades/trade-health-review-checklist";
+import {
+  parseHealthReviewLogPayload,
+  REVIEW_OUTCOME_IDS,
+  REVIEW_OUTCOME_TRADER_LABEL,
+  type ReviewOutcomeId,
+} from "@/lib/trades/review-outcome";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -54,6 +59,7 @@ type TradeHealthLogRow = {
   structureStatus: string | null;
   recommendedAction: string | null;
   reviewChecklist: EodReviewChecklistState | null;
+  reviewOutcome: ReviewOutcomeId | null;
 };
 
 const HEALTH_RANK: Record<TradeHealthLevel, number> = {
@@ -180,20 +186,24 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
        LIMIT 20`,
       trade.id
     );
-    healthLogsDesc = raw.map((r) => ({
-      checkedAt: new Date(r.checked_at),
-      healthLevel:
-        r.health_level === "HEALTHY" ||
-        r.health_level === "WARNING" ||
-        r.health_level === "AT_RISK" ||
-        r.health_level === "DEAD"
-          ? r.health_level
-          : null,
-      priceVsZone: r.price_vs_zone,
-      structureStatus: r.structure_status,
-      recommendedAction: r.recommended_action,
-      reviewChecklist: parseReviewChecklistJson(r.review_checklist),
-    }));
+    healthLogsDesc = raw.map((r) => {
+      const payload = parseHealthReviewLogPayload(r.review_checklist);
+      return {
+        checkedAt: new Date(r.checked_at),
+        healthLevel:
+          r.health_level === "HEALTHY" ||
+          r.health_level === "WARNING" ||
+          r.health_level === "AT_RISK" ||
+          r.health_level === "DEAD"
+            ? r.health_level
+            : null,
+        priceVsZone: r.price_vs_zone,
+        structureStatus: r.structure_status,
+        recommendedAction: r.recommended_action,
+        reviewChecklist: payload.checklist,
+        reviewOutcome: payload.reviewOutcome,
+      };
+    });
     hasCheckpointToday = raw.some((r) => {
       const d = new Date(r.checked_at);
       return d >= dayStart && d <= dayEnd;
@@ -640,6 +650,14 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                         Action: {log.recommendedAction}
                       </p>
                     ) : null}
+                    {log.reviewOutcome ? (
+                      <p className="mt-1 text-[11px]" style={{ color: "var(--text-secondary)" }}>
+                        Review outcome:{" "}
+                        <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+                          {REVIEW_OUTCOME_TRADER_LABEL[log.reviewOutcome]}
+                        </span>
+                      </p>
+                    ) : null}
                     {log.reviewChecklist ? (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {log.reviewChecklist.stopReviewed ? (
@@ -758,6 +776,22 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                   Recommended Action <span style={{ color: "var(--text-muted)" }}>(optional)</span>
                 </label>
                 <input id="recommendedAction" name="recommendedAction" type="text" className="input" />
+              </div>
+              <div className="sm:col-span-2">
+                <label htmlFor="reviewOutcome" className="label">
+                  Review outcome <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                </label>
+                <select id="reviewOutcome" name="reviewOutcome" className="select">
+                  <option value="">None</option>
+                  {REVIEW_OUTCOME_IDS.map((id) => (
+                    <option key={id} value={id}>
+                      {REVIEW_OUTCOME_TRADER_LABEL[id]}
+                    </option>
+                  ))}
+                </select>
+                <p className="mt-1 text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  Your operational label for this checkpoint — not advice.
+                </p>
               </div>
               <fieldset
                 className="sm:col-span-2 space-y-2 rounded-md border px-3 py-2"

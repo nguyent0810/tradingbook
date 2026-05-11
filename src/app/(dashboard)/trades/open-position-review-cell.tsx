@@ -63,6 +63,8 @@ export type OpenPositionReviewCellProps = {
   formatBarSessionDate: (d: Date) => string;
   sessionMode?: boolean;
   sessionFocused?: boolean;
+  operatingPostureLabel: string;
+  latestOutcomeLabel: string | null;
 };
 
 export function OpenPositionReviewCell({
@@ -77,6 +79,8 @@ export function OpenPositionReviewCell({
   formatBarSessionDate,
   sessionMode = false,
   sessionFocused = false,
+  operatingPostureLabel,
+  latestOutcomeLabel,
 }: OpenPositionReviewCellProps) {
   const meaningfulChange =
     reviewDto.sinceReviewDeltaLine ?? reviewDto.sessionDeltaLine;
@@ -103,6 +107,10 @@ export function OpenPositionReviewCell({
           }}
         >
           {reviewedToday ? "Handled today" : "Pending today"}
+        </span>
+        <span className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
+          {operatingPostureLabel}
+          {latestOutcomeLabel ? ` · ${latestOutcomeLabel}` : ""}
         </span>
         <Link
           href={`/trades/${tradeId}`}
@@ -326,6 +334,11 @@ export function OpenPositionReviewCell({
             Log checkpoint
           </Link>
         </div>
+        <p className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
+          Posture: {operatingPostureLabel}
+          {" · "}
+          Outcome: {latestOutcomeLabel ?? "—"}
+        </p>
 
         {stopRiskLine}
 
@@ -393,6 +406,10 @@ export function OpenPositionReviewCell({
           {reviewPriorityTraderLabel(priorityTier)}
         </span>
       </div>
+      <p className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
+        {operatingPostureLabel}
+        {latestOutcomeLabel ? ` · ${latestOutcomeLabel}` : ""}
+      </p>
 
       {escalationCues.length > 0 ? (
         <div className="flex flex-col gap-0.5 text-[10px] leading-snug" style={escalationRailStyle()}>

@@ -8,6 +8,36 @@ import {
 } from "@/lib/trades/review-priority-queue";
 import type { LatestCloseBar } from "@/lib/trades/unrealized-from-close";
 
+function postureBadgeStyle(postureLabel: string): CSSProperties {
+  const p = postureLabel.toLowerCase();
+  if (p.includes("high attention")) {
+    return {
+      borderColor: "color-mix(in srgb, #ea580c 35%, var(--border-color))",
+      backgroundColor: "color-mix(in srgb, #ea580c 8%, transparent)",
+      color: "#9a3412",
+    };
+  }
+  if (p.includes("defensive")) {
+    return {
+      borderColor: "color-mix(in srgb, #a855f7 32%, var(--border-color))",
+      backgroundColor: "color-mix(in srgb, #a855f7 7%, transparent)",
+      color: "var(--text-secondary)",
+    };
+  }
+  if (p.includes("cautious")) {
+    return {
+      borderColor: "color-mix(in srgb, #ca8a04 32%, var(--border-color))",
+      backgroundColor: "color-mix(in srgb, #eab308 7%, transparent)",
+      color: "#854d0e",
+    };
+  }
+  return {
+    borderColor: "var(--border-color)",
+    backgroundColor: "var(--bg-tertiary)",
+    color: "var(--text-muted)",
+  };
+}
+
 function tierBadgeStyle(tier: ReviewPriorityTier): CSSProperties {
   switch (tier) {
     case "urgent":
@@ -53,6 +83,11 @@ export type FocusReviewWorkspaceProps = {
   reviewedTodayOpenCount: number;
   pendingCheckpointGlobal: number;
   totalActiveOpen: number;
+  operatingPostureLabel: string;
+  postureExplainLines: readonly string[];
+  latestOutcomeLabel: string | null;
+  sessionPendingAheadInQueue: number;
+  sessionQuietLines: readonly string[];
 };
 
 export function FocusReviewWorkspace({
@@ -71,6 +106,11 @@ export function FocusReviewWorkspace({
   reviewedTodayOpenCount,
   pendingCheckpointGlobal,
   totalActiveOpen,
+  operatingPostureLabel,
+  postureExplainLines,
+  latestOutcomeLabel,
+  sessionPendingAheadInQueue,
+  sessionQuietLines,
 }: FocusReviewWorkspaceProps) {
   const meaningfulChange =
     reviewDto.sinceReviewDeltaLine ?? reviewDto.sessionDeltaLine;
@@ -164,6 +204,62 @@ export function FocusReviewWorkspace({
           }}
         />
       </div>
+
+      <div
+        className="mt-3 flex flex-wrap items-center gap-2 border-t pt-3 text-[12px]"
+        style={{ borderColor: "var(--border-color)" }}
+      >
+        <span
+          className="rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+          style={postureBadgeStyle(operatingPostureLabel)}
+        >
+          Posture · {operatingPostureLabel}
+        </span>
+        <span style={{ color: "var(--text-muted)" }} aria-hidden>
+          ·
+        </span>
+        <span style={{ color: "var(--text-secondary)" }}>
+          Outcome:{" "}
+          <span style={{ color: "var(--text-primary)" }}>
+            {latestOutcomeLabel ?? "—"}
+          </span>
+        </span>
+        <span style={{ color: "var(--text-muted)" }} aria-hidden>
+          ·
+        </span>
+        <span style={{ color: "var(--text-secondary)" }}>
+          Today&apos;s checkpoint:{" "}
+          <span style={{ color: reviewedToday ? "#166534" : "var(--text-primary)" }}>
+            {reviewedToday ? "Complete" : "Pending"}
+          </span>
+        </span>
+        <span style={{ color: "var(--text-muted)" }} aria-hidden>
+          ·
+        </span>
+        <span style={{ color: "var(--text-muted)" }}>
+          {sessionPendingAheadInQueue} ahead in this session queue
+        </span>
+      </div>
+      {postureExplainLines.length > 0 ? (
+        <p
+          className="mt-2 text-[11px] leading-snug"
+          style={{ color: "var(--text-muted)" }}
+          data-testid="focus-review-posture-explain"
+        >
+          {postureExplainLines.join(" ")}
+        </p>
+      ) : null}
+      {sessionQuietLines.length > 0 ? (
+        <ul
+          className="mt-2 list-none space-y-0.5 text-[11px] leading-snug"
+          style={{ color: "var(--text-muted)" }}
+          data-testid="focus-review-session-quiet"
+        >
+          {sessionQuietLines.map((line, i) => (
+            <li key={`ws-quiet-${i}`}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div className="space-y-3">

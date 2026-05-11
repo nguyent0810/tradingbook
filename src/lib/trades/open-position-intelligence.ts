@@ -12,6 +12,7 @@ import {
 } from "@/lib/trades/eod-review-workflow";
 import type { EodReviewChecklistState } from "@/lib/trades/trade-health-review-checklist";
 import { checklistMarkedCount } from "@/lib/trades/trade-health-review-checklist";
+import type { ReviewOutcomeId } from "@/lib/trades/review-outcome";
 
 /** Cushion from latest daily close to planned stop, as % of entry (absolute value when breached). */
 export const NEAR_STOP_CUSHION_PCT = 2;
@@ -37,6 +38,8 @@ export type LatestTradeHealthLog = {
   checkedAt: Date;
   /** From latest row `review_checklist` JSON; null when absent or empty. */
   reviewChecklist: EodReviewChecklistState | null;
+  /** From same JSON `reviewOutcome` key when present; never inferred. */
+  reviewOutcome: ReviewOutcomeId | null;
 };
 
 export type SetupLevelsSnapshot = {
