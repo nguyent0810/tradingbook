@@ -79,7 +79,9 @@ function logProductionRuntimeDiagnostics(params: {
     pooler: boolean;
     poolMax: number;
     connectTimeoutMs: number;
-    statementTimeoutMs: number;
+    /** Env intent (`DB_STATEMENT_TIMEOUT_MS`); may not be applied at PG startup for Neon pooler. */
+    statementTimeoutMsEnv: number;
+    statementTimeoutStartup: "applied" | "skipped_neon_pooler";
   };
 }) {
   if (
@@ -99,7 +101,7 @@ function logProductionRuntimeDiagnostics(params: {
   const m = params.tcpMeta;
   if (!m) return;
   console.log(
-    `[prisma runtime] mode=tcp-pg urlSource=${m.urlSource} host=${m.host} pooler=${m.pooler} poolMax=${m.poolMax} connectTimeoutMs=${m.connectTimeoutMs} statementTimeoutMs=${m.statementTimeoutMs}`
+    `[prisma runtime] mode=tcp-pg urlSource=${m.urlSource} host=${m.host} pooler=${m.pooler} poolMax=${m.poolMax} connectTimeoutMs=${m.connectTimeoutMs} statementTimeoutMsEnv=${m.statementTimeoutMsEnv} statementTimeoutStartup=${m.statementTimeoutStartup}`
   );
 }
 
@@ -125,38 +127,43 @@ function createPrismaClient(): PrismaClient {
     !!directUrlRaw &&
     connectionString === normalizeTcpPostgresScheme(directUrlRaw);
 
+  const connectTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
+  const statementTimeoutMsEnv = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
+  const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
+  const idleTimeoutMs = Number(process.env.DB_IDLE_TIMEOUT_MS ?? 30_000);
+
+  /** Neon pooler rejects startup `options`/GUC like `statement_timeout`; apply only on direct TCP. */
+  const poolerHost = hostLooksLikeNeonPooler(connectionString);
+  const statementTimeoutStartup = poolerHost
+    ? ("skipped_neon_pooler" as const)
+    : ("applied" as const);
+
   try {
     const u = new URL(connectionString.replace(/^postgresql:\/\//i, "http://"));
-    const connectTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
-    const statementTimeoutMs = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
-    const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
-
     logProductionRuntimeDiagnostics({
       mode: "tcp-pg",
       tcpMeta: {
         urlSource: pickedIsDirect ? "DIRECT_URL" : "DATABASE_URL",
         host: u.hostname,
-        pooler: u.hostname.includes("-pooler"),
+        pooler: poolerHost,
         poolMax,
         connectTimeoutMs,
-        statementTimeoutMs,
+        statementTimeoutMsEnv,
+        statementTimeoutStartup,
       },
     });
   } catch {
     console.log("[prisma runtime] mode=tcp-pg (host diagnostics unavailable)");
   }
 
-  const connectionTimeoutMs = Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 8000);
-  const statementTimeoutMs = Number(process.env.DB_STATEMENT_TIMEOUT_MS ?? 8000);
-  const poolMax = Number(process.env.DB_POOL_MAX ?? 5);
-  const idleTimeoutMs = Number(process.env.DB_IDLE_TIMEOUT_MS ?? 30_000);
-
   const pool = new Pool({
     connectionString,
-    connectionTimeoutMillis: connectionTimeoutMs,
+    connectionTimeoutMillis: connectTimeoutMs,
     max: poolMax,
     idleTimeoutMillis: idleTimeoutMs,
-    options: `-c statement_timeout=${statementTimeoutMs}`,
+    ...(statementTimeoutStartup === "applied"
+      ? { options: `-c statement_timeout=${statementTimeoutMsEnv}` }
+      : {}),
   });
 
   const adapter = new PrismaPg(pool);
