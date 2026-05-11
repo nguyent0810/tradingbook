@@ -5,6 +5,13 @@
 
 import type { StopValidity } from "@/lib/trades/position-health";
 import { utcCalendarDayMs } from "@/lib/trades/position-health";
+import {
+  buildReviewFocusHints,
+  describeDeltaSinceReview,
+  describeSessionCloseDelta,
+} from "@/lib/trades/eod-review-workflow";
+import type { EodReviewChecklistState } from "@/lib/trades/trade-health-review-checklist";
+import { checklistMarkedCount } from "@/lib/trades/trade-health-review-checklist";
 
 /** Cushion from latest daily close to planned stop, as % of entry (absolute value when breached). */
 export const NEAR_STOP_CUSHION_PCT = 2;
@@ -28,6 +35,8 @@ export type LatestTradeHealthLog = {
   healthLevel: string;
   structureStatus: string | null;
   checkedAt: Date;
+  /** From latest row `review_checklist` JSON; null when absent or empty. */
+  reviewChecklist: EodReviewChecklistState | null;
 };
 
 export type SetupLevelsSnapshot = {
@@ -241,6 +250,14 @@ export type OpenPositionReviewDto = {
     label: string;
     tone: "danger" | "warn" | "ok" | "muted";
   }>;
+  /** Conservative scan bullets — not execution advice. */
+  focusHints: readonly string[];
+  sessionDeltaLine: string | null;
+  sinceReviewDeltaLine: string | null;
+  latestChecklist: EodReviewChecklistState | null;
+  checklistSummaryLine: string | null;
+  /** True when equity bar is strictly older than benchmark session. */
+  marketDataStale: boolean;
 };
 
 export function buildOpenPositionReviewDto(params: {
@@ -257,6 +274,10 @@ export function buildOpenPositionReviewDto(params: {
   reviewedToday: boolean;
   setupLevels: SetupLevelsSnapshot | null;
   latestHealthLog: LatestTradeHealthLog | null;
+  /** Prior session daily close (same symbol), when available. */
+  priorClose: number | null;
+  /** Daily close on or before last review checkpoint (UTC date bound). */
+  baselineCloseAtLastReview: number | null;
 }): OpenPositionReviewDto {
   const {
     direction,
@@ -272,7 +293,11 @@ export function buildOpenPositionReviewDto(params: {
     reviewedToday,
     setupLevels,
     latestHealthLog,
+    priorClose,
+    baselineCloseAtLastReview,
   } = params;
+
+  const latestChecklist = latestHealthLog?.reviewChecklist ?? null;
 
   const { band: stopBand, cushionPctOfEntry } = classifyStopPriceBand({
     direction,
@@ -382,6 +407,35 @@ export function buildOpenPositionReviewDto(params: {
     });
   }
 
+  const focusHints = buildReviewFocusHints({
+    direction,
+    stopBand,
+    structureHints: hints,
+    staleVsBenchmark,
+    healthLogStress: healthStress,
+    hasSetupLevels: setupLevels != null,
+  });
+
+  const sessionDeltaLine = describeSessionCloseDelta({
+    direction,
+    latestClose,
+    priorClose,
+  });
+
+  const sinceReviewDeltaLine = describeDeltaSinceReview({
+    direction,
+    latestClose,
+    baselineClose: baselineCloseAtLastReview,
+    stopBand,
+  });
+
+  const checklistSummaryLine =
+    latestChecklist != null && checklistMarkedCount(latestChecklist) > 0
+      ? `Latest checkpoint checklist: ${checklistMarkedCount(latestChecklist)}/4 marked`
+      : null;
+
+  const marketDataStale = staleVsBenchmark === true;
+
   return {
     stopBand,
     stopBandLabel: stopBandTraderLabel(stopBand),
@@ -393,5 +447,11 @@ export function buildOpenPositionReviewDto(params: {
     primaryReviewLabel,
     surface,
     badges,
+    focusHints,
+    sessionDeltaLine,
+    sinceReviewDeltaLine,
+    latestChecklist,
+    checklistSummaryLine,
+    marketDataStale,
   };
 }

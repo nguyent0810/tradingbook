@@ -13,6 +13,10 @@ import {
   SetupHealthLevel,
   TradeOutcome,
 } from "@/generated/prisma/client";
+import {
+  reviewChecklistFromFormData,
+  serializeReviewChecklistForDb,
+} from "@/lib/trades/trade-health-review-checklist";
 
 // ─── Types ───
 
@@ -448,16 +452,21 @@ export async function addTradeHealthCheckpoint(tradeId: string, formData: FormDa
   const structureStatus = nullIfBlank(formData.get("structureStatus"));
   const recommendedAction = nullIfBlank(formData.get("recommendedAction"));
 
+  const checklistJson = serializeReviewChecklistForDb(
+    reviewChecklistFromFormData(formData)
+  );
+
   await prisma.$executeRawUnsafe(
     `INSERT INTO trade_health_logs
-      (trade_id, checked_at, health_level, health_score, price_vs_zone, structure_status, recommended_action)
-     VALUES ($1, NOW(), $2, $3, $4, $5, $6)`,
+      (trade_id, checked_at, health_level, health_score, price_vs_zone, structure_status, recommended_action, review_checklist)
+     VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7::jsonb)`,
     trade.id,
     healthLevelRaw,
     healthScore,
     priceVsZone,
     structureStatus,
-    recommendedAction
+    recommendedAction,
+    checklistJson
   );
 
   revalidatePath(`/trades/${trade.id}`);

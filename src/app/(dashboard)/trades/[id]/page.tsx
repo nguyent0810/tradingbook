@@ -24,6 +24,8 @@ import {
   displayTradeDirection,
   displayTradeStatus,
 } from "@/lib/trading-display-labels";
+import type { EodReviewChecklistState } from "@/lib/trades/trade-health-review-checklist";
+import { parseReviewChecklistJson } from "@/lib/trades/trade-health-review-checklist";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -51,6 +53,7 @@ type TradeHealthLogRow = {
   priceVsZone: string | null;
   structureStatus: string | null;
   recommendedAction: string | null;
+  reviewChecklist: EodReviewChecklistState | null;
 };
 
 const HEALTH_RANK: Record<TradeHealthLevel, number> = {
@@ -167,9 +170,10 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         price_vs_zone: string | null;
         structure_status: string | null;
         recommended_action: string | null;
+        review_checklist: unknown | null;
       }>
     >(
-      `SELECT checked_at, health_level, price_vs_zone, structure_status, recommended_action
+      `SELECT checked_at, health_level, price_vs_zone, structure_status, recommended_action, review_checklist
        FROM trade_health_logs
        WHERE trade_id = $1
        ORDER BY checked_at DESC
@@ -188,6 +192,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
       priceVsZone: r.price_vs_zone,
       structureStatus: r.structure_status,
       recommendedAction: r.recommended_action,
+      reviewChecklist: parseReviewChecklistJson(r.review_checklist),
     }));
     hasCheckpointToday = raw.some((r) => {
       const d = new Date(r.checked_at);
@@ -635,6 +640,54 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                         Action: {log.recommendedAction}
                       </p>
                     ) : null}
+                    {log.reviewChecklist ? (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {log.reviewChecklist.stopReviewed ? (
+                          <span
+                            className="rounded border px-1.5 py-0.5 text-[10px]"
+                            style={{
+                              borderColor: "var(--border-color)",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            Stop reviewed
+                          </span>
+                        ) : null}
+                        {log.reviewChecklist.structureReviewed ? (
+                          <span
+                            className="rounded border px-1.5 py-0.5 text-[10px]"
+                            style={{
+                              borderColor: "var(--border-color)",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            Structure reviewed
+                          </span>
+                        ) : null}
+                        {log.reviewChecklist.sizingReviewed ? (
+                          <span
+                            className="rounded border px-1.5 py-0.5 text-[10px]"
+                            style={{
+                              borderColor: "var(--border-color)",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            Sizing reviewed
+                          </span>
+                        ) : null}
+                        {log.reviewChecklist.exitPlanReviewed ? (
+                          <span
+                            className="rounded border px-1.5 py-0.5 text-[10px]"
+                            style={{
+                              borderColor: "var(--border-color)",
+                              color: "var(--text-secondary)",
+                            }}
+                          >
+                            Exit plan reviewed
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </li>
                 );
               })}
@@ -706,6 +759,33 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                 </label>
                 <input id="recommendedAction" name="recommendedAction" type="text" className="input" />
               </div>
+              <fieldset
+                className="sm:col-span-2 space-y-2 rounded-md border px-3 py-2"
+                style={{ borderColor: "var(--border-primary)" }}
+              >
+                <legend className="px-1 text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                  Review checklist (optional)
+                </legend>
+                <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                  Lightweight reminders — not a workflow gate.
+                </p>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="checkbox" name="checkStopReviewed" />
+                  Stop reviewed
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="checkbox" name="checkStructureReviewed" />
+                  Structure reviewed
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="checkbox" name="checkSizingReviewed" />
+                  Sizing reviewed
+                </label>
+                <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <input type="checkbox" name="checkExitPlanReviewed" />
+                  Exit plan reviewed
+                </label>
+              </fieldset>
               <div className="sm:col-span-2">
                 <button type="submit" className="btn btn-secondary btn-sm">
                   Save checkpoint

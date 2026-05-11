@@ -9,7 +9,13 @@ import { redirect } from "next/navigation";
 import { TradeFilters } from "./trade-filters";
 import { formatVND } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
-import { formatSignedPct } from "@/lib/trades/unrealized-from-close";
+import {
+  fetchBarCloseOnOrBeforeReviewBatch,
+  fetchLatestTwoClosesByTradeSymbols,
+  formatSignedPct,
+  type LatestTwoCloseBars,
+  utcStockBarCutoffDate,
+} from "@/lib/trades/unrealized-from-close";
 import {
   loadOpenPositionMarks,
   VNINDEX_FRESHNESS_UNAVAILABLE,
@@ -25,6 +31,8 @@ import {
   displayTradeDirection,
   displayTradeStatus,
 } from "@/lib/trading-display-labels";
+import { aggregateOpenPortfolioReviewStrip } from "@/lib/trades/eod-review-workflow";
+import { parseReviewChecklistJson } from "@/lib/trades/trade-health-review-checklist";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -211,13 +219,15 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           health_level: string;
           structure_status: string | null;
           checked_at: Date;
+          review_checklist: unknown | null;
         }>
       >`
         SELECT DISTINCT ON (trade_id)
           trade_id,
           health_level,
           structure_status,
-          checked_at
+          checked_at,
+          review_checklist
         FROM trade_health_logs
         WHERE trade_id IN (${Prisma.join(openTradeIds)})
         ORDER BY trade_id, checked_at DESC
@@ -229,6 +239,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             healthLevel: r.health_level,
             structureStatus: r.structure_status,
             checkedAt: r.checked_at,
+            reviewChecklist: parseReviewChecklistJson(r.review_checklist),
           } satisfies LatestTradeHealthLog,
         ])
       );
@@ -237,6 +248,132 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       latestHealthByTradeId = new Map();
     }
   }
+
+  let twoBarBySymbol = new Map<string, LatestTwoCloseBars>();
+  if (openSymbols.length > 0) {
+    try {
+      twoBarBySymbol = await fetchLatestTwoClosesByTradeSymbols(
+        prisma,
+        openSymbols
+      );
+    } catch (e) {
+      console.error("[trades] prior-bar batch skipped:", e);
+      twoBarBySymbol = new Map();
+    }
+  }
+
+  let baselineCloseByTradeId = new Map<string, number>();
+  if (openTradeIds.length > 0 && latestHealthByTradeId.size > 0) {
+    try {
+      const stockRows = await prisma.stockSymbol.findMany({
+        where: { symbol: { in: openSymbols } },
+        select: { id: true, symbol: true },
+      });
+      const symbolKeyToId = new Map(
+        stockRows.map((s) => [s.symbol.trim().toUpperCase(), s.id] as const)
+      );
+
+      const specs = trades
+        .filter((t) => t.status === "OPEN")
+        .flatMap((t) => {
+          const log = latestHealthByTradeId.get(t.id);
+          if (!log) return [];
+          const sid = symbolKeyToId.get(t.symbol.trim().toUpperCase());
+          if (!sid) return [];
+          return [
+            {
+              tradeId: t.id,
+              symbolId: sid,
+              cutoffDate: utcStockBarCutoffDate(log.checkedAt),
+            },
+          ];
+        });
+
+      const baselines = await fetchBarCloseOnOrBeforeReviewBatch(
+        prisma,
+        specs
+      );
+      for (const [tid, bar] of baselines) {
+        baselineCloseByTradeId.set(tid, bar.close);
+      }
+    } catch (e) {
+      console.error("[trades] review-baseline batch skipped:", e);
+      baselineCloseByTradeId = new Map();
+    }
+  }
+
+  type OpenRowPack = {
+    derived: ReturnType<typeof deriveTradesLedgerRowFields>;
+    reviewDto: OpenPositionReviewDto;
+  };
+  const openRowPackByTradeId = new Map<string, OpenRowPack>();
+  const ledgerCtx = {
+    latestCloseBySymbol,
+    expectedSessionDate,
+    checkedTodayTradeIds,
+    now,
+  } as const;
+
+  for (const trade of trades) {
+    if (trade.status !== "OPEN") continue;
+    const derived = deriveTradesLedgerRowFields(
+      {
+        id: trade.id,
+        symbol: trade.symbol,
+        status: trade.status,
+        direction: trade.direction,
+        entryPrice: trade.entryPrice,
+        quantity: trade.quantity,
+        stopLoss: trade.stopLoss,
+        takeProfit: trade.takeProfit,
+        entryDate: trade.entryDate,
+        exitDate: trade.exitDate,
+      },
+      ledgerCtx
+    );
+    const sym = trade.symbol.trim().toUpperCase();
+    const two = twoBarBySymbol.get(sym);
+    const reviewDto = buildOpenPositionReviewDto({
+      direction: trade.direction,
+      entryPrice: trade.entryPrice,
+      quantity: trade.quantity,
+      stopLoss: trade.stopLoss,
+      stopValidity: derived.stopValidity,
+      distanceToStop: derived.distanceToStop,
+      latestClose: derived.latestBar?.close ?? null,
+      latestBarDate: derived.latestBar?.date ?? null,
+      staleVsBenchmark: derived.staleState,
+      benchmarkSession: expectedSessionDate,
+      reviewedToday: checkedTodayTradeIds.has(trade.id),
+      setupLevels:
+        trade.setupCandidate != null
+          ? {
+              breakoutLevel: trade.setupCandidate.breakoutLevel,
+              pullbackZoneLow: trade.setupCandidate.pullbackZoneLow,
+              pullbackZoneHigh: trade.setupCandidate.pullbackZoneHigh,
+            }
+          : null,
+      latestHealthLog: latestHealthByTradeId.get(trade.id) ?? null,
+      priorClose: two?.prior?.close ?? null,
+      baselineCloseAtLastReview: baselineCloseByTradeId.get(trade.id) ?? null,
+    });
+    openRowPackByTradeId.set(trade.id, { derived, reviewDto });
+  }
+
+  const portfolioStrip =
+    openRowPackByTradeId.size > 0
+      ? aggregateOpenPortfolioReviewStrip(
+          [...openRowPackByTradeId.entries()].map(([id, pack]) => ({
+            reviewedToday: checkedTodayTradeIds.has(id),
+            stopViolated: pack.reviewDto.surface === "stop_violated",
+            underPressure:
+              pack.reviewDto.surface === "under_pressure" ||
+              pack.reviewDto.surface === "structure_weakening",
+            staleMarket: pack.reviewDto.marketDataStale,
+            plannedCapitalAtRisk: pack.reviewDto.plannedCapitalAtRisk,
+          }))
+        )
+      : null;
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -293,6 +430,99 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           Log Trade
         </Link>
       </div>
+
+      {portfolioStrip && hasOpenTrades ? (
+        <div
+          className="card mt-4 border px-4 py-3"
+          data-testid="trades-portfolio-review-strip"
+          style={{ borderColor: "var(--border-color)" }}
+        >
+          <div
+            className="text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Open portfolio · daily bar context
+          </div>
+          <div
+            className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-[13px]"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            <span>
+              <span
+                className="font-semibold tabular-nums"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {portfolioStrip.activeOpenCount}
+              </span>{" "}
+              active
+            </span>
+            <span>
+              <span
+                className="font-semibold tabular-nums"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {portfolioStrip.underPressureCount}
+              </span>{" "}
+              under pressure
+            </span>
+            <span>
+              <span
+                className="font-semibold tabular-nums"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {portfolioStrip.reviewsPendingTodayCount}
+              </span>{" "}
+              reviews pending today
+            </span>
+            <span>
+              <span
+                className="font-semibold tabular-nums"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {portfolioStrip.staleMarketOpenCount}
+              </span>{" "}
+              stale market data
+            </span>
+            <span>
+              <span
+                className="font-semibold tabular-nums"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {portfolioStrip.stopViolationsCount}
+              </span>{" "}
+              stop violations (daily close)
+            </span>
+            <span>
+              Planned capital at risk (sum):{" "}
+              <span
+                className="mono font-semibold tabular-nums"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {portfolioStrip.plannedCapitalAtRiskTotal != null ? (
+                  formatVND(portfolioStrip.plannedCapitalAtRiskTotal, false)
+                ) : (
+                  <span style={{ color: "var(--text-muted)" }}>—</span>
+                )}
+              </span>
+            </span>
+          </div>
+          {portfolioStrip.positionsPartialRiskFigures ? (
+            <p
+              className="mt-2 text-[10px] leading-snug"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Sum counts positions with a valid planned stop only; some open
+              rows omit stop-based figures.
+            </p>
+          ) : null}
+          <p
+            className="mt-1 text-[10px] leading-snug"
+            style={{ color: "var(--text-muted)" }}
+          >
+            End-of-day checkpoints only — not intraday execution advice.
+          </p>
+        </div>
+      ) : null}
 
       {dbLoadError ? (
         <div
@@ -403,16 +633,22 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             </thead>
             <tbody>
               {trades.map((trade) => {
+                const openPack = openRowPackByTradeId.get(trade.id);
+                const ledgerCtxInner = {
+                  latestCloseBySymbol,
+                  expectedSessionDate,
+                  checkedTodayTradeIds,
+                  now,
+                };
                 const {
                   latestBar,
                   unrealized,
-                  staleState,
                   holdingDays,
                   rMultiple,
                   distanceToStop,
                   distanceToTakeProfit,
-                  stopValidity,
                 } =
+                  openPack?.derived ??
                   deriveTradesLedgerRowFields(
                     {
                       id: trade.id,
@@ -426,40 +662,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       entryDate: trade.entryDate,
                       exitDate: trade.exitDate,
                     },
-                    {
-                      latestCloseBySymbol,
-                      expectedSessionDate,
-                      checkedTodayTradeIds,
-                      now,
-                    }
+                    ledgerCtxInner
                   );
 
                 const reviewDto =
-                  trade.status === "OPEN"
-                    ? buildOpenPositionReviewDto({
-                        direction: trade.direction,
-                        entryPrice: trade.entryPrice,
-                        quantity: trade.quantity,
-                        stopLoss: trade.stopLoss,
-                        stopValidity,
-                        distanceToStop,
-                        latestClose: latestBar?.close ?? null,
-                        latestBarDate: latestBar?.date ?? null,
-                        staleVsBenchmark: staleState,
-                        benchmarkSession: expectedSessionDate,
-                        reviewedToday: checkedTodayTradeIds.has(trade.id),
-                        setupLevels:
-                          trade.setupCandidate != null
-                            ? {
-                                breakoutLevel: trade.setupCandidate.breakoutLevel,
-                                pullbackZoneLow: trade.setupCandidate.pullbackZoneLow,
-                                pullbackZoneHigh: trade.setupCandidate.pullbackZoneHigh,
-                              }
-                            : null,
-                        latestHealthLog:
-                          latestHealthByTradeId.get(trade.id) ?? null,
-                      })
-                    : null;
+                  trade.status === "OPEN" ? (openPack?.reviewDto ?? null) : null;
 
                 return (
                   <tr key={trade.id} data-testid="trades-table-row">
@@ -521,6 +728,90 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                                 </span>
                               ))}
                             </div>
+                            {reviewDto.focusHints.length > 0 ? (
+                              <ul
+                                className="list-disc space-y-0.5 pl-3.5 text-[10px] leading-snug"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                {reviewDto.focusHints.map((h, hi) => (
+                                  <li key={`${hi}-${h.slice(0, 32)}`}>{h}</li>
+                                ))}
+                              </ul>
+                            ) : null}
+                            {reviewDto.sessionDeltaLine ? (
+                              <div
+                                className="text-[10px] leading-snug"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                {reviewDto.sessionDeltaLine}
+                              </div>
+                            ) : null}
+                            {reviewDto.sinceReviewDeltaLine ? (
+                              <div
+                                className="text-[10px] leading-snug"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                {reviewDto.sinceReviewDeltaLine}
+                              </div>
+                            ) : null}
+                            {reviewDto.latestChecklist ? (
+                              <div className="flex flex-col gap-1">
+                                {reviewDto.checklistSummaryLine ? (
+                                  <div
+                                    className="text-[10px] tabular-nums"
+                                    style={{ color: "var(--text-muted)" }}
+                                  >
+                                    {reviewDto.checklistSummaryLine}
+                                  </div>
+                                ) : null}
+                                <div className="flex flex-wrap gap-1">
+                                  {reviewDto.latestChecklist.stopReviewed ? (
+                                    <span
+                                      className="rounded border px-1.5 py-0.5 text-[10px]"
+                                      style={{
+                                        borderColor: "var(--border-color)",
+                                        color: "var(--text-secondary)",
+                                      }}
+                                    >
+                                      Stop reviewed
+                                    </span>
+                                  ) : null}
+                                  {reviewDto.latestChecklist.structureReviewed ? (
+                                    <span
+                                      className="rounded border px-1.5 py-0.5 text-[10px]"
+                                      style={{
+                                        borderColor: "var(--border-color)",
+                                        color: "var(--text-secondary)",
+                                      }}
+                                    >
+                                      Structure reviewed
+                                    </span>
+                                  ) : null}
+                                  {reviewDto.latestChecklist.sizingReviewed ? (
+                                    <span
+                                      className="rounded border px-1.5 py-0.5 text-[10px]"
+                                      style={{
+                                        borderColor: "var(--border-color)",
+                                        color: "var(--text-secondary)",
+                                      }}
+                                    >
+                                      Sizing reviewed
+                                    </span>
+                                  ) : null}
+                                  {reviewDto.latestChecklist.exitPlanReviewed ? (
+                                    <span
+                                      className="rounded border px-1.5 py-0.5 text-[10px]"
+                                      style={{
+                                        borderColor: "var(--border-color)",
+                                        color: "var(--text-secondary)",
+                                      }}
+                                    >
+                                      Exit plan reviewed
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                            ) : null}
                             <div
                               className="text-[11px] leading-snug"
                               style={{ color: "var(--text-secondary)" }}
