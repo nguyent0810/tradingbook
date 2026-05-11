@@ -45,7 +45,15 @@ import {
 } from "@/lib/trades/review-priority-queue";
 import { buildSessionBriefing } from "@/lib/trades/session-briefing";
 import { deriveEscalationCues } from "@/lib/trades/review-escalation-cues";
+import {
+  buildReviewSessionQueue,
+  computeReviewSessionDashboardCounts,
+  resolveReviewSessionFocus,
+  sessionQueueNeighbors,
+  sortTradesForReviewSession,
+} from "@/lib/trades/review-session-queue";
 import { OpenPositionReviewCell } from "./open-position-review-cell";
+import { ReviewSessionChrome } from "./review-session-chrome";
 
 export const metadata: Metadata = {
   title: "Trades — TradeLog",
@@ -61,6 +69,8 @@ interface TradesPageProps {
     status?: string;
     sort?: string;
     compactReview?: string;
+    reviewSession?: string;
+    reviewFocus?: string;
   }>;
 }
 
@@ -112,6 +122,8 @@ function TradeFiltersSkeleton() {
       <div className="skeleton h-10 flex-1 rounded-lg sm:max-w-xs" />
       <div className="skeleton h-10 w-36 rounded-lg" />
       <div className="skeleton h-10 w-36 rounded-lg" />
+      <div className="skeleton h-10 w-36 rounded-lg" />
+      <div className="skeleton h-10 w-40 rounded-lg" />
     </div>
   );
 }
@@ -126,6 +138,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const sortOrder = params.sort === "oldest" ? "asc" : "desc";
   const compactReview =
     params.compactReview === "1" || params.compactReview === "true";
+  const reviewSessionActive =
+    params.reviewSession === "1" || params.reviewSession === "true";
+  const reviewFocusParam =
+    typeof params.reviewFocus === "string" ? params.reviewFocus : undefined;
 
   const where: Record<string, unknown> = { userId: session.userId };
 
@@ -528,6 +544,46 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           })
           .map((x) => x.t);
 
+  const sessionPackInputs = trades.flatMap((t) => {
+    if (t.status !== "OPEN") return [];
+    const pack = openRowPackByTradeId.get(t.id);
+    if (!pack) return [];
+    return [
+      {
+        tradeId: t.id,
+        priorityTier: pack.priorityTier,
+        reviewedToday: checkedTodayTradeIds.has(t.id),
+        sortKey: pack.sortKey,
+      },
+    ];
+  });
+
+  const reviewSessionQueue = buildReviewSessionQueue(sessionPackInputs);
+  const { focusId: sessionFocusId, focusIndex: sessionFocusIndex } =
+    resolveReviewSessionFocus(reviewSessionQueue, reviewFocusParam);
+  const { prevId: sessionPrevId, nextId: sessionNextId } =
+    sessionQueueNeighbors(reviewSessionQueue, sessionFocusIndex);
+
+  const tierByTradeId = new Map(
+    sessionPackInputs.map((p) => [p.tradeId, p.priorityTier] as const)
+  );
+  const allOpenTradeIds = trades
+    .filter((t) => t.status === "OPEN")
+    .map((t) => t.id);
+
+  const sessionDashboardCounts = computeReviewSessionDashboardCounts({
+    sessionQueue: reviewSessionQueue,
+    focusIndex: sessionFocusIndex,
+    tierByTradeId,
+    reviewedTodayTradeIds: checkedTodayTradeIds,
+    allOpenTradeIds,
+  });
+
+  const tableRows =
+    reviewSessionActive && reviewSessionQueue.length > 0
+      ? sortTradesForReviewSession(displayTrades, reviewSessionQueue)
+      : displayTrades;
+
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
@@ -769,8 +825,28 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           currentStatus={statusFilter}
           currentSort={params.sort || "newest"}
           currentCompactReview={compactReview}
+          currentReviewSession={reviewSessionActive}
         />
       </Suspense>
+
+      {reviewSessionActive && hasOpenTrades ? (
+        <ReviewSessionChrome
+          sessionQueueLength={reviewSessionQueue.length}
+          focusOneBased={
+            sessionFocusIndex >= 0 ? sessionFocusIndex + 1 : null
+          }
+          totalActiveOpen={
+            portfolioStrip?.activeOpenCount ?? openTradeIds.length
+          }
+          urgentPendingGlobal={sessionDashboardCounts.urgentPendingGlobal}
+          pendingCheckpointGlobal={
+            sessionDashboardCounts.pendingCheckpointGlobal
+          }
+          pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
+          prevId={sessionPrevId}
+          nextId={sessionNextId}
+        />
+      ) : null}
 
       {showFreshnessBanner ? (
         <div
@@ -858,7 +934,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               </tr>
             </thead>
             <tbody>
-              {displayTrades.map((trade) => {
+              {tableRows.map((trade) => {
                 const openPack = openRowPackByTradeId.get(trade.id);
                 const ledgerCtxInner = {
                   latestCloseBySymbol,
@@ -894,8 +970,44 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 const reviewDto =
                   trade.status === "OPEN" ? (openPack?.reviewDto ?? null) : null;
 
+                const isSessionFocusRow =
+                  reviewSessionActive &&
+                  trade.status === "OPEN" &&
+                  sessionFocusId != null &&
+                  trade.id === sessionFocusId;
+
+                const rowHandledCalm =
+                  trade.status === "OPEN" &&
+                  openPack &&
+                  checkedTodayTradeIds.has(trade.id) &&
+                  openPack.priorityTier !== "urgent" &&
+                  reviewDto != null &&
+                  reviewDto.surface !== "stop_violated" &&
+                  reviewDto.stopBand !== "breached";
+
                 return (
-                  <tr key={trade.id} data-testid="trades-table-row">
+                  <tr
+                    key={trade.id}
+                    data-testid="trades-table-row"
+                    data-review-session-focus={
+                      isSessionFocusRow ? "true" : undefined
+                    }
+                    style={{
+                      ...(isSessionFocusRow
+                        ? {
+                            outline:
+                              "2px solid color-mix(in srgb, #0ea5e9 38%, var(--border-color))",
+                            outlineOffset: "-1px",
+                          }
+                        : {}),
+                      ...(rowHandledCalm
+                        ? {
+                            backgroundColor:
+                              "color-mix(in srgb, #22c55e 7%, transparent)",
+                          }
+                        : {}),
+                    }}
+                  >
                     <td>
                       <span
                         className="mono font-semibold"
@@ -942,7 +1054,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     <td className="align-top">
                       {trade.status === "OPEN" && reviewDto && openPack ? (
                         <OpenPositionReviewCell
-                          compact={compactReview}
+                          tradeId={trade.id}
+                          compact={
+                            compactReview ||
+                            (reviewSessionActive && !isSessionFocusRow)
+                          }
                           priorityTier={openPack.priorityTier}
                           escalationCues={openPack.escalationCues}
                           memoryLines={openPack.memoryLines}
@@ -950,6 +1066,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                           reviewedToday={checkedTodayTradeIds.has(trade.id)}
                           latestBar={latestBar ?? null}
                           formatBarSessionDate={formatBarSessionDate}
+                          sessionMode={reviewSessionActive}
+                          sessionFocused={Boolean(isSessionFocusRow)}
                         />
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>—</span>

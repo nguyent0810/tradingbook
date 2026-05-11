@@ -8,6 +8,7 @@ interface TradeFiltersProps {
   currentStatus: string;
   currentSort: string;
   currentCompactReview: boolean;
+  currentReviewSession: boolean;
 }
 
 export function TradeFilters({
@@ -15,6 +16,7 @@ export function TradeFilters({
   currentStatus,
   currentSort,
   currentCompactReview,
+  currentReviewSession,
 }: TradeFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -124,6 +126,31 @@ export function TradeFilters({
           id="compact-review-toggle"
         />
         Compact review
+      </label>
+
+      <label
+        className="flex cursor-pointer items-center gap-2 text-sm whitespace-nowrap"
+        style={{ color: "var(--text-secondary)" }}
+      >
+        <input
+          type="checkbox"
+          className="rounded border"
+          style={{ borderColor: "var(--border-color)" }}
+          checked={currentReviewSession}
+          onChange={(e) => {
+            const params = new URLSearchParams(searchParams.toString());
+            if (e.target.checked) {
+              params.set("reviewSession", "1");
+            } else {
+              params.delete("reviewSession");
+              params.delete("reviewFocus");
+            }
+            const qs = params.toString();
+            router.push(qs ? `/trades?${qs}` : "/trades");
+          }}
+          id="review-session-toggle"
+        />
+        Review session
       </label>
     </div>
   );

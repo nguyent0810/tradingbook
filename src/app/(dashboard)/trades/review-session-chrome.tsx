@@ -1,0 +1,200 @@
+"use client";
+
+import { Suspense, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+export type ReviewSessionChromeProps = {
+  sessionQueueLength: number;
+  /** null when queue empty */
+  focusOneBased: number | null;
+  totalActiveOpen: number;
+  urgentPendingGlobal: number;
+  pendingCheckpointGlobal: number;
+  pendingAheadInQueue: number;
+  prevId: string | null;
+  nextId: string | null;
+};
+
+function ReviewSessionChromeInner({
+  sessionQueueLength,
+  focusOneBased,
+  totalActiveOpen,
+  urgentPendingGlobal,
+  pendingCheckpointGlobal,
+  pendingAheadInQueue,
+  prevId,
+  nextId,
+}: ReviewSessionChromeProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const navigate = useCallback(
+    (tradeId: string | null) => {
+      if (!tradeId) return;
+      const p = new URLSearchParams(searchParams.toString());
+      p.set("reviewSession", "1");
+      p.set("reviewFocus", tradeId);
+      router.push(`/trades?${p.toString()}`);
+    },
+    [router, searchParams]
+  );
+
+  const exitSession = useCallback(() => {
+    const p = new URLSearchParams(searchParams.toString());
+    p.delete("reviewSession");
+    p.delete("reviewFocus");
+    const qs = p.toString();
+    router.push(qs ? `/trades?${qs}` : "/trades");
+  }, [router, searchParams]);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const t = e.target;
+      if (
+        t instanceof HTMLInputElement ||
+        t instanceof HTMLTextAreaElement ||
+        t instanceof HTMLSelectElement ||
+        (t instanceof HTMLElement && t.isContentEditable)
+      ) {
+        return;
+      }
+      if (e.key === "ArrowLeft" && prevId) {
+        e.preventDefault();
+        navigate(prevId);
+      }
+      if (e.key === "ArrowRight" && nextId) {
+        e.preventDefault();
+        navigate(nextId);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [navigate, prevId, nextId]);
+
+  if (sessionQueueLength === 0) {
+    return (
+      <div
+        className="card mt-4 border px-4 py-3"
+        data-testid="trades-review-session-bar"
+        style={{ borderColor: "var(--border-color)" }}
+      >
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          Review session has no queued positions (only stable open rows remain).
+          Exit to browse the full ledger.
+        </p>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm mt-3"
+          onClick={exitSession}
+        >
+          Exit review session
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="card mt-4 border px-4 py-3"
+      data-testid="trades-review-session-bar"
+      style={{ borderColor: "var(--border-color)" }}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div
+            className="text-[10px] font-semibold uppercase tracking-wide"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Review session
+          </div>
+          <p
+            className="mt-2 text-[13px] leading-relaxed"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            <span
+              className="font-semibold tabular-nums"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {focusOneBased ?? "—"}
+            </span>
+            <span style={{ color: "var(--text-muted)" }}> / </span>
+            <span className="tabular-nums">{sessionQueueLength}</span>
+            {" in queue · "}
+            <span
+              className="font-semibold tabular-nums"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {urgentPendingGlobal}
+            </span>
+            {" urgent pending · "}
+            <span
+              className="font-semibold tabular-nums"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {pendingCheckpointGlobal}
+            </span>
+            {" checkpoints pending · "}
+            <span
+              className="font-semibold tabular-nums"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {pendingAheadInQueue}
+            </span>
+            {" pending ahead · "}
+            <span
+              className="font-semibold tabular-nums"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {totalActiveOpen}
+            </span>
+            {" active"}
+          </p>
+          <p className="mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+            ← → keys move between positions. No intraday execution prompts.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            disabled={!prevId}
+            onClick={() => navigate(prevId)}
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            disabled={!nextId}
+            onClick={() => navigate(nextId)}
+          >
+            Next
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={exitSession}
+          >
+            Exit session
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ReviewSessionChrome(props: ReviewSessionChromeProps) {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className="card mt-4 border px-4 py-3 skeleton h-24 rounded-lg"
+          style={{ borderColor: "var(--border-color)" }}
+          data-testid="trades-review-session-bar-fallback"
+        />
+      }
+    >
+      <ReviewSessionChromeInner {...props} />
+    </Suspense>
+  );
+}
