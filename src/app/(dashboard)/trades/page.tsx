@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { Suspense } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
@@ -14,6 +15,11 @@ import {
   VNINDEX_FRESHNESS_UNAVAILABLE,
 } from "@/lib/trades/position-health";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
+import {
+  buildOpenPositionReviewDto,
+  type LatestTradeHealthLog,
+  type OpenPositionReviewDto,
+} from "@/lib/trades/open-position-intelligence";
 import {
   displayScanQualityTier,
   displayTradeDirection,
@@ -34,6 +40,37 @@ interface TradesPageProps {
     status?: string;
     sort?: string;
   }>;
+}
+
+function openReviewBadgeSkin(
+  tone: OpenPositionReviewDto["badges"][number]["tone"]
+): CSSProperties {
+  switch (tone) {
+    case "danger":
+      return {
+        borderColor: "color-mix(in srgb, #ef4444 45%, var(--border-color))",
+        backgroundColor: "color-mix(in srgb, #ef4444 12%, transparent)",
+        color: "#991b1b",
+      };
+    case "warn":
+      return {
+        borderColor: "color-mix(in srgb, #eab308 40%, var(--border-color))",
+        backgroundColor: "color-mix(in srgb, #eab308 12%, transparent)",
+        color: "#854d0e",
+      };
+    case "ok":
+      return {
+        borderColor: "color-mix(in srgb, #22c55e 35%, var(--border-color))",
+        backgroundColor: "color-mix(in srgb, #22c55e 12%, transparent)",
+        color: "#166534",
+      };
+    default:
+      return {
+        borderColor: "var(--border-color)",
+        backgroundColor: "var(--bg-tertiary)",
+        color: "var(--text-secondary)",
+      };
+  }
 }
 
 function formatQuantityCell(q: number): string {
@@ -96,6 +133,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               id: true,
               setupType: true,
               quality: true,
+              breakoutLevel: true,
+              pullbackZoneLow: true,
+              pullbackZoneHigh: true,
+              stopLevel: true,
+              barDate: true,
             },
           },
         },
@@ -157,6 +199,42 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     } catch (e) {
       console.error("[trades] trade_health_logs batch query skipped:", e);
       checkedTodayTradeIds = new Set();
+    }
+  }
+
+  let latestHealthByTradeId = new Map<string, LatestTradeHealthLog>();
+  if (openTradeIds.length > 0) {
+    try {
+      const healthRows = await prisma.$queryRaw<
+        Array<{
+          trade_id: string;
+          health_level: string;
+          structure_status: string | null;
+          checked_at: Date;
+        }>
+      >`
+        SELECT DISTINCT ON (trade_id)
+          trade_id,
+          health_level,
+          structure_status,
+          checked_at
+        FROM trade_health_logs
+        WHERE trade_id IN (${Prisma.join(openTradeIds)})
+        ORDER BY trade_id, checked_at DESC
+      `;
+      latestHealthByTradeId = new Map(
+        healthRows.map((r) => [
+          r.trade_id,
+          {
+            healthLevel: r.health_level,
+            structureStatus: r.structure_status,
+            checkedAt: r.checked_at,
+          } satisfies LatestTradeHealthLog,
+        ])
+      );
+    } catch (e) {
+      console.error("[trades] latest trade_health_logs batch skipped:", e);
+      latestHealthByTradeId = new Map();
     }
   }
 
@@ -302,7 +380,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         </div>
       ) : (
         <div className="table-container mt-4" data-testid="trades-scroll-container">
-          <table className="table min-w-[1680px]" data-testid="trades-table">
+          <table className="table min-w-[1840px]" data-testid="trades-table">
             <thead data-testid="trades-table-header">
               <tr>
                 <th>Symbol</th>
@@ -310,7 +388,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th>Direction</th>
                 <th>Playbook</th>
                 <th>Status</th>
-                <th>Daily review · data freshness</th>
+                <th>Position &amp; review</th>
                 <th className="table-num">Hold</th>
                 <th>Entry Date</th>
                 <th className="table-num">Entry Price</th>
@@ -333,6 +411,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                   rMultiple,
                   distanceToStop,
                   distanceToTakeProfit,
+                  stopValidity,
                 } =
                   deriveTradesLedgerRowFields(
                     {
@@ -354,6 +433,33 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       now,
                     }
                   );
+
+                const reviewDto =
+                  trade.status === "OPEN"
+                    ? buildOpenPositionReviewDto({
+                        direction: trade.direction,
+                        entryPrice: trade.entryPrice,
+                        quantity: trade.quantity,
+                        stopLoss: trade.stopLoss,
+                        stopValidity,
+                        distanceToStop,
+                        latestClose: latestBar?.close ?? null,
+                        latestBarDate: latestBar?.date ?? null,
+                        staleVsBenchmark: staleState,
+                        benchmarkSession: expectedSessionDate,
+                        reviewedToday: checkedTodayTradeIds.has(trade.id),
+                        setupLevels:
+                          trade.setupCandidate != null
+                            ? {
+                                breakoutLevel: trade.setupCandidate.breakoutLevel,
+                                pullbackZoneLow: trade.setupCandidate.pullbackZoneLow,
+                                pullbackZoneHigh: trade.setupCandidate.pullbackZoneHigh,
+                              }
+                            : null,
+                        latestHealthLog:
+                          latestHealthByTradeId.get(trade.id) ?? null,
+                      })
+                    : null;
 
                 return (
                   <tr key={trade.id} data-testid="trades-table-row">
@@ -401,74 +507,88 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       </span>
                     </td>
                     <td>
-                      <div className="flex max-w-[11rem] flex-col gap-1">
-                        {trade.status === "OPEN" ? (
+                      <div className="flex max-w-[17rem] flex-col gap-1.5">
+                        {trade.status === "OPEN" && reviewDto ? (
                           <>
-                            {checkedTodayTradeIds.has(trade.id) ? (
+                            <div className="flex flex-wrap gap-1">
+                              {reviewDto.badges.map((b) => (
+                                <span
+                                  key={b.key}
+                                  className="w-fit px-2 py-0.5 text-[11px] font-medium rounded-md border"
+                                  style={openReviewBadgeSkin(b.tone)}
+                                >
+                                  {b.label}
+                                </span>
+                              ))}
+                            </div>
+                            <div
+                              className="text-[11px] leading-snug"
+                              style={{ color: "var(--text-secondary)" }}
+                            >
                               <span
-                                className="w-fit px-2 py-1 text-xs rounded-md border"
-                                style={{
-                                  borderColor:
-                                    "color-mix(in srgb, #22c55e 35%, var(--border-color))",
-                                  backgroundColor:
-                                    "color-mix(in srgb, #22c55e 12%, transparent)",
-                                  color: "#166534",
-                                }}
+                                className="font-medium"
+                                style={{ color: "var(--text-primary)" }}
                               >
-                                Daily review logged
+                                {reviewDto.stopBandLabel}
                               </span>
-                            ) : (
-                              <span
-                                className="w-fit px-2 py-1 text-xs rounded-md border"
-                                style={{
-                                  borderColor:
-                                    "color-mix(in srgb, #eab308 40%, var(--border-color))",
-                                  backgroundColor:
-                                    "color-mix(in srgb, #eab308 12%, transparent)",
-                                  color: "#854d0e",
-                                }}
-                              >
-                                Daily review not logged
-                              </span>
-                            )}
-                            {latestBar ? (
-                              staleState === true ? (
-                                <span
-                                  className="w-fit px-2 py-1 text-xs font-medium rounded-md border"
-                                  style={{
-                                    borderColor:
-                                      "color-mix(in srgb, #f97316 45%, var(--border-color))",
-                                    backgroundColor:
-                                      "color-mix(in srgb, #f97316 14%, transparent)",
-                                    color: "#9a3412",
-                                  }}
-                                >
-                                  Stale data
-                                </span>
-                              ) : staleState === "unknown" ? (
-                                <span
-                                  className="text-[11px]"
-                                  style={{ color: "var(--text-muted)" }}
-                                  title={VNINDEX_FRESHNESS_UNAVAILABLE}
-                                >
-                                  Freshness unverified
-                                </span>
-                              ) : (
-                                <span
-                                  className="text-[11px]"
-                                  style={{ color: "var(--text-muted)" }}
-                                >
-                                  Bar synced to index session
-                                </span>
-                              )
-                            ) : (
-                              <span
-                                className="text-[11px]"
+                              {reviewDto.cushionPctDisplay ? (
+                                <>
+                                  {" · "}
+                                  <span className="tabular-nums">
+                                    {reviewDto.cushionPctDisplay}
+                                  </span>
+                                </>
+                              ) : null}
+                            </div>
+                            {reviewDto.plannedCapitalAtRisk != null ? (
+                              <div
+                                className="text-[11px] leading-snug"
                                 style={{ color: "var(--text-muted)" }}
                               >
-                                No equity bar
-                              </span>
+                                Planned capital at risk:{" "}
+                                <span
+                                  className="mono font-medium"
+                                  style={{ color: "var(--text-secondary)" }}
+                                >
+                                  {formatVND(reviewDto.plannedCapitalAtRisk, false)}
+                                </span>
+                              </div>
+                            ) : null}
+                            {reviewDto.setupValidityLine ? (
+                              <div
+                                className="text-[11px] leading-snug"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                Setup snapshot: {reviewDto.setupValidityLine}
+                              </div>
+                            ) : null}
+                            <p
+                              className="text-[10px] leading-snug line-clamp-3"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {reviewDto.headline}
+                            </p>
+                            {latestBar ? (
+                              <div
+                                className="text-[10px]"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                Latest bar: {formatBarSessionDate(latestBar.date)}
+                              </div>
+                            ) : (
+                              <div
+                                className="text-[10px]"
+                                style={{ color: "var(--text-muted)" }}
+                              >
+                                No equity bar loaded.
+                              </div>
                             )}
+                            <div
+                              className="text-[9px] uppercase tracking-wide"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Daily bar only · not intraday execution advice
+                            </div>
                           </>
                         ) : (
                           <span style={{ color: "var(--text-muted)" }}>—</span>
@@ -517,10 +637,22 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     <td className="mono table-num text-xs">
                       {trade.status === "OPEN" ? formatRMultiple(rMultiple) : "—"}
                     </td>
-                    <td className="mono table-num text-xs">
-                      {trade.status === "OPEN"
-                        ? formatSignedVnd(distanceToStop)
-                        : "—"}
+                    <td className="mono table-num text-xs align-top">
+                      {trade.status === "OPEN" ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span>{formatSignedVnd(distanceToStop)}</span>
+                          {reviewDto?.cushionPctDisplay ? (
+                            <span
+                              className="text-[10px] font-normal normal-case tabular-nums"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              {reviewDto.cushionPctDisplay}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="mono table-num text-xs">
                       {trade.status === "OPEN"

@@ -36,6 +36,7 @@ describe("deriveTradesLedgerRowFields", () => {
     expect(row.rMultiple).toBeNull();
     expect(row.distanceToStop).toBeNull();
     expect(row.distanceToTakeProfit).toBeNull();
+    expect(row.stopValidity).toBe("missing");
   });
 
   it("fallbackLedgerDerivedFields is stable", () => {

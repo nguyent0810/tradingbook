@@ -39,6 +39,7 @@ export type TradesLedgerDerivedFields = {
   rMultiple: number | null;
   distanceToStop: number | null;
   distanceToTakeProfit: number | null;
+  /** OPEN trades only (otherwise `"missing"`). */
   stopValidity: StopValidity;
 };
 
@@ -120,7 +121,7 @@ export function deriveTradesLedgerRowFields(
             rMultiple: null,
             distanceToStop: null,
             distanceToTakeProfit: null,
-            stopValidity: "missing" as const,
+            stopValidity: "missing" as StopValidity,
           };
 
     return {
