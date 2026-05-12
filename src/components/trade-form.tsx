@@ -198,7 +198,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="entryPrice" className="label">
-            Entry Price
+            Entry price <span style={{ color: "var(--text-muted)" }}>(1000 ₫ / share)</span>
           </label>
           <input
             id="entryPrice"
@@ -231,8 +231,8 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
 
         <div>
           <label htmlFor="exitPrice" className="label">
-            Exit Price{" "}
-            <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+            Exit price{" "}
+            <span style={{ color: "var(--text-muted)" }}>(optional, 1000 ₫ / share)</span>
           </label>
           <input
             id="exitPrice"
@@ -294,7 +294,8 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="stopLoss" className="label">
-            Stop Loss <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+            Stop loss{" "}
+            <span style={{ color: "var(--text-muted)" }}>(optional, 1000 ₫ / share)</span>
           </label>
           <input
             id="stopLoss"
@@ -307,7 +308,8 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
         </div>
         <div>
           <label htmlFor="takeProfit" className="label">
-            Take Profit <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+            Take profit{" "}
+            <span style={{ color: "var(--text-muted)" }}>(optional, 1000 ₫ / share)</span>
           </label>
           <input
             id="takeProfit"

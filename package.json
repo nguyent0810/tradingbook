@@ -17,7 +17,8 @@
     "data:vnindex": "python scripts/fetch_vnindex.py && npx tsx scripts/import-bars.ts",
     "gate1:print": "npx tsx scripts/print-gate1-regime.ts",
     "gate1:check": "npx tsx scripts/print-gate1-regime.ts",
-    "scanner:near-miss": "npx tsx scripts/scanner-near-miss.ts"
+    "scanner:near-miss": "npx tsx scripts/scanner-near-miss.ts",
+    "verify:market-data": "npx tsx scripts/verify-market-data.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",

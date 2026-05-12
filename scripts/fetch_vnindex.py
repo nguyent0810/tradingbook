@@ -35,7 +35,9 @@ def date_to_utc_midnight_ms(dt: datetime) -> int:
 
 def fetch_vnindex_bars(min_rows: int = 100) -> list[dict]:
     """>= min_rows trading days by requesting a long calendar window."""
-    end = datetime.now(timezone.utc).date()
+    # Inclusive end: add one calendar day so same-day / boundary fetches from VCI
+    # are less likely to drop the latest session vs a strict "today" end.
+    end = (datetime.now(timezone.utc) + timedelta(days=1)).date()
     start = end - timedelta(days=420)
     start_s = start.isoformat()
     end_s = end.isoformat()

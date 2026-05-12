@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { TradeFilters } from "./trade-filters";
-import { formatVND } from "@/lib/formatters";
+import { formatVND, formatEquityThousandVndPerShare, formatBarDataDateUtcLong } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
 import {
   fetchBarCloseOnOrBeforeReviewBatch,
@@ -145,7 +145,11 @@ function formatQuantityCell(q: number): string {
 
 function formatSignedVnd(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return "—";
-  return `${value > 0 ? "+" : ""}${formatVND(value, false)}`;
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  const s = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(
+    Math.abs(value)
+  );
+  return `${sign}${s}k ₫`;
 }
 
 function formatRMultiple(value: number | null): string {
@@ -1378,7 +1382,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           memoryLines={focusOpenPack.memoryLines}
           escalationCues={focusOpenPack.escalationCues}
           latestBar={focusOpenPack.derived.latestBar ?? null}
-          formatBarSessionDate={formatBarSessionDate}
           queuePositionOneBased={sessionFocusIndex + 1}
           queueLength={reviewSessionQueue.length}
           reviewedTodayOpenCount={reviewedTodayOpenCount}
@@ -1465,6 +1468,16 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             Scroll horizontally for the full ledger. The Symbol column stays pinned while you
             scroll.
           </p>
+          <p
+            className="mt-1 text-[11px] leading-snug"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Equity prices in this table are{" "}
+            <span className="font-medium" style={{ color: "var(--text-secondary)" }}>
+              thousand VND per share
+            </span>{" "}
+            (imported EOD). P&amp;L uses the same numeric scale × quantity.
+          </p>
           <div
             className="table-container table-sticky trades-ledger-scroll mt-2"
             data-testid="trades-scroll-container"
@@ -1480,12 +1493,44 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 <th>Position &amp; review</th>
                 <th className="table-num">Hold</th>
                 <th>Entry Date</th>
-                <th className="table-num">Entry Price</th>
-                <th className="table-num">Latest / Exit</th>
+                <th className="table-num">
+                  <span className="block">Entry</span>
+                  <span
+                    className="block text-[10px] font-normal font-sans normal-case"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    (1000 ₫)
+                  </span>
+                </th>
+                <th className="table-num">
+                  <span className="block">Session mark</span>
+                  <span
+                    className="block text-[10px] font-normal font-sans normal-case"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Open: EOD · Closed: exit
+                  </span>
+                </th>
                 <th className="table-num">Qty</th>
                 <th className="table-num">R</th>
-                <th className="table-num">Stop Dist</th>
-                <th className="table-num">TP Dist</th>
+                <th className="table-num">
+                  <span className="block">Stop dist.</span>
+                  <span
+                    className="block text-[10px] font-normal font-sans normal-case"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    (1000 ₫)
+                  </span>
+                </th>
+                <th className="table-num">
+                  <span className="block">TP dist.</span>
+                  <span
+                    className="block text-[10px] font-normal font-sans normal-case"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    (1000 ₫)
+                  </span>
+                </th>
                 <th className="table-num">P&amp;L</th>
                 <th></th>
               </tr>
@@ -1704,7 +1749,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     <td className="mono table-num">
                       {Number.isFinite(trade.entryPrice) &&
                       trade.entryPrice > 0 ? (
-                        formatVND(trade.entryPrice, false)
+                        formatEquityThousandVndPerShare(trade.entryPrice)
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>—</span>
                       )}
@@ -1713,14 +1758,16 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                       {trade.status === "OPEN" ? (
                         latestBar ? (
                           <div className="flex flex-col items-end gap-0.5">
-                            <span>
-                              Close {formatVND(latestBar.close, false)}
+                            <span style={{ color: "var(--text-secondary)" }}>
+                              Latest close:{" "}
+                              {formatEquityThousandVndPerShare(latestBar.close)}
                             </span>
                             <span
                               className="text-[11px] font-normal normal-case"
                               style={{ color: "var(--text-muted)" }}
                             >
-                              {formatBarSessionDate(latestBar.date)}
+                              Data date:{" "}
+                              {formatBarDataDateUtcLong(latestBar.date)}
                             </span>
                           </div>
                         ) : (
@@ -1728,7 +1775,21 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                         )
                       ) : trade.exitPrice !== null &&
                         Number.isFinite(trade.exitPrice) ? (
-                        formatVND(trade.exitPrice, false)
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span style={{ color: "var(--text-secondary)" }}>
+                            Exit price:{" "}
+                            {formatEquityThousandVndPerShare(trade.exitPrice)}
+                          </span>
+                          {trade.exitDate ? (
+                            <span
+                              className="text-[11px] font-normal normal-case"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Exit date:{" "}
+                              {formatBarDataDateUtcLong(trade.exitDate)}
+                            </span>
+                          ) : null}
+                        </div>
                       ) : (
                         "—"
                       )}
@@ -1779,11 +1840,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                               style={{ color: "var(--text-muted)" }}
                             >
                               Long bias: (latest close − entry) × qty. Short bias: (entry − latest
-                              close) × qty. Same price units as entry.
+                              close) × qty. Same price units as entry (thousand ₫ per share).
                               {latestBar ? (
                                 <>
                                   {" "}
-                                  Session: {formatBarSessionDate(latestBar.date)}.
+                                  Data date: {formatBarDataDateUtcLong(latestBar.date)}.
                                 </>
                               ) : null}
                             </span>

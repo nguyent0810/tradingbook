@@ -89,6 +89,21 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
 
   const parsedDecision = parsePersistedDailyDecision(raw.decision);
 
+  let benchmarkBackdrop: DailyScanGate2Notes["benchmarkBackdrop"];
+  const bdRaw = raw.benchmarkBackdrop;
+  if (isRecord(bdRaw)) {
+    const vn = bdRaw.vnindexSessionDate;
+    const eq = bdRaw.equityBarsMaxDate;
+    const delayed = bdRaw.delayedBackdrop;
+    if (typeof vn === "string" && typeof delayed === "boolean") {
+      benchmarkBackdrop = {
+        vnindexSessionDate: vn,
+        equityBarsMaxDate: typeof eq === "string" ? eq : null,
+        delayedBackdrop: delayed,
+      };
+    }
+  }
+
   const symRaw = raw.rejectionSymbolsByCategory;
   let rejectionSymbolsByCategory: Record<string, string[]> | undefined;
   if (isRecord(symRaw)) {
@@ -107,6 +122,7 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
     Boolean(recommendation.summary || recommendation.note) ||
     recommendation.likelyBottleneck !== "none_obvious" ||
     parsedDecision !== null ||
+    benchmarkBackdrop?.delayedBackdrop === true ||
     (rejectionSymbolsByCategory !== undefined &&
       Object.keys(rejectionSymbolsByCategory).length > 0);
 
@@ -118,6 +134,7 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
     recommendation,
     ...(rejectionSymbolsByCategory ? { rejectionSymbolsByCategory } : {}),
     ...(parsedDecision ? { decision: parsedDecision } : {}),
+    ...(benchmarkBackdrop ? { benchmarkBackdrop } : {}),
   };
 }
 

@@ -5,7 +5,11 @@ import { getSession } from "@/lib/session";
 import { redirect, notFound } from "next/navigation";
 import { TradeForm } from "@/components/trade-form";
 import { DeleteTradeButton } from "./delete-button";
-import { formatVND } from "@/lib/formatters";
+import {
+  formatVND,
+  formatEquityThousandVndPerShare,
+  formatBarDataDateUtcLong,
+} from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
 import { addTradeHealthCheckpoint } from "@/app/actions/trades";
 import {
@@ -44,7 +48,11 @@ export const metadata: Metadata = {
 
 function formatSignedVnd(value: number | null): string {
   if (value == null || !Number.isFinite(value)) return "—";
-  return `${value > 0 ? "+" : ""}${formatVND(value, false)}`;
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  const s = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(
+    Math.abs(value)
+  );
+  return `${sign}${s}k ₫`;
 }
 
 function formatRMultiple(value: number | null): string {
@@ -423,7 +431,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                       color: "#9a3412",
                     }}
                   >
-                    Stale data (bar before index session)
+                    Stale vs benchmark (equity bar older than VNINDEX)
                   </span>
                 ) : barStaleState === "unknown" ? (
                   <span
@@ -444,7 +452,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                       color: "var(--text-muted)",
                     }}
                   >
-                    Bar synced to VNINDEX session
+                    Equity bar date matches latest VNINDEX bar date
                   </span>
                 )
               ) : (
@@ -465,31 +473,26 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                 </dd>
               </div>
               <div>
-                <dt style={{ color: "var(--text-muted)" }}>Entry price</dt>
+                <dt style={{ color: "var(--text-muted)" }}>Entry price (1000 ₫ / share)</dt>
                 <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
                   {Number.isFinite(trade.entryPrice) && trade.entryPrice > 0
-                    ? formatVND(trade.entryPrice, false)
+                    ? formatEquityThousandVndPerShare(trade.entryPrice)
                     : "—"}
                 </dd>
               </div>
               <div>
-                <dt style={{ color: "var(--text-muted)" }}>Latest close</dt>
+                <dt style={{ color: "var(--text-muted)" }}>Latest close (1000 ₫ / share)</dt>
                 <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
                   {latestCloseSnap
-                    ? formatVND(latestCloseSnap.close, false)
+                    ? formatEquityThousandVndPerShare(latestCloseSnap.close)
                     : "—"}
                 </dd>
               </div>
               {latestCloseSnap ? (
                 <div>
-                  <dt style={{ color: "var(--text-muted)" }}>Latest bar date (UTC)</dt>
+                  <dt style={{ color: "var(--text-muted)" }}>Data date (UTC)</dt>
                   <dd style={{ color: "var(--text-secondary)" }}>
-                    {latestCloseSnap.date.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                      timeZone: "UTC",
-                    })}
+                    {formatBarDataDateUtcLong(latestCloseSnap.date)}
                   </dd>
                 </div>
               ) : null}
@@ -500,13 +503,15 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                 </dd>
               </div>
               <div>
-                <dt style={{ color: "var(--text-muted)" }}>Distance to stop</dt>
+                <dt style={{ color: "var(--text-muted)" }}>Distance to stop (1000 ₫ / share)</dt>
                 <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
                   {formatSignedVnd(phase2Metrics.distanceToStop)}
                 </dd>
               </div>
               <div>
-                <dt style={{ color: "var(--text-muted)" }}>Distance to take profit</dt>
+                <dt style={{ color: "var(--text-muted)" }}>
+                  Distance to take profit (1000 ₫ / share)
+                </dt>
                 <dd className="mono font-medium" style={{ color: "var(--text-primary)" }}>
                   {formatSignedVnd(phase2Metrics.distanceToTakeProfit)}
                 </dd>
@@ -528,18 +533,11 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               </div>
               <p className="mt-1 text-xs leading-snug" style={{ color: "var(--text-muted)" }}>
                 Long bias: (latest close − entry) × qty. Short bias: (entry − latest close) × qty.
-                Same units as entry price.
+                Same units as entry price (thousand ₫ per share).
                 {latestCloseSnap ? (
                   <>
                     {" "}
-                    Session (UTC):{" "}
-                    {new Date(latestCloseSnap.date).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                      timeZone: "UTC",
-                    })}
-                    .
+                    Data date: {formatBarDataDateUtcLong(latestCloseSnap.date)}.
                   </>
                 ) : null}
               </p>

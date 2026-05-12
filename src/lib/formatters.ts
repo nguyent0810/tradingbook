@@ -1,3 +1,23 @@
+/**
+ * Equity EOD quotes stored as **thousand VND per share** (vnstock/VCI pipeline).
+ * Display only — does not change stored numbers.
+ */
+export function formatEquityThousandVndPerShare(
+  value: number | null | undefined
+): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  const s = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(value);
+  return `${s}k ₫`;
+}
+
+/** Session / bar calendar date in UTC (long form). */
+export function formatBarDataDateUtcLong(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(date);
+}
+
 export function formatVND(value: number | null | undefined, compact: boolean = false): string {
   if (value === null || value === undefined) return "—";
 

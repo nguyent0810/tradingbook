@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { formatVND } from "@/lib/formatters";
+import {
+  formatVND,
+  formatEquityThousandVndPerShare,
+  formatBarDataDateUtcLong,
+} from "@/lib/formatters";
 import type { OpenPositionReviewDto } from "@/lib/trades/open-position-intelligence";
 import {
   reviewPriorityTraderLabel,
@@ -77,7 +81,6 @@ export type FocusReviewWorkspaceProps = {
   memoryLines: readonly string[];
   escalationCues: readonly string[];
   latestBar: LatestCloseBar | null;
-  formatBarSessionDate: (d: Date) => string;
   queuePositionOneBased: number;
   queueLength: number;
   reviewedTodayOpenCount: number;
@@ -103,7 +106,6 @@ export function FocusReviewWorkspace({
   memoryLines,
   escalationCues,
   latestBar,
-  formatBarSessionDate,
   queuePositionOneBased,
   queueLength,
   reviewedTodayOpenCount,
@@ -321,8 +323,8 @@ export function FocusReviewWorkspace({
             </p>
             {latestBar ? (
               <p className="mt-0.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
-                Latest close {formatVND(latestBar.close, false)} · bar{" "}
-                {formatBarSessionDate(latestBar.date)}
+                Latest close: {formatEquityThousandVndPerShare(latestBar.close)} · Data date:{" "}
+                {formatBarDataDateUtcLong(latestBar.date)}
               </p>
             ) : null}
           </div>

@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { formatVND } from "@/lib/formatters";
+import { formatVND, formatEquityThousandVndPerShare, formatBarDataDateUtcLong } from "@/lib/formatters";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
 import { MomentumWatchSection } from "@/components/momentum-watch-section";
 import {
@@ -289,9 +289,7 @@ export default async function DashboardPage() {
         </p>
         <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
           {regime.latestBar
-            ? `VNINDEX close ${regime.latestBar.close.toLocaleString("en-US", {
-                maximumFractionDigits: 2,
-              })} (${regime.latestBar.date.toISOString().slice(0, 10)})`
+            ? `VNINDEX latest close: ${formatEquityThousandVndPerShare(regime.latestBar.close)} · Data date: ${formatBarDataDateUtcLong(regime.latestBar.date)}`
             : "VNINDEX latest bar unavailable."}
         </p>
       </section>
@@ -318,10 +316,34 @@ export default async function DashboardPage() {
                   <th>Status</th>
                   <th>Health</th>
                   <th className="table-num">Score</th>
-                  <th className="table-num">Close</th>
-                  <th className="table-num">Zone</th>
-                  <th className="table-num">Stop</th>
-                  <th className="table-num">Bar Date</th>
+                  <th className="table-num">
+                    <span className="block">Close</span>
+                    <span
+                      className="block text-[10px] font-normal font-sans normal-case"
+                      style={{ color: "var(--text-tertiary)" }}
+                    >
+                      (1000 ₫)
+                    </span>
+                  </th>
+                  <th className="table-num">
+                    <span className="block">Zone</span>
+                    <span
+                      className="block text-[10px] font-normal font-sans normal-case"
+                      style={{ color: "var(--text-tertiary)" }}
+                    >
+                      (1000 ₫)
+                    </span>
+                  </th>
+                  <th className="table-num">
+                    <span className="block">Stop</span>
+                    <span
+                      className="block text-[10px] font-normal font-sans normal-case"
+                      style={{ color: "var(--text-tertiary)" }}
+                    >
+                      (1000 ₫)
+                    </span>
+                  </th>
+                  <th className="table-num whitespace-nowrap text-xs">Data date (UTC)</th>
                 </tr>
               </thead>
               <tbody>
@@ -345,13 +367,16 @@ export default async function DashboardPage() {
                       <td className="table-num align-top">
                         {c.healthScoreLabel} ({c.healthScore})
                       </td>
-                      <td className="table-num">{c.close.toFixed(2)}</td>
-                      <td className="table-num">
-                        {c.pullbackZoneLow.toFixed(2)} - {c.pullbackZoneHigh.toFixed(2)}
+                      <td className="table-num align-top">
+                        {formatEquityThousandVndPerShare(c.close)}
                       </td>
-                      <td className="table-num">{c.stopLevel.toFixed(2)}</td>
+                      <td className="table-num">
+                        {formatEquityThousandVndPerShare(c.pullbackZoneLow)} –{" "}
+                        {formatEquityThousandVndPerShare(c.pullbackZoneHigh)}
+                      </td>
+                      <td className="table-num">{formatEquityThousandVndPerShare(c.stopLevel)}</td>
                       <td className="table-num whitespace-nowrap text-xs">
-                        {new Date(c.barDate).toLocaleDateString("en-CA")}
+                        {formatBarDataDateUtcLong(new Date(c.barDate))}
                       </td>
                     </tr>
                     <tr>

@@ -32,6 +32,7 @@ import {
   listActiveTacticalSymbols,
   type UniverseSource,
 } from "@/lib/tactical-universe";
+import { isBenchmarkStaleVsEquity } from "@/lib/market/market-data-freshness-report";
 
 function toGate1ScanLevel(level: string): Gate1ScanLevel {
   switch (level) {
@@ -288,9 +289,31 @@ export async function runDailyScanJob(
       candidateCountB,
     });
 
+    const equityMaxRow = await prisma.stockDailyBar.aggregate({
+      _max: { date: true },
+    });
+    const equityMaxDate = equityMaxRow._max.date;
+    const delayedBackdrop = isBenchmarkStaleVsEquity(
+      expectedLatestSession,
+      equityMaxDate
+    );
+    if (delayedBackdrop) {
+      console.warn("[runDailyScanJob] benchmark_backdrop_delayed", {
+        vnindexSession: expectedLatestSession.toISOString().slice(0, 10),
+        equityBarsMax: equityMaxDate?.toISOString().slice(0, 10) ?? null,
+      });
+    }
+
     const scanNotes = {
       ...toDailyScanGate2Notes(diagnostics),
       decision: toPersistedDailyDecision(tradingDecision),
+      benchmarkBackdrop: {
+        vnindexSessionDate: expectedLatestSession.toISOString().slice(0, 10),
+        equityBarsMaxDate: equityMaxDate
+          ? equityMaxDate.toISOString().slice(0, 10)
+          : null,
+        delayedBackdrop,
+      },
     };
     const failedCount = failedSymbolKeys.size;
     const scannedCount = Math.max(0, totalSymbols - failedCount);
@@ -421,6 +444,7 @@ export async function runDailyScanJob(
       closestToValidSymbols: diagnostics.closestToValidSymbols,
       recommendation: diagnostics.recommendation,
       tradingDecision,
+      benchmarkBackdrop: scanNotes.benchmarkBackdrop,
       persistedNotesKeys: Object.keys(scanNotes),
     };
 

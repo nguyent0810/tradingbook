@@ -8,6 +8,7 @@ export type SetupsInsightBlockProps = {
   benchmarkSessionDate?: string | null;
   /** Latest calendar day among all `StockDailyBar` rows (UTC) — may differ from VNINDEX session. */
   equityBarsLatestSession?: string | null;
+  delayedMarketBackdrop?: boolean;
   /** Trader-facing regime label (e.g. Favorable / Caution). */
   gate1DisplayLabel: string;
   status: string;
@@ -25,6 +26,7 @@ export function SetupsInsightBlock({
   runAtLabel,
   benchmarkSessionDate,
   equityBarsLatestSession,
+  delayedMarketBackdrop,
   gate1DisplayLabel,
   status,
   tradabilityPassed,
@@ -42,6 +44,27 @@ export function SetupsInsightBlock({
       {status === "FAILED" && errorSummary ? (
         <p className="mb-4 rounded-lg border border-[var(--danger)]/40 bg-[var(--danger)]/10 px-4 py-3 text-sm text-[var(--danger)]">
           {errorSummary}
+        </p>
+      ) : null}
+
+      {delayedMarketBackdrop ? (
+        <p
+          className="mb-4 rounded-md border px-3 py-2 text-sm leading-snug"
+          role="status"
+          style={{
+            borderColor: "color-mix(in srgb, #f59e0b 45%, var(--border-primary))",
+            background: "color-mix(in srgb, #f59e0b 10%, var(--bg-secondary))",
+            color: "var(--text-secondary)",
+          }}
+        >
+          <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+            Delayed market backdrop:{" "}
+          </span>
+          This scan&apos;s Gate 1 regime used the VNINDEX session through the benchmark date above, while
+          at least one equity bar in the database is newer. Do not read the run as fully current vs all
+          stock EOD data until VNINDEX import is refreshed (
+          <code className="rounded bg-[var(--bg-tertiary)] px-1 py-0.5 text-xs">npm run data:vnindex</code>
+          ).
         </p>
       ) : null}
 

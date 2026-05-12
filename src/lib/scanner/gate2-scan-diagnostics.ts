@@ -393,6 +393,13 @@ export function buildGate2ScanDiagnosticsSummary(
   };
 }
 
+/** Persisted on scan notes when equity DB max date is after VNINDEX session (backdrop delay). */
+export type ScanBenchmarkBackdrop = {
+  vnindexSessionDate: string;
+  equityBarsMaxDate: string | null;
+  delayedBackdrop: boolean;
+};
+
 /** Subset persisted on DailyScanRun.notes for dashboards / review. */
 export type DailyScanGate2Notes = {
   topRejectionCategories: Record<string, number>;
@@ -401,6 +408,8 @@ export type DailyScanGate2Notes = {
   closestToValidSymbols: Gate2ClosestSymbolRow[];
   recommendation: Pick<Gate2Recommendation, "likelyBottleneck" | "summary" | "note">;
   decision?: DailyTradingDecision;
+  /** Gate 1 uses VNINDEX through `vnindexSessionDate`; equity may be newer in DB. */
+  benchmarkBackdrop?: ScanBenchmarkBackdrop;
 };
 
 export function toDailyScanGate2Notes(d: Gate2ScanDiagnosticsSummary): DailyScanGate2Notes {

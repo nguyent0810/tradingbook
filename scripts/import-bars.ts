@@ -165,6 +165,10 @@ async function main(): Promise<void> {
     `Latest close: ${latestClose !== undefined ? latestClose.toFixed(2) : "—"}`
   );
   console.error(`File:        ${path}`);
+  console.error("");
+  console.error(
+    "Next: run `npm run data:vnindex` from the project root to refresh JSON + DB when upstream has newer sessions."
+  );
 }
 
 main()

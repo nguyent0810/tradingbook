@@ -64,6 +64,9 @@ test.describe("/trades table layout", () => {
       ).toBeGreaterThan(28);
     }
 
+    await expect(header).toContainText("Session mark");
+    await expect(header).toContainText("Entry");
+
     const rowOpen = rows.filter({ hasText: "E2EOPEN" }).first();
     await expect(rowOpen.locator("td").nth(COL.symbol)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.symbol)).toContainText("E2EOPEN");
@@ -73,6 +76,9 @@ test.describe("/trades table layout", () => {
     await expect(rowOpen.locator("td").nth(COL.entryPrice)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.latestExit)).toBeVisible();
 
+    await expect(rowOpen.locator("td").nth(COL.latestExit)).toContainText("Latest close:");
+    await expect(rowOpen.locator("td").nth(COL.latestExit)).toContainText("Data date:");
+
     const rowClosed = rows.filter({ hasText: "E2ECLS" }).first();
     await expect(rowClosed.locator("td").nth(COL.symbol)).toContainText(
       "E2ECLS"
@@ -80,7 +86,7 @@ test.describe("/trades table layout", () => {
     await expect(rowClosed.locator("td").nth(COL.status)).toContainText(
       "Completed"
     );
-    await expect(rowClosed.locator("td").nth(COL.latestExit)).toBeVisible();
+    await expect(rowClosed.locator("td").nth(COL.latestExit)).toContainText("Exit price:");
     await expect(rowClosed.locator("td").nth(COL.entryPrice)).toBeVisible();
   });
 });

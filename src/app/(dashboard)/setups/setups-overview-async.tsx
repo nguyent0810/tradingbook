@@ -146,6 +146,7 @@ export async function SetupsOverviewAsync() {
               ? base.latestEquityBarSession.toISOString().slice(0, 10)
               : null
           }
+          delayedMarketBackdrop={notes?.benchmarkBackdrop?.delayedBackdrop === true}
           gate1DisplayLabel={gate1TraderLabel}
           status={latest.status}
           tradabilityPassed={latest.symbolCountAfterTradability}
