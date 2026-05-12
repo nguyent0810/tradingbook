@@ -75,9 +75,19 @@ import {
 import {
   buildNextOperatingSnapshot,
   deriveOperatingTrendDiscipline,
+  derivePersistentPressureAwareness,
   enhanceSessionOperatingNarrative,
   parseBookOperatingSnapshot,
 } from "@/lib/trades/operating-trend-discipline";
+import {
+  countBookAttentionClusters,
+  deriveBookOperatingBalanceLines,
+} from "@/lib/trades/book-operating-balance";
+import {
+  derivePositionEvolution,
+  POSITION_EVOLUTION_TRADER_LABEL,
+  type PositionEvolutionState,
+} from "@/lib/trades/position-state-evolution";
 import { OperatingSnapshotPersist } from "./operating-snapshot-persist";
 import { OpenPositionReviewCell } from "./open-position-review-cell";
 import { FocusReviewWorkspace } from "./focus-review-workspace";
@@ -420,6 +430,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     latestReviewOutcome: ReviewOutcomeId | null;
     operatingPosture: OperatingPosture;
     postureExplainLines: string[];
+    positionEvolution: PositionEvolutionState;
+    positionEvolutionLine: string | null;
   };
   const openRowPackByTradeId = new Map<string, OpenRowPack>();
   const ledgerCtx = {
@@ -532,6 +544,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         escalationCueCount: escalationCues.length,
       });
 
+    const { state: positionEvolution, explainLine: positionEvolutionLine } =
+      derivePositionEvolution({
+        operatingPosture,
+        reviewedToday,
+        stopBand: reviewDto.stopBand,
+        surface: reviewDto.surface,
+        marketDataStale: reviewDto.marketDataStale,
+        deterioratedVsReview: deteriorated,
+        escalationCueCount: escalationCues.length,
+        priorityTier,
+        latestReviewOutcome: latestOutcome,
+      });
+
     openRowPackByTradeId.set(trade.id, {
       derived,
       reviewDto,
@@ -542,6 +567,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       latestReviewOutcome: latestOutcome,
       operatingPosture,
       postureExplainLines,
+      positionEvolution,
+      positionEvolutionLine,
     });
   }
 
@@ -569,6 +596,20 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             marketDataStale: pack.reviewDto.marketDataStale,
           }))
         )
+      : null;
+
+  const bookClusterCounts =
+    openRowPackByTradeId.size > 0
+      ? countBookAttentionClusters({
+          packs: [...openRowPackByTradeId.entries()].map(
+            ([tradeId, pack]) => ({
+              tradeId,
+              operatingPosture: pack.operatingPosture,
+              priorityTier: pack.priorityTier,
+            })
+          ),
+          reviewedTodayTradeIds: checkedTodayTradeIds,
+        })
       : null;
 
   const urgentAllReviewedToday =
@@ -730,13 +771,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       }))
   );
 
+  const bookPostureCounts =
+    openRowPackByTradeId.size > 0
+      ? countOperatingPostures([...openRowPackByTradeId.values()])
+      : null;
+
   const bookOperatingContext =
-    portfolioStrip && reviewQueueModel && openRowPackByTradeId.size > 0
+    portfolioStrip &&
+    reviewQueueModel &&
+    openRowPackByTradeId.size > 0 &&
+    bookPostureCounts
       ? deriveBookOperatingContext({
           activeOpenCount: portfolioStrip.activeOpenCount,
-          postureCounts: countOperatingPostures([
-            ...openRowPackByTradeId.values(),
-          ]),
+          postureCounts: bookPostureCounts,
           urgentQueueCount: reviewQueueModel.urgent.length,
           highAttentionQueueCount: reviewQueueModel.highAttention.length,
           routinePendingQueueCount: reviewQueueModel.routinePending.length,
@@ -748,14 +795,43 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         })
       : null;
 
+  const defensiveHeavyBook =
+    portfolioStrip != null &&
+    bookPostureCounts != null &&
+    portfolioStrip.activeOpenCount >= 3 &&
+    bookPostureCounts.defensive + bookPostureCounts.high_attention >=
+      Math.ceil(portfolioStrip.activeOpenCount * 0.45);
+
+  const bookOperatingBalanceLines =
+    bookClusterCounts != null &&
+    portfolioStrip != null &&
+    bookPostureCounts != null &&
+    openRowPackByTradeId.size > 0
+      ? deriveBookOperatingBalanceLines({
+          activeOpenCount: portfolioStrip.activeOpenCount,
+          postureCounts: bookPostureCounts,
+          clusterCounts: bookClusterCounts,
+          concentration: plannedRiskConcentration,
+          previousStableClusterCount:
+            prevBookOperatingSnapshot?.stableReviewedClusterCount ?? null,
+        })
+      : [];
+
+  const deterioratingOpenCount = [...openRowPackByTradeId.values()].filter(
+    (p) => p.positionEvolution === "deteriorating"
+  ).length;
+  const evolutionSummaryBook =
+    deterioratingOpenCount >= 2
+      ? "Multiple open rows show deteriorating drift vs last checkpoint bar."
+      : null;
+
   const operatingTrendMetrics =
     bookOperatingContext != null &&
     portfolioStrip != null &&
-    reviewQueueModel != null
+    reviewQueueModel != null &&
+    bookPostureCounts != null
       ? {
-          postureCounts: countOperatingPostures([
-            ...openRowPackByTradeId.values(),
-          ]),
+          postureCounts: bookPostureCounts,
           activeOpenCount: portfolioStrip.activeOpenCount,
           urgentQueueCount: reviewQueueModel.urgent.length,
           highAttentionQueueCount: reviewQueueModel.highAttention.length,
@@ -766,6 +842,12 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           staleHeavyCondition: bookOperatingContext.staleHeavyCondition,
           top1Share: plannedRiskConcentration.top1Share,
           top2Share: plannedRiskConcentration.top2Share,
+          urgentSortedTradeIds: reviewQueueModel.urgent.map((s) => s.tradeId),
+          highAttentionSortedTradeIds: reviewQueueModel.highAttention.map(
+            (s) => s.tradeId
+          ),
+          stableReviewedClusterCount: bookClusterCounts?.stable_reviewed ?? 0,
+          defensiveHeavyBook,
         }
       : null;
 
@@ -783,11 +865,26 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           memoryLines: [] as string[],
         };
 
+  const persistenceAwarenessLines =
+    operatingTrendMetrics != null
+      ? derivePersistentPressureAwareness({
+          previous: prevBookOperatingSnapshot,
+          current: operatingTrendMetrics,
+          urgentPendingCheckpointCount:
+            sessionDashboardCounts.urgentPendingGlobal,
+        })
+      : [];
+
   const enhancedSessionOperatingNarrative =
     bookOperatingContext != null
       ? enhanceSessionOperatingNarrative(
           bookOperatingContext.sessionNarrative,
-          operatingTrendDiscipline
+          operatingTrendDiscipline,
+          {
+            balanceLines: bookOperatingBalanceLines,
+            persistenceLines: persistenceAwarenessLines,
+            evolutionSummary: evolutionSummaryBook,
+          }
         )
       : null;
 
@@ -802,7 +899,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const sinceLastVisitLines = [
     ...operatingTrendDiscipline.trendPhrases,
     ...operatingTrendDiscipline.memoryLines,
-  ].slice(0, 2);
+    ...persistenceAwarenessLines,
+  ].slice(0, 3);
 
   let largestRiskPosition: { symbol: string; amount: number } | null = null;
   for (const t of trades) {
@@ -1061,6 +1159,25 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               ))}
             </ul>
           ) : null}
+          {bookOperatingBalanceLines.length > 0 ? (
+            <>
+              <div
+                className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                Operating balance
+              </div>
+              <ul
+                className="mt-1 list-none space-y-1 text-[11px] leading-snug"
+                style={{ color: "var(--text-muted)" }}
+                data-testid="book-operating-balance-lines"
+              >
+                {bookOperatingBalanceLines.map((line, li) => (
+                  <li key={`book-bal-${li}-${line.slice(0, 24)}`}>{line}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
           {sinceLastVisitLines.length > 0 ? (
             <>
               <div
@@ -1165,6 +1282,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             sessionDashboardCounts.pendingAheadInQueue
           }
           sessionQuietLines={sessionQuietLines}
+          evolutionStateLabel={
+            POSITION_EVOLUTION_TRADER_LABEL[focusOpenPack.positionEvolution]
+          }
+          evolutionExplainLine={focusOpenPack.positionEvolutionLine}
         />
       ) : null}
 
@@ -1435,6 +1556,12 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                           latestOutcomeLabel={reviewOutcomeTraderLabel(
                             openPack.latestReviewOutcome
                           )}
+                          evolutionStateLabel={
+                            POSITION_EVOLUTION_TRADER_LABEL[
+                              openPack.positionEvolution
+                            ]
+                          }
+                          evolutionExplainLine={openPack.positionEvolutionLine}
                         />
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>—</span>

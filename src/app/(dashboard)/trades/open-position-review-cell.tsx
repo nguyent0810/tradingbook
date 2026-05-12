@@ -65,6 +65,9 @@ export type OpenPositionReviewCellProps = {
   sessionFocused?: boolean;
   operatingPostureLabel: string;
   latestOutcomeLabel: string | null;
+  /** Muted evolution label from same-visit rules (no extra badge). */
+  evolutionStateLabel?: string;
+  evolutionExplainLine?: string | null;
 };
 
 export function OpenPositionReviewCell({
@@ -81,6 +84,8 @@ export function OpenPositionReviewCell({
   sessionFocused = false,
   operatingPostureLabel,
   latestOutcomeLabel,
+  evolutionStateLabel,
+  evolutionExplainLine,
 }: OpenPositionReviewCellProps) {
   const meaningfulChange =
     reviewDto.sinceReviewDeltaLine ?? reviewDto.sessionDeltaLine;
@@ -112,6 +117,12 @@ export function OpenPositionReviewCell({
           {operatingPostureLabel}
           {latestOutcomeLabel ? ` · ${latestOutcomeLabel}` : ""}
         </span>
+        {evolutionStateLabel ? (
+          <span className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
+            Evolution · {evolutionStateLabel}
+            {evolutionExplainLine ? ` — ${evolutionExplainLine}` : ""}
+          </span>
+        ) : null}
         <Link
           href={`/trades/${tradeId}`}
           className="text-[11px] font-medium underline-offset-2 hover:underline"
@@ -339,6 +350,12 @@ export function OpenPositionReviewCell({
           {" · "}
           Outcome: {latestOutcomeLabel ?? "—"}
         </p>
+        {evolutionStateLabel ? (
+          <p className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
+            Evolution: {evolutionStateLabel}
+            {evolutionExplainLine ? ` — ${evolutionExplainLine}` : ""}
+          </p>
+        ) : null}
 
         {stopRiskLine}
 
@@ -410,6 +427,15 @@ export function OpenPositionReviewCell({
         {operatingPostureLabel}
         {latestOutcomeLabel ? ` · ${latestOutcomeLabel}` : ""}
       </p>
+      {evolutionStateLabel ? (
+        <p
+          className="text-[9px] leading-snug line-clamp-2"
+          style={{ color: "var(--text-muted)" }}
+        >
+          Evolution · {evolutionStateLabel}
+          {evolutionExplainLine ? ` — ${evolutionExplainLine}` : ""}
+        </p>
+      ) : null}
 
       {escalationCues.length > 0 ? (
         <div className="flex flex-col gap-0.5 text-[10px] leading-snug" style={escalationRailStyle()}>

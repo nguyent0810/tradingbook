@@ -4,11 +4,11 @@ import { cookies } from "next/headers";
 import { getSession } from "@/lib/session";
 import {
   BOOK_OPERATING_SNAPSHOT_VERSION,
-  type BookOperatingSnapshotV1,
+  type BookOperatingSnapshotV2,
 } from "@/lib/trades/operating-trend-discipline";
 
 export async function persistBookOperatingSnapshot(
-  snapshot: BookOperatingSnapshotV1
+  snapshot: BookOperatingSnapshotV2
 ): Promise<void> {
   const session = await getSession();
   if (!session) return;

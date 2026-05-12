@@ -88,6 +88,9 @@ export type FocusReviewWorkspaceProps = {
   latestOutcomeLabel: string | null;
   sessionPendingAheadInQueue: number;
   sessionQuietLines: readonly string[];
+  /** Same-visit evolution label — text only, no extra badges. */
+  evolutionStateLabel: string;
+  evolutionExplainLine: string | null;
 };
 
 export function FocusReviewWorkspace({
@@ -111,6 +114,8 @@ export function FocusReviewWorkspace({
   latestOutcomeLabel,
   sessionPendingAheadInQueue,
   sessionQuietLines,
+  evolutionStateLabel,
+  evolutionExplainLine,
 }: FocusReviewWorkspaceProps) {
   const meaningfulChange =
     reviewDto.sinceReviewDeltaLine ?? reviewDto.sessionDeltaLine;
@@ -239,6 +244,17 @@ export function FocusReviewWorkspace({
         <span style={{ color: "var(--text-muted)" }}>
           {sessionPendingAheadInQueue} ahead in this session queue
         </span>
+      </div>
+      <div
+        className="mt-2 text-[11px] leading-snug"
+        style={{ color: "var(--text-muted)" }}
+        data-testid="focus-review-evolution"
+      >
+        <span style={{ color: "var(--text-tertiary)" }}>Evolution · </span>
+        {evolutionStateLabel}
+        {evolutionExplainLine ? (
+          <div className="mt-0.5 text-[10px] leading-snug">{evolutionExplainLine}</div>
+        ) : null}
       </div>
       {postureExplainLines.length > 0 ? (
         <p
