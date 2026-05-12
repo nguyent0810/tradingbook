@@ -1,5 +1,5 @@
 /**
- * Seeds a dedicated Playwright user and exactly two trades for `/trades` layout tests.
+ * Seeds a dedicated Playwright user and trades for `/trades` layout + workstation tests.
  *
  * Requires DATABASE_URL (see scripts/load-env.ts).
  *
@@ -45,6 +45,18 @@ async function main(): Promise<void> {
       },
       {
         userId: user.id,
+        symbol: "E2EQ2",
+        direction: "LONG",
+        status: "OPEN",
+        playbook: "BREAKOUT_PULLBACK",
+        entryDate: new Date("2024-06-02T12:00:00.000Z"),
+        entryPrice: 20_000,
+        quantity: 50,
+        stopLoss: 19_000,
+        takeProfit: 22_000,
+      },
+      {
+        userId: user.id,
         symbol: "E2ECLS",
         direction: "SHORT",
         status: "CLOSED",
@@ -60,7 +72,7 @@ async function main(): Promise<void> {
   });
 
   console.log(
-    `[playwright-seed-trades-layout] ready user=${EMAIL} trades=2`
+    `[playwright-seed-trades-layout] ready user=${EMAIL} trades=3`
   );
 }
 

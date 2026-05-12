@@ -85,8 +85,17 @@ function ReviewSessionChromeInner({
       <div
         className="card mt-4 border px-4 py-3"
         data-testid="trades-review-session-bar"
+        role="region"
+        aria-labelledby="trades-review-session-heading"
         style={{ borderColor: "var(--border-color)" }}
       >
+        <div
+          id="trades-review-session-heading"
+          className="text-[10px] font-semibold uppercase tracking-wide"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          Review session
+        </div>
         {sessionOperatingNarrative ? (
           <p
             className="text-[12px] leading-snug"
@@ -105,7 +114,9 @@ function ReviewSessionChromeInner({
         </p>
         <button
           type="button"
-          className="btn btn-secondary btn-sm mt-3"
+          className="btn btn-secondary btn-sm mt-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ outlineColor: "var(--accent-text)" }}
+          aria-label="Exit review session and return to the full ledger"
           onClick={exitSession}
         >
           Exit review session
@@ -118,11 +129,14 @@ function ReviewSessionChromeInner({
     <div
       className="card mt-4 border px-4 py-3"
       data-testid="trades-review-session-bar"
+      role="region"
+      aria-labelledby="trades-review-session-heading"
       style={{ borderColor: "var(--border-color)" }}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div
+            id="trades-review-session-heading"
             className="text-[10px] font-semibold uppercase tracking-wide"
             style={{ color: "var(--text-tertiary)" }}
           >
@@ -224,29 +238,36 @@ function ReviewSessionChromeInner({
             </ul>
           ) : null}
           <p className="mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
-            ← → keys move between positions. No intraday execution prompts.
+            <kbd className="font-mono">←</kbd> <kbd className="font-mono">→</kbd>{" "}
+            move focus in queue. Daily bar context only.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ outlineColor: "var(--accent-text)" }}
             disabled={!prevId}
+            aria-label="Previous trade in review queue"
             onClick={() => navigate(prevId)}
           >
             Previous
           </button>
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ outlineColor: "var(--accent-text)" }}
             disabled={!nextId}
+            aria-label="Next trade in review queue"
             onClick={() => navigate(nextId)}
           >
             Next
           </button>
           <button
             type="button"
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+            style={{ outlineColor: "var(--accent-text)" }}
+            aria-label="Exit review session"
             onClick={exitSession}
           >
             Exit session

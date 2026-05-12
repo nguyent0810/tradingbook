@@ -2,7 +2,6 @@ import { test, expect } from "@playwright/test";
 
 /**
  * Ledger column order (must match `src/app/(dashboard)/trades/page.tsx`).
- * Symbol … Status … EOD … Hold … Entry Price …
  */
 const COL = {
   symbol: 0,
@@ -10,10 +9,11 @@ const COL = {
   direction: 2,
   playbook: 3,
   status: 4,
-  freshness: 5,
+  positionReview: 5,
   hold: 6,
   entryDate: 7,
   entryPrice: 8,
+  latestExit: 9,
 } as const;
 
 test.describe("/trades table layout", () => {
@@ -31,13 +31,13 @@ test.describe("/trades table layout", () => {
       page.getByRole("heading", { level: 1, name: "Trades" })
     ).toBeVisible();
 
-    await expect(page.getByTestId("trades-header-count")).toHaveText(/2 trades/);
+    await expect(page.getByTestId("trades-header-count")).toHaveText(/3 trades/);
 
     const scroll = page.getByTestId("trades-scroll-container");
     const header = page.getByTestId("trades-table-header");
     const rows = page.getByTestId("trades-table-row");
 
-    await expect(rows).toHaveCount(2);
+    await expect(rows).toHaveCount(3);
 
     const needsHorizontalScroll = await scroll.evaluate(
       (el) => el.scrollWidth > el.clientWidth + 1
@@ -56,7 +56,7 @@ test.describe("/trades table layout", () => {
       "First body row must sit below thead bottom (no header overlap)"
     ).toBeGreaterThanOrEqual(hb!.y + hb!.height - 1);
 
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 3; i++) {
       const box = await rows.nth(i).boundingBox();
       expect(
         box!.height,
@@ -68,9 +68,10 @@ test.describe("/trades table layout", () => {
     await expect(rowOpen.locator("td").nth(COL.symbol)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.symbol)).toContainText("E2EOPEN");
     await expect(rowOpen.locator("td").nth(COL.status)).toContainText("Active");
-    await expect(rowOpen.locator("td").nth(COL.freshness)).toBeVisible();
+    await expect(rowOpen.locator("td").nth(COL.positionReview)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.hold)).toBeVisible();
     await expect(rowOpen.locator("td").nth(COL.entryPrice)).toBeVisible();
+    await expect(rowOpen.locator("td").nth(COL.latestExit)).toBeVisible();
 
     const rowClosed = rows.filter({ hasText: "E2ECLS" }).first();
     await expect(rowClosed.locator("td").nth(COL.symbol)).toContainText(
@@ -79,7 +80,7 @@ test.describe("/trades table layout", () => {
     await expect(rowClosed.locator("td").nth(COL.status)).toContainText(
       "Completed"
     );
-    await expect(rowClosed.locator("td").nth(COL.freshness)).toBeVisible();
+    await expect(rowClosed.locator("td").nth(COL.latestExit)).toBeVisible();
     await expect(rowClosed.locator("td").nth(COL.entryPrice)).toBeVisible();
   });
 });

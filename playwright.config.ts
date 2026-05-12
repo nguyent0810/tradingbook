@@ -37,6 +37,16 @@ export default defineConfig({
         storageState: authState,
       },
     },
+    {
+      name: "chromium-trades-workstation",
+      testMatch: /trades-workstation\.spec\.ts$/,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 900 },
+        storageState: authState,
+      },
+    },
   ],
   webServer: {
     command: "npm run dev",

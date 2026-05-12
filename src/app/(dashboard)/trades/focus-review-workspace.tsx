@@ -133,7 +133,9 @@ export function FocusReviewWorkspace({
     <section
       className="card mt-4 border px-4 py-4"
       data-testid="focus-review-workspace"
+      role="region"
       aria-labelledby="focus-review-workspace-title"
+      aria-label={`Operational review for ${symbol}`}
       style={{
         borderColor: "color-mix(in srgb, #0ea5e9 22%, var(--border-color))",
         backgroundColor: "color-mix(in srgb, #0ea5e9 4%, var(--bg-secondary))",
@@ -163,7 +165,8 @@ export function FocusReviewWorkspace({
         </div>
         <Link
           href={`/trades/${tradeId}`}
-          className="btn btn-secondary btn-sm shrink-0"
+          className="btn btn-secondary btn-sm shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ outlineColor: "var(--accent-text)" }}
         >
           Trade sheet
         </Link>

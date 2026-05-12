@@ -114,6 +114,27 @@ interface TradesPageProps {
   }>;
 }
 
+function buildTradesSearchParams(input: {
+  search: string;
+  statusFilter: string;
+  sortParam: string | undefined;
+  compactReview: boolean;
+  reviewSessionActive: boolean;
+  reviewFocusId: string | undefined;
+}): URLSearchParams {
+  const p = new URLSearchParams();
+  const s = input.search.trim();
+  if (s) p.set("search", s);
+  if (input.statusFilter && input.statusFilter !== "ALL") {
+    p.set("status", input.statusFilter);
+  }
+  if (input.sortParam) p.set("sort", input.sortParam);
+  if (input.compactReview) p.set("compactReview", "1");
+  if (input.reviewSessionActive) p.set("reviewSession", "1");
+  if (input.reviewFocusId) p.set("reviewFocus", input.reviewFocusId);
+  return p;
+}
+
 function formatQuantityCell(q: number): string {
   if (!Number.isFinite(q) || q <= 0) return "—";
   return new Intl.NumberFormat("en-US", {
@@ -685,6 +706,38 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     resolveReviewSessionFocus(reviewSessionQueue, reviewFocusParam);
   const { prevId: sessionPrevId, nextId: sessionNextId } =
     sessionQueueNeighbors(reviewSessionQueue, sessionFocusIndex);
+
+  if (reviewSessionActive) {
+    if (
+      reviewSessionQueue.length > 0 &&
+      sessionFocusId &&
+      reviewFocusParam &&
+      reviewFocusParam !== sessionFocusId
+    ) {
+      redirect(
+        `/trades?${buildTradesSearchParams({
+          search,
+          statusFilter,
+          sortParam: params.sort,
+          compactReview,
+          reviewSessionActive: true,
+          reviewFocusId: sessionFocusId,
+        }).toString()}`
+      );
+    }
+    if (reviewSessionQueue.length === 0 && reviewFocusParam) {
+      redirect(
+        `/trades?${buildTradesSearchParams({
+          search,
+          statusFilter,
+          sortParam: params.sort,
+          compactReview,
+          reviewSessionActive: true,
+          reviewFocusId: undefined,
+        }).toString()}`
+      );
+    }
+  }
 
   const tierByTradeId = new Map(
     sessionPackInputs.map((p) => [p.tradeId, p.priorityTier] as const)
@@ -1441,6 +1494,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                     <tr
                       key={`cluster-divider-${rowIndex}-${item.label}`}
                       data-testid="trades-cluster-divider"
+                      aria-hidden="true"
                       style={{
                         backgroundColor: "var(--bg-tertiary)",
                       }}
