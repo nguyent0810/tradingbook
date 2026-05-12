@@ -73,10 +73,12 @@ import {
   deriveBookOperatingContext,
 } from "@/lib/trades/book-operating-context";
 import {
+  bookOperatingSnapshotsMeaningfullyEqual,
   buildNextOperatingSnapshot,
   deriveOperatingTrendDiscipline,
   derivePersistentPressureAwareness,
   enhanceSessionOperatingNarrative,
+  mergeSinceLastVisitDisplayLines,
   parseBookOperatingSnapshot,
 } from "@/lib/trades/operating-trend-discipline";
 import {
@@ -822,7 +824,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   ).length;
   const evolutionSummaryBook =
     deterioratingOpenCount >= 2
-      ? "Multiple open rows show deteriorating drift vs last checkpoint bar."
+      ? "Multiple rows deteriorating vs last checkpoint."
       : null;
 
   const operatingTrendMetrics =
@@ -880,11 +882,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ? enhanceSessionOperatingNarrative(
           bookOperatingContext.sessionNarrative,
           operatingTrendDiscipline,
-          {
-            balanceLines: bookOperatingBalanceLines,
-            persistenceLines: persistenceAwarenessLines,
-            evolutionSummary: evolutionSummaryBook,
-          }
+          { evolutionSummary: evolutionSummaryBook }
         )
       : null;
 
@@ -896,11 +894,22 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         )
       : null;
 
-  const sinceLastVisitLines = [
-    ...operatingTrendDiscipline.trendPhrases,
-    ...operatingTrendDiscipline.memoryLines,
-    ...persistenceAwarenessLines,
-  ].slice(0, 3);
+  const snapshotForPersistence =
+    snapshotToPersist != null &&
+    (prevBookOperatingSnapshot == null ||
+      !bookOperatingSnapshotsMeaningfullyEqual(
+        prevBookOperatingSnapshot,
+        snapshotToPersist
+      ))
+      ? snapshotToPersist
+      : null;
+
+  const sinceLastVisitLines = mergeSinceLastVisitDisplayLines(
+    operatingTrendDiscipline.trendPhrases,
+    operatingTrendDiscipline.memoryLines,
+    persistenceAwarenessLines,
+    compactReview ? 2 : 3
+  );
 
   let largestRiskPosition: { symbol: string; amount: number } | null = null;
   for (const t of trades) {
@@ -996,7 +1005,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         </Link>
       </div>
 
-      {sessionBriefing && hasOpenTrades ? (
+      {sessionBriefing && hasOpenTrades && !compactReview ? (
         <div
           className="card mt-4 border px-4 py-3"
           data-testid="trades-session-briefing"
@@ -1037,7 +1046,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             className="text-[10px] font-semibold uppercase tracking-wide"
             style={{ color: "var(--text-tertiary)" }}
           >
-            Review queue · daily bar context
+            {compactReview ? "Review queue" : "Review queue · daily bar context"}
           </div>
           <dl className="mt-2 space-y-2 text-[13px]">
             {reviewQueueModel.urgent.length > 0 ? (
@@ -1154,48 +1163,94 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
               className="mt-2 list-none space-y-1 text-[12px] leading-snug"
               style={{ color: "var(--text-secondary)" }}
             >
-              {bookOperatingContext.detailLines.map((line, li) => (
+              {(compactReview
+                ? bookOperatingContext.detailLines.slice(0, 1)
+                : bookOperatingContext.detailLines
+              ).map((line, li) => (
                 <li key={`book-ctx-${li}-${line.slice(0, 28)}`}>{line}</li>
               ))}
             </ul>
           ) : null}
-          {bookOperatingBalanceLines.length > 0 ? (
+          {!compactReview &&
+          (bookOperatingBalanceLines.length > 0 || sinceLastVisitLines.length > 0) ? (
             <>
-              <div
-                className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                Operating balance
-              </div>
-              <ul
-                className="mt-1 list-none space-y-1 text-[11px] leading-snug"
-                style={{ color: "var(--text-muted)" }}
-                data-testid="book-operating-balance-lines"
-              >
-                {bookOperatingBalanceLines.map((line, li) => (
-                  <li key={`book-bal-${li}-${line.slice(0, 24)}`}>{line}</li>
-                ))}
-              </ul>
+              {bookOperatingBalanceLines.length > 0 ? (
+                <>
+                  <div
+                    className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
+                    style={{ color: "var(--text-tertiary)" }}
+                  >
+                    Operating balance
+                  </div>
+                  <ul
+                    className="mt-1 list-none space-y-1 text-[11px] leading-snug"
+                    style={{ color: "var(--text-muted)" }}
+                    data-testid="book-operating-balance-lines"
+                  >
+                    {bookOperatingBalanceLines.map((line, li) => (
+                      <li key={`book-bal-${li}-${line.slice(0, 24)}`}>{line}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
+              {sinceLastVisitLines.length > 0 ? (
+                <>
+                  <div
+                    className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
+                    style={{ color: "var(--text-tertiary)" }}
+                  >
+                    Since last ledger visit
+                  </div>
+                  <ul
+                    className="mt-1 list-none space-y-1 text-[11px] leading-snug"
+                    style={{ color: "var(--text-muted)" }}
+                    data-testid="book-operating-trend-lines"
+                  >
+                    {sinceLastVisitLines.map((line, li) => (
+                      <li key={`book-trend-${li}-${line.slice(0, 24)}`}>{line}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : null}
             </>
           ) : null}
-          {sinceLastVisitLines.length > 0 ? (
-            <>
-              <div
-                className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
+          {compactReview &&
+          (bookOperatingBalanceLines.length > 0 || sinceLastVisitLines.length > 0) ? (
+            <details
+              className="mt-2 group"
+              data-testid="book-visit-delta-collapsed"
+            >
+              <summary
+                className="cursor-pointer list-none text-[10px] font-medium uppercase tracking-wide underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden"
                 style={{ color: "var(--text-tertiary)" }}
               >
-                Since last ledger visit
+                Visit delta & balance
+              </summary>
+              <div className="mt-2 space-y-2 border-t pt-2" style={{ borderColor: "var(--border-color)" }}>
+                {bookOperatingBalanceLines.length > 0 ? (
+                  <ul
+                    className="list-none space-y-1 text-[11px] leading-snug"
+                    style={{ color: "var(--text-muted)" }}
+                    data-testid="book-operating-balance-lines"
+                  >
+                    {bookOperatingBalanceLines.slice(0, 1).map((line, li) => (
+                      <li key={`book-bal-c-${li}-${line.slice(0, 24)}`}>{line}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                {sinceLastVisitLines.length > 0 ? (
+                  <ul
+                    className="list-none space-y-1 text-[11px] leading-snug"
+                    style={{ color: "var(--text-muted)" }}
+                    data-testid="book-operating-trend-lines"
+                  >
+                    {sinceLastVisitLines.map((line, li) => (
+                      <li key={`book-trend-c-${li}-${line.slice(0, 24)}`}>{line}</li>
+                    ))}
+                  </ul>
+                ) : null}
               </div>
-              <ul
-                className="mt-1 list-none space-y-1 text-[11px] leading-snug"
-                style={{ color: "var(--text-muted)" }}
-                data-testid="book-operating-trend-lines"
-              >
-                {sinceLastVisitLines.map((line, li) => (
-                  <li key={`book-trend-${li}-${line.slice(0, 24)}`}>{line}</li>
-                ))}
-              </ul>
-            </>
+            </details>
           ) : null}
         </div>
       ) : null}
@@ -1562,6 +1617,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                             ]
                           }
                           evolutionExplainLine={openPack.positionEvolutionLine}
+                          compactReviewMode={compactReview}
                         />
                       ) : (
                         <span style={{ color: "var(--text-muted)" }}>—</span>
@@ -1735,7 +1791,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           </table>
         </div>
       )}
-      <OperatingSnapshotPersist snapshot={snapshotToPersist} />
+      <OperatingSnapshotPersist snapshot={snapshotForPersistence} />
     </div>
   );
 }

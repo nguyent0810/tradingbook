@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  bookOperatingSnapshotsMeaningfullyEqual,
   BOOK_OPERATING_SNAPSHOT_VERSION,
   buildNextOperatingSnapshot,
   deriveOperatingTrendDiscipline,
   derivePersistentPressureAwareness,
   enhanceSessionOperatingNarrative,
+  mergeSinceLastVisitDisplayLines,
   parseBookOperatingSnapshot,
   type OperatingTrendMetrics,
 } from "./operating-trend-discipline";
@@ -167,20 +169,49 @@ describe("enhanceSessionOperatingNarrative", () => {
     expect(s).toContain("queue");
   });
 
-  it("weaves balance, evolution, and persistence when provided", () => {
+  it("weaves evolution and trend without book-level tails", () => {
     const s = enhanceSessionOperatingNarrative(
       "Session base.",
-      { trendPhrases: [], disciplineCues: [], memoryLines: [] },
       {
-        balanceLines: ["Healthy balance restored on this scan."],
-        evolutionSummary: "Multiple deteriorating rows.",
-        persistenceLines: ["Stale pressure carried across visits."],
-      }
+        trendPhrases: ["Urgent queue grew since last ledger visit"],
+        disciplineCues: ["Urgent queue: checkpoints still open today."],
+        memoryLines: [],
+      },
+      { evolutionSummary: "Multiple rows deteriorating vs last checkpoint." }
     );
     expect(s).toContain("Session base.");
-    expect(s).toContain("Balance:");
     expect(s).toContain("Evolution:");
-    expect(s).toContain("Persistence:");
+    expect(s.toLowerCase()).toContain("trend:");
+    expect(s).toContain("Urgent queue:");
+    expect(s).not.toContain("Balance:");
+    expect(s).not.toContain("Persistence:");
+  });
+});
+
+describe("bookOperatingSnapshotsMeaningfullyEqual", () => {
+  it("treats snapshots as equal when only recordedAtMs differs", () => {
+    const a = buildNextOperatingSnapshot(null, metrics({ headlineTag: "stable" }));
+    const b = { ...a, recordedAtMs: a.recordedAtMs + 99_000 };
+    expect(bookOperatingSnapshotsMeaningfullyEqual(a, b)).toBe(true);
+  });
+
+  it("detects meaningful mismatch", () => {
+    const a = buildNextOperatingSnapshot(null, metrics({ headlineTag: "stable" }));
+    const b = buildNextOperatingSnapshot(a, metrics({ headlineTag: "stale_data" }));
+    expect(bookOperatingSnapshotsMeaningfullyEqual(a, b)).toBe(false);
+  });
+});
+
+describe("mergeSinceLastVisitDisplayLines", () => {
+  it("keeps only one stale-themed line", () => {
+    const merged = mergeSinceLastVisitDisplayLines(
+      ["Stale bar pressure unchanged vs last visit."],
+      [],
+      ["Stale headline carried across multiple visits."],
+      3
+    );
+    expect(merged.filter((l) => /stale/i.test(l))).toHaveLength(1);
+    expect(merged.length).toBeGreaterThanOrEqual(1);
   });
 });
 

@@ -366,7 +366,7 @@ function buildSessionOperatingNarrative(params: {
     (staleMarketOpenCount >= 1 && pendingCheckpointCount >= 2)
   ) {
     parts.push(
-      "Review pressure is elevated from stale bar context and pending checkpoints — work the queue calmly."
+      "Stale bars plus pending checkpoints — work the queue calmly."
     );
   } else if (
     concentration.top2Share != null &&
@@ -375,15 +375,15 @@ function buildSessionOperatingNarrative(params: {
     concentration.top2Symbol
   ) {
     parts.push(
-      `Risk concentration is elevated across ${concentration.top1Symbol} and ${concentration.top2Symbol} vs the rest of the summed at-risk book (where computable).`
+      `Elevated at-risk share in ${concentration.top1Symbol} + ${concentration.top2Symbol} (where computable).`
     );
   } else if (urgentQueueCount + highAttentionQueueCount > 0) {
     parts.push(
-      `${urgentQueueCount} urgent and ${highAttentionQueueCount} high-attention queue name(s) on ${activeOpenCount} open — prioritize checkpoints in order.`
+      `${urgentQueueCount} urgent, ${highAttentionQueueCount} high-attention on ${activeOpenCount} open — queue order stands.`
     );
   } else {
     parts.push(
-      `${pendingCheckpointCount} checkpoint(s) still pending today across ${activeOpenCount} open position(s).`
+      `${pendingCheckpointCount} checkpoint(s) pending today across ${activeOpenCount} open.`
     );
   }
 

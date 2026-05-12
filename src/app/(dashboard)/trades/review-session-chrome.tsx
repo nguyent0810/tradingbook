@@ -128,15 +128,6 @@ function ReviewSessionChromeInner({
           >
             Review session
           </div>
-          {sessionOperatingNarrative ? (
-            <p
-              className="mt-2 text-[12px] leading-snug"
-              style={{ color: "var(--text-secondary)" }}
-              data-testid="trades-review-session-operating-narrative"
-            >
-              {sessionOperatingNarrative}
-            </p>
-          ) : null}
           <p
             className="mt-2 text-[13px] leading-relaxed"
             style={{ color: "var(--text-secondary)" }}
@@ -149,79 +140,78 @@ function ReviewSessionChromeInner({
             </span>
             <span style={{ color: "var(--text-muted)" }}> / </span>
             <span className="tabular-nums">{sessionQueueLength}</span>
-            {" in queue · "}
+            {" queue · "}
             <span
               className="font-semibold tabular-nums"
               style={{ color: "var(--text-primary)" }}
             >
               {urgentPendingGlobal}
             </span>
-            {" urgent pending · "}
+            {" urgent · "}
             <span
               className="font-semibold tabular-nums"
               style={{ color: "var(--text-primary)" }}
             >
               {pendingCheckpointGlobal}
             </span>
-            {" checkpoints pending · "}
+            {" chk · "}
             <span
               className="font-semibold tabular-nums"
               style={{ color: "var(--text-primary)" }}
             >
               {pendingAheadInQueue}
             </span>
-            {" pending ahead · "}
+            {" ahead · "}
             <span
               className="font-semibold tabular-nums"
               style={{ color: "var(--text-primary)" }}
             >
-              {totalActiveOpen}
+              {reviewedTodayOpenCount}
             </span>
-            {" active"}
+            {"/"}
+            <span className="tabular-nums">{totalActiveOpen}</span>
+            {" reviewed today"}
           </p>
           {sessionQueueLength > 0 ? (
-            <>
-              <p
-                className="mt-2 text-[11px] leading-snug"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                <span className="font-semibold tabular-nums" style={{ color: "var(--text-primary)" }}>
-                  {reviewedTodayOpenCount}
-                </span>
-                {" of "}
-                <span className="tabular-nums">{totalActiveOpen}</span>
-                {" open reviewed today · "}
-                <span className="font-semibold tabular-nums" style={{ color: "var(--text-primary)" }}>
-                  {pendingCheckpointGlobal}
-                </span>
-                {" checkpoints still pending"}
-              </p>
+            <div
+              className="mt-1.5 h-0.5 max-w-md overflow-hidden rounded-full"
+              style={{ background: "var(--bg-tertiary)" }}
+              role="img"
+              aria-label={`Today's review progress about ${Math.min(
+                100,
+                Math.round(
+                  (totalActiveOpen > 0
+                    ? (reviewedTodayOpenCount / totalActiveOpen) * 100
+                    : 0)
+                )
+              )} percent`}
+            >
               <div
-                className="mt-1.5 h-0.5 max-w-md overflow-hidden rounded-full"
-                style={{ background: "var(--bg-tertiary)" }}
-                aria-hidden
-              >
-                <div
-                  className="h-full rounded-full"
-                  style={{
-                    width: `${Math.min(
-                      100,
-                      Math.round(
-                        (totalActiveOpen > 0
-                          ? reviewedTodayOpenCount / totalActiveOpen
-                          : 0) * 100
-                      )
-                    )}%`,
-                    backgroundColor:
-                      "color-mix(in srgb, #64748b 50%, var(--border-color))",
-                  }}
-                />
-              </div>
-            </>
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.min(
+                    100,
+                    Math.round(
+                      (totalActiveOpen > 0
+                        ? (reviewedTodayOpenCount / totalActiveOpen) * 100
+                        : 0)
+                    )
+                  )}%`,
+                  backgroundColor:
+                    "color-mix(in srgb, #64748b 50%, var(--border-color))",
+                }}
+              />
+            </div>
           ) : null}
-          <p className="mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
-            ← → keys move between positions. No intraday execution prompts.
-          </p>
+          {sessionOperatingNarrative ? (
+            <p
+              className="mt-2 text-[12px] leading-snug"
+              style={{ color: "var(--text-secondary)" }}
+              data-testid="trades-review-session-operating-narrative"
+            >
+              {sessionOperatingNarrative}
+            </p>
+          ) : null}
           {sessionQuietLines.length > 0 ? (
             <ul
               className="mt-2 list-none space-y-0.5 text-[11px] leading-snug"
@@ -233,6 +223,9 @@ function ReviewSessionChromeInner({
               ))}
             </ul>
           ) : null}
+          <p className="mt-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+            ← → keys move between positions. No intraday execution prompts.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button

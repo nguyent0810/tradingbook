@@ -68,6 +68,8 @@ export type OpenPositionReviewCellProps = {
   /** Muted evolution label from same-visit rules (no extra badge). */
   evolutionStateLabel?: string;
   evolutionExplainLine?: string | null;
+  /** When true, hide long evolution explain (compact ledger scan). */
+  compactReviewMode?: boolean;
 };
 
 export function OpenPositionReviewCell({
@@ -86,6 +88,7 @@ export function OpenPositionReviewCell({
   latestOutcomeLabel,
   evolutionStateLabel,
   evolutionExplainLine,
+  compactReviewMode = false,
 }: OpenPositionReviewCellProps) {
   const meaningfulChange =
     reviewDto.sinceReviewDeltaLine ?? reviewDto.sessionDeltaLine;
@@ -120,7 +123,9 @@ export function OpenPositionReviewCell({
         {evolutionStateLabel ? (
           <span className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
             Evolution · {evolutionStateLabel}
-            {evolutionExplainLine ? ` — ${evolutionExplainLine}` : ""}
+            {evolutionExplainLine && !compactReviewMode
+              ? ` — ${evolutionExplainLine}`
+              : ""}
           </span>
         ) : null}
         <Link
@@ -321,9 +326,11 @@ export function OpenPositionReviewCell({
           No equity bar loaded.
         </div>
       )}
-      <p className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
-        Daily bars only — not live execution advice.
-      </p>
+      {!compactReviewMode ? (
+        <p className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
+          Daily bars only — not live execution advice.
+        </p>
+      ) : null}
     </>
   );
 
@@ -353,7 +360,7 @@ export function OpenPositionReviewCell({
         {evolutionStateLabel ? (
           <p className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
             Evolution: {evolutionStateLabel}
-            {evolutionExplainLine ? ` — ${evolutionExplainLine}` : ""}
+            {evolutionExplainLine && !compactReviewMode ? ` — ${evolutionExplainLine}` : ""}
           </p>
         ) : null}
 
@@ -433,7 +440,9 @@ export function OpenPositionReviewCell({
           style={{ color: "var(--text-muted)" }}
         >
           Evolution · {evolutionStateLabel}
-          {evolutionExplainLine ? ` — ${evolutionExplainLine}` : ""}
+          {evolutionExplainLine && !compactReviewMode
+            ? ` — ${evolutionExplainLine}`
+            : ""}
         </p>
       ) : null}
 

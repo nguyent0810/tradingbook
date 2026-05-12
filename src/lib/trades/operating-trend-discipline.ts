@@ -93,6 +93,80 @@ function setsEqual(a: readonly string[], b: readonly string[]): boolean {
   return true;
 }
 
+/** True when persisted snapshot and candidate differ only by `recordedAtMs` (or are identical). */
+export function bookOperatingSnapshotsMeaningfullyEqual(
+  a: BookOperatingSnapshotV2,
+  b: BookOperatingSnapshotV2
+): boolean {
+  return (
+    a.v === b.v &&
+    a.activeOpenCount === b.activeOpenCount &&
+    a.postureStable === b.postureStable &&
+    a.postureCautious === b.postureCautious &&
+    a.postureDefensive === b.postureDefensive &&
+    a.postureHighAttention === b.postureHighAttention &&
+    a.urgentQueueCount === b.urgentQueueCount &&
+    a.highAttentionQueueCount === b.highAttentionQueueCount &&
+    a.staleMarketOpenCount === b.staleMarketOpenCount &&
+    a.pendingCheckpointCount === b.pendingCheckpointCount &&
+    a.reviewedTodayOpenCount === b.reviewedTodayOpenCount &&
+    a.headlineTag === b.headlineTag &&
+    a.staleHeavyCondition === b.staleHeavyCondition &&
+    a.top1Share === b.top1Share &&
+    a.top2Share === b.top2Share &&
+    a.completionRatio === b.completionRatio &&
+    a.consecutiveReviewHeavyVisits === b.consecutiveReviewHeavyVisits &&
+    a.consecutiveStalePressureVisits === b.consecutiveStalePressureVisits &&
+    setsEqual(a.urgentSortedTradeIds, b.urgentSortedTradeIds) &&
+    setsEqual(a.highAttentionSortedTradeIds, b.highAttentionSortedTradeIds) &&
+    a.stableReviewedClusterCount === b.stableReviewedClusterCount &&
+    a.defensiveHeavyBook === b.defensiveHeavyBook &&
+    a.consecutiveDefensiveHeavyVisits === b.consecutiveDefensiveHeavyVisits
+  );
+}
+
+/**
+ * Single pass of visit-delta lines for the book card: persistence first, then trend, then memory.
+ * Drops a second line whose theme repeats "stale" (one stale signal is enough).
+ */
+export function mergeSinceLastVisitDisplayLines(
+  trendPhrases: readonly string[],
+  memoryLines: readonly string[],
+  persistenceLines: readonly string[],
+  maxLines: number
+): string[] {
+  const out: string[] = [];
+  let staleUsed = false;
+  const mentionsStale = (s: string) => /stale/i.test(s);
+  const push = (line: string) => {
+    if (out.length >= maxLines) return;
+    const st = mentionsStale(line);
+    if (st && staleUsed) return;
+    if (st) staleUsed = true;
+    out.push(line);
+  };
+  for (const p of persistenceLines) push(p);
+  for (const t of trendPhrases) push(t);
+  for (const m of memoryLines) push(m);
+  return out;
+}
+
+function ordinal(n: number): string {
+  if (n === 3) return "Third";
+  if (n === 4) return "Fourth";
+  if (n === 5) return "Fifth";
+  return `${n}th`;
+}
+
+function dedupePhrases(lines: string[]): string[] {
+  const seen = new Set<string>();
+  return lines.filter((l) => {
+    if (seen.has(l)) return false;
+    seen.add(l);
+    return true;
+  });
+}
+
 export function buildNextOperatingSnapshot(
   previous: BookOperatingSnapshotV2 | null,
   metrics: OperatingTrendMetrics
@@ -195,16 +269,14 @@ export function deriveOperatingTrendDiscipline(params: {
     current.staleHeavyCondition &&
     current.staleMarketOpenCount >= 1
   ) {
-    trendPhrases.push("Stale review pressure persists");
+    trendPhrases.push("Stale bar pressure unchanged vs last visit.");
   }
 
   if (
     urgentPendingCheckpointCount >= 1 &&
     current.urgentQueueCount >= 1
   ) {
-    disciplineCues.push(
-      "Some urgent-queue positions still need today’s checkpoint."
-    );
+    disciplineCues.push("Urgent queue: checkpoints still open today.");
   }
 
   if (
@@ -212,7 +284,7 @@ export function deriveOperatingTrendDiscipline(params: {
     current.headlineTag === "stale_data"
   ) {
     disciplineCues.push(
-      "Stale bar context repeated on successive ledger visits — verify data freshness."
+      "Stale bar context repeated across visits — check data freshness."
     );
   }
 
@@ -222,9 +294,7 @@ export function deriveOperatingTrendDiscipline(params: {
     prev.top1Share >= 0.45 &&
     current.top1Share >= 0.45
   ) {
-    disciplineCues.push(
-      "Planned capital-at-risk concentration remains elevated vs last visit’s snapshot."
-    );
+    disciplineCues.push("Planned at-risk concentration still elevated vs last visit.");
   }
 
   const prevRatio = prev.completionRatio;
@@ -238,9 +308,7 @@ export function deriveOperatingTrendDiscipline(params: {
     currRatio - prevRatio >= 0.15 &&
     current.activeOpenCount >= 2
   ) {
-    disciplineCues.push(
-      "Review completion coverage improved versus your last ledger visit."
-    );
+    disciplineCues.push("Checkpoint coverage improved vs last visit.");
   }
 
   const streak =
@@ -249,7 +317,7 @@ export function deriveOperatingTrendDiscipline(params: {
       : 0;
   if (streak >= 3) {
     memoryLines.push(
-      `${ordinal(streak)} consecutive review-heavy ledger scan — pending checkpoints still dominate vs open count.`
+      `${ordinal(streak)} consecutive review-heavy visit — checkpoints still dominate vs opens.`
     );
   }
 
@@ -257,7 +325,7 @@ export function deriveOperatingTrendDiscipline(params: {
     current.highAttentionQueueCount < prev.highAttentionQueueCount &&
     prev.highAttentionQueueCount >= 2
   ) {
-    memoryLines.push("High-attention queue names decreased vs last visit.");
+    memoryLines.push("High-attention queue shrank vs last visit.");
   }
 
   if (
@@ -265,7 +333,7 @@ export function deriveOperatingTrendDiscipline(params: {
     prev.headlineTag !== "stable" &&
     current.postureCounts.stable >= prev.postureStable
   ) {
-    memoryLines.push("Book headline reads stable vs prior visit.");
+    memoryLines.push("Book headline now stable vs prior visit.");
   }
 
   return {
@@ -290,9 +358,7 @@ export function derivePersistentPressureAwareness(params: {
     setsEqual(previous.urgentSortedTradeIds, current.urgentSortedTradeIds) &&
     urgentPendingCheckpointCount >= 1
   ) {
-    lines.push(
-      "Urgent queue roster unchanged since last visit — some checkpoints may still be open."
-    );
+    lines.push("Urgent queue roster unchanged; checkpoints may still be open.");
   }
 
   if (
@@ -303,18 +369,14 @@ export function derivePersistentPressureAwareness(params: {
     ) &&
     current.highAttentionQueueCount >= previous.highAttentionQueueCount
   ) {
-    lines.push(
-      "Same high-attention queue names as last visit — operational load is persisting."
-    );
+    lines.push("Same high-attention queue roster as last visit.");
   }
 
   if (
     previous.consecutiveStalePressureVisits >= 2 &&
     current.headlineTag === "stale_data"
   ) {
-    lines.push(
-      "Stale-review pressure has carried across multiple ledger visits."
-    );
+    lines.push("Stale headline carried across multiple visits.");
   }
 
   if (
@@ -322,37 +384,17 @@ export function derivePersistentPressureAwareness(params: {
     current.defensiveHeavyBook &&
     previous.consecutiveDefensiveHeavyVisits >= 1
   ) {
-    lines.push(
-      "Defensive posture concentration remains elevated across successive visits."
-    );
+    lines.push("Defensive-heavy book again vs last visit.");
   }
 
   return dedupePhrases(lines).slice(0, 2);
 }
 
 export type SessionNarrativeExtras = {
-  balanceLines?: readonly string[];
-  persistenceLines?: readonly string[];
   evolutionSummary?: string | null;
 };
 
-function ordinal(n: number): string {
-  if (n === 3) return "Third";
-  if (n === 4) return "Fourth";
-  if (n === 5) return "Fifth";
-  return `${n}th`;
-}
-
-function dedupePhrases(lines: string[]): string[] {
-  const seen = new Set<string>();
-  return lines.filter((l) => {
-    if (seen.has(l)) return false;
-    seen.add(l);
-    return true;
-  });
-}
-
-/** Concise narrative extension — no AI tone. */
+/** Session chrome only: book card owns balance and visit-delta lines. */
 export function enhanceSessionOperatingNarrative(
   baseNarrative: string,
   trendDiscipline: OperatingTrendDisciplineResult,
@@ -360,9 +402,6 @@ export function enhanceSessionOperatingNarrative(
 ): string {
   const parts: string[] = [baseNarrative.trim()];
   const tail: string[] = [];
-
-  const bal = extras?.balanceLines?.[0];
-  if (bal) tail.push(`Balance: ${bal}`);
 
   const evo = extras?.evolutionSummary?.trim();
   if (evo) tail.push(`Evolution: ${evo}`);
@@ -374,13 +413,10 @@ export function enhanceSessionOperatingNarrative(
     tail.push(trendDiscipline.disciplineCues[0]);
   }
 
-  const pers = extras?.persistenceLines?.[0];
-  if (pers) tail.push(`Persistence: ${pers}`);
-
   if (tail.length === 0) return parts.join(" ");
 
   const merged = `${parts[0]} ${tail.join(" ")}`.trim();
-  return merged.length > 400 ? `${merged.slice(0, 397)}…` : merged;
+  return merged.length > 280 ? `${merged.slice(0, 277)}…` : merged;
 }
 
 /** Normalize v1 legacy cookies into v2 shape (unknown fields defaulted). */
