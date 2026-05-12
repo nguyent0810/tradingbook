@@ -18,13 +18,16 @@ export type SetupsBaseData = {
   latest: LatestScanWithCandidates | null;
   notes: ReturnType<typeof parseDailyScanGate2Notes>;
   expectedSession: Date | null;
+  /** Max `StockDailyBar.date` in DB (UTC calendar). */
+  latestEquityBarSession: Date | null;
   scanLoadError: string | null;
   sessionLoadError: string | null;
+  equityMaxLoadError: string | null;
 };
 
 /** Latest scan + index session in parallel (single flight per request via React cache). */
 export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
-  const [scanRes, sessionRes] = await Promise.all([
+  const [scanRes, sessionRes, equityRes] = await Promise.all([
     getLatestDailyScanRun()
       .then((latest) => ({ latest, error: null as string | null }))
       .catch((e) => {
@@ -43,6 +46,16 @@ export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
           error: "Database temporarily unavailable (benchmark session).",
         };
       }),
+    prisma.stockDailyBar
+      .aggregate({ _max: { date: true } })
+      .then((r) => ({ maxDate: r._max.date, error: null as string | null }))
+      .catch((e) => {
+        console.error("[setups] equity max bar date failed:", e);
+        return {
+          maxDate: null as Date | null,
+          error: "Database temporarily unavailable (equity bar dates).",
+        };
+      }),
   ]);
 
   const notes = parseDailyScanGate2Notes(scanRes.latest?.notes ?? null);
@@ -51,8 +64,10 @@ export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
     latest: scanRes.latest,
     notes,
     expectedSession: sessionRes.session,
+    latestEquityBarSession: equityRes.maxDate,
     scanLoadError: scanRes.error,
     sessionLoadError: sessionRes.error,
+    equityMaxLoadError: equityRes.error,
   };
 });
 

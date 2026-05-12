@@ -4,6 +4,10 @@ import { displayDailyScanRunStatus } from "@/lib/trading-display-labels";
 export type SetupsInsightBlockProps = {
   insight: InsightCopy;
   runAtLabel: string;
+  /** Latest VNINDEX EOD calendar day (UTC) used as benchmark session — not scan wall-clock time. */
+  benchmarkSessionDate?: string | null;
+  /** Latest calendar day among all `StockDailyBar` rows (UTC) — may differ from VNINDEX session. */
+  equityBarsLatestSession?: string | null;
   /** Trader-facing regime label (e.g. Favorable / Caution). */
   gate1DisplayLabel: string;
   status: string;
@@ -19,6 +23,8 @@ export type SetupsInsightBlockProps = {
 export function SetupsInsightBlock({
   insight,
   runAtLabel,
+  benchmarkSessionDate,
+  equityBarsLatestSession,
   gate1DisplayLabel,
   status,
   tradabilityPassed,
@@ -79,6 +85,37 @@ export function SetupsInsightBlock({
           <span className="font-medium" style={{ color: "var(--text-primary)" }}>
             {gate1DisplayLabel}
           </span>
+          {benchmarkSessionDate ? (
+            <>
+              <br />
+              Benchmark EOD session (VNINDEX):{" "}
+              <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+                {benchmarkSessionDate}
+              </span>
+              {" — "}
+              <span style={{ color: "var(--text-muted)" }}>
+                not the same as &quot;scan completed&quot; wall time
+              </span>
+            </>
+          ) : null}
+          {equityBarsLatestSession &&
+          (!benchmarkSessionDate ||
+            equityBarsLatestSession !== benchmarkSessionDate) ? (
+            <>
+              <br />
+              Equity bars latest session:{" "}
+              <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+                {equityBarsLatestSession}
+              </span>
+              {benchmarkSessionDate &&
+              equityBarsLatestSession !== benchmarkSessionDate ? (
+                <span style={{ color: "var(--text-muted)" }}>
+                  {" "}
+                  (newer than benchmark EOD — refresh VNINDEX import for alignment)
+                </span>
+              ) : null}
+            </>
+          ) : null}
         </div>
         <div style={{ color: "var(--text-tertiary)" }}>
           Liquidity &amp; session screen{" "}

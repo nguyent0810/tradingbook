@@ -8,6 +8,8 @@ import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { buildSetupsInsightCopy } from "@/lib/scanner/setups-trader-copy";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
+import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { loadGate2BreakdownCached, loadSetupsBaseData } from "./setups-cached-data";
 import { buildDiagnosticsAccordionItems, dominantCategoryFromNotes, fmtRunDate } from "./setups-shared-helpers";
 
@@ -16,7 +18,9 @@ export async function SetupsOverviewAsync() {
 
   if (!base.latest) {
     const dbBanner =
-      [base.scanLoadError, base.sessionLoadError].filter(Boolean).join(" ") || null;
+      [base.scanLoadError, base.sessionLoadError, base.equityMaxLoadError]
+        .filter(Boolean)
+        .join(" ") || null;
     return (
       <>
         {dbBanner ? (
@@ -65,9 +69,17 @@ export async function SetupsOverviewAsync() {
 
   const { breakdown, error: breakdownError } = await loadGate2BreakdownCached();
   const dbBanner =
-    [base.scanLoadError, base.sessionLoadError, breakdownError].filter(Boolean).join(" ") || null;
+    [base.scanLoadError, base.sessionLoadError, base.equityMaxLoadError, breakdownError]
+      .filter(Boolean)
+      .join(" ") || null;
 
   const { latest, notes } = base;
+
+  const marketAlignment = analyzeMarketDataAlignment({
+    benchmarkSessionDate: base.expectedSession,
+    latestEquityBarSessionDate: base.latestEquityBarSession,
+    latestScanRunAt: latest.runAt,
+  });
 
   const dominantCategoryKey =
     (breakdown[0]?.categoryKey as string | undefined) ??
@@ -111,6 +123,10 @@ export async function SetupsOverviewAsync() {
         </div>
       ) : null}
 
+      {marketAlignment.showBanner ? (
+        <MarketDataAlignmentBanner analysis={marketAlignment} />
+      ) : null}
+
       {tradingDecision ? <SetupsTodaysActionBlock decision={tradingDecision} /> : null}
 
       <section className="space-y-4">
@@ -120,6 +136,16 @@ export async function SetupsOverviewAsync() {
         <SetupsInsightBlock
           insight={insight}
           runAtLabel={fmtRunDate(latest.runAt)}
+          benchmarkSessionDate={
+            base.expectedSession
+              ? base.expectedSession.toISOString().slice(0, 10)
+              : null
+          }
+          equityBarsLatestSession={
+            base.latestEquityBarSession
+              ? base.latestEquityBarSession.toISOString().slice(0, 10)
+              : null
+          }
           gate1DisplayLabel={gate1TraderLabel}
           status={latest.status}
           tradabilityPassed={latest.symbolCountAfterTradability}

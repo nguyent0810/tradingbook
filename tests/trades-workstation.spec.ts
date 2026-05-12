@@ -46,13 +46,9 @@ test.describe("/trades workstation (review session & compact)", () => {
     await expect(page.getByTestId("trades-session-briefing")).toHaveCount(0);
   });
 
-  test("compactReview with review session still loads session chrome", async ({
-    page,
-  }) => {
-    await page.goto("/trades?compactReview=1&reviewSession=1");
-    await expect(page.getByTestId("trades-review-session-bar")).toBeVisible({
+  test("ledger shows horizontal scroll hint for wide table", async ({ page }) => {
+    await expect(page.getByTestId("trades-ledger-scroll-hint")).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.getByTestId("trades-session-briefing")).toHaveCount(0);
   });
 });

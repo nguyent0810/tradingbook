@@ -336,6 +336,25 @@ body {
   box-shadow: 0 1px 0 var(--border-primary);
 }
 
+/* Trades ledger: pin Symbol column while scrolling wide rows */
+.trades-ledger-scroll .table thead th.ledger-sticky-symbol,
+.trades-ledger-scroll .table tbody td.ledger-sticky-symbol {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: var(--bg-primary);
+  box-shadow: 4px 0 14px -6px rgba(0, 0, 0, 0.16);
+}
+
+.trades-ledger-scroll.table-container.table-sticky .table thead th.ledger-sticky-symbol {
+  z-index: 15;
+  background: var(--bg-secondary);
+}
+
+.trades-ledger-scroll .table tbody tr:hover td.ledger-sticky-symbol {
+  background: var(--bg-hover);
+}
+
 .table th {
   text-align: left;
   padding: 10px 14px;

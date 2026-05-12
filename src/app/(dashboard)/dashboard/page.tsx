@@ -28,6 +28,9 @@ import { distanceToZonePct, healthLevelActionHint } from "@/lib/setup-health";
 import { rejectionBucketLabel, rejectionBucketTraderGuide } from "@/lib/scanner/setups-trader-copy";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
 import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config";
+import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
+import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
+import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
 import {
   displayCandidateLifecycleSortLabel,
   displayGate1ScanLevel,
@@ -104,7 +107,11 @@ export default async function DashboardPage() {
     trades = [];
   }
 
-  const regime = await getMarketRegimeFromDb("VNINDEX");
+  const [regime, marketSnapshot] = await Promise.all([
+    getMarketRegimeFromDb("VNINDEX"),
+    fetchMarketSessionSnapshot(prisma),
+  ]);
+  const alignmentAnalysis = analyzeMarketDataAlignment(marketSnapshot);
 
   let latestScan = null as Awaited<ReturnType<typeof getLatestDailyScanRun>>;
   try {
@@ -252,6 +259,10 @@ export default async function DashboardPage() {
         >
           {dbLoadError}
         </div>
+      ) : null}
+
+      {alignmentAnalysis.showBanner ? (
+        <MarketDataAlignmentBanner analysis={alignmentAnalysis} />
       ) : null}
 
       <section className="card space-y-3 p-5">

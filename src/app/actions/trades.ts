@@ -18,6 +18,11 @@ import {
   reviewOutcomeFromFormData,
   serializeTradeHealthReviewPayloadForDb,
 } from "@/lib/trades/review-outcome";
+import { fetchLatestCloseByTradeSymbols } from "@/lib/trades/unrealized-from-close";
+import {
+  detectTradePriceUnitMismatch,
+  TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE,
+} from "@/lib/trades/price-unit-guard";
 
 // ─── Types ───
 
@@ -34,6 +39,49 @@ async function requireUser() {
     redirect("/login");
   }
   return session;
+}
+
+async function validateEntryPriceVsLatestBars(
+  symbol: string,
+  entryPrice: number,
+  status: string
+): Promise<Record<string, string[]> | null> {
+  if (status !== "OPEN" && status !== "PLANNED") return null;
+  try {
+    const sym = symbol.trim().toUpperCase();
+    const m = await fetchLatestCloseByTradeSymbols(prisma, [sym]);
+    const bar = m.get(sym);
+    if (bar && detectTradePriceUnitMismatch(entryPrice, bar.close)) {
+      return { entryPrice: [TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE] };
+    }
+  } catch (e) {
+    console.error("[trades] entry/bars alignment check skipped:", e);
+  }
+  return null;
+}
+
+export async function checkTradeEntryPriceAlignment(
+  symbol: string,
+  entryPrice: number
+): Promise<{ status: "skip" } | { status: "warn"; message: string } | { status: "ok" }> {
+  const session = await getSession();
+  if (!session) return { status: "skip" };
+  const sym = symbol.trim().toUpperCase();
+  if (sym.length < 2 || !Number.isFinite(entryPrice) || entryPrice <= 0) {
+    return { status: "skip" };
+  }
+  try {
+    const m = await fetchLatestCloseByTradeSymbols(prisma, [sym]);
+    const bar = m.get(sym);
+    if (!bar) return { status: "skip" };
+    if (detectTradePriceUnitMismatch(entryPrice, bar.close)) {
+      return { status: "warn", message: TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE };
+    }
+    return { status: "ok" };
+  } catch (e) {
+    console.error("[trades] checkTradeEntryPriceAlignment failed:", e);
+    return { status: "skip" };
+  }
 }
 
 function nullIfBlank(v: unknown): string | null {
@@ -142,6 +190,15 @@ export async function createTrade(
   }
 
   const data = parsed.data;
+
+  const entryUnitErrors = await validateEntryPriceVsLatestBars(
+    data.symbol,
+    data.entryPrice,
+    data.status
+  );
+  if (entryUnitErrors) {
+    return { errors: entryUnitErrors };
+  }
 
   const setupId = nullIfBlank(data.setupId);
   const stopLoss = numberOrNull(data.stopLoss);
@@ -276,6 +333,15 @@ export async function updateTrade(
   }
 
   const data = parsed.data;
+
+  const entryUnitErrors = await validateEntryPriceVsLatestBars(
+    data.symbol,
+    data.entryPrice,
+    data.status
+  );
+  if (entryUnitErrors) {
+    return { errors: entryUnitErrors };
+  }
 
   // Verify ownership
   const existing = await prisma.trade.findFirst({

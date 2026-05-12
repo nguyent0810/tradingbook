@@ -16,11 +16,12 @@ import {
   type LatestTwoCloseBars,
   utcStockBarCutoffDate,
 } from "@/lib/trades/unrealized-from-close";
-import {
-  loadOpenPositionMarks,
-  VNINDEX_FRESHNESS_UNAVAILABLE,
-} from "@/lib/trades/position-health";
+import { loadOpenPositionMarks } from "@/lib/trades/position-health";
+import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
+import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
+import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
+import { TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE } from "@/lib/trades/price-unit-guard";
 import {
   buildOpenPositionReviewDto,
   type LatestTradeHealthLog,
@@ -221,32 +222,37 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
 
   let dbLoadError: string | null = null;
 
-  const trades = await (async () => {
-    try {
-      return await prisma.trade.findMany({
-        where,
-        orderBy: { entryDate: sortOrder },
-        include: {
-          setupCandidate: {
-            select: {
-              id: true,
-              setupType: true,
-              quality: true,
-              breakoutLevel: true,
-              pullbackZoneLow: true,
-              pullbackZoneHigh: true,
-              stopLevel: true,
-              barDate: true,
+  const [trades, marketSnapshot] = await Promise.all([
+    (async () => {
+      try {
+        return await prisma.trade.findMany({
+          where,
+          orderBy: { entryDate: sortOrder },
+          include: {
+            setupCandidate: {
+              select: {
+                id: true,
+                setupType: true,
+                quality: true,
+                breakoutLevel: true,
+                pullbackZoneLow: true,
+                pullbackZoneHigh: true,
+                stopLevel: true,
+                barDate: true,
+              },
             },
           },
-        },
-      });
-    } catch (e) {
-      dbLoadError = "Database temporarily unavailable (trades).";
-      console.error("[trades] trade list query failed:", e);
-      return [];
-    }
-  })();
+        });
+      } catch (e) {
+        dbLoadError = "Database temporarily unavailable (trades).";
+        console.error("[trades] trade list query failed:", e);
+        return [];
+      }
+    })(),
+    fetchMarketSessionSnapshot(prisma),
+  ]);
+
+  const alignmentAnalysis = analyzeMarketDataAlignment(marketSnapshot);
 
   const now = new Date();
   const dayStart = new Date(now);
@@ -506,6 +512,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       latestHealthLog: latestHealthByTradeId.get(trade.id) ?? null,
       priorClose: two?.prior?.close ?? null,
       baselineCloseAtLastReview: baselineCloseByTradeId.get(trade.id) ?? null,
+      priceUnitMismatch: derived.priceUnitMismatch,
     });
 
     const reviewedToday = checkedTodayTradeIds.has(trade.id);
@@ -771,8 +778,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     });
 
   const hasOpenTrades = trades.some((t) => t.status === "OPEN");
-  const showFreshnessBanner =
-    hasOpenTrades && expectedSessionDate === null;
 
   const clusterPackMap = new Map(
     [...openRowPackByTradeId.entries()].map(([id, pack]) => [
@@ -1397,20 +1402,11 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
         />
       ) : null}
 
-      {showFreshnessBanner ? (
-        <div
-          role="alert"
-          className="card mt-4 border px-4 py-3"
-          style={{
-            borderColor: "color-mix(in srgb, #eab308 45%, var(--border-color))",
-            backgroundColor:
-              "color-mix(in srgb, #eab308 8%, var(--bg-secondary))",
-          }}
-        >
-          <p className="text-sm font-medium" style={{ color: "#854d0e" }}>
-            {VNINDEX_FRESHNESS_UNAVAILABLE}
-          </p>
-        </div>
+      {alignmentAnalysis.showBanner ? (
+        <MarketDataAlignmentBanner
+          analysis={alignmentAnalysis}
+          mentionOpenPositionMarks={hasOpenTrades}
+        />
       ) : null}
 
       {marks.barsLoadFailed && hasOpenTrades ? (
@@ -1460,11 +1456,23 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
           </div>
         </div>
       ) : (
-        <div className="table-container mt-4" data-testid="trades-scroll-container">
+        <>
+          <p
+            className="mt-1 text-xs"
+            style={{ color: "var(--text-muted)" }}
+            data-testid="trades-ledger-scroll-hint"
+          >
+            Scroll horizontally for the full ledger. The Symbol column stays pinned while you
+            scroll.
+          </p>
+          <div
+            className="table-container table-sticky trades-ledger-scroll mt-2"
+            data-testid="trades-scroll-container"
+          >
           <table className="table min-w-[1840px]" data-testid="trades-table">
             <thead data-testid="trades-table-header">
               <tr>
-                <th>Symbol</th>
+                <th className="ledger-sticky-symbol">Symbol</th>
                 <th>Setup</th>
                 <th>Direction</th>
                 <th>Playbook</th>
@@ -1521,6 +1529,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                 const {
                   latestBar,
                   unrealized,
+                  priceUnitMismatch,
                   holdingDays,
                   rMultiple,
                   distanceToStop,
@@ -1597,13 +1606,24 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                         : {}),
                     }}
                   >
-                    <td>
+                    <td className="ledger-sticky-symbol">
                       <span
                         className="mono font-semibold"
                         style={{ color: "var(--text-primary)" }}
                       >
                         {trade.symbol}
                       </span>
+                      {priceUnitMismatch ? (
+                        <span
+                          className="mt-1 block rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                          style={{
+                            borderColor: "color-mix(in srgb, #f97316 45%, var(--border-color))",
+                            color: "#9a3412",
+                          }}
+                        >
+                          Unit check needed
+                        </span>
+                      ) : null}
                     </td>
                     <td>
                       {trade.setupCandidate ? (
@@ -1767,7 +1787,26 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                                 </>
                               ) : null}
                             </span>
-                            {unrealized?.pnlAmount != null ? (
+                            {priceUnitMismatch ? (
+                              <>
+                                <span
+                                  className="text-left text-[11px] font-medium leading-snug"
+                                  style={{ color: "#9a3412" }}
+                                >
+                                  Unit check needed — unrealized P&amp;L not shown as valid.
+                                </span>
+                                <span
+                                  className="max-w-[16rem] text-right text-[10px] leading-snug"
+                                  style={{ color: "var(--text-muted)" }}
+                                >
+                                  {TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE}
+                                </span>
+                                <span className="mono text-[11px]" style={{ color: "var(--text-muted)" }}>
+                                  Entry (raw): {trade.entryPrice.toFixed(4)} · Latest close (raw):{" "}
+                                  {latestBar.close.toFixed(4)}
+                                </span>
+                              </>
+                            ) : unrealized?.pnlAmount != null ? (
                               <span
                                 className="mono"
                                 style={{
@@ -1788,19 +1827,25 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
                                 —
                               </span>
                             )}
-                            <span
-                              className="mono text-[12px]"
-                              style={{
-                                color:
-                                  unrealized?.pnlPct != null
-                                    ? unrealized.pnlPct >= 0
-                                      ? "var(--pnl-positive)"
-                                      : "var(--pnl-negative)"
-                                    : "var(--text-muted)",
-                              }}
-                            >
-                              {formatSignedPct(unrealized?.pnlPct ?? null)}
-                            </span>
+                            {priceUnitMismatch ? (
+                              <span className="mono text-[12px]" style={{ color: "var(--text-muted)" }}>
+                                Raw % (do not use): {formatSignedPct(unrealized?.pnlPct ?? null)}
+                              </span>
+                            ) : (
+                              <span
+                                className="mono text-[12px]"
+                                style={{
+                                  color:
+                                    unrealized?.pnlPct != null
+                                      ? unrealized.pnlPct >= 0
+                                        ? "var(--pnl-positive)"
+                                        : "var(--pnl-negative)"
+                                      : "var(--text-muted)",
+                                }}
+                              >
+                                {formatSignedPct(unrealized?.pnlPct ?? null)}
+                              </span>
+                            )}
                           </div>
                         ) : (
                           <span style={{ color: "var(--text-muted)" }}>—</span>
@@ -1844,6 +1889,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             </tbody>
           </table>
         </div>
+        </>
       )}
       <OperatingSnapshotPersist snapshot={snapshotForPersistence} />
     </div>

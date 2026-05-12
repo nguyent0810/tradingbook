@@ -17,8 +17,14 @@ import {
   computeDisplayHoldingDaysUtc,
   equityBarStaleVsBenchmark,
   loadOpenPositionMarks,
-  VNINDEX_FRESHNESS_UNAVAILABLE,
 } from "@/lib/trades/position-health";
+import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
+import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
+import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import {
+  detectTradePriceUnitMismatch,
+  TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE,
+} from "@/lib/trades/price-unit-guard";
 import {
   displayScanQualityTier,
   displayTradeDirection,
@@ -124,6 +130,12 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
     trade.status === "OPEN"
       ? positionMarks?.latestCloseBySymbol.get(symKey) ?? null
       : null;
+
+  const priceUnitMismatch =
+    trade.status === "OPEN"
+      ? detectTradePriceUnitMismatch(trade.entryPrice, latestCloseSnap?.close ?? null)
+      : false;
+
   const unrealizedLive =
     latestCloseSnap != null
       ? computeUnrealizedFromLatestClose({
@@ -154,7 +166,8 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   const phase2Metrics = computeOpenPhase2Metrics({
     direction: trade.direction,
     entryPrice: trade.entryPrice,
-    latestClose: latestCloseSnap?.close ?? null,
+    latestClose:
+      priceUnitMismatch || latestCloseSnap == null ? null : latestCloseSnap.close,
     stopLoss: trade.stopLoss,
     takeProfit: trade.takeProfit,
   });
@@ -215,8 +228,14 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   }
   const healthLogs = [...healthLogsDesc].reverse();
 
-  const showOpenFreshnessBanner =
-    trade.status === "OPEN" && expectedSessionDate === null;
+  const alignmentAnalysis =
+    trade.status === "OPEN"
+      ? analyzeMarketDataAlignment(await fetchMarketSessionSnapshot(prisma))
+      : analyzeMarketDataAlignment({
+          benchmarkSessionDate: null,
+          latestEquityBarSessionDate: null,
+          latestScanRunAt: null,
+        });
 
   return (
     <div className="page-container animate-in">
@@ -277,21 +296,11 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
           <DeleteTradeButton tradeId={trade.id} />
         </div>
 
-        {showOpenFreshnessBanner ? (
-          <div
-            role="alert"
-            className="card mb-4 border px-4 py-3"
-            style={{
-              borderColor:
-                "color-mix(in srgb, #eab308 45%, var(--border-color))",
-              backgroundColor:
-                "color-mix(in srgb, #eab308 8%, var(--bg-secondary))",
-            }}
-          >
-            <p className="text-sm font-medium" style={{ color: "#854d0e" }}>
-              {VNINDEX_FRESHNESS_UNAVAILABLE}
-            </p>
-          </div>
+        {trade.status === "OPEN" && alignmentAnalysis.showBanner ? (
+          <MarketDataAlignmentBanner
+            analysis={alignmentAnalysis}
+            mentionOpenPositionMarks
+          />
         ) : null}
 
         {trade.status === "OPEN" && positionMarks?.barsLoadFailed ? (
@@ -423,7 +432,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                       borderColor: "var(--border-color)",
                       color: "var(--text-secondary)",
                     }}
-                    title={VNINDEX_FRESHNESS_UNAVAILABLE}
+                    title="Cannot evaluate bar freshness — import or refresh VNINDEX daily bars."
                   >
                     Bar freshness unverified
                   </span>
@@ -537,21 +546,39 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               <dl className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <div>
                   <dt style={{ color: "var(--text-muted)" }}>Unrealized P&amp;L</dt>
-                  <dd
-                    className="mono font-normal"
-                    style={{
-                      color:
-                        unrealizedLive?.pnlAmount != null
-                          ? unrealizedLive.pnlAmount >= 0
-                            ? "var(--pnl-positive)"
-                            : "var(--pnl-negative)"
-                          : "var(--text-muted)",
-                    }}
-                  >
-                    {unrealizedLive?.pnlAmount != null ? (
+                  <dd className="mono font-normal" style={{ color: "var(--text-muted)" }}>
+                    {priceUnitMismatch ? (
+                      <span className="block space-y-1 text-left text-xs font-normal normal-case">
+                        <span className="font-medium" style={{ color: "#9a3412" }}>
+                          Unit check needed
+                        </span>
+                        <span className="block leading-snug" style={{ color: "var(--text-secondary)" }}>
+                          {TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE}
+                        </span>
+                        <span className="block font-mono text-[11px]">
+                          Entry (raw): {trade.entryPrice.toFixed(4)} · Latest close (raw):{" "}
+                          {latestCloseSnap ? latestCloseSnap.close.toFixed(4) : "—"}
+                        </span>
+                        <span className="block text-[11px]">
+                          Raw amount (do not use):{" "}
+                          {unrealizedLive?.pnlAmount != null
+                            ? `${unrealizedLive.pnlAmount > 0 ? "+" : ""}${formatVND(unrealizedLive.pnlAmount, false)}`
+                            : "—"}
+                        </span>
+                      </span>
+                    ) : unrealizedLive?.pnlAmount != null ? (
                       <>
-                        {unrealizedLive.pnlAmount > 0 ? "+" : ""}
-                        {formatVND(unrealizedLive.pnlAmount, false)}
+                        <span
+                          style={{
+                            color:
+                              unrealizedLive.pnlAmount >= 0
+                                ? "var(--pnl-positive)"
+                                : "var(--pnl-negative)",
+                          }}
+                        >
+                          {unrealizedLive.pnlAmount > 0 ? "+" : ""}
+                          {formatVND(unrealizedLive.pnlAmount, false)}
+                        </span>
                       </>
                     ) : (
                       "—"
@@ -564,14 +591,22 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
                     className="mono font-normal"
                     style={{
                       color:
-                        unrealizedLive?.pnlPct != null
-                          ? unrealizedLive.pnlPct >= 0
-                            ? "var(--pnl-positive)"
-                            : "var(--pnl-negative)"
-                          : "var(--text-muted)",
+                        priceUnitMismatch
+                          ? "var(--text-muted)"
+                          : unrealizedLive?.pnlPct != null
+                            ? unrealizedLive.pnlPct >= 0
+                              ? "var(--pnl-positive)"
+                              : "var(--pnl-negative)"
+                            : "var(--text-muted)",
                     }}
                   >
-                    {formatSignedPct(unrealizedLive?.pnlPct ?? null)}
+                    {priceUnitMismatch ? (
+                      <span>
+                        Raw % (do not use): {formatSignedPct(unrealizedLive?.pnlPct ?? null)}
+                      </span>
+                    ) : (
+                      formatSignedPct(unrealizedLive?.pnlPct ?? null)
+                    )}
                   </dd>
                 </div>
               </dl>

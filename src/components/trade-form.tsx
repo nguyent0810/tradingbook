@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useCallback, useState } from "react";
 import Link from "next/link";
 import {
+  checkTradeEntryPriceAlignment,
   createTrade,
   updateTrade,
   type TradeActionState,
@@ -41,6 +42,22 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
     FormData
   >(action, undefined);
 
+  const [entryUnitHint, setEntryUnitHint] = useState<string | null>(null);
+
+  const runEntryUnitCheck = useCallback(async () => {
+    const symEl = document.getElementById("symbol") as HTMLInputElement | null;
+    const epEl = document.getElementById("entryPrice") as HTMLInputElement | null;
+    const sym = symEl?.value?.trim() ?? "";
+    const ep = Number(epEl?.value);
+    if (!sym || !Number.isFinite(ep) || ep <= 0) {
+      setEntryUnitHint(null);
+      return;
+    }
+    const res = await checkTradeEntryPriceAlignment(sym, ep);
+    if (res.status === "warn") setEntryUnitHint(res.message);
+    else setEntryUnitHint(null);
+  }, []);
+
   const formatDate = (date: Date | null | undefined) => {
     if (!date) return "";
     return new Date(date).toISOString().slice(0, 16);
@@ -76,6 +93,9 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             defaultValue={trade?.symbol || initialValues?.symbol || ""}
             className="input"
             style={{ textTransform: "uppercase" }}
+            onBlur={() => {
+              void runEntryUnitCheck();
+            }}
           />
           {state?.errors?.symbol && (
             <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
@@ -189,12 +209,24 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             placeholder="0"
             defaultValue={trade?.entryPrice || initialValues?.entryPrice || ""}
             className="input"
+            onBlur={() => {
+              void runEntryUnitCheck();
+            }}
           />
           {state?.errors?.entryPrice && (
             <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
               {state.errors.entryPrice[0]}
             </p>
           )}
+          <p className="mt-1 text-xs leading-snug" style={{ color: "var(--text-muted)" }}>
+            Same unit as imported equity daily closes (vnstock/VCI: thousand VND per share), so
+            unrealized P&amp;L matches latest bar closes.
+          </p>
+          {entryUnitHint ? (
+            <p className="mt-2 text-xs leading-snug" role="status" style={{ color: "#9a3412" }}>
+              {entryUnitHint}
+            </p>
+          ) : null}
         </div>
 
         <div>

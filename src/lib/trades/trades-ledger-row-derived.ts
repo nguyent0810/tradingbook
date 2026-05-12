@@ -9,6 +9,7 @@ import {
   computeUnrealizedFromLatestClose,
   type LatestCloseBar,
 } from "@/lib/trades/unrealized-from-close";
+import { detectTradePriceUnitMismatch } from "@/lib/trades/price-unit-guard";
 
 export type LedgerTradeShape = {
   id: string;
@@ -34,6 +35,8 @@ export type TradesLedgerDerivedFields = {
   symKey: string;
   latestBar: LatestCloseBar | null;
   unrealized: ReturnType<typeof computeUnrealizedFromLatestClose> | null;
+  /** When true, unrealized %/amount must not be shown as validated P&L. */
+  priceUnitMismatch: boolean;
   staleState: boolean | "unknown" | null;
   holdingDays: number | null;
   rMultiple: number | null;
@@ -57,6 +60,7 @@ export function fallbackLedgerDerivedFields(
     symKey,
     latestBar: null,
     unrealized: null,
+    priceUnitMismatch: false,
     staleState: null,
     holdingDays: null,
     rMultiple: null,
@@ -79,6 +83,11 @@ export function deriveTradesLedgerRowFields(
       trade.status === "OPEN"
         ? supplemental.latestCloseBySymbol.get(symKey) ?? null
         : null;
+
+    const priceUnitMismatch =
+      trade.status === "OPEN" && latestBar != null
+        ? detectTradePriceUnitMismatch(trade.entryPrice, latestBar.close)
+        : false;
 
     const unrealized =
       latestBar != null
@@ -113,7 +122,8 @@ export function deriveTradesLedgerRowFields(
         ? computeOpenPhase2Metrics({
             direction: trade.direction,
             entryPrice: trade.entryPrice,
-            latestClose: latestBar?.close ?? null,
+            latestClose:
+              priceUnitMismatch || latestBar == null ? null : latestBar.close,
             stopLoss: trade.stopLoss,
             takeProfit: trade.takeProfit,
           })
@@ -128,6 +138,7 @@ export function deriveTradesLedgerRowFields(
       symKey,
       latestBar,
       unrealized,
+      priceUnitMismatch,
       staleState,
       holdingDays,
       rMultiple: phase2.rMultiple,

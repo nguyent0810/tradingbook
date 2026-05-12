@@ -261,6 +261,8 @@ export type OpenPositionReviewDto = {
   checklistSummaryLine: string | null;
   /** True when equity bar is strictly older than benchmark session. */
   marketDataStale: boolean;
+  /** Entry vs latest close likely on different numeric scales — do not trust unrealized math. */
+  priceUnitMismatch: boolean;
   /** Raw geometry hints used for priority / scanning (LONG-heavy). */
   structureHints: readonly StructureHint[];
 };
@@ -283,6 +285,8 @@ export function buildOpenPositionReviewDto(params: {
   priorClose: number | null;
   /** Daily close on or before last review checkpoint (UTC date bound). */
   baselineCloseAtLastReview: number | null;
+  /** When true, surface is forced to review (unless stop breached) and badges warn. */
+  priceUnitMismatch?: boolean;
 }): OpenPositionReviewDto {
   const {
     direction,
@@ -300,7 +304,10 @@ export function buildOpenPositionReviewDto(params: {
     latestHealthLog,
     priorClose,
     baselineCloseAtLastReview,
+    priceUnitMismatch: priceUnitMismatchParam,
   } = params;
+
+  const priceUnitMismatch = Boolean(priceUnitMismatchParam);
 
   const latestChecklist = latestHealthLog?.reviewChecklist ?? null;
 
@@ -339,7 +346,12 @@ export function buildOpenPositionReviewDto(params: {
     reviewedToday,
   });
 
-  const primaryReviewLabel = eodSurfaceTraderLabel(surface);
+  let surfaceEffective = surface;
+  if (priceUnitMismatch && stopBand !== "breached") {
+    surfaceEffective = "review_needed";
+  }
+
+  const primaryReviewLabel = eodSurfaceTraderLabel(surfaceEffective);
 
   const cushionPctDisplay =
     cushionPctOfEntry != null && Number.isFinite(cushionPctOfEntry)
@@ -384,25 +396,43 @@ export function buildOpenPositionReviewDto(params: {
 
   headline = [headline, structureTail, staleTail].filter(Boolean).join(" ").trim();
 
+  if (priceUnitMismatch && stopBand !== "breached") {
+    headline = [
+      "Latest close vs entry price are on incompatible scales — unrealized P&L is not reliable until entry is corrected.",
+      headline,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+  }
+
   type Badge = OpenPositionReviewDto["badges"][number];
   const badges: Badge[] = [
     {
       key: "surface",
       label: primaryReviewLabel,
       tone:
-        surface === "stop_violated"
+        surfaceEffective === "stop_violated"
           ? "danger"
-          : surface === "structure_weakening" ||
-              surface === "under_pressure" ||
-              surface === "stale_bar_review"
+          : surfaceEffective === "structure_weakening" ||
+              surfaceEffective === "under_pressure" ||
+              surfaceEffective === "stale_bar_review"
             ? "warn"
-            : surface === "review_completed"
+            : surfaceEffective === "review_completed"
               ? "ok"
               : "muted",
     },
   ];
 
-  if (staleVsBenchmark === true && surface !== "stale_bar_review") {
+  if (priceUnitMismatch) {
+    badges.push({
+      key: "unit_mismatch",
+      label: "Price unit mismatch",
+      tone: "danger",
+    });
+  }
+
+  if (staleVsBenchmark === true && surfaceEffective !== "stale_bar_review") {
     badges.push({ key: "stale", label: "Stale market data", tone: "warn" });
   } else if (staleVsBenchmark === "unknown") {
     badges.push({
@@ -412,7 +442,7 @@ export function buildOpenPositionReviewDto(params: {
     });
   }
 
-  const focusHints = buildReviewFocusHints({
+  const focusHintsBase = buildReviewFocusHints({
     direction,
     stopBand,
     structureHints: hints,
@@ -420,6 +450,13 @@ export function buildOpenPositionReviewDto(params: {
     healthLogStress: healthStress,
     hasSetupLevels: setupLevels != null,
   });
+
+  const focusHints = priceUnitMismatch
+    ? [
+        "Entry price appears to use a different unit than imported closes. Imported VN equity closes are stored in thousand VND per share — fix entry before trusting unrealized P&L.",
+        ...focusHintsBase,
+      ]
+    : focusHintsBase;
 
   const sessionDeltaLine = describeSessionCloseDelta({
     direction,
@@ -450,7 +487,7 @@ export function buildOpenPositionReviewDto(params: {
     setupValidityLine,
     headline: headline.trim(),
     primaryReviewLabel,
-    surface,
+    surface: surfaceEffective,
     badges,
     focusHints,
     sessionDeltaLine,
@@ -458,6 +495,7 @@ export function buildOpenPositionReviewDto(params: {
     latestChecklist,
     checklistSummaryLine,
     marketDataStale,
+    priceUnitMismatch,
     structureHints: hints,
   };
 }

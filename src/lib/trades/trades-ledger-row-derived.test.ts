@@ -37,9 +37,43 @@ describe("deriveTradesLedgerRowFields", () => {
     expect(row.distanceToStop).toBeNull();
     expect(row.distanceToTakeProfit).toBeNull();
     expect(row.stopValidity).toBe("missing");
+    expect(row.priceUnitMismatch).toBe(false);
+  });
+
+  it("flags price unit mismatch for absurd entry vs latest close", () => {
+    const row = deriveTradesLedgerRowFields(
+      {
+        id: "t1",
+        symbol: "VNM",
+        status: "OPEN",
+        direction: "LONG",
+        entryPrice: 8800,
+        quantity: 100,
+        stopLoss: 8700,
+        takeProfit: null,
+        entryDate: new Date("2026-01-01T00:00:00.000Z"),
+        exitDate: null,
+      },
+      {
+        latestCloseBySymbol: new Map([
+          [
+            "VNM",
+            { close: 9, date: new Date("2026-01-09T00:00:00.000Z") },
+          ],
+        ]),
+        expectedSessionDate: new Date("2026-01-09T00:00:00.000Z"),
+        checkedTodayTradeIds: new Set(),
+        now,
+      }
+    );
+    expect(row.priceUnitMismatch).toBe(true);
+    expect(row.rMultiple).toBeNull();
+    expect(row.distanceToStop).toBeNull();
+    expect(row.unrealized?.pnlPct).toBeDefined();
   });
 
   it("fallbackLedgerDerivedFields is stable", () => {
     expect(fallbackLedgerDerivedFields({ symbol: "AAA" }).symKey).toBe("AAA");
+    expect(fallbackLedgerDerivedFields({ symbol: "AAA" }).priceUnitMismatch).toBe(false);
   });
 });
