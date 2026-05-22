@@ -11,9 +11,8 @@ export default async function Home() {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-6">
       <div className="animate-in w-full max-w-md text-center">
-        {/* Logo Mark */}
         <div
-          className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-2xl"
+          className="mx-auto mb-8 flex h-16 w-16 items-center justify-center rounded-2xl shadow-[var(--shadow-glow-accent)]"
           style={{ background: "var(--accent-muted)" }}
         >
           <svg

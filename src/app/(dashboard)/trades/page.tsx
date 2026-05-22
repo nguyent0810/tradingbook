@@ -20,6 +20,7 @@ import { loadOpenPositionMarks } from "@/lib/trades/position-health";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import { PageHeader } from "@/components/shell/page-header";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
 import { TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE } from "@/lib/trades/price-unit-guard";
 import {
@@ -1033,38 +1034,32 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
 
   return (
     <div className="page-container animate-in">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1
-            className="text-2xl font-semibold tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Trades
-          </h1>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: "var(--text-tertiary)" }}
-            data-testid="trades-header-count"
-          >
-            {trades.length} trade{trades.length !== 1 ? "s" : ""}
-          </p>
-        </div>
-
-        <Link href="/trades/new" className="btn btn-primary">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Log Trade
-        </Link>
+      <div className="mb-6">
+        <PageHeader
+          title="Trades"
+          subtitle={`${trades.length} trade${trades.length !== 1 ? "s" : ""}`}
+          actions={
+            <Link href="/trades/new" className="btn btn-primary" data-testid="trades-log-trade-cta">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Log Trade
+            </Link>
+          }
+        />
+        <p className="sr-only" data-testid="trades-header-count">
+          {trades.length} trade{trades.length !== 1 ? "s" : ""}
+        </p>
       </div>
 
       {sessionBriefing && hasOpenTrades && !compactReview ? (

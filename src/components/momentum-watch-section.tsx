@@ -43,7 +43,7 @@ export async function MomentumWatchSection() {
   }
 
   return (
-    <section className="space-y-3 rounded-lg border border-dashed p-4 md:p-5" id="momentum-watch" style={{ borderColor: "var(--border-primary)", background: "var(--bg-secondary)" }}>
+    <section className="panel space-y-3 border-dashed p-4 md:p-5" id="momentum-watch">
       <div>
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
           Momentum Watch
