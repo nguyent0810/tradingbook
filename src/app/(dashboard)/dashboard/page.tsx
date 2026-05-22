@@ -31,8 +31,6 @@ import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
-import { PageHeader } from "@/components/shell/page-header";
-import { PortfolioSummary } from "@/components/ui";
 import {
   displayCandidateLifecycleSortLabel,
   displayGate1ScanLevel,
@@ -219,28 +217,35 @@ export default async function DashboardPage() {
 
   return (
     <div className="page-container animate-in space-y-6 pb-10">
-      <PageHeader
-        title="Dashboard"
-        subtitle="Decision-first trading cockpit."
-        actions={
-          <Link href="/trades/new" className="btn btn-primary">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden
-            >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Log Trade
-          </Link>
-        }
-      />
+      <div className="flex items-center justify-between">
+        <div>
+          <h1
+            className="text-2xl font-semibold tracking-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
+            Decision-first trading cockpit.
+          </p>
+        </div>
+
+        <Link href="/trades/new" className="btn btn-primary">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Log Trade
+        </Link>
+      </div>
 
       {dbLoadError ? (
         <div
@@ -260,7 +265,7 @@ export default async function DashboardPage() {
         <MarketDataAlignmentBanner analysis={alignmentAnalysis} />
       ) : null}
 
-      <section className="card-elevated space-y-3 p-5">
+      <section className="card space-y-3 p-5">
         <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
           Today&apos;s Action
         </div>
@@ -417,35 +422,69 @@ export default async function DashboardPage() {
       <MomentumWatchSection />
 
       <section className="space-y-3">
-        <h2 className="section-title">
+        <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
           {portfolioRiskConfigured ? "Exposure overview (guidance only)" : "Exposure snapshot"}
         </h2>
         <div className="card p-5">
-          <PortfolioSummary
-            configured={portfolioRiskConfigured}
-            exposure={formatVND(currentExposure, true)}
-            allocationGuide={
-              !portfolioRiskConfigured
-                ? "—"
-                : maxPortfolioPct == null
-                  ? "Unavailable"
-                  : `${decision.allocation} — qualitative cap`
-            }
-            perTradeGuide={perTradeGuidance}
-            stance={
-              decision.level === "NO_TRADE"
-                ? "Preserve capital."
-                : decision.level === "PROBE"
-                  ? "Small, selective probes only."
-                  : "Normal risk with discipline."
-            }
-            openCount={openTrades.length}
-          />
-          <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
-            {portfolioRiskConfigured
-              ? "Guidance only — not stop-based risk or mark-to-market sizing."
-              : "Allocation reflects scanner guidance until account equity is configured."}
-          </p>
+          {!portfolioRiskConfigured ? (
+            <p className="mb-4 rounded-md border px-3 py-2 text-sm leading-snug" style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}>
+              Risk budget is not configured yet. These values are guidance-only. Set{" "}
+              <code className="rounded bg-[var(--bg-tertiary)] px-1 py-0.5 text-xs">TRADING_ACCOUNT_EQUITY_VND</code>{" "}
+              on the server to unlock exposure overview labels that reference your account.
+            </p>
+          ) : null}
+          <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+            <div>
+              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+                Current exposure (entry notional)
+              </div>
+              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                {formatVND(currentExposure, true)}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+                Allocation guidance (not remaining capacity math)
+              </div>
+              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                {!portfolioRiskConfigured
+                  ? "—"
+                  : maxPortfolioPct == null
+                    ? "Unavailable (could not parse allocation text)"
+                    : `${decision.allocation} — qualitative cap from scan only`}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+                Max per-trade exposure (guide)
+              </div>
+              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                {perTradeGuidance}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+                Stance from scan
+              </div>
+              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+                {decision.level === "NO_TRADE"
+                  ? "Preserve capital."
+                  : decision.level === "PROBE"
+                    ? "Small, selective probes only."
+                    : "Normal risk with discipline."}
+              </div>
+            </div>
+          </div>
+          {!portfolioRiskConfigured ? (
+            <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
+              Allocation percentages below still reflect scanner guidance; they are not validated against your account until equity is configured.
+            </p>
+          ) : (
+            <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
+              Guidance only — not stop-based risk or mark-to-market sizing. Exposure shown uses entry
+              prices × quantity.
+            </p>
+          )}
         </div>
       </section>
 

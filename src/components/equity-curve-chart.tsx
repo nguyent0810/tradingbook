@@ -15,7 +15,7 @@ import { formatVND } from "@/lib/formatters";
 export function EquityCurveChart({ data }: { data: EquityDataPoint[] }) {
   if (!data || data.length === 0) {
     return (
-      <div className="chart-panel flex h-[350px] items-center justify-center">
+      <div className="flex h-[350px] items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)]">
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           Not enough closed trades to plot equity curve.
         </p>
@@ -29,7 +29,7 @@ export function EquityCurveChart({ data }: { data: EquityDataPoint[] }) {
     : "var(--danger)"; // Using danger/negative red
 
   return (
-    <div className="chart-panel relative z-0 h-[350px] w-full p-4 pb-6">
+    <div className="h-[350px] w-full p-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] pb-6 relative z-0">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={data}
