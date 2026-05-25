@@ -34,13 +34,14 @@ import {
   displayTradeDirection,
   displayTradeStatus,
 } from "@/lib/trading-display-labels";
-import type { EodReviewChecklistState } from "@/lib/trades/trade-health-review-checklist";
 import {
-  parseHealthReviewLogPayload,
   REVIEW_OUTCOME_IDS,
   REVIEW_OUTCOME_TRADER_LABEL,
-  type ReviewOutcomeId,
 } from "@/lib/trades/review-outcome";
+import {
+  loadTradeHealthLogsForDetailPage,
+  type TradeHealthLevel,
+} from "@/lib/trades/trade-health-logs";
 
 export const metadata: Metadata = {
   title: "Trade Details — TradeLog",
@@ -63,18 +64,6 @@ function formatRMultiple(value: number | null): string {
 interface TradeDetailPageProps {
   params: Promise<{ id: string }>;
 }
-
-type TradeHealthLevel = "HEALTHY" | "WARNING" | "AT_RISK" | "DEAD";
-
-type TradeHealthLogRow = {
-  checkedAt: Date;
-  healthLevel: TradeHealthLevel | null;
-  priceVsZone: string | null;
-  structureStatus: string | null;
-  recommendedAction: string | null;
-  reviewChecklist: EodReviewChecklistState | null;
-  reviewOutcome: ReviewOutcomeId | null;
-};
 
 const HEALTH_RANK: Record<TradeHealthLevel, number> = {
   HEALTHY: 0,
@@ -183,57 +172,11 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
   const latestOutcome = trade.setupOutcomes[0] ?? null;
   const showWritebackCard =
     trade.status === "OPEN" || trade.status === "CLOSED";
-  const dayStart = new Date(now);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(now);
-  dayEnd.setHours(23, 59, 59, 999);
-  let hasCheckpointToday = false;
-  let healthLogsDesc: TradeHealthLogRow[] = [];
-  try {
-    const raw = await prisma.$queryRawUnsafe<
-      Array<{
-        checked_at: Date;
-        health_level: string | null;
-        price_vs_zone: string | null;
-        structure_status: string | null;
-        recommended_action: string | null;
-        review_checklist: unknown | null;
-      }>
-    >(
-      `SELECT checked_at, health_level, price_vs_zone, structure_status, recommended_action, review_checklist
-       FROM trade_health_logs
-       WHERE trade_id = $1
-       ORDER BY checked_at DESC
-       LIMIT 20`,
-      trade.id
-    );
-    healthLogsDesc = raw.map((r) => {
-      const payload = parseHealthReviewLogPayload(r.review_checklist);
-      return {
-        checkedAt: new Date(r.checked_at),
-        healthLevel:
-          r.health_level === "HEALTHY" ||
-          r.health_level === "WARNING" ||
-          r.health_level === "AT_RISK" ||
-          r.health_level === "DEAD"
-            ? r.health_level
-            : null,
-        priceVsZone: r.price_vs_zone,
-        structureStatus: r.structure_status,
-        recommendedAction: r.recommended_action,
-        reviewChecklist: payload.checklist,
-        reviewOutcome: payload.reviewOutcome,
-      };
+  const { healthLogsDesc, hasCheckpointToday } =
+    await loadTradeHealthLogsForDetailPage(prisma, {
+      tradeId: trade.id,
+      now,
     });
-    hasCheckpointToday = raw.some((r) => {
-      const d = new Date(r.checked_at);
-      return d >= dayStart && d <= dayEnd;
-    });
-  } catch {
-    // Keep read-only UI resilient if logs table/model isn't present in this environment yet.
-    healthLogsDesc = [];
-    hasCheckpointToday = false;
-  }
   const healthLogs = [...healthLogsDesc].reverse();
 
   const alignmentAnalysis =
