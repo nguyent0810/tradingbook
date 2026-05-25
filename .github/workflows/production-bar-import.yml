@@ -1,0 +1,140 @@
+# Production bar import: VNINDEX + active equities (vnstock) → Neon, then daily scan.
+# Does not run on Vercel (Python + ~15–25 min equity fetch exceeds serverless limits).
+# Replaces the VNINDEX-only workflow; see docs/integration/PRODUCTION_BAR_IMPORT_AUTOMATION.md
+
+name: Production bar import
+
+on:
+  schedule:
+    # Mon–Fri 12:30 UTC (~19:30 ICT) — after VN cash session; before Vercel backup scan
+    - cron: "30 12 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      trigger_scan:
+        description: "Call /api/cron/daily-scan after successful import"
+        type: boolean
+        default: true
+      skip_equity:
+        description: "VNINDEX import only (skip equity fetch/import)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: production-bar-import
+  cancel-in-progress: false
+
+jobs:
+  import-and-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      BAR_IMPORT_REQUIRE_PRODUCTION_DB: "1"
+      PROD_DB_HOST_ALLOWLIST: neon.tech
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      DEPLOYMENT_URL: ${{ secrets.DEPLOYMENT_URL }}
+      VNINDEX_JSON: ${{ runner.temp }}/vnindex.json
+      STOCK_JSON: ${{ runner.temp }}/stock-bars.json
+      SYMBOLS_JSON: ${{ runner.temp }}/active-symbol-keys.json
+      TRIGGER_SCAN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.trigger_scan == 'false' && '0' || '1' }}
+      SKIP_EQUITY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_equity == 'true' && '1' || '0' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate required secrets
+        run: |
+          test -n "$DATABASE_URL" || (echo "Missing secret DATABASE_URL" && exit 1)
+          test -n "$CRON_SECRET" || (echo "Missing secret CRON_SECRET (scan trigger)" && exit 1)
+          test -n "$DEPLOYMENT_URL" || (echo "Missing secret DEPLOYMENT_URL (e.g. https://tradingbook-phi.vercel.app)" && exit 1)
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      - name: Assert production database target
+        run: npx tsx scripts/assert-production-database.ts
+
+      - name: Pre-import health snapshot
+        run: npx tsx scripts/verify-bar-import-health.ts --json | tee pre-import-health.json
+
+      - name: Fetch VNINDEX (ephemeral JSON)
+        run: python scripts/fetch_vnindex.py --output "$VNINDEX_JSON"
+
+      - name: Import VNINDEX into Postgres
+        run: npx tsx scripts/import-bars.ts "$VNINDEX_JSON"
+
+      - name: Export active symbols (no smoke tickers)
+        run: npx tsx scripts/export-active-symbol-keys.ts --out "$SYMBOLS_JSON"
+
+      - name: Resolve equity fetch end-date from VNINDEX session
+        id: session
+        run: echo "end_date=$(npx tsx scripts/print-expected-session-day.ts)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch equity bars
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          python scripts/fetch_stock_bars.py \
+            --symbols-file "$SYMBOLS_JSON" \
+            --output "$STOCK_JSON" \
+            --sleep 3.2 \
+            --calendar-days 200 \
+            --end-date "${{ steps.session.outputs.end_date }}"
+
+      - name: Import equity bars into Postgres
+        if: env.SKIP_EQUITY != '1'
+        run: npx tsx scripts/import-stock-bars.ts "$STOCK_JSON"
+
+      - name: Post-import health snapshot
+        run: npx tsx scripts/verify-bar-import-health.ts --json | tee post-import-health.json
+
+      - name: Upload monitoring artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bar-import-health-${{ github.run_id }}
+          path: |
+            pre-import-health.json
+            post-import-health.json
+          retention-days: 14
+
+      - name: Trigger production daily scan
+        if: env.TRIGGER_SCAN == '1'
+        run: |
+          set -euo pipefail
+          BASE="${DEPLOYMENT_URL%/}"
+          RESP="$(curl -sS -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${BASE}/api/cron/daily-scan")"
+          BODY="$(echo "$RESP" | head -n -1)"
+          CODE="$(echo "$RESP" | tail -n 1)"
+          echo "$BODY" | tee scan-response.json
+          if [ "$CODE" != "200" ]; then
+            echo "daily-scan HTTP $CODE" >&2
+            exit 1
+          fi
+          echo "$BODY" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d.get('ok') is True, d"
+
+      - name: Upload scan response
+        if: env.TRIGGER_SCAN == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-response-${{ github.run_id }}
+          path: scan-response.json
+          retention-days: 14

@@ -145,7 +145,7 @@ curl -H "Authorization: Bearer ***" https://tradingbook-phi.vercel.app/api/cron/
 
 ## Recommended follow-up
 
-1. **Automate** weekly or daily post-close: `fetch:vnindex` + equity fetch/import on a scheduler (GitHub Action or Vercel job — **not** implemented here).
+1. **Automate** — implemented in [PRODUCTION_BAR_IMPORT_AUTOMATION.md](./PRODUCTION_BAR_IMPORT_AUTOMATION.md) (GitHub Actions `production-bar-import.yml`).
 2. **Universe curation** — reduce structurally stale active symbols (`curate-active-symbols.ts`).
 3. **Dashboard FE rebuild** — safe to proceed once alignment behavior is accepted; wire P1 freshness DTO when rebuilding.
 4. Optional: document `SMOKE_DATABASE=production` / prod env loader for ops scripts (avoid `.env` localhost mismatch).
