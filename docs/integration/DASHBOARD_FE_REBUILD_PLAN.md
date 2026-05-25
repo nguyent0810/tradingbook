@@ -58,7 +58,7 @@
 
 **Trading OS v2 cockpit (2026-05-25, `/dashboard` only):** `DashboardMarketStatusBar`, `DashboardDecisionHero`, `DashboardExposurePanel`, `DashboardPerformancePanel` (analytics sparkline, no chart lib), `DashboardScanMetaStrip`, `DashboardBestSetupsPanel`, `DashboardWatchlistPanel`, `DashboardDiagnosticsStack`. Preserved testids: `dashboard-freshness-ok`, `dashboard-freshness-stale`, `dashboard-scan-meta`, `dashboard-best-setups-empty`, `dashboard-watchlist-empty`, `dashboard-diagnostics-empty`, `dashboard-db-load-error`.
 
-### `/setups` — **Slice 2** `DONE` (`f3a677e`)
+### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
 |--|--|
@@ -66,9 +66,9 @@
 | **Data** | `setups-cached-data.ts` loaders, Suspense segments |
 | **Problems** | Skeleton-only fallbacks; lifecycle DB vs computed merge unclear in UI |
 | **Reuse** | Suspense boundaries, cached loaders, `SetupsPipelineContext` (P1 DTO + scan meta) |
-| **Implemented** | `SetupsPipelineContextAsync`, `SetupsPageHeader`, improved empty states, removed duplicate alignment banner from overview |
+| **Implemented** | Slice 2: `SetupsPipelineContextAsync`, `SetupsPageHeader`, improved empty states. Phase 2 (`614d53b`): summary strip, sidebar funnel + diagnostics stack, `SetupsSidebarAsync`, near-miss empty |
 
-### `/trades` — **Slice 3** `DONE` (shell polish — see §6)
+### `/trades` — **Slice 3** `DONE` (shell polish — see §6) · **Trading OS v2 Phase 3** `DONE` (`614d53b`)
 
 | | |
 |--|--|
@@ -76,6 +76,7 @@
 | **Data** | `prisma.trade`, health logs (Prisma post-P0), cookies |
 | **Problems** | ~1955-line monolith; alignment banner only when stale; legacy empty-state markup |
 | **Note** | P0E batch SQL on `/trades` deferred — **do not split monolith in Slice 3** |
+| **Phase 3 (`614d53b`)** | Trades ledger header, filter chips + clear, `tos-ledger-table`, risk/context panels restyled; monolith + `$queryRaw` unchanged |
 
 ### `/trades/new` — **Slice 4B** `DONE` (stale candidate warning — see §7)
 
@@ -102,6 +103,79 @@
 - [x] Setups page (Slice 2) — `f3a677e` pushed & production deployed
 - [x] Trades page (Slice 3) — `0634571` pushed & production deployed
 - [x] Trading OS v2 dashboard cockpit — `81922d6` pushed & production deployed
+- [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` (docs: follow-up commit on `main`)
+
+---
+
+## Trading OS v2 Phase 2+3 — Setups + Trades (2026-05-25)
+
+**Commit:** `614d53b` — `feat(ui): apply Trading OS visual system to setups and trades`
+
+| | |
+|--|--|
+| **Scope** | `/setups` and `/trades` only (+ shared `globals.css` `.tos-*`; reuses dashboard `DashboardMarketStatusBar`, `DashboardScanMetaStrip`) |
+| **Routes unchanged** | No `/setups/[id]`, `/analytics`, `/settings`; `/trades/new`, `/trades/[id]` logic untouched |
+| **Backend** | No Prisma/schema/cron/import/scanner/Server Action changes |
+
+### `/setups` — pipeline workspace
+
+- Page header (no “Run Scan Now” / Scanner Settings — no production actions)
+- Compact market status + scan meta via `SetupsPipelineContext` (`setups-pipeline-context`)
+- Pipeline summary strip (`setups-pipeline-summary`) — counts labeled **remaining after stage**
+- Sidebar: today’s action, vertical funnel (`setups-pipeline-funnel`), flat diagnostics stack (`setups-diagnostics-panel`, `setups-diagnostics-stack`, `setups-diagnostics-empty`)
+- Candidates panel + near-miss empty (`setups-near-miss-empty`) when no closest symbols
+- READY → `/trades/new?setupCandidateId=...` preserved
+- Suspense + `setups-cached-data.ts` loaders unchanged
+
+### `/trades` — professional ledger
+
+- Header “Trades ledger” + count (`trades-page-header`, `trades-header-count`) + CTA `/trades/new`
+- `TradesFreshnessContext` → market bar + scan meta strip
+- Filter bar with active chips + clear all (`trades-active-filters`, `trades-clear-filters`)
+- Dense ledger table (`tos-ledger-table`); right-aligned numerics; no fees column
+- Explicit Edit links (no mandatory row navigation)
+- Monolith `page.tsx`, 3× `$queryRaw`, review-session params/cookies/filters/warnings unchanged
+
+### Testids preserved / added
+
+| Route | Preserved | Added |
+|-------|-----------|-------|
+| `/setups` | `setups-pipeline-context`, `setups-candidates-empty`, `setups-overview-no-scan-run`, `setups-overview-db-banner*`, `setups-diagnostics-empty` | `setups-pipeline-summary`, `setups-pipeline-funnel`, `setups-diagnostics-panel`, `setups-diagnostics-stack`, `setups-near-miss-empty` |
+| `/trades` | `trades-page-header`, `trades-header-count`, `trades-freshness-context`, `dashboard-freshness-ok`/`stale`, `dashboard-scan-meta`, `trades-db-load-error`, `trades-ledger-empty`, `trades-ledger-empty-filtered`, `trades-table`, `trades-scroll-container`, review-session ids | `trades-clear-filters`, `trades-active-filters` |
+
+### Pre-push validation (`614d53b`)
+
+| Check | Result |
+|-------|--------|
+| `npm run lint` | Pass |
+| `npm test` | **261/261** pass |
+| `npm run build` | Pass |
+| Playwright | `tests/trades-table-layout.spec.ts` — h1 **“Trades ledger”** |
+
+### Visual compromises (vs design mockup)
+
+- No Run Scan Now / Scanner Settings on `/setups`
+- Funnel counts labeled as remaining-after-stage (not rejection totals)
+- Diagnostics use flat stack (not accordion mockup)
+- No fees column on ledger
+- No mandatory row click-through on `/trades`
+- Near-miss empty state when no closest symbols
+
+---
+
+## Production validation — Trading OS v2 Phase 2+3 (pending deploy)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Push to `main` | _pending_ | `614d53b` + docs commit |
+| Vercel Production deploy | _pending_ | SHA TBD |
+| `/api/db-health` | _pending_ | `https://tradingbook-phi.vercel.app/api/db-health` |
+| `/setups` auth (logged out) | _pending_ | Expect **307** → `/login` |
+| `/trades` auth (logged out) | _pending_ | Expect **307** → `/login` |
+| `/setups` Trading OS pipeline UI | _pending_ | Logged-in: `setups-pipeline-context`, `setups-pipeline-summary`, funnel, diagnostics |
+| `/trades` Trading OS ledger UI | _pending_ | Logged-in: `trades-page-header`, `trades-freshness-context`, filters, table, empties, warnings |
+| Mobile horizontal scroll | _pending_ | `trades-scroll-container`, `table-container` |
+| Backend / contracts | Unchanged | No Prisma/cron/actions in `614d53b` |
 
 ---
 
@@ -196,7 +270,7 @@
 | Alignment banner (open) | Unchanged | `MarketDataAlignmentBanner` when `showBanner` still in `page.tsx` |
 | Review session / filters | Unchanged | `reviewSession`, `TradeFilters` Suspense, cookie snapshot persist |
 | Table / mobile | Unchanged | `trades-scroll-container`, `min-w-[1840px]`, `trades-ledger-scroll-hint` |
-| Playwright contract | Unchanged | `tests/trades-table-layout.spec.ts` expects `Trades` h1 + `3 trades` |
+| Playwright contract | Updated in `614d53b` | `tests/trades-table-layout.spec.ts` expects **Trades ledger** h1 + `3 trades` |
 | `/trades/new`, `/trades/[id]` | Not touched | `0634571` diff scope |
 
 **Logged-in smoke:** Sign in → `/trades` → confirm header count matches ledger rows, aligned freshness OK strip, scan meta id prefix `cmpku2jyq…`, table loads seeded/historical trades, filter to zero rows shows `trades-ledger-empty-filtered`, review-session toggle and open-position warnings still behave.
