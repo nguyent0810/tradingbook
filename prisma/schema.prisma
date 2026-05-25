@@ -28,17 +28,17 @@ model Trade {
   direction Direction
   status    TradeStatus @default(PLANNED)
 
-  entryDate  DateTime  @map("entry_date")
-  exitDate   DateTime? @map("exit_date")
+  entryDate DateTime  @map("entry_date")
+  exitDate  DateTime? @map("exit_date")
 
-  entryPrice Float @map("entry_price")
+  entryPrice Float  @map("entry_price")
   exitPrice  Float? @map("exit_price")
   quantity   Float
   fees       Float  @default(0)
 
-  realizedPnl Float? @map("realized_pnl")
-  rMultiple  Float?  @map("r_multiple")
-  outcome    TradeOutcome?
+  realizedPnl Float?        @map("realized_pnl")
+  rMultiple   Float?        @map("r_multiple")
+  outcome     TradeOutcome?
 
   /// Locked product playbook — only `BREAKOUT_PULLBACK` is supported.
   playbook Playbook @default(BREAKOUT_PULLBACK) @map("playbook")
@@ -61,9 +61,10 @@ model Trade {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  setupCandidate SetupCandidate? @relation(fields: [setupId], references: [id], onDelete: SetNull)
-  setupOutcomes SetupOutcome[]
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  setupCandidate SetupCandidate?  @relation(fields: [setupId], references: [id], onDelete: SetNull)
+  setupOutcomes  SetupOutcome[]
+  healthLogs     TradeHealthLog[]
 
   @@index([userId])
   @@index([setupId])
@@ -71,6 +72,23 @@ model Trade {
   @@index([status])
   @@index([entryDate])
   @@map("trades")
+}
+
+/// Per-trade EOD health checkpoints (append-only). Table created in migration 20260506120000.
+model TradeHealthLog {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tradeId           String           @map("trade_id")
+  trade             Trade            @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  checkedAt         DateTime         @default(now()) @map("checked_at")
+  healthLevel       SetupHealthLevel @map("health_level")
+  healthScore       Int?             @map("health_score")
+  priceVsZone       String?          @map("price_vs_zone")
+  structureStatus   String?          @map("structure_status")
+  recommendedAction String?          @map("recommended_action")
+  reviewChecklist   Json?            @map("review_checklist")
+
+  @@index([tradeId, checkedAt])
+  @@map("trade_health_logs")
 }
 
 enum Direction {
@@ -199,9 +217,9 @@ model StockSymbol {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bars              StockDailyBar[]
-  setupCandidates   SetupCandidate[]
-  setupWatchItems   SetupWatchItem[]
+  bars            StockDailyBar[]
+  setupCandidates SetupCandidate[]
+  setupWatchItems SetupWatchItem[]
 
   @@map("stock_symbols")
 }
@@ -231,17 +249,17 @@ model TacticalSymbol {
 }
 
 model StockDailyBar {
-  id       String      @id @default(cuid())
-  symbolId String      @map("symbol_id")
-  symbol   StockSymbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
-  date     DateTime    @db.Date
-  open     Float
-  high     Float
-  low      Float
-  close    Float
-  volume   Float
-  source   String      @default("vnstock:VCI")
-  updatedAt DateTime   @updatedAt @map("updated_at")
+  id        String      @id @default(cuid())
+  symbolId  String      @map("symbol_id")
+  symbol    StockSymbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  date      DateTime    @db.Date
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  volume    Float
+  source    String      @default("vnstock:VCI")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
   @@unique([symbolId, date])
   @@index([symbolId, date(sort: Desc)])
@@ -249,25 +267,25 @@ model StockDailyBar {
 }
 
 model DailyScanRun {
-  id                          String              @id @default(cuid())
-  runAt                       DateTime            @default(now()) @map("run_at")
-  startedAt                   DateTime?           @map("started_at")
-  finishedAt                  DateTime?           @map("finished_at")
-  gate1Level                  Gate1ScanLevel      @map("gate1_level")
+  id                          String             @id @default(cuid())
+  runAt                       DateTime           @default(now()) @map("run_at")
+  startedAt                   DateTime?          @map("started_at")
+  finishedAt                  DateTime?          @map("finished_at")
+  gate1Level                  Gate1ScanLevel     @map("gate1_level")
   status                      DailyScanRunStatus
-  symbolCountTotal            Int                 @map("symbol_count_total")
-  symbolCountScanned          Int                 @default(0) @map("symbol_count_scanned")
-  symbolCountFailed           Int                 @default(0) @map("symbol_count_failed")
-  symbolCountAfterTradability Int                 @map("symbol_count_after_tradability")
-  symbolCountFilteredOut      Int                 @map("symbol_count_filtered_out")
-  candidateCountA             Int                 @map("candidate_count_a")
-  candidateCountB             Int                 @map("candidate_count_b")
-  candidateCountSurfaced      Int                 @map("candidate_count_surfaced")
-  setupCandidatesCreated      Int                 @default(0) @map("setup_candidates_created")
-  tradabilityBreakdown        Json?               @map("tradability_breakdown")
+  symbolCountTotal            Int                @map("symbol_count_total")
+  symbolCountScanned          Int                @default(0) @map("symbol_count_scanned")
+  symbolCountFailed           Int                @default(0) @map("symbol_count_failed")
+  symbolCountAfterTradability Int                @map("symbol_count_after_tradability")
+  symbolCountFilteredOut      Int                @map("symbol_count_filtered_out")
+  candidateCountA             Int                @map("candidate_count_a")
+  candidateCountB             Int                @map("candidate_count_b")
+  candidateCountSurfaced      Int                @map("candidate_count_surfaced")
+  setupCandidatesCreated      Int                @default(0) @map("setup_candidates_created")
+  tradabilityBreakdown        Json?              @map("tradability_breakdown")
   /// Optional Gate 2 rejection diagnostics when surfacing 0 candidates (JSON).
-  notes                       Json?               @map("notes")
-  errorSummary                String?             @map("error_summary") @db.Text
+  notes                       Json?              @map("notes")
+  errorSummary                String?            @map("error_summary") @db.Text
 
   candidates SetupCandidate[]
 
@@ -301,23 +319,23 @@ model SetupCandidate {
 }
 
 model SetupOutcome {
-  id                  String                   @id @default(cuid())
-  setupId             String                   @map("setup_id")
-  setup               SetupCandidate           @relation(fields: [setupId], references: [id], onDelete: Cascade)
-  tradeId             String                   @unique @map("trade_id")
-  trade               Trade                    @relation(fields: [tradeId], references: [id], onDelete: Cascade)
-  setupType           ScanSetupType            @map("setup_type")
-  setupTierAtEntry    ScanQuality              @map("setup_tier_at_entry")
-  entryReason         TradeEntryReason?        @map("entry_reason")
+  id                  String                    @id @default(cuid())
+  setupId             String                    @map("setup_id")
+  setup               SetupCandidate            @relation(fields: [setupId], references: [id], onDelete: Cascade)
+  tradeId             String                    @unique @map("trade_id")
+  trade               Trade                     @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  setupType           ScanSetupType             @map("setup_type")
+  setupTierAtEntry    ScanQuality               @map("setup_tier_at_entry")
+  entryReason         TradeEntryReason?         @map("entry_reason")
   entryLocationVsZone TradeEntryLocationVsZone? @map("entry_location_vs_zone")
-  healthLevelAtEntry  SetupHealthLevel?        @map("health_level_at_entry")
-  healthLevelAtExit   SetupHealthLevel?        @map("health_level_at_exit")
-  exitReason          TradeExitReason?         @map("exit_reason")
-  exitDiscipline      TradeExitDiscipline?     @map("exit_discipline")
-  rMultiple           Float?                   @map("r_multiple")
-  pnl                 Float?                   @map("pnl")
+  healthLevelAtEntry  SetupHealthLevel?         @map("health_level_at_entry")
+  healthLevelAtExit   SetupHealthLevel?         @map("health_level_at_exit")
+  exitReason          TradeExitReason?          @map("exit_reason")
+  exitDiscipline      TradeExitDiscipline?      @map("exit_discipline")
+  rMultiple           Float?                    @map("r_multiple")
+  pnl                 Float?                    @map("pnl")
   outcome             TradeOutcome?
-  createdAt           DateTime                 @default(now()) @map("created_at")
+  createdAt           DateTime                  @default(now()) @map("created_at")
 
   @@index([setupId])
   @@index([setupType, setupTierAtEntry])
@@ -326,9 +344,9 @@ model SetupOutcome {
 
 /// Durable watch row for scanner setups — health overlay only in this phase (no lifecycle FSM).
 model SetupWatchItem {
-  id        String @id @default(cuid())
-  symbolId  String @map("symbol_id")
-  symbol    StockSymbol @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  id        String        @id @default(cuid())
+  symbolId  String        @map("symbol_id")
+  symbol    StockSymbol   @relation(fields: [symbolId], references: [id], onDelete: Cascade)
   setupType ScanSetupType @map("setup_type")
   quality   ScanQuality
 
@@ -338,8 +356,8 @@ model SetupWatchItem {
   pullbackZoneLow  Float @map("pullback_zone_low")
   pullbackZoneHigh Float @map("pullback_zone_high")
 
-  firstSeenBarDate DateTime @map("first_seen_bar_date") @db.Date
-  lastSeenScanRunId String? @map("last_seen_scan_run_id")
+  firstSeenBarDate  DateTime @map("first_seen_bar_date") @db.Date
+  lastSeenScanRunId String?  @map("last_seen_scan_run_id")
 
   healthFlags           Json?             @map("health_flags")
   healthScore           Int?              @map("health_score")

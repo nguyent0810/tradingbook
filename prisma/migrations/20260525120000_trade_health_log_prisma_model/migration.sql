@@ -1,0 +1,3 @@
+-- P0A: Prisma schema-only mapping for existing `trade_health_logs` table.
+-- Table, indexes, and FK were created in 20260506120000 and 20260511103000.
+-- No DDL changes; this migration records schema state for migrate history.
