@@ -75,9 +75,9 @@
 | **Problems** | ~1955-line monolith; alignment banner only when stale; legacy empty-state markup |
 | **Note** | P0E batch SQL on `/trades` deferred — **do not split monolith in Slice 3** |
 
-### `/trades/new`, `/trades/[id]` — **Slice 4** `PLANNED` (see §7)
+### `/trades/new` — **Slice 4B** `DONE` (stale candidate warning — see §7)
 
-Two scoped options — **recommended order: 4B then 4A** (lowest risk first).
+### `/trades/[id]` — **Slice 4A** `PENDING` (health timeline — see §7)
 
 ### Recommended new pages (after inventory)
 
@@ -247,12 +247,14 @@ See **§7** for chosen slice order and acceptance criteria.
 
 **Not in Slice 4:** monolith split, P0E migration, REST APIs, hard reject of stale candidates without explicit approval.
 
-### Slice 4B checklist (implement next)
+### Slice 4B checklist — `DONE`
 
-- [ ] Load latest non-smoke scan id alongside candidate lookup
-- [ ] `data-testid="trades-new-stale-candidate-warning"` when mismatched
-- [ ] Copy explains scan run id vs latest; CTA to `/setups`
-- [ ] No `createTrade` / form field contract changes
+- [x] Load latest non-smoke scan via `getLatestDailyScanRun()` alongside candidate lookup
+- [x] Compare `candidate.scanRunId` to latest id (`resolveStaleSetupCandidateNotice`)
+- [x] `data-testid="trades-new-stale-candidate-warning"` when stale; `trades-new-setup-current` when current
+- [x] `data-testid="trades-new-scan-lookup-unavailable"` when latest scan lookup fails (non-blocking)
+- [x] `StaleSetupCandidateWarning` — soft warn only; prefill + `createTrade` unchanged
+- [x] Unit tests: `src/lib/trades/stale-setup-candidate.test.ts`
 
 ### Slice 4A checklist (after 4B)
 

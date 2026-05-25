@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { TradeForm } from "@/components/trade-form";
+import { StaleSetupCandidateWarning } from "@/components/trades/stale-setup-candidate-warning";
 import { prisma } from "@/lib/prisma";
+import { getLatestDailyScanRun } from "@/lib/scanner/setups-queries";
 import { getSession } from "@/lib/session";
+import {
+  resolveStaleSetupCandidateNotice,
+  type StaleSetupCandidateNotice,
+} from "@/lib/trades/stale-setup-candidate";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -21,15 +27,33 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
   const setupCandidateId = (params.setupCandidateId ?? "").trim();
   let initialValues: Parameters<typeof TradeForm>[0]["initialValues"] | undefined;
   let setupContextLabel: string | null = null;
+  let staleNotice: StaleSetupCandidateNotice = { kind: "none" };
 
   if (setupCandidateId) {
+    let latestScanLookupFailed = false;
+    let latestScan: Awaited<ReturnType<typeof getLatestDailyScanRun>> = null;
+
+    try {
+      latestScan = await getLatestDailyScanRun();
+    } catch (e) {
+      latestScanLookupFailed = true;
+      console.error("[trades/new] getLatestDailyScanRun failed:", e);
+    }
+
     const candidate = await prisma.setupCandidate.findUnique({
       where: { id: setupCandidateId },
       include: {
         symbol: { select: { symbol: true } },
       },
     });
+
     if (candidate) {
+      staleNotice = resolveStaleSetupCandidateNotice({
+        candidateScanRunId: candidate.scanRunId,
+        latestScanRunId: latestScan?.id,
+        latestScanLookupFailed,
+      });
+
       const watch = await prisma.setupWatchItem.findUnique({
         where: {
           symbolId_setupType: {
@@ -61,6 +85,7 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
           {
             source: "setup_candidate",
             setupCandidateId: candidate.id,
+            scanRunId: candidate.scanRunId,
             symbol: candidate.symbol.symbol,
             setupType: candidate.setupType,
             setupTier: candidate.quality,
@@ -81,6 +106,11 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
     }
   }
 
+  const showCurrentSetupMarker =
+    setupCandidateId.length > 0 &&
+    initialValues != null &&
+    staleNotice.kind === "none";
+
   return (
     <div className="page-container animate-in">
       <div className="mx-auto max-w-2xl">
@@ -97,7 +127,14 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
           </p>
         </div>
 
-        <div className="card p-6">
+        <StaleSetupCandidateWarning notice={staleNotice} />
+
+        <div
+          className="card p-6"
+          {...(showCurrentSetupMarker
+            ? { "data-testid": "trades-new-setup-current" }
+            : {})}
+        >
           <TradeForm initialValues={initialValues} setupContextLabel={setupContextLabel} />
         </div>
       </div>
