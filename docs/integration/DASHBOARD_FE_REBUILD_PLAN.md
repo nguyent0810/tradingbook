@@ -56,7 +56,7 @@
 | **Error** | `ErrorStateWithEvidence` (keep) |
 | **Mobile** | Stack cockpit columns; horizontal scroll tables |
 
-### `/setups` — **Slice 2** `DONE` (see commit after `f5b7eea`)
+### `/setups` — **Slice 2** `DONE` (`f3a677e`)
 
 | | |
 |--|--|
@@ -66,14 +66,14 @@
 | **Reuse** | Suspense boundaries, cached loaders, `SetupsPipelineContext` (P1 DTO + scan meta) |
 | **Implemented** | `SetupsPipelineContextAsync`, `SetupsPageHeader`, improved empty states, removed duplicate alignment banner from overview |
 
-### `/trades` — **Slice 3+** `PENDING` (defer monolith split)
+### `/trades` — **Slice 3** `PLANNED` (shell polish — see §6)
 
 | | |
 |--|--|
 | **User goal** | Review queue, filters, EOD checkpoints |
 | **Data** | `prisma.trade`, health logs (Prisma post-P0), cookies |
-| **Problems** | ~1959-line page; raw SQL reduced but still dense |
-| **Note** | P0E batch SQL still deferred per `06-backend-gaps.md` |
+| **Problems** | ~1955-line monolith; alignment banner only when stale; legacy empty-state markup |
+| **Note** | P0E batch SQL on `/trades` deferred — **do not split monolith in Slice 3** |
 
 ### `/trades/new`, `/trades/[id]` — **Slice 4** `PENDING`
 
@@ -97,7 +97,7 @@ Stale `setupCandidateId` guard; health timeline UX.
 - [x] Cockpit grid + improved `loading.tsx`
 - [x] `EmptyStateWithReason` on Best Setups / Watchlist / Diagnostics
 - [x] Dashboard Slice 1 committed (`f5b7eea`) — pushed & production deployed
-- [x] Setups page (Slice 2) — in progress / next commit
+- [x] Setups page (Slice 2) — `f3a677e` pushed & production deployed
 
 ---
 
@@ -117,6 +117,84 @@ Stale `setupCandidateId` guard; health timeline UX.
 | Mobile | Cockpit grid stacks; tables scroll horizontally | `dashboard-cockpit-grid` + `table-container` |
 
 **Logged-in smoke:** Sign in at `/login`, then confirm `dashboard-freshness-ok`, `dashboard-scan-meta`, and empty Best Setups copy on production.
+
+---
+
+## Production validation — Setups Slice 2 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Push to `main` | `f3a677e` | `f5b7eea..f3a677e` |
+| Vercel Production deploy | **Ready** | SHA `f3a677e`, `2026-05-25T06:47:20Z` |
+| `/api/db-health` | `{"ok":true}` | Production URL |
+| `/setups` auth | **307** → `/login` | Expected — session required |
+| `/dashboard` auth | **307** → `/login` | Unchanged post-`f3a677e` |
+| Market data aligned (data) | **Yes** | `ops:verify-bar-import`: bars **2026-05-25**, `delayedBackdrop: false` |
+| Latest scan id (data) | **`cmpku2jyq000004l42cv873wq`** | `latestNonSmokeScan.id` in verify probe |
+| Pipeline context (code) | `data-testid="setups-pipeline-context"` | `SetupsPipelineContext` → `DashboardFreshnessStrip` + `DashboardScanRunMeta` |
+| No duplicate alignment banner in overview | **Yes** | No `MarketDataAlignmentBanner` under `src/app/(dashboard)/setups/` |
+| Candidate empty state | Scan id prefix, Gate 1, tradability count | `setups-candidates-empty` in `setups-candidates-async.tsx` |
+| No-scan empty state | References GHA “Production bar import” | `setups-overview-no-scan-run` |
+| Suspense segments | Unchanged boundaries + `SetupsPipelineContextFallback` | `setups/page.tsx`, `setups-stream-fallbacks.tsx` |
+| Partial/error paths | `ErrorStateWithEvidence` testids preserved | `setups-overview-db-banner*`, `setups-candidates-partial-data` |
+| Mobile | Reuses dashboard freshness/scan-meta CSS; tables use `table-container` | `globals.css` cockpit/freshness classes |
+
+**Logged-in smoke:** Sign in, open `/setups`, confirm `setups-pipeline-context` shows aligned freshness OK strip and scan meta (`cmpku2jyq…` or newer), overview has no second alignment banner, and candidate empty copy matches Gate 1 + tradability when count is 0.
+
+**Dashboard re-check (post-`f3a677e`):** Same data probe; `/dashboard` still redirects when logged out; Slice 1 components unchanged in `f5b7eea` files.
+
+---
+
+## 6. Trades Slice 3 — inventory and low-risk plan
+
+**Scope rule:** Existing routes only (`/trades`, `/trades/new`, `/trades/[id]`). No `/analytics`, `/settings`, `/setups/[id]`. No page-level REST. **Do not** extract the monolith into route segments unless a later slice proves a safe cut point.
+
+### 6.1 Route inventory (traced)
+
+| Route | File | Lines (approx.) | Data / actions |
+|-------|------|-----------------|----------------|
+| `/trades` | `src/app/(dashboard)/trades/page.tsx` | ~1955 | `prisma.trade.findMany` (user-scoped); `fetchMarketSessionSnapshot` + `analyzeMarketDataAlignment`; `loadOpenPositionMarks`; **3× `$queryRaw`** on `trade_health_logs` (checked-today, latest per trade, weekly checklist agg); bar batch via `fetchLatestTwoClosesByTradeSymbols` / `fetchBarCloseOnOrBeforeReviewBatch`; cookies `bookOperatingSnapshot`; `dynamic = "force-dynamic"` |
+| `/trades/new` | `src/app/(dashboard)/trades/new/page.tsx` | ~106 | Optional `setupCandidateId` → `prisma.setupCandidate` + `setupWatchItem`; `TradeForm` → `createTrade` Server Action |
+| `/trades/[id]` | `src/app/(dashboard)/trades/[id]/page.tsx` | ~816 | `prisma.trade.findFirst`; `loadTradeHealthLogsForDetailPage` (typed Prisma); `fetchMarketSessionSnapshot`; `MarketDataAlignmentBanner` when stale; `TradeForm` → `updateTrade`; `addTradeHealthCheckpoint`; `deleteTrade` |
+
+**Colocated UI (not separate routes):** `trade-filters.tsx` (client, `useSearchParams`), `review-session-chrome.tsx`, `focus-review-workspace.tsx`, `open-position-review-cell.tsx`, `operating-snapshot-persist.tsx`, `loading.tsx`.
+
+**Server libs (`src/lib/trades/*`):** review queue/session (`review-priority-queue`, `review-session-queue`), operating book (`book-operating-context`, `book-clusters`, `operating-posture`, `operating-trend-discipline`), position intel (`open-position-intelligence`, `position-health`, `position-state-evolution`), EOD (`eod-review-workflow`, `trade-health-review-checklist`), derived ledger (`trades-ledger-row-derived`), health logs (`trade-health-logs`).
+
+**Server Actions:** `src/app/actions/trades.ts` — `createTrade`, `updateTrade`, `deleteTrade`, `addTradeHealthCheckpoint`, `checkTradeEntryPriceAlignment`.
+
+### 6.2 Current UX / state gaps (vs Dashboard/Setups slices)
+
+| Area | Today | Slice 3 target |
+|------|-------|----------------|
+| Market trust | `MarketDataAlignmentBanner` only when `showBanner` (stale/misaligned) | Add **`TradesFreshnessStrip`** (reuse `DashboardFreshnessStrip` + `fetchMarketFreshnessDto`) at top of `/trades`; keep banner for open-position mark warnings |
+| Empty states | Legacy `.empty-state` div on ledger zero | Migrate to **`EmptyStateWithReason`** (filter vs true zero) — same copy, better evidence styling |
+| Errors | `ErrorStateWithEvidence` for partial DB load (`trades-db-load-error`) | Keep; ensure health-log batch failures surface a **non-blocking** note when `$queryRaw` skips (optional one-liner, no contract change) |
+| Loading | `loading.tsx` skeleton | Light refresh to match header + freshness strip layout (no behavior change) |
+| `/trades/new` | No freshness context | Optional slim strip or link-back only — **defer stale `setupCandidateId` guard** to Slice 4 per `06-backend-gaps.md` §10 |
+| `/trades/[id]` | Alignment banner + silent health load catch | Slice 4: loud health read failures; Slice 3 touch only if adding shared freshness strip without changing forms |
+
+### 6.3 P0E / backend constraints (from `06-backend-gaps.md`)
+
+- **Keep** the three `$queryRaw` blocks on `/trades` until a dedicated backend slice migrates them to `tradeHealthLog` Prisma aggregations.
+- **Do not** change Server Action payloads, trade schema, or health checkpoint shape.
+- **Do not** add REST routes for trades.
+
+### 6.4 Proposed Slice 3 implementation checklist (frontend only)
+
+1. **`TradesPageHeader`** — title, trade count, primary CTA → `/trades/new` (mirror dashboard/setups headers).
+2. **`TradesFreshnessContext`** — server segment or inline block: `fetchMarketFreshnessDto` + optional latest scan meta (read-only, same as setups) at top of `/trades` **without** moving ledger logic out of `page.tsx`.
+3. **Empty state** — replace ledger empty markup with `EmptyStateWithReason` + existing CTAs.
+4. **`loading.tsx`** — align skeleton with header + freshness strip.
+5. **CSS** — reuse `.dashboard-freshness-*` / `.dashboard-scan-meta` classes (no new design system).
+6. **Tests** — extend `tests/trades-table-layout.spec.ts` only if new `data-testid`s added; keep Playwright seed path unchanged.
+
+**Explicitly out of Slice 3:** monolith file split, Suspense segmentation of ledger, review-session refactor, P0E SQL → Prisma migration, `/trades/new` stale-candidate validation, `/trades/[id]` health timeline redesign.
+
+### 6.5 Slice 4 preview (after Slice 3 ships)
+
+- `/trades/new`: reject or warn on `setupCandidateId` not from latest scan run.
+- `/trades/[id]`: health timeline UX + loud `loadTradeHealthLogsForDetailPage` errors.
 
 ---
 
