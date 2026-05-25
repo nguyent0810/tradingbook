@@ -18,7 +18,10 @@ import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
-import { buildDecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
+import {
+  buildDecisionCockpitDto,
+  resolveBestSetupsPanelPresentation,
+} from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
@@ -29,6 +32,7 @@ import { DashboardOpportunityPreview } from "@/components/dashboard/dashboard-op
 import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardBestSetupsPanel } from "@/components/dashboard/dashboard-best-setups-panel";
+import { DashboardSetupQualityLadder } from "@/components/dashboard/dashboard-setup-quality-ladder";
 import { DashboardWatchlistPanel } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import { DashboardActionableBlockers } from "@/components/dashboard/dashboard-actionable-blockers";
@@ -178,6 +182,20 @@ export default async function DashboardPage() {
   const surfacedCount = latestScan?.candidateCountSurfaced ?? 0;
   const maxPortfolioPct = pctFromRangeText(cockpitDto.verdict.allocation.value);
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
+  const bestSetupsPresentation = resolveBestSetupsPanelPresentation({
+    setupRowCount: topSetups.length,
+    opportunity: cockpitDto.opportunity,
+    latestScan: latestScan
+      ? {
+          id: latestScan.id,
+          runAt: latestScan.runAt,
+          gate1Level: latestScan.gate1Level,
+          candidateCountA: latestScan.candidateCountA,
+          candidateCountB: latestScan.candidateCountB,
+          candidateCountSurfaced: latestScan.candidateCountSurfaced,
+        }
+      : null,
+  });
 
   return (
     <div className="page-container dash-cockpit animate-in pb-10">
@@ -211,6 +229,8 @@ export default async function DashboardPage() {
 
       <DashboardOpportunityPreview opportunity={cockpitDto.opportunity} />
 
+      <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
+
       <div className="dash-cockpit__secondary-row">
         <DashboardScanMetaStrip
           latestScan={latestScan}
@@ -219,7 +239,10 @@ export default async function DashboardPage() {
         <DashboardPerformancePanel trades={trades} />
       </div>
 
-      <DashboardBestSetupsPanel topSetups={topSetups} latestScan={latestScan} />
+      <DashboardBestSetupsPanel
+        topSetups={topSetups}
+        presentation={bestSetupsPresentation}
+      />
 
       <MomentumWatchSection />
 

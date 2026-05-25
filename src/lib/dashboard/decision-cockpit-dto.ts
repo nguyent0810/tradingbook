@@ -167,6 +167,39 @@ export type LadderRowDto = {
   provenance: DataProvenance;
 };
 
+/** Ordered pipeline stages for the setup quality ladder panel (S5). */
+export const SETUP_LADDER_STAGE_ORDER: SetupLadderStage[] = [
+  "tier_a",
+  "tier_b",
+  "watch",
+  "extended",
+  "invalid",
+  "avoid",
+];
+
+export type LadderStageGroupDto = {
+  stage: SetupLadderStage;
+  label: string;
+  subtitle: string;
+  count: number;
+  sampleSymbols: string[];
+  provenance: DataProvenance;
+};
+
+export type SetupQualityLadderDto = {
+  stages: LadderStageGroupDto[];
+  /** Sum of per-stage counts (each symbol counted once in one stage). */
+  totalClassified: number;
+};
+
+export type BestSetupsPanelMode = "full_table" | "compact_empty";
+
+export type BestSetupsPanelPresentation = {
+  mode: BestSetupsPanelMode;
+  emptyTitle: string;
+  emptyReason: string;
+};
+
 export type RiskGuardrailDto = {
   maxBookAllocation: ProvenanceField<string>;
   perTradeGuidance: ProvenanceField<string>;
@@ -206,6 +239,8 @@ export type DecisionCockpitDto = {
   evidence: EvidenceChipDto[];
   opportunity: OpportunityBoardDto;
   ladder: LadderRowDto[];
+  /** Grouped pipeline counts + sample symbols (S5). */
+  setupQualityLadder: SetupQualityLadderDto;
   risk: RiskGuardrailDto;
   tomorrow: TomorrowPlanDto;
   /** Dashboard compact blockers (max 3); same source as `blockers`. */
@@ -213,6 +248,20 @@ export type DecisionCockpitDto = {
   blockers: ActionableBlockerDto[];
   scanRunId: string | null;
 };
+
+const LADDER_STAGE_UI: Record<SetupLadderStage, { label: string; subtitle: string }> = {
+  tier_a: { label: "Tier A", subtitle: "Tradeable" },
+  tier_b: { label: "Tier B", subtitle: "Reduced size" },
+  watch: { label: "Watch", subtitle: "Near miss" },
+  extended: { label: "Extended", subtitle: "Good stock, bad entry" },
+  invalid: { label: "Invalid", subtitle: "Rule broken" },
+  avoid: { label: "Avoid", subtitle: "Risk too high" },
+};
+
+/** Trader-facing ladder stage label (shared with dashboard panels). */
+export function formatSetupLadderStageLabel(stage: SetupLadderStage): string {
+  return LADDER_STAGE_UI[stage]?.label ?? stage;
+}
 
 /** Trader-facing severity group for dashboard blockers. */
 export function formatBlockerSeverity(severity: BlockerSeverity): string {
@@ -576,6 +625,96 @@ function buildLadderRows(
   }));
 }
 
+function buildSetupQualityLadder(
+  candidates: DecisionCockpitCandidateSnapshot[],
+  nearMiss: Gate2ClosestSymbolRow[]
+): SetupQualityLadderDto {
+  const symbolsByStage = new Map<SetupLadderStage, string[]>();
+  for (const stage of SETUP_LADDER_STAGE_ORDER) {
+    symbolsByStage.set(stage, []);
+  }
+
+  for (const c of candidates) {
+    const stage = resolveSetupLadderStage(c);
+    const bucket = symbolsByStage.get(stage)!;
+    if (!bucket.includes(c.symbolKey)) bucket.push(c.symbolKey);
+  }
+
+  for (const row of nearMiss) {
+    const status = computeClosestExecutionStatus(
+      row.terminalCategory,
+      row.close,
+      row.pullbackZoneLow,
+      row.pullbackZoneHigh
+    );
+    const stage = resolveNearMissLadderStage(row, status);
+    const bucket = symbolsByStage.get(stage)!;
+    if (!bucket.includes(row.symbol)) bucket.push(row.symbol);
+  }
+
+  const stages: LadderStageGroupDto[] = SETUP_LADDER_STAGE_ORDER.map((stage) => {
+    const symbols = symbolsByStage.get(stage) ?? [];
+    return {
+      stage,
+      label: LADDER_STAGE_UI[stage].label,
+      subtitle: LADDER_STAGE_UI[stage].subtitle,
+      count: symbols.length,
+      sampleSymbols: symbols.slice(0, 3),
+      provenance: "derived",
+    };
+  });
+
+  return {
+    stages,
+    totalClassified: stages.reduce((sum, s) => sum + s.count, 0),
+  };
+}
+
+/**
+ * Best Setups table vs compact empty (S5 dedup with Opportunity preview).
+ * Uses only setup row count + opportunity mode — no new queries.
+ */
+export function resolveBestSetupsPanelPresentation(params: {
+  setupRowCount: number;
+  opportunity: OpportunityBoardDto;
+  latestScan: DecisionCockpitScanSnapshot | null;
+}): BestSetupsPanelPresentation {
+  if (params.setupRowCount > 0) {
+    return {
+      mode: "full_table",
+      emptyTitle: "",
+      emptyReason: "",
+    };
+  }
+
+  const { opportunity, latestScan } = params;
+  if (opportunity.mode === "near_miss") {
+    return {
+      mode: "compact_empty",
+      emptyTitle: "No Tier A/B surfaced today",
+      emptyReason:
+        "Near-miss watch names and wait-fors are in Opportunity preview above. This table only lists health-scored Tier A/B candidates when the scan surfaces them.",
+    };
+  }
+
+  if (opportunity.mode === "candidates") {
+    return {
+      mode: "compact_empty",
+      emptyTitle: "No setup rows to display",
+      emptyReason:
+        "Opportunity preview lists surfaced names above, but none passed health scoring for the detailed table. Review on Setups.",
+    };
+  }
+
+  return {
+    mode: "compact_empty",
+    emptyTitle: "No Tier A/B surfaced today",
+    emptyReason: latestScan
+      ? "Opportunity preview above is empty for this scan. Open Setups for near-miss rankings and full Gate 2 rejection detail."
+      : "No daily scan yet — wait for bar import and scan automation, then check Setups.",
+  };
+}
+
 function buildActionableBlockers(
   scanNotes: DailyScanGate2Notes | null,
   gate1: Gate1Level,
@@ -712,6 +851,10 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     nearMiss,
     input.latestScan
   );
+  const setupQualityLadder = buildSetupQualityLadder(
+    input.surfacedCandidates,
+    nearMiss
+  );
   const blockers = buildActionableBlockers(input.scanNotes, gate1.canonical);
 
   const verdict: VerdictDto = {
@@ -767,6 +910,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     evidence: buildEvidenceStack(gate1, input.latestScan, input.liveRegime, input.freshness),
     opportunity,
     ladder: buildLadderRows(opportunity, input.surfacedCandidates),
+    setupQualityLadder,
     risk,
     tomorrow,
     actionableDiagnostics: {

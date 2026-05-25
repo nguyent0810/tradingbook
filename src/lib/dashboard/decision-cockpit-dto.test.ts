@@ -4,8 +4,10 @@ import {
   buildDecisionCockpitDto,
   computeConfidenceBand,
   mapDecisionLevelToUxVerdict,
+  resolveBestSetupsPanelPresentation,
   resolveCanonicalGate1,
   resolveSetupLadderStage,
+  SETUP_LADDER_STAGE_ORDER,
   type DecisionCockpitInput,
 } from "./decision-cockpit-dto";
 
@@ -305,6 +307,102 @@ describe("buildDecisionCockpitDto — actionable diagnostics", () => {
     );
     expect(pullback?.sampleSymbols).toEqual(["HPG", "FPT", "VNM"]);
     expect(pullback?.sampleSymbols).not.toContain("FAKE");
+  });
+});
+
+describe("buildDecisionCockpitDto — setup quality ladder (S5)", () => {
+  it("candidate day: groups tier_a with real symbols and zero other stages", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          closestToValidSymbols: [],
+        },
+        latestScan: {
+          ...baseInput().latestScan!,
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+        },
+        surfacedCandidates: [
+          {
+            id: "c1",
+            symbolKey: "MWG",
+            quality: "A",
+            lifecycleSortLabel: "READY",
+            healthLevel: "HEALTHY",
+            healthScore: 80,
+            healthScoreLabel: "Strong",
+            healthFlags: [],
+            healthSummary: null,
+            reasons: [],
+            close: 10,
+            pullbackZoneLow: 9.5,
+            pullbackZoneHigh: 10.2,
+            stopLevel: 9,
+            rankScore: 1,
+          },
+        ],
+      })
+    );
+    expect(dto.setupQualityLadder.totalClassified).toBe(1);
+    const tierA = dto.setupQualityLadder.stages.find((s) => s.stage === "tier_a");
+    expect(tierA?.count).toBe(1);
+    expect(tierA?.sampleSymbols).toEqual(["MWG"]);
+    expect(dto.setupQualityLadder.stages.find((s) => s.stage === "watch")?.count).toBe(0);
+    expect(SETUP_LADDER_STAGE_ORDER).toHaveLength(6);
+  });
+
+  it("zero surfaced + near-miss: watch stage has HPG, no fabricated symbols", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    const watch = dto.setupQualityLadder.stages.find((s) => s.stage === "watch");
+    expect(watch?.count).toBe(1);
+    expect(watch?.sampleSymbols).toEqual(["HPG"]);
+    expect(watch?.sampleSymbols).not.toContain("FAKE");
+    expect(dto.setupQualityLadder.stages.find((s) => s.stage === "tier_a")?.count).toBe(0);
+    for (const group of dto.setupQualityLadder.stages) {
+      for (const sym of group.sampleSymbols) {
+        expect(sym).toMatch(/^[A-Z0-9]+$/);
+      }
+    }
+  });
+
+  it("zero surfaced + no near-miss: all stages show count 0", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          closestToValidSymbols: [],
+        },
+      })
+    );
+    expect(dto.setupQualityLadder.totalClassified).toBe(0);
+    expect(dto.setupQualityLadder.stages.every((s) => s.count === 0)).toBe(true);
+    expect(dto.setupQualityLadder.stages.every((s) => s.sampleSymbols.length === 0)).toBe(true);
+  });
+});
+
+describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
+  it("uses full table when setup rows exist", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    const p = resolveBestSetupsPanelPresentation({
+      setupRowCount: 2,
+      opportunity: dto.opportunity,
+      latestScan: baseInput().latestScan!,
+    });
+    expect(p.mode).toBe("full_table");
+  });
+
+  it("compact empty references opportunity when near_miss and zero rows", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    const p = resolveBestSetupsPanelPresentation({
+      setupRowCount: 0,
+      opportunity: dto.opportunity,
+      latestScan: baseInput().latestScan!,
+    });
+    expect(p.mode).toBe("compact_empty");
+    expect(p.emptyReason).toMatch(/Opportunity preview/i);
+    expect(p.emptyReason).not.toMatch(/Gate 1 is PASS/i);
   });
 });
 

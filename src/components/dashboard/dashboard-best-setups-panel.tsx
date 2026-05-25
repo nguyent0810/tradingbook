@@ -4,42 +4,46 @@ import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health";
 import { distanceToZonePct } from "@/lib/setup-health";
-import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
+import type { BestSetupsPanelPresentation } from "@/lib/dashboard/decision-cockpit-dto";
 import {
   formatBarDataDateUtcLong,
   formatEquityThousandVndPerShare,
 } from "@/lib/formatters";
 import {
   displayCandidateLifecycleSortLabel,
-  displayGate1ScanLevel,
   displayScanQualityTier,
 } from "@/lib/trading-display-labels";
 
 export type DashboardBestSetupsPanelProps = {
   topSetups: SurfacedCandidateHealthView[];
-  latestScan: LatestScanWithCandidates | null;
+  presentation: BestSetupsPanelPresentation;
 };
 
 export function DashboardBestSetupsPanel({
   topSetups,
-  latestScan,
+  presentation,
 }: DashboardBestSetupsPanelProps) {
+  const isCompactEmpty = topSetups.length === 0 && presentation.mode === "compact_empty";
+
   return (
-    <section className="dash-panel dash-surface-1" data-testid="dashboard-best-setups-panel">
+    <section
+      className={`dash-panel dash-surface-1${isCompactEmpty ? " dash-best-setups--compact-empty" : ""}`}
+      data-testid="dashboard-best-setups-panel"
+    >
       <header className="dash-panel__header">
         <h2 className="dash-section-title">Best setups</h2>
-        <p className="dash-panel__subtitle">Tier A/B surfaced — top five for today</p>
+        <p className="dash-panel__subtitle">
+          {topSetups.length > 0
+            ? "Tier A/B surfaced — top five for today (detail table)"
+            : "Detailed candidate table when Tier A/B are surfaced"}
+        </p>
       </header>
 
       {topSetups.length === 0 ? (
-        <div className="dash-empty-compact">
+        <div className={isCompactEmpty ? "dash-best-setups__compact-empty" : "dash-empty-compact"}>
           <EmptyStateWithReason
-            title="No qualified setups in the latest scan"
-            reason={
-              latestScan
-                ? `Zero Tier A/B surfaced is normal when Gate 1 is ${displayGate1ScanLevel(latestScan.gate1Level)} and filters are strict (${latestScan.candidateCountSurfaced} surfaced). Near-miss symbols and rejection detail live on Setups.`
-                : "No daily scan yet — wait for production bar import + scan automation."
-            }
+            title={presentation.emptyTitle || "No qualified setups in the latest scan"}
+            reason={presentation.emptyReason}
             data-testid="dashboard-best-setups-empty"
           >
             <Link href="/setups" className="btn btn-secondary text-xs">

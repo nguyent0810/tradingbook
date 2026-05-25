@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S4 on production (`bcbad8e`) — actionable blockers + tomorrow plan deployed  
+**Status:** S1–S4 on production (`bcbad8e`) · **S5 local** — setup quality ladder + Best Setups dedup  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -211,17 +211,32 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S4.
 
-### Remaining (S5+)
+## 11. S5 — setup quality ladder + Best Setups dedup (local)
 
-- [ ] Full setup quality ladder panel (DTO `ladder[]`)
+### Part A — Setup quality ladder
+
+- [x] `setupQualityLadder` on `DecisionCockpitDto` — grouped counts from full `surfacedCandidates` + `closestToValidSymbols` (no new queries)
+- [x] `DashboardSetupQualityLadder` — six stages always visible (zero state per stage)
+- [x] Up to 3 real sample symbols per stage; no fabrication
+- [x] Placement: after Opportunity preview, before scan meta / Best Setups
+- [x] Testids: `dashboard-setup-quality-ladder`, `dashboard-ladder-stage-*`, `dashboard-ladder-count-*`
+
+### Part B — Opportunity vs Best Setups
+
+- [x] `resolveBestSetupsPanelPresentation` — `full_table` when rows exist; `compact_empty` when zero
+- [x] Compact copy points to Opportunity preview on `near_miss` / `empty` (no repeated Gate 1 paragraph)
+- [x] `dashboard-best-setups-empty` preserved
+
+### Remaining (S6+)
+
 - [ ] Risk budget headroom API (DC-5)
 - [ ] Full cockpit layout reorder per UX spec
-- [ ] Demote/remove duplicate Best Setups vs opportunity preview (product decision)
 
 ### Caveats
 
 - Parsed % vs equity only when env configured and verdict ≠ NO_TRADE — labeled qualitative / DC-5.
-- Opportunity preview max 5 candidates / 8 near-miss matches DTO builder caps.
+- Opportunity preview max 5 candidates / 8 near-miss; ladder classifies **all** surfaced + closest rows (may exceed preview cap).
+- Flat `cockpitDto.ladder[]` retained for spike compatibility; UI uses `setupQualityLadder`.
 
 ---
 

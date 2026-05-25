@@ -70,6 +70,8 @@
 
 **S4 scope (production `bcbad8e`):** `DashboardActionableBlockers` + `DashboardTomorrowPlan`; legacy diagnostics stack removed from `/dashboard`.
 
+**S5 scope (local):** `DashboardSetupQualityLadder` from `cockpitDto.setupQualityLadder`; Best Setups compact empty when zero surfaced rows (dedup with Opportunity preview via `resolveBestSetupsPanelPresentation`).
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -119,6 +121,7 @@
 - [x] Decision Cockpit S2 verdict + evidence — `857a761` pushed & production deployed
 - [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
 - [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
+- [ ] Decision Cockpit S5 ladder + best-setups dedup — local (not pushed)
 
 ---
 
@@ -144,7 +147,7 @@
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence + exposure Gate 1 match + opportunity preview; scroll to plan row — Tomorrow’s Plan (watch/trigger/avoid/posture) and Actionable blockers (≤3 with meaning and real sample symbols when scan has rejections); freshness, scan meta, best setups, momentum, watchlist still present.
 
-**Remaining (S5+):** Full setup quality ladder panel (`cockpitDto.ladder`), DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec, optional Best Setups vs opportunity preview dedup.
+**Remaining (S6+):** DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec. S5 adds grouped ladder + Best Setups compact empty (see S5 scope).
 
 ---
 
