@@ -22,6 +22,8 @@ import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import { buildDecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
+import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
@@ -185,6 +187,21 @@ export default async function DashboardPage() {
   const vnindexLine = regime.latestBar
     ? `VNINDEX ${formatEquityThousandVndPerShare(regime.latestBar.close)} · ${formatBarDataDateUtcLong(regime.latestBar.date)}`
     : "VNINDEX latest bar unavailable.";
+
+  // S1: compute Decision Cockpit DTO in parallel for validation before S2 UI (no render yet).
+  const cockpitDto = buildDecisionCockpitDto(
+    buildDashboardCockpitInput({
+      latestScan,
+      scanNotes,
+      regime,
+      freshness,
+      candidatesWithHealth,
+      activeWatchItems,
+      openExposureVnd: currentExposure,
+      portfolioRiskConfigured: isTradingRiskBudgetConfigured(),
+    })
+  );
+  void cockpitDto;
 
   return (
     <div className="page-container dash-cockpit animate-in pb-10">

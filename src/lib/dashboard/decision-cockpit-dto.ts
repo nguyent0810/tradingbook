@@ -253,12 +253,7 @@ export function resolveSetupLadderStage(
   ) {
     return "tier_a";
   }
-  if (
-    candidate.quality === "B" &&
-    candidate.lifecycleSortLabel === "READY" &&
-    candidate.healthLevel !== "DEAD" &&
-    candidate.healthLevel !== "AT_RISK"
-  ) {
+  if (candidate.quality === "B" && candidate.lifecycleSortLabel === "READY") {
     return "tier_b";
   }
   return "watch";
