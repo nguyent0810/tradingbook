@@ -58,6 +58,8 @@
 
 **Trading OS v2 cockpit (2026-05-25, `/dashboard` only):** `DashboardMarketStatusBar`, `DashboardDecisionHero`, `DashboardExposurePanel`, `DashboardPerformancePanel` (analytics sparkline, no chart lib), `DashboardScanMetaStrip`, `DashboardBestSetupsPanel`, `DashboardWatchlistPanel`, `DashboardDiagnosticsStack`. Preserved testids: `dashboard-freshness-ok`, `dashboard-freshness-stale`, `dashboard-scan-meta`, `dashboard-best-setups-empty`, `dashboard-watchlist-empty`, `dashboard-diagnostics-empty`, `dashboard-db-load-error`.
 
+**Decision Cockpit vNext (PROPOSED — not implemented):** [DASHBOARD_DECISION_COCKPIT_UX_SPEC.md](../design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md) · mockup `/design-preview/decision-cockpit` — verdict/evidence/opportunity/guardrail/tomorrow IA; production `/dashboard` unchanged until spec review.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
