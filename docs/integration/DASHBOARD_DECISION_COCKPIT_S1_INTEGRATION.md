@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S3 on production · **S4 local** — actionable blockers + tomorrow plan (not pushed)  
+**Status:** S1–S4 on production (`bcbad8e`) — actionable blockers + tomorrow plan deployed  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -173,7 +173,7 @@ Render when `process.env.NODE_ENV === "development"` && `?cockpit=1`:
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S3.
 
-## 10. S4 — actionable diagnostics + tomorrow plan (local)
+## 10. S4 — actionable diagnostics + tomorrow plan (production)
 
 ### Part A — Actionable blockers
 
@@ -198,6 +198,18 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 ### Layout
 
 - [x] `dash-cockpit__plan-row` after watchlist (2-col on lg) — not full UX reorder
+
+### Production validation (2026-05-25)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `bcbad8e` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Tomorrow + actionable blockers | Deployed on `/dashboard` |
+| Full diagnostics detail | Still on `/setups` |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S4.
 
 ### Remaining (S5+)
 

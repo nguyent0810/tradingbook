@@ -68,7 +68,7 @@
 
 **S3 scope (`a9337ff`, production):** `DashboardExposurePanel` from `cockpitDto.risk` + `verdict`; `DashboardOpportunityPreview` from `cockpitDto.opportunity`; best setups table retained.
 
-**S4 scope (local):** `DashboardActionableBlockers` + `DashboardTomorrowPlan`; legacy diagnostics stack removed from `/dashboard`.
+**S4 scope (production `bcbad8e`):** `DashboardActionableBlockers` + `DashboardTomorrowPlan`; legacy diagnostics stack removed from `/dashboard`.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -118,7 +118,33 @@
 - [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` pushed & production deployed (`0e82e01` docs)
 - [x] Decision Cockpit S2 verdict + evidence — `857a761` pushed & production deployed
 - [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
-- [ ] Decision Cockpit S4 diagnostics + tomorrow — pending push
+- [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S4 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `bcbad8e` | `feat(dashboard): add Decision Cockpit diagnostics and tomorrow plan` — 8 files only |
+| Push to `main` | `bcbad8e` | `567d71e..bcbad8e` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `bcbad8e`, `2026-05-25T08:50:36Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Verdict + evidence (S2) | Unchanged | `dashboard-decision-hero`, `dashboard-evidence-*` from `cockpitDto` |
+| Exposure + opportunity (S3) | Unchanged | `dashboard-exposure-*`, `dashboard-opportunity-*` from `cockpitDto` |
+| Tomorrow’s Plan | Deployed | `dashboard-tomorrow-plan` — watch / trigger / avoid / posture + `watchNote` when empty |
+| Actionable blockers | Deployed | `dashboard-diagnostics-panel` — max 3, severity, meaning, count, sample symbols, wait-for |
+| Legacy diagnostics on dashboard | Removed | `DashboardDiagnosticsStack` + `rejectionBuckets` slice no longer on page |
+| Full Gate 2 detail | On `/setups` | Unchanged — dashboard shows actionable subset only |
+| Freshness, scan meta, best setups, momentum, watchlist | Unchanged | Same panels below cockpit hero/evidence/opportunity |
+| Layout | Plan row after watchlist | `dash-cockpit__plan-row` — tomorrow + blockers (2-col lg) |
+| Backend / contracts | Unchanged | No Prisma/cron/scanner/import/API/Server Action changes; existing `scanNotes` path only |
+| Tests (local pre-push) | **279/279** | +5 in `decision-cockpit-dto.test.ts` |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence + exposure Gate 1 match + opportunity preview; scroll to plan row — Tomorrow’s Plan (watch/trigger/avoid/posture) and Actionable blockers (≤3 with meaning and real sample symbols when scan has rejections); freshness, scan meta, best setups, momentum, watchlist still present.
+
+**Remaining (S5+):** Full setup quality ladder panel (`cockpitDto.ladder`), DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec, optional Best Setups vs opportunity preview dedup.
 
 ---
 
@@ -141,12 +167,12 @@
 | Empty path | **empty** + Setups link | `dashboard-opportunity-empty` when no surfaced and no closest rows |
 | Best Setups table | Unchanged | `dashboard-best-setups-panel` retained below preview |
 | Layout insert | One section | Evidence → **Opportunity preview** → scan meta; hero row unchanged |
-| S2 panels preserved | Unchanged | Verdict, evidence, freshness, momentum, watchlist, diagnostics |
+| S2 panels preserved | Unchanged | Verdict, evidence, freshness, momentum, watchlist (S4 replaced flat diagnostics) |
 | Backend / contracts | Unchanged | No Prisma/cron/actions/new queries in `a9337ff` |
 
-**Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence (S2), exposure max book/stance/Gate 1 match hero, opportunity preview shows near-miss rows (e.g. HPG) or empty with Setups CTA when prod has 0 surfaced, best setups / scan meta / momentum / watchlist / diagnostics still present.
+**Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence (S2), exposure max book/stance/Gate 1 match hero, opportunity preview shows near-miss rows (e.g. HPG) or empty with Setups CTA when prod has 0 surfaced, best setups / scan meta / momentum / watchlist still present.
 
-**Remaining (S4+):** Tomorrow’s Plan, full setup quality ladder panel, diagnostics rewrite/demotion, DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec.
+**Remaining (post-S4):** See S4 production validation § Remaining (S5+).
 
 ---
 
