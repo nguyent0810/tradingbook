@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import { AppShellNavDesktop, AppShellNavMobile } from "@/components/app-shell-nav";
 import { LogoutButton } from "@/components/logout-button";
 
 export default async function DashboardLayout({
@@ -36,11 +37,7 @@ export default async function DashboardLayout({
               TradeLog
             </Link>
 
-            <nav className="app-shell-nav" aria-label="Main">
-              <NavLink href="/dashboard">Dashboard</NavLink>
-              <NavLink href="/setups">Setups</NavLink>
-              <NavLink href="/trades">Trades</NavLink>
-            </nav>
+            <AppShellNavDesktop />
           </div>
 
           <div className="flex items-center gap-3">
@@ -50,43 +47,9 @@ export default async function DashboardLayout({
         </div>
       </header>
 
-      <nav className="app-shell-mobile-nav" aria-label="Main mobile">
-        <NavLink href="/dashboard" mobile>
-          Dashboard
-        </NavLink>
-        <NavLink href="/setups" mobile>
-          Setups
-        </NavLink>
-        <NavLink href="/trades" mobile>
-          Trades
-        </NavLink>
-      </nav>
+      <AppShellNavMobile />
 
       <main className="app-shell-main">{children}</main>
     </div>
-  );
-}
-
-function NavLink({
-  href,
-  children,
-  mobile,
-}: {
-  href: string;
-  children: React.ReactNode;
-  mobile?: boolean;
-}) {
-  if (mobile) {
-    return (
-      <Link href={href} className="app-shell-mobile-nav-link">
-        {children}
-      </Link>
-    );
-  }
-
-  return (
-    <Link href={href} className="app-shell-nav-link">
-      {children}
-    </Link>
   );
 }

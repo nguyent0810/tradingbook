@@ -9,6 +9,9 @@ import {
   displayMomentumRiskAnnotation,
   displayUniverseSource,
 } from "@/lib/trading-display-labels";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
+import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { PriceWithUnit } from "@/components/ui/price-with-unit";
 
 function fmtRatio(n: number | null): string {
   if (n == null || !Number.isFinite(n)) return "—";
@@ -64,13 +67,23 @@ export async function MomentumWatchSection() {
         </p>
       </div>
 
-      {rows.length === 0 ? (
-        <div
-          className="rounded-md border border-dashed px-4 py-5 text-sm"
-          style={{ color: "var(--text-secondary)", borderColor: "var(--border-primary)" }}
-        >
-          {dbError ? "Momentum watch temporarily unavailable." : "No momentum watch names today."}
-        </div>
+      {rows.length === 0 && dbError ? (
+        <ErrorStateWithEvidence
+          title="Momentum watch unavailable"
+          message="Momentum watch temporarily unavailable."
+          evidence={
+            dbError instanceof Error
+              ? dbError.message
+              : "src/components/momentum-watch-section.tsx · getMomentumWatchRowsForPhase1"
+          }
+          data-testid="momentum-watch-db-error"
+        />
+      ) : rows.length === 0 ? (
+        <EmptyStateWithReason
+          title="No momentum watch names"
+          reason="No momentum watch names today."
+          data-testid="momentum-watch-empty"
+        />
       ) : (
         <div className="overflow-hidden rounded-md border p-0" style={{ borderColor: "var(--border-primary)", background: "var(--bg-primary)" }}>
           <div className="table-container">
@@ -115,7 +128,9 @@ export async function MomentumWatchSection() {
                         </ul>
                       )}
                     </td>
-                    <td className="table-num text-sm">{row.latestClose.toFixed(2)}</td>
+                    <td className="table-num text-sm">
+                      <PriceWithUnit value={row.latestClose} />
+                    </td>
                     <td className="table-num text-sm">{fmtRatio(row.volumeRatio20)}</td>
                     <td className="table-num text-sm">{fmtPct(row.breakoutExtensionPct)}</td>
                     <td>

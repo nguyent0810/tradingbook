@@ -31,6 +31,7 @@ import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import {
   displayCandidateLifecycleSortLabel,
   displayGate1ScanLevel,
@@ -248,17 +249,12 @@ export default async function DashboardPage() {
       </div>
 
       {dbLoadError ? (
-        <div
-          role="alert"
-          className="rounded-lg border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--border-primary)",
-            background: "var(--bg-secondary)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          {dbLoadError}
-        </div>
+        <ErrorStateWithEvidence
+          title="Partial dashboard data unavailable"
+          message={dbLoadError}
+          evidence="src/app/(dashboard)/dashboard/page.tsx · one or more Prisma reads failed; sections below may be empty."
+          data-testid="dashboard-db-load-error"
+        />
       ) : null}
 
       {alignmentAnalysis.showBanner ? (
