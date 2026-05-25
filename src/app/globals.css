@@ -951,6 +951,78 @@ body {
   color: var(--text-tertiary);
 }
 
+.dash-decision-hero__preservation {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #fbbf24;
+  line-height: var(--line-height-snug);
+}
+
+.dash-decision-hero__confidence {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.dash-decision-hero__meta-live {
+  color: var(--text-secondary);
+}
+
+/* Evidence stack (Decision Cockpit S2) */
+.dash-evidence {
+  margin-top: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-primary);
+}
+
+.dash-evidence__header {
+  margin-bottom: var(--space-3);
+}
+
+.dash-evidence__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.dash-evidence-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 5.5rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+}
+
+.dash-evidence-chip--blocker {
+  border-color: color-mix(in srgb, var(--warning) 30%, var(--border-primary));
+}
+
+.dash-evidence-chip__label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-tertiary);
+}
+
+.dash-evidence-chip__value {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.dash-evidence__caption {
+  margin-top: var(--space-3);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
 /* Exposure metrics */
 .dash-metric-grid {
   display: grid;

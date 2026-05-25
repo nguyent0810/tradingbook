@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { formatEquityThousandVndPerShare, formatBarDataDateUtcLong } from "@/lib/formatters";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
 import { MomentumWatchSection } from "@/components/momentum-watch-section";
 import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
@@ -27,6 +26,7 @@ import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpi
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
+import { DashboardEvidenceStack } from "@/components/dashboard/dashboard-evidence-stack";
 import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
 import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
@@ -184,11 +184,6 @@ export default async function DashboardPage() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
 
-  const vnindexLine = regime.latestBar
-    ? `VNINDEX ${formatEquityThousandVndPerShare(regime.latestBar.close)} · ${formatBarDataDateUtcLong(regime.latestBar.date)}`
-    : "VNINDEX latest bar unavailable.";
-
-  // S1: compute Decision Cockpit DTO in parallel for validation before S2 UI (no render yet).
   const cockpitDto = buildDecisionCockpitDto(
     buildDashboardCockpitInput({
       latestScan,
@@ -201,7 +196,8 @@ export default async function DashboardPage() {
       portfolioRiskConfigured: isTradingRiskBudgetConfigured(),
     })
   );
-  void cockpitDto;
+
+  const surfacedCount = latestScan?.candidateCountSurfaced ?? 0;
 
   return (
     <div className="page-container dash-cockpit animate-in pb-10">
@@ -219,12 +215,7 @@ export default async function DashboardPage() {
       ) : null}
 
       <div className="dash-cockpit__hero-row">
-        <DashboardDecisionHero
-          decision={decision}
-          gate1Level={regime.level}
-          surfacedCount={latestScan?.candidateCountSurfaced ?? 0}
-          vnindexLine={vnindexLine}
-        />
+        <DashboardDecisionHero verdict={cockpitDto.verdict} surfacedCount={surfacedCount} />
         <DashboardExposurePanel
           decision={decision}
           currentExposure={currentExposure}
@@ -233,6 +224,11 @@ export default async function DashboardPage() {
           portfolioRiskConfigured={isTradingRiskBudgetConfigured()}
         />
       </div>
+
+      <DashboardEvidenceStack
+        chips={cockpitDto.evidence}
+        blockers={cockpitDto.blockers}
+      />
 
       <div className="dash-cockpit__secondary-row">
         <DashboardScanMetaStrip
