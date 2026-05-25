@@ -88,12 +88,43 @@ function mapRowToDetail(row: {
   };
 }
 
+/** Server-local end of calendar day (aligned with trade detail `hasCheckpointToday`). */
+export function endOfLocalCalendarDay(date: Date): Date {
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999);
+  return end;
+}
+
 function localDayBounds(now: Date): { dayStart: Date; dayEnd: Date } {
   const dayStart = new Date(now);
   dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(now);
-  dayEnd.setHours(23, 59, 59, 999);
+  const dayEnd = endOfLocalCalendarDay(now);
   return { dayStart, dayEnd };
+}
+
+/**
+ * Resolves exit health from trade checkpoints for `SetupOutcome` writeback.
+ * Never falls back to `healthLevelAtEntry`.
+ */
+export async function resolveHealthLevelAtExitForTrade(
+  db: PrismaClient,
+  params: { tradeId: string; exitDate: Date | null }
+): Promise<SetupHealthLevel | null> {
+  const where =
+    params.exitDate != null
+      ? {
+          tradeId: params.tradeId,
+          checkedAt: { lte: endOfLocalCalendarDay(params.exitDate) },
+        }
+      : { tradeId: params.tradeId };
+
+  const latest = await db.tradeHealthLog.findFirst({
+    where,
+    orderBy: { checkedAt: "desc" },
+    select: { healthLevel: true },
+  });
+
+  return latest?.healthLevel ?? null;
 }
 
 /**

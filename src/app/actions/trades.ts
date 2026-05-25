@@ -18,7 +18,10 @@ import {
   reviewOutcomeFromFormData,
   serializeTradeHealthReviewPayloadForDb,
 } from "@/lib/trades/review-outcome";
-import { buildTradeHealthLogCreateData } from "@/lib/trades/trade-health-logs";
+import {
+  buildTradeHealthLogCreateData,
+  resolveHealthLevelAtExitForTrade,
+} from "@/lib/trades/trade-health-logs";
 import { fetchLatestCloseByTradeSymbols } from "@/lib/trades/unrealized-from-close";
 import {
   detectTradePriceUnitMismatch,
@@ -143,6 +146,11 @@ async function writeSetupOutcomeFromTrade(tradeId: string): Promise<void> {
   if (trade.status !== "CLOSED") return;
 
   const setupTier = trade.setupCandidate.quality ?? ScanQuality.B;
+  const healthLevelAtExit = await resolveHealthLevelAtExitForTrade(prisma, {
+    tradeId: trade.id,
+    exitDate: trade.exitDate,
+  });
+
   await prisma.setupOutcome.upsert({
     where: { tradeId },
     create: {
@@ -153,7 +161,7 @@ async function writeSetupOutcomeFromTrade(tradeId: string): Promise<void> {
       entryReason: trade.entryReason,
       entryLocationVsZone: trade.entryLocationVsZone,
       healthLevelAtEntry: trade.healthLevelAtEntry,
-      healthLevelAtExit: trade.healthLevelAtEntry,
+      healthLevelAtExit,
       exitReason: trade.exitReason,
       exitDiscipline: trade.exitDiscipline,
       rMultiple: trade.rMultiple,
@@ -165,7 +173,7 @@ async function writeSetupOutcomeFromTrade(tradeId: string): Promise<void> {
       entryReason: trade.entryReason,
       entryLocationVsZone: trade.entryLocationVsZone,
       healthLevelAtEntry: trade.healthLevelAtEntry,
-      healthLevelAtExit: trade.healthLevelAtEntry,
+      healthLevelAtExit,
       exitReason: trade.exitReason,
       exitDiscipline: trade.exitDiscipline,
       rMultiple: trade.rMultiple,

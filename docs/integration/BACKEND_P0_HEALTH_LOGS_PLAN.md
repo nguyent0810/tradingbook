@@ -1,7 +1,7 @@
 # Backend P0 — `trade_health_logs` Prisma Model + Exit Health Integrity
 
-**Status:** P0A ✅ · P0B ✅ · **P0C planning (no code)** — P0D/P0E not started  
-**Date:** 2026-05-25 (P0C section added after P0B deploy `8f6a0f7`)  
+**Status:** P0A ✅ · P0B ✅ · P0C ✅ · P0D ✅ — P0E not started  
+**Date:** 2026-05-25 (P0D section added after P0C deploy `c72a664`)  
 **Sources:** `06-backend-gaps.md`, `02-api-contract.md`, `03-data-model-and-persistence.md`, `05-integration-mismatches.md`  
 **Scope:** Promote `trade_health_logs` to Prisma; replace raw SQL where low-risk; fix `SetupOutcome.healthLevelAtExit`.  
 **Out of scope:** Frontend/UI changes, REST APIs, `/trades/page.tsx` refactor, auth changes, destructive migrations.
@@ -15,8 +15,8 @@
 | Table definition | `prisma/migrations/20260506120000_trade_health_logs/migration.sql` | Creates `trade_health_logs` (UUID PK, FK → `trades`) | Table exists in prod; not in Prisma schema |
 | JSON column | `prisma/migrations/20260511103000_trade_health_review_checklist/migration.sql` | Adds nullable `review_checklist JSONB` | Must map as `Json?` in Prisma |
 | Prisma schema | `prisma/schema.prisma` | **No** `TradeHealthLog` model; `Trade` has no `healthLogs` relation | Client cannot type-check health queries |
-| Checkpoint write | `src/app/actions/trades.ts` → `addTradeHealthCheckpoint` | **P0C target** — still `$executeRawUnsafe` INSERT; validates `healthLevel` via string Set; serializes `review_checklist` JSON | Medium — replace with `tradeHealthLog.create` only after P0C approval |
-| Outcome write (bug) | `src/app/actions/trades.ts` → `writeSetupOutcomeFromTrade` | On `CLOSED`, upserts `SetupOutcome` with `healthLevelAtExit: trade.healthLevelAtEntry` (lines 155, 167) | **Learning-loop / exit stats wrong** |
+| Checkpoint write | `src/app/actions/trades.ts` → `addTradeHealthCheckpoint` | **P0C done** — `tradeHealthLog.create` via `buildTradeHealthLogCreateData` | — |
+| Outcome write | `src/app/actions/trades.ts` → `writeSetupOutcomeFromTrade` | **P0D done** — `resolveHealthLevelAtExitForTrade` for `healthLevelAtExit` | — |
 | Outcome trigger | `createTrade` / `updateTrade` | Calls `writeSetupOutcomeFromTrade` when `status === "CLOSED"` | Same bug on create-closed and update-closed |
 | Trades ledger reads | `src/app/(dashboard)/trades/page.tsx` | 3× `$queryRaw`: today checkpoints, `DISTINCT ON` latest log, weekly JSON agg | Silent catch → empty Maps; no schema drift protection |
 | Trade detail reads | `src/app/(dashboard)/trades/[id]/page.tsx` | **P0B done** — `loadTradeHealthLogsForDetailPage` (`tradeHealthLog.findMany`); silent catch → empty history | Low — reads typed; writes still raw SQL until P0C |
@@ -159,7 +159,7 @@ Add Prisma model **without** `CREATE TABLE`, `DROP`, or column type changes.
 
 | File | Query purpose | Replace now? | Replacement approach | Risk |
 |------|---------------|--------------|----------------------|------|
-| `src/app/actions/trades.ts` | INSERT checkpoint | **P0C** | `prisma.tradeHealthLog.create({ data: { tradeId, healthLevel, healthScore, priceVsZone, structureStatus, recommendedAction, reviewChecklist } })` | Medium — must map enum + `Json`; keep validation identical |
+| `src/app/actions/trades.ts` | INSERT checkpoint | **P0C ✅** | `prisma.tradeHealthLog.create` + `buildTradeHealthLogCreateData` | Done |
 | `src/app/(dashboard)/trades/[id]/page.tsx` | Last 20 logs for one trade | **P0B** | `findMany({ where: { tradeId }, orderBy: { checkedAt: 'desc' }, take: 20 })` | **Low** — isolated block; can move to `src/lib/trades/trade-health-logs.ts` helper |
 | `src/app/(dashboard)/trades/page.tsx` | DISTINCT trade_ids checked today | **Defer** | Helper `findTradeIdsWithCheckpointBetween(tradeIds, dayStart, dayEnd)` | Medium — date boundary logic must match exactly |
 | `src/app/(dashboard)/trades/page.tsx` | `DISTINCT ON` latest log per trade | **Defer** | `findMany` + in-app dedupe **or** `$queryRaw` kept until Prisma supports DISTINCT ON via extension | **High** — DISTINCT ON is why raw SQL exists; replacement must be behavior-identical |
@@ -186,57 +186,9 @@ Add Prisma model **without** `CREATE TABLE`, `DROP`, or column type changes.
 
 ---
 
-## 6. Exit Health Fix Plan
+## 6. Exit Health Fix Plan (summary)
 
-### Current incorrect behavior (TRACED)
-
-`writeSetupOutcomeFromTrade` sets:
-
-- `healthLevelAtExit: trade.healthLevelAtEntry` on create and update of `SetupOutcome`.
-
-So closed-trade learning stats treat exit health as entry-time snapshot, ignoring EOD checkpoints.
-
-### Intended behavior (from `06-backend-gaps.md` + FRD intent)
-
-`healthLevelAtExit` on `SetupOutcome` should reflect **health at/near exit**, not entry.
-
-### Proposed resolution
-
-| Step | Logic |
-|------|--------|
-| 1 | When `trade.status === "CLOSED"` and `setupId` present, load latest checkpoint: `tradeHealthLog.findFirst({ where: { tradeId }, orderBy: { checkedAt: 'desc' } })` |
-| 2 | `exitHealth = latestLog?.healthLevel ?? null` |
-| 3 | **Do not** copy `trade.healthLevelAtEntry` to `healthLevelAtExit` |
-| 4 | Optional tie-break **NEEDS_BACKEND_CONFIRMATION:** if `trade.exitDate` set, prefer latest log with `checkedAt <= trade.exitDate` (if multiple checkpoints after exit timestamp, exclude them) |
-
-### Fallback when no checkpoint exists
-
-| Option | Behavior |
-|--------|----------|
-| **A (recommended)** | `healthLevelAtExit: null` | Honest — no checkpoint data |
-| B | `trade.healthLevelAtEntry` | Preserves old (wrong) semantics |
-| C | `trade.healthLevelAtEntry` only when `healthLevelAtEntry != null` else null | Partial |
-
-**Plan recommends A** unless product requires B for backward-compat dashboards.
-
-### Interaction with `Trade.healthLevelAtEntry`
-
-Entry field remains set at trade create/update from form — unchanged.
-
-### Call sites (unchanged flow)
-
-- `createTrade` → `writeSetupOutcomeFromTrade(created.id)` when closed
-- `updateTrade` → `writeSetupOutcomeFromTrade(tradeId)` when closed
-
-Only internal assignment of `healthLevelAtExit` changes.
-
-### Tests required (P0D)
-
-- Closed trade **with** checkpoint → `SetupOutcome.healthLevelAtExit` equals latest log `healthLevel`
-- Closed trade **without** checkpoint → `healthLevelAtExit` is `null` (if option A)
-- Closed trade with multiple checkpoints → uses latest `checkedAt`
-- Open trade → `writeSetupOutcomeFromTrade` no-op (unchanged)
-- Update closed trade after new checkpoint → upsert picks up new latest log
+**Superseded by § P0D Exit Health Fix Plan** — rules and tests are locked there. Key point: `healthLevelAtExit` must come from `TradeHealthLog` resolution, never `healthLevelAtEntry`.
 
 ---
 
@@ -300,7 +252,7 @@ Only internal assignment of `healthLevelAtExit` changes.
 | **Validation** | See **§ P0C Typed Write Path Plan** below |
 | **Stop if** | JSON/null handling differs from `$executeRawUnsafe`; enum write fails against TEXT `health_level` |
 
-**Not approved for implementation until explicit P0C coding approval.**
+**Implemented** — deploy `dcfd6c4` / `c72a664`.
 
 ---
 
@@ -318,7 +270,8 @@ SELECT DISTINCT health_level FROM trade_health_logs ORDER BY health_level;
 
 | Environment | Date | Result |
 |-------------|------|--------|
-| Production (Neon, `.env.prod.local`) | 2026-05-25 | **Empty table** — `rowCount: 0`, `values: []` |
+| Production (Neon, `.env.prod.local`) | 2026-05-25 (pre-P0C) | Empty table |
+| Production (post-P0C smoke) | 2026-05-25 | **`HEALTHY` only** — safe for enum read/write |
 | Local dev (`.env` → localhost) | — | Not run (P1001) |
 
 **Implication:** No outlier `health_level` values in production yet. Enum write is **likely safe** (validated set matches `SetupHealthLevel`). **Re-run audit after first real checkpoint** and before P0D if historical TEXT rows appear.
@@ -496,14 +449,154 @@ Confirm also:
 
 ---
 
-### P0D — Exit health fix
+## P0D Exit Health Fix Plan
 
-| Field | Value |
-|-------|--------|
-| **Files** | `src/app/actions/trades.ts` (`writeSetupOutcomeFromTrade` + small helper `resolveHealthLevelAtExit(tradeId, exitDate?)`) |
-| **Risk** | Low logic change; high product impact |
-| **Validation** | Close trade with prior checkpoint; inspect `setup_outcomes.health_level_at_exit` |
-| **Stop if** | Stakeholder requires entry-level fallback (option B) |
+**Scope:** Fix `SetupOutcome.healthLevelAtExit` in `writeSetupOutcomeFromTrade` only. No UI, no `[id]/page.tsx`, no `trades/page.tsx`, no checkpoint write changes, no schema/migrations, no P0E.
+
+### Approved resolution rules (locked for implementation)
+
+1. If trade has `exitDate`, use the **latest** `TradeHealthLog` where `checkedAt <= exitDate` **end-of local calendar day** (`23:59:59.999` on that date, same pattern as `loadTradeHealthLogsForDetailPage` / `hasCheckpointToday`).
+2. If no checkpoint on/before that bound → `healthLevelAtExit: null`.
+3. If trade has **no** `exitDate`, use global latest checkpoint by `checkedAt DESC`.
+4. **Never** copy `healthLevelAtEntry` as fallback.
+
+---
+
+### 1. Current Exit Health Trace
+
+| File | Current behavior | Problem | User / data impact |
+|------|------------------|---------|-------------------|
+| `src/app/actions/trades.ts` → `writeSetupOutcomeFromTrade` (≈137–176) | Loads trade + `setupCandidate`; no-op unless `setupId`, candidate, `status === "CLOSED"` | Ignores `trade_health_logs` entirely | Setup learning stats use wrong exit health |
+| Same — `create` branch | `healthLevelAtExit: trade.healthLevelAtEntry` (line 156) | Exit health = entry snapshot | Closed-trade outcome rows misstate deterioration/improvement at exit |
+| Same — `update` branch | `healthLevelAtExit: trade.healthLevelAtEntry` (line 168) | Re-upsert on re-close/update repeats bug | Updating a closed trade overwrites outcome with same wrong value |
+| Same — other fields | `healthLevelAtEntry`, PnL, R, exit reason/discipline from trade | Entry fields correct | Entry vs exit conflation in analytics only |
+| `src/app/actions/trades.ts` → `createTrade` (≈311–312) | After insert, if `data.status === "CLOSED"` → `writeSetupOutcomeFromTrade(created.id)` | Triggers bug on create-as-closed | One-shot closed trades get wrong exit health |
+| `src/app/actions/trades.ts` → `updateTrade` (≈457–458) | After update, if `data.status === "CLOSED"` → `writeSetupOutcomeFromTrade(tradeId)` | Triggers bug on close transition | Primary user close path |
+| `prisma/schema.prisma` → `SetupOutcome` | `healthLevelAtExit SetupHealthLevel?` | Schema allows fix | No migration required |
+| `src/lib/trades/trade-health-logs.ts` | P0B read + P0C write helpers | No exit-resolution helper yet | P0D adds query helper only |
+| `**/*.test.ts` | **Zero** tests for `writeSetupOutcomeFromTrade` / `healthLevelAtExit` | No regression guard | P0D must add tests |
+
+**Evidence (bug):**
+
+```155:168:src/app/actions/trades.ts
+      healthLevelAtEntry: trade.healthLevelAtEntry,
+      healthLevelAtExit: trade.healthLevelAtEntry,
+    },
+    update: {
+      ...
+      healthLevelAtEntry: trade.healthLevelAtEntry,
+      healthLevelAtExit: trade.healthLevelAtEntry,
+```
+
+---
+
+### 2. Proposed Exit Health Resolution
+
+Add **`resolveHealthLevelAtExitForTrade(db, { tradeId, exitDate })`** in `src/lib/trades/trade-health-logs.ts` (pure query + date bound; unit-testable).
+
+**End-of-day bound (shared with detail page convention):**
+
+```typescript
+function endOfLocalCalendarDay(date: Date): Date {
+  const end = new Date(date);
+  end.setHours(23, 59, 59, 999);
+  return end;
+}
+```
+
+| Scenario | Query | `healthLevelAtExit` |
+|----------|--------|---------------------|
+| **Closed + `exitDate` set** | `findFirst({ where: { tradeId, checkedAt: { lte: endOfLocalCalendarDay(exitDate) } }, orderBy: { checkedAt: 'desc' }, select: { healthLevel: true } })` | `log?.healthLevel ?? null` |
+| **Closed + `exitDate` null** | `findFirst({ where: { tradeId }, orderBy: { checkedAt: 'desc' }, select: { healthLevel: true } })` | `log?.healthLevel ?? null` |
+| **No matching log** | — | `null` (not entry level) |
+| **Checkpoints only after exit EOD** | Filter excludes them → no row | `null` |
+| **Open / not closed** | `writeSetupOutcomeFromTrade` returns early (unchanged) | N/A |
+
+**`writeSetupOutcomeFromTrade` change (only):**
+
+```typescript
+const healthLevelAtExit = await resolveHealthLevelAtExitForTrade(prisma, {
+  tradeId: trade.id,
+  exitDate: trade.exitDate,
+});
+
+await prisma.setupOutcome.upsert({
+  // ...
+  create: { /* ... */ healthLevelAtExit, /* entry fields unchanged */ },
+  update: { /* ... */ healthLevelAtExit, /* entry fields unchanged */ },
+});
+```
+
+**Invalid / missing checkpoint behavior:**
+
+- No checkpoint rows → `null`.
+- Prisma returns `SetupHealthLevel` enum from validated P0C writes; legacy TEXT outliers **unlikely** (prod audit: `HEALTHY` only). If `findFirst` throws on corrupt row, behavior matches today (unhandled) — optional follow-up: `normalizeTradeHealthLevel` on read (out of minimal P0D slice).
+
+**Timezone note:** EOD bound uses **server local calendar day** on `exitDate` (consistent with `[id]` page `hasCheckpointToday`). Document in code comment; full TZ contract remains P1 (`06-backend-gaps.md` §7).
+
+---
+
+### 3. Schema Compatibility
+
+| Field | Prisma type | Nullable? | P0D `null` fallback |
+|-------|-------------|-----------|---------------------|
+| `SetupOutcome.healthLevelAtExit` | `SetupHealthLevel?` | **Yes** (`?`) | **Allowed** — no schema change |
+
+**Conclusion:** Implementation may proceed with `healthLevelAtExit: null`. **Do not** stop for schema reasons.
+
+`healthLevelAtEntry` remains `SetupHealthLevel?` — unchanged; still copied from trade at writeback.
+
+---
+
+### 4. Test Plan
+
+**New file (proposed):** `src/lib/trades/trade-health-logs.exit-health.test.ts` or `src/app/actions/trades.exit-health.test.ts`
+
+| # | Case | Setup | Expected `healthLevelAtExit` |
+|---|------|--------|------------------------------|
+| 1 | Checkpoint before exit date | Logs at T−2d, T−1d; `exitDate` = T | Level at T−1d (latest ≤ EOD) |
+| 2 | Checkpoint after exit date only | Log at T+1d only; `exitDate` = T | `null` |
+| 3 | No checkpoints | No rows | `null` |
+| 4 | No `exitDate` | Logs at various times; `exitDate: null` | Global latest `checkedAt DESC` |
+| 5 | Entry health unchanged | Trade `healthLevelAtEntry: HEALTHY`, exit resolved `WARNING` | Upsert: entry still `HEALTHY`, exit `WARNING` |
+| 6 | Upsert still succeeds | Mock `setupOutcome.upsert` | Called once with resolved exit level |
+| 7 | Non-closed trade | `status: OPEN` | `writeSetupOutcomeFromTrade` no-op (no upsert) |
+
+**Implementation approach:** Unit-test `resolveHealthLevelAtExitForTrade` with mocked `tradeHealthLog.findFirst` (deterministic). Optional thin integration test if test DB harness exists later.
+
+**Manual validation:**
+
+1. OPEN trade → add checkpoint `WARNING` → close with `exitDate` today → `setup_outcomes.health_level_at_exit = WARNING`.
+2. Close with only post-exit checkpoints → exit health `null` in DB.
+3. `healthLevelAtEntry` on same row still matches trade form.
+
+**Regression:** `npm run lint`, `npm test`, `npm run build`. No changes to `addTradeHealthCheckpoint`.
+
+---
+
+### 5. Implementation Slice
+
+| File | Change | Risk | Validation |
+|------|--------|------|------------|
+| `src/lib/trades/trade-health-logs.ts` | Add `endOfLocalCalendarDay`, `resolveHealthLevelAtExitForTrade` | Low | Unit tests |
+| `src/lib/trades/trade-health-logs.exit-health.test.ts` (new) | Cases 1–4 for resolver | Low | `npm test` |
+| `src/app/actions/trades.ts` | `writeSetupOutcomeFromTrade`: call resolver; set `healthLevelAtExit` on create/update | **Medium** — learning loop | Manual close + DB inspect |
+| `docs/integration/BACKEND_P0_HEALTH_LOGS_PLAN.md` | Mark P0D done after implementation | — | — |
+
+**Do not touch:** `addTradeHealthCheckpoint`, `[id]/page.tsx`, `trades/page.tsx`, UI, `prisma/schema.prisma`, migrations.
+
+**Suggested commit message (when approved):** `fix(trades): resolve setup outcome exit health from checkpoints`
+
+---
+
+### P0D approval question (before coding)
+
+> **Approve P0D implementation** — update `writeSetupOutcomeFromTrade` to set `healthLevelAtExit` via `resolveHealthLevelAtExitForTrade` using the four locked rules above (`null` fallback, no entry copy, exitDate EOD filter, global latest when no exitDate)?
+
+Confirm:
+
+- **EOD semantics:** server-local calendar day on `exitDate` (match `[id]` page) — Y/N.
+- **Tests:** resolver unit tests only (no full Prisma integration DB) — Y/N.
 
 ---
 
@@ -544,7 +637,7 @@ Confirm:
 4. **Failed reads:** keep silent catch for P0 or require throw + UI error (may need tiny caller change on `[id]/page.tsx`)?
 5. **`health_level` enum:** run DISTINCT audit query on prod/staging before enum mapping?
 
-**P0A–P0B:** implemented and deployed. **P0C:** plan only — await approval. **P0D–P0E:** not started.
+**P0A–P0D:** implemented. **P0E:** not started.
 
 ---
 
@@ -552,7 +645,7 @@ Confirm:
 
 | Location | Line area (approx) | SQL type |
 |----------|-------------------|----------|
-| `src/app/actions/trades.ts` | 527–537 | INSERT |
+| `src/app/actions/trades.ts` | ~~527–537~~ | **Removed in P0C** — `tradeHealthLog.create` |
 | `src/app/(dashboard)/trades/[id]/page.tsx` | ~~203–207~~ | **Removed in P0B** — `loadTradeHealthLogsForDetailPage` |
 | `src/app/(dashboard)/trades/page.tsx` | 301–307 | SELECT DISTINCT today |
 | `src/app/(dashboard)/trades/page.tsx` | 331–339 | SELECT DISTINCT ON latest |
