@@ -2,7 +2,7 @@ import { LoadingSkeleton, LoadingSkeletonGroup } from "@/components/ui/loading-s
 
 export default function DashboardLoading() {
   return (
-    <div className="page-container animate-in space-y-6 pb-10">
+    <div className="page-container dash-cockpit animate-in pb-10">
       <div className="dashboard-page-header">
         <div>
           <LoadingSkeleton className="mb-2 h-7 w-36" />
@@ -11,17 +11,21 @@ export default function DashboardLoading() {
         <LoadingSkeleton className="h-10 w-28 rounded-lg" />
       </div>
 
-      <LoadingSkeleton className="h-16 w-full rounded-lg" />
+      <LoadingSkeleton className="h-12 w-full rounded-lg" />
 
-      <div className="dashboard-cockpit-grid">
-        <LoadingSkeletonGroup rows={4} className="card p-5" />
-        <LoadingSkeletonGroup rows={4} className="card p-5" />
+      <div className="dash-cockpit__hero-row">
+        <LoadingSkeletonGroup rows={5} className="dash-surface-2 rounded-xl p-6" />
+        <LoadingSkeletonGroup rows={4} className="dash-surface-1 rounded-lg p-5" />
       </div>
 
-      <LoadingSkeleton className="h-20 w-full rounded-lg" />
+      <div className="dash-cockpit__secondary-row">
+        <LoadingSkeleton className="h-14 w-full rounded-lg" />
+        <LoadingSkeletonGroup rows={3} className="dash-surface-1 rounded-lg p-5" />
+      </div>
 
-      <LoadingSkeletonGroup rows={3} />
-      <LoadingSkeleton className="h-32 w-full rounded-lg" />
+      <LoadingSkeletonGroup rows={2} className="dash-surface-1 rounded-lg p-5" />
+      <LoadingSkeleton className="h-24 w-full rounded-lg" />
+      <LoadingSkeletonGroup rows={3} className="dash-surface-1 rounded-lg p-5" />
     </div>
   );
 }

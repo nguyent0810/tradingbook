@@ -56,6 +56,8 @@
 | **Error** | `ErrorStateWithEvidence` (keep) |
 | **Mobile** | Stack cockpit columns; horizontal scroll tables |
 
+**Trading OS v2 cockpit (2026-05-25, `/dashboard` only):** `DashboardMarketStatusBar`, `DashboardDecisionHero`, `DashboardExposurePanel`, `DashboardPerformancePanel` (analytics sparkline, no chart lib), `DashboardScanMetaStrip`, `DashboardBestSetupsPanel`, `DashboardWatchlistPanel`, `DashboardDiagnosticsStack`. Preserved testids: `dashboard-freshness-ok`, `dashboard-freshness-stale`, `dashboard-scan-meta`, `dashboard-best-setups-empty`, `dashboard-watchlist-empty`, `dashboard-diagnostics-empty`, `dashboard-db-load-error`.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`)
 
 | | |
