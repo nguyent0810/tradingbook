@@ -66,7 +66,7 @@
 
 **S2 scope on `/dashboard`:** `DashboardDecisionHero` + `DashboardEvidenceStack` from `cockpitDto` (`857a761`).
 
-**S3 scope (local, not pushed):** `DashboardExposurePanel` from `cockpitDto.risk` + `verdict`; `DashboardOpportunityPreview` from `cockpitDto.opportunity`; best setups table retained.
+**S3 scope (`a9337ff`, production):** `DashboardExposurePanel` from `cockpitDto.risk` + `verdict`; `DashboardOpportunityPreview` from `cockpitDto.opportunity`; best setups table retained.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -115,6 +115,35 @@
 - [x] Trading OS v2 dashboard cockpit — `81922d6` pushed & production deployed
 - [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` pushed & production deployed (`0e82e01` docs)
 - [x] Decision Cockpit S2 verdict + evidence — `857a761` pushed & production deployed
+- [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S3 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `a9337ff` | `feat(dashboard): align Decision Cockpit exposure and opportunity preview` — 6 files |
+| Push to `main` | `a9337ff` | `ecc39a3..a9337ff` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `a9337ff`, `2026-05-25T08:41:43Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Legacy exposure decision removed | **Yes** | UI no longer uses `computeDailyTradingDecision` + `regime.level` for exposure panel |
+| Exposure aligned to DTO | Deployed | `dashboard-exposure-panel` — `cockpitDto.risk` + `verdict.gate1Resolution` |
+| Exposure testids | Deployed | `dashboard-exposure-stance`, `dashboard-exposure-max-book`, `dashboard-exposure-per-trade`, `dashboard-exposure-gate1`, `dashboard-exposure-qualitative-hint` |
+| Hero/exposure Gate 1 match | **Yes** | Same canonical Gate 1; live suffix on both when mismatch |
+| Opportunity preview | Deployed | `dashboard-opportunity-preview` — mode from `cockpitDto.opportunity` |
+| Near-miss path (prod-like) | **near_miss** when `closestToValidSymbols` in scan notes | Real symbols only — no fabrication; prod often 0 surfaced |
+| Candidates path | **candidates** when Tier A/B surfaced | `dashboard-opportunity-candidate-row`, Log trade link when READY |
+| Empty path | **empty** + Setups link | `dashboard-opportunity-empty` when no surfaced and no closest rows |
+| Best Setups table | Unchanged | `dashboard-best-setups-panel` retained below preview |
+| Layout insert | One section | Evidence → **Opportunity preview** → scan meta; hero row unchanged |
+| S2 panels preserved | Unchanged | Verdict, evidence, freshness, momentum, watchlist, diagnostics |
+| Backend / contracts | Unchanged | No Prisma/cron/actions/new queries in `a9337ff` |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence (S2), exposure max book/stance/Gate 1 match hero, opportunity preview shows near-miss rows (e.g. HPG) or empty with Setups CTA when prod has 0 surfaced, best setups / scan meta / momentum / watchlist / diagnostics still present.
+
+**Remaining (S4+):** Tomorrow’s Plan, full setup quality ladder panel, diagnostics rewrite/demotion, DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec.
 
 ---
 

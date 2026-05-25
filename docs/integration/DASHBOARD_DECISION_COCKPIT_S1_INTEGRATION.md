@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1 DONE (`3228344`) · S2 DONE (`857a761`) · S3 local (`feat` pending push) — exposure + opportunity preview  
+**Status:** S1 DONE (`3228344`) · S2 DONE (`857a761`) · S3 DONE (`a9337ff`) — exposure + opportunity preview on production  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -145,7 +145,7 @@ Render when `process.env.NODE_ENV === "development"` && `?cockpit=1`:
 
 ---
 
-## 9. S3 — exposure alignment + opportunity preview (local)
+## 9. S3 — exposure alignment + opportunity preview (`a9337ff`)
 
 ### Part A — Exposure
 
@@ -161,6 +161,17 @@ Render when `process.env.NODE_ENV === "development"` && `?cockpit=1`:
 - [x] Modes: `candidates` | `near_miss` | `empty` with link to `/setups`
 - [x] Near-miss from `scanNotes.closestToValidSymbols` via existing dashboard loader path (**DC-9 partial** — dashboard preview only; full queue still on Setups)
 - [x] `DashboardBestSetupsPanel` retained (table detail unchanged)
+
+### Production validation (2026-05-25)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `a9337ff` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Exposure ↔ verdict Gate 1 | Aligned (canonical scan Gate 1) |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S3.
 
 ### Remaining (S4+)
 
