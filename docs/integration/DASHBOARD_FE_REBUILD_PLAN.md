@@ -103,7 +103,7 @@
 - [x] Setups page (Slice 2) — `f3a677e` pushed & production deployed
 - [x] Trades page (Slice 3) — `0634571` pushed & production deployed
 - [x] Trading OS v2 dashboard cockpit — `81922d6` pushed & production deployed
-- [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` (docs: follow-up commit on `main`)
+- [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` pushed & production deployed (`0e82e01` docs)
 
 ---
 
@@ -163,19 +163,33 @@
 
 ---
 
-## Production validation — Trading OS v2 Phase 2+3 (pending deploy)
+## Production validation — Trading OS v2 Phase 2+3 (2026-05-25)
 
 | Check | Result | Evidence |
 |-------|--------|----------|
-| Push to `main` | _pending_ | `614d53b` + docs commit |
-| Vercel Production deploy | _pending_ | SHA TBD |
-| `/api/db-health` | _pending_ | `https://tradingbook-phi.vercel.app/api/db-health` |
-| `/setups` auth (logged out) | _pending_ | Expect **307** → `/login` |
-| `/trades` auth (logged out) | _pending_ | Expect **307** → `/login` |
-| `/setups` Trading OS pipeline UI | _pending_ | Logged-in: `setups-pipeline-context`, `setups-pipeline-summary`, funnel, diagnostics |
-| `/trades` Trading OS ledger UI | _pending_ | Logged-in: `trades-page-header`, `trades-freshness-context`, filters, table, empties, warnings |
-| Mobile horizontal scroll | _pending_ | `trades-scroll-container`, `table-container` |
+| Feature commit | `614d53b` | `feat(ui): apply Trading OS visual system to setups and trades` — 20 files, `/setups` + `/trades` only |
+| Docs commit | `0e82e01` | `docs: record Trading OS v2 Phase 2+3 setups and trades integration` |
+| Push to `main` | `0e82e01` | `04b6ce1..0e82e01` (includes `614d53b`) |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `0e82e01`, `2026-05-25T07:45:22Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/setups` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| `/trades` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Market data aligned (data) | **Yes** (baseline) | Prior prod probe: bars **2026-05-25**, `delayedBackdrop: false` — local `ops:verify-bar-import` unreachable (P1001) this session |
+| Latest scan id (data) | **`cmpku2jyq000004l42cv873wq`** (baseline) | Same prod probe as dashboard validation |
+| `/setups` pipeline context | Deployed in `614d53b` | `setups-pipeline-context`, `setups-pipeline-summary`, `setups-pipeline-funnel`, `setups-diagnostics-stack` |
+| `/setups` candidate / near-miss empties | Deployed | `setups-candidates-empty`, `setups-near-miss-empty`, `setups-overview-no-scan-run` |
+| `/trades` ledger header | Deployed | `trades-page-header`, h1 **Trades ledger**, `trades-header-count` |
+| `/trades` freshness + scan meta | Deployed | `trades-freshness-context` → `dashboard-freshness-ok` / `dashboard-scan-meta` |
+| `/trades` filters | Deployed | `trades-active-filters`, `trades-clear-filters` |
+| `/trades` ledger table + scroll | Deployed | `trades-table`, `trades-scroll-container`, `min-w-[1840px]` |
+| `/trades` empty / warning panels | Deployed | `trades-ledger-empty`, `trades-ledger-empty-filtered`, `trades-review-queue`, open-position warnings unchanged |
+| `/trades/new`, `/trades/[id]` | Not touched | Out of `614d53b` scope |
 | Backend / contracts | Unchanged | No Prisma/cron/actions in `614d53b` |
+| Mobile | CSS unchanged pattern | `tos-setups-grid` stacks; `table-container` / `trades-scroll-container` horizontal scroll |
+
+**Logged-in smoke:** Sign in → `/setups` → compact market bar + scan chips, pipeline summary strip (remaining-after-stage labels), sidebar funnel + flat diagnostics, candidates or `setups-candidates-empty`, near-miss block or `setups-near-miss-empty`. → `/trades` → **Trades ledger** header + Log Trade, freshness strip, filter chips when active, ledger rows, filter-empty vs true-empty, review-session + warning panels, horizontal scroll on narrow viewport.
+
+**Unstaged locally (not pushed):** `docs/design/`, `src/app/design-preview/`, `.superpowers/`
 
 ---
 
