@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S4 on production (`bcbad8e`) · **S5 local** — setup quality ladder + Best Setups dedup  
+**Status:** S1–S5 on production (`e58199a`) — setup quality ladder + Best Setups dedup deployed  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -211,7 +211,7 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S4.
 
-## 11. S5 — setup quality ladder + Best Setups dedup (local)
+## 11. S5 — setup quality ladder + Best Setups dedup (production)
 
 ### Part A — Setup quality ladder
 
@@ -226,6 +226,18 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - [x] `resolveBestSetupsPanelPresentation` — `full_table` when rows exist; `compact_empty` when zero
 - [x] Compact copy points to Opportunity preview on `near_miss` / `empty` (no repeated Gate 1 paragraph)
 - [x] `dashboard-best-setups-empty` preserved
+
+### Production validation (2026-05-25)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `e58199a` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Setup quality ladder | Deployed — six stages on `/dashboard` |
+| Best Setups dedup | `compact_empty` / `full_table` per `resolveBestSetupsPanelPresentation` |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S5.
 
 ### Remaining (S6+)
 

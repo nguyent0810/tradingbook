@@ -70,7 +70,7 @@
 
 **S4 scope (production `bcbad8e`):** `DashboardActionableBlockers` + `DashboardTomorrowPlan`; legacy diagnostics stack removed from `/dashboard`.
 
-**S5 scope (local):** `DashboardSetupQualityLadder` from `cockpitDto.setupQualityLadder`; Best Setups compact empty when zero surfaced rows (dedup with Opportunity preview via `resolveBestSetupsPanelPresentation`).
+**S5 scope (production `e58199a`):** `DashboardSetupQualityLadder` from `cockpitDto.setupQualityLadder`; Best Setups compact empty when zero surfaced rows (dedup with Opportunity preview via `resolveBestSetupsPanelPresentation`).
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -121,7 +121,33 @@
 - [x] Decision Cockpit S2 verdict + evidence — `857a761` pushed & production deployed
 - [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
 - [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
-- [ ] Decision Cockpit S5 ladder + best-setups dedup — local (not pushed)
+- [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S5 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `e58199a` | `feat(dashboard): add Decision Cockpit setup quality ladder` — 8 files only |
+| Push to `main` | `e58199a` | `b3dc34d..e58199a` (GitHub push retried after transient 500) |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `e58199a`, `2026-05-25T09:03:53Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Verdict + evidence + exposure (S2–S3) | Unchanged | `cockpitDto` hero, evidence, exposure, opportunity panels |
+| Setup quality ladder | Deployed | `dashboard-setup-quality-ladder` — six stages always visible |
+| Ladder data | Honest | Counts + sample symbols from `surfacedCandidates` + `closestToValidSymbols` only; per-stage zero copy when empty |
+| Best Setups dedup | Deployed | `compact_empty` when 0 rows — points to Opportunity preview; `full_table` when Tier A/B rows exist |
+| `dashboard-best-setups-empty` | Preserved | Compact empty path retains testid |
+| Tomorrow + blockers (S4) | Unchanged | Plan row after watchlist |
+| Freshness, scan meta, momentum, watchlist | Unchanged | Below ladder / best setups |
+| Layout insert | One section | Opportunity → **Setup quality ladder** → scan meta / best setups |
+| Backend / contracts | Unchanged | No Prisma/cron/scanner/import/API/Server Action changes |
+| Tests (local pre-push) | **284/284** | +5 in `decision-cockpit-dto.test.ts` (ladder groups, dedup) |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm S2–S4 panels; **Setup quality ladder** shows all six stages (Tier A through Avoid) with real symbols or “None in latest scan data”; **Best Setups** compact empty when no surfaced rows (references Opportunity preview), full table when candidates exist; freshness, scan meta, momentum, watchlist unchanged.
+
+**Remaining (S6+):** DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec.
 
 ---
 
