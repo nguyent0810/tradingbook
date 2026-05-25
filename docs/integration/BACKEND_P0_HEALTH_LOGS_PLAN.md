@@ -1,7 +1,7 @@
 # Backend P0 — `trade_health_logs` Prisma Model + Exit Health Integrity
 
-**Status:** Planning only — **no implementation approved yet**  
-**Date:** 2026-05-25  
+**Status:** P0A ✅ · P0B ✅ · **P0C planning (no code)** — P0D/P0E not started  
+**Date:** 2026-05-25 (P0C section added after P0B deploy `8f6a0f7`)  
 **Sources:** `06-backend-gaps.md`, `02-api-contract.md`, `03-data-model-and-persistence.md`, `05-integration-mismatches.md`  
 **Scope:** Promote `trade_health_logs` to Prisma; replace raw SQL where low-risk; fix `SetupOutcome.healthLevelAtExit`.  
 **Out of scope:** Frontend/UI changes, REST APIs, `/trades/page.tsx` refactor, auth changes, destructive migrations.
@@ -15,11 +15,11 @@
 | Table definition | `prisma/migrations/20260506120000_trade_health_logs/migration.sql` | Creates `trade_health_logs` (UUID PK, FK → `trades`) | Table exists in prod; not in Prisma schema |
 | JSON column | `prisma/migrations/20260511103000_trade_health_review_checklist/migration.sql` | Adds nullable `review_checklist JSONB` | Must map as `Json?` in Prisma |
 | Prisma schema | `prisma/schema.prisma` | **No** `TradeHealthLog` model; `Trade` has no `healthLogs` relation | Client cannot type-check health queries |
-| Checkpoint write | `src/app/actions/trades.ts` → `addTradeHealthCheckpoint` | `$executeRawUnsafe` INSERT; validates `healthLevel` via string Set; serializes `review_checklist` JSON | SQL injection surface low (parameterized) but untyped; no Prisma errors surfaced to UI |
+| Checkpoint write | `src/app/actions/trades.ts` → `addTradeHealthCheckpoint` | **P0C target** — still `$executeRawUnsafe` INSERT; validates `healthLevel` via string Set; serializes `review_checklist` JSON | Medium — replace with `tradeHealthLog.create` only after P0C approval |
 | Outcome write (bug) | `src/app/actions/trades.ts` → `writeSetupOutcomeFromTrade` | On `CLOSED`, upserts `SetupOutcome` with `healthLevelAtExit: trade.healthLevelAtEntry` (lines 155, 167) | **Learning-loop / exit stats wrong** |
 | Outcome trigger | `createTrade` / `updateTrade` | Calls `writeSetupOutcomeFromTrade` when `status === "CLOSED"` | Same bug on create-closed and update-closed |
 | Trades ledger reads | `src/app/(dashboard)/trades/page.tsx` | 3× `$queryRaw`: today checkpoints, `DISTINCT ON` latest log, weekly JSON agg | Silent catch → empty Maps; no schema drift protection |
-| Trade detail reads | `src/app/(dashboard)/trades/[id]/page.tsx` | `$queryRawUnsafe` SELECT last 20 logs; silent catch → empty history | User sees “no history” on DB errors |
+| Trade detail reads | `src/app/(dashboard)/trades/[id]/page.tsx` | **P0B done** — `loadTradeHealthLogsForDetailPage` (`tradeHealthLog.findMany`); silent catch → empty history | Low — reads typed; writes still raw SQL until P0C |
 | Payload parsing | `src/lib/trades/review-outcome.ts`, `trade-health-review-checklist.ts` | `parseHealthReviewLogPayload` on `review_checklist` | Unchanged by P0 if column shape preserved |
 | Consumer types | `src/lib/trades/open-position-intelligence.ts` | `LatestTradeHealthLog` uses `healthLevel: string` | May narrow to `SetupHealthLevel` after reads typed |
 | Tests | `**/*.test.ts` | **No** tests for health logs or `writeSetupOutcomeFromTrade` | P0 must add targeted tests |
@@ -295,10 +295,204 @@ Only internal assignment of `healthLevelAtExit` changes.
 
 | Field | Value |
 |-------|--------|
-| **Files** | `src/app/actions/trades.ts` (`addTradeHealthCheckpoint` only) |
+| **Files** | `src/app/actions/trades.ts` (`addTradeHealthCheckpoint` only); optional `src/lib/trades/trade-health-logs.ts` helper for testability |
 | **Risk** | Medium — production checkpoint path |
-| **Validation** | Add checkpoint on OPEN trade; row appears in DB; detail + list see it |
-| **Stop if** | JSON/null handling differs from `$executeRawUnsafe` |
+| **Validation** | See **§ P0C Typed Write Path Plan** below |
+| **Stop if** | JSON/null handling differs from `$executeRawUnsafe`; enum write fails against TEXT `health_level` |
+
+**Not approved for implementation until explicit P0C coding approval.**
+
+---
+
+## P0C Typed Write Path Plan
+
+**Scope:** Replace only the `$executeRawUnsafe` INSERT inside `addTradeHealthCheckpoint`. No UI, no `[id]/page.tsx`, no `trades/page.tsx`, no `writeSetupOutcomeFromTrade`, no schema/migrations.
+
+### Pre-implementation audit — `health_level` DISTINCT
+
+Run on staging/production before coding P0C:
+
+```sql
+SELECT DISTINCT health_level FROM trade_health_logs ORDER BY health_level;
+```
+
+| Environment | Date | Result |
+|-------------|------|--------|
+| Production (Neon, `.env.prod.local`) | 2026-05-25 | **Empty table** — `rowCount: 0`, `values: []` |
+| Local dev (`.env` → localhost) | — | Not run (P1001) |
+
+**Implication:** No outlier `health_level` values in production yet. Enum write is **likely safe** (validated set matches `SetupHealthLevel`). **Re-run audit after first real checkpoint** and before P0D if historical TEXT rows appear.
+
+**P0B evidence:** `tradeHealthLog.findMany` on production succeeded (read path); enum column mapping did not break reads on empty table.
+
+---
+
+### 1. Current Write Trace
+
+| File | Current write | Validation | Redirect / revalidate | Risk |
+|------|---------------|------------|------------------------|------|
+| `src/app/actions/trades.ts` → `addTradeHealthCheckpoint` (≈487–543) | `$executeRawUnsafe` INSERT into `trade_health_logs` with `NOW()` for `checked_at`; parameterized `$1`–`$7::jsonb` | See validation table below | Success: `revalidatePath(\`/trades/${id}\`)`, `revalidatePath("/trades")`, `redirect(\`/trades/${id}\`)` | **Medium** — production write path |
+| Same | No `try/catch` around INSERT | — | DB error → unhandled exception (Next error surface); same as today | No silent swallow on write |
+| Same | Trade gate | `requireUser()`; trade must exist for user | Not found → `redirect("/trades")` | Auth unchanged |
+| Same | Status gate | `trade.status === "OPEN"` required to reach INSERT | Non-OPEN → `revalidatePath` detail + `redirect` detail **without** insert | Preserves “no checkpoint on closed” |
+| Same | `healthLevel` | `Set(["HEALTHY","WARNING","AT_RISK","DEAD"])` on trimmed form string | Invalid → revalidate detail + redirect detail **without** insert | Must keep pre-DB rejection |
+| Same | `healthScore` | Optional; if non-empty, `Number` finite and `0–100` → `Math.round`; else `null` | Invalid numeric → treated as `null` (not rejected) | Preserve lenient parse |
+| Same | `priceVsZone`, `structureStatus`, `recommendedAction` | `nullIfBlank` (trim; empty → `null`) | — | Free text unchanged |
+| Same | `review_checklist` | `serializeTradeHealthReviewPayloadForDb(reviewChecklistFromFormData(...), reviewOutcomeFromFormData(...))` → `string \| null` | Empty checklist + no outcome → SQL `NULL`; else JSON string cast `::jsonb` | **Highest parity risk** — Prisma `Json?` needs object/null not string |
+| `src/lib/trades/trade-health-review-checklist.ts` | Form → booleans | Checkbox presence `"on"` | — | Unchanged |
+| `src/lib/trades/review-outcome.ts` | Merge checklist + outcome JSON | `reviewOutcome` whitelist via `REVIEW_OUTCOME_IDS` | — | Unchanged |
+
+**Current INSERT (reference):**
+
+```527:538:src/app/actions/trades.ts
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO trade_health_logs
+      (trade_id, checked_at, health_level, health_score, price_vs_zone, structure_status, recommended_action, review_checklist)
+     VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7::jsonb)`,
+    trade.id,
+    healthLevelRaw,
+    healthScore,
+    priceVsZone,
+    structureStatus,
+    recommendedAction,
+    reviewPayloadJson
+  );
+```
+
+**Columns written vs omitted:**
+
+| Column | INSERT behavior |
+|--------|-----------------|
+| `id` | Omitted — DB `gen_random_uuid()` |
+| `trade_id` | `$1` = `trade.id` |
+| `checked_at` | `NOW()` (DB server clock) |
+| `health_level` | `$2` = validated TEXT string |
+| `health_score` | `$3` nullable |
+| `price_vs_zone`, `structure_status`, `recommended_action` | `$4`–`$6` nullable |
+| `review_checklist` | `$7::jsonb` or NULL |
+
+---
+
+### 2. Proposed Prisma Write (draft — do not implement until approved)
+
+Replace the `$executeRawUnsafe` block with a single `prisma.tradeHealthLog.create`. Keep all validation and redirect/revalidate **above** the create unchanged.
+
+```typescript
+import { SetupHealthLevel, type Prisma } from "@/generated/prisma/client";
+
+// After validation (healthLevelRaw is in allowedLevels):
+const healthLevel = healthLevelRaw as SetupHealthLevel;
+
+const reviewChecklist: Prisma.InputJsonValue | null =
+  reviewPayloadJson != null
+    ? (JSON.parse(reviewPayloadJson) as Prisma.InputJsonValue)
+    : null;
+
+await prisma.tradeHealthLog.create({
+  data: {
+    tradeId: trade.id,
+    // Omit id — @default(dbgenerated("gen_random_uuid()")) on DB
+    // Omit checkedAt — @default(now()) on model; see parity note below
+    healthLevel,
+    healthScore,
+    priceVsZone,
+    structureStatus,
+    recommendedAction,
+    reviewChecklist,
+  },
+});
+```
+
+**Prisma model mapping (P0A — already deployed):**
+
+| Prisma field | DB column | Write note |
+|--------------|-----------|------------|
+| `id` | `id` UUID | Omit on create |
+| `tradeId` | `trade_id` | Required |
+| `checkedAt` | `checked_at` | Omit → `@default(now())` |
+| `healthLevel` | `health_level` TEXT | `SetupHealthLevel` enum in client |
+| `healthScore` | `health_score` | `Int?` |
+| `priceVsZone` | `price_vs_zone` | `String?` |
+| `structureStatus` | `structure_status` | `String?` |
+| `recommendedAction` | `recommended_action` | `String?` |
+| `reviewChecklist` | `review_checklist` JSONB | `Json?` — **object or `null`**, not JSON string |
+
+**Enum vs TEXT column:** Schema uses `SetupHealthLevel` without `@db.Text` (native PG enum exists elsewhere; this column remains TEXT). P0B reads succeeded on production. Writes should emit string enum values (`HEALTHY`, etc.) compatible with TEXT — **verify in P0C integration smoke**; if Prisma errors, stop and report (do not alter schema in P0C).
+
+**`checkedAt` parity:** Raw SQL uses `NOW()`. Omitting `checkedAt` uses Prisma `@default(now())` (may be client-generated timestamp vs DB `NOW()`). Acceptable if within seconds; **test** that omitting field matches DB default or set `checkedAt: new Date()` explicitly if audit requires closer parity.
+
+---
+
+### 3. Behavior Parity Checklist
+
+| Behavior | Preserve? | P0C approach |
+|----------|-------------|--------------|
+| UUID generated by DB | Yes | Omit `id` in `create` |
+| `trade_id` = open trade id | Yes | `tradeId: trade.id` |
+| `checked_at` ≈ insert time | Yes | Omit `checkedAt` or explicit `new Date()` — verify in test |
+| `health_level` = validated form value | Yes | Cast `healthLevelRaw as SetupHealthLevel` after Set check |
+| Optional `health_score` 0–100 or null | Yes | Same `healthScore` variable |
+| Optional text fields null when blank | Yes | Same `nullIfBlank` results |
+| `review_checklist` null when empty payload | Yes | `reviewChecklist: null` when `reviewPayloadJson === null` |
+| JSON shape `{ stopReviewed?, …, reviewOutcome? }` | Yes | Parse serialized string to `InputJsonValue` (same object as `::jsonb`) |
+| Invalid `healthLevel` → no row | Yes | Keep early redirect before `create` |
+| Non-OPEN trade → no row | Yes | Keep status gate before `create` |
+| Success redirect to `/trades/[id]` | Yes | Unchanged |
+| `revalidatePath` detail + `/trades` | Yes | Unchanged |
+| Write failure → surfaces error | Yes | No new try/catch (match current) |
+| `/trades/page.tsx` batch reads | N/A | Still raw SQL — list may not show new checkpoint until P0E |
+| Detail page shows new row | Yes | P0B `loadTradeHealthLogsForDetailPage` after redirect |
+
+---
+
+### 4. Test Plan (P0C)
+
+| # | Check | Type | Pass criteria |
+|---|-------|------|---------------|
+| 1 | Valid checkpoint insert | Manual / integration | OPEN trade → submit form → row in `trade_health_logs`; `health_level` correct |
+| 2 | Null optional fields | Unit / integration | No score/text/checklist → DB NULLs for nullable columns |
+| 3 | Review checklist + outcome JSON | Unit (existing) + integration | `serializeTradeHealthReviewPayloadForDb` round-trip; after insert, `parseHealthReviewLogPayload` via P0B helper matches |
+| 4 | Invalid `healthLevel` | Unit | `"bogus"` → no `create` call (mock prisma) or no new row |
+| 5 | Non-OPEN trade | Manual | CLOSED trade → redirect, no new row |
+| 6 | P0B read after write | Manual | Detail timeline shows new checkpoint; `hasCheckpointToday` true when same local day |
+| 7 | Production enum write | Smoke (post-deploy) | One checkpoint on staging/prod OPEN trade; no Prisma enum/TEXT error |
+| 8 | DISTINCT audit after first row | SQL | Only `HEALTHY` \| `WARNING` \| `AT_RISK` \| `DEAD` |
+| 9 | CI | `npm run lint`, `npm test`, `npm run build` | All pass |
+
+**Proposed test files (minimal):**
+
+| File | Purpose |
+|------|---------|
+| `src/app/actions/trades.health-checkpoint.test.ts` (new) | Mock `prisma.tradeHealthLog.create`; assert data shape for valid/invalid level |
+| Reuse `review-outcome.test.ts` | JSON payload unchanged |
+
+**Out of scope for P0C tests:** `trades/page.tsx` DISTINCT ON / weekly agg; `writeSetupOutcomeFromTrade`.
+
+---
+
+### 5. Implementation Slice (smallest safe diff)
+
+| File | Change | Risk | Validation |
+|------|--------|------|------------|
+| `src/app/actions/trades.ts` | Replace `$executeRawUnsafe` INSERT with `tradeHealthLog.create`; add `SetupHealthLevel` + `Prisma` imports; map `reviewPayloadJson` → `InputJsonValue \| null` | **Medium** | Manual checkpoint + build |
+| `src/lib/trades/trade-health-logs.ts` (optional) | Extract `buildTradeHealthLogCreateData(...)` for unit tests | Low | Optional — only if action test needs pure mapper |
+| `src/app/actions/trades.health-checkpoint.test.ts` (optional) | Mapper / mock create tests | Low | `npm test` |
+
+**Do not touch:** `[id]/page.tsx`, `trades/page.tsx`, `writeSetupOutcomeFromTrade`, `prisma/schema.prisma`, UI components, migrations.
+
+**Suggested commit message (when approved):** `refactor(db): write trade health checkpoints through Prisma`
+
+---
+
+### P0C approval question (before coding)
+
+> **Approve P0C implementation** — replace `addTradeHealthCheckpoint` INSERT with `prisma.tradeHealthLog.create` only, with parity checklist above and post-deploy checkpoint smoke on OPEN trade?
+
+Confirm also:
+
+- **`checkedAt`:** omit field (Prisma/DB default) vs explicit `new Date()` — default recommendation: **omit** unless test shows drift.
+- **`reviewChecklist`:** parse JSON string to `Prisma.InputJsonValue` (required for parity with `::jsonb`).
+- **No helper extraction** unless tests need it (Y/N).
 
 ---
 
@@ -350,7 +544,7 @@ Confirm:
 4. **Failed reads:** keep silent catch for P0 or require throw + UI error (may need tiny caller change on `[id]/page.tsx`)?
 5. **`health_level` enum:** run DISTINCT audit query on prod/staging before enum mapping?
 
-**Do not implement until written approval for slices P0A–P0D (and optional P0E).**
+**P0A–P0B:** implemented and deployed. **P0C:** plan only — await approval. **P0D–P0E:** not started.
 
 ---
 
@@ -359,7 +553,7 @@ Confirm:
 | Location | Line area (approx) | SQL type |
 |----------|-------------------|----------|
 | `src/app/actions/trades.ts` | 527–537 | INSERT |
-| `src/app/(dashboard)/trades/[id]/page.tsx` | 203–207 | SELECT … LIMIT 20 |
+| `src/app/(dashboard)/trades/[id]/page.tsx` | ~~203–207~~ | **Removed in P0B** — `loadTradeHealthLogsForDetailPage` |
 | `src/app/(dashboard)/trades/page.tsx` | 301–307 | SELECT DISTINCT today |
 | `src/app/(dashboard)/trades/page.tsx` | 331–339 | SELECT DISTINCT ON latest |
 | `src/app/(dashboard)/trades/page.tsx` | 377–385 | SELECT weekly BOOL_OR JSON |
