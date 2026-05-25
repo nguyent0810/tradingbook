@@ -12,7 +12,7 @@ export default async function AuthLayout({
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-4">
+    <div className="auth-shell">
       <div className="animate-in w-full max-w-sm">{children}</div>
     </div>
   );

@@ -14,23 +14,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex flex-1 flex-col">
-      {/* Top Navigation */}
-      <header
-        className="sticky top-0 z-50 border-b backdrop-blur-xl"
-        style={{
-          borderColor: "var(--border-primary)",
-          background: "rgba(9, 9, 11, 0.8)",
-        }}
-      >
-        <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center justify-between px-6">
-          {/* Left: Logo + Nav */}
+    <div className="app-shell">
+      <header className="app-shell-header">
+        <div className="app-shell-header-inner">
           <div className="flex items-center gap-8">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 text-sm font-semibold tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <Link href="/dashboard" className="app-shell-brand">
               <svg
                 width="18"
                 height="18"
@@ -40,6 +28,7 @@ export default async function DashboardLayout({
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                aria-hidden
               >
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 <polyline points="16 7 22 7 22 13" />
@@ -47,34 +36,21 @@ export default async function DashboardLayout({
               TradeLog
             </Link>
 
-            <nav className="hidden items-center gap-1 sm:flex">
+            <nav className="app-shell-nav" aria-label="Main">
               <NavLink href="/dashboard">Dashboard</NavLink>
               <NavLink href="/setups">Setups</NavLink>
               <NavLink href="/trades">Trades</NavLink>
             </nav>
           </div>
 
-          {/* Right: User + Logout */}
           <div className="flex items-center gap-3">
-            <span
-              className="hidden text-sm sm:block"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              {session.email}
-            </span>
+            <span className="app-shell-user hidden sm:block">{session.email}</span>
             <LogoutButton />
           </div>
         </div>
       </header>
 
-      {/* Mobile Nav */}
-      <nav
-        className="flex border-b sm:hidden"
-        style={{
-          borderColor: "var(--border-primary)",
-          background: "var(--bg-secondary)",
-        }}
-      >
+      <nav className="app-shell-mobile-nav" aria-label="Main mobile">
         <NavLink href="/dashboard" mobile>
           Dashboard
         </NavLink>
@@ -86,8 +62,7 @@ export default async function DashboardLayout({
         </NavLink>
       </nav>
 
-      {/* Content */}
-      <main className="flex-1">{children}</main>
+      <main className="app-shell-main">{children}</main>
     </div>
   );
 }
@@ -103,22 +78,14 @@ function NavLink({
 }) {
   if (mobile) {
     return (
-      <Link
-        href={href}
-        className="flex-1 px-4 py-3 text-center text-sm font-medium transition-colors"
-        style={{ color: "var(--text-secondary)" }}
-      >
+      <Link href={href} className="app-shell-mobile-nav-link">
         {children}
       </Link>
     );
   }
 
   return (
-    <Link
-      href={href}
-      className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
-      style={{ color: "var(--text-secondary)" }}
-    >
+    <Link href={href} className="app-shell-nav-link">
       {children}
     </Link>
   );
