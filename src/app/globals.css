@@ -589,6 +589,100 @@ body {
   }
 }
 
+/* ─── Dashboard cockpit (Slice 1) ─── */
+.dashboard-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.dashboard-page-header__title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--text-primary);
+}
+
+.dashboard-page-header__subtitle {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
+.dashboard-freshness-ok {
+  border: 1px solid color-mix(in srgb, var(--success) 35%, var(--border-primary));
+  border-radius: var(--radius-lg);
+  background: var(--success-muted);
+  padding: var(--space-4) var(--space-5);
+}
+
+.dashboard-freshness-ok__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--success);
+}
+
+.dashboard-freshness-ok__detail {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.dashboard-scan-meta {
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-secondary);
+  padding: var(--space-4) var(--space-5);
+}
+
+.dashboard-scan-meta__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .dashboard-scan-meta__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dashboard-scan-meta__label {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-tertiary);
+}
+
+.dashboard-scan-meta__value {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.dashboard-scan-meta__hint {
+  margin-top: var(--space-1);
+  color: var(--text-tertiary);
+}
+
+.dashboard-cockpit-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 1024px) {
+  .dashboard-cockpit-grid {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+  }
+}
+
 /* Scrollbar styling for WebKit */
 ::-webkit-scrollbar {
   width: 6px;

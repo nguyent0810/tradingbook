@@ -30,8 +30,14 @@ import { SetupLifecycleStatus } from "@/generated/prisma/client";
 import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
-import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import {
+  buildMarketFreshnessDto,
+} from "@/lib/market/market-freshness-dto";
+import { DashboardFreshnessStrip } from "@/components/dashboard/dashboard-freshness-strip";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import { DashboardScanRunMeta } from "@/components/dashboard/dashboard-scan-run-meta";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import {
   displayCandidateLifecycleSortLabel,
   displayGate1ScanLevel,
@@ -124,6 +130,14 @@ export default async function DashboardPage() {
   }
 
   const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
+  const freshness = buildMarketFreshnessDto({
+    snapshot: marketSnapshot,
+    alignment: alignmentAnalysis,
+    delayedBackdropFromScanNotes:
+      scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
+  });
+  const scanDelayedBackdrop =
+    scanNotes?.benchmarkBackdrop?.delayedBackdrop ?? null;
   const rawCandidates = toCandidateRows(latestScan);
   const evalDate =
     rawCandidates.length > 0
@@ -216,37 +230,86 @@ export default async function DashboardPage() {
 
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
 
+  const exposureSection = (
+    <>
+      <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+        {portfolioRiskConfigured ? "Exposure overview (guidance only)" : "Exposure snapshot"}
+      </h2>
+      <div className="card p-5">
+        {!portfolioRiskConfigured ? (
+          <p
+            className="mb-4 rounded-md border px-3 py-2 text-sm leading-snug"
+            style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}
+          >
+            Risk budget is not configured yet. These values are guidance-only. Set{" "}
+            <code className="rounded bg-[var(--bg-tertiary)] px-1 py-0.5 text-xs">
+              TRADING_ACCOUNT_EQUITY_VND
+            </code>{" "}
+            on the server to unlock exposure overview labels that reference your account.
+          </p>
+        ) : null}
+        <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+          <div>
+            <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+              Current exposure (entry notional)
+            </div>
+            <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              {formatVND(currentExposure, true)}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+              Allocation guidance (not remaining capacity math)
+            </div>
+            <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              {!portfolioRiskConfigured
+                ? "—"
+                : maxPortfolioPct == null
+                  ? "Unavailable (could not parse allocation text)"
+                  : `${decision.allocation} — qualitative cap from scan only`}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+              Max per-trade exposure (guide)
+            </div>
+            <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              {perTradeGuidance}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+              Stance from scan
+            </div>
+            <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
+              {decision.level === "NO_TRADE"
+                ? "Preserve capital."
+                : decision.level === "PROBE"
+                  ? "Small, selective probes only."
+                  : "Normal risk with discipline."}
+            </div>
+          </div>
+        </div>
+        {!portfolioRiskConfigured ? (
+          <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
+            Allocation percentages below still reflect scanner guidance; they are not validated
+            against your account until equity is configured.
+          </p>
+        ) : (
+          <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
+            Guidance only — not stop-based risk or mark-to-market sizing. Exposure shown uses entry
+            prices × quantity.
+          </p>
+        )}
+      </div>
+    </>
+  );
+
   return (
     <div className="page-container animate-in space-y-6 pb-10">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1
-            className="text-2xl font-semibold tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Dashboard
-          </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
-            Decision-first trading cockpit.
-          </p>
-        </div>
+      <DashboardPageHeader />
 
-        <Link href="/trades/new" className="btn btn-primary">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Log Trade
-        </Link>
-      </div>
+      <DashboardFreshnessStrip freshness={freshness} />
 
       {dbLoadError ? (
         <ErrorStateWithEvidence
@@ -257,10 +320,7 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      {alignmentAnalysis.showBanner ? (
-        <MarketDataAlignmentBanner analysis={alignmentAnalysis} />
-      ) : null}
-
+      <div className="dashboard-cockpit-grid">
       <section className="card space-y-3 p-5">
         <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
           Today&apos;s Action
@@ -290,6 +350,14 @@ export default async function DashboardPage() {
         </p>
       </section>
 
+      <section className="space-y-3">{exposureSection}</section>
+      </div>
+
+      <DashboardScanRunMeta
+        latestScan={latestScan}
+        delayedBackdrop={scanDelayedBackdrop}
+      />
+
       <section className="space-y-3">
         <div>
           <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
@@ -300,9 +368,19 @@ export default async function DashboardPage() {
           </p>
         </div>
         {topSetups.length === 0 ? (
-          <div className="card p-5 text-sm" style={{ color: "var(--text-secondary)" }}>
-            No surfaced candidates in the latest run.
-          </div>
+          <EmptyStateWithReason
+            title="No qualified setups in the latest scan"
+            reason={
+              latestScan
+                ? `The latest run (${latestScan.candidateCountSurfaced} surfaced) produced no Tier A/B candidates for the dashboard shortlist. Gate 1 was ${displayGate1ScanLevel(latestScan.gate1Level)} — see Diagnostics or the full Setups page for near-miss symbols.`
+                : "No daily scan run is available yet. Wait for the scheduled import and scan, or check automation in GitHub Actions."
+            }
+            data-testid="dashboard-best-setups-empty"
+          >
+            <Link href="/setups" className="btn btn-secondary text-xs">
+              Open Setups pipeline
+            </Link>
+          </EmptyStateWithReason>
         ) : (
           <div className="table-container">
             <table className="table min-w-[760px]">
@@ -419,79 +497,14 @@ export default async function DashboardPage() {
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-          {portfolioRiskConfigured ? "Exposure overview (guidance only)" : "Exposure snapshot"}
-        </h2>
-        <div className="card p-5">
-          {!portfolioRiskConfigured ? (
-            <p className="mb-4 rounded-md border px-3 py-2 text-sm leading-snug" style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}>
-              Risk budget is not configured yet. These values are guidance-only. Set{" "}
-              <code className="rounded bg-[var(--bg-tertiary)] px-1 py-0.5 text-xs">TRADING_ACCOUNT_EQUITY_VND</code>{" "}
-              on the server to unlock exposure overview labels that reference your account.
-            </p>
-          ) : null}
-          <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
-            <div>
-              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Current exposure (entry notional)
-              </div>
-              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {formatVND(currentExposure, true)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Allocation guidance (not remaining capacity math)
-              </div>
-              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {!portfolioRiskConfigured
-                  ? "—"
-                  : maxPortfolioPct == null
-                    ? "Unavailable (could not parse allocation text)"
-                    : `${decision.allocation} — qualitative cap from scan only`}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Max per-trade exposure (guide)
-              </div>
-              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {perTradeGuidance}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
-                Stance from scan
-              </div>
-              <div className="mt-1 text-lg font-semibold" style={{ color: "var(--text-primary)" }}>
-                {decision.level === "NO_TRADE"
-                  ? "Preserve capital."
-                  : decision.level === "PROBE"
-                    ? "Small, selective probes only."
-                    : "Normal risk with discipline."}
-              </div>
-            </div>
-          </div>
-          {!portfolioRiskConfigured ? (
-            <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
-              Allocation percentages below still reflect scanner guidance; they are not validated against your account until equity is configured.
-            </p>
-          ) : (
-            <p className="mt-3 text-xs" style={{ color: "var(--text-tertiary)" }}>
-              Guidance only — not stop-based risk or mark-to-market sizing. Exposure shown uses entry
-              prices × quantity.
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
           Watchlist
         </h2>
         {activeWatchItems.length === 0 ? (
-          <div className="card p-5 text-sm" style={{ color: "var(--text-secondary)" }}>
-            No active watch items yet.
-          </div>
+          <EmptyStateWithReason
+            title="Watchlist is empty"
+            reason="No setup watch items are in NEW, WATCHING, or READY lifecycle. Surfaced candidates from a future scan will populate the watchlist automatically."
+            data-testid="dashboard-watchlist-empty"
+          />
         ) : (
           <div className="table-container">
             <table className="table min-w-[760px]">
@@ -537,9 +550,15 @@ export default async function DashboardPage() {
           Diagnostics
         </h2>
         {rejectionBuckets.length === 0 ? (
-          <div className="card p-5 text-sm" style={{ color: "var(--text-secondary)" }}>
-            No rejection diagnostics available.
-          </div>
+          <EmptyStateWithReason
+            title="No rejection diagnostics"
+            reason={
+              latestScan
+                ? "The latest scan did not persist Gate 2 rejection buckets in notes, or the run had no tradability failures to summarize."
+                : "Run a daily scan to populate rejection diagnostics."
+            }
+            data-testid="dashboard-diagnostics-empty"
+          />
         ) : (
           <div className="card p-5">
             <ul className="space-y-2">
