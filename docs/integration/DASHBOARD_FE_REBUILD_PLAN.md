@@ -75,9 +75,9 @@
 | **Problems** | ~1955-line monolith; alignment banner only when stale; legacy empty-state markup |
 | **Note** | P0E batch SQL on `/trades` deferred — **do not split monolith in Slice 3** |
 
-### `/trades/new`, `/trades/[id]` — **Slice 4** `PENDING`
+### `/trades/new`, `/trades/[id]` — **Slice 4** `PLANNED` (see §7)
 
-Stale `setupCandidateId` guard; health timeline UX.
+Two scoped options — **recommended order: 4B then 4A** (lowest risk first).
 
 ### Recommended new pages (after inventory)
 
@@ -98,7 +98,7 @@ Stale `setupCandidateId` guard; health timeline UX.
 - [x] `EmptyStateWithReason` on Best Setups / Watchlist / Diagnostics
 - [x] Dashboard Slice 1 committed (`f5b7eea`) — pushed & production deployed
 - [x] Setups page (Slice 2) — `f3a677e` pushed & production deployed
-- [x] Trades page (Slice 3) — header, P1 freshness + scan meta, `EmptyStateWithReason`, `loading.tsx`
+- [x] Trades page (Slice 3) — `0634571` pushed & production deployed
 
 ---
 
@@ -143,6 +143,33 @@ Stale `setupCandidateId` guard; health timeline UX.
 **Logged-in smoke:** Sign in, open `/setups`, confirm `setups-pipeline-context` shows aligned freshness OK strip and scan meta (`cmpku2jyq…` or newer), overview has no second alignment banner, and candidate empty copy matches Gate 1 + tradability when count is 0.
 
 **Dashboard re-check (post-`f3a677e`):** Same data probe; `/dashboard` still redirects when logged out; Slice 1 components unchanged in `f5b7eea` files.
+
+---
+
+## Production validation — Trades Slice 3 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Plan commit on `main` | `512b039` | Docs-only Trades Slice 3 plan + Setups validation |
+| Feature commit | `0634571` | `feat(trades): add freshness context, header, and ledger empty states` |
+| Vercel Production deploy | **Ready** | SHA `0634571`, `2026-05-25T06:55:27Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` |
+| `/trades` auth (logged out) | **307** → `/login` | Production curl |
+| Market data aligned (data) | **Yes** | `ops:verify-bar-import`: bars **2026-05-25**, `delayedBackdrop: false` |
+| Latest scan id (data) | **`cmpku2jyq000004l42cv873wq`** | `latestNonSmokeScan.id` in verify probe |
+| `TradesPageHeader` | Deployed | `data-testid="trades-page-header"`, `trades-header-count` |
+| Log Trade CTA | `/trades/new` | `TradesPageHeader` primary button |
+| Freshness context | Deployed | `data-testid="trades-freshness-context"` → `dashboard-freshness-ok` when aligned |
+| Scan meta | Deployed | `dashboard-scan-meta` via `TradesFreshnessContext` |
+| Ledger empty states | Deployed | `trades-ledger-empty` / `trades-ledger-empty-filtered` |
+| Monolith + `$queryRaw` | Unchanged | No edits to health-log SQL blocks in `0634571` |
+| Alignment banner (open) | Unchanged | `MarketDataAlignmentBanner` when `showBanner` still in `page.tsx` |
+| Review session / filters | Unchanged | `reviewSession`, `TradeFilters` Suspense, cookie snapshot persist |
+| Table / mobile | Unchanged | `trades-scroll-container`, `min-w-[1840px]`, `trades-ledger-scroll-hint` |
+| Playwright contract | Unchanged | `tests/trades-table-layout.spec.ts` expects `Trades` h1 + `3 trades` |
+| `/trades/new`, `/trades/[id]` | Not touched | `0634571` diff scope |
+
+**Logged-in smoke:** Sign in → `/trades` → confirm header count matches ledger rows, aligned freshness OK strip, scan meta id prefix `cmpku2jyq…`, table loads seeded/historical trades, filter to zero rows shows `trades-ledger-empty-filtered`, review-session toggle and open-position warnings still behave.
 
 ---
 
@@ -192,10 +219,47 @@ Stale `setupCandidateId` guard; health timeline UX.
 
 **Explicitly out of Slice 3:** monolith file split, Suspense segmentation of ledger, review-session refactor, P0E SQL → Prisma migration, `/trades/new` stale-candidate validation, `/trades/[id]` health timeline redesign.
 
-### 6.5 Slice 4 preview (after Slice 3 ships)
+### 6.5 Slice 4 preview (superseded by §7)
 
-- `/trades/new`: reject or warn on `setupCandidateId` not from latest scan run.
-- `/trades/[id]`: health timeline UX + loud `loadTradeHealthLogsForDetailPage` errors.
+See **§7** for chosen slice order and acceptance criteria.
+
+---
+
+## 7. Trades Slice 4 — recommendation (post–Slice 3 prod validation)
+
+**Deferred (unchanged):** P0E `$queryRaw` → Prisma on `/trades` monolith; route split; new product routes.
+
+### Option comparison
+
+| | **4B — `/trades/new`** | **4A — `/trades/[id]`** |
+|--|------------------------|-------------------------|
+| **Problem** | `setupCandidateId` from any past scan still prefills form (`06-backend-gaps.md` §10) | Health timeline uses plain empty copy; `loadTradeHealthLogsForDetailPage` **silent catch** masks DB read failures |
+| **Files** | `trades/new/page.tsx` (~106 lines), optional shared warning component | `trades/[id]/page.tsx` (~816 lines), `trade-health-logs.ts` (return `readError` flag) |
+| **Data contract** | Compare `candidate.scanRunId` to `getLatestDailyScanRun()?.id` — **warn first** (no hard reject until product approves) | Extend loader result with optional `readError`; no checkpoint schema change |
+| **Reuse** | `StaleDataWarning` or `EmptyStateWithReason`, `getLatestDailyScanRun` | `EmptyStateWithReason`, `ErrorStateWithEvidence`, optional `TradesFreshnessContext` for OPEN trades |
+| **Risk** | **Lower** — isolated page, no ledger/review-session surface | Medium — larger page but localized to header + health block |
+| **E2E** | New test: stale id query shows warning, still allows submit | Extend detail smoke or unit test on loader error path |
+
+### **Recommended sequence**
+
+1. **Slice 4B** (`/trades/new`) — stale-candidate **warning** strip when `setupCandidateId` exists but `scanRunId !== latestNonSmokeScan.id`; keep prefill behavior unless user clears; link to `/setups` / Dashboard.
+2. **Slice 4A** (`/trades/[id]`) — health timeline data states: `ErrorStateWithEvidence` on read failure (not “no checkpoints”); `EmptyStateWithReason` for true zero logs; optional P1 freshness strip for **OPEN** only; keep `addTradeHealthCheckpoint` form unchanged.
+
+**Not in Slice 4:** monolith split, P0E migration, REST APIs, hard reject of stale candidates without explicit approval.
+
+### Slice 4B checklist (implement next)
+
+- [ ] Load latest non-smoke scan id alongside candidate lookup
+- [ ] `data-testid="trades-new-stale-candidate-warning"` when mismatched
+- [ ] Copy explains scan run id vs latest; CTA to `/setups`
+- [ ] No `createTrade` / form field contract changes
+
+### Slice 4A checklist (after 4B)
+
+- [ ] `loadTradeHealthLogsForDetailPage` returns `{ readError?: string }` on catch
+- [ ] Detail page surfaces `ErrorStateWithEvidence` vs empty timeline
+- [ ] `data-testid` on health timeline block
+- [ ] Optional `TradesFreshnessContext` when `trade.status === "OPEN"`
 
 ---
 
