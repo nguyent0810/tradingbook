@@ -255,6 +255,35 @@ See **§7** for chosen slice order and acceptance criteria.
 - [x] `data-testid="trades-new-scan-lookup-unavailable"` when latest scan lookup fails (non-blocking)
 - [x] `StaleSetupCandidateWarning` — soft warn only; prefill + `createTrade` unchanged
 - [x] Unit tests: `src/lib/trades/stale-setup-candidate.test.ts`
+- [x] Committed & pushed (`b07b116`) — production deployed
+
+---
+
+## Production validation — Trades Slice 4B (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit scope | 5 files only | `b07b116`: `stale-setup-candidate*`, `stale-setup-candidate-warning.tsx`, `trades/new/page.tsx`, plan doc — no `.env`, no `src/app/actions/trades.ts` |
+| Push to `main` | `b07b116` | `18bb425..b07b116` |
+| Vercel Production deploy | **Ready** | SHA `b07b116`, `2026-05-25T07:06:14Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` |
+| `/trades/new` auth (logged out) | **307** → `/login` | Production curl |
+| Latest scan (data) | **`cmpku2jyq000004l42cv873wq`** | `ops:verify-bar-import` `latestNonSmokeScan.id` |
+| `trades-new-stale-candidate-warning` | Deployed | `StaleSetupCandidateWarning` when `scanRunId !== latest` |
+| `trades-new-setup-current` | Deployed | Form card `data-testid` when prefill current |
+| `trades-new-scan-lookup-unavailable` | Deployed | Non-blocking panel when `getLatestDailyScanRun` fails |
+| `createTrade` / Server Actions | Unchanged | No diff in `src/app/actions/trades.ts` in `b07b116` |
+| `/trades`, `/trades/[id]` | Unchanged | Not in `b07b116` diff |
+| Hard reject stale candidate | **No** | Warning only; form prefill preserved |
+| Unit tests | **261** passed | Includes `stale-setup-candidate.test.ts` (6 cases) |
+
+**Logged-in smoke:**
+
+1. `/trades/new` — no query param → no warning; form empty/default.
+2. `/trades/new?setupCandidateId=<id from latest scan>` — `trades-new-setup-current` on card; linked setup label; no stale warning (production has 0 surfaced candidates — use any `setup_candidates` row where `scan_run_id = cmpku2jyq…` if present, or seed locally).
+3. `/trades/new?setupCandidateId=<id from older scan_run_id>` — `trades-new-stale-candidate-warning` with scan id prefixes; form still prefilled; submit still calls `createTrade`.
+
+**SQL to find smoke ids (Neon):** latest scan `SELECT id FROM daily_scan_runs ORDER BY run_at DESC LIMIT 5`; stale candidate `SELECT id, scan_run_id FROM setup_candidates WHERE scan_run_id != '<latestId>' LIMIT 1`.
 
 ### Slice 4A checklist (after 4B)
 
