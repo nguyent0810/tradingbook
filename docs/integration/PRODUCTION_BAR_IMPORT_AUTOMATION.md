@@ -133,18 +133,31 @@ Bar data already imported is **not** rolled back by disabling automation.
 
 | Step | Status |
 |------|--------|
-| Push `173456b` (+ workflow fix) to `main` | Done |
-| GitHub secret `DEPLOYMENT_URL` | Set via `gh` as `https://tradingbook-phi.vercel.app` (repo admin account) |
-| Manual workflow run | **Actions → Production bar import → Run workflow** after workflow YAML fix |
-| Local health | `npm run ops:verify-bar-import` — exit **0**, no PowerShell pipe truncation |
+| Push `173456b` + fix `1aa632a` to `main` | Done |
+| GitHub secrets `DATABASE_URL`, `CRON_SECRET`, `DEPLOYMENT_URL` | Configured on `nguyent0810/tradingbook` |
+| First successful manual run | [**Run #26386350438**](https://github.com/nguyent0810/tradingbook/actions/runs/26386350438) · **~21 min** · `success` |
+| Local health | `npm run ops:verify-bar-import` — exit **0** (no `Select-Object` pipe) |
 
-**Note:** Do not pipe `ops:verify-bar-import` through `Select-Object -First N` — it can truncate stdout and yield a bogus non-zero exit code on Windows.
+**Workflow fix (`1aa632a`):** `runner.temp` cannot be used in job-level `env`; ephemeral paths are set in step **Set ephemeral JSON paths** via `GITHUB_ENV`.
 
-**Workflow fix:** `runner.temp` cannot be used in job-level `env`; ephemeral paths are set in step **Set ephemeral JSON paths** via `GITHUB_ENV`.
+**Failed run (config):** [Run #26386321472](https://github.com/nguyent0810/tradingbook/actions/runs/26386321472) — missing `DATABASE_URL` / `CRON_SECRET` before secrets were added.
 
-Record first successful GHA run URL here after manual validation:
+### Validated evidence (run #26386350438)
 
-`https://github.com/nguyent0810/tradingbook/actions/workflows/production-bar-import.yml`
+| Metric | Value |
+|--------|-------|
+| Workflow URL | https://github.com/nguyent0810/tradingbook/actions/runs/26386350438 |
+| VNINDEX latest day | `2026-05-25` (close **1886.27** after re-fetch) |
+| Equity max day | `2026-05-25` |
+| Active symbols exported | **189** (smoke tickers excluded) |
+| Scan triggered | **yes** — `scanRunId` **`cmpku2jyq000004l42cv873wq`** |
+| `delayedBackdrop` | **false** |
+| `benchmarkBackdrop` | `vnindexSessionDate` / `equityBarsMaxDate` = **2026-05-25** |
+| Surfaced candidates | **0** (tradability/gate2 — not import failure) |
+| Tradability passed | **37 / 189** |
+| Artifacts | `bar-import-health-26386350438`, `scan-response-26386350438` |
+
+**Note:** Do not pipe `ops:verify-bar-import` through `Select-Object -First N` on Windows — it can truncate stdout and return exit code `4294967295` while the script succeeded.
 
 ---
 
