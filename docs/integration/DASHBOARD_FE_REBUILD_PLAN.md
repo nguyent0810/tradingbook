@@ -66,7 +66,7 @@
 | **Reuse** | Suspense boundaries, cached loaders, `SetupsPipelineContext` (P1 DTO + scan meta) |
 | **Implemented** | `SetupsPipelineContextAsync`, `SetupsPageHeader`, improved empty states, removed duplicate alignment banner from overview |
 
-### `/trades` — **Slice 3** `PLANNED` (shell polish — see §6)
+### `/trades` — **Slice 3** `DONE` (shell polish — see §6)
 
 | | |
 |--|--|
@@ -98,6 +98,7 @@ Stale `setupCandidateId` guard; health timeline UX.
 - [x] `EmptyStateWithReason` on Best Setups / Watchlist / Diagnostics
 - [x] Dashboard Slice 1 committed (`f5b7eea`) — pushed & production deployed
 - [x] Setups page (Slice 2) — `f3a677e` pushed & production deployed
+- [x] Trades page (Slice 3) — header, P1 freshness + scan meta, `EmptyStateWithReason`, `loading.tsx`
 
 ---
 

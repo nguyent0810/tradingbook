@@ -20,7 +20,13 @@ import { loadOpenPositionMarks } from "@/lib/trades/position-health";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import { TradesFreshnessContext } from "@/components/trades/trades-freshness-context";
+import { TradesPageHeader } from "@/components/trades/trades-page-header";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
+import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
+import { getLatestDailyScanRun } from "@/lib/scanner/setups-queries";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
 import { TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE } from "@/lib/trades/price-unit-guard";
 import {
@@ -227,7 +233,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
 
   let dbLoadError: string | null = null;
 
-  const [trades, marketSnapshot] = await Promise.all([
+  const [trades, marketSnapshot, latestScan] = await Promise.all([
     (async () => {
       try {
         return await prisma.trade.findMany({
@@ -255,9 +261,19 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       }
     })(),
     fetchMarketSessionSnapshot(prisma),
+    getLatestDailyScanRun(),
   ]);
 
   const alignmentAnalysis = analyzeMarketDataAlignment(marketSnapshot);
+  const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
+  const marketFreshness = buildMarketFreshnessDto({
+    snapshot: marketSnapshot,
+    alignment: alignmentAnalysis,
+    delayedBackdropFromScanNotes:
+      scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
+  });
+  const scanDelayedBackdrop =
+    scanNotes?.benchmarkBackdrop?.delayedBackdrop ?? null;
 
   const now = new Date();
   const dayStart = new Date(now);
@@ -1032,41 +1048,32 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const totalActiveOpenForSession =
     portfolioStrip?.activeOpenCount ?? openTradeIds.length;
 
-  return (
-    <div className="page-container animate-in">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1
-            className="text-2xl font-semibold tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Trades
-          </h1>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: "var(--text-tertiary)" }}
-            data-testid="trades-header-count"
-          >
-            {trades.length} trade{trades.length !== 1 ? "s" : ""}
-          </p>
-        </div>
+  const ledgerEmptyIcon = (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </svg>
+  );
 
-        <Link href="/trades/new" className="btn btn-primary">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Log Trade
-        </Link>
-      </div>
+  return (
+    <div className="page-container animate-in space-y-6 pb-10">
+      <TradesPageHeader tradeCount={trades.length} />
+
+      <TradesFreshnessContext
+        freshness={marketFreshness}
+        latestScan={latestScan}
+        delayedBackdrop={scanDelayedBackdrop}
+      />
 
       {sessionBriefing && hasOpenTrades && !compactReview ? (
         <div
@@ -1423,37 +1430,25 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ) : null}
 
       {trades.length === 0 ? (
-        <div className="card mt-4">
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-            </div>
-            <div className="empty-state-title">
-              {search || statusFilter ? "No matching trades" : "No trades yet"}
-            </div>
-            <div className="empty-state-description">
-              {search || statusFilter
-                ? "Try adjusting your search or filters."
-                : "Log your first trade to start tracking your performance."}
-            </div>
-            {!search && !statusFilter && (
-              <Link href="/trades/new" className="btn btn-primary mt-6">
+        <div className="card p-0">
+          <EmptyStateWithReason
+            title={search || statusFilter ? "No matching trades" : "No trades yet"}
+            reason={
+              search || statusFilter
+                ? "Try adjusting your search or filters — the ledger only shows rows that match the current query."
+                : "Log your first trade to start tracking performance, review checkpoints, and operating posture."
+            }
+            icon={ledgerEmptyIcon}
+            data-testid={
+              search || statusFilter ? "trades-ledger-empty-filtered" : "trades-ledger-empty"
+            }
+          >
+            {!search && !statusFilter ? (
+              <Link href="/trades/new" className="btn btn-primary text-xs">
                 Log Your First Trade
               </Link>
-            )}
-          </div>
+            ) : null}
+          </EmptyStateWithReason>
         </div>
       ) : (
         <>

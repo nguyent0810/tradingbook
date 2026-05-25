@@ -704,6 +704,27 @@ body {
   color: var(--text-tertiary);
 }
 
+.trades-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.trades-page-header__title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--text-primary);
+}
+
+.trades-page-header__subtitle {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+}
+
 /* Scrollbar styling for WebKit */
 ::-webkit-scrollbar {
   width: 6px;
