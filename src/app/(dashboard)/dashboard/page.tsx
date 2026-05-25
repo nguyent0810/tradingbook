@@ -10,9 +10,6 @@ import {
   toCandidateRows,
 } from "@/lib/scanner/setups-queries";
 import {
-  computeDailyTradingDecision,
-} from "@/lib/scanner/trading-decision";
-import {
   prepareSurfacedCandidatesHealthView,
   type SurfacedCandidateHealthView,
 } from "@/lib/setup-health";
@@ -28,6 +25,7 @@ import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-marke
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
 import { DashboardEvidenceStack } from "@/components/dashboard/dashboard-evidence-stack";
 import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
+import { DashboardOpportunityPreview } from "@/components/dashboard/dashboard-opportunity-preview";
 import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardBestSetupsPanel } from "@/components/dashboard/dashboard-best-setups-panel";
@@ -116,28 +114,11 @@ export default async function DashboardPage() {
   }
   const topSetups = candidatesWithHealth.slice(0, 5);
 
-  const decision =
-    scanNotes?.decision ??
-    (latestScan
-      ? computeDailyTradingDecision({
-          gate1Level: regime.level,
-          candidateCountA: latestScan.candidateCountA,
-          candidateCountB: latestScan.candidateCountB,
-        })
-      : {
-          level: "NO_TRADE" as const,
-          allocation: "0%",
-          explanation: "No scan run found yet.",
-        });
-
   const openTrades = trades.filter((t) => t.status === "OPEN");
   const currentExposure = openTrades.reduce(
     (sum, t) => sum + t.entryPrice * t.quantity,
     0
   );
-  const maxPortfolioPct = pctFromRangeText(decision.allocation);
-  const perTradeGuidance = decision.level === "PROBE" ? "10-15%" : "10-20%";
-
   let activeWatchItems: DashboardWatchlistItem[] = [];
   try {
     activeWatchItems = await prisma.setupWatchItem.findMany({
@@ -198,6 +179,8 @@ export default async function DashboardPage() {
   );
 
   const surfacedCount = latestScan?.candidateCountSurfaced ?? 0;
+  const maxPortfolioPct = pctFromRangeText(cockpitDto.verdict.allocation.value);
+  const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
 
   return (
     <div className="page-container dash-cockpit animate-in pb-10">
@@ -217,11 +200,10 @@ export default async function DashboardPage() {
       <div className="dash-cockpit__hero-row">
         <DashboardDecisionHero verdict={cockpitDto.verdict} surfacedCount={surfacedCount} />
         <DashboardExposurePanel
-          decision={decision}
-          currentExposure={currentExposure}
-          perTradeGuidance={perTradeGuidance}
+          risk={cockpitDto.risk}
+          verdict={cockpitDto.verdict}
           maxPortfolioPct={maxPortfolioPct}
-          portfolioRiskConfigured={isTradingRiskBudgetConfigured()}
+          portfolioRiskConfigured={portfolioRiskConfigured}
         />
       </div>
 
@@ -229,6 +211,8 @@ export default async function DashboardPage() {
         chips={cockpitDto.evidence}
         blockers={cockpitDto.blockers}
       />
+
+      <DashboardOpportunityPreview opportunity={cockpitDto.opportunity} />
 
       <div className="dash-cockpit__secondary-row">
         <DashboardScanMetaStrip

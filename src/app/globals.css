@@ -1023,6 +1023,97 @@ body {
   color: var(--text-tertiary);
 }
 
+/* Opportunity preview (Decision Cockpit S3) */
+.dash-opportunity {
+  margin-top: var(--space-4);
+}
+
+.dash-opportunity__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dash-opportunity__row {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+}
+
+.dash-opportunity__row-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dash-opportunity__badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.dash-opportunity__meta {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.dash-opportunity__wait,
+.dash-opportunity__summary,
+.dash-opportunity__hint {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.dash-opportunity__reasons {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  list-style: disc;
+}
+
+.dash-opportunity__action {
+  display: inline-block;
+  margin-top: var(--space-2);
+  color: var(--accent-text);
+}
+
+.dash-exposure__stance {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dash-exposure__gate1-live {
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.dash-exposure__rules {
+  margin: var(--space-3) 0 0;
+  padding-left: var(--space-4);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  list-style: disc;
+}
+
+.dash-exposure__caption {
+  margin-top: var(--space-2);
+}
+
 /* Exposure metrics */
 .dash-metric-grid {
   display: grid;

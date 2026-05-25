@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1 DONE (`3228344`) · S2 DONE (`857a761` verdict + evidence on production)  
+**Status:** S1 DONE (`3228344`) · S2 DONE (`857a761`) · S3 local (`feat` pending push) — exposure + opportunity preview  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -140,9 +140,40 @@ Render when `process.env.NODE_ENV === "development"` && `?cockpit=1`:
 - [x] `DashboardDecisionHero` from `cockpitDto.verdict` (TRADE not NORMAL in UI)
 - [x] `DashboardEvidenceStack` after hero row (chips + top 2 blockers)
 - [x] Production validation — [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S2
-- [ ] S3+ Opportunity / exposure alignment / layout demotion (not started)
 
 **Out of S2 (unchanged):** exposure, best setups, momentum, watchlist, diagnostics data paths.
+
+---
+
+## 9. S3 — exposure alignment + opportunity preview (local)
+
+### Part A — Exposure
+
+- [x] `DashboardExposurePanel` consumes `cockpitDto.risk` + `cockpitDto.verdict` (not legacy `decision` / `regime.level`)
+- [x] Max book, per-trade, stance, Gate 1 (canonical + live when mismatch) aligned with verdict hero
+- [x] Open notional unchanged (`risk.openExposureVnd` — same entry×qty derivation)
+- [x] Honest copy when `TRADING_ACCOUNT_EQUITY_VND` unset (qualitative caps; DC-5 headroom still gap)
+- [x] Top 2 `risk.rules` shown as bullets (includes gap-labeled stop/R rules)
+
+### Part B — Opportunity preview
+
+- [x] `DashboardOpportunityPreview` from `cockpitDto.opportunity` only (no new queries)
+- [x] Modes: `candidates` | `near_miss` | `empty` with link to `/setups`
+- [x] Near-miss from `scanNotes.closestToValidSymbols` via existing dashboard loader path (**DC-9 partial** — dashboard preview only; full queue still on Setups)
+- [x] `DashboardBestSetupsPanel` retained (table detail unchanged)
+
+### Remaining (S4+)
+
+- [ ] Tomorrow’s Plan block
+- [ ] Full setup quality ladder panel (DTO `ladder[]` exists, not rendered)
+- [ ] Diagnostics rewrite / demotion
+- [ ] Risk budget headroom API (DC-5)
+- [ ] Full dashboard layout reorder per UX spec
+
+### Caveats
+
+- Parsed % vs equity only when env configured and verdict ≠ NO_TRADE — labeled qualitative / DC-5.
+- Opportunity preview max 5 candidates / 8 near-miss matches DTO builder caps.
 
 ---
 

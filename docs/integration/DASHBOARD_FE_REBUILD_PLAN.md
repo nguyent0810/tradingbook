@@ -64,7 +64,9 @@
 
 **S1/S2 integration:** [DASHBOARD_DECISION_COCKPIT_S1_INTEGRATION.md](./DASHBOARD_DECISION_COCKPIT_S1_INTEGRATION.md) · [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
-**S2 scope on `/dashboard`:** `DashboardDecisionHero` + `DashboardEvidenceStack` from `cockpitDto`; exposure / best setups / momentum / watchlist / diagnostics unchanged (legacy `decision` + `regime.level` on exposure — caveat when Gate 1 mismatch).
+**S2 scope on `/dashboard`:** `DashboardDecisionHero` + `DashboardEvidenceStack` from `cockpitDto` (`857a761`).
+
+**S3 scope (local, not pushed):** `DashboardExposurePanel` from `cockpitDto.risk` + `verdict`; `DashboardOpportunityPreview` from `cockpitDto.opportunity`; best setups table retained.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -136,7 +138,7 @@
 | Top blocker chips | Deployed | `dashboard-evidence-blocker-chip` (max 2 from `cockpitDto.blockers`) |
 | Layout insert | One section | Evidence between hero row and scan meta row; other panels unchanged |
 | Freshness / exposure / setups panels | Unchanged | `dashboard-freshness-ok`, exposure panel, best setups, momentum, watchlist, diagnostics testids preserved |
-| Exposure caveat (known) | Deferred S3+ | Exposure still uses legacy `decision` from `regime.level` fallback — may disagree with DTO verdict when Gate 1 mismatch |
+| Exposure caveat (S2) | **Resolved in S3** | Exposure now uses `cockpitDto.risk` + canonical Gate 1 — see S3 commit |
 | Backend / contracts | Unchanged | No Prisma/cron/actions in `857a761` |
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm **Today's verdict** (not legacy “Today's action” only), NO TRADE preservation line when applicable, evidence chips (Gate 1, Tier A/B, surfaced, aligned), live Gate 1 chip only if mismatch, exposure/best setups/momentum/watchlist/diagnostics still below.
