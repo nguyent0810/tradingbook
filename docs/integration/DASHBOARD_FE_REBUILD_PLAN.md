@@ -101,6 +101,34 @@
 - [x] Dashboard Slice 1 committed (`f5b7eea`) — pushed & production deployed
 - [x] Setups page (Slice 2) — `f3a677e` pushed & production deployed
 - [x] Trades page (Slice 3) — `0634571` pushed & production deployed
+- [x] Trading OS v2 dashboard cockpit — `81922d6` pushed & production deployed
+
+---
+
+## Production validation — Trading OS v2 Dashboard Cockpit (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `81922d6` | `feat(dashboard): apply Trading OS cockpit visual system` |
+| Push to `main` | `81922d6` | `e75f0f9..81922d6` |
+| Vercel Production deploy | **Ready** | SHA `81922d6`, `2026-05-25T07:31:01Z` |
+| `/api/db-health` | `{"ok":true}` | Production URL |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production curl |
+| Market data aligned (data) | **Yes** | `ops:verify-bar-import`: bars **2026-05-25**, `delayedBackdrop: false` |
+| Latest scan id (data) | **`cmpku2jyq000004l42cv873wq`** | `latestNonSmokeScan.id` |
+| 0 surfaced candidates (data) | **0** | Intentional empty state path on prod |
+| Compact market status | Deployed | `dashboard-freshness-ok` on `DashboardMarketStatusBar` (chip layout) |
+| Decision hero | Deployed | `dashboard-decision-hero` — amber NO_TRADE surface when aligned data shows capital preservation stance |
+| Scan meta strip | Deployed | `dashboard-scan-meta` chips (replaces full-width debug grid on `/dashboard` only) |
+| Best setups empty | Deployed | `dashboard-best-setups-empty` — compact panel + Setups link |
+| Watchlist empty | Deployed | `dashboard-watchlist-empty` |
+| Diagnostics | Deployed | `dashboard-diagnostics-stack` / `dashboard-diagnostics-empty` |
+| Momentum | Unchanged component | `MomentumWatchSection` still on page |
+| Secondary performance | Deployed | `dashboard-performance-panel`, optional `dashboard-equity-sparkline` |
+| Backend / other routes | Unchanged | No Prisma/cron/actions diff; `/setups`, `/trades*` not in commit |
+| Mobile | CSS stack order | `dash-cockpit` → hero row → secondary row → panels; tables `table-container` scroll |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm compact aligned status bar, NO TRADE (or current) decision hero, exposure panel, scan chips with `cmpku2jyq…`, compact best-setups empty, momentum section, watchlist empty, diagnostics stack when rejection notes exist.
 
 ---
 
