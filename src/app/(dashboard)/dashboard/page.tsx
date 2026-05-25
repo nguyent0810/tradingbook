@@ -197,11 +197,11 @@ export default async function DashboardPage() {
       : null,
   });
 
+  const verdictUx = cockpitDto.verdict.uxLevel.value;
+
   return (
     <div className="page-container dash-cockpit animate-in pb-10">
       <DashboardPageHeader />
-
-      <DashboardMarketStatusBar freshness={freshness} />
 
       {dbLoadError ? (
         <ErrorStateWithEvidence
@@ -212,49 +212,90 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      <div className="dash-cockpit__hero-row">
-        <DashboardDecisionHero verdict={cockpitDto.verdict} surfacedCount={surfacedCount} />
-        <DashboardExposurePanel
-          risk={cockpitDto.risk}
-          verdict={cockpitDto.verdict}
-          maxPortfolioPct={maxPortfolioPct}
-          portfolioRiskConfigured={portfolioRiskConfigured}
-        />
-      </div>
-
-      <DashboardEvidenceStack
-        chips={cockpitDto.evidence}
-        blockers={cockpitDto.blockers}
-      />
-
-      <DashboardOpportunityPreview opportunity={cockpitDto.opportunity} />
-
-      <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
-
-      <div className="dash-cockpit__secondary-row">
+      {/* 1. Top status — freshness + scan meta */}
+      <div
+        className="dash-cockpit__zone dash-cockpit__zone--status"
+        data-testid="dashboard-cockpit-zone-status"
+      >
+        <DashboardMarketStatusBar freshness={freshness} />
         <DashboardScanMetaStrip
           latestScan={latestScan}
           delayedBackdrop={scanDelayedBackdrop}
         />
-        <DashboardPerformancePanel trades={trades} />
       </div>
 
-      <DashboardBestSetupsPanel
-        topSetups={topSetups}
-        presentation={bestSetupsPresentation}
-      />
+      {/* 2. Primary decision — verdict, evidence, exposure */}
+      <section
+        className={`dash-cockpit__zone dash-cockpit__zone--decision${verdictUx === "NO_TRADE" ? " dash-cockpit__zone--no-trade" : ""}`}
+        data-testid="dashboard-cockpit-zone-decision"
+        aria-label="Today's decision"
+      >
+        <div className="dash-cockpit__decision-grid">
+          <div className="dash-cockpit__decision-hero-slot">
+            <DashboardDecisionHero verdict={cockpitDto.verdict} surfacedCount={surfacedCount} />
+          </div>
+          <div className="dash-cockpit__decision-exposure-slot">
+            <DashboardExposurePanel
+              risk={cockpitDto.risk}
+              verdict={cockpitDto.verdict}
+              maxPortfolioPct={maxPortfolioPct}
+              portfolioRiskConfigured={portfolioRiskConfigured}
+            />
+          </div>
+          <div className="dash-cockpit__decision-evidence-slot">
+            <DashboardEvidenceStack
+              chips={cockpitDto.evidence}
+              blockers={cockpitDto.blockers}
+            />
+          </div>
+        </div>
+      </section>
 
-      <MomentumWatchSection />
+      {/* 3. Opportunity — preview + quality ladder */}
+      <section
+        className="dash-cockpit__zone dash-cockpit__zone--opportunity"
+        data-testid="dashboard-cockpit-zone-opportunity"
+        aria-label="Opportunity pipeline"
+      >
+        <div className="dash-cockpit__opportunity-grid">
+          <DashboardOpportunityPreview opportunity={cockpitDto.opportunity} />
+          <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
+        </div>
+      </section>
 
-      <DashboardWatchlistPanel
-        items={activeWatchItems}
-        latestCloseBySymbol={latestCloseBySymbol}
-      />
+      {/* 4. Execution context — setups, momentum, watchlist, book snapshot */}
+      <section
+        className="dash-cockpit__zone dash-cockpit__zone--execution"
+        data-testid="dashboard-cockpit-zone-execution"
+        aria-label="Execution context"
+      >
+        <DashboardBestSetupsPanel
+          topSetups={topSetups}
+          presentation={bestSetupsPresentation}
+        />
+        <div className="dash-cockpit__execution-secondary">
+          <MomentumWatchSection />
+          <DashboardWatchlistPanel
+            items={activeWatchItems}
+            latestCloseBySymbol={latestCloseBySymbol}
+          />
+        </div>
+        <div className="dash-cockpit__performance-slot">
+          <DashboardPerformancePanel trades={trades} />
+        </div>
+      </section>
 
-      <div className="dash-cockpit__plan-row">
-        <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} />
-        <DashboardActionableBlockers diagnostics={cockpitDto.actionableDiagnostics} />
-      </div>
+      {/* 5. Next-session intelligence — tomorrow + blockers */}
+      <section
+        className="dash-cockpit__zone dash-cockpit__zone--next-session"
+        data-testid="dashboard-cockpit-zone-next-session"
+        aria-label="Next session"
+      >
+        <div className="dash-cockpit__plan-row">
+          <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} />
+          <DashboardActionableBlockers diagnostics={cockpitDto.actionableDiagnostics} />
+        </div>
+      </section>
     </div>
   );
 }

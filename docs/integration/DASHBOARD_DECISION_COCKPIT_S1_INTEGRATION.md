@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S5 on production (`e58199a`) — setup quality ladder + Best Setups dedup deployed  
+**Status:** S1–S5 on production (`e58199a`) · **S6 local** — full cockpit layout reorder per UX spec  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -239,16 +239,31 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S5.
 
-### Remaining (S6+)
+## 12. S6 — full cockpit layout reorder (local)
+
+### Zones (top → bottom)
+
+1. **Status** — `DashboardMarketStatusBar` + `DashboardScanMetaStrip` (`dashboard-cockpit-zone-status`)
+2. **Decision** — verdict + exposure grid; evidence full width below (`dashboard-cockpit-zone-decision`)
+3. **Opportunity** — preview + ladder side-by-side on lg (`dashboard-cockpit-zone-opportunity`)
+4. **Execution** — Best Setups → momentum + watchlist → performance (`dashboard-cockpit-zone-execution`)
+5. **Next session** — tomorrow + blockers (`dashboard-cockpit-zone-next-session`)
+
+### Polish
+
+- [x] NO_TRADE decision zone tint (`dash-cockpit__zone--no-trade`)
+- [x] Blockers visually lighter than verdict/opportunity (next-session zone CSS)
+- [x] Performance panel demoted (compact padding in execution zone)
+- [x] All existing testids preserved; zone wrappers additive
+
+### Remaining (S7+)
 
 - [ ] Risk budget headroom API (DC-5)
-- [ ] Full cockpit layout reorder per UX spec
 
-### Caveats
+### Caveats (unchanged)
 
 - Parsed % vs equity only when env configured and verdict ≠ NO_TRADE — labeled qualitative / DC-5.
 - Opportunity preview max 5 candidates / 8 near-miss; ladder classifies **all** surfaced + closest rows (may exceed preview cap).
-- Flat `cockpitDto.ladder[]` retained for spike compatibility; UI uses `setupQualityLadder`.
 
 ---
 

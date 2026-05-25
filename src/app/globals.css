@@ -683,11 +683,154 @@ body {
   }
 }
 
-/* ─── Trading OS v2 — Dashboard cockpit ─── */
+/* ─── Trading OS v2 — Dashboard cockpit (S6 IA zones) ─── */
 .dash-cockpit {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
+}
+
+.dash-cockpit__zone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+/* 1. Top status */
+.dash-cockpit__zone--status {
+  gap: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .dash-cockpit__zone--status {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+}
+
+/* 2. Primary decision */
+.dash-cockpit__decision-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+.dash-cockpit__decision-hero-slot,
+.dash-cockpit__decision-exposure-slot,
+.dash-cockpit__decision-evidence-slot {
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  .dash-cockpit__decision-grid {
+    grid-template-columns: 1.35fr 1fr;
+    grid-template-areas:
+      "hero exposure"
+      "evidence evidence";
+    gap: var(--space-3) var(--space-4);
+    align-items: stretch;
+  }
+
+  .dash-cockpit__decision-hero-slot {
+    grid-area: hero;
+  }
+
+  .dash-cockpit__decision-exposure-slot {
+    grid-area: exposure;
+  }
+
+  .dash-cockpit__decision-evidence-slot {
+    grid-area: evidence;
+  }
+}
+
+.dash-cockpit__zone--decision.dash-cockpit__zone--no-trade {
+  padding: var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--warning-muted) 12%, transparent);
+}
+
+/* 3. Opportunity */
+.dash-cockpit__opportunity-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .dash-cockpit__opportunity-grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: start;
+  }
+}
+
+/* 4. Execution context */
+.dash-cockpit__zone--execution {
+  gap: var(--space-3);
+}
+
+.dash-cockpit__execution-secondary {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .dash-cockpit__execution-secondary {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.dash-cockpit__performance-slot .dash-performance {
+  padding: var(--space-3) var(--space-4);
+}
+
+.dash-cockpit__performance-slot .dash-performance__subtitle {
+  margin-top: var(--space-1);
+}
+
+@media (min-width: 1280px) {
+  .dash-cockpit__zone--execution {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
+    grid-template-areas:
+      "setups setups"
+      "secondary secondary"
+      "performance performance";
+    gap: var(--space-3) var(--space-4);
+    align-items: start;
+  }
+
+  .dash-cockpit__zone--execution > [data-testid="dashboard-best-setups-panel"] {
+    grid-area: setups;
+  }
+
+  .dash-cockpit__execution-secondary {
+    grid-area: secondary;
+  }
+
+  .dash-cockpit__performance-slot {
+    grid-area: performance;
+  }
+}
+
+/* 5. Next-session — lighter weight than verdict/opportunity */
+.dash-cockpit__zone--next-session .dash-panel__header {
+  margin-bottom: var(--space-2);
+}
+
+.dash-cockpit__zone--next-session [data-testid="dashboard-diagnostics-panel"] .dash-section-title {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.dash-cockpit__zone--next-session .dash-actionable-blockers__item {
+  padding: var(--space-2) var(--space-3);
 }
 
 .dash-surface-0 {
@@ -742,32 +885,6 @@ body {
   margin-top: var(--space-1);
   font-size: var(--font-size-xs);
   color: var(--text-tertiary);
-}
-
-.dash-cockpit__hero-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-4);
-}
-
-@media (min-width: 1024px) {
-  .dash-cockpit__hero-row {
-    grid-template-columns: 1.35fr 1fr;
-    align-items: stretch;
-  }
-}
-
-.dash-cockpit__secondary-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
-}
-
-@media (min-width: 768px) {
-  .dash-cockpit__secondary-row {
-    grid-template-columns: 1.4fr 1fr;
-    align-items: start;
-  }
 }
 
 /* Compact market status bar */
@@ -1207,17 +1324,16 @@ body {
   line-height: var(--line-height-relaxed);
 }
 
-/* Tomorrow plan + actionable blockers (S4) */
+/* Tomorrow plan + actionable blockers (S4 / S6 next-session zone) */
 .dash-cockpit__plan-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-4);
-  margin-top: var(--space-4);
+  gap: var(--space-3);
 }
 
 @media (min-width: 1024px) {
   .dash-cockpit__plan-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.05fr 0.95fr;
     align-items: start;
   }
 }

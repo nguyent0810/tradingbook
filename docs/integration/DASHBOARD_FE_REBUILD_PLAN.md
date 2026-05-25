@@ -72,6 +72,8 @@
 
 **S5 scope (production `e58199a`):** `DashboardSetupQualityLadder` from `cockpitDto.setupQualityLadder`; Best Setups compact empty when zero surfaced rows (dedup with Opportunity preview via `resolveBestSetupsPanelPresentation`).
 
+**S6 scope (local):** Full Decision Cockpit IA reorder on `/dashboard` — five zones (status → decision → opportunity → execution → next-session); desktop grids; scan meta with freshness; performance demoted in execution zone; no DTO/query changes.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -122,6 +124,7 @@
 - [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
 - [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
 - [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
+- [ ] Decision Cockpit S6 layout reorder — local (not pushed)
 
 ---
 
