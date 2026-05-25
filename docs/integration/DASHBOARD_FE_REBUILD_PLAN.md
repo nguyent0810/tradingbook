@@ -72,7 +72,7 @@
 
 **S5 scope (production `e58199a`):** `DashboardSetupQualityLadder` from `cockpitDto.setupQualityLadder`; Best Setups compact empty when zero surfaced rows (dedup with Opportunity preview via `resolveBestSetupsPanelPresentation`).
 
-**S6 scope (local):** Full Decision Cockpit IA reorder on `/dashboard` — five zones (status → decision → opportunity → execution → next-session); desktop grids; scan meta with freshness; performance demoted in execution zone; no DTO/query changes.
+**S6 scope (production `945de00`):** Full Decision Cockpit IA reorder on `/dashboard` — five zones (status → decision → opportunity → execution → next-session); desktop grids; scan meta with freshness; performance demoted in execution zone; no DTO/query changes.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -124,7 +124,33 @@
 - [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
 - [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
 - [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
-- [ ] Decision Cockpit S6 layout reorder — local (not pushed)
+- [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S6 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `945de00` | `feat(dashboard): reorder Decision Cockpit layout` — 4 files only |
+| Push to `main` | `945de00` | `ebfd0ad..945de00` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `945de00`, `2026-05-25T09:36:36Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Zone 1 — Status | Deployed | `dashboard-cockpit-zone-status` — freshness + scan meta (md+ side-by-side) |
+| Zone 2 — Decision | Deployed | `dashboard-cockpit-zone-decision` — verdict + exposure grid; evidence full width |
+| Zone 3 — Opportunity | Deployed | `dashboard-cockpit-zone-opportunity` — preview + ladder (lg+ 2-col) |
+| Zone 4 — Execution | Deployed | `dashboard-cockpit-zone-execution` — best setups, momentum, watchlist, compact performance |
+| Zone 5 — Next session | Deployed | `dashboard-cockpit-zone-next-session` — tomorrow + blockers (lg+ 2-col) |
+| NO_TRADE polish | Deployed | `dash-cockpit__zone--no-trade` tint + hero preservation copy |
+| Blockers visual weight | Demoted | Lighter title/padding in next-session zone vs verdict/opportunity |
+| All S2–S5 panels | Unchanged data | Same `cockpitDto` fields and panel testids |
+| Backend / contracts | Unchanged | Layout/CSS only — no Prisma/cron/scanner/import/API/Server Action changes |
+| Tests (local pre-push) | **284/284** | No new tests (layout-only slice) |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm five zones top-to-bottom; desktop: status row, decision grid (verdict \| exposure, evidence below), opportunity \| ladder, execution block, tomorrow \| blockers; mobile stacks per DOM order; NO TRADE feels like capital preservation; blockers secondary to verdict/opportunity.
+
+**Remaining (S7+):** DC-5 risk budget headroom vs equity.
 
 ---
 

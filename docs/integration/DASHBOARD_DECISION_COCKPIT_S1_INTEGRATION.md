@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S5 on production (`e58199a`) · **S6 local** — full cockpit layout reorder per UX spec  
+**Status:** S1–S6 on production (`945de00`) — full cockpit layout reorder deployed  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -239,7 +239,7 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S5.
 
-## 12. S6 — full cockpit layout reorder (local)
+## 12. S6 — full cockpit layout reorder (production)
 
 ### Zones (top → bottom)
 
@@ -255,6 +255,17 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - [x] Blockers visually lighter than verdict/opportunity (next-session zone CSS)
 - [x] Performance panel demoted (compact padding in execution zone)
 - [x] All existing testids preserved; zone wrappers additive
+
+### Production validation (2026-05-25)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `945de00` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Five cockpit zones | Deployed on `/dashboard` |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S6.
 
 ### Remaining (S7+)
 
