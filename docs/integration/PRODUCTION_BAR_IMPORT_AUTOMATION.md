@@ -129,6 +129,25 @@ Bar data already imported is **not** rolled back by disabling automation.
 
 ---
 
+## Finalization (2026-05-25)
+
+| Step | Status |
+|------|--------|
+| Push `173456b` (+ workflow fix) to `main` | Done |
+| GitHub secret `DEPLOYMENT_URL` | Set via `gh` as `https://tradingbook-phi.vercel.app` (repo admin account) |
+| Manual workflow run | **Actions → Production bar import → Run workflow** after workflow YAML fix |
+| Local health | `npm run ops:verify-bar-import` — exit **0**, no PowerShell pipe truncation |
+
+**Note:** Do not pipe `ops:verify-bar-import` through `Select-Object -First N` — it can truncate stdout and yield a bogus non-zero exit code on Windows.
+
+**Workflow fix:** `runner.temp` cannot be used in job-level `env`; ephemeral paths are set in step **Set ephemeral JSON paths** via `GITHUB_ENV`.
+
+Record first successful GHA run URL here after manual validation:
+
+`https://github.com/nguyent0810/tradingbook/actions/workflows/production-bar-import.yml`
+
+---
+
 ## Verification checklist
 
 1. GHA run **green** with artifacts `bar-import-health-*` and `scan-response-*`

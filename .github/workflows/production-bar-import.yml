@@ -33,15 +33,18 @@ jobs:
       PROD_DB_HOST_ALLOWLIST: neon.tech
       CRON_SECRET: ${{ secrets.CRON_SECRET }}
       DEPLOYMENT_URL: ${{ secrets.DEPLOYMENT_URL }}
-      VNINDEX_JSON: ${{ runner.temp }}/vnindex.json
-      STOCK_JSON: ${{ runner.temp }}/stock-bars.json
-      SYMBOLS_JSON: ${{ runner.temp }}/active-symbol-keys.json
       TRIGGER_SCAN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.trigger_scan == 'false' && '0' || '1' }}
       SKIP_EQUITY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_equity == 'true' && '1' || '0' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Set ephemeral JSON paths
+        run: |
+          echo "VNINDEX_JSON=${RUNNER_TEMP}/vnindex.json" >> "$GITHUB_ENV"
+          echo "STOCK_JSON=${RUNNER_TEMP}/stock-bars.json" >> "$GITHUB_ENV"
+          echo "SYMBOLS_JSON=${RUNNER_TEMP}/active-symbol-keys.json" >> "$GITHUB_ENV"
 
       - name: Validate required secrets
         run: |
