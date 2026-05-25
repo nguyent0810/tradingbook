@@ -28,7 +28,7 @@ test.describe("/trades table layout", () => {
     page,
   }) => {
     await expect(
-      page.getByRole("heading", { level: 1, name: "Trades" })
+      page.getByRole("heading", { level: 1, name: "Trades ledger" })
     ).toBeVisible();
 
     await expect(page.getByTestId("trades-header-count")).toHaveText(/3 trades/);

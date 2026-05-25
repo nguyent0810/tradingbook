@@ -1,9 +1,19 @@
 export function SetupsPipelineContextFallback() {
   return (
-    <div className="space-y-4" aria-busy="true">
-      <div className="skeleton h-16 w-full rounded-lg" />
-      <div className="skeleton h-20 w-full rounded-lg" />
+    <div className="tos-setups-context space-y-3" aria-busy="true">
+      <div className="skeleton h-12 w-full rounded-lg" />
+      <div className="skeleton h-14 w-full rounded-lg" />
     </div>
+  );
+}
+
+export function SetupsSidebarFallback() {
+  return (
+    <aside className="tos-setups-sidebar space-y-4" aria-busy="true">
+      <div className="skeleton h-24 w-full rounded-lg" />
+      <div className="skeleton h-40 w-full rounded-lg" />
+      <div className="skeleton h-32 w-full rounded-lg" />
+    </aside>
   );
 }
 

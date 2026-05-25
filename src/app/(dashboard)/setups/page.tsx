@@ -7,11 +7,13 @@ import { getSession } from "@/lib/session";
 import { SetupsCandidatesAsync } from "./setups-candidates-async";
 import { SetupsOverviewAsync } from "./setups-overview-async";
 import { SetupsPipelineContextAsync } from "./setups-pipeline-context-async";
+import { SetupsSidebarAsync } from "./setups-sidebar-async";
 import { SetupsTailAsync } from "./setups-tail-async";
 import {
   SetupsCandidatesFallback,
   SetupsMomentumFallback,
   SetupsPipelineContextFallback,
+  SetupsSidebarFallback,
   SetupsTailFallback,
   SetupsTopFallback,
 } from "./setups-stream-fallbacks";
@@ -26,7 +28,7 @@ export default async function SetupsPage() {
   if (!session) redirect("/login");
 
   return (
-    <div className="page-container animate-in space-y-8 pb-10">
+    <div className="page-container tos-setups dash-cockpit animate-in pb-10">
       <SetupsPageHeader />
 
       <Suspense fallback={<SetupsPipelineContextFallback />}>
@@ -37,17 +39,25 @@ export default async function SetupsPage() {
         <SetupsOverviewAsync />
       </Suspense>
 
-      <Suspense fallback={<SetupsCandidatesFallback />}>
-        <SetupsCandidatesAsync />
-      </Suspense>
+      <div className="tos-setups-grid">
+        <div className="tos-setups-main space-y-5">
+          <Suspense fallback={<SetupsCandidatesFallback />}>
+            <SetupsCandidatesAsync />
+          </Suspense>
 
-      <Suspense fallback={<SetupsMomentumFallback />}>
-        <MomentumWatchSection />
-      </Suspense>
+          <Suspense fallback={<SetupsMomentumFallback />}>
+            <MomentumWatchSection />
+          </Suspense>
 
-      <Suspense fallback={<SetupsTailFallback />}>
-        <SetupsTailAsync />
-      </Suspense>
+          <Suspense fallback={<SetupsTailFallback />}>
+            <SetupsTailAsync />
+          </Suspense>
+        </div>
+
+        <Suspense fallback={<SetupsSidebarFallback />}>
+          <SetupsSidebarAsync />
+        </Suspense>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { SetupsClosestSymbolsSection } from "@/components/setups-closest-symbols";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { compareClosestRowsExecutionOrder } from "@/lib/scanner/closest-execution-metrics";
 import { displayTradabilityBreakdownKey } from "@/lib/trading-display-labels";
 import { loadSetupsBaseData } from "./setups-cached-data";
@@ -37,24 +38,32 @@ export async function SetupsTailAsync() {
   const breakdown = base.latest.tradabilityBreakdown;
 
   return (
-    <>
-      {closestRows.length > 0 ? <SetupsClosestSymbolsSection rows={closestRows} /> : null}
+    <div className="tos-setups-tail space-y-4">
+      <section className="dash-panel dash-surface-1" data-testid="setups-near-miss-panel">
+        <header className="dash-panel__header">
+          <h2 className="dash-section-title">
+            Near-miss pipeline{closestRows.length > 0 ? ` (${closestRows.length})` : ""}
+          </h2>
+          <p className="dash-panel__subtitle">
+            Closest-to-valid symbols — not Tier A/B surfaced
+          </p>
+        </header>
+        {closestRows.length > 0 ? (
+          <SetupsClosestSymbolsSection rows={closestRows} />
+        ) : (
+          <div className="dash-empty-compact">
+            <EmptyStateWithReason
+              title="No near-miss symbols saved"
+              reason="This scan did not persist closest-to-valid rows in notes, or none qualified. When present, symbols appear here with distance-to-zone context."
+              data-testid="setups-near-miss-empty"
+            />
+          </div>
+        )}
+      </section>
 
       {breakdown && typeof breakdown === "object" && breakdown !== null ? (
-        <details
-          className="details-disclosure card p-5 text-sm"
-          style={{ color: "var(--text-secondary)" }}
-        >
-          <summary
-            className="cursor-pointer text-base font-medium outline-none"
-            style={{ color: "var(--text-primary)" }}
-          >
-            <span className="details-marker-closed mr-2 inline text-[var(--text-tertiary)]" aria-hidden>
-              ▸
-            </span>
-            <span className="details-marker-open mr-2 inline text-[var(--text-tertiary)]" aria-hidden>
-              ▾
-            </span>
+        <details className="tos-details-disclosure dash-surface-1 text-sm">
+          <summary className="tos-details-disclosure__summary">
             Liquidity &amp; session filter (technical detail)
           </summary>
           <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--text-tertiary)" }}>
@@ -64,7 +73,7 @@ export async function SetupsTailAsync() {
           <ul className="mt-3 space-y-1.5">
             {Object.entries(breakdown as Record<string, number>).map(([reason, count]) => (
               <li key={reason}>
-                <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+                <span className="font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
                   {count}×
                 </span>{" "}
                 {displayTradabilityBreakdownKey(reason)}
@@ -73,6 +82,6 @@ export async function SetupsTailAsync() {
           </ul>
         </details>
       ) : null}
-    </>
+    </div>
   );
 }

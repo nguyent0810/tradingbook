@@ -2,11 +2,11 @@ import Link from "next/link";
 
 export function SetupsPageHeader() {
   return (
-    <div className="setups-page-header">
+    <div className="tos-page-header setups-page-header">
       <div>
-        <h1 className="setups-page-header__title">Setups</h1>
-        <p className="setups-page-header__subtitle">
-          Breakout-pullback pipeline — surfaced candidates, diagnostics, and near-miss symbols.
+        <h1 className="tos-page-header__title setups-page-header__title">Setups pipeline</h1>
+        <p className="tos-page-header__subtitle setups-page-header__subtitle">
+          EOD scanner — surfaced candidates, near-miss context, and rejection diagnostics.
         </p>
       </div>
       <Link

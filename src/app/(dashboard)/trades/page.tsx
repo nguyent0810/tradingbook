@@ -1065,9 +1065,16 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     </svg>
   );
 
+  const openCount = trades.filter((t) => t.status === "OPEN").length;
+  const closedCount = trades.filter((t) => t.status === "CLOSED").length;
+
   return (
-    <div className="page-container animate-in space-y-6 pb-10">
-      <TradesPageHeader tradeCount={trades.length} />
+    <div className="page-container tos-trades dash-cockpit animate-in space-y-5 pb-10">
+      <TradesPageHeader
+        tradeCount={trades.length}
+        openCount={openCount}
+        closedCount={closedCount}
+      />
 
       <TradesFreshnessContext
         freshness={marketFreshness}
@@ -1077,9 +1084,8 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
 
       {sessionBriefing && hasOpenTrades && !compactReview ? (
         <div
-          className="card mt-4 border px-4 py-3"
+          className="tos-risk-panel dash-surface-1"
           data-testid="trades-session-briefing"
-          style={{ borderColor: "var(--border-color)" }}
         >
           <div
             className="text-[10px] font-semibold uppercase tracking-wide"
@@ -1107,11 +1113,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ) : null}
 
       {reviewQueueModel && hasOpenTrades ? (
-        <div
-          className="card mt-4 border px-4 py-3"
-          data-testid="trades-review-queue"
-          style={{ borderColor: "var(--border-color)" }}
-        >
+        <div className="tos-risk-panel dash-surface-1" data-testid="trades-review-queue">
           <div
             className="text-[10px] font-semibold uppercase tracking-wide"
             style={{ color: "var(--text-tertiary)" }}
@@ -1211,11 +1213,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ) : null}
 
       {bookOperatingContext && hasOpenTrades ? (
-        <div
-          className="card mt-4 border px-4 py-3"
-          data-testid="book-operating-context"
-          style={{ borderColor: "var(--border-color)" }}
-        >
+        <div className="tos-context-panel dash-surface-1" data-testid="book-operating-context">
           <div
             className="text-[10px] font-semibold uppercase tracking-wide"
             style={{ color: "var(--text-tertiary)" }}
@@ -1410,18 +1408,16 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ) : null}
 
       {alignmentAnalysis.showBanner ? (
-        <MarketDataAlignmentBanner
-          analysis={alignmentAnalysis}
-          mentionOpenPositionMarks={hasOpenTrades}
-        />
+        <div className="tos-risk-panel">
+          <MarketDataAlignmentBanner
+            analysis={alignmentAnalysis}
+            mentionOpenPositionMarks={hasOpenTrades}
+          />
+        </div>
       ) : null}
 
       {marks.barsLoadFailed && hasOpenTrades ? (
-        <div
-          role="status"
-          className="card mt-4 border px-4 py-3"
-          style={{ borderColor: "var(--border-color)" }}
-        >
+        <div role="status" className="tos-risk-panel dash-surface-1">
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             Latest closes could not be loaded. Open-position marks may be
             incomplete until bars load.
@@ -1471,10 +1467,10 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
             (imported EOD). P&amp;L uses the same numeric scale × quantity.
           </p>
           <div
-            className="table-container table-sticky trades-ledger-scroll mt-2"
+            className="table-container table-sticky trades-ledger-scroll tos-ledger-table-wrap"
             data-testid="trades-scroll-container"
           >
-          <table className="table min-w-[1840px]" data-testid="trades-table">
+          <table className="table min-w-[1840px] tos-ledger-table" data-testid="trades-table">
             <thead data-testid="trades-table-header">
               <tr>
                 <th className="ledger-sticky-symbol">Symbol</th>

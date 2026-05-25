@@ -58,16 +58,12 @@ export async function SetupsCandidatesAsync() {
       ) : null}
 
       {candidates.length === 0 ? (
-        <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
-              Surfaced candidates
-            </h2>
-            <p className="mt-0.5 text-xs font-medium tracking-wide text-[var(--text-tertiary)]">
-              Qualified setups — core scanner Tier A/B only
-            </p>
-          </div>
-          <div className="card p-0">
+        <section className="dash-panel dash-surface-1" data-testid="setups-candidates-panel">
+          <header className="dash-panel__header">
+            <h2 className="dash-section-title">Surfaced candidates</h2>
+            <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
+          </header>
+          <div className="dash-empty-compact">
             <EmptyStateWithReason
               title="No surfaced candidates on this scan"
               reason={
@@ -84,16 +80,14 @@ export async function SetupsCandidatesAsync() {
           </div>
         </section>
       ) : (
-        <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+        <section className="dash-panel dash-surface-1" data-testid="setups-candidates-panel">
+          <header className="dash-panel__header">
+            <h2 className="dash-section-title">
               Surfaced candidates ({candidates.length})
             </h2>
-            <p className="mt-0.5 text-xs font-medium tracking-wide text-[var(--text-tertiary)]">
-              Qualified setups — core scanner Tier A/B only
-            </p>
-          </div>
-          <div className="table-container">
+            <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
+          </header>
+          <div className="table-container tos-dense-table">
             <table className="table min-w-[760px]">
               <thead>
                 <tr>

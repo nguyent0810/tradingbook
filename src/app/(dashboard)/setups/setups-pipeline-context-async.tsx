@@ -25,14 +25,13 @@ export async function SetupsPipelineContextAsync() {
       base.notes?.benchmarkBackdrop?.delayedBackdrop === true,
   });
 
-  const scanDelayedBackdrop =
-    base.notes?.benchmarkBackdrop?.delayedBackdrop ?? null;
+  const nearMissCount = base.notes?.closestToValidSymbols?.length ?? 0;
 
   return (
     <SetupsPipelineContext
       freshness={freshness}
       latestScan={base.latest}
-      delayedBackdrop={scanDelayedBackdrop}
+      nearMissCount={nearMissCount}
     />
   );
 }
