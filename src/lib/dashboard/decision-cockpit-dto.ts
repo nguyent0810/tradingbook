@@ -21,7 +21,7 @@ import { healthFlagSummary } from "@/lib/setup-health/health-ui-copy";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
 
 /** How a cockpit field is sourced (UX spec §10). */
-export type DataProvenance = "real" | "derived" | "static_copy" | "gap";
+export type DataProvenance = "real" | "derived" | "static_copy" | "config" | "gap";
 
 /** Trader-facing verdict (NORMAL → TRADE in UI only). */
 export type VerdictUxLevel = "NO_TRADE" | "PROBE" | "TRADE";
@@ -101,6 +101,8 @@ export type DecisionCockpitInput = {
   watchlist: DecisionCockpitWatchSnapshot[];
   /** Sum of entryPrice × quantity for OPEN trades (VND). */
   openExposureVnd: number;
+  /** From `TRADING_ACCOUNT_EQUITY_VND` when set — not live broker balance. */
+  accountEquityVnd: number | null;
   portfolioRiskConfigured: boolean;
   /** When set, used for scan-age confidence (tests). */
   now?: Date;
@@ -208,6 +210,23 @@ export type RiskGuardrailDto = {
   rules: Array<{ text: string; provenance: DataProvenance }>;
 };
 
+/** DC-5 book-level headroom — not stop/R-multiple risk. */
+export type RiskBudgetHeadroomStatus = "configured" | "partial" | "unavailable";
+
+export type RiskBudgetHeadroomDto = {
+  status: RiskBudgetHeadroomStatus;
+  statusCopy: string;
+  equityVnd: ProvenanceField<number | null>;
+  openExposureVnd: ProvenanceField<number>;
+  maxBookVnd: ProvenanceField<number | null>;
+  remainingBookVnd: ProvenanceField<number | null>;
+  /** Upper bound of verdict allocation range as decimal (e.g. 0.7 for 70%). */
+  maxBookPercent: ProvenanceField<number | null>;
+  perTradeRiskGuidance: ProvenanceField<string>;
+  isOverMaxBook: boolean;
+  caveats: string[];
+};
+
 export type TomorrowPlanDto = {
   watchSymbols: ProvenanceField<string[]>;
   /** Set when watch list is empty — honest fallback copy (derived/static). */
@@ -242,6 +261,8 @@ export type DecisionCockpitDto = {
   /** Grouped pipeline counts + sample symbols (S5). */
   setupQualityLadder: SetupQualityLadderDto;
   risk: RiskGuardrailDto;
+  /** DC-5 book cap vs configured equity — no fabricated R/stop risk. */
+  riskBudgetHeadroom: RiskBudgetHeadroomDto;
   tomorrow: TomorrowPlanDto;
   /** Dashboard compact blockers (max 3); same source as `blockers`. */
   actionableDiagnostics: ActionableDiagnosticsDto;
@@ -424,6 +445,96 @@ function resolveDecision(
 
 function perTradeGuidanceForLevel(level: DailyTradingDecisionLevel): string {
   return level === "PROBE" ? "10–15% of equity" : level === "NORMAL" ? "10–20% of equity" : "None";
+}
+
+const RISK_BUDGET_CAVEATS = [
+  "Equity from TRADING_ACCOUNT_EQUITY_VND — not a live broker balance.",
+  "Open exposure is sum of entry × quantity on OPEN trades — not mark-to-market or stop-based risk.",
+  "Per-trade guidance is static copy — not R-multiple sizing from stops.",
+] as const;
+
+/**
+ * Parse upper bound of verdict max-book allocation string (e.g. "50-70%" → 0.7).
+ * Returns null when the string cannot be parsed.
+ */
+export function parseMaxBookFractionFromAllocation(allocation: string): number | null {
+  const range = allocation.match(/(\d+)\s*-\s*(\d+)%/);
+  if (range) return Number(range[2]) / 100;
+  const single = allocation.match(/(\d+)%/);
+  if (single) return Number(single[1]) / 100;
+  return null;
+}
+
+/**
+ * DC-5: book-level headroom from env equity + verdict cap + open notional only.
+ */
+export function buildRiskBudgetHeadroom(params: {
+  accountEquityVnd: number | null;
+  openExposureVnd: number;
+  maxBookAllocation: string;
+  perTradeGuidance: string;
+}): RiskBudgetHeadroomDto {
+  const { accountEquityVnd, openExposureVnd, maxBookAllocation, perTradeGuidance } = params;
+  const openField: ProvenanceField<number> = {
+    value: openExposureVnd,
+    provenance: "derived",
+  };
+  const perTradeField: ProvenanceField<string> = {
+    value: perTradeGuidance,
+    provenance: "static_copy",
+  };
+
+  if (accountEquityVnd == null || accountEquityVnd <= 0) {
+    return {
+      status: "unavailable",
+      statusCopy:
+        "Risk budget headroom not configured — set TRADING_ACCOUNT_EQUITY_VND to compare open notional to a book cap.",
+      equityVnd: { value: null, provenance: "gap" },
+      openExposureVnd: openField,
+      maxBookVnd: { value: null, provenance: "gap" },
+      remainingBookVnd: { value: null, provenance: "gap" },
+      maxBookPercent: { value: null, provenance: "gap" },
+      perTradeRiskGuidance: perTradeField,
+      isOverMaxBook: false,
+      caveats: [...RISK_BUDGET_CAVEATS],
+    };
+  }
+
+  const maxBookPercent = parseMaxBookFractionFromAllocation(maxBookAllocation);
+  if (maxBookPercent == null) {
+    return {
+      status: "partial",
+      statusCopy:
+        "Account equity is configured but verdict max-book allocation could not be parsed — caps stay qualitative.",
+      equityVnd: { value: accountEquityVnd, provenance: "config" },
+      openExposureVnd: openField,
+      maxBookVnd: { value: null, provenance: "gap" },
+      remainingBookVnd: { value: null, provenance: "gap" },
+      maxBookPercent: { value: null, provenance: "gap" },
+      perTradeRiskGuidance: perTradeField,
+      isOverMaxBook: false,
+      caveats: [...RISK_BUDGET_CAVEATS],
+    };
+  }
+
+  const maxBookVnd = Math.round(accountEquityVnd * maxBookPercent);
+  const remainingBookVnd = maxBookVnd - openExposureVnd;
+
+  return {
+    status: "configured",
+    statusCopy:
+      remainingBookVnd < 0
+        ? "Open notional exceeds parsed max-book cap — reduce exposure or raise cap only after review."
+        : "Book headroom uses configured equity and verdict max-book upper bound.",
+    equityVnd: { value: accountEquityVnd, provenance: "config" },
+    openExposureVnd: openField,
+    maxBookVnd: { value: maxBookVnd, provenance: "derived" },
+    remainingBookVnd: { value: remainingBookVnd, provenance: "derived" },
+    maxBookPercent: { value: maxBookPercent, provenance: "derived" },
+    perTradeRiskGuidance: perTradeField,
+    isOverMaxBook: remainingBookVnd < 0,
+    caveats: [...RISK_BUDGET_CAVEATS],
+  };
 }
 
 function stanceCopyForLevel(ux: VerdictUxLevel): string {
@@ -880,10 +991,18 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     gate1Resolution: gate1,
   };
 
+  const perTradeGuidance = perTradeGuidanceForLevel(decision.level);
+  const riskBudgetHeadroom = buildRiskBudgetHeadroom({
+    accountEquityVnd: input.accountEquityVnd,
+    openExposureVnd: input.openExposureVnd,
+    maxBookAllocation: decision.allocation,
+    perTradeGuidance,
+  });
+
   const risk: RiskGuardrailDto = {
     maxBookAllocation: { value: decision.allocation, provenance: "real" },
     perTradeGuidance: {
-      value: perTradeGuidanceForLevel(decision.level),
+      value: perTradeGuidance,
       provenance: "static_copy",
     },
     openExposureVnd: { value: input.openExposureVnd, provenance: "derived" },
@@ -891,14 +1010,15 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     rules: [
       { text: "No-chase when extended or extension_cap dominates.", provenance: "static_copy" },
       {
-        text: "Stop levels from scanner — not portfolio R-multiple enforcement.",
+        text: "Stop levels from scanner — not portfolio R-multiple enforcement on this panel.",
         provenance: "gap",
       },
       {
-        text: input.portfolioRiskConfigured
-          ? "Compare open notional to equity cap when configured."
-          : "Risk budget env not set — caps are qualitative.",
-        provenance: input.portfolioRiskConfigured ? "derived" : "gap",
+        text:
+          riskBudgetHeadroom.status === "configured"
+            ? "Book headroom compares open notional to parsed max-book cap (DC-5)."
+            : "Risk budget headroom unavailable until equity env and parseable cap.",
+        provenance: riskBudgetHeadroom.status === "configured" ? "derived" : "gap",
       },
     ],
   };
@@ -912,6 +1032,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     ladder: buildLadderRows(opportunity, input.surfacedCandidates),
     setupQualityLadder,
     risk,
+    riskBudgetHeadroom,
     tomorrow,
     actionableDiagnostics: {
       blockers,

@@ -43,6 +43,7 @@ describe("buildDashboardCockpitInput", () => {
       candidatesWithHealth: [],
       activeWatchItems: [],
       openExposureVnd: 1_000_000,
+      accountEquityVnd: null,
       portfolioRiskConfigured: false,
     });
 
@@ -110,6 +111,7 @@ describe("buildDashboardCockpitInput", () => {
       candidatesWithHealth: [],
       activeWatchItems: [],
       openExposureVnd: 0,
+      accountEquityVnd: null,
       portfolioRiskConfigured: false,
     });
 

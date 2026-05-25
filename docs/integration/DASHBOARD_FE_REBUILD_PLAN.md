@@ -74,6 +74,8 @@
 
 **S6 scope (production `945de00`):** Full Decision Cockpit IA reorder on `/dashboard` — five zones (status → decision → opportunity → execution → next-session); desktop grids; scan meta with freshness; performance demoted in execution zone; no DTO/query changes.
 
+**S7 scope (local):** DC-5 `riskBudgetHeadroom` DTO + exposure panel book headroom (env equity + open notional + parsed verdict cap); audit in S1 integration §13.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -125,6 +127,7 @@
 - [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
 - [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
 - [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
+- [ ] Decision Cockpit S7 DC-5 risk headroom — local (not pushed)
 
 ---
 
@@ -150,7 +153,7 @@
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm five zones top-to-bottom; desktop: status row, decision grid (verdict \| exposure, evidence below), opportunity \| ladder, execution block, tomorrow \| blockers; mobile stacks per DOM order; NO TRADE feels like capital preservation; blockers secondary to verdict/opportunity.
 
-**Remaining (S7+):** DC-5 risk budget headroom vs equity.
+**Remaining (post-S7):** Live broker equity and stop/R headroom — see S1 integration §13.
 
 ---
 
@@ -176,7 +179,7 @@
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm S2–S4 panels; **Setup quality ladder** shows all six stages (Tier A through Avoid) with real symbols or “None in latest scan data”; **Best Setups** compact empty when no surfaced rows (references Opportunity preview), full table when candidates exist; freshness, scan meta, momentum, watchlist unchanged.
 
-**Remaining (post-S6):** DC-5 risk budget headroom vs equity only — layout reorder shipped in `945de00`.
+**Remaining (post-S7):** Live broker equity and stop/R headroom — see S1 integration §13.
 
 ---
 
@@ -202,7 +205,7 @@
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence + exposure Gate 1 match + opportunity preview; scroll to plan row — Tomorrow’s Plan (watch/trigger/avoid/posture) and Actionable blockers (≤3 with meaning and real sample symbols when scan has rejections); freshness, scan meta, best setups, momentum, watchlist still present.
 
-**Remaining (post-S6):** DC-5 risk budget headroom vs equity only.
+**Remaining (post-S7):** Live broker equity and stop/R headroom — see S1 integration §13.
 
 ---
 

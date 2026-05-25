@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S6 on production (`945de00`) — full cockpit layout reorder deployed  
+**Status:** S1–S6 on production (`945de00`) · **S7 local** — DC-5 risk budget headroom (DTO + exposure panel)  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -54,8 +54,9 @@ Implemented in `src/lib/dashboard/map-dashboard-cockpit-input.ts` (mapper only; 
 | `freshness` | `freshness` | Already built |
 | `surfacedCandidates` | `candidatesWithHealth` (all, not only top 5) | Full list for opportunity/ladder |
 | `watchlist` | `activeWatchItems` | symbol, lifecycle, health, zones |
-| `openExposureVnd` | `currentExposure` | OPEN notional |
-| `portfolioRiskConfigured` | `isTradingRiskBudgetConfigured()` | env flag |
+| `openExposureVnd` | `currentExposure` | OPEN notional (Σ entry × qty, OPEN trades) |
+| `accountEquityVnd` | `parseTradingAccountEquityVnd()` | env `TRADING_ACCOUNT_EQUITY_VND` — not broker balance |
+| `portfolioRiskConfigured` | `isTradingRiskBudgetConfigured()` | true when equity env parses |
 
 **DTO output blocks** (no extra queries):
 
@@ -66,6 +67,7 @@ Implemented in `src/lib/dashboard/map-dashboard-cockpit-input.ts` (mapper only; 
 | Opportunity | `candidatesWithHealth` or `scanNotes.closestToValidSymbols` |
 | Ladder | same as opportunity |
 | Risk | decision + exposure |
+| Risk budget headroom (DC-5) | `accountEquityVnd` + `openExposureVnd` + verdict `allocation` |
 | Tomorrow | opportunity + watchlist + blockers |
 | Blockers | `scanNotes` rejection maps |
 
@@ -267,14 +269,45 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S6.
 
-### Remaining (S7+)
+## 13. S7 — DC-5 risk budget headroom audit + DTO (local)
 
-- [ ] Risk budget headroom API (DC-5)
+### Part A — Risk input audit
 
-### Caveats (unchanged)
+| Input | Source today | Classification | Used in DC-5 |
+|-------|----------------|----------------|--------------|
+| Account equity (VND) | `TRADING_ACCOUNT_EQUITY_VND` env via `parseTradingAccountEquityVnd()` | **env/config** | Yes — `equityVnd`, provenance `config` |
+| Open exposure (VND) | Dashboard `prisma.trade` OPEN rows: Σ `entryPrice × quantity` | **derived** (trade rows) | Yes — `openExposureVnd` |
+| Open positions | Same trade query | **real** persisted | Count implicit in exposure sum |
+| Position size | Per-trade `quantity` on `Trade` | **real** persisted | Not summed into headroom (notional only) |
+| Stop price / distance | `Trade.stopLoss` optional; scanner `stopLevel` on candidates | **real** / **gap** on dashboard | **Not used** — no R-multiple headroom |
+| Per-trade risk rule | `perTradeGuidanceForLevel()` static copy | **static_copy** | Shown, not math |
+| Max book allocation | `scanNotes.decision.allocation` or `computeDailyTradingDecision` | **real** / **derived** | Parsed % upper bound → `maxBookVnd` |
+| Portfolio risk flag | `isTradingRiskBudgetConfigured()` | **env/config** | Drives unavailable vs configured UI |
 
-- Parsed % vs equity only when env configured and verdict ≠ NO_TRADE — labeled qualitative / DC-5.
-- Opportunity preview max 5 candidates / 8 near-miss; ladder classifies **all** surfaced + closest rows (may exceed preview cap).
+**Gaps (unchanged):** Live broker equity, mark-to-market exposure, portfolio R from stops, server-side `computePositionSizing` on dashboard (exists in `position-sizing.ts` for trade entry UX only).
+
+### Part B — DTO
+
+- [x] `riskBudgetHeadroom` on `DecisionCockpitDto` — `buildRiskBudgetHeadroom()`
+- [x] Status: `configured` \| `partial` \| `unavailable`
+- [x] Fields: `equityVnd`, `openExposureVnd`, `maxBookVnd`, `remainingBookVnd`, `maxBookPercent`, `perTradeRiskGuidance`, `caveats`, `isOverMaxBook`
+- [x] Provenance per field; equity labeled **config**, not live balance
+
+### Part C — UI
+
+- [x] `DashboardExposurePanel` — headroom grid when `configured`; honest copy when `partial` / `unavailable`
+- [x] Testids: `dashboard-exposure-headroom`, `dashboard-exposure-headroom-unavailable`, `dashboard-exposure-headroom-partial`, `dashboard-exposure-remaining-headroom`, `dashboard-exposure-max-book-budget`
+- [x] Preserved: `dashboard-exposure-panel`, `dashboard-exposure-stance`, `dashboard-exposure-max-book`, `dashboard-exposure-per-trade`, `dashboard-exposure-gate1`, `dashboard-exposure-qualitative-hint`
+
+### Remaining (post-S7)
+
+- [ ] Live broker equity sync (DB/API) — would change equity provenance from `config` to `real`
+- [ ] Stop-based open risk / R headroom — needs reliable OPEN `stopLoss` + product rules
+
+### Caveats
+
+- Book headroom = parsed max-book % × configured equity − open **notional** (not stop risk).
+- Opportunity preview max 5 / near-miss 8 unchanged.
 
 ---
 

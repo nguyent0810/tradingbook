@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import {
   buildDecisionCockpitDto,
+  buildRiskBudgetHeadroom,
   computeConfidenceBand,
   mapDecisionLevelToUxVerdict,
+  parseMaxBookFractionFromAllocation,
   resolveBestSetupsPanelPresentation,
   resolveCanonicalGate1,
   resolveSetupLadderStage,
@@ -73,6 +75,7 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
     surfacedCandidates: [],
     watchlist: [],
     openExposureVnd: 0,
+    accountEquityVnd: null,
     portfolioRiskConfigured: false,
     now: new Date(Date.UTC(2026, 4, 25, 14, 0, 0)),
     ...overrides,
@@ -403,6 +406,96 @@ describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
     expect(p.mode).toBe("compact_empty");
     expect(p.emptyReason).toMatch(/Opportunity preview/i);
     expect(p.emptyReason).not.toMatch(/Gate 1 is PASS/i);
+  });
+});
+
+describe("buildRiskBudgetHeadroom (DC-5)", () => {
+  it("configured path: equity from config, derived max book and remaining headroom", () => {
+    const h = buildRiskBudgetHeadroom({
+      accountEquityVnd: 100_000_000,
+      openExposureVnd: 30_000_000,
+      maxBookAllocation: "50-70%",
+      perTradeGuidance: "10–20% of equity",
+    });
+    expect(h.status).toBe("configured");
+    expect(h.equityVnd.provenance).toBe("config");
+    expect(h.equityVnd.value).toBe(100_000_000);
+    expect(h.maxBookPercent.value).toBe(0.7);
+    expect(h.maxBookVnd.value).toBe(70_000_000);
+    expect(h.remainingBookVnd.value).toBe(40_000_000);
+    expect(h.isOverMaxBook).toBe(false);
+    expect(h.openExposureVnd.provenance).toBe("derived");
+  });
+
+  it("unavailable when equity missing", () => {
+    const h = buildRiskBudgetHeadroom({
+      accountEquityVnd: null,
+      openExposureVnd: 5_000_000,
+      maxBookAllocation: "50%",
+      perTradeGuidance: "None",
+    });
+    expect(h.status).toBe("unavailable");
+    expect(h.equityVnd.provenance).toBe("gap");
+    expect(h.maxBookVnd.value).toBeNull();
+    expect(h.statusCopy).toMatch(/not configured/i);
+  });
+
+  it("flags over max book when open exposure exceeds parsed cap", () => {
+    const h = buildRiskBudgetHeadroom({
+      accountEquityVnd: 100_000_000,
+      openExposureVnd: 60_000_000,
+      maxBookAllocation: "50%",
+      perTradeGuidance: "10–20% of equity",
+    });
+    expect(h.status).toBe("configured");
+    expect(h.maxBookVnd.value).toBe(50_000_000);
+    expect(h.remainingBookVnd.value).toBe(-10_000_000);
+    expect(h.isOverMaxBook).toBe(true);
+  });
+
+  it("partial when allocation cannot be parsed", () => {
+    const h = buildRiskBudgetHeadroom({
+      accountEquityVnd: 50_000_000,
+      openExposureVnd: 0,
+      maxBookAllocation: "TBD",
+      perTradeGuidance: "None",
+    });
+    expect(h.status).toBe("partial");
+    expect(h.equityVnd.provenance).toBe("config");
+    expect(h.maxBookVnd.value).toBeNull();
+  });
+
+  it("does not expose R-multiple or stop-based risk fields", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        accountEquityVnd: 100_000_000,
+        openExposureVnd: 10_000_000,
+        portfolioRiskConfigured: true,
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          decision: {
+            level: "NORMAL",
+            allocation: "50%",
+            explanation: "Test day.",
+          },
+        },
+        latestScan: {
+          ...baseInput().latestScan!,
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+        },
+      })
+    );
+    const serialized = JSON.stringify(dto.riskBudgetHeadroom);
+    expect(serialized).not.toMatch(/riskAtStop|rMultiple|riskBudgetVnd|perShareRisk/i);
+    expect(dto.riskBudgetHeadroom.status).toBe("configured");
+  });
+});
+
+describe("parseMaxBookFractionFromAllocation", () => {
+  it("parses range upper bound", () => {
+    expect(parseMaxBookFractionFromAllocation("20-40%")).toBe(0.4);
   });
 });
 

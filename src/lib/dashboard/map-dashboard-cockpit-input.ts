@@ -29,6 +29,7 @@ export type BuildDashboardCockpitInputParams = {
   candidatesWithHealth: SurfacedCandidateHealthView[];
   activeWatchItems: DashboardWatchItemForCockpit[];
   openExposureVnd: number;
+  accountEquityVnd: number | null;
   portfolioRiskConfigured: boolean;
   now?: Date;
 };
@@ -102,6 +103,7 @@ export function buildDashboardCockpitInput(
     surfacedCandidates: toCandidateSnapshots(params.candidatesWithHealth),
     watchlist: toWatchSnapshots(params.activeWatchItems),
     openExposureVnd: params.openExposureVnd,
+    accountEquityVnd: params.accountEquityVnd,
     portfolioRiskConfigured: params.portfolioRiskConfigured,
     now: params.now,
   };

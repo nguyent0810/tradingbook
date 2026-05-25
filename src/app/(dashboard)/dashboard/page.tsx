@@ -14,7 +14,10 @@ import {
   type SurfacedCandidateHealthView,
 } from "@/lib/setup-health";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
-import { isTradingRiskBudgetConfigured } from "@/lib/trading-account-risk-config";
+import {
+  isTradingRiskBudgetConfigured,
+  parseTradingAccountEquityVnd,
+} from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
@@ -44,13 +47,6 @@ export const metadata: Metadata = {
   title: "Dashboard — TradeLog",
   description: "Decision-first trading cockpit.",
 };
-
-function pctFromRangeText(input: string): number | null {
-  const m = input.match(/(\d+)\s*-\s*(\d+)%/);
-  if (m) return Number(m[2]) / 100;
-  const single = input.match(/(\d+)%/);
-  return single ? Number(single[1]) / 100 : null;
-}
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -166,6 +162,9 @@ export default async function DashboardPage() {
   }
   const latestCloseBySymbol = new Map(latestBars.map((b) => [b.symbolId, b.close]));
 
+  const accountEquityVnd = parseTradingAccountEquityVnd();
+  const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
+
   const cockpitDto = buildDecisionCockpitDto(
     buildDashboardCockpitInput({
       latestScan,
@@ -175,13 +174,12 @@ export default async function DashboardPage() {
       candidatesWithHealth,
       activeWatchItems,
       openExposureVnd: currentExposure,
-      portfolioRiskConfigured: isTradingRiskBudgetConfigured(),
+      accountEquityVnd,
+      portfolioRiskConfigured,
     })
   );
 
   const surfacedCount = latestScan?.candidateCountSurfaced ?? 0;
-  const maxPortfolioPct = pctFromRangeText(cockpitDto.verdict.allocation.value);
-  const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
   const bestSetupsPresentation = resolveBestSetupsPanelPresentation({
     setupRowCount: topSetups.length,
     opportunity: cockpitDto.opportunity,
@@ -238,7 +236,7 @@ export default async function DashboardPage() {
             <DashboardExposurePanel
               risk={cockpitDto.risk}
               verdict={cockpitDto.verdict}
-              maxPortfolioPct={maxPortfolioPct}
+              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
               portfolioRiskConfigured={portfolioRiskConfigured}
             />
           </div>

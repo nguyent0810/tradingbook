@@ -1231,6 +1231,34 @@ body {
   margin-top: var(--space-2);
 }
 
+.dash-exposure__headroom {
+  margin-top: var(--space-2);
+}
+
+.dash-exposure__pct {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+.dash-exposure__value--over {
+  color: var(--warning);
+}
+
+.dash-metric-grid--compact {
+  margin-top: var(--space-2);
+  gap: var(--space-2);
+}
+
+.dash-exposure__caveats {
+  margin: var(--space-2) 0 0;
+  padding-left: var(--space-4);
+  font-size: 0.625rem;
+  color: var(--text-tertiary);
+  list-style: disc;
+  line-height: var(--line-height-relaxed);
+}
+
 /* Setup quality ladder (S5) */
 .dash-ladder__stages {
   list-style: none;
