@@ -60,6 +60,8 @@
 
 **Decision Cockpit vNext (PROPOSED — not implemented):** [DASHBOARD_DECISION_COCKPIT_UX_SPEC.md](../design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md) · mockup `/design-preview/decision-cockpit` — verdict/evidence/opportunity/guardrail/tomorrow IA; production `/dashboard` unchanged until spec review.
 
+**Decision Cockpit DTO spike (lib only):** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md) · `buildDecisionCockpitDto` in `src/lib/dashboard/decision-cockpit-dto.ts` (11 unit tests); DC-1 scan Gate 1 canonical; no production `/dashboard` wiring yet.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
