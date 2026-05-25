@@ -68,6 +68,8 @@
 
 **S3 scope (`a9337ff`, production):** `DashboardExposurePanel` from `cockpitDto.risk` + `verdict`; `DashboardOpportunityPreview` from `cockpitDto.opportunity`; best setups table retained.
 
+**S4 scope (local):** `DashboardActionableBlockers` + `DashboardTomorrowPlan`; legacy diagnostics stack removed from `/dashboard`.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -116,6 +118,7 @@
 - [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` pushed & production deployed (`0e82e01` docs)
 - [x] Decision Cockpit S2 verdict + evidence — `857a761` pushed & production deployed
 - [x] Decision Cockpit S3 exposure + opportunity — `a9337ff` pushed & production deployed
+- [ ] Decision Cockpit S4 diagnostics + tomorrow — pending push
 
 ---
 

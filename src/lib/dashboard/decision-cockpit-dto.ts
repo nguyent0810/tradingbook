@@ -177,6 +177,8 @@ export type RiskGuardrailDto = {
 
 export type TomorrowPlanDto = {
   watchSymbols: ProvenanceField<string[]>;
+  /** Set when watch list is empty — honest fallback copy (derived/static). */
+  watchNote: ProvenanceField<string | null>;
   triggerLine: ProvenanceField<string>;
   avoidLine: ProvenanceField<string>;
   postureLine: ProvenanceField<string>;
@@ -185,10 +187,18 @@ export type TomorrowPlanDto = {
 export type ActionableBlockerDto = {
   severity: BlockerSeverity;
   title: string;
+  /** Plain-language meaning (trader copy mapped from scanner category). */
+  meaning: string;
   count: number;
   sampleSymbols: string[];
   waitFor: string;
   provenance: DataProvenance;
+};
+
+export type ActionableDiagnosticsDto = {
+  blockers: ActionableBlockerDto[];
+  maxShown: number;
+  emptyReason: string | null;
 };
 
 export type DecisionCockpitDto = {
@@ -198,9 +208,27 @@ export type DecisionCockpitDto = {
   ladder: LadderRowDto[];
   risk: RiskGuardrailDto;
   tomorrow: TomorrowPlanDto;
+  /** Dashboard compact blockers (max 3); same source as `blockers`. */
+  actionableDiagnostics: ActionableDiagnosticsDto;
   blockers: ActionableBlockerDto[];
   scanRunId: string | null;
 };
+
+/** Trader-facing severity group for dashboard blockers. */
+export function formatBlockerSeverity(severity: BlockerSeverity): string {
+  switch (severity) {
+    case "market_off":
+      return "Market off";
+    case "structure_broken":
+      return "Structure broken";
+    case "extension":
+      return "Extension / chase";
+    case "timing":
+      return "Timing / wait";
+    default:
+      return "Data / liquidity";
+  }
+}
 
 const EXTENSION_FLAGS: SetupHealthFlag[] = ["EXTENDED", "TOO_EXTENDED", "CHASE"];
 const EXTENSION_CATEGORIES = new Set(["extension_cap", "volume_ratio"]);
@@ -563,6 +591,7 @@ function buildActionableBlockers(
     blockers.push({
       severity: "market_off",
       title: "Gate 1 — market backdrop unfavorable",
+      meaning: "Index trend filter failed — new swing longs are off the table.",
       count: 0,
       sampleSymbols: [],
       waitFor: "VNINDEX regime to improve before new swing risk.",
@@ -575,6 +604,7 @@ function buildActionableBlockers(
     blockers.push({
       severity: classifyBlockerSeverity(category, gate1),
       title: rejectionBucketLabel(category),
+      meaning: guide.meaning,
       count,
       sampleSymbols: (scanNotes?.rejectionSymbolsByCategory?.[category] ?? []).slice(0, 3),
       waitFor: guide.waitFor,
@@ -633,8 +663,21 @@ function buildTomorrowPlan(
 
   const posture = `${ux.replace("_", " ")} · ${decision.allocation} max book`;
 
+  let watchNote: string | null = null;
+  if (watchSymbols.length === 0) {
+    if (opportunity.mode === "near_miss") {
+      watchNote = null;
+    } else if (opportunity.mode === "candidates") {
+      watchNote = "Focus on surfaced Tier A/B names above; add manual watches from Setups if needed.";
+    } else {
+      watchNote =
+        "No near-miss symbols surfaced in the latest scan; review /setups for full pipeline diagnostics.";
+    }
+  }
+
   return {
     watchSymbols: { value: watchSymbols.slice(0, 8), provenance: "derived" },
+    watchNote: { value: watchNote, provenance: watchNote ? "static_copy" : "derived" },
     triggerLine: { value: triggerParts.join(" "), provenance: "derived" },
     avoidLine: { value: avoidParts.join(" ") || "Follow verdict caps.", provenance: "derived" },
     postureLine: { value: posture, provenance: "derived" },
@@ -717,13 +760,25 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     ],
   };
 
+  const tomorrow = buildTomorrowPlan(ux, decision, opportunity, input.watchlist, blockers);
+
   return {
     verdict,
     evidence: buildEvidenceStack(gate1, input.latestScan, input.liveRegime, input.freshness),
     opportunity,
     ladder: buildLadderRows(opportunity, input.surfacedCandidates),
     risk,
-    tomorrow: buildTomorrowPlan(ux, decision, opportunity, input.watchlist, blockers),
+    tomorrow,
+    actionableDiagnostics: {
+      blockers,
+      maxShown: 3,
+      emptyReason:
+        blockers.length === 0
+          ? input.latestScan
+            ? "No Gate 2 rejection buckets in latest scan notes."
+            : "Run a daily scan to populate actionable blockers."
+          : null,
+    },
     blockers,
     scanRunId: input.latestScan?.id ?? null,
   };

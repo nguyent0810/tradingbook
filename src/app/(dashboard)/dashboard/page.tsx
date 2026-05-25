@@ -31,7 +31,8 @@ import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-me
 import { DashboardBestSetupsPanel } from "@/components/dashboard/dashboard-best-setups-panel";
 import { DashboardWatchlistPanel } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
-import { DashboardDiagnosticsStack } from "@/components/dashboard/dashboard-diagnostics-stack";
+import { DashboardActionableBlockers } from "@/components/dashboard/dashboard-actionable-blockers";
+import { DashboardTomorrowPlan } from "@/components/dashboard/dashboard-tomorrow-plan";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -161,10 +162,6 @@ export default async function DashboardPage() {
   }
   const latestCloseBySymbol = new Map(latestBars.map((b) => [b.symbolId, b.close]));
 
-  const rejectionBuckets = Object.entries(scanNotes?.topRejectionCategories ?? {})
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
   const cockpitDto = buildDecisionCockpitDto(
     buildDashboardCockpitInput({
       latestScan,
@@ -231,11 +228,10 @@ export default async function DashboardPage() {
         latestCloseBySymbol={latestCloseBySymbol}
       />
 
-      <DashboardDiagnosticsStack
-        rejectionBuckets={rejectionBuckets}
-        scanNotes={scanNotes}
-        latestScan={latestScan}
-      />
+      <div className="dash-cockpit__plan-row">
+        <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} />
+        <DashboardActionableBlockers diagnostics={cockpitDto.actionableDiagnostics} />
+      </div>
     </div>
   );
 }

@@ -223,6 +223,91 @@ describe("resolveSetupLadderStage", () => {
   });
 });
 
+describe("buildDecisionCockpitDto — tomorrow plan", () => {
+  it("zero surfaced + near-miss: watch symbols from closestToValidSymbols", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    expect(dto.tomorrow.watchSymbols.value).toContain("HPG");
+    expect(dto.tomorrow.watchNote.value).toBeNull();
+    expect(dto.tomorrow.triggerLine.value).toContain("HPG");
+  });
+
+  it("zero surfaced + no near-miss: honest watch note", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          closestToValidSymbols: [],
+          topRejectionCategories: { extension_cap: 5 },
+          rejectionSymbolsByCategory: { extension_cap: ["SSI"] },
+          recommendation: {
+            likelyBottleneck: "extension_cap",
+            summary: "",
+            note: "",
+          },
+        },
+      })
+    );
+    expect(dto.opportunity.mode).toBe("empty");
+    expect(dto.tomorrow.watchSymbols.value).toHaveLength(0);
+    expect(dto.tomorrow.watchNote.value).toContain("No near-miss symbols");
+    expect(dto.tomorrow.watchNote.value).toContain("/setups");
+  });
+
+  it("candidate day: watch includes surfaced symbol", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        latestScan: {
+          ...baseInput().latestScan!,
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+        },
+        surfacedCandidates: [
+          {
+            id: "c1",
+            symbolKey: "MWG",
+            quality: "A",
+            lifecycleSortLabel: "READY",
+            healthLevel: "HEALTHY",
+            healthScore: 80,
+            healthScoreLabel: "Strong",
+            healthFlags: [],
+            healthSummary: null,
+            reasons: [],
+            close: 10,
+            pullbackZoneLow: 9.5,
+            pullbackZoneHigh: 10.2,
+            stopLevel: 9,
+            rankScore: 1,
+          },
+        ],
+      })
+    );
+    expect(dto.tomorrow.watchSymbols.value).toContain("MWG");
+    expect(dto.tomorrow.triggerLine.value).toContain("MWG");
+    expect(dto.tomorrow.postureLine.value).toContain("TRADE");
+  });
+});
+
+describe("buildDecisionCockpitDto — actionable diagnostics", () => {
+  it("exposes actionableDiagnostics aligned with blockers (max 3)", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    expect(dto.actionableDiagnostics.maxShown).toBe(3);
+    expect(dto.actionableDiagnostics.blockers).toEqual(dto.blockers);
+    expect(dto.actionableDiagnostics.blockers.length).toBeLessThanOrEqual(3);
+    expect(dto.actionableDiagnostics.blockers[0]?.meaning.length).toBeGreaterThan(0);
+  });
+
+  it("uses only real sample symbols from scan notes", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    const pullback = dto.actionableDiagnostics.blockers.find((b) =>
+      b.title.toLowerCase().includes("pullback")
+    );
+    expect(pullback?.sampleSymbols).toEqual(["HPG", "FPT", "VNM"]);
+    expect(pullback?.sampleSymbols).not.toContain("FAKE");
+  });
+});
+
 describe("computeConfidenceBand", () => {
   it("returns low when benchmark missing", () => {
     const fresh = buildMarketFreshnessDto({

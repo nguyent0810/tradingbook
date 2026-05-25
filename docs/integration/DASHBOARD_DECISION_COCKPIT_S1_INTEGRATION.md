@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1 DONE (`3228344`) · S2 DONE (`857a761`) · S3 DONE (`a9337ff`) — exposure + opportunity preview on production  
+**Status:** S1–S3 on production · **S4 local** — actionable blockers + tomorrow plan (not pushed)  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -173,13 +173,38 @@ Render when `process.env.NODE_ENV === "development"` && `?cockpit=1`:
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S3.
 
-### Remaining (S4+)
+## 10. S4 — actionable diagnostics + tomorrow plan (local)
 
-- [ ] Tomorrow’s Plan block
-- [ ] Full setup quality ladder panel (DTO `ladder[]` exists, not rendered)
-- [ ] Diagnostics rewrite / demotion
+### Part A — Actionable blockers
+
+- [x] `DashboardActionableBlockers` replaces flat `DashboardDiagnosticsStack` on `/dashboard`
+- [x] Data: `cockpitDto.actionableDiagnostics` (= `blockers`, max 3, severity-sorted)
+- [x] Fields: severity label, title, **meaning**, count, real sample symbols (≤3), wait-for
+- [x] Preserved testids: `dashboard-diagnostics-panel`, `dashboard-diagnostics-stack`, `dashboard-diagnostics-empty`
+- [x] Link to `/setups` for full Gate 2 detail
+
+### Part B — Tomorrow’s plan
+
+- [x] `DashboardTomorrowPlan` from `cockpitDto.tomorrow`
+- [x] Watch / trigger / avoid / posture sections
+- [x] `watchNote` when no symbols (honest near-miss / setups copy — no fabrication)
+- [x] Testids: `dashboard-tomorrow-plan`, `dashboard-tomorrow-watch`, `dashboard-tomorrow-trigger`, `dashboard-tomorrow-avoid`, `dashboard-tomorrow-posture`
+
+### DTO
+
+- [x] `ActionableDiagnosticsDto`, `meaning` on blockers, `watchNote` on `TomorrowPlanDto`
+- [x] Tests: near-miss plan, empty near-miss plan, candidate day, blocker cap, real symbols only
+
+### Layout
+
+- [x] `dash-cockpit__plan-row` after watchlist (2-col on lg) — not full UX reorder
+
+### Remaining (S5+)
+
+- [ ] Full setup quality ladder panel (DTO `ladder[]`)
 - [ ] Risk budget headroom API (DC-5)
-- [ ] Full dashboard layout reorder per UX spec
+- [ ] Full cockpit layout reorder per UX spec
+- [ ] Demote/remove duplicate Best Setups vs opportunity preview (product decision)
 
 ### Caveats
 

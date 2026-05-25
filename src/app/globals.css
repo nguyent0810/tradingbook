@@ -1114,6 +1114,133 @@ body {
   margin-top: var(--space-2);
 }
 
+/* Tomorrow plan + actionable blockers (S4) */
+.dash-cockpit__plan-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+@media (min-width: 1024px) {
+  .dash-cockpit__plan-row {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.dash-tomorrow__grid {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.dash-tomorrow__grid dt {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-tertiary);
+}
+
+.dash-tomorrow__grid dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.dash-tomorrow__symbols {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dash-tomorrow__note {
+  font-style: normal;
+  color: var(--text-secondary);
+}
+
+.dash-tomorrow__link {
+  margin-top: var(--space-3);
+}
+
+.dash-actionable-blockers {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dash-actionable-blockers__item {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-primary);
+  border-left-width: 3px;
+}
+
+.dash-actionable-blockers__item--market_off {
+  border-left-color: var(--danger);
+}
+
+.dash-actionable-blockers__item--structure_broken {
+  border-left-color: var(--danger);
+}
+
+.dash-actionable-blockers__item--extension {
+  border-left-color: var(--warning);
+}
+
+.dash-actionable-blockers__item--timing {
+  border-left-color: var(--accent);
+}
+
+.dash-actionable-blockers__item--info {
+  border-left-color: var(--text-tertiary);
+}
+
+.dash-actionable-blockers__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.dash-actionable-blockers__severity {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-tertiary);
+}
+
+.dash-actionable-blockers__title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.dash-actionable-blockers__count {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.dash-actionable-blockers__meaning,
+.dash-actionable-blockers__wait,
+.dash-actionable-blockers__symbols {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
+}
+
+.dash-actionable-blockers__footer {
+  margin-top: var(--space-3);
+  font-size: var(--font-size-xs);
+}
+
 /* Exposure metrics */
 .dash-metric-grid {
   display: grid;
