@@ -20,6 +20,7 @@ import { loadOpenPositionMarks } from "@/lib/trades/position-health";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
+import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
 import { TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE } from "@/lib/trades/price-unit-guard";
 import {
@@ -1318,17 +1319,13 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
       ) : null}
 
       {dbLoadError ? (
-        <div
-          role="alert"
-          className="card mt-4 border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--border-primary)",
-            background: "var(--bg-secondary)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          {dbLoadError}
-        </div>
+        <ErrorStateWithEvidence
+          className="mt-4"
+          title="Partial trades data unavailable"
+          message={dbLoadError}
+          evidence="src/app/(dashboard)/trades/page.tsx · trade list and/or position marks load failed; ledger may be incomplete."
+          data-testid="trades-db-load-error"
+        />
       ) : null}
 
       <Suspense fallback={<TradeFiltersSkeleton />}>
