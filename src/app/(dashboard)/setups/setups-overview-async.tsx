@@ -10,6 +10,8 @@ import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
+import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { loadGate2BreakdownCached, loadSetupsBaseData } from "./setups-cached-data";
 import { buildDiagnosticsAccordionItems, dominantCategoryFromNotes, fmtRunDate } from "./setups-shared-helpers";
 
@@ -24,44 +26,19 @@ export async function SetupsOverviewAsync() {
     return (
       <>
         {dbBanner ? (
-          <div
-            role="alert"
-            className="card border px-4 py-3 text-sm"
-            style={{
-              borderColor: "var(--border-primary)",
-              background: "var(--bg-secondary)",
-              color: "var(--text-secondary)",
-            }}
-          >
-            {dbBanner}
-          </div>
+          <ErrorStateWithEvidence
+            title="Partial scanner data unavailable"
+            message={dbBanner}
+            evidence="src/app/(dashboard)/setups/setups-overview-async.tsx · loadSetupsBaseData"
+            data-testid="setups-overview-db-banner-no-run"
+          />
         ) : null}
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                <polyline points="16 7 22 7 22 13" />
-              </svg>
-            </div>
-            <div className="empty-state-title">No scanner runs yet</div>
-            <div className="empty-state-description">
-              Run{" "}
-              <code className="rounded bg-[var(--bg-secondary)] px-1 py-0.5 text-xs">
-                npx tsx scripts/run-daily-scanner.ts
-              </code>{" "}
-              after importing bars.
-            </div>
-          </div>
+        <div className="card p-0">
+          <EmptyStateWithReason
+            title="No scanner runs yet"
+            reason="Run npx tsx scripts/run-daily-scanner.ts after importing bars."
+            data-testid="setups-overview-no-scan-run"
+          />
         </div>
       </>
     );
@@ -110,17 +87,12 @@ export async function SetupsOverviewAsync() {
   return (
     <>
       {dbBanner ? (
-        <div
-          role="alert"
-          className="card border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--border-primary)",
-            background: "var(--bg-secondary)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          {dbBanner}
-        </div>
+        <ErrorStateWithEvidence
+          title="Partial scanner data unavailable"
+          message={dbBanner}
+          evidence="src/app/(dashboard)/setups/setups-overview-async.tsx · loadSetupsBaseData / loadGate2BreakdownCached"
+          data-testid="setups-overview-db-banner"
+        />
       ) : null}
 
       {marketAlignment.showBanner ? (
@@ -160,33 +132,12 @@ export async function SetupsOverviewAsync() {
       </section>
 
       {!base.expectedSession && accordionItems.length === 0 ? (
-        <div className="card">
-          <div className="empty-state">
-            <div className="empty-state-icon">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                <polyline points="16 7 22 7 22 13" />
-              </svg>
-            </div>
-            <div className="empty-state-title">Setup diagnostics unavailable</div>
-            <div className="empty-state-description">
-              Detailed rejection breakdown needs a latest benchmark session (e.g. VNINDEX bars) or saved scan notes.
-              Import index bars and run{" "}
-              <code className="rounded bg-[var(--bg-secondary)] px-1 py-0.5 text-xs">
-                npx tsx scripts/run-daily-scanner.ts
-              </code>
-              .
-            </div>
-          </div>
+        <div className="card p-0">
+          <EmptyStateWithReason
+            title="Setup diagnostics unavailable"
+            reason="Detailed rejection breakdown needs a latest benchmark session (e.g. VNINDEX bars) or saved scan notes. Import index bars and run npx tsx scripts/run-daily-scanner.ts."
+            data-testid="setups-overview-diagnostics-unavailable"
+          />
         </div>
       ) : null}
 

@@ -12,6 +12,8 @@ import {
   loadSetupPerfRowsCached,
   loadSurfacedCandidatesHealthCached,
 } from "./setups-cached-data";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
+import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import {
   fmtSetupPerfHint,
   fmtThousands,
@@ -47,17 +49,12 @@ export async function SetupsCandidatesAsync() {
   return (
     <>
       {perfBanner ? (
-        <div
-          role="alert"
-          className="card border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--border-primary)",
-            background: "var(--bg-secondary)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          {perfBanner}
-        </div>
+        <ErrorStateWithEvidence
+          title="Partial candidate data unavailable"
+          message={perfBanner}
+          evidence="src/app/(dashboard)/setups/setups-candidates-async.tsx · loadSurfacedCandidatesHealthCached / loadSetupPerfRowsCached"
+          data-testid="setups-candidates-partial-data"
+        />
       ) : null}
 
       {candidates.length === 0 ? (
@@ -70,28 +67,12 @@ export async function SetupsCandidatesAsync() {
               Qualified setups — core scanner Tier A/B only
             </p>
           </div>
-          <div className="card">
-            <div className="empty-state">
-              <div className="empty-state-icon">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                  <polyline points="16 7 22 7 22 13" />
-                </svg>
-              </div>
-              <div className="empty-state-title">No surfaced candidates</div>
-              <div className="empty-state-description">
-                No Tier A/B candidates surfaced on this run.
-              </div>
-            </div>
+          <div className="card p-0">
+            <EmptyStateWithReason
+              title="No surfaced candidates"
+              reason="No Tier A/B candidates surfaced on this run."
+              data-testid="setups-candidates-empty"
+            />
           </div>
         </section>
       ) : (
