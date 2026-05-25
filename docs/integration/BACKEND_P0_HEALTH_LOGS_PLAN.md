@@ -637,7 +637,39 @@ Confirm:
 4. **Failed reads:** keep silent catch for P0 or require throw + UI error (may need tiny caller change on `[id]/page.tsx`)?
 5. **`health_level` enum:** run DISTINCT audit query on prod/staging before enum mapping?
 
-**P0A–P0D:** implemented. **P0E:** not started.
+**P0A–P0D:** implemented and closed (see § Backend P0 Closure). **P0E:** **DEFER** (see closure table). **P1 DTO foundation:** implemented in `P1_FRESHNESS_LIFECYCLE_DTO_CONTRACT.md` — not wired into UI pages yet.
+
+---
+
+## Backend P0 Closure (2026-05-25)
+
+| Slice | Status | Commit | Production verified? | Notes |
+|-------|--------|--------|----------------------|-------|
+| P0A Prisma model | ✅ Complete | `ad1af84` | Yes (migrate deploy + deploy `c72a664`) | No-op migration `20260525120000`; table pre-existed |
+| P0B typed detail read | ✅ Complete | `8f6a0f7` | Yes (`8f6a0f7` deploy) | `loadTradeHealthLogsForDetailPage`; `[id]/page.tsx` only |
+| P0C typed checkpoint write | ✅ Complete | `dcfd6c4` | Yes (`c72a664` deploy) | `buildTradeHealthLogCreateData` + `tradeHealthLog.create` |
+| P0D true exit health | ✅ Complete | `d1de890` | Yes (`d1de890` deploy) | `resolveHealthLevelAtExitForTrade`; never copies entry |
+| P0D production smoke | ✅ Verified | — | Yes (Neon) | Trade `cmpkmn7vt000344sznauan3yn`: entry `HEALTHY`, exit `WARNING`, not copied |
+| P0E `/trades/page.tsx` batch SQL | **DEFER** | — | N/A | Maintainability-only; batch SQL works; does not block P0 correctness |
+
+### P0E decision: **DEFER**
+
+| Criterion | Assessment |
+|-----------|------------|
+| Correctness | Trades ledger batch reads still function; silent catch unchanged |
+| UI rebuild blocker? | No — P1 DTOs address freshness/lifecycle separately |
+| Risk | High (`DISTINCT ON`, weekly JSON agg) |
+| Trigger later | Typed batch helpers + parity tests when `/trades` page refactor is approved (P0E or Phase 2 slice) |
+
+### P0D smoke script
+
+| Item | Decision |
+|------|----------|
+| `scripts/p0d-exit-health-verification-smoke.ts` | **Committed** — requires `RUN_P0D_EXIT_HEALTH_SMOKE=1` + optional `SMOKE_DATABASE=production` |
+| Markers | `P0DEXIT`, `P0D_EXIT_HEALTH_SMOKE`, `notes.p0dExitHealthSmoke` |
+| Cleanup | Documented in script header; **do not auto-delete** — keep prod smoke row as audit evidence unless approved cleanup |
+
+**Backend P0:** **conditionally complete** — all P0A–P0D shipped; P0E explicitly deferred; failed-read loudness still optional (`06-backend-gaps.md` §1).
 
 ---
 

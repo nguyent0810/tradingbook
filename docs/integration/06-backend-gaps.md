@@ -6,17 +6,17 @@ Ordered by dependency. Items are **TRACED** from code/docs unless marked **NEEDS
 
 ## P0 — Contract and schema integrity
 
-### 1. Promote `trade_health_logs` to first-class Prisma model
+### 1. Promote `trade_health_logs` to first-class Prisma model — **DONE (P0A–P0C)**
 
 **Why:** Entire open-position review UX depends on raw SQL (`trades/page.tsx`, `trades/[id]/page.tsx`, `addTradeHealthCheckpoint`).
 
 **Done when:**
 
-- Model + typed queries exist
-- Migrations remain compatible
-- Failed reads return explicit errors to UI (not empty history)
+- Model + typed queries exist ✅ (`TradeHealthLog`, P0B read, P0C write)
+- Migrations remain compatible ✅
+- Failed reads return explicit errors to UI (not empty history) — **still optional** (silent catch on `[id]` remains)
 
-**Evidence:** `prisma/migrations/20260506120000_trade_health_logs/migration.sql` vs missing `schema.prisma` entry.
+**Evidence:** `BACKEND_P0_HEALTH_LOGS_PLAN.md` closure table. **Remaining:** P0E batch SQL on `trades/page.tsx` deferred; loud read failures optional.
 
 ---
 
@@ -31,31 +31,33 @@ Ordered by dependency. Items are **TRACED** from code/docs unless marked **NEEDS
 
 ---
 
-### 3. Fix `SetupOutcome.healthLevelAtExit` on close
+### 3. Fix `SetupOutcome.healthLevelAtExit` on close — **DONE (P0D)**
 
-**Why:** `writeSetupOutcomeFromTrade` copies `healthLevelAtEntry` (`trades.ts`).
+**Why:** `writeSetupOutcomeFromTrade` copied `healthLevelAtEntry` (`trades.ts`).
 
-**Done when:** Exit health captured from last checkpoint or explicit form field.
+**Done when:** Exit health captured from last checkpoint ✅ (`resolveHealthLevelAtExitForTrade`, prod smoke `WARNING` vs entry `HEALTHY`).
+
+**Note:** Historical `setup_outcomes` rows before P0D deploy are **not** backfilled.
 
 ---
 
 ## P1 — Data truth the UI already advertises
 
-### 4. Unified setup lifecycle API
+### 4. Unified setup lifecycle API — **FOUNDATION (P1, not wired)**
 
 **Why:** DB `SetupLifecycleStatus` vs computed `lifecycleSortLabel` diverge (`05-integration-mismatches.md` §3).
 
-**Done when:** Single server DTO field drives Dashboard + Setups + Watchlist.
+**Done when:** Single server DTO field drives Dashboard + Setups + Watchlist — **helpers only:** `src/lib/setup-lifecycle/setup-lifecycle-dto.ts` + `P1_FRESHNESS_LIFECYCLE_DTO_CONTRACT.md`. UI adoption deferred to Phase 2.
 
 ---
 
-### 5. Explicit market-data freshness DTO
+### 5. Explicit market-data freshness DTO — **FOUNDATION (P1, not wired)**
 
 **Why:** `fetchMarketSessionSnapshot` + alignment banners are computed in multiple pages.
 
-**Done when:** One loader returns `{ benchmarkDate, equityMaxDate, scanRunAt, delayedBackdrop, staleFlags[] }` consumed everywhere.
+**Done when:** One loader returns `{ benchmarkDate, equityMaxDate, scanRunAt, delayedBackdrop, staleFlags[] }` — **implemented:** `src/lib/market/market-freshness-dto.ts` (`fetchMarketFreshnessDto`). Page consumption deferred to Phase 2.
 
-**Evidence:** `market-session-snapshot.ts`, `market-data-alignment.ts`.
+**Evidence:** `market-session-snapshot.ts`, `market-data-alignment.ts`, `P1_FRESHNESS_LIFECYCLE_DTO_CONTRACT.md`.
 
 ---
 
