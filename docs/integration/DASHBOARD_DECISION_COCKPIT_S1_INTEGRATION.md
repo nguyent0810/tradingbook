@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** PLANNED (not started on production `/dashboard`)  
+**Status:** S1 DONE (`3228344`) · S2 DONE (`857a761` verdict + evidence on production)  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -130,18 +130,19 @@ Render when `process.env.NODE_ENV === "development"` && `?cockpit=1`:
 ## 7. S1 implementation checklist
 
 - [x] Mapper `buildDashboardCockpitInput` in `src/lib/dashboard/map-dashboard-cockpit-input.ts` + unit tests
-- [ ] Wire parallel `buildDecisionCockpitDto` in `dashboard/page.tsx` (Option A)
-- [ ] Optional: `data-testid="dashboard-cockpit-dto-ready"` empty marker in HTML comment for e2e (no visible UI)
-- [ ] Document prod comparison: log `cockpitDto.verdict.gate1Resolution.mismatch` once in staging
-- [ ] `npm run lint` · `npm test` · `npm run build`
-- [ ] Update this doc status → IN PROGRESS / DONE
-- [ ] Do **not** push until reviewed (same as Phase 2+3)
+- [x] Wire parallel `buildDecisionCockpitDto` in `dashboard/page.tsx` (`3228344`)
+- [x] `npm run lint` · `npm test` · `npm run build` — pushed `3228344`
 
 ---
 
-## 8. S2 preview (after S1 sign-off)
+## 8. S2 — verdict + evidence render (`857a761`)
 
-Replace hero row with Verdict + Evidence + Opportunity using DTO-driven components; demote performance/momentum/diagnostics per UX spec.
+- [x] `DashboardDecisionHero` from `cockpitDto.verdict` (TRADE not NORMAL in UI)
+- [x] `DashboardEvidenceStack` after hero row (chips + top 2 blockers)
+- [x] Production validation — [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S2
+- [ ] S3+ Opportunity / exposure alignment / layout demotion (not started)
+
+**Out of S2 (unchanged):** exposure, best setups, momentum, watchlist, diagnostics data paths.
 
 ---
 

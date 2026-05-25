@@ -58,11 +58,13 @@
 
 **Trading OS v2 cockpit (2026-05-25, `/dashboard` only):** `DashboardMarketStatusBar`, `DashboardDecisionHero`, `DashboardExposurePanel`, `DashboardPerformancePanel` (analytics sparkline, no chart lib), `DashboardScanMetaStrip`, `DashboardBestSetupsPanel`, `DashboardWatchlistPanel`, `DashboardDiagnosticsStack`. Preserved testids: `dashboard-freshness-ok`, `dashboard-freshness-stale`, `dashboard-scan-meta`, `dashboard-best-setups-empty`, `dashboard-watchlist-empty`, `dashboard-diagnostics-empty`, `dashboard-db-load-error`.
 
-**Decision Cockpit vNext (PROPOSED — not implemented):** [DASHBOARD_DECISION_COCKPIT_UX_SPEC.md](../design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md) · mockup `/design-preview/decision-cockpit` — verdict/evidence/opportunity/guardrail/tomorrow IA; production `/dashboard` unchanged until spec review.
+**Decision Cockpit UX spec:** [DASHBOARD_DECISION_COCKPIT_UX_SPEC.md](../design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md) · mockup `/design-preview/decision-cockpit`
 
-**Decision Cockpit DTO spike (lib only):** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md) · `buildDecisionCockpitDto` in `src/lib/dashboard/decision-cockpit-dto.ts` (11 unit tests); DC-1 scan Gate 1 canonical; no production `/dashboard` wiring yet.
+**Decision Cockpit stack:** `37d9839` spec · `596e792` DTO · `9743847` S1 mapper · `3228344` S1 parallel compute · `857a761` **S2 verdict + evidence render** (production)
 
-**Decision Cockpit S1 (planned):** [DASHBOARD_DECISION_COCKPIT_S1_INTEGRATION.md](./DASHBOARD_DECISION_COCKPIT_S1_INTEGRATION.md) · `buildDashboardCockpitInput` mapper + tests; parallel DTO on `/dashboard` not wired yet.
+**S1/S2 integration:** [DASHBOARD_DECISION_COCKPIT_S1_INTEGRATION.md](./DASHBOARD_DECISION_COCKPIT_S1_INTEGRATION.md) · [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
+
+**S2 scope on `/dashboard`:** `DashboardDecisionHero` + `DashboardEvidenceStack` from `cockpitDto`; exposure / best setups / momentum / watchlist / diagnostics unchanged (legacy `decision` + `regime.level` on exposure — caveat when Gate 1 mismatch).
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -110,6 +112,34 @@
 - [x] Trades page (Slice 3) — `0634571` pushed & production deployed
 - [x] Trading OS v2 dashboard cockpit — `81922d6` pushed & production deployed
 - [x] Trading OS v2 `/setups` pipeline + `/trades` ledger — `614d53b` pushed & production deployed (`0e82e01` docs)
+- [x] Decision Cockpit S2 verdict + evidence — `857a761` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S2 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `857a761` | `feat(dashboard): render Decision Cockpit verdict and evidence` — 4 files only |
+| Prior stack on `main` | `3228344` S1 · `9743847` mapper · `596e792` DTO · `37d9839` spec | Pushed before S2 |
+| Push to `main` | `857a761` | `3228344..857a761` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `857a761`, `2026-05-25T08:26:12Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| No mock metrics | **Yes** | No `confidencePercent`, breadth %, or NEUTRAL in components |
+| Verdict hero | Deployed | `dashboard-decision-hero` — `Today's verdict`, uxLevel **NO TRADE** / **PROBE** / **TRADE** |
+| Capital preservation | Deployed | `dashboard-verdict-preservation` when NO_TRADE (amber hero) |
+| Confidence qualitative | Deployed | `dashboard-verdict-confidence` — High / Medium / Low only |
+| Gate 1 canonical (scan) | Deployed | `dashboard-verdict-gate1` — `gate1Resolution.canonical` (scan when present) |
+| Gate 1 live (mismatch only) | Deployed | `dashboard-verdict-gate1-live` when scan ≠ live regime |
+| Evidence stack | Deployed | `dashboard-evidence-stack`, `dashboard-evidence-chips`, `dashboard-evidence-chip-*` |
+| Top blocker chips | Deployed | `dashboard-evidence-blocker-chip` (max 2 from `cockpitDto.blockers`) |
+| Layout insert | One section | Evidence between hero row and scan meta row; other panels unchanged |
+| Freshness / exposure / setups panels | Unchanged | `dashboard-freshness-ok`, exposure panel, best setups, momentum, watchlist, diagnostics testids preserved |
+| Exposure caveat (known) | Deferred S3+ | Exposure still uses legacy `decision` from `regime.level` fallback — may disagree with DTO verdict when Gate 1 mismatch |
+| Backend / contracts | Unchanged | No Prisma/cron/actions in `857a761` |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm **Today's verdict** (not legacy “Today's action” only), NO TRADE preservation line when applicable, evidence chips (Gate 1, Tier A/B, surfaced, aligned), live Gate 1 chip only if mismatch, exposure/best setups/momentum/watchlist/diagnostics still below.
 
 ---
 
