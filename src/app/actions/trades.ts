@@ -18,6 +18,7 @@ import {
   reviewOutcomeFromFormData,
   serializeTradeHealthReviewPayloadForDb,
 } from "@/lib/trades/review-outcome";
+import { buildTradeHealthLogCreateData } from "@/lib/trades/trade-health-logs";
 import { fetchLatestCloseByTradeSymbols } from "@/lib/trades/unrealized-from-close";
 import {
   detectTradePriceUnitMismatch,
@@ -524,18 +525,17 @@ export async function addTradeHealthCheckpoint(tradeId: string, formData: FormDa
     reviewOutcomeFromFormData(formData)
   );
 
-  await prisma.$executeRawUnsafe(
-    `INSERT INTO trade_health_logs
-      (trade_id, checked_at, health_level, health_score, price_vs_zone, structure_status, recommended_action, review_checklist)
-     VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7::jsonb)`,
-    trade.id,
-    healthLevelRaw,
-    healthScore,
-    priceVsZone,
-    structureStatus,
-    recommendedAction,
-    reviewPayloadJson
-  );
+  await prisma.tradeHealthLog.create({
+    data: buildTradeHealthLogCreateData({
+      tradeId: trade.id,
+      healthLevel: healthLevelRaw as SetupHealthLevel,
+      healthScore,
+      priceVsZone,
+      structureStatus,
+      recommendedAction,
+      reviewPayloadJson,
+    }),
+  });
 
   revalidatePath(`/trades/${trade.id}`);
   revalidatePath("/trades");

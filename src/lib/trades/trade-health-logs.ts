@@ -1,4 +1,8 @@
-import type { PrismaClient } from "@/generated/prisma/client";
+import {
+  SetupHealthLevel,
+  type Prisma,
+  type PrismaClient,
+} from "@/generated/prisma/client";
 import type { EodReviewChecklistState } from "@/lib/trades/trade-health-review-checklist";
 import {
   parseHealthReviewLogPayload,
@@ -23,6 +27,36 @@ const HEALTH_LEVELS = new Set<TradeHealthLevel>([
   "AT_RISK",
   "DEAD",
 ]);
+
+export type TradeHealthLogCreateParams = {
+  tradeId: string;
+  healthLevel: SetupHealthLevel;
+  healthScore: number | null;
+  priceVsZone: string | null;
+  structureStatus: string | null;
+  recommendedAction: string | null;
+  reviewPayloadJson: string | null;
+};
+
+/** Maps validated checkpoint fields to `tradeHealthLog.create` data (omits `id`, `checkedAt`). */
+export function buildTradeHealthLogCreateData(
+  input: TradeHealthLogCreateParams
+): Prisma.TradeHealthLogUncheckedCreateInput {
+  const reviewChecklist: Prisma.InputJsonValue | undefined =
+    input.reviewPayloadJson != null
+      ? (JSON.parse(input.reviewPayloadJson) as Prisma.InputJsonValue)
+      : undefined;
+
+  return {
+    tradeId: input.tradeId,
+    healthLevel: input.healthLevel,
+    healthScore: input.healthScore,
+    priceVsZone: input.priceVsZone,
+    structureStatus: input.structureStatus,
+    recommendedAction: input.recommendedAction,
+    reviewChecklist,
+  };
+}
 
 /** Coerce DB / Prisma enum values to the detail-page health level union. */
 export function normalizeTradeHealthLevel(
