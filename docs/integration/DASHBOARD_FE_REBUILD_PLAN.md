@@ -176,7 +176,7 @@
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm S2–S4 panels; **Setup quality ladder** shows all six stages (Tier A through Avoid) with real symbols or “None in latest scan data”; **Best Setups** compact empty when no surfaced rows (references Opportunity preview), full table when candidates exist; freshness, scan meta, momentum, watchlist unchanged.
 
-**Remaining (S6+):** DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec.
+**Remaining (post-S6):** DC-5 risk budget headroom vs equity only — layout reorder shipped in `945de00`.
 
 ---
 
@@ -202,7 +202,7 @@
 
 **Logged-in smoke:** Sign in → `/dashboard` → confirm verdict + evidence + exposure Gate 1 match + opportunity preview; scroll to plan row — Tomorrow’s Plan (watch/trigger/avoid/posture) and Actionable blockers (≤3 with meaning and real sample symbols when scan has rejections); freshness, scan meta, best setups, momentum, watchlist still present.
 
-**Remaining (S6+):** DC-5 risk budget headroom vs equity, full cockpit layout reorder per UX spec. S5 adds grouped ladder + Best Setups compact empty (see S5 scope).
+**Remaining (post-S6):** DC-5 risk budget headroom vs equity only.
 
 ---
 
