@@ -1,21 +1,31 @@
-import type { Gate1ScanLevel } from "@/generated/prisma/client";
+import type { Gate1ScanLevel, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  isSmokeDailyScanRunNotes,
+  isSmokeSetupCandidateRow,
+} from "@/lib/scanner/production-smoke-markers";
 
-async function fetchLatestDailyScanRun() {
-  return prisma.dailyScanRun.findFirst({
+const LATEST_SCAN_LOOKBACK = 30;
+
+const scanRunInclude = {
+  candidates: {
+    include: { symbol: { select: { symbol: true } } },
+    orderBy: [{ rankScore: "desc" }, { symbolId: "asc" }],
+  },
+} satisfies Prisma.DailyScanRunInclude;
+
+export type LatestScanWithCandidates = Prisma.DailyScanRunGetPayload<{
+  include: typeof scanRunInclude;
+}>;
+
+async function fetchLatestDailyScanRun(): Promise<LatestScanWithCandidates | null> {
+  const recentRuns = await prisma.dailyScanRun.findMany({
     orderBy: { runAt: "desc" },
-    include: {
-      candidates: {
-        include: { symbol: { select: { symbol: true } } },
-        orderBy: [{ rankScore: "desc" }, { symbolId: "asc" }],
-      },
-    },
+    take: LATEST_SCAN_LOOKBACK,
+    include: scanRunInclude,
   });
+  return recentRuns.find((r) => !isSmokeDailyScanRunNotes(r.notes)) ?? null;
 }
-
-export type LatestScanWithCandidates = NonNullable<
-  Awaited<ReturnType<typeof fetchLatestDailyScanRun>>
->;
 
 export async function getLatestDailyScanRun(): Promise<LatestScanWithCandidates | null> {
   return fetchLatestDailyScanRun();
@@ -27,10 +37,18 @@ export type SetupCandidateRow = LatestScanWithCandidates["candidates"][number] &
 
 export function toCandidateRows(run: LatestScanWithCandidates | null): SetupCandidateRow[] {
   if (!run) return [];
-  return run.candidates.map((c) => ({
-    ...c,
-    symbolKey: c.symbol.symbol,
-  }));
+  return run.candidates
+    .filter(
+      (c) =>
+        !isSmokeSetupCandidateRow({
+          symbol: c.symbol.symbol,
+          reasons: c.reasons,
+        })
+    )
+    .map((c) => ({
+      ...c,
+      symbolKey: c.symbol.symbol,
+    }));
 }
 
 export function gate1Label(level: Gate1ScanLevel): string {
