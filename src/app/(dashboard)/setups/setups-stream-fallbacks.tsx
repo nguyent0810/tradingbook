@@ -1,3 +1,12 @@
+export function SetupsPipelineContextFallback() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="skeleton h-16 w-full rounded-lg" />
+      <div className="skeleton h-20 w-full rounded-lg" />
+    </div>
+  );
+}
+
 export function SetupsTopFallback() {
   return (
     <div className="space-y-6" aria-busy="true">

@@ -8,8 +8,6 @@ import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { buildSetupsInsightCopy } from "@/lib/scanner/setups-trader-copy";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
-import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
-import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { loadGate2BreakdownCached, loadSetupsBaseData } from "./setups-cached-data";
@@ -36,7 +34,7 @@ export async function SetupsOverviewAsync() {
         <div className="card p-0">
           <EmptyStateWithReason
             title="No scanner runs yet"
-            reason="Run npx tsx scripts/run-daily-scanner.ts after importing bars."
+            reason="No daily scan run in the database yet. Production uses the GitHub Actions “Production bar import” workflow (import + scan); locally run npx tsx scripts/run-daily-scanner.ts after bars are imported."
             data-testid="setups-overview-no-scan-run"
           />
         </div>
@@ -51,12 +49,6 @@ export async function SetupsOverviewAsync() {
       .join(" ") || null;
 
   const { latest, notes } = base;
-
-  const marketAlignment = analyzeMarketDataAlignment({
-    benchmarkSessionDate: base.expectedSession,
-    latestEquityBarSessionDate: base.latestEquityBarSession,
-    latestScanRunAt: latest.runAt,
-  });
 
   const dominantCategoryKey =
     (breakdown[0]?.categoryKey as string | undefined) ??
@@ -93,10 +85,6 @@ export async function SetupsOverviewAsync() {
           evidence="src/app/(dashboard)/setups/setups-overview-async.tsx · loadSetupsBaseData / loadGate2BreakdownCached"
           data-testid="setups-overview-db-banner"
         />
-      ) : null}
-
-      {marketAlignment.showBanner ? (
-        <MarketDataAlignmentBanner analysis={marketAlignment} />
       ) : null}
 
       {tradingDecision ? <SetupsTodaysActionBlock decision={tradingDecision} /> : null}

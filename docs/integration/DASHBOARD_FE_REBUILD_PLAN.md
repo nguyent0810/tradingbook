@@ -56,14 +56,15 @@
 | **Error** | `ErrorStateWithEvidence` (keep) |
 | **Mobile** | Stack cockpit columns; horizontal scroll tables |
 
-### `/setups` — **Slice 2** `PENDING`
+### `/setups` — **Slice 2** `DONE` (see commit after `f5b7eea`)
 
 | | |
 |--|--|
 | **User goal** | Full pipeline table, perf + near-miss panels |
 | **Data** | `setups-cached-data.ts` loaders, Suspense segments |
 | **Problems** | Skeleton-only fallbacks; lifecycle DB vs computed merge unclear in UI |
-| **Reuse** | Suspense boundaries, cached loaders, freshness DTO in overview |
+| **Reuse** | Suspense boundaries, cached loaders, `SetupsPipelineContext` (P1 DTO + scan meta) |
+| **Implemented** | `SetupsPipelineContextAsync`, `SetupsPageHeader`, improved empty states, removed duplicate alignment banner from overview |
 
 ### `/trades` — **Slice 3+** `PENDING` (defer monolith split)
 
@@ -95,8 +96,27 @@ Stale `setupCandidateId` guard; health timeline UX.
 - [x] `DashboardPageHeader`
 - [x] Cockpit grid + improved `loading.tsx`
 - [x] `EmptyStateWithReason` on Best Setups / Watchlist / Diagnostics
-- [x] Dashboard Slice 1 committed
-- [ ] Setups page (Slice 2)
+- [x] Dashboard Slice 1 committed (`f5b7eea`) — pushed & production deployed
+- [x] Setups page (Slice 2) — in progress / next commit
+
+---
+
+## Production validation — Dashboard Slice 1 (2026-05-25)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Push to `main` | `f5b7eea` | `39c4dd5..f5b7eea` |
+| Vercel Production deploy | **Ready** | SHA `f5b7eea`, `2026-05-25T06:44:31Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` |
+| `/dashboard` auth | Redirects to `/login` | Expected — session required |
+| Market data aligned (data) | **Yes** | `npm run ops:verify-bar-import`: VNINDEX/equity **2026-05-25**, `delayedBackdrop: false` |
+| Latest scan id (data) | **`cmpku2jyq000004l42cv873wq`** or newer | Same probe / GHA run #26386350438 |
+| 0 best setups UX | `EmptyStateWithReason` + link to `/setups` | `data-testid="dashboard-best-setups-empty"` in `f5b7eea` |
+| Diagnostics | Gate 2 rejection accordion when notes present | Unchanged loader; shows when `topRejectionCategories` populated |
+| Log Trade | `DashboardPageHeader` → `/trades/new` | `f5b7eea` |
+| Mobile | Cockpit grid stacks; tables scroll horizontally | `dashboard-cockpit-grid` + `table-container` |
+
+**Logged-in smoke:** Sign in at `/login`, then confirm `dashboard-freshness-ok`, `dashboard-scan-meta`, and empty Best Setups copy on production.
 
 ---
 

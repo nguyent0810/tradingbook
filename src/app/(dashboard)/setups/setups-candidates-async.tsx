@@ -5,7 +5,7 @@ import Link from "next/link";
 import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health-strip";
 import { SetupsCandidatePositionSizing } from "@/components/setups-candidate-position-sizing";
 import { ScanQuality } from "@/generated/prisma/client";
-import { displayScanQualityTier } from "@/lib/trading-display-labels";
+import { displayGate1ScanLevel, displayScanQualityTier } from "@/lib/trading-display-labels";
 import { toCandidateRows } from "@/lib/scanner/setups-queries";
 import {
   loadSetupsBaseData,
@@ -69,10 +69,18 @@ export async function SetupsCandidatesAsync() {
           </div>
           <div className="card p-0">
             <EmptyStateWithReason
-              title="No surfaced candidates"
-              reason="No Tier A/B candidates surfaced on this run."
+              title="No surfaced candidates on this scan"
+              reason={
+                base.latest.candidateCountSurfaced === 0
+                  ? `Latest run ${base.latest.id.slice(0, 12)}… completed with Gate 1 ${displayGate1ScanLevel(String(base.latest.gate1Level))} and ${base.latest.symbolCountAfterTradability} symbols passing tradability — none met Tier A/B surfacing rules. Use Market & setup insight and rejection diagnostics above, or closest-to-valid symbols below.`
+                  : "No Tier A/B candidates in this scan run."
+              }
               data-testid="setups-candidates-empty"
-            />
+            >
+              <Link href="/dashboard" className="btn btn-secondary text-xs">
+                Back to Dashboard
+              </Link>
+            </EmptyStateWithReason>
           </div>
         </section>
       ) : (
