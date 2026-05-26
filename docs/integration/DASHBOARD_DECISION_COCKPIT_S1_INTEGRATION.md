@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S8 on production (`4e5d876`) · **S8.1 local** — strict bento contract + density pass
+**Status:** S1–S8.1 on production (`9725135`) — strict bento contract + density pass deployed
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -352,7 +352,7 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 ---
 
-## 15. S8.1 — strict bento layout contract (local)
+## 15. S8.1 — strict bento layout contract (production)
 
 ### Desktop rows (contract)
 
@@ -372,6 +372,17 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - [x] Blockers remain compact and collapsed by default
 - [x] Best setups empty state stays compact and non-duplicative
 - [x] CSS bento row min-heights / max-heights to reduce uneven sprawl
+
+### Production validation (2026-05-26)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `9725135` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Strict bento rows | Deployed on `/dashboard` |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S8.1.
 
 ### Validation (local)
 

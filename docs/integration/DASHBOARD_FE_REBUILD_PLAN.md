@@ -78,7 +78,7 @@
 
 **S8 scope (production `4e5d876`):** Action-first IA — verdict + compact evidence \| What next; opportunity \| visual ladder; risk \| best setups; secondary momentum/watchlist/blockers; progressive disclosure.
 
-**S8.1 scope (local):** Strict Bento v9 contract — balanced row heights, capped opportunity (max 3 + “more”), compact ladder+risk side card, momentum/blockers capped to 3, low-priority row compression.
+**S8.1 scope (production `9725135`):** Strict Bento v9 contract — balanced row heights, capped opportunity (max 3 + “more”), compact ladder+risk side card, momentum/blockers capped to 3, low-priority row compression.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -133,7 +133,30 @@
 - [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
 - [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
 - [x] Decision Cockpit S8 action-first layout — `4e5d876` pushed & production deployed
-- [ ] Decision Cockpit S8.1 strict bento layout — local (not pushed)
+- [x] Decision Cockpit S8.1 strict bento layout — `9725135` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S8.1 (2026-05-26)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `9725135` | `feat(dashboard): tighten Decision Cockpit bento layout` — 8 files |
+| Push to `main` | `9725135` | `2324176..9725135` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `9725135`, `2026-05-26T01:39:51Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Row 1 status strip | Deployed | Compact freshness + scan meta |
+| Row 2 primary decision | Deployed | Balanced verdict \| What next above the fold |
+| Row 3 opportunity+risk | Deployed | Opportunity capped to 3 + “more”; ladder + risk compact side |
+| Row 4 secondary support | Deployed | Momentum top 3 \| compact blockers top 3 |
+| Row 5 low priority | Deployed | Best setups \| watchlist+performance compact |
+| Backend / contracts | Unchanged | No Prisma/cron/scanner/import/API/Server Action changes |
+| Tests (local pre-push) | **290/290** | `npm run lint`, `npm test`, `npm run build` passed |
+
+**Logged-in smoke checklist:** Sign in → `/dashboard` and confirm first screen shows status, verdict, what next, and opportunity/risk without long card sprawl; opportunity rows capped; right column balanced; ladder+risk compact; evidence secondary; mobile order preserved.
+
+**Before/after visual verdict (layout):** S8.1 improves bento rhythm and reduces uneven card sprawl by enforcing capped rows and compact secondary blocks.
 
 ---
 
