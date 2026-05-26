@@ -74,7 +74,7 @@
 
 **S6 scope (production `945de00`):** Full Decision Cockpit IA reorder on `/dashboard` — five zones (status → decision → opportunity → execution → next-session); desktop grids; scan meta with freshness; performance demoted in execution zone; no DTO/query changes.
 
-**S7 scope (local):** DC-5 `riskBudgetHeadroom` DTO + exposure panel book headroom (env equity + open notional + parsed verdict cap); audit in S1 integration §13.
+**S7 scope (production `744df69`):** DC-5 `riskBudgetHeadroom` DTO + exposure panel book headroom (env equity + open notional + parsed verdict cap); audit in S1 integration §13.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -127,7 +127,34 @@
 - [x] Decision Cockpit S4 diagnostics + tomorrow — `bcbad8e` pushed & production deployed
 - [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
 - [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
-- [ ] Decision Cockpit S7 DC-5 risk headroom — local (not pushed)
+- [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S7 / DC-5 (2026-05-26)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `744df69` | `feat(dashboard): add Decision Cockpit risk budget headroom` — 9 files only |
+| Push to `main` | `744df69` | `b8c2fa8..744df69` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `744df69`, `2026-05-26T01:07:28Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| `riskBudgetHeadroom` DTO | Deployed | `buildRiskBudgetHeadroom()` — book notional only, no R/stop math |
+| Exposure — configured | When env + parseable cap | `dashboard-exposure-headroom` — equity (config), max book, open notional, remaining |
+| Exposure — partial | Equity set, bad allocation string | `dashboard-exposure-headroom-partial` |
+| Exposure — unavailable | No `TRADING_ACCOUNT_EQUITY_VND` | `dashboard-exposure-headroom-unavailable` + `dashboard-exposure-qualitative-hint` |
+| Provenance | Honest | Equity `config` — caveats state not live broker balance |
+| No fake R/stop headroom | Yes | DTO has no `riskAtStop` / R-multiple fields; panel caveats explicit |
+| S1–S6 cockpit | Unchanged | Five zones, verdict, evidence, opportunity, ladder, execution, next-session |
+| Backend / contracts | Unchanged | No Prisma/cron/scanner/import/API/Server Action changes |
+| Tests (local pre-push) | **290/290** | +6 DC-5 tests in `decision-cockpit-dto.test.ts` |
+
+**Logged-in smoke:** Sign in → `/dashboard` → confirm five zones; **Risk guardrail** shows headroom grid when Vercel `TRADING_ACCOUNT_EQUITY_VND` is set and verdict allocation parses, otherwise partial/unavailable copy; no live-broker equity implied; no stop/R headroom; all other cockpit panels unchanged.
+
+**Remaining (post-cockpit):** Live broker equity sync; stop-based / R headroom — see S1 integration §13.
+
+**Cockpit scope:** S1–S7 production-safe dashboard Decision Cockpit is **complete** for current contracts.
 
 ---
 

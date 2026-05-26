@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S6 on production (`945de00`) · **S7 local** — DC-5 risk budget headroom (DTO + exposure panel)  
+**Status:** S1–S7 on production (`744df69`) — Decision Cockpit complete for current production-safe scope  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -269,7 +269,7 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S6.
 
-## 13. S7 — DC-5 risk budget headroom audit + DTO (local)
+## 13. S7 — DC-5 risk budget headroom audit + DTO (production)
 
 ### Part A — Risk input audit
 
@@ -299,7 +299,18 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - [x] Testids: `dashboard-exposure-headroom`, `dashboard-exposure-headroom-unavailable`, `dashboard-exposure-headroom-partial`, `dashboard-exposure-remaining-headroom`, `dashboard-exposure-max-book-budget`
 - [x] Preserved: `dashboard-exposure-panel`, `dashboard-exposure-stance`, `dashboard-exposure-max-book`, `dashboard-exposure-per-trade`, `dashboard-exposure-gate1`, `dashboard-exposure-qualitative-hint`
 
-### Remaining (post-S7)
+### Production validation (2026-05-26)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `744df69` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| DC-5 headroom on exposure panel | Deployed |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S7 / DC-5.
+
+### Remaining (post-cockpit)
 
 - [ ] Live broker equity sync (DB/API) — would change equity provenance from `config` to `real`
 - [ ] Stop-based open risk / R headroom — needs reliable OPEN `stopLoss` + product rules
