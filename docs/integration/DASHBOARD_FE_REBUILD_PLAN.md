@@ -80,6 +80,8 @@
 
 **S8.1 scope (production `9725135`):** Strict Bento v9 contract — balanced row heights, capped opportunity (max 3 + “more”), compact ladder+risk side card, momentum/blockers capped to 3, low-priority row compression.
 
+**S8.2 scope (local):** Three major unified panels (Command, Opportunity Board, Secondary Intelligence) with strict bento composition, balanced card heights, and collapsed detail defaults.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -134,6 +136,7 @@
 - [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
 - [x] Decision Cockpit S8 action-first layout — `4e5d876` pushed & production deployed
 - [x] Decision Cockpit S8.1 strict bento layout — `9725135` pushed & production deployed
+- [ ] Decision Cockpit S8.2 strict command layout — local (not pushed)
 
 ---
 

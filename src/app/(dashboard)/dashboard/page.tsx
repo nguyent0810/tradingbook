@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
-import { MomentumWatchSection } from "@/components/momentum-watch-section";
 import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
 import {
   getLatestDailyScanRun,
@@ -27,19 +26,10 @@ import {
 } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
-import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
-import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
-import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
-import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
-import { DashboardOpportunityPreview } from "@/components/dashboard/dashboard-opportunity-preview";
-import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
-import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
-import { DashboardBestSetupsPanel } from "@/components/dashboard/dashboard-best-setups-panel";
-import { DashboardSetupQualityLadder } from "@/components/dashboard/dashboard-setup-quality-ladder";
-import { DashboardWatchlistPanel } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
-import { DashboardActionableBlockers } from "@/components/dashboard/dashboard-actionable-blockers";
-import { DashboardTomorrowPlan } from "@/components/dashboard/dashboard-tomorrow-plan";
+import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
+import { DashboardOpportunityBoard } from "@/components/dashboard/dashboard-opportunity-board";
+import { DashboardSecondaryIntelligence } from "@/components/dashboard/dashboard-secondary-intelligence";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -195,8 +185,6 @@ export default async function DashboardPage() {
       : null,
   });
 
-  const verdictUx = cockpitDto.verdict.uxLevel.value;
-
   return (
     <div className="page-container dash-cockpit dash-cockpit--action-first animate-in pb-10">
       <DashboardPageHeader />
@@ -210,97 +198,34 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      {/* 1. Top strip — freshness + scan meta */}
-      <div
-        className="dash-cockpit__zone dash-cockpit__zone--status"
-        data-testid="dashboard-cockpit-zone-status"
-      >
-        <DashboardMarketStatusBar freshness={freshness} />
-        <DashboardScanMetaStrip
-          latestScan={latestScan}
-          delayedBackdrop={scanDelayedBackdrop}
-        />
-      </div>
+      <DashboardCommandPanel
+        freshness={freshness}
+        latestScan={latestScan}
+        scanDelayedBackdrop={scanDelayedBackdrop}
+        verdict={cockpitDto.verdict}
+        surfacedCount={surfacedCount}
+        tomorrow={cockpitDto.tomorrow}
+        evidence={cockpitDto.evidence}
+        blockers={cockpitDto.blockers}
+      />
 
-      {/* 2. Primary action — verdict + compact evidence | What next */}
-      <section
-        className={`dash-cockpit__zone dash-cockpit__zone--decision${verdictUx === "NO_TRADE" ? " dash-cockpit__zone--no-trade" : ""}`}
-        data-testid="dashboard-cockpit-zone-decision"
-        aria-label="Today's decision and next actions"
-      >
-        <div className="dash-cockpit__action-row">
-          <div className="dash-cockpit__action-verdict">
-            <DashboardDecisionHero
-              verdict={cockpitDto.verdict}
-              surfacedCount={surfacedCount}
-              compact
-            />
-            <DashboardEvidenceCompact
-              chips={cockpitDto.evidence}
-              blockers={cockpitDto.blockers}
-            />
-          </div>
-          <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} promoted />
-        </div>
-      </section>
+      <DashboardOpportunityBoard
+        opportunity={cockpitDto.opportunity}
+        ladder={cockpitDto.setupQualityLadder}
+        risk={cockpitDto.risk}
+        verdict={cockpitDto.verdict}
+        riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
+        portfolioRiskConfigured={portfolioRiskConfigured}
+      />
 
-      {/* 3. Opportunity row */}
-      <section
-        className="dash-cockpit__zone dash-cockpit__zone--opportunity"
-        data-testid="dashboard-cockpit-zone-opportunity"
-        aria-label="Opportunity pipeline"
-      >
-        <div className="dash-cockpit__bento-row dash-cockpit__bento-row--opportunity-risk">
-          <DashboardOpportunityPreview opportunity={cockpitDto.opportunity} />
-          <div className="dash-cockpit__opportunity-side">
-            <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
-            <DashboardExposurePanel
-              risk={cockpitDto.risk}
-              verdict={cockpitDto.verdict}
-              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-              portfolioRiskConfigured={portfolioRiskConfigured}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Secondary decision support */}
-      <section
-        className="dash-cockpit__zone dash-cockpit__zone--execution"
-        data-testid="dashboard-cockpit-zone-execution"
-        aria-label="Secondary decision support"
-      >
-        <div className="dash-cockpit__bento-row dash-cockpit__bento-row--secondary-support">
-          <MomentumWatchSection />
-          <DashboardActionableBlockers
-            diagnostics={cockpitDto.actionableDiagnostics}
-            compact
-          />
-        </div>
-      </section>
-
-      {/* 5. Low priority */}
-      <section
-        className="dash-cockpit__zone dash-cockpit__zone--secondary"
-        data-testid="dashboard-cockpit-zone-next-session"
-        aria-label="Low priority context"
-      >
-        <div className="dash-cockpit__bento-row dash-cockpit__bento-row--low-priority">
-          <DashboardBestSetupsPanel
-            topSetups={topSetups}
-            presentation={bestSetupsPresentation}
-          />
-          <div className="dash-cockpit__low-priority-side">
-            <DashboardWatchlistPanel
-              items={activeWatchItems}
-              latestCloseBySymbol={latestCloseBySymbol}
-            />
-            <div className="dash-cockpit__performance-slot">
-              <DashboardPerformancePanel trades={trades} />
-            </div>
-          </div>
-        </div>
-      </section>
+      <DashboardSecondaryIntelligence
+        diagnostics={cockpitDto.actionableDiagnostics}
+        topSetups={topSetups}
+        bestSetupsPresentation={bestSetupsPresentation}
+        watchItems={activeWatchItems}
+        latestCloseBySymbol={latestCloseBySymbol}
+        trades={trades}
+      />
     </div>
   );
 }

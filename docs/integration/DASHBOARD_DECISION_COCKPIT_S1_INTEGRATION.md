@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S8.1 on production (`9725135`) — strict bento contract + density pass deployed
+**Status:** S1–S8.1 on production (`9725135`) · **S8.2 local** — strict command-panel composition
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -391,6 +391,31 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - [x] `npm run build`
 - [x] Logged-out production `/dashboard` → `/login` (307)
 - [ ] Logged-in screenshot pass pending manual sign-in (before/after visual judgment)
+
+---
+
+## 16. S8.2 — strict command-panel layout (local)
+
+### Major panels (desktop)
+
+1. **Command Panel** — status strip + verdict/what-next + evidence footer
+2. **Opportunity Board** — opportunity (max 3 rows) + ladder/risk side
+3. **Secondary Intelligence** — momentum/blockers + best setups/watchlist+performance
+
+### Composition constraints applied
+
+- [x] Row composition moved to 3 unified shells (not many separate cards)
+- [x] Opportunity rows capped to 3 + `+N more in Setups`
+- [x] Momentum capped to top 3 without awkward internal scroll
+- [x] Risk caveats collapsed by default
+- [x] Evidence remains chips + collapsed “Why this verdict?”
+- [x] Best setups empty stays compact
+- [x] Added card variants for density rhythm: `card--hero`, `card--compact`, `card--dense`, `card--strip`, `card--table`
+
+### Before/after note
+
+- **Before (S8.1):** better order, but still card-by-card sprawl and uneven visual rhythm.
+- **After (S8.2 local):** unified command/opportunity/secondary panel composition with balanced rows and reduced empty-space artifacts.
 
 ---
 
