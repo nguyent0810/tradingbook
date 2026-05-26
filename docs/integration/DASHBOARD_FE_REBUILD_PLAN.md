@@ -76,7 +76,7 @@
 
 **S7 scope (production `744df69`):** DC-5 `riskBudgetHeadroom` DTO + exposure panel book headroom (env equity + open notional + parsed verdict cap); audit in S1 integration §13.
 
-**S8 scope (local):** Action-first IA — verdict + compact evidence \| What next; opportunity \| visual ladder; risk \| best setups; secondary momentum/watchlist/blockers; progressive disclosure.
+**S8 scope (production `4e5d876`):** Action-first IA — verdict + compact evidence \| What next; opportunity \| visual ladder; risk \| best setups; secondary momentum/watchlist/blockers; progressive disclosure.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -130,7 +130,36 @@
 - [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
 - [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
 - [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
-- [ ] Decision Cockpit S8 action-first layout — local (not pushed)
+- [x] Decision Cockpit S8 action-first layout — `4e5d876` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S8 (2026-05-26)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `4e5d876` | `feat(dashboard): optimize Decision Cockpit information order` — 11 files |
+| Push to `main` | `4e5d876` | `01a4904..4e5d876` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `4e5d876`, `2026-05-26T01:28:13Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| DashboardEvidenceStack on `/dashboard` | Not used | `DashboardEvidenceCompact` replaces it in page layout (legacy component retained in repo) |
+| IA order (S8) | Deployed | Status → primary action (verdict + What next) → opportunity → risk/execution → secondary |
+| Tomorrow’s Plan prominence | Improved | `What next` now beside verdict in primary row |
+| Evidence prominence | Demoted | Hint chips + `Why this verdict?` details, `dashboard-evidence-*` testids preserved |
+| Ladder visual clarity | Improved | `dashboard-ladder-distribution` + micro-bars per stage |
+| Blockers compactness | Improved | Compact expandable rows in secondary zone |
+| Risk/headroom honesty | Preserved | DC-5 panel still config/partial/unavailable; no fake stop/R headroom |
+| Backend / contracts | Unchanged | No Prisma/cron/scanner/import/API/Server Action changes |
+| Tests (local pre-push) | **290/290** | `npm run lint`, `npm test`, `npm run build` passed |
+
+**Logged-in smoke:** Sign in → `/dashboard` → first screen answers “trade or not?” and “what next?” with verdict + promoted What next; evidence chips are readable and details disclosure works; opportunity + ladder visible early; risk/headroom honest; best setups, momentum, watchlist, blockers, performance render; mobile order matches S8 stack.
+
+**Remaining polish caveats:** Potential future UX polish on hint-chip density and details styling; functional behavior is production-safe.
+
+**Remaining (post-cockpit):** Live broker equity sync; stop-based / R headroom — see S1 integration §13.
+
+**Cockpit scope:** S1–S8 production-safe dashboard Decision Cockpit is **complete** for current contracts.
 
 ---
 

@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S7 on production (`744df69`) · **S8 local** — action-first layout + progressive disclosure  
+**Status:** S1–S8 on production (`4e5d876`) — action-first layout + progressive disclosure deployed
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -320,7 +320,7 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - Book headroom = parsed max-book % × configured equity − open **notional** (not stop risk).
 - Opportunity preview max 5 / near-miss 8 unchanged.
 
-## 14. S8 — action-first layout (local)
+## 14. S8 — action-first layout (production)
 
 ### IA (top → bottom)
 
@@ -338,6 +338,17 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 - [x] Ladder distribution bar + micro-bars (`dashboard-ladder-distribution`)
 - [x] Blockers compact with expandable rows (`compact` on `DashboardActionableBlockers`)
 - [x] Shorter Best Setups empty copy (no repeat of opportunity/tomorrow)
+
+### Production validation (2026-05-26)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `4e5d876` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Action-first IA | Deployed on `/dashboard` |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S8.
 
 ---
 
