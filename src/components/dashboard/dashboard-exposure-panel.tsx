@@ -154,19 +154,22 @@ export function DashboardExposurePanel({
         </dl>
       ) : null}
 
-      <ul className="dash-exposure__rules">
-        {risk.rules.slice(0, 2).map((rule) => (
-          <li key={rule.text}>{rule.text}</li>
-        ))}
-      </ul>
-      <ul className="dash-exposure__caveats">
-        {headroom.caveats.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-      </ul>
-      <p className="dash-exposure__footnote">
-        Open notional = entry × quantity on OPEN trades — not mark-to-market.
-      </p>
+      <details className="dash-exposure__details text-xs">
+        <summary>Risk caveats</summary>
+        <ul className="dash-exposure__rules">
+          {risk.rules.slice(0, 2).map((rule) => (
+            <li key={rule.text}>{rule.text}</li>
+          ))}
+        </ul>
+        <ul className="dash-exposure__caveats">
+          {headroom.caveats.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <p className="dash-exposure__footnote">
+          Open notional = entry × quantity on OPEN trades — not mark-to-market.
+        </p>
+      </details>
     </section>
   );
 }

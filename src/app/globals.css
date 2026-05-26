@@ -2553,3 +2553,151 @@ body {
   color: var(--text-tertiary);
   font-weight: 500;
 }
+
+/* ===== Decision Cockpit S8.1 strict bento overrides ===== */
+.dash-cockpit--action-first {
+  max-width: 1500px;
+  margin-inline: auto;
+  gap: var(--space-3);
+}
+
+.dash-cockpit__bento-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+@media (min-width: 1024px) {
+  .dash-cockpit__bento-row--opportunity-risk,
+  .dash-cockpit__bento-row--secondary-support,
+  .dash-cockpit__bento-row--low-priority {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.dash-cockpit__action-row > * {
+  min-height: 20rem;
+}
+
+.dash-cockpit__bento-row--opportunity-risk > * {
+  min-height: 20.5rem;
+}
+
+.dash-cockpit__bento-row--secondary-support > *,
+.dash-cockpit__bento-row--low-priority > * {
+  min-height: 17rem;
+}
+
+@media (max-width: 1023px) {
+  .dash-cockpit__action-row > *,
+  .dash-cockpit__bento-row--opportunity-risk > *,
+  .dash-cockpit__bento-row--secondary-support > *,
+  .dash-cockpit__bento-row--low-priority > * {
+    min-height: 0;
+  }
+}
+
+.dash-cockpit__opportunity-side,
+.dash-cockpit__low-priority-side {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.dash-opportunity {
+  margin-top: 0;
+}
+
+.dash-opportunity__list {
+  gap: var(--space-2);
+}
+
+.dash-opportunity__row {
+  padding: var(--space-2) var(--space-3);
+}
+
+.dash-opportunity__summary,
+.dash-opportunity__hint {
+  margin-top: var(--space-1);
+  line-height: var(--line-height-snug);
+}
+
+.dash-opportunity__line-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dash-opportunity__row-actions {
+  margin-top: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.dash-opportunity__details summary {
+  cursor: pointer;
+  color: var(--accent-text);
+}
+
+.dash-opportunity__more {
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--border-primary);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+}
+
+.dash-ladder__stage {
+  padding: var(--space-2) var(--space-3);
+}
+
+.dash-ladder__micro-bar {
+  height: 2px;
+  margin: 0.2rem 0;
+}
+
+.dash-ladder__symbols,
+.dash-ladder__empty-stage {
+  margin-top: var(--space-1);
+}
+
+.dash-exposure__details {
+  margin-top: var(--space-2);
+}
+
+.dash-exposure__details summary {
+  cursor: pointer;
+  color: var(--accent-text);
+  font-weight: 600;
+  list-style: none;
+}
+
+.dash-exposure__details summary::-webkit-details-marker {
+  display: none;
+}
+
+.dash-exposure__rules,
+.dash-exposure__caveats {
+  margin-top: var(--space-2);
+}
+
+.dash-momentum {
+  min-height: 17rem;
+}
+
+.dash-momentum .table-container {
+  max-height: 14.5rem;
+  overflow: auto;
+}
+
+.dash-cockpit__zone--secondary [data-testid="dashboard-watchlist-panel"] .table-container,
+.dash-cockpit__zone--secondary [data-testid="dashboard-best-setups-panel"] .table-container {
+  max-height: 18rem;
+  overflow: auto;
+}
+
+.dash-cockpit__zone--secondary [data-testid="dashboard-diagnostics-panel"] {
+  min-height: 17rem;
+}

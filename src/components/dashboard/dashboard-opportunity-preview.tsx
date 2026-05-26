@@ -56,13 +56,20 @@ function NearMissRow({ row }: { row: OpportunityNearMissDto }) {
         <span className="dash-opportunity__badge">{formatLadderStage(row.ladderStage)}</span>
         {dist ? <span className="dash-opportunity__meta tabular-nums">{dist}</span> : null}
       </div>
-      <p className="dash-opportunity__wait">
+      <p className="dash-opportunity__summary dash-opportunity__line-clamp">
         {rejectionBucketLabel(row.terminalCategory)} — {row.waitFor}
       </p>
-      <p className="dash-opportunity__hint">{row.actionHint}</p>
-      <Link href="/setups" className="dash-opportunity__action text-xs font-medium">
-        Full pipeline →
-      </Link>
+      <p className="dash-opportunity__hint dash-opportunity__line-clamp">{row.actionHint}</p>
+      <details className="dash-opportunity__details text-xs">
+        <summary>Details</summary>
+        <p className="mt-1">
+          Wait-for: {row.waitFor}
+          {dist ? ` · ${dist}` : ""}
+        </p>
+        <Link href="/setups" className="dash-opportunity__action font-medium">
+          Full pipeline →
+        </Link>
+      </details>
     </li>
   );
 }
@@ -76,21 +83,37 @@ function CandidateRow({ row }: { row: OpportunityCandidateDto }) {
         <span className="dash-opportunity__badge">{formatLadderStage(row.ladderStage)}</span>
       </div>
       {row.healthSummary ? (
-        <p className="dash-opportunity__summary">{row.healthSummary}</p>
+        <p className="dash-opportunity__summary dash-opportunity__line-clamp">{row.healthSummary}</p>
       ) : null}
       {row.primaryReasons.length > 0 ? (
-        <ul className="dash-opportunity__reasons">
-          {row.primaryReasons.map((line, i) => (
-            <li key={i}>{line}</li>
-          ))}
-        </ul>
+        <p className="dash-opportunity__hint dash-opportunity__line-clamp">{row.primaryReasons[0]}</p>
       ) : null}
-      {candidateAction(row)}
+      <div className="dash-opportunity__row-actions">
+        {candidateAction(row)}
+        {(row.primaryReasons.length > 1 || row.healthSummary) ? (
+          <details className="dash-opportunity__details text-xs">
+            <summary>Details</summary>
+            {row.healthSummary ? <p className="mt-1">{row.healthSummary}</p> : null}
+            {row.primaryReasons.length > 0 ? (
+              <ul className="dash-opportunity__reasons">
+                {row.primaryReasons.map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </details>
+        ) : null}
+      </div>
     </li>
   );
 }
 
 export function DashboardOpportunityPreview({ opportunity }: DashboardOpportunityPreviewProps) {
+  const visibleCandidateRows = opportunity.candidates.slice(0, 3);
+  const hiddenCandidateCount = Math.max(0, opportunity.candidates.length - visibleCandidateRows.length);
+  const visibleNearMissRows = opportunity.nearMiss.slice(0, 3);
+  const hiddenNearMissCount = Math.max(0, opportunity.nearMiss.length - visibleNearMissRows.length);
+
   return (
     <section
       className="dash-opportunity dash-panel dash-surface-1"
@@ -108,17 +131,33 @@ export function DashboardOpportunityPreview({ opportunity }: DashboardOpportunit
 
       {opportunity.mode === "candidates" ? (
         <ul className="dash-opportunity__list" data-testid="dashboard-opportunity-candidates">
-          {opportunity.candidates.map((c) => (
+          {visibleCandidateRows.map((c) => (
             <CandidateRow key={c.candidateId} row={c} />
           ))}
+          {hiddenCandidateCount > 0 ? (
+            <li className="dash-opportunity__more text-xs" data-testid="dashboard-opportunity-more">
+              +{hiddenCandidateCount} more in{" "}
+              <Link href="/setups" className="dash-opportunity__action font-medium">
+                Setups
+              </Link>
+            </li>
+          ) : null}
         </ul>
       ) : null}
 
       {opportunity.mode === "near_miss" ? (
         <ul className="dash-opportunity__list" data-testid="dashboard-opportunity-near-miss">
-          {opportunity.nearMiss.map((row) => (
+          {visibleNearMissRows.map((row) => (
             <NearMissRow key={row.symbol} row={row} />
           ))}
+          {hiddenNearMissCount > 0 ? (
+            <li className="dash-opportunity__more text-xs" data-testid="dashboard-opportunity-more">
+              +{hiddenNearMissCount} more in{" "}
+              <Link href="/setups" className="dash-opportunity__action font-medium">
+                Setups
+              </Link>
+            </li>
+          ) : null}
         </ul>
       ) : null}
 

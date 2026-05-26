@@ -78,6 +78,8 @@
 
 **S8 scope (production `4e5d876`):** Action-first IA — verdict + compact evidence \| What next; opportunity \| visual ladder; risk \| best setups; secondary momentum/watchlist/blockers; progressive disclosure.
 
+**S8.1 scope (local):** Strict Bento v9 contract — balanced row heights, capped opportunity (max 3 + “more”), compact ladder+risk side card, momentum/blockers capped to 3, low-priority row compression.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -131,6 +133,7 @@
 - [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
 - [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
 - [x] Decision Cockpit S8 action-first layout — `4e5d876` pushed & production deployed
+- [ ] Decision Cockpit S8.1 strict bento layout — local (not pushed)
 
 ---
 

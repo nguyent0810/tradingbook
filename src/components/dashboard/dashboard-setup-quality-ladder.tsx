@@ -76,7 +76,7 @@ export function DashboardSetupQualityLadder({ ladder }: DashboardSetupQualityLad
                 className="dash-ladder__symbols font-mono"
                 data-testid={`dashboard-ladder-symbols-${group.stage}`}
               >
-                {group.sampleSymbols.join(", ")}
+                {group.sampleSymbols.slice(0, 2).join(", ")}
               </p>
             ) : (
               <p className="dash-ladder__empty-stage" data-testid={`dashboard-ladder-empty-${group.stage}`}>

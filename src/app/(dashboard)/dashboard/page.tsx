@@ -250,51 +250,55 @@ export default async function DashboardPage() {
         data-testid="dashboard-cockpit-zone-opportunity"
         aria-label="Opportunity pipeline"
       >
-        <div className="dash-cockpit__opportunity-grid">
+        <div className="dash-cockpit__bento-row dash-cockpit__bento-row--opportunity-risk">
           <DashboardOpportunityPreview opportunity={cockpitDto.opportunity} />
-          <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
+          <div className="dash-cockpit__opportunity-side">
+            <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
+            <DashboardExposurePanel
+              risk={cockpitDto.risk}
+              verdict={cockpitDto.verdict}
+              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
+              portfolioRiskConfigured={portfolioRiskConfigured}
+            />
+          </div>
         </div>
       </section>
 
-      {/* 4. Risk + execution */}
+      {/* 4. Secondary decision support */}
       <section
         className="dash-cockpit__zone dash-cockpit__zone--execution"
         data-testid="dashboard-cockpit-zone-execution"
-        aria-label="Risk and setups"
+        aria-label="Secondary decision support"
       >
-        <div className="dash-cockpit__risk-exec-row">
-          <DashboardExposurePanel
-            risk={cockpitDto.risk}
-            verdict={cockpitDto.verdict}
-            riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-            portfolioRiskConfigured={portfolioRiskConfigured}
+        <div className="dash-cockpit__bento-row dash-cockpit__bento-row--secondary-support">
+          <MomentumWatchSection />
+          <DashboardActionableBlockers
+            diagnostics={cockpitDto.actionableDiagnostics}
+            compact
           />
+        </div>
+      </section>
+
+      {/* 5. Low priority */}
+      <section
+        className="dash-cockpit__zone dash-cockpit__zone--secondary"
+        data-testid="dashboard-cockpit-zone-next-session"
+        aria-label="Low priority context"
+      >
+        <div className="dash-cockpit__bento-row dash-cockpit__bento-row--low-priority">
           <DashboardBestSetupsPanel
             topSetups={topSetups}
             presentation={bestSetupsPresentation}
           />
-        </div>
-      </section>
-
-      {/* 5. Secondary detail */}
-      <section
-        className="dash-cockpit__zone dash-cockpit__zone--secondary"
-        data-testid="dashboard-cockpit-zone-next-session"
-        aria-label="Secondary context"
-      >
-        <div className="dash-cockpit__secondary-grid">
-          <MomentumWatchSection />
-          <DashboardWatchlistPanel
-            items={activeWatchItems}
-            latestCloseBySymbol={latestCloseBySymbol}
-          />
-        </div>
-        <DashboardActionableBlockers
-          diagnostics={cockpitDto.actionableDiagnostics}
-          compact
-        />
-        <div className="dash-cockpit__performance-slot">
-          <DashboardPerformancePanel trades={trades} />
+          <div className="dash-cockpit__low-priority-side">
+            <DashboardWatchlistPanel
+              items={activeWatchItems}
+              latestCloseBySymbol={latestCloseBySymbol}
+            />
+            <div className="dash-cockpit__performance-slot">
+              <DashboardPerformancePanel trades={trades} />
+            </div>
+          </div>
         </div>
       </section>
     </div>

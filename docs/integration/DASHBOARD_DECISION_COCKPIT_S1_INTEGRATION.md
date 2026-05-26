@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S8 on production (`4e5d876`) — action-first layout + progressive disclosure deployed
+**Status:** S1–S8 on production (`4e5d876`) · **S8.1 local** — strict bento contract + density pass
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -349,6 +349,37 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 | Action-first IA | Deployed on `/dashboard` |
 
 See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S8.
+
+---
+
+## 15. S8.1 — strict bento layout contract (local)
+
+### Desktop rows (contract)
+
+1. **Status strip** — compact freshness + scan meta
+2. **Primary decision** — balanced Verdict \| What next
+3. **Opportunity + risk** — Opportunity (max 3 rows) \| Ladder + Risk headroom
+4. **Secondary support** — Momentum (top 3) \| Blockers (top 3 compact)
+5. **Low priority** — Best setups \| Watchlist + performance
+
+### S8.1 UI enforcement
+
+- [x] Opportunity list capped to 3 visible rows + `+N more in Setups`
+- [x] Opportunity reasons/hints line-clamped; extra detail collapsed in `<details>`
+- [x] Ladder keeps six stages with distribution bar + compact chips; symbols capped to 2 per stage
+- [x] Risk caveats moved to collapsed details by default
+- [x] Momentum query/display capped to top 3 rows
+- [x] Blockers remain compact and collapsed by default
+- [x] Best setups empty state stays compact and non-duplicative
+- [x] CSS bento row min-heights / max-heights to reduce uneven sprawl
+
+### Validation (local)
+
+- [x] `npm run lint`
+- [x] `npm test` (290/290)
+- [x] `npm run build`
+- [x] Logged-out production `/dashboard` → `/login` (307)
+- [ ] Logged-in screenshot pass pending manual sign-in (before/after visual judgment)
 
 ---
 

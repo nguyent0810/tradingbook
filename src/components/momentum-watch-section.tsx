@@ -35,7 +35,7 @@ export async function MomentumWatchSection() {
   let dbError: unknown = null;
   try {
     rows = await getMomentumWatchRowsForPhase1(prisma, {
-      limit: 20,
+      limit: 3,
       includeExtendedWatchOnly: true,
       includeFailedRisk: false,
     });
@@ -46,25 +46,17 @@ export async function MomentumWatchSection() {
   }
 
   return (
-    <section className="space-y-3 rounded-lg border border-dashed p-4 md:p-5" id="momentum-watch" style={{ borderColor: "var(--border-primary)", background: "var(--bg-secondary)" }}>
+    <section className="dash-momentum dash-panel dash-surface-1" id="momentum-watch">
       <div>
-        <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+        <h2 className="dash-section-title" style={{ color: "var(--text-primary)" }}>
           Momentum Watch
         </h2>
-        <p className="mt-0.5 text-xs font-medium tracking-wide text-[var(--text-tertiary)]">
-          Strong momentum context — watchlist only
-        </p>
-        <p
-          className="mt-1 rounded-md border px-3 py-2 text-sm leading-snug"
-          style={{
-            borderColor: "var(--border-primary)",
-            color: "var(--text-secondary)",
-            background: "var(--bg-secondary)",
-          }}
-          role="note"
-        >
-          {MOMENTUM_WATCH_UI_DISCLAIMER}. Not validated core setups — observational context only.
-        </p>
+        <details className="text-xs mt-1">
+          <summary className="cursor-pointer text-[var(--accent-text)] font-medium">About this list</summary>
+          <p className="mt-1 leading-snug" style={{ color: "var(--text-secondary)" }}>
+            {MOMENTUM_WATCH_UI_DISCLAIMER}. Not validated core setups — observational context only.
+          </p>
+        </details>
       </div>
 
       {rows.length === 0 && dbError ? (
@@ -87,7 +79,7 @@ export async function MomentumWatchSection() {
       ) : (
         <div className="overflow-hidden rounded-md border p-0" style={{ borderColor: "var(--border-primary)", background: "var(--bg-primary)" }}>
           <div className="table-container">
-            <table className="table min-w-[760px]">
+            <table className="table min-w-[640px]">
               <thead>
                 <tr>
                   <th>Symbol</th>
