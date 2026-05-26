@@ -80,7 +80,7 @@
 
 **S8.1 scope (production `9725135`):** Strict Bento v9 contract — balanced row heights, capped opportunity (max 3 + “more”), compact ladder+risk side card, momentum/blockers capped to 3, low-priority row compression.
 
-**S8.2 scope (local):** Three major unified panels (Command, Opportunity Board, Secondary Intelligence) with strict bento composition, balanced card heights, and collapsed detail defaults.
+**S8.2 scope (production `028ba85`):** Three major unified panels (Command, Opportunity Board, Secondary Intelligence) with strict bento composition, balanced card heights, and collapsed detail defaults.
 
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
@@ -136,7 +136,30 @@
 - [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
 - [x] Decision Cockpit S8 action-first layout — `4e5d876` pushed & production deployed
 - [x] Decision Cockpit S8.1 strict bento layout — `9725135` pushed & production deployed
-- [ ] Decision Cockpit S8.2 strict command layout — local (not pushed)
+- [x] Decision Cockpit S8.2 strict command layout — `028ba85` pushed & production deployed
+
+---
+
+## Production validation — Decision Cockpit S8.2 (2026-05-26)
+
+| Check | Result | Evidence |
+|-------|--------|----------|
+| Commit | `028ba85` | `feat(dashboard): consolidate Decision Cockpit command layout` — 7 files |
+| Push to `main` | `028ba85` | `06ea552..028ba85` |
+| Vercel Production deploy | **Ready** | GitHub Production deployment SHA `028ba85`, `2026-05-26T02:05:54Z` |
+| `/api/db-health` | `{"ok":true}` | `https://tradingbook-phi.vercel.app/api/db-health` (HTTP 200) |
+| `/dashboard` auth (logged out) | **307** → `/login` | Production `fetch(..., { redirect: 'manual' })` |
+| Command Panel | Deployed | Unified status + verdict/what-next + compact evidence |
+| Opportunity Board | Deployed | Compact opportunity (max 3 visible) + ladder/risk side |
+| Secondary Intelligence | Deployed | Momentum/blockers + best setups/watchlist+performance 2x2 |
+| Momentum awkward scrollbar | Removed | Top-3 rows, no forced internal momentum scroll shell |
+| Empty-state density | Improved | Best setups empty remains compact |
+| Backend / contracts | Unchanged | No Prisma/cron/scanner/import/API/Server Action changes |
+| Tests (local pre-push) | **290/290** | `npm run lint`, `npm test`, `npm run build` passed |
+
+**Logged-in smoke checklist:** Sign in → `/dashboard` → confirm command panel reads as one module above fold; what-next immediately visible; opportunity no longer dominates height; right side no large blank gaps; secondary panels stay visually secondary; mobile order remains sensible.
+
+**Before/after note:** S8.2 replaces scattered card rhythm with three deterministic cockpit panels, improving visual trust and reducing composition noise.
 
 ---
 

@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S8.1 on production (`9725135`) · **S8.2 local** — strict command-panel composition
+**Status:** S1–S8.2 on production (`028ba85`) — strict command-panel composition deployed
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -394,7 +394,7 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 ---
 
-## 16. S8.2 — strict command-panel layout (local)
+## 16. S8.2 — strict command-panel layout (production)
 
 ### Major panels (desktop)
 
@@ -416,6 +416,17 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 - **Before (S8.1):** better order, but still card-by-card sprawl and uneven visual rhythm.
 - **After (S8.2 local):** unified command/opportunity/secondary panel composition with balanced rows and reduced empty-space artifacts.
+
+### Production validation (2026-05-26)
+
+| Check | Result |
+|-------|--------|
+| Deploy SHA | `028ba85` |
+| `/api/db-health` | `{"ok":true}` |
+| `/dashboard` logged out | **307** → `/login` |
+| Strict command panel layout | Deployed on `/dashboard` |
+
+See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production validation — Decision Cockpit S8.2.
 
 ---
 
