@@ -1,6 +1,6 @@
 # Decision Cockpit — S1 integration plan
 
-**Status:** S1–S7 on production (`744df69`) — Decision Cockpit complete for current production-safe scope  
+**Status:** S1–S7 on production (`744df69`) · **S8 local** — action-first layout + progressive disclosure  
 **Prerequisites (pushed):** `37d9839` UX spec + preview · `596e792` `buildDecisionCockpitDto` + tests  
 **Spike doc:** [DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md](./DASHBOARD_DECISION_COCKPIT_DTO_SPIKE.md)
 
@@ -319,6 +319,25 @@ See [DASHBOARD_FE_REBUILD_PLAN.md](./DASHBOARD_FE_REBUILD_PLAN.md) § Production
 
 - Book headroom = parsed max-book % × configured equity − open **notional** (not stop risk).
 - Opportunity preview max 5 / near-miss 8 unchanged.
+
+## 14. S8 — action-first layout (local)
+
+### IA (top → bottom)
+
+1. **Status** — freshness + scan meta (`dashboard-cockpit-zone-status`)
+2. **Primary action** — verdict + compact evidence \| **What next** (`dashboard-cockpit-zone-decision`)
+3. **Opportunity** — preview \| visual ladder distribution (`dashboard-cockpit-zone-opportunity`)
+4. **Risk / execution** — exposure headroom \| best setups (`dashboard-cockpit-zone-execution`)
+5. **Secondary** — momentum, watchlist, compact blockers, performance (`dashboard-cockpit-zone-next-session`)
+
+### UX
+
+- [x] Tomorrow promoted beside verdict (`promoted` on `DashboardTomorrowPlan`)
+- [x] Evidence demoted to hint chips + “Why this verdict?” `<details>` (`DashboardEvidenceCompact`)
+- [x] Verdict `compact` — allocation inline; explanation in `<details>`
+- [x] Ladder distribution bar + micro-bars (`dashboard-ladder-distribution`)
+- [x] Blockers compact with expandable rows (`compact` on `DashboardActionableBlockers`)
+- [x] Shorter Best Setups empty copy (no repeat of opportunity/tomorrow)
 
 ---
 

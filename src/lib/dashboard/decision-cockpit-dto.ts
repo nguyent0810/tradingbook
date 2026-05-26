@@ -802,9 +802,9 @@ export function resolveBestSetupsPanelPresentation(params: {
   if (opportunity.mode === "near_miss") {
     return {
       mode: "compact_empty",
-      emptyTitle: "No Tier A/B surfaced today",
+      emptyTitle: "No Tier A/B table rows",
       emptyReason:
-        "Near-miss watch names and wait-fors are in Opportunity preview above. This table only lists health-scored Tier A/B candidates when the scan surfaces them.",
+        "Near-miss names and wait-fors are in Opportunity preview and What next above.",
     };
   }
 
@@ -812,17 +812,16 @@ export function resolveBestSetupsPanelPresentation(params: {
     return {
       mode: "compact_empty",
       emptyTitle: "No setup rows to display",
-      emptyReason:
-        "Opportunity preview lists surfaced names above, but none passed health scoring for the detailed table. Review on Setups.",
+      emptyReason: "Surfaced names are in Opportunity preview — none scored for this table.",
     };
   }
 
   return {
     mode: "compact_empty",
-    emptyTitle: "No Tier A/B surfaced today",
+    emptyTitle: "No Tier A/B table rows",
     emptyReason: latestScan
-      ? "Opportunity preview above is empty for this scan. Open Setups for near-miss rankings and full Gate 2 rejection detail."
-      : "No daily scan yet — wait for bar import and scan automation, then check Setups.",
+      ? "See Opportunity preview and What next above, or open Setups for full pipeline."
+      : "No daily scan yet — check Setups after the next scan run.",
   };
 }
 

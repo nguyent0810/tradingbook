@@ -404,7 +404,7 @@ describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
       latestScan: baseInput().latestScan!,
     });
     expect(p.mode).toBe("compact_empty");
-    expect(p.emptyReason).toMatch(/Opportunity preview/i);
+    expect(p.emptyReason).toMatch(/Opportunity preview|What next/i);
     expect(p.emptyReason).not.toMatch(/Gate 1 is PASS/i);
   });
 });

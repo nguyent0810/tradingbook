@@ -4,6 +4,8 @@ import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
 export type DashboardDecisionHeroProps = {
   verdict: VerdictDto;
   surfacedCount: number;
+  /** Shorter card with detail in progressive disclosure (S8). */
+  compact?: boolean;
 };
 
 function decisionModifier(uxLevel: VerdictUxLevel): string {
@@ -26,7 +28,11 @@ function formatConfidenceBand(band: "high" | "medium" | "low"): string {
   return label;
 }
 
-export function DashboardDecisionHero({ verdict, surfacedCount }: DashboardDecisionHeroProps) {
+export function DashboardDecisionHero({
+  verdict,
+  surfacedCount,
+  compact = false,
+}: DashboardDecisionHeroProps) {
   const ux = verdict.uxLevel.value;
   const { gate1Resolution } = verdict;
   const perTrade = verdict.perTradeGuidance.value;
@@ -48,7 +54,7 @@ export function DashboardDecisionHero({ verdict, surfacedCount }: DashboardDecis
         </p>
       ) : null}
       <p className="dash-decision-hero__allocation">
-        Max book guidance{" "}
+        Max book{" "}
         <span className="font-semibold tabular-nums">{verdict.allocation.value}</span>
         {showPerTrade ? (
           <>
@@ -57,41 +63,81 @@ export function DashboardDecisionHero({ verdict, surfacedCount }: DashboardDecis
             <span className="font-semibold tabular-nums">{perTrade}</span>
           </>
         ) : null}
-      </p>
-      <p className="dash-decision-hero__explanation">{verdict.explanation.value}</p>
-      <p
-        className="dash-decision-hero__confidence"
-        data-testid="dashboard-verdict-confidence"
-      >
-        Evidence strength:{" "}
-        <span className="font-semibold">{formatConfidenceBand(verdict.confidenceBand.value)}</span>
-      </p>
-      <dl className="dash-decision-hero__meta">
-        <div>
-          <dt>Gate 1 (verdict)</dt>
-          <dd data-testid="dashboard-verdict-gate1">
-            {displayGate1ScanLevel(gate1Resolution.canonical)}
-          </dd>
-        </div>
-        {gate1Resolution.mismatch ? (
-          <div>
-            <dt>Gate 1 (live)</dt>
-            <dd
-              className="dash-decision-hero__meta-live"
-              data-testid="dashboard-verdict-gate1-live"
-              title={gate1Resolution.note}
-            >
-              {displayGate1ScanLevel(gate1Resolution.liveRegimeGate1)}
-            </dd>
-          </div>
+        {compact ? (
+          <>
+            {" "}
+            · Gate 1{" "}
+            <span data-testid="dashboard-verdict-gate1">
+              {displayGate1ScanLevel(gate1Resolution.canonical)}
+            </span>
+            {" "}
+            · Surfaced{" "}
+            <span className="tabular-nums" data-testid="dashboard-verdict-surfaced">
+              {surfacedCount}
+            </span>
+          </>
         ) : null}
-        <div>
-          <dt>Surfaced</dt>
-          <dd className="tabular-nums" data-testid="dashboard-verdict-surfaced">
-            {surfacedCount}
-          </dd>
-        </div>
-      </dl>
+      </p>
+
+      {compact ? (
+        <details className="dash-decision-hero__details">
+          <summary>Verdict detail</summary>
+          <p className="dash-decision-hero__explanation">{verdict.explanation.value}</p>
+          <p className="dash-decision-hero__confidence" data-testid="dashboard-verdict-confidence">
+            Evidence strength:{" "}
+            <span className="font-semibold">
+              {formatConfidenceBand(verdict.confidenceBand.value)}
+            </span>
+          </p>
+          {gate1Resolution.mismatch ? (
+            <p className="dash-decision-hero__meta-live text-xs" title={gate1Resolution.note}>
+              Live Gate 1:{" "}
+              <span data-testid="dashboard-verdict-gate1-live">
+                {displayGate1ScanLevel(gate1Resolution.liveRegimeGate1)}
+              </span>
+            </p>
+          ) : null}
+        </details>
+      ) : (
+        <>
+          <p className="dash-decision-hero__explanation">{verdict.explanation.value}</p>
+          <p
+            className="dash-decision-hero__confidence"
+            data-testid="dashboard-verdict-confidence"
+          >
+            Evidence strength:{" "}
+            <span className="font-semibold">
+              {formatConfidenceBand(verdict.confidenceBand.value)}
+            </span>
+          </p>
+          <dl className="dash-decision-hero__meta">
+            <div>
+              <dt>Gate 1 (verdict)</dt>
+              <dd data-testid="dashboard-verdict-gate1">
+                {displayGate1ScanLevel(gate1Resolution.canonical)}
+              </dd>
+            </div>
+            {gate1Resolution.mismatch ? (
+              <div>
+                <dt>Gate 1 (live)</dt>
+                <dd
+                  className="dash-decision-hero__meta-live"
+                  data-testid="dashboard-verdict-gate1-live"
+                  title={gate1Resolution.note}
+                >
+                  {displayGate1ScanLevel(gate1Resolution.liveRegimeGate1)}
+                </dd>
+              </div>
+            ) : null}
+            <div>
+              <dt>Surfaced</dt>
+              <dd className="tabular-nums" data-testid="dashboard-verdict-surfaced">
+                {surfacedCount}
+              </dd>
+            </div>
+          </dl>
+        </>
+      )}
     </section>
   );
 }

@@ -3,26 +3,35 @@ import type { TomorrowPlanDto } from "@/lib/dashboard/decision-cockpit-dto";
 
 export type DashboardTomorrowPlanProps = {
   tomorrow: TomorrowPlanDto;
+  /** Promoted beside verdict in primary action row (S8). */
+  promoted?: boolean;
 };
 
-export function DashboardTomorrowPlan({ tomorrow }: DashboardTomorrowPlanProps) {
+export function DashboardTomorrowPlan({
+  tomorrow,
+  promoted = false,
+}: DashboardTomorrowPlanProps) {
   const symbols = tomorrow.watchSymbols.value;
   const watchNote = tomorrow.watchNote.value;
 
   return (
     <section
-      className="dash-tomorrow dash-panel dash-surface-1"
+      className={`dash-tomorrow dash-panel dash-surface-1${promoted ? " dash-tomorrow--promoted" : ""}`}
       data-testid="dashboard-tomorrow-plan"
       aria-labelledby="dashboard-tomorrow-heading"
     >
       <header className="dash-panel__header">
         <h2 id="dashboard-tomorrow-heading" className="dash-section-title">
-          Tomorrow&apos;s plan
+          {promoted ? "What next" : "Tomorrow's plan"}
         </h2>
-        <p className="dash-panel__subtitle">Watch, triggers, and avoid rules for the next session</p>
+        <p className="dash-panel__subtitle">
+          {promoted
+            ? "Watch · trigger · avoid · posture for the next session"
+            : "Watch, triggers, and avoid rules for the next session"}
+        </p>
       </header>
 
-      <dl className="dash-tomorrow__grid">
+      <dl className={`dash-tomorrow__grid${promoted ? " dash-tomorrow__grid--promoted" : ""}`}>
         <div data-testid="dashboard-tomorrow-watch">
           <dt>Watch</dt>
           <dd>
@@ -35,19 +44,23 @@ export function DashboardTomorrowPlan({ tomorrow }: DashboardTomorrowPlanProps) 
         </div>
         <div data-testid="dashboard-tomorrow-trigger">
           <dt>Trigger</dt>
-          <dd>{tomorrow.triggerLine.value}</dd>
+          <dd className={promoted ? "dash-tomorrow__line-clamp" : undefined} title={tomorrow.triggerLine.value}>
+            {tomorrow.triggerLine.value}
+          </dd>
         </div>
         <div data-testid="dashboard-tomorrow-avoid">
           <dt>Avoid</dt>
-          <dd>{tomorrow.avoidLine.value}</dd>
+          <dd className={promoted ? "dash-tomorrow__line-clamp" : undefined} title={tomorrow.avoidLine.value}>
+            {tomorrow.avoidLine.value}
+          </dd>
         </div>
         <div data-testid="dashboard-tomorrow-posture">
-          <dt>Risk posture</dt>
+          <dt>Posture</dt>
           <dd className="font-semibold">{tomorrow.postureLine.value}</dd>
         </div>
       </dl>
 
-      {symbols.length === 0 ? (
+      {symbols.length === 0 && !promoted ? (
         <p className="dash-tomorrow__link">
           <Link href="/setups" className="text-xs font-medium" style={{ color: "var(--accent-text)" }}>
             Review /setups for pipeline context →

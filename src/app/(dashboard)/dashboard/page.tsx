@@ -29,7 +29,7 @@ import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpi
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
-import { DashboardEvidenceStack } from "@/components/dashboard/dashboard-evidence-stack";
+import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
 import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
 import { DashboardOpportunityPreview } from "@/components/dashboard/dashboard-opportunity-preview";
 import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
@@ -198,7 +198,7 @@ export default async function DashboardPage() {
   const verdictUx = cockpitDto.verdict.uxLevel.value;
 
   return (
-    <div className="page-container dash-cockpit animate-in pb-10">
+    <div className="page-container dash-cockpit dash-cockpit--action-first animate-in pb-10">
       <DashboardPageHeader />
 
       {dbLoadError ? (
@@ -210,7 +210,7 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      {/* 1. Top status — freshness + scan meta */}
+      {/* 1. Top strip — freshness + scan meta */}
       <div
         className="dash-cockpit__zone dash-cockpit__zone--status"
         data-testid="dashboard-cockpit-zone-status"
@@ -222,34 +222,29 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* 2. Primary decision — verdict, evidence, exposure */}
+      {/* 2. Primary action — verdict + compact evidence | What next */}
       <section
         className={`dash-cockpit__zone dash-cockpit__zone--decision${verdictUx === "NO_TRADE" ? " dash-cockpit__zone--no-trade" : ""}`}
         data-testid="dashboard-cockpit-zone-decision"
-        aria-label="Today's decision"
+        aria-label="Today's decision and next actions"
       >
-        <div className="dash-cockpit__decision-grid">
-          <div className="dash-cockpit__decision-hero-slot">
-            <DashboardDecisionHero verdict={cockpitDto.verdict} surfacedCount={surfacedCount} />
-          </div>
-          <div className="dash-cockpit__decision-exposure-slot">
-            <DashboardExposurePanel
-              risk={cockpitDto.risk}
+        <div className="dash-cockpit__action-row">
+          <div className="dash-cockpit__action-verdict">
+            <DashboardDecisionHero
               verdict={cockpitDto.verdict}
-              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-              portfolioRiskConfigured={portfolioRiskConfigured}
+              surfacedCount={surfacedCount}
+              compact
             />
-          </div>
-          <div className="dash-cockpit__decision-evidence-slot">
-            <DashboardEvidenceStack
+            <DashboardEvidenceCompact
               chips={cockpitDto.evidence}
               blockers={cockpitDto.blockers}
             />
           </div>
+          <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} promoted />
         </div>
       </section>
 
-      {/* 3. Opportunity — preview + quality ladder */}
+      {/* 3. Opportunity row */}
       <section
         className="dash-cockpit__zone dash-cockpit__zone--opportunity"
         data-testid="dashboard-cockpit-zone-opportunity"
@@ -261,37 +256,45 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* 4. Execution context — setups, momentum, watchlist, book snapshot */}
+      {/* 4. Risk + execution */}
       <section
         className="dash-cockpit__zone dash-cockpit__zone--execution"
         data-testid="dashboard-cockpit-zone-execution"
-        aria-label="Execution context"
+        aria-label="Risk and setups"
       >
-        <DashboardBestSetupsPanel
-          topSetups={topSetups}
-          presentation={bestSetupsPresentation}
-        />
-        <div className="dash-cockpit__execution-secondary">
+        <div className="dash-cockpit__risk-exec-row">
+          <DashboardExposurePanel
+            risk={cockpitDto.risk}
+            verdict={cockpitDto.verdict}
+            riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
+            portfolioRiskConfigured={portfolioRiskConfigured}
+          />
+          <DashboardBestSetupsPanel
+            topSetups={topSetups}
+            presentation={bestSetupsPresentation}
+          />
+        </div>
+      </section>
+
+      {/* 5. Secondary detail */}
+      <section
+        className="dash-cockpit__zone dash-cockpit__zone--secondary"
+        data-testid="dashboard-cockpit-zone-next-session"
+        aria-label="Secondary context"
+      >
+        <div className="dash-cockpit__secondary-grid">
           <MomentumWatchSection />
           <DashboardWatchlistPanel
             items={activeWatchItems}
             latestCloseBySymbol={latestCloseBySymbol}
           />
         </div>
+        <DashboardActionableBlockers
+          diagnostics={cockpitDto.actionableDiagnostics}
+          compact
+        />
         <div className="dash-cockpit__performance-slot">
           <DashboardPerformancePanel trades={trades} />
-        </div>
-      </section>
-
-      {/* 5. Next-session intelligence — tomorrow + blockers */}
-      <section
-        className="dash-cockpit__zone dash-cockpit__zone--next-session"
-        data-testid="dashboard-cockpit-zone-next-session"
-        aria-label="Next session"
-      >
-        <div className="dash-cockpit__plan-row">
-          <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} />
-          <DashboardActionableBlockers diagnostics={cockpitDto.actionableDiagnostics} />
         </div>
       </section>
     </div>

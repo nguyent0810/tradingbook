@@ -76,6 +76,8 @@
 
 **S7 scope (production `744df69`):** DC-5 `riskBudgetHeadroom` DTO + exposure panel book headroom (env equity + open notional + parsed verdict cap); audit in S1 integration §13.
 
+**S8 scope (local):** Action-first IA — verdict + compact evidence \| What next; opportunity \| visual ladder; risk \| best setups; secondary momentum/watchlist/blockers; progressive disclosure.
+
 ### `/setups` — **Slice 2** `DONE` (`f3a677e`) · **Trading OS v2 Phase 2** `DONE` (`614d53b`)
 
 | | |
@@ -128,6 +130,7 @@
 - [x] Decision Cockpit S5 ladder + best-setups dedup — `e58199a` pushed & production deployed
 - [x] Decision Cockpit S6 layout reorder — `945de00` pushed & production deployed
 - [x] Decision Cockpit S7 DC-5 risk headroom — `744df69` pushed & production deployed
+- [ ] Decision Cockpit S8 action-first layout — local (not pushed)
 
 ---
 
