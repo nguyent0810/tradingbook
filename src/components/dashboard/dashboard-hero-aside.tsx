@@ -15,7 +15,6 @@ export type DashboardHeroAsideProps = {
   trades: Trade[];
 };
 
-/** Command Center v1.1 — right rail: exposure + closed-trade performance. */
 export function DashboardHeroAside({
   risk,
   verdict,
@@ -24,14 +23,19 @@ export function DashboardHeroAside({
   trades,
 }: DashboardHeroAsideProps) {
   return (
-    <div className="dash-hero-aside">
-      <DashboardExposurePanel
-        risk={risk}
-        verdict={verdict}
-        riskBudgetHeadroom={riskBudgetHeadroom}
-        portfolioRiskConfigured={portfolioRiskConfigured}
-      />
-      <DashboardPerformancePanel trades={trades} />
-    </div>
+    <>
+      <p className="dash-v2-rail__label">Book &amp; exposure</p>
+      <div className="dash-v2-card dash-v2-card--rail">
+        <DashboardExposurePanel
+          risk={risk}
+          verdict={verdict}
+          riskBudgetHeadroom={riskBudgetHeadroom}
+          portfolioRiskConfigured={portfolioRiskConfigured}
+        />
+      </div>
+      <div className="dash-v2-card dash-v2-card--rail dash-v2-card--muted">
+        <DashboardPerformancePanel trades={trades} />
+      </div>
+    </>
   );
 }

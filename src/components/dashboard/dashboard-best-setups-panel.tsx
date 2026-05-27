@@ -17,37 +17,45 @@ import {
 export type DashboardBestSetupsPanelProps = {
   topSetups: SurfacedCandidateHealthView[];
   presentation: BestSetupsPanelPresentation;
+  /** Parent zone provides section header (v2 actionable band). */
+  embedded?: boolean;
 };
 
 export function DashboardBestSetupsPanel({
   topSetups,
   presentation,
+  embedded = false,
 }: DashboardBestSetupsPanelProps) {
   const isCompactEmpty = topSetups.length === 0 && presentation.mode === "compact_empty";
 
   return (
     <section
-      className={`dash-panel dash-surface-1${isCompactEmpty ? " dash-best-setups--compact-empty" : ""}`}
+      className={`dash-v2-setups-table${isCompactEmpty ? " dash-v2-setups-table--empty" : ""}`}
       data-testid="dashboard-best-setups-panel"
     >
-      <header className="dash-panel__header">
-        <h2 className="dash-section-title">Best setups</h2>
-        <p className="dash-panel__subtitle">
-          {topSetups.length > 0
-            ? "Tier A/B surfaced — top five for today (detail table)"
-            : "Detailed candidate table when Tier A/B are surfaced"}
-        </p>
-      </header>
+      {!embedded ? (
+        <header className="dash-panel__header">
+          <h2 className="dash-section-title">Best setups</h2>
+          <p className="dash-panel__subtitle">
+            {topSetups.length > 0
+              ? "Tier A/B surfaced — top five for today"
+              : "Detailed candidate table when Tier A/B are surfaced"}
+          </p>
+        </header>
+      ) : null}
 
       {topSetups.length === 0 ? (
-        <div className={isCompactEmpty ? "dash-best-setups__compact-empty" : "dash-empty-compact"}>
+        <div className="dash-v2-empty">
           <EmptyStateWithReason
             title={presentation.emptyTitle || "No qualified setups in the latest scan"}
             reason={presentation.emptyReason}
             data-testid="dashboard-best-setups-empty"
           >
-            <Link href="/setups" className="btn btn-secondary text-xs">
-              Open Setups pipeline
+            <Link href="/setups" className="btn btn-secondary dash-v2-btn-secondary">
+              Explore pipeline
+            </Link>
+            <Link href="/trades/new" className="btn btn-primary dash-v2-btn-primary">
+              Log trade anyway
             </Link>
           </EmptyStateWithReason>
         </div>

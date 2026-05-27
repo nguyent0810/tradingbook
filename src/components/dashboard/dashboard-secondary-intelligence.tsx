@@ -9,10 +9,6 @@ export type DashboardSecondaryIntelligenceProps = {
   latestCloseBySymbol: Map<string, number>;
 };
 
-/**
- * Command Center v1.1 — Row D: watchlist + collapsible gate diagnostics.
- * Best setups, momentum, and performance live in dedicated zones above.
- */
 export function DashboardSecondaryIntelligence({
   diagnostics,
   watchItems,
@@ -20,38 +16,37 @@ export function DashboardSecondaryIntelligence({
 }: DashboardSecondaryIntelligenceProps) {
   return (
     <section
-      className="dash-secondary-panel dash-panel dash-surface-1 dash-cockpit-v11__watch-zone"
+      className="dash-v2-zone dash-v2-zone--quiet"
       data-testid="dashboard-cockpit-zone-next-session"
       aria-labelledby="dashboard-watch-zone-heading"
     >
-      <header className="dash-panel__header dash-cockpit-v11__zone-header">
-        <div>
-          <p className="dash-eyebrow">Watch &amp; diagnostics</p>
-          <h2 id="dashboard-watch-zone-heading" className="dash-section-title">
-            Watchlist &amp; gate diagnostics
-          </h2>
-          <p className="dash-panel__subtitle">
-            Symbols you are tracking — expand diagnostics when you need Gate2 detail.
-          </p>
-        </div>
+      <header className="dash-v2-zone-header">
+        <p className="dash-v2-eyebrow">Watch</p>
+        <h2 id="dashboard-watch-zone-heading" className="dash-v2-zone-title">
+          Watchlist
+        </h2>
+        <p className="dash-v2-zone-lead">
+          Symbols you track. Gate diagnostics stay collapsed unless you need detail.
+        </p>
       </header>
 
-      <div className="dash-secondary-panel__grid dash-secondary-panel__grid--v11">
-        <div className="card--table">
+      <div className="dash-v2-zone__body">
+        <div className="dash-v2-card dash-v2-card--inset">
           <DashboardWatchlistPanel
             items={watchItems}
             latestCloseBySymbol={latestCloseBySymbol}
           />
         </div>
-        <details className="dash-cockpit-v11__details card--dense">
-          <summary className="dash-cockpit-v11__details-summary">
-            Gate diagnostics &amp; blockers
-          </summary>
-          <div className="dash-cockpit-v11__details-body">
-            <DashboardActionableBlockers diagnostics={diagnostics} compact />
-          </div>
-        </details>
       </div>
+
+      <details className="dash-v2-details dash-v2-details--diagnostics">
+        <summary className="dash-v2-details__summary">
+          Gate diagnostics &amp; blockers
+        </summary>
+        <div className="dash-v2-details__body">
+          <DashboardActionableBlockers diagnostics={diagnostics} compact />
+        </div>
+      </details>
     </section>
   );
 }

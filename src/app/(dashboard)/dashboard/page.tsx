@@ -191,11 +191,12 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="page-container dash-cockpit dash-cockpit--v11 pb-10">
+    <div className="page-container dash-cockpit dash-cockpit--v2 pb-12">
       <DashboardPageHeader />
 
       {dbLoadError ? (
         <ErrorStateWithEvidence
+          className="dash-v2-alert"
           title="Partial dashboard data unavailable"
           message={dbLoadError}
           evidence="src/app/(dashboard)/dashboard/page.tsx · one or more Prisma reads failed; sections below may be empty."
@@ -204,8 +205,8 @@ export default async function DashboardPage() {
       ) : null}
 
       <DashboardEntrance>
-        {/* EOD 1–2: stance + exposure/performance (5/12 hero rail) */}
-        <DashboardCommandPanel
+        <div className="dash-v2-hero-band" data-testid="dashboard-v2-hero-band">
+          <DashboardCommandPanel
           freshness={freshness}
           latestScan={latestScan}
           scanDelayedBackdrop={scanDelayedBackdrop}
@@ -224,32 +225,29 @@ export default async function DashboardPage() {
             />
           }
         />
+        </div>
 
         <DashboardTradingDecisionSummary
           latestScan={latestScan}
           verdict={cockpitDto.verdict}
         />
 
-        {/* Pipeline context before actionable table */}
         <DashboardOpportunityBoard
           opportunity={cockpitDto.opportunity}
           ladder={cockpitDto.setupQualityLadder}
         />
 
-        {/* EOD 3: actionable setups */}
         <DashboardActionableSetupsZone
           topSetups={topSetups}
           bestSetupsPresentation={bestSetupsPresentation}
         />
 
-        {/* Observational: near-miss + momentum */}
         <DashboardObservationalBand
           opportunity={cockpitDto.opportunity}
           freshness={freshness}
           scanRunId={cockpitDto.scanRunId}
         />
 
-        {/* EOD 4: watchlist + collapsible diagnostics */}
         <DashboardSecondaryIntelligence
           diagnostics={cockpitDto.actionableDiagnostics}
           watchItems={activeWatchItems}

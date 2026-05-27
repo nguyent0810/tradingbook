@@ -13,31 +13,27 @@ export function DashboardOpportunityBoard({
 }: DashboardOpportunityBoardProps) {
   return (
     <section
-      className="dash-opportunity-board dash-panel dash-surface-1"
+      className="dash-v2-zone dash-v2-zone--context"
       data-testid="dashboard-cockpit-zone-opportunity"
       aria-labelledby="dashboard-opportunity-heading"
     >
-      <header className="dash-panel__header dash-cockpit-v11__zone-header">
-        <div>
-          <p className="dash-eyebrow">Pipeline context</p>
-          <h2 id="dashboard-opportunity-heading" className="dash-section-title">
-            Opportunity &amp; quality ladder
-          </h2>
-          <p className="dash-panel__subtitle">
-            Shortlist context before Best Setups — exposure and book performance are in the
-            command row above.
-          </p>
-        </div>
+      <header className="dash-v2-zone-header">
+        <p className="dash-v2-eyebrow">Pipeline</p>
+        <h2 id="dashboard-opportunity-heading" className="dash-v2-zone-title">
+          Opportunity context
+        </h2>
+        <p className="dash-v2-zone-lead">
+          Shortlist before actionable setups — exposure and performance sit in the command hero.
+        </p>
       </header>
-      <div className="dash-opportunity-board__grid dash-opportunity-board__grid--v11">
-        <div className="card--hero">
+      <div className="dash-v2-zone__body dash-v2-split">
+        <div className="dash-v2-card dash-v2-card--inset">
           <DashboardOpportunityPreview opportunity={opportunity} />
         </div>
-        <div className="card--compact">
+        <div className="dash-v2-card dash-v2-card--inset dash-v2-card--muted">
           <DashboardSetupQualityLadder ladder={ladder} />
         </div>
       </div>
     </section>
   );
 }
-
