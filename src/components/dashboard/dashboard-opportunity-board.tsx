@@ -1,39 +1,40 @@
-import type { OpportunityBoardDto, RiskBudgetHeadroomDto, RiskGuardrailDto, SetupQualityLadderDto, VerdictDto } from "@/lib/dashboard/decision-cockpit-dto";
+import type { OpportunityBoardDto, SetupQualityLadderDto } from "@/lib/dashboard/decision-cockpit-dto";
 import { DashboardOpportunityPreview } from "@/components/dashboard/dashboard-opportunity-preview";
 import { DashboardSetupQualityLadder } from "@/components/dashboard/dashboard-setup-quality-ladder";
-import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
 
 export type DashboardOpportunityBoardProps = {
   opportunity: OpportunityBoardDto;
   ladder: SetupQualityLadderDto;
-  risk: RiskGuardrailDto;
-  verdict: VerdictDto;
-  riskBudgetHeadroom: RiskBudgetHeadroomDto;
-  portfolioRiskConfigured: boolean;
 };
 
 export function DashboardOpportunityBoard({
   opportunity,
   ladder,
-  risk,
-  verdict,
-  riskBudgetHeadroom,
-  portfolioRiskConfigured,
 }: DashboardOpportunityBoardProps) {
   return (
-    <section className="dash-opportunity-board dash-panel dash-surface-1" data-testid="dashboard-cockpit-zone-opportunity">
-      <div className="dash-opportunity-board__grid">
+    <section
+      className="dash-opportunity-board dash-panel dash-surface-1"
+      data-testid="dashboard-cockpit-zone-opportunity"
+      aria-labelledby="dashboard-opportunity-heading"
+    >
+      <header className="dash-panel__header dash-cockpit-v11__zone-header">
+        <div>
+          <p className="dash-eyebrow">Pipeline context</p>
+          <h2 id="dashboard-opportunity-heading" className="dash-section-title">
+            Opportunity &amp; quality ladder
+          </h2>
+          <p className="dash-panel__subtitle">
+            Shortlist context before Best Setups — exposure and book performance are in the
+            command row above.
+          </p>
+        </div>
+      </header>
+      <div className="dash-opportunity-board__grid dash-opportunity-board__grid--v11">
         <div className="card--hero">
           <DashboardOpportunityPreview opportunity={opportunity} />
         </div>
-        <div className="dash-opportunity-board__side card--compact">
+        <div className="card--compact">
           <DashboardSetupQualityLadder ladder={ladder} />
-          <DashboardExposurePanel
-            risk={risk}
-            verdict={verdict}
-            riskBudgetHeadroom={riskBudgetHeadroom}
-            portfolioRiskConfigured={portfolioRiskConfigured}
-          />
         </div>
       </div>
     </section>

@@ -52,8 +52,11 @@ export function DashboardBestSetupsPanel({
           </EmptyStateWithReason>
         </div>
       ) : (
-        <div className="table-container">
-          <table className="table min-w-[760px]">
+        <div className="table-container table-container--scroll-hint">
+          <table className="table min-w-[760px]" aria-label="Best setups — Tier A and B candidates">
+            <caption className="dash-sr-only">
+              Top five Tier A/B breakout-pullback candidates from the latest scan
+            </caption>
             <thead>
               <tr>
                 <th>Symbol</th>

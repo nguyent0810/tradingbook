@@ -51,7 +51,7 @@ export function DashboardNearMissRejectionsPanel({
       data-testid="dashboard-near-miss-panel"
     >
       <header className="dash-panel__header">
-        <h2 className="dash-section-title">Near miss / rejection reasons</h2>
+        <h3 className="dash-section-title">Near miss / rejection reasons</h3>
         <p className="dash-panel__subtitle">
           Closest names from the latest scan that did not become Tier A/B setups.
         </p>

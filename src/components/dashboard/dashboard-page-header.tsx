@@ -9,7 +9,10 @@ export function DashboardPageHeader() {
           Today&apos;s stance, setups, and exposure — from the latest production scan.
         </p>
       </div>
-      <Link href="/trades/new" className="btn btn-primary shrink-0">
+      <Link
+        href="/trades/new"
+        className="btn btn-primary shrink-0 dash-cockpit-v11__cta"
+      >
         <svg
           width="16"
           height="16"
