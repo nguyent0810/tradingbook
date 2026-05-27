@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "VNINDEX_JSON=${RUNNER_TEMP}/vnindex.json" >> "$GITHUB_ENV"
           echo "STOCK_JSON=${RUNNER_TEMP}/stock-bars.json" >> "$GITHUB_ENV"
-          echo "SYMBOLS_JSON=${RUNNER_TEMP}/active-symbol-keys.json" >> "$GITHUB_ENV"
+          echo "SYMBOLS_JSON=${RUNNER_TEMP}/effective-universe-symbol-keys.json" >> "$GITHUB_ENV"
 
       - name: Validate required secrets
         run: |
@@ -84,7 +84,7 @@ jobs:
       - name: Import VNINDEX into Postgres
         run: npx tsx scripts/import-bars.ts "$VNINDEX_JSON"
 
-      - name: Export active symbols (no smoke tickers)
+      - name: Export effective universe symbols (core + tactical, no smoke tickers)
         run: npx tsx scripts/export-active-symbol-keys.ts --out "$SYMBOLS_JSON"
 
       - name: Resolve equity fetch end-date from VNINDEX session

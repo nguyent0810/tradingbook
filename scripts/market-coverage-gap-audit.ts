@@ -122,8 +122,7 @@ async function run(): Promise<void> {
   const { TRADABILITY_ROLLING_DAYS } = await import(
     "../src/lib/scanner/tradability-constants"
   );
-  const { computeEffectiveScanUniverse, listActiveTacticalSymbols } =
-    await import("../src/lib/tactical-universe");
+  const { loadEffectiveScanUniverse } = await import("../src/lib/tactical-universe");
 
   console.error("market-coverage-gap-audit.ts → DATABASE_URL:", describeDatabaseUrl());
 
@@ -150,33 +149,22 @@ async function run(): Promise<void> {
     barCounts.map((c) => [c.symbolId, c._max.date] as const)
   );
 
-  const coreSymbols = allSymbols.filter((s) => s.active);
-  const tacticalSymbols = await listActiveTacticalSymbols(prisma);
-  const tacticalKeys = [...new Set(tacticalSymbols.map((t) => t.symbol.trim().toUpperCase()))];
-  const tacticalStockRows =
-    tacticalKeys.length === 0
-      ? []
-      : await prisma.stockSymbol.findMany({
-          where: { symbol: { in: tacticalKeys } },
-          select: { id: true, symbol: true },
-        });
-  const stockIdBySymbol = new Map(
-    tacticalStockRows.map((s) => [s.symbol.trim().toUpperCase(), s.id] as const)
-  );
-  const universe = computeEffectiveScanUniverse({
-    coreRows: coreSymbols.map((s) => ({ id: s.id, symbol: s.symbol })),
-    tacticalRows: tacticalSymbols.map((t) => ({
-      tacticalId: t.id,
-      tacticalSymbol: t.symbol,
-      stockSymbolId: stockIdBySymbol.get(t.symbol.trim().toUpperCase()) ?? null,
-    })),
-  });
+  const universe = await loadEffectiveScanUniverse(prisma);
   const inUniverse = new Set(universe.symbols.map((s) => s.symbol));
+  const tacticalMetaBySymbol = new Map(
+    universe.tacticalRows.map((t) => [t.symbol.trim().toUpperCase(), t] as const)
+  );
 
   type Row = {
     symbol: string;
     name: string | null;
     active: boolean;
+    inCore: boolean;
+    inTactical: boolean;
+    effectiveSource: "core" | "tactical" | "both" | "excluded";
+    tacticalExpiry: string | null;
+    includedInImport: boolean;
+    includedInScan: boolean;
     barCount: number;
     latestBarDate: string | null;
     sessionAligned: boolean;
@@ -192,6 +180,9 @@ async function run(): Promise<void> {
   const rows: Row[] = [];
 
   for (const sym of allSymbols) {
+    const key = sym.symbol.trim().toUpperCase();
+    const universeRow = universe.symbols.find((u) => u.symbol === key);
+    const tacticalMeta = tacticalMetaBySymbol.get(key);
     const barCount = countById.get(sym.id) ?? 0;
     const latest = maxDateById.get(sym.id) ?? null;
     const sessionAligned =
@@ -205,14 +196,27 @@ async function run(): Promise<void> {
       symbol: sym.symbol,
       name: sym.name,
       active: sym.active,
+      inCore: sym.active,
+      inTactical: Boolean(tacticalMeta),
+      effectiveSource:
+        universeRow?.universeSource === "CORE"
+          ? "core"
+          : universeRow?.universeSource === "TACTICAL"
+            ? "tactical"
+            : universeRow?.universeSource === "BOTH"
+              ? "both"
+              : "excluded",
+      tacticalExpiry: tacticalMeta?.expiresAt.toISOString() ?? null,
+      includedInImport: Boolean(universeRow),
+      includedInScan: Boolean(universeRow),
       barCount,
       latestBarDate: latest ? isoDay(latest) : null,
       sessionAligned,
       calendarDaysStale,
       weekdaySessionsStale,
       avgValue20Vnd: null,
-      inEffectiveUniverse: inUniverse.has(sym.symbol.trim().toUpperCase()),
-      latestScanConsidered: sym.active,
+      inEffectiveUniverse: inUniverse.has(key),
+      latestScanConsidered: Boolean(universeRow),
       reasonGuess: guessReason({
         active: sym.active,
         barCount,
@@ -298,6 +302,12 @@ async function run(): Promise<void> {
         symbol: ticker,
         exists: false,
         active: null,
+        inCore: false,
+        inTactical: false,
+        effectiveSource: "excluded",
+        tacticalExpiry: null,
+        includedInImport: false,
+        includedInScan: false,
         latestBarDate: null,
         inEffectiveUniverse: false,
         latestScanConsidered: false,
@@ -317,6 +327,12 @@ async function run(): Promise<void> {
       symbol: ticker,
       exists: true,
       active: row.active,
+      inCore: row.inCore,
+      inTactical: row.inTactical,
+      effectiveSource: row.effectiveSource,
+      tacticalExpiry: row.tacticalExpiry,
+      includedInImport: row.includedInImport,
+      includedInScan: row.includedInScan,
       latestBarDate: row.latestBarDate,
       inEffectiveUniverse: row.inEffectiveUniverse,
       latestScanConsidered: row.latestScanConsidered,
@@ -373,6 +389,16 @@ async function run(): Promise<void> {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 15)
       .map(([latestBarDate, count]) => ({ latestBarDate, count })),
+    coverageMatrix: rows.map((r) => ({
+      symbol: r.symbol,
+      inCore: r.inCore,
+      inTactical: r.inTactical,
+      effectiveSource: r.effectiveSource,
+      active: r.active,
+      tacticalExpiry: r.tacticalExpiry,
+      includedInImport: r.includedInImport,
+      includedInScan: r.includedInScan,
+    })),
   };
 
   if (jsonOut) {

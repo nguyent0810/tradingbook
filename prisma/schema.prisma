@@ -224,7 +224,7 @@ model StockSymbol {
   @@map("stock_symbols")
 }
 
-/// Additive tactical symbol intake (dormant foundation; not merged into scanner yet).
+/// Additive tactical symbol intake used by effective universe merge (core ∪ tactical).
 model TacticalSymbol {
   id               String               @id @default(cuid())
   symbol           String

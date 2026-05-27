@@ -1,9 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   buildActiveTacticalSymbolWhere,
   computeEffectiveScanUniverse,
   isTacticalSymbolActiveNow,
+  loadEffectiveScanUniverse,
   normalizeTacticalSymbolInput,
+  toEffectiveUniverseSymbols,
 } from "./tactical-universe";
 
 describe("normalizeTacticalSymbolInput", () => {
@@ -156,5 +158,116 @@ describe("computeEffectiveScanUniverse", () => {
     ]);
     expect(r.stats.tacticalMissingStockSymbolCount).toBe(1);
     expect(r.includedTacticalIds).toEqual([]);
+  });
+});
+
+describe("toEffectiveUniverseSymbols", () => {
+  it("maps CORE/TACTICAL/BOTH to lowercase source with tactical metadata", () => {
+    const rows = toEffectiveUniverseSymbols({
+      symbols: [
+        { symbolId: "s1", symbol: "AAA", universeSource: "CORE" },
+        { symbolId: "s2", symbol: "BBB", universeSource: "TACTICAL" },
+        { symbolId: "s3", symbol: "CCC", universeSource: "BOTH" },
+      ],
+      tacticalRows: [
+        {
+          id: "t2",
+          symbol: "BBB",
+          expiresAt: new Date("2026-06-01T00:00:00.000Z"),
+        },
+        {
+          id: "t3",
+          symbol: "CCC",
+          expiresAt: new Date("2026-06-02T00:00:00.000Z"),
+        },
+      ],
+    });
+
+    expect(rows).toEqual([
+      {
+        symbol: "AAA",
+        source: "core",
+        stockSymbolId: "s1",
+        tacticalId: undefined,
+        reason: null,
+        expiresAt: null,
+      },
+      {
+        symbol: "BBB",
+        source: "tactical",
+        stockSymbolId: "s2",
+        tacticalId: "t2",
+        reason: null,
+        expiresAt: new Date("2026-06-01T00:00:00.000Z"),
+      },
+      {
+        symbol: "CCC",
+        source: "both",
+        stockSymbolId: "s3",
+        tacticalId: "t3",
+        reason: null,
+        expiresAt: new Date("2026-06-02T00:00:00.000Z"),
+      },
+    ]);
+  });
+});
+
+describe("loadEffectiveScanUniverse", () => {
+  it("loads merged core+tactical universe via shared helper contract", async () => {
+    const stockFindMany = vi
+      .fn()
+      .mockResolvedValueOnce([
+        { id: "s1", symbol: "AAA" },
+        { id: "s2", symbol: "BBB" },
+      ])
+      .mockResolvedValueOnce([
+        { id: "s2", symbol: "BBB" },
+        { id: "s3", symbol: "GEX" },
+      ]);
+    const tacticalFindMany = vi.fn().mockResolvedValue([
+      {
+        id: "t1",
+        symbol: "GEX",
+        source: "manual",
+        expiresAt: new Date("2026-06-01T00:00:00.000Z"),
+        status: "ACTIVE",
+        activeForScanner: true,
+      },
+      {
+        id: "t2",
+        symbol: "BBB",
+        source: "manual",
+        expiresAt: new Date("2026-06-02T00:00:00.000Z"),
+        status: "ACTIVE",
+        activeForScanner: true,
+      },
+    ]);
+
+    const prisma = {
+      stockSymbol: { findMany: stockFindMany },
+      tacticalSymbol: { findMany: tacticalFindMany },
+    } as unknown as Parameters<typeof loadEffectiveScanUniverse>[0];
+
+    const out = await loadEffectiveScanUniverse(
+      prisma,
+      new Date("2026-05-20T00:00:00.000Z")
+    );
+
+    expect(out.symbols).toEqual([
+      { symbolId: "s1", symbol: "AAA", universeSource: "CORE" },
+      { symbolId: "s2", symbol: "BBB", universeSource: "BOTH" },
+      { symbolId: "s3", symbol: "GEX", universeSource: "TACTICAL" },
+    ]);
+    expect(out.stats).toMatchObject({
+      coreCount: 2,
+      tacticalCount: 2,
+      overlapCount: 1,
+      effectiveCount: 3,
+    });
+    expect(out.effectiveSymbols.map((s) => s.source)).toEqual([
+      "core",
+      "both",
+      "tactical",
+    ]);
   });
 });

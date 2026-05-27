@@ -48,8 +48,7 @@ async function run(): Promise<void> {
     determineFreshBreakoutGroup,
     shouldIncludeFreshBreakoutRow,
   } = await import("../src/lib/scanner/fresh-breakout-audit");
-  const { computeEffectiveScanUniverse, listActiveTacticalSymbols } =
-    await import("../src/lib/tactical-universe");
+  const { loadEffectiveScanUniverse } = await import("../src/lib/tactical-universe");
   const { getLatestDailyScanRun, toCandidateRows } = await import(
     "../src/lib/scanner/setups-queries"
   );
@@ -69,30 +68,7 @@ async function run(): Promise<void> {
   const regime = await getMarketRegimeFromDb("VNINDEX");
   const gate1Level = regime.level as "PASS" | "WARNING" | "FAIL";
 
-  const coreSymbols = await prisma.stockSymbol.findMany({
-    where: { active: true },
-    select: { id: true, symbol: true },
-  });
-  const tacticalSymbols = await listActiveTacticalSymbols(prisma);
-  const tacticalKeys = [...new Set(tacticalSymbols.map((t) => t.symbol.trim().toUpperCase()))];
-  const tacticalStockRows =
-    tacticalKeys.length === 0
-      ? []
-      : await prisma.stockSymbol.findMany({
-          where: { symbol: { in: tacticalKeys } },
-          select: { id: true, symbol: true },
-        });
-  const stockIdBySymbol = new Map(
-    tacticalStockRows.map((s) => [s.symbol.trim().toUpperCase(), s.id] as const)
-  );
-  const universe = computeEffectiveScanUniverse({
-    coreRows: coreSymbols,
-    tacticalRows: tacticalSymbols.map((t) => ({
-      tacticalId: t.id,
-      tacticalSymbol: t.symbol,
-      stockSymbolId: stockIdBySymbol.get(t.symbol.trim().toUpperCase()) ?? null,
-    })),
-  });
+  const universe = await loadEffectiveScanUniverse(prisma);
 
   const latestScan = await getLatestDailyScanRun();
   const surfaced = toCandidateRows(latestScan);
@@ -210,8 +186,14 @@ async function run(): Promise<void> {
 
     const tactical = await prisma.tacticalSymbol.findFirst({
       where: { symbol: symbolKey },
+      orderBy: { expiresAt: "desc" },
       select: { status: true, activeForScanner: true, expiresAt: true },
     });
+    const universeRow = universe.symbols.find((u) => u.symbol === symbolKey);
+    const inCore = stock.active;
+    const inTactical = universe.tacticalRows.some(
+      (t) => t.symbol.trim().toUpperCase() === symbolKey
+    );
 
     const inLatestScanCandidate = latestScan
       ? await prisma.setupCandidate.findFirst({
@@ -224,10 +206,22 @@ async function run(): Promise<void> {
       symbol: symbolKey,
       name: stock.name,
       active: stock.active,
-      inEffectiveUniverse: universe.symbols.some((u) => u.symbol === symbolKey),
-      universeSource:
-        universe.symbols.find((u) => u.symbol === symbolKey)?.universeSource ?? null,
+      inCore,
+      inTactical,
+      inEffectiveUniverse: Boolean(universeRow),
+      universeSource: universeRow?.universeSource ?? null,
+      effectiveSource:
+        universeRow?.universeSource === "CORE"
+          ? "core"
+          : universeRow?.universeSource === "TACTICAL"
+            ? "tactical"
+            : universeRow?.universeSource === "BOTH"
+              ? "both"
+              : "excluded",
       tactical: tactical ?? null,
+      tacticalExpiry: tactical?.expiresAt?.toISOString() ?? null,
+      includedInImport: Boolean(universeRow),
+      includedInScan: Boolean(universeRow),
       barCount: bars.length,
       latestBarDate: latest?.date.toISOString() ?? null,
       latestCloseThousandVnd: latest?.close ?? null,
@@ -304,6 +298,16 @@ async function run(): Promise<void> {
             }
           : null,
         universe: { effectiveCount: universe.stats.effectiveCount },
+        coverageMatrix: symbolResults.map((r) => ({
+          symbol: r.symbol,
+          inCore: r.inCore,
+          inTactical: r.inTactical,
+          effectiveSource: r.effectiveSource,
+          active: r.active,
+          tacticalExpiry: r.tacticalExpiry,
+          includedInImport: r.includedInImport,
+          includedInScan: r.includedInScan,
+        })),
         symbols: symbolResults,
       },
       null,

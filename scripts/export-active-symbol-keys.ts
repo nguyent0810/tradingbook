@@ -12,6 +12,8 @@ import { describeDatabaseUrl } from "./load-env";
 import { isSmokeProductionSymbol } from "../src/lib/scanner/production-smoke-markers";
 import { validateProductionDatabaseUrl } from "../src/lib/ops/production-database-guard";
 import { prisma } from "../src/lib/prisma";
+import { loadEffectiveScanUniverse } from "../src/lib/tactical-universe";
+import { buildImportSymbolKeys } from "../src/lib/effective-universe-export";
 
 const DEFAULT_OUT = join(process.cwd(), "data", "active-symbol-keys.json");
 
@@ -33,17 +35,12 @@ async function main(): Promise<void> {
   const outPath = parseOutPath(process.argv.slice(2));
   console.error("[export-active-symbol-keys] DATABASE_URL:", describeDatabaseUrl());
 
-  const rows = await prisma.stockSymbol.findMany({
-    where: { active: true },
-    select: { symbol: true },
-    orderBy: { symbol: "asc" },
+  const effective = await loadEffectiveScanUniverse(prisma);
+  const symbols = buildImportSymbolKeys(effective.symbols, {
+    exclude: (s) => isSmokeProductionSymbol(s),
   });
 
-  const symbols = rows
-    .map((r) => r.symbol.trim().toUpperCase())
-    .filter((s) => s.length > 0 && !isSmokeProductionSymbol(s));
-
-  const excludedSmoke = rows.length - symbols.length;
+  const excludedSmoke = effective.symbols.length - symbols.length;
   if (excludedSmoke > 0) {
     console.error(
       `[export-active-symbol-keys] excluded ${excludedSmoke} smoke symbol(s) from export`
@@ -58,7 +55,14 @@ async function main(): Promise<void> {
       {
         ok: true,
         outPath,
-        activeExported: symbols.length,
+        effectiveExported: symbols.length,
+        sourceCounts: effective.symbols.reduce(
+          (acc, row) => {
+            acc[row.universeSource] = (acc[row.universeSource] ?? 0) + 1;
+            return acc;
+          },
+          { CORE: 0, TACTICAL: 0, BOTH: 0 } as Record<"CORE" | "TACTICAL" | "BOTH", number>
+        ),
         excludedSmoke,
       },
       null,
