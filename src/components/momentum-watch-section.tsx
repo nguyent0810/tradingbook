@@ -35,7 +35,7 @@ export async function MomentumWatchSection() {
   let dbError: unknown = null;
   try {
     rows = await getMomentumWatchRowsForPhase1(prisma, {
-      limit: 3,
+      limit: 8,
       includeExtendedWatchOnly: true,
       includeFailedRisk: false,
     });
@@ -51,12 +51,10 @@ export async function MomentumWatchSection() {
         <h2 className="dash-section-title" style={{ color: "var(--text-primary)" }}>
           Momentum Watch
         </h2>
-        <details className="text-xs mt-1">
-          <summary className="cursor-pointer text-[var(--accent-text)] font-medium">About this list</summary>
-          <p className="mt-1 leading-snug" style={{ color: "var(--text-secondary)" }}>
-            {MOMENTUM_WATCH_UI_DISCLAIMER}. Not validated core setups — observational context only.
-          </p>
-        </details>
+        <p className="text-xs mt-1 leading-snug" style={{ color: "var(--text-secondary)" }}>
+          {MOMENTUM_WATCH_UI_DISCLAIMER}. Observational only — not a validated Best Setup (Gate2
+          breakout-pullback). Names like PDR may appear here without qualifying for Tier A/B.
+        </p>
       </div>
 
       {rows.length === 0 && dbError ? (
