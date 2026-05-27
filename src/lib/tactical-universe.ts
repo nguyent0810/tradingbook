@@ -56,6 +56,15 @@ export type UniverseSymbolRow = {
   universeSource: UniverseSource;
 };
 
+export type EffectiveUniverseSymbol = {
+  symbol: string;
+  source: "core" | "tactical" | "both";
+  stockSymbolId?: string;
+  tacticalId?: string;
+  reason?: string | null;
+  expiresAt?: Date | null;
+};
+
 export type EffectiveUniverseStats = {
   coreCount: number;
   tacticalCount: number;
@@ -75,10 +84,7 @@ type TacticalStockMatchInput = {
   stockSymbolId: string | null;
 };
 
-/**
- * Dormant read path: active tactical rows only.
- * Intentionally not merged into scanner runtime in this slice.
- */
+/** Active tactical rows eligible for effective universe merge. */
 export async function listActiveTacticalSymbols(
   prisma: PrismaClient,
   now: Date = new Date()
@@ -156,5 +162,85 @@ export function computeEffectiveScanUniverse(params: {
       tacticalMissingStockSymbolCount,
     },
     includedTacticalIds: [...includedTacticalIds],
+  };
+}
+
+export function toEffectiveUniverseSymbols(params: {
+  symbols: ReadonlyArray<UniverseSymbolRow>;
+  tacticalRows?: ReadonlyArray<Pick<ActiveTacticalSymbolRow, "id" | "symbol" | "expiresAt">>;
+}): EffectiveUniverseSymbol[] {
+  const tacticalRows = params.tacticalRows ?? [];
+  const tacticalBySymbol = new Map<string, Pick<ActiveTacticalSymbolRow, "id" | "symbol" | "expiresAt">>();
+  for (const row of tacticalRows) {
+    const key = normalizeTacticalSymbolInput(row.symbol);
+    if (!tacticalBySymbol.has(key)) tacticalBySymbol.set(key, row);
+  }
+
+  return params.symbols.map((row) => {
+    const tactical = tacticalBySymbol.get(row.symbol);
+    const source =
+      row.universeSource === "CORE"
+        ? "core"
+        : row.universeSource === "TACTICAL"
+          ? "tactical"
+          : "both";
+    return {
+      symbol: row.symbol,
+      source,
+      stockSymbolId: row.symbolId,
+      tacticalId: tactical?.id,
+      reason: null,
+      expiresAt: tactical?.expiresAt ?? null,
+    };
+  });
+}
+
+export async function loadEffectiveScanUniverse(
+  prisma: PrismaClient,
+  now: Date = new Date()
+): Promise<{
+  symbols: UniverseSymbolRow[];
+  effectiveSymbols: EffectiveUniverseSymbol[];
+  stats: EffectiveUniverseStats;
+  includedTacticalIds: string[];
+  tacticalRows: ActiveTacticalSymbolRow[];
+}> {
+  const coreRows = await prisma.stockSymbol.findMany({
+    where: { active: true },
+    select: { id: true, symbol: true },
+    orderBy: { symbol: "asc" },
+  });
+  const tacticalRows = await listActiveTacticalSymbols(prisma, now);
+  const tacticalKeys = [...new Set(tacticalRows.map((t) => t.symbol.trim().toUpperCase()))];
+  const tacticalStockRows =
+    tacticalKeys.length === 0
+      ? []
+      : await prisma.stockSymbol.findMany({
+          where: { symbol: { in: tacticalKeys } },
+          select: { id: true, symbol: true },
+        });
+  const stockIdBySymbol = new Map(
+    tacticalStockRows.map((s) => [s.symbol.trim().toUpperCase(), s.id] as const)
+  );
+  const tacticalMatches = tacticalRows.map((t) => ({
+    tacticalId: t.id,
+    tacticalSymbol: t.symbol,
+    stockSymbolId: stockIdBySymbol.get(t.symbol.trim().toUpperCase()) ?? null,
+  }));
+
+  const merged = computeEffectiveScanUniverse({
+    coreRows,
+    tacticalRows: tacticalMatches,
+  });
+
+  return {
+    symbols: merged.symbols,
+    effectiveSymbols: toEffectiveUniverseSymbols({
+      symbols: merged.symbols,
+      tacticalRows,
+    }),
+    stats: merged.stats,
+    includedTacticalIds: merged.includedTacticalIds,
+    tacticalRows,
   };
 }

@@ -28,8 +28,7 @@ import {
   syncWatchItemsFromSurfacedCandidates,
 } from "@/lib/setup-health";
 import {
-  computeEffectiveScanUniverse,
-  listActiveTacticalSymbols,
+  loadEffectiveScanUniverse,
   type UniverseSource,
 } from "@/lib/tactical-universe";
 import { isBenchmarkStaleVsEquity } from "@/lib/market/market-data-freshness-report";
@@ -126,35 +125,7 @@ export async function runDailyScanJob(
 
     const regime = await getMarketRegimeFromDb();
     const gate1Level = toGate1ScanLevel(regime.level);
-    const coreSymbols = await prisma.stockSymbol.findMany({
-      where: { active: true },
-      select: { id: true, symbol: true },
-      orderBy: { symbol: "asc" },
-    });
-    const tacticalSymbols = await listActiveTacticalSymbols(prisma, startedAt);
-    const tacticalSymbolKeys = [
-      ...new Set(tacticalSymbols.map((t) => t.symbol.trim().toUpperCase())),
-    ];
-    const tacticalStockRows =
-      tacticalSymbolKeys.length === 0
-        ? []
-        : await prisma.stockSymbol.findMany({
-            where: { symbol: { in: tacticalSymbolKeys } },
-            select: { id: true, symbol: true },
-          });
-    const stockIdBySymbol = new Map(
-      tacticalStockRows.map((s) => [s.symbol.trim().toUpperCase(), s.id] as const)
-    );
-    const tacticalMatches = tacticalSymbols.map((t) => ({
-      tacticalId: t.id,
-      tacticalSymbol: t.symbol,
-      stockSymbolId: stockIdBySymbol.get(t.symbol.trim().toUpperCase()) ?? null,
-    }));
-
-    const effectiveUniverse = computeEffectiveScanUniverse({
-      coreRows: coreSymbols,
-      tacticalRows: tacticalMatches,
-    });
+    const effectiveUniverse = await loadEffectiveScanUniverse(prisma, startedAt);
     const symbolsToScan =
       scanLimit > 0
         ? effectiveUniverse.symbols.slice(0, scanLimit)
@@ -322,7 +293,7 @@ export async function runDailyScanJob(
     const selectedSymbolSet = new Set(
       symbolsToScan.map((s) => s.symbol.trim().toUpperCase())
     );
-    const selectedTacticalIds = tacticalSymbols
+    const selectedTacticalIds = effectiveUniverse.tacticalRows
       .filter((t) => selectedSymbolSet.has(t.symbol.trim().toUpperCase()))
       .map((t) => t.id);
 
