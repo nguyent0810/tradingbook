@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "description": "Bounded curated core activation for production bar recovery (May 2026). Activate-only; does not deactivate existing actives.",
+  "tier1_required": [
+    "VND",
+    "PDR",
+    "SSI",
+    "HPG",
+    "FPT",
+    "MWG",
+    "VHM",
+    "VIC",
+    "TCB",
+    "MBB",
+    "VPB",
+    "VRE",
+    "NVL"
+  ],
+  "tier2_supplemental": [
+    "SHB",
+    "VCB",
+    "STB",
+    "MSN"
+  ],
+  "excluded_notes": {
+    "BCG": "Excluded — 164 session staleness cluster outlier",
+    "BCR": "Excluded — lower liquidity vs tier targets",
+    "BGE": "Excluded — lower liquidity vs tier targets",
+    "HCM": "Excluded — no bars; needs separate seed/import path",
+    "VCI": "Excluded — no bars",
+    "DIG": "Excluded — no bars",
+    "DXG": "Excluded — no bars"
+  }
+}
