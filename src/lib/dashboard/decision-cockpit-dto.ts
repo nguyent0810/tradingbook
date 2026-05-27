@@ -799,30 +799,50 @@ export function resolveBestSetupsPanelPresentation(params: {
   }
 
   const { opportunity, latestScan } = params;
-  if (opportunity.mode === "near_miss") {
+
+  function emptyBestSetupsCopy(extraNearMissHint: boolean): BestSetupsPanelPresentation {
+    if (!latestScan) {
+      return {
+        mode: "compact_empty",
+        emptyTitle: "No validated breakout-pullback setups today",
+        emptyReason: "No daily scan yet — check Setups after the next scan run.",
+      };
+    }
+    const gate1 = latestScan.gate1Level;
+    const gate1Note =
+      gate1 === "WARNING"
+        ? "Gate 1 is WARNING (Tier B would not surface even if present)."
+        : gate1 === "FAIL"
+          ? "Gate 1 is FAIL — new swing setups are suppressed."
+          : "Gate 1 is PASS.";
+    const nearHint = extraNearMissHint
+      ? " See Near miss / rejection panel for closest names (e.g. VND pullback-box near-miss)."
+      : " See Near miss / rejection and Momentum Watch below for observational context.";
     return {
       mode: "compact_empty",
-      emptyTitle: "No Tier A/B table rows",
-      emptyReason:
-        "Near-miss names and wait-fors are in Opportunity preview and What next above.",
+      emptyTitle: "No validated breakout-pullback setups today",
+      emptyReason: [
+        "Coverage is fresh; the scanner found 0 Tier A/B candidates under current Gate2 rules.",
+        `${gate1Note} Surfaced: ${latestScan.candidateCountSurfaced} (Tier A ${latestScan.candidateCountA} · Tier B ${latestScan.candidateCountB}).`,
+        nearHint,
+      ].join(" "),
     };
+  }
+
+  if (opportunity.mode === "near_miss") {
+    return emptyBestSetupsCopy(true);
   }
 
   if (opportunity.mode === "candidates") {
     return {
       mode: "compact_empty",
-      emptyTitle: "No setup rows to display",
-      emptyReason: "Surfaced names are in Opportunity preview — none scored for this table.",
+      emptyTitle: "No validated breakout-pullback setups today",
+      emptyReason:
+        "Surfaced names appear in Opportunity preview — none scored for this detail table.",
     };
   }
 
-  return {
-    mode: "compact_empty",
-    emptyTitle: "No Tier A/B table rows",
-    emptyReason: latestScan
-      ? "See Opportunity preview and What next above, or open Setups for full pipeline."
-      : "No daily scan yet — check Setups after the next scan run.",
-  };
+  return emptyBestSetupsCopy(false);
 }
 
 function buildActionableBlockers(
