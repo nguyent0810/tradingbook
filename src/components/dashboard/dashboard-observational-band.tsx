@@ -10,9 +10,6 @@ export type DashboardObservationalBandProps = {
   scanRunId: string | null;
 };
 
-/**
- * Near-miss + momentum + integrity — explicitly observational (not Tier A/B actionable).
- */
 export function DashboardObservationalBand({
   opportunity,
   freshness,
@@ -20,34 +17,36 @@ export function DashboardObservationalBand({
 }: DashboardObservationalBandProps) {
   return (
     <section
-      className="dash-cockpit-v11__observational"
+      className="dash-v2-zone dash-v2-zone--observational"
       aria-labelledby="dashboard-observational-heading"
       data-testid="dashboard-observational-band"
     >
-      <header className="dash-cockpit-v11__observational-header">
+      <header className="dash-v2-zone-header dash-v2-zone-header--row">
         <div>
-          <p className="dash-eyebrow">Observational only</p>
-          <h2 id="dashboard-observational-heading" className="dash-section-title">
+          <p className="dash-v2-eyebrow">Observational only</p>
+          <h2 id="dashboard-observational-heading" className="dash-v2-zone-title">
             Near-miss &amp; momentum
           </h2>
-          <p className="dash-panel__subtitle">
-            Scanner context and fresh-breakout audit — not validated Best Setups (Gate2
-            breakout-pullback).
+          <p className="dash-v2-zone-lead">
+            Scanner context and fresh-breakout audit — not validated Best Setups.
           </p>
         </div>
-        <span className="dash-chip dash-chip--observational">Not actionable</span>
+        <span className="dash-v2-tag dash-v2-tag--observational">Watch, don&apos;t act</span>
       </header>
 
-      <div className="dash-cockpit-v11__observational-grid">
+      <div className="dash-v2-observational-grid">
         <DashboardNearMissRejectionsPanel opportunity={opportunity} />
-        <div className="dash-cockpit-v11__momentum-slot">
+        <div className="dash-v2-card dash-v2-card--inset dash-v2-momentum-slot">
           <MomentumWatchSection />
         </div>
       </div>
 
-      <div className="dash-cockpit-v11__integrity-slot">
-        <DashboardDataIntegrityNotes freshness={freshness} scanRunId={scanRunId} />
-      </div>
+      <details className="dash-v2-details dash-v2-details--quiet">
+        <summary className="dash-v2-details__summary">Data integrity notes</summary>
+        <div className="dash-v2-details__body">
+          <DashboardDataIntegrityNotes freshness={freshness} scanRunId={scanRunId} />
+        </div>
+      </details>
     </section>
   );
 }

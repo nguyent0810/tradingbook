@@ -46,16 +46,13 @@ export async function MomentumWatchSection() {
   }
 
   return (
-    <section className="dash-momentum dash-panel dash-surface-1" id="momentum-watch">
-      <div>
-        <h2 className="dash-section-title" style={{ color: "var(--text-primary)" }}>
-          Momentum Watch
-        </h2>
-        <p className="text-xs mt-1 leading-snug" style={{ color: "var(--text-secondary)" }}>
-          {MOMENTUM_WATCH_UI_DISCLAIMER}. Observational only — not a validated Best Setup (Gate2
-          breakout-pullback). Names like PDR may appear here without qualifying for Tier A/B.
+    <div className="dash-momentum dash-v2-momentum-inner" id="momentum-watch">
+      <header className="dash-v2-card__header">
+        <h3 className="dash-v2-card__title">Momentum Watch</h3>
+        <p className="dash-v2-card__lead">
+          {MOMENTUM_WATCH_UI_DISCLAIMER}. Observational only — not a validated Best Setup.
         </p>
-      </div>
+      </header>
 
       {rows.length === 0 && dbError ? (
         <ErrorStateWithEvidence
@@ -143,6 +140,6 @@ export async function MomentumWatchSection() {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }

@@ -46,30 +46,29 @@ export function DashboardNearMissRejectionsPanel({
   const rows = opportunity.nearMiss;
 
   return (
-    <section
-      className="dash-near-miss dash-panel dash-surface-1"
-      data-testid="dashboard-near-miss-panel"
-    >
-      <header className="dash-panel__header">
-        <h3 className="dash-section-title">Near miss / rejection reasons</h3>
-        <p className="dash-panel__subtitle">
-          Closest names from the latest scan that did not become Tier A/B setups.
+    <div className="dash-v2-card dash-v2-card--inset dash-v2-near-miss" data-testid="dashboard-near-miss-panel">
+      <header className="dash-v2-card__header">
+        <h3 className="dash-v2-card__title">Near miss / rejection</h3>
+        <p className="dash-v2-card__lead">
+          Closest names that did not become Tier A/B setups.
         </p>
       </header>
 
       {rows.length === 0 ? (
-        <EmptyStateWithReason
-          title="No near-miss ranking in latest scan"
-          reason={
-            opportunity.emptyReason ??
-            "Scanner notes did not include closest-to-valid symbols for this run."
-          }
-          data-testid="dashboard-near-miss-empty"
-        >
-          <Link href="/setups" className="btn btn-secondary text-xs">
-            Open Setups pipeline
-          </Link>
-        </EmptyStateWithReason>
+        <div className="dash-v2-empty">
+          <EmptyStateWithReason
+            title="No near-miss ranking in latest scan"
+            reason={
+              opportunity.emptyReason ??
+              "Scanner notes did not include closest-to-valid symbols for this run."
+            }
+            data-testid="dashboard-near-miss-empty"
+          >
+            <Link href="/setups" className="btn btn-secondary dash-v2-btn-secondary">
+              Open pipeline
+            </Link>
+          </EmptyStateWithReason>
+        </div>
       ) : (
         <>
           <ul className="dash-near-miss__list">
@@ -79,13 +78,13 @@ export function DashboardNearMissRejectionsPanel({
           </ul>
           <p className="dash-near-miss__footer text-xs" style={{ color: "var(--text-tertiary)" }}>
             Full rejection buckets and symbol lists are on{" "}
-            <Link href="/setups" className="font-medium text-[var(--accent-text)]">
-              Setups
+            <Link href="/setups" className="dash-v2-link">
+              Setups pipeline
             </Link>
             .
           </p>
         </>
       )}
-    </section>
+    </div>
   );
 }

@@ -1,7 +1,12 @@
 import type { ReactNode } from "react";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
-import type { ActionableBlockerDto, EvidenceChipDto, TomorrowPlanDto, VerdictDto } from "@/lib/dashboard/decision-cockpit-dto";
+import type {
+  ActionableBlockerDto,
+  EvidenceChipDto,
+  TomorrowPlanDto,
+  VerdictDto,
+} from "@/lib/dashboard/decision-cockpit-dto";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
@@ -17,7 +22,6 @@ export type DashboardCommandPanelProps = {
   tomorrow: TomorrowPlanDto;
   evidence: EvidenceChipDto[];
   blockers: ActionableBlockerDto[];
-  /** Right rail (5/12 layout): exposure + performance — Command Center v1.1 */
   heroAside?: ReactNode;
 };
 
@@ -33,35 +37,40 @@ export function DashboardCommandPanel({
   heroAside,
 }: DashboardCommandPanelProps) {
   return (
-    <section className="dash-command-panel dash-panel dash-surface-1" data-testid="dashboard-cockpit-zone-decision">
+    <section
+      className="dash-v2-command"
+      data-testid="dashboard-cockpit-zone-decision"
+      aria-labelledby="dash-v2-command-heading"
+    >
+      <h2 id="dash-v2-command-heading" className="dash-sr-only">
+        Command center hero
+      </h2>
+
       <div
-        className="dash-command-panel__status dash-cockpit-v11__sticky-status card--strip"
+        className="dash-v2-command__status"
         data-testid="dashboard-cockpit-zone-status"
       >
         <DashboardMarketStatusBar freshness={freshness} />
         <DashboardScanMetaStrip latestScan={latestScan} delayedBackdrop={scanDelayedBackdrop} />
       </div>
 
-      <div className="dash-command-panel__hero dash-cockpit-v11__hero-rail">
-        <div className="dash-command-panel__hero-main">
-          <div className="card--hero">
-            <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} compact />
-          </div>
-          <div className="card--hero">
+      <div className="dash-v2-command__hero">
+        <div className="dash-v2-command__stance">
+          <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} compact />
+          <div className="dash-v2-card dash-v2-card--inset">
             <DashboardTomorrowPlan tomorrow={tomorrow} promoted />
           </div>
         </div>
         {heroAside ? (
-          <div className="dash-command-panel__hero-aside" data-testid="dashboard-hero-aside">
+          <aside className="dash-v2-rail" data-testid="dashboard-hero-aside">
             {heroAside}
-          </div>
+          </aside>
         ) : null}
       </div>
 
-      <div className="dash-command-panel__evidence card--compact">
+      <div className="dash-v2-proof-foot">
         <DashboardEvidenceCompact chips={evidence} blockers={blockers} />
       </div>
     </section>
   );
 }
-

@@ -9,13 +9,13 @@ export function DashboardEntrance({ children }: { children: ReactNode }) {
   const items = React.Children.toArray(children).filter(Boolean);
 
   return (
-    <div className="dash-cockpit-v11__entrance" data-testid="dashboard-entrance">
+    <div className="dash-cockpit-v2__entrance" data-testid="dashboard-entrance">
       {items.map((child, index) => {
         const style: EntranceStyle = { "--entrance-index": index };
         return (
           <div
             key={index}
-            className="dash-cockpit-v11__entrance-item"
+            className="dash-cockpit-v2__entrance-item"
             style={style}
           >
             {child}

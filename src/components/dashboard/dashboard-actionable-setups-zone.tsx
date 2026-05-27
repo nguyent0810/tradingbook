@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DashboardBestSetupsPanel } from "@/components/dashboard/dashboard-best-setups-panel";
 import type { BestSetupsPanelPresentation } from "@/lib/dashboard/decision-cockpit-dto";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health";
@@ -7,29 +8,40 @@ export type DashboardActionableSetupsZoneProps = {
   bestSetupsPresentation: BestSetupsPanelPresentation;
 };
 
-/** Command Center v1.1 — Row C: Tier A/B actionable setups only. */
 export function DashboardActionableSetupsZone({
   topSetups,
   bestSetupsPresentation,
 }: DashboardActionableSetupsZoneProps) {
   return (
-    <div
-      className="dash-cockpit-v11__setups-zone"
+    <section
+      className="dash-v2-zone dash-v2-zone--actionable"
       data-testid="dashboard-actionable-setups-zone"
+      aria-labelledby="dashboard-actionable-heading"
     >
-      <header className="dash-cockpit-v11__zone-header dash-cockpit-v11__zone-header--inline">
+      <header className="dash-v2-zone-header dash-v2-zone-header--row">
         <div>
-          <p className="dash-eyebrow">Actionable</p>
-          <p className="dash-panel__subtitle">
-            Tier A/B validated breakout-pullback — log trade when criteria match your playbook.
+          <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Actionable now</p>
+          <h2 id="dashboard-actionable-heading" className="dash-v2-zone-title">
+            Best setups
+          </h2>
+          <p className="dash-v2-zone-lead">
+            Tier A/B validated breakout-pullback — log when your playbook criteria match.
           </p>
         </div>
-        <span className="dash-chip dash-chip--actionable">Best setups</span>
+        <div className="dash-v2-zone-header__actions">
+          <span className="dash-v2-tag dash-v2-tag--actionable">Operational</span>
+          <Link href="/trades/new" className="btn btn-primary btn-sm dash-v2-btn-primary">
+            Log trade
+          </Link>
+        </div>
       </header>
-      <DashboardBestSetupsPanel
-        topSetups={topSetups}
-        presentation={bestSetupsPresentation}
-      />
-    </div>
+      <div className="dash-v2-zone__body">
+        <DashboardBestSetupsPanel
+          topSetups={topSetups}
+          presentation={bestSetupsPresentation}
+          embedded
+        />
+      </div>
+    </section>
   );
 }
