@@ -3066,6 +3066,24 @@ body {
   gap: var(--space-4);
 }
 
+.dash-cockpit-v11__entrance-item {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: dash-v11-entrance 320ms ease-out forwards;
+  animation-delay: calc(var(--entrance-index, 0) * 70ms);
+}
+
+@keyframes dash-v11-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .dash-cockpit-v11__sticky-status {
   position: sticky;
   top: var(--app-header-height);
@@ -3281,5 +3299,7 @@ body {
   .dash-cockpit-v11__sticky-status {
     animation: none !important;
     transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
