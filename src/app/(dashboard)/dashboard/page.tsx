@@ -26,10 +26,14 @@ import {
 } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
 import { DashboardOpportunityBoard } from "@/components/dashboard/dashboard-opportunity-board";
 import { DashboardSecondaryIntelligence } from "@/components/dashboard/dashboard-secondary-intelligence";
+import { DashboardTradingDecisionSummary } from "@/components/dashboard/dashboard-trading-decision-summary";
+import { DashboardNearMissRejectionsPanel } from "@/components/dashboard/dashboard-near-miss-rejections-panel";
+import { DashboardDataIntegrityNotes } from "@/components/dashboard/dashboard-data-integrity-notes";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -198,34 +202,46 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      <DashboardCommandPanel
-        freshness={freshness}
-        latestScan={latestScan}
-        scanDelayedBackdrop={scanDelayedBackdrop}
-        verdict={cockpitDto.verdict}
-        surfacedCount={surfacedCount}
-        tomorrow={cockpitDto.tomorrow}
-        evidence={cockpitDto.evidence}
-        blockers={cockpitDto.blockers}
-      />
+      <DashboardEntrance>
+        <DashboardCommandPanel
+          freshness={freshness}
+          latestScan={latestScan}
+          scanDelayedBackdrop={scanDelayedBackdrop}
+          verdict={cockpitDto.verdict}
+          surfacedCount={surfacedCount}
+          tomorrow={cockpitDto.tomorrow}
+          evidence={cockpitDto.evidence}
+          blockers={cockpitDto.blockers}
+        />
 
-      <DashboardOpportunityBoard
-        opportunity={cockpitDto.opportunity}
-        ladder={cockpitDto.setupQualityLadder}
-        risk={cockpitDto.risk}
-        verdict={cockpitDto.verdict}
-        riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-        portfolioRiskConfigured={portfolioRiskConfigured}
-      />
+        <DashboardTradingDecisionSummary latestScan={latestScan} verdict={cockpitDto.verdict} />
 
-      <DashboardSecondaryIntelligence
-        diagnostics={cockpitDto.actionableDiagnostics}
-        topSetups={topSetups}
-        bestSetupsPresentation={bestSetupsPresentation}
-        watchItems={activeWatchItems}
-        latestCloseBySymbol={latestCloseBySymbol}
-        trades={trades}
-      />
+        <div className="dash-command-center-v1__watch-row grid gap-6 lg:grid-cols-2">
+          <DashboardNearMissRejectionsPanel opportunity={cockpitDto.opportunity} />
+          <DashboardDataIntegrityNotes
+            freshness={freshness}
+            scanRunId={cockpitDto.scanRunId}
+          />
+        </div>
+
+        <DashboardOpportunityBoard
+          opportunity={cockpitDto.opportunity}
+          ladder={cockpitDto.setupQualityLadder}
+          risk={cockpitDto.risk}
+          verdict={cockpitDto.verdict}
+          riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
+          portfolioRiskConfigured={portfolioRiskConfigured}
+        />
+
+        <DashboardSecondaryIntelligence
+          diagnostics={cockpitDto.actionableDiagnostics}
+          topSetups={topSetups}
+          bestSetupsPresentation={bestSetupsPresentation}
+          watchItems={activeWatchItems}
+          latestCloseBySymbol={latestCloseBySymbol}
+          trades={trades}
+        />
+      </DashboardEntrance>
     </div>
   );
 }

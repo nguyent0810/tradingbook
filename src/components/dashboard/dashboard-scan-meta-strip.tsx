@@ -49,6 +49,9 @@ export function DashboardScanMetaStrip({
         {latestScan.symbolCountScanned}/{latestScan.symbolCountTotal} scanned
       </span>
       <span className="dash-chip">
+        Tradable {latestScan.symbolCountAfterTradability}
+      </span>
+      <span className="dash-chip">
         Surfaced {latestScan.candidateCountSurfaced} (A {latestScan.candidateCountA} · B{" "}
         {latestScan.candidateCountB})
       </span>
