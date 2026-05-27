@@ -1,7 +1,7 @@
 # Market Universe Coverage Strategy (Core + Tactical)
 
 **Scope:** Coverage universe/import workstream only  
-**Status:** Strategy proposal (no runtime implementation in this slice)
+**Status:** Strategy approved; runtime alignment implementation in progress
 
 ---
 
