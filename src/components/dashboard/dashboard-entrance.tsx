@@ -1,19 +1,27 @@
-﻿import React from "react";
+﻿import type { CSSProperties, ReactNode } from "react";
+import React from "react";
 
-export function DashboardEntrance({ children }: { children: React.ReactNode }) {
+type EntranceStyle = CSSProperties & {
+  "--entrance-index"?: number;
+};
+
+export function DashboardEntrance({ children }: { children: ReactNode }) {
   const items = React.Children.toArray(children).filter(Boolean);
 
   return (
     <div className="dash-cockpit-v11__entrance" data-testid="dashboard-entrance">
-      {items.map((child, index) => (
-        <div
-          key={index}
-          className="dash-cockpit-v11__entrance-item"
-          style={{ ["--entrance-index" as const]: index }}
-        >
-          {child}
-        </div>
-      ))}
+      {items.map((child, index) => {
+        const style: EntranceStyle = { "--entrance-index": index };
+        return (
+          <div
+            key={index}
+            className="dash-cockpit-v11__entrance-item"
+            style={style}
+          >
+            {child}
+          </div>
+        );
+      })}
     </div>
   );
 }
