@@ -29,11 +29,12 @@ import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-heade
 import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
+import { DashboardHeroAside } from "@/components/dashboard/dashboard-hero-aside";
 import { DashboardOpportunityBoard } from "@/components/dashboard/dashboard-opportunity-board";
 import { DashboardSecondaryIntelligence } from "@/components/dashboard/dashboard-secondary-intelligence";
 import { DashboardTradingDecisionSummary } from "@/components/dashboard/dashboard-trading-decision-summary";
-import { DashboardNearMissRejectionsPanel } from "@/components/dashboard/dashboard-near-miss-rejections-panel";
-import { DashboardDataIntegrityNotes } from "@/components/dashboard/dashboard-data-integrity-notes";
+import { DashboardObservationalBand } from "@/components/dashboard/dashboard-observational-band";
+import { DashboardActionableSetupsZone } from "@/components/dashboard/dashboard-actionable-setups-zone";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -190,7 +191,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="page-container dash-cockpit dash-cockpit--action-first animate-in pb-10">
+    <div className="page-container dash-cockpit dash-cockpit--v11 pb-10">
       <DashboardPageHeader />
 
       {dbLoadError ? (
@@ -203,6 +204,7 @@ export default async function DashboardPage() {
       ) : null}
 
       <DashboardEntrance>
+        {/* EOD 1–2: stance + exposure/performance (5/12 hero rail) */}
         <DashboardCommandPanel
           freshness={freshness}
           latestScan={latestScan}
@@ -212,34 +214,46 @@ export default async function DashboardPage() {
           tomorrow={cockpitDto.tomorrow}
           evidence={cockpitDto.evidence}
           blockers={cockpitDto.blockers}
+          heroAside={
+            <DashboardHeroAside
+              risk={cockpitDto.risk}
+              verdict={cockpitDto.verdict}
+              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
+              portfolioRiskConfigured={portfolioRiskConfigured}
+              trades={trades}
+            />
+          }
         />
 
-        <DashboardTradingDecisionSummary latestScan={latestScan} verdict={cockpitDto.verdict} />
+        <DashboardTradingDecisionSummary
+          latestScan={latestScan}
+          verdict={cockpitDto.verdict}
+        />
 
-        <div className="dash-command-center-v1__watch-row grid gap-6 lg:grid-cols-2">
-          <DashboardNearMissRejectionsPanel opportunity={cockpitDto.opportunity} />
-          <DashboardDataIntegrityNotes
-            freshness={freshness}
-            scanRunId={cockpitDto.scanRunId}
-          />
-        </div>
-
+        {/* Pipeline context before actionable table */}
         <DashboardOpportunityBoard
           opportunity={cockpitDto.opportunity}
           ladder={cockpitDto.setupQualityLadder}
-          risk={cockpitDto.risk}
-          verdict={cockpitDto.verdict}
-          riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-          portfolioRiskConfigured={portfolioRiskConfigured}
         />
 
-        <DashboardSecondaryIntelligence
-          diagnostics={cockpitDto.actionableDiagnostics}
+        {/* EOD 3: actionable setups */}
+        <DashboardActionableSetupsZone
           topSetups={topSetups}
           bestSetupsPresentation={bestSetupsPresentation}
+        />
+
+        {/* Observational: near-miss + momentum */}
+        <DashboardObservationalBand
+          opportunity={cockpitDto.opportunity}
+          freshness={freshness}
+          scanRunId={cockpitDto.scanRunId}
+        />
+
+        {/* EOD 4: watchlist + collapsible diagnostics */}
+        <DashboardSecondaryIntelligence
+          diagnostics={cockpitDto.actionableDiagnostics}
           watchItems={activeWatchItems}
           latestCloseBySymbol={latestCloseBySymbol}
-          trades={trades}
         />
       </DashboardEntrance>
     </div>
