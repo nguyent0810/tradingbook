@@ -1,0 +1,220 @@
+import { describe, expect, it } from "vitest";
+import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import {
+  buildDecisionCockpitDto,
+  type DecisionCockpitInput,
+} from "./decision-cockpit-dto";
+import {
+  confidenceBandMeterWidth,
+  mapDashboardV3ViewModel,
+  mapUxVerdictToDecisionMode,
+} from "./map-dashboard-v3-view-model";
+
+const alignedFreshness = buildMarketFreshnessDto({
+  snapshot: {
+    benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
+    latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
+    latestScanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+  },
+});
+
+function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockpitInput {
+  return {
+    latestScan: {
+      id: "scan-1",
+      runAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+      gate1Level: "PASS",
+      candidateCountA: 0,
+      candidateCountB: 0,
+      candidateCountSurfaced: 0,
+      universeScannedCount: 400,
+    },
+    scanNotes: {
+      gate2QualityCounts: { A: 0, B: 0, INVALID: 10 },
+      invalidCountByCategory: {},
+      topRejectionCategories: { extension_cap: 5 },
+      rejectionSymbolsByCategory: { extension_cap: ["MWG"] },
+      topRejectionTerminalReasons: {},
+      closestToValidSymbols: [
+        {
+          symbol: "HPG",
+          partialPipelineScore: 0.8,
+          stageRank: 58,
+          reasonLineCount: 1,
+          terminalCategory: "pullback_zone_interaction",
+          terminalReasonPreview: "Not in zone",
+          rankScore: 70,
+          close: 28,
+          breakoutLevel: 27,
+          pullbackZoneLow: 27.5,
+          pullbackZoneHigh: 28.2,
+          stopLevel: 26.5,
+        },
+      ],
+      recommendation: {
+        likelyBottleneck: "pullback_zone_interaction",
+        summary: "",
+        note: "",
+      },
+    },
+    liveRegime: {
+      level: "PASS",
+      symbol: "VNINDEX",
+      latestBar: { date: new Date(Date.UTC(2026, 4, 25)), close: 1286.42 },
+    },
+    freshness: alignedFreshness,
+    surfacedCandidates: [],
+    watchlist: [],
+    openExposureVnd: 0,
+    accountEquityVnd: null,
+    portfolioRiskConfigured: false,
+    now: new Date(Date.UTC(2026, 4, 25, 14, 0, 0)),
+    ...overrides,
+  };
+}
+
+function mapFromInput(input: DecisionCockpitInput) {
+  const dto = buildDecisionCockpitDto(input);
+  return mapDashboardV3ViewModel({
+    cockpitDto: dto,
+    freshness: input.freshness,
+    regime: {
+      ...input.liveRegime,
+      storedBarsCount: 60,
+      evaluatedBarsCount: 60,
+      checkedAt: input.now ?? new Date(),
+      reasons: [],
+      trend: "bullish",
+      momentum: "up",
+    },
+    latestScan: input.latestScan
+      ? ({
+          id: input.latestScan.id,
+          runAt: input.latestScan.runAt,
+          gate1Level: input.latestScan.gate1Level,
+          candidateCountA: input.latestScan.candidateCountA,
+          candidateCountB: input.latestScan.candidateCountB,
+          candidateCountSurfaced: input.latestScan.candidateCountSurfaced,
+          universeScannedCount: input.latestScan.universeScannedCount,
+          notes: null,
+          candidates: [],
+        } as Parameters<typeof mapDashboardV3ViewModel>[0]["latestScan"])
+      : null,
+    topSetups: [],
+    trades: [],
+    watchItemCount: 2,
+    openPositionCount: 0,
+  });
+}
+
+describe("confidenceBandMeterWidth", () => {
+  it("maps bands to UX widths without exposing percent labels", () => {
+    expect(confidenceBandMeterWidth("high")).toBe(85);
+    expect(confidenceBandMeterWidth("medium")).toBe(65);
+    expect(confidenceBandMeterWidth("low")).toBe(40);
+  });
+});
+
+describe("mapDashboardV3ViewModel — NO_TRADE + near-miss", () => {
+  it("plots near-miss on map and leaves rejected without invented coords", () => {
+    const vm = mapFromInput(baseInput());
+    expect(vm.decision.mode).toBe("PROTECT CAPITAL");
+    expect(vm.radar.mapDots.every((d) => d.status === "near-miss")).toBe(true);
+    expect(vm.radar.mapDots[0]?.symbol).toBe("HPG");
+    expect(vm.radar.nearMiss.length).toBeGreaterThan(0);
+    const rejectedOnMap = vm.radar.mapDots.filter((d) =>
+      vm.radar.rejected.some((r) => r.symbol === d.symbol)
+    );
+    expect(rejectedOnMap).toHaveLength(0);
+  });
+
+  it("uses confidence band text encoding only", () => {
+    const vm = mapFromInput(baseInput());
+    expect(vm.decision.confidenceBand).toMatch(/high|medium|low/);
+    expect(vm.decision.confidenceMeterWidth).toBeGreaterThan(0);
+    const serialized = JSON.stringify(vm.decision);
+    expect(serialized).not.toMatch(/"confidence":\s*\d{2,}/);
+  });
+});
+
+describe("mapDashboardV3ViewModel — TRADE + candidates", () => {
+  it("maps qualified candidates to radar and setup cards", () => {
+    const vm = mapFromInput(
+      baseInput({
+        latestScan: {
+          id: "scan-2",
+          runAt: new Date(),
+          gate1Level: "PASS",
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+          universeScannedCount: 400,
+        },
+        surfacedCandidates: [
+          {
+            id: "cand-1",
+            symbolKey: "FPT",
+            quality: "A",
+            lifecycleSortLabel: "READY",
+            healthLevel: "HEALTHY",
+            healthScore: 88,
+            healthScoreLabel: "Strong",
+            healthFlags: [],
+            healthSummary: null,
+            reasons: ["Pullback hold"],
+            close: 128,
+            pullbackZoneLow: 127,
+            pullbackZoneHigh: 129,
+            stopLevel: 124,
+            rankScore: 90,
+          },
+        ],
+      })
+    );
+
+    expect(vm.decision.mode).toBe("TRADE");
+    expect(vm.radar.qualified.length).toBeGreaterThan(0);
+    expect(vm.radar.mapDots.some((d) => d.symbol === "FPT" && d.status === "qualified")).toBe(
+      true
+    );
+  });
+});
+
+describe("mapDashboardV3ViewModel — risk headroom gaps", () => {
+  it("leaves exposure percent null when equity not configured", () => {
+    const vm = mapFromInput(baseInput({ accountEquityVnd: null }));
+    expect(vm.risk.exposurePercent).toBeNull();
+    expect(vm.risk.maxRiskPercent).toBeNull();
+    expect(vm.risk.lossLimit).toBeNull();
+  });
+});
+
+describe("mapDashboardV3ViewModel — no scan", () => {
+  it("handles empty opportunity without fake radar qualified rows", () => {
+    const vm = mapFromInput(
+      baseInput({
+        latestScan: null,
+        scanNotes: null,
+        surfacedCandidates: [],
+      })
+    );
+    expect(vm.radar.qualified).toHaveLength(0);
+    expect(vm.radar.mapDots).toHaveLength(0);
+  });
+});
+
+describe("mapDashboardV3ViewModel — ledger", () => {
+  it("does not fabricate discipline score or review queue count", () => {
+    const vm = mapFromInput(baseInput());
+    const serialized = JSON.stringify(vm.ledger);
+    expect(serialized).not.toMatch(/disciplineScore|reviewQueue/);
+    expect(vm.ledger.reviewHref).toBe("/trades");
+    expect(vm.ledger.reviewLabel).toContain("Review");
+  });
+});
+
+describe("mapUxVerdictToDecisionMode", () => {
+  it("maps PROBE to WAIT", () => {
+    expect(mapUxVerdictToDecisionMode("PROBE")).toBe("WAIT");
+  });
+});
