@@ -14,6 +14,30 @@ type Props = {
   radar: DashboardV3ViewModel["radar"];
 };
 
+function readinessLabel(readiness: number): string {
+  if (readiness >= 75) return "High readiness";
+  if (readiness >= 55) return "Building readiness";
+  return "Low readiness";
+}
+
+function riskLabel(risk: number): string {
+  if (risk >= 70) return "High risk";
+  if (risk >= 45) return "Elevated risk";
+  return "Contained risk";
+}
+
+function signalTrace(item: DashboardV3ViewModel["radar"]["mapDots"][number]): number[] {
+  const base = Math.max(8, Math.min(92, item.readiness));
+  const caution = Math.max(6, Math.min(34, Math.round(item.risk / 3)));
+  return [
+    Math.max(5, base - caution),
+    Math.max(5, base - Math.round(caution * 0.6)),
+    Math.max(5, base - Math.round(caution * 0.35)),
+    Math.max(5, base - Math.round(caution * 0.2)),
+    Math.max(5, base),
+  ];
+}
+
 export function OpportunityRadar({ radar }: Props) {
   const [activeSymbol, setActiveSymbol] = useState<string | null>(
     radar.mapDots[0]?.symbol ?? null
@@ -72,9 +96,11 @@ export function OpportunityRadar({ radar }: Props) {
                 height: size,
                 margin: `${-half}px 0 0 ${-half}px`,
               }}
-              aria-label={`${item.symbol}: ${action}`}
+              aria-label={`${item.symbol}: ${action}, readiness ${item.readiness}, risk ${item.risk}`}
               aria-pressed={isActive}
               onClick={() => setActiveSymbol(item.symbol)}
+              onMouseEnter={() => setActiveSymbol(item.symbol)}
+              onFocus={() => setActiveSymbol(item.symbol)}
             >
               <span className="tosv3-radar-dot__symbol">{item.symbol}</span>
               <span className="tosv3-radar-dot__action">{action}</span>
@@ -105,6 +131,47 @@ export function OpportunityRadar({ radar }: Props) {
 
         <span className="tosv3-radar-map__axis tosv3-radar-map__axis--x">Readiness →</span>
         <span className="tosv3-radar-map__axis tosv3-radar-map__axis--y">Risk ↓</span>
+
+        {active ? (
+          <div className="tosv3-radar-tooltip" role="status" aria-live="polite">
+            <div className="tosv3-radar-tooltip__head">
+              <strong>{active.symbol}</strong>
+              <span>{radarActionLabel(active)}</span>
+            </div>
+            <p>{active.reason}</p>
+            <div className="tosv3-radar-tooltip__meta">
+              <span className="tabular-nums">
+                Readiness {active.readiness} · {readinessLabel(active.readiness)}
+              </span>
+              <span className="tabular-nums">
+                Risk {active.risk} · {riskLabel(active.risk)}
+              </span>
+            </div>
+            <svg
+              viewBox="0 0 120 24"
+              className="tosv3-radar-tooltip__trace"
+              role="img"
+              aria-label="Signal trace from current radar state"
+            >
+              {signalTrace(active).map((candle, index) => {
+                const x = 12 + index * 24;
+                const bodyTop = 24 - candle;
+                const wickTop = Math.max(2, bodyTop - 5);
+                const wickBottom = Math.min(22, bodyTop + 8);
+                const hue =
+                  active.status === "qualified"
+                    ? "rgba(95, 223, 184, 0.92)"
+                    : "rgba(251, 191, 36, 0.92)";
+                return (
+                  <g key={`${active.symbol}-trace-${index}`}>
+                    <line x1={x} y1={wickTop} x2={x} y2={wickBottom} stroke={hue} strokeWidth="1.5" />
+                    <rect x={x - 3} y={bodyTop} width="6" height="7" rx="1.5" fill={hue} />
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        ) : null}
       </div>
 
       {active ? (

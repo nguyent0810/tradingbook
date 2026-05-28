@@ -4,6 +4,62 @@ type Props = {
   data: V3RiskConsole;
 };
 
+type RuleState = "pass" | "caution" | "blocked";
+
+function inferRuleState(rule: string, data: V3RiskConsole): RuleState {
+  const lower = rule.toLowerCase();
+  if (
+    lower.includes("no averaging") ||
+    lower.includes("pause all new entries") ||
+    (data.utilizationTone === "critical" && lower.includes("add risk"))
+  ) {
+    return "blocked";
+  }
+  if (lower.includes("do not") || data.utilizationTone === "elevated") return "caution";
+  if (data.utilizationTone === "critical") return "caution";
+  return "pass";
+}
+
+function statusLabel(state: RuleState): string {
+  if (state === "blocked") return "Blocked";
+  if (state === "caution") return "Guard";
+  return "Ready";
+}
+
+function actionLabel(state: RuleState): string {
+  if (state === "blocked") return "Hold";
+  if (state === "caution") return "Watch";
+  return "Go";
+}
+
+function severityLabel(state: RuleState): string {
+  if (state === "blocked") return "High";
+  if (state === "caution") return "Med";
+  return "Low";
+}
+
+function statusTitle(state: RuleState): string {
+  if (state === "blocked") return "Rule currently blocking new risk.";
+  if (state === "caution") return "Rule requires caution before adding risk.";
+  return "Rule currently clear.";
+}
+
+function statusClass(state: RuleState): string {
+  if (state === "blocked") return "tosv3-risk-rule--blocked";
+  if (state === "caution") return "tosv3-risk-rule--caution";
+  return "tosv3-risk-rule--pass";
+}
+
+function statusIcon(state: RuleState): string {
+  if (state === "blocked") return "✕";
+  if (state === "caution") return "!";
+  return "✓";
+}
+
+function cellClass(base: string, label: string): string {
+  return `${base} tosv3-risk-rule__cell` + ` tosv3-risk-rule__cell--${label}`;
+}
+
 export function RiskConsole({ data }: Props) {
   const hasPercentCap =
     data.exposurePercent != null && data.maxRiskPercent != null && data.utilizationPercent != null;
@@ -71,11 +127,40 @@ export function RiskConsole({ data }: Props) {
       {data.blockers.length > 0 ? (
         <>
           <p className="tosv3-risk__dont-trade">Do not trade if</p>
-          <ol className="tosv3-risk__blockers">
-            {data.blockers.map((blocker) => (
-              <li key={blocker}>{blocker}</li>
-            ))}
-          </ol>
+          <div className="tosv3-risk-matrix" role="table" aria-label="Risk rule matrix">
+            <div className="tosv3-risk-matrix__head" role="row">
+              <span role="columnheader">Rule</span>
+              <span role="columnheader">Status</span>
+              <span role="columnheader">Severity</span>
+              <span role="columnheader">Action</span>
+            </div>
+            <ol className="tosv3-risk__blockers">
+              {data.blockers.map((blocker) => {
+                const state = inferRuleState(blocker, data);
+                return (
+                  <li key={blocker} className={`tosv3-risk-rule ${statusClass(state)}`} role="row">
+                    <span className={cellClass("tosv3-risk-rule__text", "rule")} role="cell">
+                      {blocker}
+                    </span>
+                    <span
+                      className={cellClass("tosv3-risk-rule__status", "status")}
+                      role="cell"
+                      title={statusTitle(state)}
+                    >
+                      <i aria-hidden>{statusIcon(state)}</i>
+                      {statusLabel(state)}
+                    </span>
+                    <span className={cellClass("tabular-nums", "severity")} role="cell">
+                      {severityLabel(state)}
+                    </span>
+                    <span className={cellClass("", "action")} role="cell">
+                      {actionLabel(state)}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
         </>
       ) : null}
     </section>
