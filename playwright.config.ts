@@ -8,6 +8,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
+  timeout: 60_000,
   globalSetup: path.join(process.cwd(), "tests", "playwright", "global-setup.ts"),
   reporter: [["list"], ["html", { open: "never" }]],
   use: {

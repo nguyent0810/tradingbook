@@ -189,14 +189,12 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         });
 
   return (
-    <div className="page-container animate-in">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-8 flex items-start justify-between">
-          <div>
-            <h1
-              className="text-2xl font-semibold tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
+    <div className="page-container command-deck command-deck-form-page animate-in">
+      <div className="command-deck-form-page__inner mx-auto max-w-2xl">
+        <header className="command-deck-form-page__header mb-8 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Ledger deck</p>
+            <h1 className="dash-v2-page-header__title text-2xl font-semibold tracking-tight">
               Edit Trade
             </h1>
             <p
@@ -245,7 +243,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
           </div>
 
           <DeleteTradeButton tradeId={trade.id} />
-        </div>
+        </header>
 
         {trade.status === "OPEN" && alignmentAnalysis.showBanner ? (
           <MarketDataAlignmentBanner
@@ -257,8 +255,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         {trade.status === "OPEN" && positionMarks?.barsLoadFailed ? (
           <div
             role="status"
-            className="card mb-4 border px-4 py-3"
-            style={{ borderColor: "var(--border-color)" }}
+            className="ledger-deck-panel pipeline-deck-panel mb-4 px-4 py-3"
           >
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
               Latest close could not be loaded for this symbol.
@@ -267,7 +264,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         ) : null}
 
         {showWritebackCard ? (
-          <div className="card mb-4 p-4">
+          <div className="ledger-deck-panel pipeline-deck-panel mb-4 p-4">
             <div
               className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-tertiary)" }}
@@ -316,7 +313,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
         ) : null}
 
         {trade.status === "OPEN" ? (
-          <div className="card mb-4 p-4">
+          <div className="ledger-deck-panel pipeline-deck-panel mb-4 p-4">
             <div
               className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-tertiary)" }}
@@ -555,7 +552,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
           </div>
         ) : null}
 
-        <div className="card mb-4 p-4">
+        <div className="ledger-deck-panel pipeline-deck-panel mb-4 p-4">
           <div
             className="text-xs font-semibold uppercase tracking-wide"
             style={{ color: "var(--text-tertiary)" }}
@@ -691,7 +688,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
 
         {trade.status === "OPEN" ? (
           <>
-            <div className="card mb-4 p-4">
+            <div className="ledger-deck-panel pipeline-deck-panel mb-4 p-4">
               <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
                 {hasCheckpointToday
                   ? "Health checkpoint recorded today."
@@ -699,7 +696,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
               </p>
             </div>
 
-          <div className="card mb-4 p-4">
+          <div className="ledger-deck-panel pipeline-deck-panel mb-4 p-4">
             <div
               className="text-xs font-semibold uppercase tracking-wide"
               style={{ color: "var(--text-tertiary)" }}
@@ -806,7 +803,7 @@ export default async function TradeDetailPage({ params }: TradeDetailPageProps) 
           </>
         ) : null}
 
-        <div className="card p-6">
+        <div className="ledger-deck-panel pipeline-deck-panel p-6">
           <TradeForm trade={trade} />
         </div>
       </div>

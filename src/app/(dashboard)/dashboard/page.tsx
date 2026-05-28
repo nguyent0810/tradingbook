@@ -26,15 +26,8 @@ import {
 } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
-import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
+import { DashboardCommandCenter } from "@/components/dashboard/dashboard-command-center";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
-import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
-import { DashboardHeroAside } from "@/components/dashboard/dashboard-hero-aside";
-import { DashboardOpportunityBoard } from "@/components/dashboard/dashboard-opportunity-board";
-import { DashboardSecondaryIntelligence } from "@/components/dashboard/dashboard-secondary-intelligence";
-import { DashboardTradingDecisionSummary } from "@/components/dashboard/dashboard-trading-decision-summary";
-import { DashboardObservationalBand } from "@/components/dashboard/dashboard-observational-band";
-import { DashboardActionableSetupsZone } from "@/components/dashboard/dashboard-actionable-setups-zone";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -191,7 +184,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="page-container dash-cockpit dash-cockpit--v2 pb-12">
+    <div className="page-container command-deck dash-cockpit dash-cockpit--v2 pb-10">
       <DashboardPageHeader />
 
       {dbLoadError ? (
@@ -204,56 +197,19 @@ export default async function DashboardPage() {
         />
       ) : null}
 
-      <DashboardEntrance>
-        <div className="dash-v2-hero-band" data-testid="dashboard-v2-hero-band">
-          <DashboardCommandPanel
-          freshness={freshness}
-          latestScan={latestScan}
-          scanDelayedBackdrop={scanDelayedBackdrop}
-          verdict={cockpitDto.verdict}
-          surfacedCount={surfacedCount}
-          tomorrow={cockpitDto.tomorrow}
-          evidence={cockpitDto.evidence}
-          blockers={cockpitDto.blockers}
-          heroAside={
-            <DashboardHeroAside
-              risk={cockpitDto.risk}
-              verdict={cockpitDto.verdict}
-              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-              portfolioRiskConfigured={portfolioRiskConfigured}
-              trades={trades}
-            />
-          }
-        />
-        </div>
-
-        <DashboardTradingDecisionSummary
-          latestScan={latestScan}
-          verdict={cockpitDto.verdict}
-        />
-
-        <DashboardOpportunityBoard
-          opportunity={cockpitDto.opportunity}
-          ladder={cockpitDto.setupQualityLadder}
-        />
-
-        <DashboardActionableSetupsZone
-          topSetups={topSetups}
-          bestSetupsPresentation={bestSetupsPresentation}
-        />
-
-        <DashboardObservationalBand
-          opportunity={cockpitDto.opportunity}
-          freshness={freshness}
-          scanRunId={cockpitDto.scanRunId}
-        />
-
-        <DashboardSecondaryIntelligence
-          diagnostics={cockpitDto.actionableDiagnostics}
-          watchItems={activeWatchItems}
-          latestCloseBySymbol={latestCloseBySymbol}
-        />
-      </DashboardEntrance>
+      <DashboardCommandCenter
+        freshness={freshness}
+        latestScan={latestScan}
+        scanDelayedBackdrop={scanDelayedBackdrop}
+        cockpitDto={cockpitDto}
+        surfacedCount={surfacedCount}
+        topSetups={topSetups}
+        bestSetupsPresentation={bestSetupsPresentation}
+        portfolioRiskConfigured={portfolioRiskConfigured}
+        trades={trades}
+        activeWatchItems={activeWatchItems}
+        latestCloseBySymbol={latestCloseBySymbol}
+      />
     </div>
   );
 }

@@ -112,25 +112,23 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
     staleNotice.kind === "none";
 
   return (
-    <div className="page-container animate-in">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-8">
-          <h1
-            className="text-2xl font-semibold tracking-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
+    <div className="page-container command-deck command-deck-form-page animate-in">
+      <div className="command-deck-form-page__inner mx-auto max-w-2xl">
+        <header className="command-deck-form-page__header mb-8">
+          <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Ledger deck</p>
+          <h1 className="dash-v2-page-header__title text-2xl font-semibold tracking-tight">
             Log a Trade
           </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--text-tertiary)" }}>
-            Record your trade details. P&L is computed automatically for closed
+          <p className="dash-v2-page-header__lead mt-1 text-sm">
+            Record your trade details. P&amp;L is computed automatically for closed
             trades.
           </p>
-        </div>
+        </header>
 
         <StaleSetupCandidateWarning notice={staleNotice} />
 
         <div
-          className="card p-6"
+          className="ledger-deck-panel pipeline-deck-panel p-6"
           {...(showCurrentSetupMarker
             ? { "data-testid": "trades-new-setup-current" }
             : {})}

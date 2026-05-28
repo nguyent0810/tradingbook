@@ -1,31 +1,33 @@
-import type { Trade } from "@/generated/prisma/client";
 import type {
   RiskBudgetHeadroomDto,
   RiskGuardrailDto,
   VerdictDto,
 } from "@/lib/dashboard/decision-cockpit-dto";
 import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
-import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
 
-export type DashboardHeroAsideProps = {
+export type DashboardRiskRailProps = {
   risk: RiskGuardrailDto;
   verdict: VerdictDto;
   riskBudgetHeadroom: RiskBudgetHeadroomDto;
   portfolioRiskConfigured: boolean;
-  trades: Trade[];
 };
 
-export function DashboardHeroAside({
+export function DashboardRiskRail({
   risk,
   verdict,
   riskBudgetHeadroom,
   portfolioRiskConfigured,
-  trades,
-}: DashboardHeroAsideProps) {
+}: DashboardRiskRailProps) {
   return (
-    <>
-      <p className="dash-v2-rail__label">Book &amp; exposure</p>
-      <div className="dash-v2-card dash-v2-card--rail">
+    <aside
+      className="command-deck-risk-rail"
+      data-testid="dashboard-risk-rail"
+      aria-labelledby="dashboard-risk-rail-heading"
+    >
+      <p id="dashboard-risk-rail-heading" className="dash-v2-rail__label">
+        Risk guardrail
+      </p>
+      <div className="dash-v2-card dash-v2-card--rail command-deck-risk-rail__card">
         <DashboardExposurePanel
           risk={risk}
           verdict={verdict}
@@ -33,9 +35,6 @@ export function DashboardHeroAside({
           portfolioRiskConfigured={portfolioRiskConfigured}
         />
       </div>
-      <div className="dash-v2-card dash-v2-card--rail dash-v2-card--muted">
-        <DashboardPerformancePanel trades={trades} />
-      </div>
-    </>
+    </aside>
   );
 }

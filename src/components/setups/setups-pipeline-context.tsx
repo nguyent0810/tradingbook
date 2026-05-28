@@ -9,15 +9,17 @@ export type SetupsPipelineContextProps = {
   nearMissCount: number;
 };
 
-/** Scanner pipeline market status + summary strip (Trading OS v2). */
+/** Trust strip + pipeline summary for the setups pipeline deck. */
 export function SetupsPipelineContext({
   freshness,
   latestScan,
   nearMissCount,
 }: SetupsPipelineContextProps) {
   return (
-    <div className="tos-setups-context space-y-3" data-testid="setups-pipeline-context">
-      <DashboardMarketStatusBar freshness={freshness} />
+    <div className="pipeline-deck__trust" data-testid="setups-pipeline-context">
+      <div className="pipeline-deck__trust-bar">
+        <DashboardMarketStatusBar freshness={freshness} />
+      </div>
       <SetupsPipelineSummaryStrip latestScan={latestScan} nearMissCount={nearMissCount} />
     </div>
   );

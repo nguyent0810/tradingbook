@@ -38,8 +38,8 @@ export async function SetupsTailAsync() {
   const breakdown = base.latest.tradabilityBreakdown;
 
   return (
-    <div className="tos-setups-tail space-y-4">
-      <section className="dash-panel dash-surface-1" data-testid="setups-near-miss-panel">
+    <div className="pipeline-deck__tail space-y-4">
+      <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-near-miss-panel">
         <header className="dash-panel__header">
           <h2 className="dash-section-title">
             Near-miss pipeline{closestRows.length > 0 ? ` (${closestRows.length})` : ""}

@@ -13,20 +13,20 @@ export function DashboardOpportunityBoard({
 }: DashboardOpportunityBoardProps) {
   return (
     <section
-      className="dash-v2-zone dash-v2-zone--context"
+      className="command-deck-opportunity dash-v2-zone dash-v2-zone--context"
       data-testid="dashboard-cockpit-zone-opportunity"
       aria-labelledby="dashboard-opportunity-heading"
     >
       <header className="dash-v2-zone-header">
-        <p className="dash-v2-eyebrow">Pipeline</p>
+        <p className="dash-v2-eyebrow">Opportunities</p>
         <h2 id="dashboard-opportunity-heading" className="dash-v2-zone-title">
-          Opportunity context
+          Opportunity board
         </h2>
         <p className="dash-v2-zone-lead">
-          Shortlist before actionable setups — exposure and performance sit in the command hero.
+          Tier actions, near-miss path, and setup quality — compare before you log risk.
         </p>
       </header>
-      <div className="dash-v2-zone__body dash-v2-split">
+      <div className="command-deck-opportunity__body dash-v2-zone__body">
         <div className="dash-v2-card dash-v2-card--inset">
           <DashboardOpportunityPreview opportunity={opportunity} />
         </div>

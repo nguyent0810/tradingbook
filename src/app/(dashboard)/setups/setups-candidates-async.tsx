@@ -1,11 +1,8 @@
 import "server-only";
 
-import { Fragment } from "react";
 import Link from "next/link";
-import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health-strip";
-import { SetupsCandidatePositionSizing } from "@/components/setups-candidate-position-sizing";
 import { ScanQuality } from "@/generated/prisma/client";
-import { displayGate1ScanLevel, displayScanQualityTier } from "@/lib/trading-display-labels";
+import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
 import { toCandidateRows } from "@/lib/scanner/setups-queries";
 import {
   loadSetupsBaseData,
@@ -16,10 +13,11 @@ import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import {
   fmtSetupPerfHint,
-  fmtThousands,
   reasonsToStrings,
   type SetupPerfHint,
 } from "./setups-shared-helpers";
+import { DenseTable } from "@/components/command-deck";
+import { CandidateRowClient } from "./candidate-row-client";
 
 export async function SetupsCandidatesAsync() {
   const base = await loadSetupsBaseData();
@@ -58,7 +56,7 @@ export async function SetupsCandidatesAsync() {
       ) : null}
 
       {candidates.length === 0 ? (
-        <section className="dash-panel dash-surface-1" data-testid="setups-candidates-panel">
+        <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
           <header className="dash-panel__header">
             <h2 className="dash-section-title">Surfaced candidates</h2>
             <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
@@ -80,15 +78,15 @@ export async function SetupsCandidatesAsync() {
           </div>
         </section>
       ) : (
-        <section className="dash-panel dash-surface-1" data-testid="setups-candidates-panel">
+        <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
           <header className="dash-panel__header">
             <h2 className="dash-section-title">
               Surfaced candidates ({candidates.length})
             </h2>
             <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
           </header>
-          <div className="table-container tos-dense-table">
-            <table className="table min-w-[760px]">
+          <DenseTable testId="setups-candidates-table">
+            <table className="table dense-table">
               <thead>
                 <tr>
                   <th>Symbol</th>
@@ -105,119 +103,37 @@ export async function SetupsCandidatesAsync() {
                   const lines = reasonsToStrings(c.reasons);
                   const tier = c.quality === ScanQuality.A ? "A" : "B";
                   const perfHint = setupPerfMap.get(`${c.setupType}:${c.quality}`) ?? null;
+                  const perfHintStr = fmtSetupPerfHint(tier, perfHint);
                   return (
-                    <Fragment key={c.id}>
-                      <tr>
-                        <td className="max-w-[280px] align-top">
-                          <SetupsCandidateHealthStrip
-                            symbolKey={c.symbolKey}
-                            lifecycleSortLabel={c.lifecycleSortLabel}
-                            healthLevel={c.healthLevel}
-                            healthScore={c.healthScore}
-                            healthScoreLabel={c.healthScoreLabel}
-                            healthLines={c.healthLines}
-                            healthHint={c.healthHint}
-                            compact
-                          />
-                          <p className="mt-1 text-xs" style={{ color: "var(--text-tertiary)" }}>
-                            {fmtSetupPerfHint(tier, perfHint)}
-                          </p>
-                        </td>
-                        <td className="align-top">{displayScanQualityTier(c.quality)}</td>
-                        <td className="table-num align-top">{c.healthScore}</td>
-                        <td className="table-num">{fmtThousands(c.close)}</td>
-                        <td className="table-num">
-                          {fmtThousands(c.pullbackZoneLow)} – {fmtThousands(c.pullbackZoneHigh)}
-                        </td>
-                        <td className="table-num">{fmtThousands(c.stopLevel)}</td>
-                        <td className="table-num whitespace-nowrap text-xs">
-                          {new Date(c.barDate).toLocaleDateString("en-CA")}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="border-t p-0 align-top"
-                          style={{ borderColor: "var(--border-primary)" }}
-                        >
-                          <details
-                            className="px-3 py-2 text-xs"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            <summary
-                              className="cursor-pointer font-medium"
-                              style={{ color: "var(--text-primary)" }}
-                            >
-                              Candidate details
-                            </summary>
-                            {c.healthLines.length > 0 || c.healthHint ? (
-                              <div className="mt-2">
-                                {c.healthSummary ? (
-                                  <p className="leading-snug" style={{ color: "var(--text-primary)" }}>
-                                    {c.healthSummary}
-                                  </p>
-                                ) : null}
-                                {c.healthLines.length > 0 ? (
-                                  <ul className="mt-1 space-y-0.5 leading-snug">
-                                    {c.healthLines.map((line, i) => (
-                                      <li key={i}>{line}</li>
-                                    ))}
-                                  </ul>
-                                ) : null}
-                                {c.healthHint ? (
-                                  <p
-                                    className="mt-1 italic leading-snug"
-                                    style={{ color: "var(--text-tertiary)" }}
-                                  >
-                                    {c.healthHint}
-                                  </p>
-                                ) : null}
-                              </div>
-                            ) : null}
-                            {lines.length > 0 ? (
-                              <ul className="mt-2 list-disc space-y-1 pl-4 leading-snug">
-                                {lines.map((line, i) => (
-                                  <li key={i} className="break-words">
-                                    {line}
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="mt-2 leading-snug">No extra scanner notes.</p>
-                            )}
-                          </details>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td
-                          colSpan={7}
-                          className="border-t p-0 align-top"
-                          style={{ borderColor: "var(--border-primary)" }}
-                        >
-                          <div className="px-3 py-2">
-                            <div className="mb-2 flex justify-end">
-                              <Link
-                                href={`/trades/new?setupCandidateId=${c.id}`}
-                                className="btn btn-secondary btn-sm"
-                              >
-                                Create Trade from Setup
-                              </Link>
-                            </div>
-                            <SetupsCandidatePositionSizing
-                              symbolKey={c.symbolKey}
-                              quality={tier}
-                              defaultEntryKVnd={c.close}
-                              defaultStopKVnd={c.stopLevel}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    </Fragment>
+                    <CandidateRowClient
+                      key={c.id}
+                      candidate={{
+                        id: c.id,
+                        symbolKey: c.symbolKey,
+                        lifecycleSortLabel: c.lifecycleSortLabel,
+                        healthLevel: c.healthLevel,
+                        healthScore: c.healthScore,
+                        healthScoreLabel: c.healthScoreLabel,
+                        healthLines: c.healthLines,
+                        healthHint: c.healthHint,
+                        healthSummary: c.healthSummary,
+                        quality: c.quality,
+                        close: c.close,
+                        pullbackZoneLow: c.pullbackZoneLow,
+                        pullbackZoneHigh: c.pullbackZoneHigh,
+                        stopLevel: c.stopLevel,
+                        barDate: c.barDate,
+                        reasons: c.reasons,
+                        setupType: c.setupType,
+                      }}
+                      perfHint={perfHintStr}
+                      reasonsLines={lines}
+                    />
                   );
                 })}
               </tbody>
             </table>
-          </div>
+          </DenseTable>
         </section>
       )}
     </>
