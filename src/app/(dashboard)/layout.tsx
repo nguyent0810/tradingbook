@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="app-shell">
+    <div className="app-shell command-deck-shell">
       <header className="app-shell-header">
         <div className="app-shell-header-inner">
           <div className="flex items-center gap-8">
@@ -49,7 +49,7 @@ export default async function DashboardLayout({
 
       <AppShellNavMobile />
 
-      <main className="app-shell-main">{children}</main>
+      <main className="app-shell-main command-deck-shell__main">{children}</main>
     </div>
   );
 }

@@ -83,11 +83,10 @@ function ReviewSessionChromeInner({
   if (sessionQueueLength === 0) {
     return (
       <div
-        className="card mt-4 border px-4 py-3"
+        className="ledger-deck-review-session pipeline-deck-panel ledger-deck-panel"
         data-testid="trades-review-session-bar"
         role="region"
         aria-labelledby="trades-review-session-heading"
-        style={{ borderColor: "var(--border-color)" }}
       >
         <div
           id="trades-review-session-heading"
@@ -127,11 +126,10 @@ function ReviewSessionChromeInner({
 
   return (
     <div
-      className="card mt-4 border px-4 py-3"
-      data-testid="trades-review-session-bar"
-      role="region"
-      aria-labelledby="trades-review-session-heading"
-      style={{ borderColor: "var(--border-color)" }}
+        className="ledger-deck-review-session pipeline-deck-panel ledger-deck-panel"
+        data-testid="trades-review-session-bar"
+        role="region"
+        aria-labelledby="trades-review-session-heading"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
@@ -283,7 +281,7 @@ export function ReviewSessionChrome(props: ReviewSessionChromeProps) {
     <Suspense
       fallback={
         <div
-          className="card mt-4 border px-4 py-3 skeleton h-24 rounded-lg"
+          className="ledger-deck-review-session pipeline-deck-panel skeleton h-24 rounded-lg"
           style={{ borderColor: "var(--border-color)" }}
           data-testid="trades-review-session-bar-fallback"
         />

@@ -1,54 +1,39 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+﻿import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Suspense } from "react";
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { TradeFilters } from "./trade-filters";
-import { formatVND, formatEquityThousandVndPerShare, formatBarDataDateUtcLong } from "@/lib/formatters";
-import { formatPlaybookLabel } from "@/lib/playbook-config";
 import {
   fetchBarCloseOnOrBeforeReviewBatch,
   fetchLatestTwoClosesByTradeSymbols,
-  formatSignedPct,
   type LatestTwoCloseBars,
   utcStockBarCutoffDate,
 } from "@/lib/trades/unrealized-from-close";
 import { loadOpenPositionMarks } from "@/lib/trades/position-health";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
-import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
-import { TradesFreshnessContext } from "@/components/trades/trades-freshness-context";
-import { TradesPageHeader } from "@/components/trades/trades-page-header";
-import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
-import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
+import {
+  TradesLedgerDeck,
+  TradesLedgerPageShell,
+} from "@/components/trades/trades-ledger-deck";
+import type { TradesLedgerOpenRowPack } from "@/components/trades/trades-ledger-types";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
 import { getLatestDailyScanRun } from "@/lib/scanner/setups-queries";
 import { deriveTradesLedgerRowFields } from "@/lib/trades/trades-ledger-row-derived";
-import { TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE } from "@/lib/trades/price-unit-guard";
 import {
   buildOpenPositionReviewDto,
   type LatestTradeHealthLog,
-  type OpenPositionReviewDto,
 } from "@/lib/trades/open-position-intelligence";
-import {
-  displayScanQualityTier,
-  displayTradeDirection,
-  displayTradeStatus,
-} from "@/lib/trading-display-labels";
 import { aggregateOpenPortfolioReviewStrip } from "@/lib/trades/eod-review-workflow";
 import {
   deriveOperatingPosture,
   OPERATING_POSTURE_TRADER_LABEL,
-  type OperatingPosture,
 } from "@/lib/trades/operating-posture";
 import {
   parseHealthReviewLogPayload,
   reviewOutcomeTraderLabel,
-  type ReviewOutcomeId,
 } from "@/lib/trades/review-outcome";
 import {
   buildOpenLedgerReviewOrder,
@@ -57,8 +42,6 @@ import {
   classifyReviewPriorityTier,
   compareOpenLedgerReviewOrder,
   deterioratedVsLastReviewBar,
-  type ReviewPriorityTier,
-  type ReviewQueueSymbol,
   type WeeklyReviewChecklistAgg,
 } from "@/lib/trades/review-priority-queue";
 import { buildSessionBriefing } from "@/lib/trades/session-briefing";
@@ -96,10 +79,8 @@ import {
 import {
   derivePositionEvolution,
   POSITION_EVOLUTION_TRADER_LABEL,
-  type PositionEvolutionState,
 } from "@/lib/trades/position-state-evolution";
 import { OperatingSnapshotPersist } from "./operating-snapshot-persist";
-import { OpenPositionReviewCell } from "./open-position-review-cell";
 import { FocusReviewWorkspace } from "./focus-review-workspace";
 import { ReviewSessionChrome } from "./review-session-chrome";
 
@@ -141,64 +122,6 @@ function buildTradesSearchParams(input: {
   if (input.reviewSessionActive) p.set("reviewSession", "1");
   if (input.reviewFocusId) p.set("reviewFocus", input.reviewFocusId);
   return p;
-}
-
-function formatQuantityCell(q: number): string {
-  if (!Number.isFinite(q) || q <= 0) return "—";
-  return new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 4,
-  }).format(q);
-}
-
-function formatSignedVnd(value: number | null): string {
-  if (value == null || !Number.isFinite(value)) return "—";
-  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
-  const s = new Intl.NumberFormat("en-US", { maximumFractionDigits: 4 }).format(
-    Math.abs(value)
-  );
-  return `${sign}${s}k ₫`;
-}
-
-function formatRMultiple(value: number | null): string {
-  if (value == null || !Number.isFinite(value)) return "—";
-  return `${value > 0 ? "+" : ""}${value.toFixed(2)}R`;
-}
-
-function ReviewQueueSymbolLinks({ items }: { items: ReviewQueueSymbol[] }) {
-  if (items.length === 0) return null;
-  return (
-    <span className="inline-flex flex-wrap items-center gap-x-1 gap-y-1">
-      {items.map((s, i) => (
-        <span key={s.tradeId} className="inline-flex items-center gap-1">
-          {i > 0 ? (
-            <span style={{ color: "var(--text-muted)" }} aria-hidden>
-              ·
-            </span>
-          ) : null}
-          <Link
-            href={`/trades/${s.tradeId}`}
-            className="mono font-semibold text-[13px] underline-offset-2 hover:underline"
-            style={{ color: "var(--accent-text)" }}
-          >
-            {s.symbol}
-          </Link>
-        </span>
-      ))}
-    </span>
-  );
-}
-
-/** Mirrors filters layout — Suspense fallback while client filters hydrate (`useSearchParams`). */
-function TradeFiltersSkeleton() {
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <div className="skeleton h-10 flex-1 rounded-lg sm:max-w-xs" />
-      <div className="skeleton h-10 w-36 rounded-lg" />
-      <div className="skeleton h-10 w-36 rounded-lg" />
-      <div className="skeleton h-10 w-36 rounded-lg" />
-      <div className="skeleton h-10 w-40 rounded-lg" />
-    </div>
-  );
 }
 
 export default async function TradesPage({ searchParams }: TradesPageProps) {
@@ -470,20 +393,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     }
   }
 
-  type OpenRowPack = {
-    derived: ReturnType<typeof deriveTradesLedgerRowFields>;
-    reviewDto: OpenPositionReviewDto;
-    priorityTier: ReviewPriorityTier;
-    sortKey: ReturnType<typeof buildOpenLedgerReviewOrder>;
-    memoryLines: string[];
-    escalationCues: string[];
-    latestReviewOutcome: ReviewOutcomeId | null;
-    operatingPosture: OperatingPosture;
-    postureExplainLines: string[];
-    positionEvolution: PositionEvolutionState;
-    positionEvolutionLine: string | null;
-  };
-  const openRowPackByTradeId = new Map<string, OpenRowPack>();
+  const openRowPackByTradeId = new Map<string, TradesLedgerOpenRowPack>();
   const ledgerCtx = {
     latestCloseBySymbol,
     expectedSessionDate,
@@ -782,22 +692,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     allOpenTradeIds,
   });
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatBarSessionDate = (date: Date) =>
-    new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      timeZone: "UTC",
-    });
-
   const hasOpenTrades = trades.some((t) => t.status === "OPEN");
 
   const clusterPackMap = new Map(
@@ -1048,899 +942,112 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
   const totalActiveOpenForSession =
     portfolioStrip?.activeOpenCount ?? openTradeIds.length;
 
-  const ledgerEmptyIcon = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-
   const openCount = trades.filter((t) => t.status === "OPEN").length;
   const closedCount = trades.filter((t) => t.status === "CLOSED").length;
 
   return (
-    <div className="page-container tos-trades dash-cockpit animate-in space-y-5 pb-10">
-      <TradesPageHeader
-        tradeCount={trades.length}
-        openCount={openCount}
-        closedCount={closedCount}
-      />
-
-      <TradesFreshnessContext
-        freshness={marketFreshness}
+    <TradesLedgerPageShell
+      tradeCount={trades.length}
+      openCount={openCount}
+      closedCount={closedCount}
+    >
+      <TradesLedgerDeck
+        marketFreshness={marketFreshness}
         latestScan={latestScan}
-        delayedBackdrop={scanDelayedBackdrop}
+        scanDelayedBackdrop={scanDelayedBackdrop}
+        sessionBriefing={sessionBriefing}
+        reviewQueueModel={reviewQueueModel}
+        bookOperatingContext={bookOperatingContext}
+        bookOperatingBalanceLines={bookOperatingBalanceLines}
+        sinceLastVisitLines={sinceLastVisitLines}
+        compactReview={compactReview}
+        hasOpenTrades={hasOpenTrades}
+        dbLoadError={dbLoadError}
+        search={search}
+        statusFilter={statusFilter}
+        sortParam={params.sort}
+        reviewSessionActive={reviewSessionActive}
+        alignmentAnalysis={alignmentAnalysis}
+        barsLoadFailed={marks.barsLoadFailed}
+        tradesEmpty={trades.length === 0}
+        ledgerTableItems={ledgerTableItems}
+        openRowPackByTradeId={openRowPackByTradeId}
+        latestCloseBySymbol={latestCloseBySymbol}
+        expectedSessionDate={expectedSessionDate}
+        checkedTodayTradeIds={checkedTodayTradeIds}
+        now={now}
+        sessionFocusId={sessionFocusId}
+        reviewSessionQueueLength={reviewSessionQueue.length}
+        reviewSessionChrome={
+          reviewSessionActive && hasOpenTrades ? (
+            <ReviewSessionChrome
+              sessionQueueLength={reviewSessionQueue.length}
+              focusOneBased={
+                sessionFocusIndex >= 0 ? sessionFocusIndex + 1 : null
+              }
+              totalActiveOpen={totalActiveOpenForSession}
+              reviewedTodayOpenCount={reviewedTodayOpenCount}
+              urgentPendingGlobal={sessionDashboardCounts.urgentPendingGlobal}
+              pendingCheckpointGlobal={
+                sessionDashboardCounts.pendingCheckpointGlobal
+              }
+              pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
+              sessionQuietLines={sessionQuietLines}
+              sessionOperatingNarrative={
+                enhancedSessionOperatingNarrative ??
+                  bookOperatingContext?.sessionNarrative ??
+                  null
+              }
+              prevId={sessionPrevId}
+              nextId={sessionNextId}
+            />
+          ) : null
+        }
+        focusReviewWorkspace={
+          reviewSessionActive &&
+          hasOpenTrades &&
+          reviewSessionQueue.length > 0 &&
+          sessionFocusId != null &&
+          focusTrade != null &&
+          focusTrade.status === "OPEN" &&
+          focusOpenPack != null ? (
+            <FocusReviewWorkspace
+              tradeId={focusTrade.id}
+              symbol={focusTrade.symbol.trim().toUpperCase()}
+              priorityTier={focusOpenPack.priorityTier}
+              reviewDto={focusOpenPack.reviewDto}
+              reviewedToday={checkedTodayTradeIds.has(sessionFocusId)}
+              continuityLines={focusContinuityLines}
+              memoryLines={focusOpenPack.memoryLines}
+              escalationCues={focusOpenPack.escalationCues}
+              latestBar={focusOpenPack.derived.latestBar ?? null}
+              queuePositionOneBased={sessionFocusIndex + 1}
+              queueLength={reviewSessionQueue.length}
+              reviewedTodayOpenCount={reviewedTodayOpenCount}
+              pendingCheckpointGlobal={sessionDashboardCounts.pendingCheckpointGlobal}
+              totalActiveOpen={totalActiveOpenForSession}
+              operatingPostureLabel={
+                OPERATING_POSTURE_TRADER_LABEL[focusOpenPack.operatingPosture]
+              }
+              postureExplainLines={focusOpenPack.postureExplainLines}
+              latestOutcomeLabel={reviewOutcomeTraderLabel(
+                focusOpenPack.latestReviewOutcome
+              )}
+              sessionPendingAheadInQueue={
+                sessionDashboardCounts.pendingAheadInQueue
+              }
+              sessionQuietLines={sessionQuietLines}
+              evolutionStateLabel={
+                POSITION_EVOLUTION_TRADER_LABEL[focusOpenPack.positionEvolution]
+              }
+              evolutionExplainLine={focusOpenPack.positionEvolutionLine}
+            />
+          ) : null
+        }
+        operatingSnapshotPersist={
+          <OperatingSnapshotPersist snapshot={snapshotForPersistence} />
+        }
       />
-
-      {sessionBriefing && hasOpenTrades && !compactReview ? (
-        <div
-          className="tos-risk-panel dash-surface-1"
-          data-testid="trades-session-briefing"
-        >
-          <div
-            className="text-[10px] font-semibold uppercase tracking-wide"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            Today&apos;s briefing
-          </div>
-          <ul
-            className="mt-2 list-none space-y-1 text-[13px] leading-snug"
-            style={{ color: "var(--text-secondary)" }}
-          >
-            {sessionBriefing.lines.map((line, bi) => (
-              <li key={`brief-${bi}-${line.slice(0, 24)}`}>{line}</li>
-            ))}
-          </ul>
-          {sessionBriefing.partialRiskFigures ? (
-            <p
-              className="mt-2 text-[10px] leading-snug"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Risk sum excludes rows without a valid planned stop.
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-
-      {reviewQueueModel && hasOpenTrades ? (
-        <div className="tos-risk-panel dash-surface-1" data-testid="trades-review-queue">
-          <div
-            className="text-[10px] font-semibold uppercase tracking-wide"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            {compactReview ? "Review queue" : "Review queue · daily bar context"}
-          </div>
-          <dl className="mt-2 space-y-2 text-[13px]">
-            {reviewQueueModel.urgent.length > 0 ? (
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <dt
-                  className="font-semibold tabular-nums"
-                  style={{ color: "#9a3412" }}
-                >
-                  {reviewQueueModel.urgent.length} urgent
-                </dt>
-                <dd style={{ color: "var(--text-secondary)" }}>
-                  <ReviewQueueSymbolLinks items={reviewQueueModel.urgent} />
-                </dd>
-              </div>
-            ) : null}
-            {reviewQueueModel.highAttention.length > 0 ? (
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <dt
-                  className="font-semibold tabular-nums"
-                  style={{ color: "#854d0e" }}
-                >
-                  {reviewQueueModel.highAttention.length} high attention
-                </dt>
-                <dd style={{ color: "var(--text-secondary)" }}>
-                  <ReviewQueueSymbolLinks
-                    items={reviewQueueModel.highAttention}
-                  />
-                </dd>
-              </div>
-            ) : null}
-            {reviewQueueModel.routinePending.length > 0 ? (
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <dt
-                  className="font-semibold tabular-nums"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  {reviewQueueModel.routinePending.length} routine reviews
-                  pending
-                </dt>
-                <dd style={{ color: "var(--text-secondary)" }}>
-                  <ReviewQueueSymbolLinks
-                    items={reviewQueueModel.routinePending}
-                  />
-                </dd>
-              </div>
-            ) : null}
-            {reviewQueueModel.staleMarket.length > 0 ? (
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <dt
-                  className="font-semibold tabular-nums"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  {reviewQueueModel.staleMarket.length} stale market data
-                </dt>
-                <dd style={{ color: "var(--text-secondary)" }}>
-                  <ReviewQueueSymbolLinks
-                    items={reviewQueueModel.staleMarket}
-                  />
-                </dd>
-              </div>
-            ) : null}
-          </dl>
-          {!reviewQueueModel.urgent.length &&
-          !reviewQueueModel.highAttention.length &&
-          !reviewQueueModel.routinePending.length &&
-          !reviewQueueModel.staleMarket.length ? (
-            <p
-              className="mt-2 text-[12px]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Nothing flagged in the queue — quick-scan open rows below.
-            </p>
-          ) : null}
-          {!compactReview ? (
-            <p
-              className="mt-2 text-[10px] leading-snug"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Open rows sort for review: stop urgency · proximity to stress · drift
-              vs last checkpoint · stale data or pending log · planned capital at
-              risk · symbol.
-            </p>
-          ) : (
-            <p
-              className="mt-2 text-[10px] leading-snug"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Same sort as briefing — expand filters for full legend.
-            </p>
-          )}
-        </div>
-      ) : null}
-
-      {bookOperatingContext && hasOpenTrades ? (
-        <div className="tos-context-panel dash-surface-1" data-testid="book-operating-context">
-          <div
-            className="text-[10px] font-semibold uppercase tracking-wide"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            Book operating context
-          </div>
-          <p
-            className="mt-2 text-[13px] font-medium leading-snug"
-            style={{ color: "var(--text-primary)" }}
-          >
-            {bookOperatingContext.headline}
-          </p>
-          {bookOperatingContext.detailLines.length > 0 ? (
-            <ul
-              className="mt-2 list-none space-y-1 text-[12px] leading-snug"
-              style={{ color: "var(--text-secondary)" }}
-            >
-              {(compactReview
-                ? bookOperatingContext.detailLines.slice(0, 1)
-                : bookOperatingContext.detailLines
-              ).map((line, li) => (
-                <li key={`book-ctx-${li}-${line.slice(0, 28)}`}>{line}</li>
-              ))}
-            </ul>
-          ) : null}
-          {!compactReview &&
-          (bookOperatingBalanceLines.length > 0 || sinceLastVisitLines.length > 0) ? (
-            <>
-              {bookOperatingBalanceLines.length > 0 ? (
-                <>
-                  <div
-                    className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    Operating balance
-                  </div>
-                  <ul
-                    className="mt-1 list-none space-y-1 text-[11px] leading-snug"
-                    style={{ color: "var(--text-muted)" }}
-                    data-testid="book-operating-balance-lines"
-                  >
-                    {bookOperatingBalanceLines.map((line, li) => (
-                      <li key={`book-bal-${li}-${line.slice(0, 24)}`}>{line}</li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-              {sinceLastVisitLines.length > 0 ? (
-                <>
-                  <div
-                    className="mt-3 text-[10px] font-semibold uppercase tracking-wide"
-                    style={{ color: "var(--text-tertiary)" }}
-                  >
-                    Since last ledger visit
-                  </div>
-                  <ul
-                    className="mt-1 list-none space-y-1 text-[11px] leading-snug"
-                    style={{ color: "var(--text-muted)" }}
-                    data-testid="book-operating-trend-lines"
-                  >
-                    {sinceLastVisitLines.map((line, li) => (
-                      <li key={`book-trend-${li}-${line.slice(0, 24)}`}>{line}</li>
-                    ))}
-                  </ul>
-                </>
-              ) : null}
-            </>
-          ) : null}
-          {compactReview &&
-          (bookOperatingBalanceLines.length > 0 || sinceLastVisitLines.length > 0) ? (
-            <details
-              className="mt-2 group"
-              data-testid="book-visit-delta-collapsed"
-            >
-              <summary
-                className="cursor-pointer list-none text-[10px] font-medium uppercase tracking-wide underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                Visit delta & balance
-              </summary>
-              <div className="mt-2 space-y-2 border-t pt-2" style={{ borderColor: "var(--border-color)" }}>
-                {bookOperatingBalanceLines.length > 0 ? (
-                  <ul
-                    className="list-none space-y-1 text-[11px] leading-snug"
-                    style={{ color: "var(--text-muted)" }}
-                    data-testid="book-operating-balance-lines"
-                  >
-                    {bookOperatingBalanceLines.slice(0, 1).map((line, li) => (
-                      <li key={`book-bal-c-${li}-${line.slice(0, 24)}`}>{line}</li>
-                    ))}
-                  </ul>
-                ) : null}
-                {sinceLastVisitLines.length > 0 ? (
-                  <ul
-                    className="list-none space-y-1 text-[11px] leading-snug"
-                    style={{ color: "var(--text-muted)" }}
-                    data-testid="book-operating-trend-lines"
-                  >
-                    {sinceLastVisitLines.map((line, li) => (
-                      <li key={`book-trend-c-${li}-${line.slice(0, 24)}`}>{line}</li>
-                    ))}
-                  </ul>
-                ) : null}
-              </div>
-            </details>
-          ) : null}
-        </div>
-      ) : null}
-
-      {dbLoadError ? (
-        <ErrorStateWithEvidence
-          className="mt-4"
-          title="Partial trades data unavailable"
-          message={dbLoadError}
-          evidence="src/app/(dashboard)/trades/page.tsx · trade list and/or position marks load failed; ledger may be incomplete."
-          data-testid="trades-db-load-error"
-        />
-      ) : null}
-
-      <Suspense fallback={<TradeFiltersSkeleton />}>
-        <TradeFilters
-          currentSearch={search}
-          currentStatus={statusFilter}
-          currentSort={params.sort || "newest"}
-          currentCompactReview={compactReview}
-          currentReviewSession={reviewSessionActive}
-        />
-      </Suspense>
-
-      {reviewSessionActive && hasOpenTrades ? (
-        <ReviewSessionChrome
-          sessionQueueLength={reviewSessionQueue.length}
-          focusOneBased={
-            sessionFocusIndex >= 0 ? sessionFocusIndex + 1 : null
-          }
-          totalActiveOpen={totalActiveOpenForSession}
-          reviewedTodayOpenCount={reviewedTodayOpenCount}
-          urgentPendingGlobal={sessionDashboardCounts.urgentPendingGlobal}
-          pendingCheckpointGlobal={
-            sessionDashboardCounts.pendingCheckpointGlobal
-          }
-          pendingAheadInQueue={sessionDashboardCounts.pendingAheadInQueue}
-          sessionQuietLines={sessionQuietLines}
-          sessionOperatingNarrative={
-            enhancedSessionOperatingNarrative ??
-              bookOperatingContext?.sessionNarrative ??
-              null
-          }
-          prevId={sessionPrevId}
-          nextId={sessionNextId}
-        />
-      ) : null}
-
-      {reviewSessionActive &&
-      hasOpenTrades &&
-      reviewSessionQueue.length > 0 &&
-      sessionFocusId != null &&
-      focusTrade != null &&
-      focusTrade.status === "OPEN" &&
-      focusOpenPack != null ? (
-        <FocusReviewWorkspace
-          tradeId={focusTrade.id}
-          symbol={focusTrade.symbol.trim().toUpperCase()}
-          priorityTier={focusOpenPack.priorityTier}
-          reviewDto={focusOpenPack.reviewDto}
-          reviewedToday={checkedTodayTradeIds.has(sessionFocusId)}
-          continuityLines={focusContinuityLines}
-          memoryLines={focusOpenPack.memoryLines}
-          escalationCues={focusOpenPack.escalationCues}
-          latestBar={focusOpenPack.derived.latestBar ?? null}
-          queuePositionOneBased={sessionFocusIndex + 1}
-          queueLength={reviewSessionQueue.length}
-          reviewedTodayOpenCount={reviewedTodayOpenCount}
-          pendingCheckpointGlobal={sessionDashboardCounts.pendingCheckpointGlobal}
-          totalActiveOpen={totalActiveOpenForSession}
-          operatingPostureLabel={
-            OPERATING_POSTURE_TRADER_LABEL[focusOpenPack.operatingPosture]
-          }
-          postureExplainLines={focusOpenPack.postureExplainLines}
-          latestOutcomeLabel={reviewOutcomeTraderLabel(
-            focusOpenPack.latestReviewOutcome
-          )}
-          sessionPendingAheadInQueue={
-            sessionDashboardCounts.pendingAheadInQueue
-          }
-          sessionQuietLines={sessionQuietLines}
-          evolutionStateLabel={
-            POSITION_EVOLUTION_TRADER_LABEL[focusOpenPack.positionEvolution]
-          }
-          evolutionExplainLine={focusOpenPack.positionEvolutionLine}
-        />
-      ) : null}
-
-      {alignmentAnalysis.showBanner ? (
-        <div className="tos-risk-panel">
-          <MarketDataAlignmentBanner
-            analysis={alignmentAnalysis}
-            mentionOpenPositionMarks={hasOpenTrades}
-          />
-        </div>
-      ) : null}
-
-      {marks.barsLoadFailed && hasOpenTrades ? (
-        <div role="status" className="tos-risk-panel dash-surface-1">
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Latest closes could not be loaded. Open-position marks may be
-            incomplete until bars load.
-          </p>
-        </div>
-      ) : null}
-
-      {trades.length === 0 ? (
-        <div className="card p-0">
-          <EmptyStateWithReason
-            title={search || statusFilter ? "No matching trades" : "No trades yet"}
-            reason={
-              search || statusFilter
-                ? "Try adjusting your search or filters — the ledger only shows rows that match the current query."
-                : "Log your first trade to start tracking performance, review checkpoints, and operating posture."
-            }
-            icon={ledgerEmptyIcon}
-            data-testid={
-              search || statusFilter ? "trades-ledger-empty-filtered" : "trades-ledger-empty"
-            }
-          >
-            {!search && !statusFilter ? (
-              <Link href="/trades/new" className="btn btn-primary text-xs">
-                Log Your First Trade
-              </Link>
-            ) : null}
-          </EmptyStateWithReason>
-        </div>
-      ) : (
-        <>
-          <p
-            className="mt-1 text-xs"
-            style={{ color: "var(--text-muted)" }}
-            data-testid="trades-ledger-scroll-hint"
-          >
-            Scroll horizontally for the full ledger. The Symbol column stays pinned while you
-            scroll.
-          </p>
-          <p
-            className="mt-1 text-[11px] leading-snug"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Equity prices in this table are{" "}
-            <span className="font-medium" style={{ color: "var(--text-secondary)" }}>
-              thousand VND per share
-            </span>{" "}
-            (imported EOD). P&amp;L uses the same numeric scale × quantity.
-          </p>
-          <div
-            className="table-container table-sticky trades-ledger-scroll tos-ledger-table-wrap"
-            data-testid="trades-scroll-container"
-          >
-          <table className="table min-w-[1840px] tos-ledger-table" data-testid="trades-table">
-            <thead data-testid="trades-table-header">
-              <tr>
-                <th className="ledger-sticky-symbol">Symbol</th>
-                <th>Setup</th>
-                <th>Direction</th>
-                <th>Playbook</th>
-                <th>Status</th>
-                <th>Position &amp; review</th>
-                <th className="table-num">Hold</th>
-                <th>Entry Date</th>
-                <th className="table-num">
-                  <span className="block">Entry</span>
-                  <span
-                    className="block text-[10px] font-normal font-sans normal-case"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    (1000 ₫)
-                  </span>
-                </th>
-                <th className="table-num">
-                  <span className="block">Session mark</span>
-                  <span
-                    className="block text-[10px] font-normal font-sans normal-case"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    Open: EOD · Closed: exit
-                  </span>
-                </th>
-                <th className="table-num">Qty</th>
-                <th className="table-num">R</th>
-                <th className="table-num">
-                  <span className="block">Stop dist.</span>
-                  <span
-                    className="block text-[10px] font-normal font-sans normal-case"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    (1000 ₫)
-                  </span>
-                </th>
-                <th className="table-num">
-                  <span className="block">TP dist.</span>
-                  <span
-                    className="block text-[10px] font-normal font-sans normal-case"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    (1000 ₫)
-                  </span>
-                </th>
-                <th className="table-num">P&amp;L</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {ledgerTableItems.map((item, rowIndex) => {
-                if (
-                  item !== null &&
-                  typeof item === "object" &&
-                  "kind" in item &&
-                  item.kind === "divider"
-                ) {
-                  return (
-                    <tr
-                      key={`cluster-divider-${rowIndex}-${item.label}`}
-                      data-testid="trades-cluster-divider"
-                      aria-hidden="true"
-                      style={{
-                        backgroundColor: "var(--bg-tertiary)",
-                      }}
-                    >
-                      <td colSpan={16} className="py-1.5 pl-3">
-                        <span
-                          className="text-[10px] font-semibold uppercase tracking-wide"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {item.label}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                }
-                const trade = item as (typeof trades)[number];
-                const openPack = openRowPackByTradeId.get(trade.id);
-                const ledgerCtxInner = {
-                  latestCloseBySymbol,
-                  expectedSessionDate,
-                  checkedTodayTradeIds,
-                  now,
-                };
-                const {
-                  latestBar,
-                  unrealized,
-                  priceUnitMismatch,
-                  holdingDays,
-                  rMultiple,
-                  distanceToStop,
-                  distanceToTakeProfit,
-                } =
-                  openPack?.derived ??
-                  deriveTradesLedgerRowFields(
-                    {
-                      id: trade.id,
-                      symbol: trade.symbol,
-                      status: trade.status,
-                      direction: trade.direction,
-                      entryPrice: trade.entryPrice,
-                      quantity: trade.quantity,
-                      stopLoss: trade.stopLoss,
-                      takeProfit: trade.takeProfit,
-                      entryDate: trade.entryDate,
-                      exitDate: trade.exitDate,
-                    },
-                    ledgerCtxInner
-                  );
-
-                const reviewDto =
-                  trade.status === "OPEN" ? (openPack?.reviewDto ?? null) : null;
-
-                const isSessionFocusRow =
-                  reviewSessionActive &&
-                  trade.status === "OPEN" &&
-                  sessionFocusId != null &&
-                  trade.id === sessionFocusId;
-
-                const rowHandledCalm =
-                  trade.status === "OPEN" &&
-                  openPack &&
-                  checkedTodayTradeIds.has(trade.id) &&
-                  openPack.priorityTier !== "urgent" &&
-                  reviewDto != null &&
-                  reviewDto.surface !== "stop_violated" &&
-                  reviewDto.stopBand !== "breached";
-
-                const dimNonFocusSessionRow =
-                  reviewSessionActive &&
-                  reviewSessionQueue.length > 0 &&
-                  sessionFocusId != null &&
-                  !isSessionFocusRow;
-
-                const sessionRowOpacity = dimNonFocusSessionRow
-                  ? trade.status === "OPEN"
-                    ? 0.56
-                    : 0.82
-                  : 1;
-
-                return (
-                  <tr
-                    key={trade.id}
-                    data-testid="trades-table-row"
-                    data-review-session-focus={
-                      isSessionFocusRow ? "true" : undefined
-                    }
-                    style={{
-                      opacity: sessionRowOpacity,
-                      ...(isSessionFocusRow
-                        ? {
-                            outline:
-                              "2px solid color-mix(in srgb, #0ea5e9 38%, var(--border-color))",
-                            outlineOffset: "-1px",
-                          }
-                        : {}),
-                      ...(rowHandledCalm
-                        ? {
-                            backgroundColor:
-                              "color-mix(in srgb, #22c55e 7%, transparent)",
-                          }
-                        : {}),
-                    }}
-                  >
-                    <td className="ledger-sticky-symbol">
-                      <span
-                        className="mono font-semibold"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {trade.symbol}
-                      </span>
-                      {priceUnitMismatch ? (
-                        <span
-                          className="mt-1 block rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                          style={{
-                            borderColor: "color-mix(in srgb, #f97316 45%, var(--border-color))",
-                            color: "#9a3412",
-                          }}
-                        >
-                          Unit check needed
-                        </span>
-                      ) : null}
-                    </td>
-                    <td>
-                      {trade.setupCandidate ? (
-                        <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)]">
-                          {displayScanQualityTier(trade.setupCandidate.quality)} ·{" "}
-                          {formatPlaybookLabel(trade.setupCandidate.setupType)}
-                        </span>
-                      ) : (
-                        <span style={{ color: "var(--text-muted)" }}>
-                          Manual
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          trade.direction === "LONG"
-                            ? "badge-long"
-                            : "badge-short"
-                        }`}
-                      >
-                        {displayTradeDirection(trade.direction)}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap">
-                      <span className="rounded-md border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-2 py-1 text-xs text-[var(--text-secondary)] whitespace-nowrap">
-                        {formatPlaybookLabel(trade.playbook)}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`badge badge-${trade.status.toLowerCase()}`}
-                      >
-                        {displayTradeStatus(trade.status)}
-                      </span>
-                    </td>
-                    <td className="align-top">
-                      {trade.status === "OPEN" && reviewDto && openPack ? (
-                        <OpenPositionReviewCell
-                          tradeId={trade.id}
-                          compact={
-                            compactReview ||
-                            (reviewSessionActive && !isSessionFocusRow)
-                          }
-                          priorityTier={openPack.priorityTier}
-                          escalationCues={openPack.escalationCues}
-                          memoryLines={openPack.memoryLines}
-                          reviewDto={reviewDto}
-                          reviewedToday={checkedTodayTradeIds.has(trade.id)}
-                          latestBar={latestBar ?? null}
-                          formatBarSessionDate={formatBarSessionDate}
-                          sessionMode={reviewSessionActive}
-                          sessionFocused={Boolean(isSessionFocusRow)}
-                          operatingPostureLabel={
-                            OPERATING_POSTURE_TRADER_LABEL[
-                              openPack.operatingPosture
-                            ]
-                          }
-                          latestOutcomeLabel={reviewOutcomeTraderLabel(
-                            openPack.latestReviewOutcome
-                          )}
-                          evolutionStateLabel={
-                            POSITION_EVOLUTION_TRADER_LABEL[
-                              openPack.positionEvolution
-                            ]
-                          }
-                          evolutionExplainLine={openPack.positionEvolutionLine}
-                          compactReviewMode={compactReview}
-                        />
-                      ) : (
-                        <span style={{ color: "var(--text-muted)" }}>—</span>
-                      )}
-                    </td>
-                    <td className="mono table-num">
-                      {holdingDays != null ? holdingDays : "—"}
-                    </td>
-                    <td className="mono">{formatDate(trade.entryDate)}</td>
-                    <td className="mono table-num">
-                      {Number.isFinite(trade.entryPrice) &&
-                      trade.entryPrice > 0 ? (
-                        formatEquityThousandVndPerShare(trade.entryPrice)
-                      ) : (
-                        <span style={{ color: "var(--text-muted)" }}>—</span>
-                      )}
-                    </td>
-                    <td className="mono table-num">
-                      {trade.status === "OPEN" ? (
-                        latestBar ? (
-                          <div className="flex flex-col items-end gap-0.5">
-                            <span style={{ color: "var(--text-secondary)" }}>
-                              Latest close:{" "}
-                              {formatEquityThousandVndPerShare(latestBar.close)}
-                            </span>
-                            <span
-                              className="text-[11px] font-normal normal-case"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              Data date:{" "}
-                              {formatBarDataDateUtcLong(latestBar.date)}
-                            </span>
-                          </div>
-                        ) : (
-                          <span style={{ color: "var(--text-muted)" }}>—</span>
-                        )
-                      ) : trade.exitPrice !== null &&
-                        Number.isFinite(trade.exitPrice) ? (
-                        <div className="flex flex-col items-end gap-0.5">
-                          <span style={{ color: "var(--text-secondary)" }}>
-                            Exit price:{" "}
-                            {formatEquityThousandVndPerShare(trade.exitPrice)}
-                          </span>
-                          {trade.exitDate ? (
-                            <span
-                              className="text-[11px] font-normal normal-case"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              Exit date:{" "}
-                              {formatBarDataDateUtcLong(trade.exitDate)}
-                            </span>
-                          ) : null}
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="mono table-num">
-                      {formatQuantityCell(trade.quantity)}
-                    </td>
-                    <td className="mono table-num text-xs">
-                      {trade.status === "OPEN" ? formatRMultiple(rMultiple) : "—"}
-                    </td>
-                    <td className="mono table-num text-xs align-top">
-                      {trade.status === "OPEN" ? (
-                        <div className="flex flex-col items-end gap-0.5">
-                          <span>{formatSignedVnd(distanceToStop)}</span>
-                          {reviewDto?.cushionPctDisplay ? (
-                            <span
-                              className="text-[10px] font-normal normal-case tabular-nums"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              {reviewDto.cushionPctDisplay}
-                            </span>
-                          ) : null}
-                        </div>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td className="mono table-num text-xs">
-                      {trade.status === "OPEN"
-                        ? formatSignedVnd(distanceToTakeProfit)
-                        : "—"}
-                    </td>
-                    <td className="table-num align-top">
-                      {trade.status === "OPEN" ? (
-                        latestBar ? (
-                          <div
-                            className="flex flex-col items-end gap-0.5 text-[13px] font-normal opacity-95"
-                            style={{ color: "var(--text-secondary)" }}
-                          >
-                            <span
-                              className="text-[10px] font-semibold uppercase tracking-wide"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              Unrealized
-                            </span>
-                            <span
-                              className="max-w-[14rem] text-right text-[10px] leading-snug"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              Long bias: (latest close − entry) × qty. Short bias: (entry − latest
-                              close) × qty. Same price units as entry (thousand ₫ per share).
-                              {latestBar ? (
-                                <>
-                                  {" "}
-                                  Data date: {formatBarDataDateUtcLong(latestBar.date)}.
-                                </>
-                              ) : null}
-                            </span>
-                            {priceUnitMismatch ? (
-                              <>
-                                <span
-                                  className="text-left text-[11px] font-medium leading-snug"
-                                  style={{ color: "#9a3412" }}
-                                >
-                                  Unit check needed — unrealized P&amp;L not shown as valid.
-                                </span>
-                                <span
-                                  className="max-w-[16rem] text-right text-[10px] leading-snug"
-                                  style={{ color: "var(--text-muted)" }}
-                                >
-                                  {TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE}
-                                </span>
-                                <span className="mono text-[11px]" style={{ color: "var(--text-muted)" }}>
-                                  Entry (raw): {trade.entryPrice.toFixed(4)} · Latest close (raw):{" "}
-                                  {latestBar.close.toFixed(4)}
-                                </span>
-                              </>
-                            ) : unrealized?.pnlAmount != null ? (
-                              <span
-                                className="mono"
-                                style={{
-                                  color:
-                                    unrealized.pnlAmount >= 0
-                                      ? "var(--pnl-positive)"
-                                      : "var(--pnl-negative)",
-                                }}
-                              >
-                                {unrealized.pnlAmount > 0 ? "+" : ""}
-                                {formatVND(unrealized.pnlAmount, false)}
-                              </span>
-                            ) : (
-                              <span
-                                className="mono"
-                                style={{ color: "var(--text-muted)" }}
-                              >
-                                —
-                              </span>
-                            )}
-                            {priceUnitMismatch ? (
-                              <span className="mono text-[12px]" style={{ color: "var(--text-muted)" }}>
-                                Raw % (do not use): {formatSignedPct(unrealized?.pnlPct ?? null)}
-                              </span>
-                            ) : (
-                              <span
-                                className="mono text-[12px]"
-                                style={{
-                                  color:
-                                    unrealized?.pnlPct != null
-                                      ? unrealized.pnlPct >= 0
-                                        ? "var(--pnl-positive)"
-                                        : "var(--pnl-negative)"
-                                      : "var(--text-muted)",
-                                }}
-                              >
-                                {formatSignedPct(unrealized?.pnlPct ?? null)}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span style={{ color: "var(--text-muted)" }}>—</span>
-                        )
-                      ) : trade.realizedPnl !== null ? (
-                        <div className="flex flex-col items-end gap-0.5">
-                          <span
-                            className="text-[10px] font-semibold uppercase tracking-wide"
-                            style={{ color: "var(--text-muted)" }}
-                          >
-                            Realized
-                          </span>
-                          <span
-                            className="mono font-medium text-sm"
-                            style={{
-                              color:
-                                trade.realizedPnl >= 0
-                                  ? "var(--pnl-positive)"
-                                  : "var(--pnl-negative)",
-                            }}
-                          >
-                            {trade.realizedPnl > 0 ? "+" : ""}
-                            {formatVND(trade.realizedPnl, false)}
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ color: "var(--text-muted)" }}>—</span>
-                      )}
-                    </td>
-                    <td>
-                      <Link
-                        href={`/trades/${trade.id}`}
-                        className="btn btn-ghost btn-sm"
-                      >
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        </>
-      )}
-      <OperatingSnapshotPersist snapshot={snapshotForPersistence} />
-    </div>
+    </TradesLedgerPageShell>
   );
 }

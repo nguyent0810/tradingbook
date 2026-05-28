@@ -133,15 +133,11 @@ export function FocusReviewWorkspace({
 
   return (
     <section
-      className="card mt-4 border px-4 py-4"
+      className="ledger-deck-focus-review pipeline-deck-panel ledger-deck-panel"
       data-testid="focus-review-workspace"
       role="region"
       aria-labelledby="focus-review-workspace-title"
       aria-label={`Operational review for ${symbol}`}
-      style={{
-        borderColor: "color-mix(in srgb, #0ea5e9 22%, var(--border-color))",
-        backgroundColor: "color-mix(in srgb, #0ea5e9 4%, var(--bg-secondary))",
-      }}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">

@@ -14,8 +14,10 @@ function decisionModifier(uxLevel: VerdictUxLevel): string {
       return "dash-decision-hero--no-trade";
     case "PROBE":
       return "dash-decision-hero--probe";
+    case "TRADE":
+      return "dash-decision-hero--trade";
     default:
-      return "dash-decision-hero--normal";
+      return "dash-decision-hero--trade";
   }
 }
 

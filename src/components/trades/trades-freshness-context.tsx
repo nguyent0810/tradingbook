@@ -16,7 +16,10 @@ export function TradesFreshnessContext({
   delayedBackdrop,
 }: TradesFreshnessContextProps) {
   return (
-    <div className="tos-trades-context space-y-3" data-testid="trades-freshness-context">
+    <div
+      className="ledger-deck__trust pipeline-deck__trust tos-trades-context"
+      data-testid="trades-freshness-context"
+    >
       <DashboardMarketStatusBar freshness={freshness} />
       <DashboardScanMetaStrip latestScan={latestScan} delayedBackdrop={delayedBackdrop} />
     </div>

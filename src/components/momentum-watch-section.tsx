@@ -25,12 +25,12 @@ function fmtPct(n: number | null): string {
 
 function riskEmphasisClass(code: string): string {
   if (code === "STOP_FAR" || code === "EXTENDED") {
-    return "font-semibold text-amber-700 dark:text-amber-400";
+    return "pipeline-deck-momentum__risk-emphasis";
   }
   return "";
 }
 
-export async function MomentumWatchSection() {
+export async function MomentumWatchSection({ embedded = false }: { embedded?: boolean } = {}) {
   let rows: Awaited<ReturnType<typeof getMomentumWatchRowsForPhase1>> = [];
   let dbError: unknown = null;
   try {
@@ -46,13 +46,21 @@ export async function MomentumWatchSection() {
   }
 
   return (
-    <div className="dash-momentum dash-v2-momentum-inner" id="momentum-watch">
-      <header className="dash-v2-card__header">
-        <h3 className="dash-v2-card__title">Momentum Watch</h3>
-        <p className="dash-v2-card__lead">
-          {MOMENTUM_WATCH_UI_DISCLAIMER}. Observational only — not a validated Best Setup.
-        </p>
-      </header>
+    <div
+      className={`dash-momentum dash-v2-momentum-inner pipeline-deck-momentum${embedded ? " pipeline-deck-momentum--embedded" : ""}`}
+      id="momentum-watch"
+      data-testid="setups-momentum-watch"
+    >
+      {!embedded ? (
+        <header className="dash-v2-card__header">
+          <h3 className="dash-v2-card__title">Momentum Watch</h3>
+          <p className="dash-v2-card__lead">
+            {MOMENTUM_WATCH_UI_DISCLAIMER}. Observational only — not a validated Best Setup.
+          </p>
+        </header>
+      ) : (
+        <p className="pipeline-deck-momentum__disclaimer">{MOMENTUM_WATCH_UI_DISCLAIMER}</p>
+      )}
 
       {rows.length === 0 && dbError ? (
         <ErrorStateWithEvidence

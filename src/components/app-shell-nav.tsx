@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/setups", label: "Setups" },
-  { href: "/trades", label: "Trades" },
+  { href: "/dashboard", label: "Dashboard", deck: "Command" },
+  { href: "/setups", label: "Setups", deck: "Pipeline" },
+  { href: "/trades", label: "Trades", deck: "Ledger" },
 ] as const;
 
 function isNavActive(pathname: string, href: string): boolean {
@@ -35,7 +35,7 @@ function NavLinks({
 }) {
   return (
     <>
-      {NAV_ITEMS.map(({ href, label }) => {
+      {NAV_ITEMS.map(({ href, label, deck }) => {
         const active = isNavActive(pathname, href);
         return (
           <Link
@@ -44,7 +44,8 @@ function NavLinks({
             className={mobile ? mobileLinkClass(active) : desktopLinkClass(active)}
             aria-current={active ? "page" : undefined}
           >
-            {label}
+            <span className="app-shell-nav-link__label">{label}</span>
+            <span className="app-shell-nav-link__deck">{deck}</span>
           </Link>
         );
       })}
