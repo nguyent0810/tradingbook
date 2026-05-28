@@ -20,20 +20,16 @@ import {
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
-import {
-  buildDecisionCockpitDto,
-  resolveBestSetupsPanelPresentation,
-} from "@/lib/dashboard/decision-cockpit-dto";
+import { buildDecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
-import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
-import { DashboardCommandCenter } from "@/components/dashboard/dashboard-command-center";
+import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
+import { TradingOsDashboard } from "@/components/trading-os-v3/trading-os-dashboard";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
-import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { Trade } from "@/generated/prisma/client";
 
 export const metadata: Metadata = {
   title: "Dashboard — TradeLog",
-  description: "Decision-first trading cockpit.",
+  description: "Trading OS decision cockpit.",
 };
 
 export default async function DashboardPage() {
@@ -76,8 +72,6 @@ export default async function DashboardPage() {
     delayedBackdropFromScanNotes:
       scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
   });
-  const scanDelayedBackdrop =
-    scanNotes?.benchmarkBackdrop?.delayedBackdrop ?? null;
   const rawCandidates = toCandidateRows(latestScan);
   const evalDate =
     rawCandidates.length > 0
@@ -132,24 +126,6 @@ export default async function DashboardPage() {
     activeWatchItems = [];
   }
 
-  const watchSymbolIds = [...new Set(activeWatchItems.map((w) => w.symbolId))];
-  let latestBars: { symbolId: string; close: number }[] = [];
-  if (watchSymbolIds.length > 0) {
-    try {
-      latestBars = await prisma.stockDailyBar.findMany({
-        where: { symbolId: { in: watchSymbolIds } },
-        orderBy: [{ symbolId: "asc" }, { date: "desc" }],
-        distinct: ["symbolId"],
-        select: { symbolId: true, close: true },
-      });
-    } catch (e) {
-      dbLoadError ??= "Database temporarily unavailable (latest closes).";
-      console.error("[dashboard] latest bars query failed:", e);
-      latestBars = [];
-    }
-  }
-  const latestCloseBySymbol = new Map(latestBars.map((b) => [b.symbolId, b.close]));
-
   const accountEquityVnd = parseTradingAccountEquityVnd();
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
 
@@ -167,49 +143,17 @@ export default async function DashboardPage() {
     })
   );
 
-  const surfacedCount = latestScan?.candidateCountSurfaced ?? 0;
-  const bestSetupsPresentation = resolveBestSetupsPanelPresentation({
-    setupRowCount: topSetups.length,
-    opportunity: cockpitDto.opportunity,
-    latestScan: latestScan
-      ? {
-          id: latestScan.id,
-          runAt: latestScan.runAt,
-          gate1Level: latestScan.gate1Level,
-          candidateCountA: latestScan.candidateCountA,
-          candidateCountB: latestScan.candidateCountB,
-          candidateCountSurfaced: latestScan.candidateCountSurfaced,
-        }
-      : null,
+  const viewModel = mapDashboardV3ViewModel({
+    cockpitDto,
+    freshness,
+    regime,
+    latestScan,
+    topSetups,
+    trades,
+    watchItemCount: activeWatchItems.length,
+    openPositionCount: openTrades.length,
+    dbLoadError,
   });
 
-  return (
-    <div className="page-container command-deck dash-cockpit dash-cockpit--v2 pb-10">
-      <DashboardPageHeader />
-
-      {dbLoadError ? (
-        <ErrorStateWithEvidence
-          className="dash-v2-alert"
-          title="Partial dashboard data unavailable"
-          message={dbLoadError}
-          evidence="src/app/(dashboard)/dashboard/page.tsx · one or more Prisma reads failed; sections below may be empty."
-          data-testid="dashboard-db-load-error"
-        />
-      ) : null}
-
-      <DashboardCommandCenter
-        freshness={freshness}
-        latestScan={latestScan}
-        scanDelayedBackdrop={scanDelayedBackdrop}
-        cockpitDto={cockpitDto}
-        surfacedCount={surfacedCount}
-        topSetups={topSetups}
-        bestSetupsPresentation={bestSetupsPresentation}
-        portfolioRiskConfigured={portfolioRiskConfigured}
-        trades={trades}
-        activeWatchItems={activeWatchItems}
-        latestCloseBySymbol={latestCloseBySymbol}
-      />
-    </div>
-  );
+  return <TradingOsDashboard viewModel={viewModel} />;
 }
