@@ -22,7 +22,7 @@ export function MarketPulseCommandBar({ data }: Props) {
           <strong>{data.freshness}</strong>
         </div>
         {data.vnindex ? (
-          <div>
+          <div className="tosv3-commandbar__metric tosv3-commandbar__metric--primary">
             <span>VNINDEX</span>
             <strong className="tabular-nums">{data.vnindex}</strong>
           </div>

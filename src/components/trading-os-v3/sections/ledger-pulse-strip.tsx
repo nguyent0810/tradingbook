@@ -33,7 +33,7 @@ export function LedgerPulseStrip({ data }: Props) {
         )}
       </div>
 
-      <div>
+      <div className="tosv3-ledger__open">
         <span className="tosv3-type-label">Open trades</span>
         <strong className="tosv3-type-metric tabular-nums">{data.openTrades}</strong>
       </div>
