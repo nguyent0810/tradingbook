@@ -8778,30 +8778,290 @@ body {
   color: #8fc8ff;
 }
 
-.tosv3-setups-cockpit .tosv3-setups-master-detail {
+/* Surfaced candidates — selector + workstation (32% / 68%) */
+.tosv3-setups-cockpit .tosv3-setups-workstation {
   flex: 1;
   min-height: 0;
-  max-height: none;
-  align-items: stretch;
 }
 
-.tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap {
-  max-height: min(16rem, 42vh);
+.tosv3-setups-workstation {
+  display: grid;
+  grid-template-columns: minmax(10.5rem, 32%) minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.tosv3-setups-selector {
+  align-self: start;
+  min-width: 0;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid rgba(102, 128, 159, 0.25);
+  border-radius: 8px;
+  background: rgba(8, 13, 20, 0.72);
+}
+
+.tosv3-setups-selector__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin: 0 0 0.35rem;
+}
+
+.tosv3-setups-selector__count {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #8fc8ff;
+}
+
+.tosv3-setups-selector__scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.tosv3-setups-workstation--many .tosv3-setups-selector__scroll {
+  max-height: min(14rem, 38vh);
   overflow-y: auto;
 }
 
-.tosv3-setups-cockpit .tosv3-setups-master-detail__detail {
-  max-height: none;
-  overflow: visible;
-  position: static;
+.tosv3-setups-selector-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.64rem;
 }
 
-.tosv3-setups-master-detail--single {
-  grid-template-columns: minmax(0, 1fr);
+.tosv3-setups-selector-table th {
+  padding: 0.22rem 0.28rem;
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8fa0bc;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(102, 128, 159, 0.22);
 }
 
-.tosv3-setups-master-detail--single .tosv3-setups-master-detail__list-wrap {
-  max-height: min(8rem, 22vh);
+.tosv3-setups-selector-table th.table-num {
+  text-align: right;
+}
+
+.tosv3-setups-selector-table td {
+  padding: 0.28rem 0.28rem;
+  border-bottom: 1px solid rgba(102, 128, 159, 0.12);
+  vertical-align: middle;
+}
+
+.tosv3-setups-selector-table__row {
+  cursor: pointer;
+}
+
+.tosv3-setups-selector-table__row:hover td {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.tosv3-setups-selector-table__row.is-selected td {
+  background: rgba(45, 212, 191, 0.12);
+  box-shadow: inset 2px 0 0 #2dd4bf;
+}
+
+.tosv3-setups-selector-table__symbol {
+  font-weight: 700;
+  color: #eef6ff;
+  white-space: nowrap;
+}
+
+.tosv3-setups-selector-table__tier {
+  font-size: 0.58rem;
+  padding: 0.06rem 0.28rem;
+}
+
+.tosv3-setups-workstation__main {
+  min-width: 0;
+  align-self: start;
+}
+
+.tosv3-setups-workstation-panel {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(102, 128, 159, 0.28);
+  border-radius: 10px;
+  background: linear-gradient(165deg, rgba(14, 22, 36, 0.94), rgba(8, 13, 22, 0.98));
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.tosv3-setups-workstation-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.45rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(102, 128, 159, 0.2);
+}
+
+.tosv3-setups-workstation-panel__symbol {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fbff;
+  letter-spacing: 0.02em;
+}
+
+.tosv3-setups-workstation-panel__badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.28rem;
+  margin-top: 0.2rem;
+}
+
+.tosv3-setups-workstation-panel__score {
+  font-size: 0.65rem;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-metric-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.tosv3-setups-metric-card {
+  padding: 0.35rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid rgba(102, 128, 159, 0.22);
+  background: rgba(8, 13, 22, 0.65);
+}
+
+.tosv3-setups-metric-card dt {
+  margin: 0 0 0.12rem;
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8fa0bc;
+}
+
+.tosv3-setups-metric-card dd {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #eef6ff;
+}
+
+.tosv3-setups-workstation-panel__hint,
+.tosv3-setups-workstation-panel__summary,
+.tosv3-setups-workstation-panel__meta {
+  margin: 0 0 0.4rem;
+  font-size: 0.68rem;
+  color: #b6c8e2;
+  line-height: 1.35;
+}
+
+.tosv3-setups-workstation-panel__summary {
+  color: #dbe7f8;
+}
+
+.tosv3-setups-workstation-panel__section {
+  margin-bottom: 0.5rem;
+}
+
+.tosv3-setups-workstation-panel__section--sizing {
+  margin-bottom: 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(102, 128, 159, 0.2);
+}
+
+.tosv3-setups-workstation-panel__section-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-evidence-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tosv3-setups-evidence-grid--dense {
+  margin-bottom: 0.45rem;
+}
+
+.tosv3-setups-evidence-item {
+  padding: 0.28rem 0.38rem;
+  border-radius: 6px;
+  border: 1px solid rgba(102, 128, 159, 0.28);
+  background: rgba(15, 23, 42, 0.55);
+  font-size: 0.62rem;
+  line-height: 1.3;
+  color: #c5d4e8;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tosv3-setups-evidence-item--ok {
+  border-color: rgba(52, 211, 153, 0.32);
+  color: #a7f3d0;
+  background: rgba(6, 78, 59, 0.25);
+}
+
+.tosv3-setups-workstation-panel__more {
+  margin: 0.28rem 0 0;
+  font-size: 0.6rem;
+  color: #8fa0bc;
+}
+
+.tosv3-setups-tech-block {
+  margin-bottom: 0.45rem;
+}
+
+.tosv3-setups-tech-block__toggle {
+  appearance: none;
+  border: 1px solid rgba(102, 128, 159, 0.35);
+  background: rgba(15, 23, 42, 0.5);
+  color: #9eb0c9;
+  font-size: 0.65rem;
+  padding: 0.28rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tosv3-setups-tech-block__toggle:hover {
+  color: #dbe7f8;
+}
+
+.tosv3-setups-tech-block__toggle:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.85);
+  outline-offset: 2px;
+}
+
+.tosv3-setups-tech-block__body {
+  margin-top: 0.4rem;
+  padding: 0.45rem;
+  border-radius: 8px;
+  border: 1px solid rgba(102, 128, 159, 0.2);
+  background: rgba(8, 13, 22, 0.55);
+  max-height: min(12rem, 28vh);
+  overflow-y: auto;
+}
+
+.tosv3-setups-tech-block__list {
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+  font-size: 0.62rem;
+  color: #9eb0c9;
 }
 
 /* Trades ledger cockpit */
@@ -9249,37 +9509,96 @@ body {
 }
 
 .tosv3-setups-sizing-panel {
-  margin-top: 0.45rem;
-  padding: 0.55rem 0.65rem;
+  padding: 0.45rem 0.5rem;
   border-radius: 8px;
-  border: 1px solid rgba(102, 128, 159, 0.25);
-  background: rgba(8, 13, 22, 0.72);
-}
-
-.tosv3-setups-sizing-panel .label {
-  font-size: 0.62rem;
-  color: #9eb0c9;
-}
-
-.tosv3-setups-sizing-panel .input {
-  font-size: 0.72rem;
-  padding: 0.35rem 0.45rem;
-}
-
-.tosv3-setups-sizing-panel__title {
-  margin: 0;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #9eb0c9;
+  border: 1px solid rgba(102, 128, 159, 0.22);
+  background: rgba(8, 13, 22, 0.65);
 }
 
 .tosv3-setups-sizing-panel__hint {
-  margin: 0.25rem 0 0;
-  font-size: 0.65rem;
-  line-height: 1.35;
+  margin: 0 0 0.4rem;
+  font-size: 0.6rem;
   color: #8fa0bc;
+}
+
+.tosv3-setups-sizing-panel__group {
+  margin-bottom: 0.4rem;
+}
+
+.tosv3-setups-sizing-panel__group-title {
+  margin: 0 0 0.28rem;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8fa0bc;
+}
+
+.tosv3-setups-sizing-panel__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.tosv3-setups-sizing-panel__fields--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tosv3-setups-sizing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.tosv3-setups-sizing-field__label {
+  font-size: 0.55rem;
+  color: #8fa0bc;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tosv3-setups-sizing-field__input {
+  font-size: 0.68rem;
+  padding: 0.28rem 0.38rem;
+  min-height: 1.65rem;
+}
+
+.tosv3-setups-sizing-panel__results {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(102, 128, 159, 0.18);
+}
+
+.tosv3-setups-sizing-panel__error {
+  margin: 0;
+  font-size: 0.65rem;
+  color: #fda4af;
+}
+
+.tosv3-setups-sizing-results {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem 0.45rem;
+  margin: 0;
+}
+
+.tosv3-setups-sizing-results dt {
+  font-size: 0.52rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8fa0bc;
+}
+
+.tosv3-setups-sizing-results dd {
+  margin: 0.08rem 0 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #eef6ff;
+}
+
+.tosv3-setups-sizing-results__wide {
+  grid-column: 1 / -1;
 }
 
 /* Ledger column widths — prevent overlap */
@@ -9512,17 +9831,20 @@ body {
     min-height: 0;
   }
 
-  .tosv3-setups-master-detail {
+  .tosv3-setups-workstation {
     grid-template-columns: 1fr;
   }
 
-  .tosv3-setups-master-detail__detail {
-    position: static;
-    max-height: none;
+  .tosv3-setups-metric-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap {
-    max-height: none;
+  .tosv3-setups-evidence-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tosv3-setups-sizing-panel__fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tosv3-setups-dock__body {
@@ -9535,5 +9857,20 @@ body {
 
   .tosv3-ticket--dense .tosv3-ticket__analysis-rail {
     position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .tosv3-setups-metric-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tosv3-setups-evidence-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tosv3-setups-sizing-panel__fields,
+  .tosv3-setups-sizing-results {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
