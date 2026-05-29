@@ -10,6 +10,7 @@ import {
 } from "@/lib/scanner/closest-execution-metrics";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
 import {
   displayNearMissDiagnosticStatus,
   nearMissDiagnosticActionHint,
@@ -83,11 +84,59 @@ function statusStyle(status: ReturnType<typeof computeClosestExecutionStatus>): 
 export function SetupsClosestSymbolsSection({
   rows,
   rsBySymbol,
+  compact = false,
 }: {
   rows: Gate2ClosestSymbolRow[];
   rsBySymbol?: Map<string, RsDiagnosticUi | null>;
+  compact?: boolean;
 }) {
   if (rows.length === 0) return null;
+
+  if (compact) {
+    return (
+      <div className="tosv3-setups-near-miss-table-wrap">
+        <table className="tosv3-setups-near-miss-table">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Status</th>
+              <th className="table-num">Close</th>
+              <th>Blocker</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => {
+              const status = computeClosestExecutionStatus(
+                row.terminalCategory,
+                row.close,
+                row.pullbackZoneLow,
+                row.pullbackZoneHigh
+              );
+              const blocker = row.terminalReasonPreview
+                ? formatScannerReasonForUser(row.terminalReasonPreview)
+                : "Not ready";
+              return (
+                <tr key={`${row.symbol}-${row.stageRank}`}>
+                  <td className="tosv3-setups-near-miss-table__symbol">{row.symbol}</td>
+                  <td>
+                    <span className="tosv3-setups-chip tosv3-setups-chip--watch">
+                      {displayNearMissDiagnosticStatus(status)}
+                    </span>
+                  </td>
+                  <td className="table-num tabular-nums">
+                    {row.close > 0 ? fmtThousands(row.close) : "—"}
+                  </td>
+                  <td className="tosv3-setups-near-miss-table__blocker" title={blocker}>
+                    {blocker.length > 42 ? `${blocker.slice(0, 41)}…` : blocker}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <section className="card p-6">
@@ -133,15 +182,9 @@ export function SetupsClosestSymbolsSection({
               </div>
 
               <div className="mt-3 space-y-1.5 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                {row.terminalCode ? (
-                  <p className="text-xs font-mono" data-testid="closest-terminal-code">
-                    <span style={{ color: "var(--text-tertiary)" }}>Rejection code: </span>
-                    {row.terminalCode}
-                  </p>
-                ) : null}
                 {row.terminalReasonPreview ? (
                   <p className="text-xs leading-snug" style={{ color: "var(--text-tertiary)" }}>
-                    {row.terminalReasonPreview}
+                    {formatScannerReasonForUser(row.terminalReasonPreview)}
                   </p>
                 ) : null}
                 <p>
