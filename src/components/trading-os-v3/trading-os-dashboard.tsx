@@ -33,7 +33,9 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
       <div className="tosv3-bg-noise" aria-hidden />
 
       <motion.div className="tosv3-shell" {...motionProps}>
-        <DashboardPageHeader />
+        <div className="tosv3-page-header-slot">
+          <DashboardPageHeader />
+        </div>
 
         {viewModel.partialError ? (
           <ErrorStateWithEvidence

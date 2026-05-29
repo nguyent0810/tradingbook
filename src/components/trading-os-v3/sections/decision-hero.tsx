@@ -11,6 +11,9 @@ function confidenceLabel(band: V3DecisionHero["confidenceBand"]): string {
 
 export function DecisionHero({ data }: Props) {
   const meterStyle = { width: `${data.confidenceMeterWidth}%` };
+  const hasScanStrip = Boolean(
+    data.highestQualitySetup || data.mainRisk || data.nextAction
+  );
 
   return (
     <section
@@ -44,26 +47,32 @@ export function DecisionHero({ data }: Props) {
         <div className="tosv3-meter__fill" style={meterStyle} />
       </div>
 
-      <dl className="tosv3-scan-strip">
-        {data.highestQualitySetup ? (
-          <div>
-            <dt>Top setup</dt>
-            <dd>{data.highestQualitySetup}</dd>
-          </div>
-        ) : null}
-        {data.mainRisk ? (
-          <div>
-            <dt>Main risk</dt>
-            <dd>{data.mainRisk}</dd>
-          </div>
-        ) : null}
-        {data.nextAction ? (
-          <div className="tosv3-scan-strip__action">
-            <dt>Next action</dt>
-            <dd>{data.nextAction}</dd>
-          </div>
-        ) : null}
-      </dl>
+      {hasScanStrip ? (
+        <dl className="tosv3-scan-strip">
+          {data.highestQualitySetup ? (
+            <div>
+              <dt>Top setup</dt>
+              <dd>{data.highestQualitySetup}</dd>
+            </div>
+          ) : null}
+          {data.mainRisk ? (
+            <div>
+              <dt>Main risk</dt>
+              <dd>{data.mainRisk}</dd>
+            </div>
+          ) : null}
+          {data.nextAction ? (
+            <div className="tosv3-scan-strip__action">
+              <dt>Next action</dt>
+              <dd>{data.nextAction}</dd>
+            </div>
+          ) : null}
+        </dl>
+      ) : (
+        <p className="tosv3-empty-state tosv3-hero__empty-copy">
+          No actionable scan detail surfaced in the latest run.
+        </p>
+      )}
 
       <div className="tosv3-hero__grid">
         <div>

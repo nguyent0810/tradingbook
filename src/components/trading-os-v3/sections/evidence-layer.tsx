@@ -30,6 +30,7 @@ export function EvidenceLayer({ items }: Props) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-controls="dashboard-v3-evidence-panel"
+        aria-label={open ? "Hide evidence diagnostics" : "Show evidence diagnostics"}
       >
         <span className="tosv3-kicker">Evidence layer</span>
         <strong>{open ? "Hide diagnostics" : "Show diagnostics"}</strong>

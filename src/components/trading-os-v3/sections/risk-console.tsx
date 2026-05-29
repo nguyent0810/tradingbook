@@ -108,7 +108,11 @@ export function RiskConsole({ data }: Props) {
       <div
         className="tosv3-meter tosv3-meter--risk"
         role="img"
-        aria-label="Exposure utilization"
+        aria-label={
+          hasPercentCap
+            ? `Exposure utilization ${data.utilizationPercent}% of ${data.maxRiskPercent}% cap`
+            : "Exposure utilization unavailable until equity is configured"
+        }
       >
         <div className="tosv3-meter__track">
           <span className="tosv3-meter__cap-mark" style={{ left: "100%" }} aria-hidden />

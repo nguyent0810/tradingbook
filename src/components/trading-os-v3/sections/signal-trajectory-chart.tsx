@@ -28,7 +28,7 @@ export function SignalTrajectoryChart({ data }: Props) {
         <p className="tosv3-type-muted">Closed trades cumulative P&amp;L</p>
       </div>
       {data.emptyMessage ? (
-        <p className="tosv3-type-muted">{data.emptyMessage}</p>
+        <p className="tosv3-empty-state tosv3-chart__empty">{data.emptyMessage}</p>
       ) : (
         <svg viewBox="0 0 960 220" role="img" aria-label="Closed trades cumulative P and L">
           <defs>
