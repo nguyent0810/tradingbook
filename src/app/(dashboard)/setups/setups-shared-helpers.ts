@@ -6,6 +6,7 @@ import {
 } from "@/lib/scanner/setups-trader-copy";
 import type { SetupsRejectionAccordionItem } from "@/components/setups-rejection-accordion";
 import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
+import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
 
 export function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -19,7 +20,13 @@ export function fmtRunDate(d: Date): string {
 }
 
 export function reasonsToStrings(reasons: unknown): string[] {
-  return parseSetupCandidateReasons(reasons).lines;
+  return parseSetupCandidateReasons(reasons).lines.map((line) =>
+    formatScannerReasonForUser(line)
+  );
+}
+
+export function humanizeDisplayLine(line: string): string {
+  return formatScannerReasonForUser(line);
 }
 
 export function rankComponentsFromReasons(reasons: unknown) {

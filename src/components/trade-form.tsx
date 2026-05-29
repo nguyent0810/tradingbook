@@ -81,25 +81,22 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
   };
 
   return (
-    <form ref={formRef} action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="tosv3-ticket">
       {state?.message && (
-        <div
-          className="rounded-lg px-4 py-3 text-sm"
-          style={{
-            background: "var(--danger-muted)",
-            color: "var(--danger)",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
-          }}
-        >
+        <div className="tosv3-ticket__alert" role="alert">
           {state.message}
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT COLUMN: Inputs form */}
-        <div className="lg:col-span-8 space-y-6">
-          
-          {/* Row 1: Symbol + Direction + Status */}
+      <div className="tosv3-ticket__layout">
+        <div className="tosv3-ticket__main">
+          <section className="tosv3-ticket__section" aria-labelledby="tosv3-ticket-instrument">
+            <header className="tosv3-ticket__section-head">
+              <h2 id="tosv3-ticket-instrument" className="tosv3-ticket__section-title">
+                Instrument
+              </h2>
+              <p className="tosv3-ticket__section-hint">Symbol, direction, and lifecycle status</p>
+            </header>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
               <label htmlFor="symbol" className="label">
@@ -161,7 +158,17 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             </div>
           </div>
 
-          <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm">
+          </section>
+
+          <section className="tosv3-ticket__section" aria-labelledby="tosv3-ticket-execution">
+            <header className="tosv3-ticket__section-head">
+              <h2 id="tosv3-ticket-execution" className="tosv3-ticket__section-title">
+                Execution
+              </h2>
+              <p className="tosv3-ticket__section-hint">Entry timing, price, size, and fees</p>
+            </header>
+
+          <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm tosv3-ticket__playbook">
             <span className="font-medium text-[var(--text-primary)]">Playbook</span>
             <span className="mx-2 text-[var(--text-muted)]">·</span>
             <span className="text-[var(--text-secondary)]">
@@ -534,13 +541,13 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
               style={{ resize: "vertical", minHeight: "80px" }}
             />
           </div>
+          </section>
 
-          {/* Form Actions */}
-          <div className="flex items-center gap-3 pt-2">
+          <div className="tosv3-ticket__actions">
             <button
               type="submit"
               disabled={pending}
-              className="btn btn-primary"
+              className="tosv3-btn tosv3-btn--primary"
             >
               {pending ? (
                 <span className="flex items-center gap-2">
@@ -563,19 +570,18 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
               )}
             </button>
 
-            <Link href="/trades" className="btn btn-secondary">
+            <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
               Cancel
             </Link>
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Financial Stats Live Preview */}
-        <div className="lg:col-span-4 lg:sticky lg:top-24">
+        <aside className="tosv3-ticket__aside">
           <FinancialStatsPreview 
             formRef={formRef} 
             direction={trade?.direction || initialValues?.direction || "LONG"} 
           />
-        </div>
+        </aside>
       </div>
     </form>
   );
@@ -663,7 +669,7 @@ function FinancialStatsPreview({
   };
 
   return (
-    <div className="card p-5 space-y-4 bg-[#121215] border border-[#1f1f23] rounded-lg shadow-lg">
+    <div className="tosv3-ticket__risk-panel">
       <div className="border-b border-[#1f1f23] pb-2">
         <h3 className="text-xs font-bold text-[#fafafa] uppercase tracking-wider">
           Position Live Analysis

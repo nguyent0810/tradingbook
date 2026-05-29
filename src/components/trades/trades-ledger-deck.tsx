@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Suspense } from "react";
+import { V3WorkstationShell } from "@/components/trading-os-v3/shared/v3-workstation-shell";
 import { TradesPageHeader } from "@/components/trades/trades-page-header";
 import { TradesFreshnessContext } from "@/components/trades/trades-freshness-context";
 import { TradesReviewQueue } from "@/components/trades/trades-review-queue";
@@ -9,7 +10,7 @@ import { TradesLedgerEmpty } from "@/components/trades/trades-ledger-empty";
 import { TradeFilters, TradeFiltersSkeleton } from "@/components/trades/trades-ledger-filters";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
-import { CommandDeckEntrance, CommandDeckZone } from "@/components/command-deck";
+import { CommandDeckZone } from "@/components/command-deck";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { MarketDataAlignmentAnalysis } from "@/lib/market/market-data-alignment";
@@ -85,7 +86,7 @@ export function TradesLedgerDeck({
   const filteredEmpty = Boolean(search || statusFilter);
 
   return (
-    <CommandDeckEntrance className="ledger-deck__flow">
+    <div className="tosv3-workstation-flow ledger-deck__flow">
       <TradesFreshnessContext
         freshness={marketFreshness}
         latestScan={latestScan}
@@ -168,7 +169,7 @@ export function TradesLedgerDeck({
       )}
 
       {operatingSnapshotPersist}
-    </CommandDeckEntrance>
+    </div>
   );
 }
 
@@ -184,13 +185,13 @@ export function TradesLedgerPageShell({
   closedCount: number;
 }) {
   return (
-    <div className="page-container command-deck ledger-deck pipeline-deck dash-cockpit dash-cockpit--v2 pb-10">
+    <V3WorkstationShell className="ledger-deck" testId="trades-workstation">
       <TradesPageHeader
         tradeCount={tradeCount}
         openCount={openCount}
         closedCount={closedCount}
       />
       {children}
-    </div>
+    </V3WorkstationShell>
   );
 }

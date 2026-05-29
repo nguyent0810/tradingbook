@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { CommandDeckEntrance } from "@/components/command-deck";
+import { V3WorkstationShell } from "@/components/trading-os-v3/shared/v3-workstation-shell";
 import { SetupsPageHeader } from "@/components/setups/setups-page-header";
 import { getSession } from "@/lib/session";
 import { SetupsCandidatesAsync } from "./setups-candidates-async";
@@ -29,10 +29,10 @@ export default async function SetupsPage() {
   if (!session) redirect("/login");
 
   return (
-    <div className="page-container command-deck pipeline-deck dash-cockpit dash-cockpit--v2 pb-10">
+    <V3WorkstationShell testId="setups-workstation">
       <SetupsPageHeader />
 
-      <CommandDeckEntrance className="pipeline-deck__flow">
+      <div className="tosv3-workstation-flow pipeline-deck__flow">
         <Suspense fallback={<SetupsPipelineContextFallback />}>
           <SetupsPipelineContextAsync />
         </Suspense>
@@ -41,8 +41,8 @@ export default async function SetupsPage() {
           <SetupsOverviewAsync />
         </Suspense>
 
-        <div className="pipeline-deck__grid">
-          <div className="pipeline-deck__main">
+        <div className="pipeline-deck__grid tosv3-workstation-grid">
+          <div className="pipeline-deck__main tosv3-workstation-main">
             <Suspense fallback={<SetupsCandidatesFallback />}>
               <SetupsCandidatesAsync />
             </Suspense>
@@ -60,7 +60,7 @@ export default async function SetupsPage() {
             <SetupsSidebarAsync />
           </Suspense>
         </div>
-      </CommandDeckEntrance>
-    </div>
+      </div>
+    </V3WorkstationShell>
   );
 }

@@ -19,6 +19,7 @@ import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import {
   fmtSetupPerfHint,
+  humanizeDisplayLine,
   rankComponentsFromReasons,
   reasonsToStrings,
   type SetupPerfHint,
@@ -66,7 +67,7 @@ export async function SetupsCandidatesAsync() {
       ) : null}
 
       {candidates.length === 0 ? (
-        <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
+        <section className="tosv3-glass-panel pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
           <header className="dash-panel__header">
             <h2 className="dash-section-title">Surfaced candidates</h2>
             <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
@@ -88,7 +89,7 @@ export async function SetupsCandidatesAsync() {
           </div>
         </section>
       ) : (
-        <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
+        <section className="tosv3-glass-panel pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
           <header className="dash-panel__header">
             <h2 className="dash-section-title">
               Surfaced candidates ({candidates.length})
@@ -113,7 +114,7 @@ export async function SetupsCandidatesAsync() {
                   const lines = reasonsToStrings(c.reasons);
                   const rankComponents = rankComponentsFromReasons(c.reasons);
                   const rankBreakdownLines = rankComponents
-                    ? formatGate2RankBreakdownLines(rankComponents)
+                    ? formatGate2RankBreakdownLines(rankComponents).map(humanizeDisplayLine)
                     : [];
                   const rsUi = rsMap.get(c.symbolKey) ?? null;
                   const rsRankPreviewLines =
@@ -123,7 +124,7 @@ export async function SetupsCandidatesAsync() {
                             rankComponents.rankScore,
                             rsUi?.rs20SpreadPct ?? null
                           )
-                        )
+                        ).map(humanizeDisplayLine)
                       : [];
                   const tier = c.quality === ScanQuality.A ? "A" : "B";
                   const perfHint = setupPerfMap.get(`${c.setupType}:${c.quality}`) ?? null;
