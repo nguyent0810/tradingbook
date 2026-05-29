@@ -6749,12 +6749,43 @@ body {
   opacity: 0.4;
 }
 
+.tosv3-radar-detail {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  margin-top: 0.45rem;
+}
+
+.tosv3-radar-detail__close {
+  margin-left: auto;
+  border: 1px solid rgba(120, 149, 183, 0.4);
+  border-radius: 6px;
+  background: rgba(12, 20, 30, 0.65);
+  color: #c7d6ea;
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.42rem;
+  cursor: pointer;
+}
+
+.tosv3-radar-detail__close:hover,
+.tosv3-radar-detail__close:focus-visible {
+  border-color: rgba(94, 234, 212, 0.55);
+  color: #e9f2ff;
+  outline: none;
+}
+
+.tosv3-radar-tooltip--inmap {
+  display: none !important;
+}
+
 .tosv3-radar-tooltip {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  z-index: 5;
-  width: min(300px, calc(100% - 24px));
+  position: relative;
+  left: auto;
+  top: auto;
+  z-index: 1;
+  width: 100%;
   border: 1px solid rgba(120, 149, 183, 0.36);
   border-radius: 10px;
   background: linear-gradient(180deg, rgba(10, 16, 24, 0.92), rgba(7, 12, 18, 0.87));
@@ -7099,14 +7130,6 @@ body {
 }
 
 @media (max-width: 760px) {
-  .tosv3-radar-tooltip--inmap {
-    display: none;
-  }
-
-  .tosv3-radar-focus {
-    display: block;
-  }
-
   .tosv3-commandbar {
     grid-template-columns: 1fr;
     gap: 0.65rem;

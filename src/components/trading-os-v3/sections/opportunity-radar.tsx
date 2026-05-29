@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DashboardV3ViewModel } from "@/lib/dashboard/dashboard-v3-view-model";
 import {
   AVOID_PLACEHOLDER_POSITIONS,
@@ -38,14 +38,114 @@ function signalTrace(item: DashboardV3ViewModel["radar"]["mapDots"][number]): nu
   ];
 }
 
-export function OpportunityRadar({ radar }: Props) {
-  const [activeSymbol, setActiveSymbol] = useState<string | null>(
-    radar.mapDots[0]?.symbol ?? null
+function prefersHoverDetail(): boolean {
+  if (typeof window === "undefined") return true;
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
+function RadarDetailCard({
+  detail,
+  pinned,
+  onDismissPin,
+}: {
+  detail: DashboardV3ViewModel["radar"]["mapDots"][number];
+  pinned: boolean;
+  onDismissPin: () => void;
+}) {
+  return (
+    <div
+      className="tosv3-radar-detail tosv3-radar-tooltip"
+      role="status"
+      aria-live="polite"
+      id={`tosv3-radar-detail-${detail.symbol}`}
+    >
+      <div className="tosv3-radar-tooltip__head">
+        <strong>{detail.symbol}</strong>
+        <span>{radarActionLabel(detail)}</span>
+        {pinned ? (
+          <button
+            type="button"
+            className="tosv3-radar-detail__close"
+            aria-label={`Close ${detail.symbol} details`}
+            onClick={onDismissPin}
+          >
+            Close
+          </button>
+        ) : null}
+      </div>
+      <p>{detail.reason}</p>
+      <div className="tosv3-radar-tooltip__meta">
+        <span className="tabular-nums">
+          Readiness {detail.readiness} · {readinessLabel(detail.readiness)}
+        </span>
+        <span className="tabular-nums">
+          Risk {detail.risk} · {riskLabel(detail.risk)}
+        </span>
+      </div>
+      <svg
+        viewBox="0 0 120 24"
+        className="tosv3-radar-tooltip__trace"
+        role="img"
+        aria-label="Signal trace from current radar state"
+      >
+        {signalTrace(detail).map((candle, index) => {
+          const x = 12 + index * 24;
+          const bodyTop = 24 - candle;
+          const wickTop = Math.max(2, bodyTop - 5);
+          const wickBottom = Math.min(22, bodyTop + 8);
+          const hue =
+            detail.status === "qualified"
+              ? "rgba(95, 223, 184, 0.92)"
+              : "rgba(251, 191, 36, 0.92)";
+          return (
+            <g key={`${detail.symbol}-trace-${index}`}>
+              <line x1={x} y1={wickTop} x2={x} y2={wickBottom} stroke={hue} strokeWidth="1.5" />
+              <rect x={x - 3} y={bodyTop} width="6" height="7" rx="1.5" fill={hue} />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
   );
-  const active = radar.mapDots.find((d) => d.symbol === activeSymbol);
+}
+
+export function OpportunityRadar({ radar }: Props) {
+  const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
+  const [pinnedSymbol, setPinnedSymbol] = useState<string | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const detailSymbol = pinnedSymbol ?? hoveredSymbol;
+  const detail = detailSymbol
+    ? radar.mapDots.find((d) => d.symbol === detailSymbol)
+    : null;
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPinnedSymbol(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!pinnedSymbol) return;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (sectionRef.current?.contains(target)) return;
+      setPinnedSymbol(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [pinnedSymbol]);
+
+  const clearHoverUnlessPinned = (symbol: string) => {
+    if (pinnedSymbol === symbol) return;
+    setHoveredSymbol((current) => (current === symbol ? null : current));
+  };
 
   return (
     <section
+      ref={sectionRef}
       className="tosv3-panel tosv3-radar"
       aria-label="Opportunity radar"
       data-testid="dashboard-v3-opportunity-radar"
@@ -87,7 +187,9 @@ export function OpportunityRadar({ radar }: Props) {
           const size = radarDotSize(item);
           const half = size / 2;
           const action = radarActionLabel(item);
-          const isActive = activeSymbol === item.symbol;
+          const isPinned = pinnedSymbol === item.symbol;
+          const isHovered = hoveredSymbol === item.symbol;
+          const isActive = isPinned || isHovered;
           return (
             <button
               key={item.symbol}
@@ -101,10 +203,23 @@ export function OpportunityRadar({ radar }: Props) {
                 margin: `${-half}px 0 0 ${-half}px`,
               }}
               aria-label={`${item.symbol}: ${action}, readiness ${item.readiness}, risk ${item.risk}`}
-              aria-pressed={isActive}
-              onClick={() => setActiveSymbol(item.symbol)}
-              onMouseEnter={() => setActiveSymbol(item.symbol)}
-              onFocus={() => setActiveSymbol(item.symbol)}
+              aria-pressed={isPinned}
+              aria-describedby={detail?.symbol === item.symbol ? `tosv3-radar-detail-${item.symbol}` : undefined}
+              onClick={() =>
+                setPinnedSymbol((current) => (current === item.symbol ? null : item.symbol))
+              }
+              onMouseEnter={() => {
+                if (prefersHoverDetail()) setHoveredSymbol(item.symbol);
+              }}
+              onMouseLeave={() => {
+                if (prefersHoverDetail()) clearHoverUnlessPinned(item.symbol);
+              }}
+              onFocus={() => setHoveredSymbol(item.symbol)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  clearHoverUnlessPinned(item.symbol);
+                }
+              }}
             >
               <span className="tosv3-radar-dot__symbol">{item.symbol}</span>
               <span className="tosv3-radar-dot__action">{action}</span>
@@ -141,53 +256,14 @@ export function OpportunityRadar({ radar }: Props) {
             No qualified or near-miss symbols in the latest scan.
           </p>
         ) : null}
-
-        {active ? (
-          <div className="tosv3-radar-tooltip tosv3-radar-tooltip--inmap" role="status" aria-live="polite">
-            <div className="tosv3-radar-tooltip__head">
-              <strong>{active.symbol}</strong>
-              <span>{radarActionLabel(active)}</span>
-            </div>
-            <p>{active.reason}</p>
-            <div className="tosv3-radar-tooltip__meta">
-              <span className="tabular-nums">
-                Readiness {active.readiness} · {readinessLabel(active.readiness)}
-              </span>
-              <span className="tabular-nums">
-                Risk {active.risk} · {riskLabel(active.risk)}
-              </span>
-            </div>
-            <svg
-              viewBox="0 0 120 24"
-              className="tosv3-radar-tooltip__trace"
-              role="img"
-              aria-label="Signal trace from current radar state"
-            >
-              {signalTrace(active).map((candle, index) => {
-                const x = 12 + index * 24;
-                const bodyTop = 24 - candle;
-                const wickTop = Math.max(2, bodyTop - 5);
-                const wickBottom = Math.min(22, bodyTop + 8);
-                const hue =
-                  active.status === "qualified"
-                    ? "rgba(95, 223, 184, 0.92)"
-                    : "rgba(251, 191, 36, 0.92)";
-                return (
-                  <g key={`${active.symbol}-trace-${index}`}>
-                    <line x1={x} y1={wickTop} x2={x} y2={wickBottom} stroke={hue} strokeWidth="1.5" />
-                    <rect x={x - 3} y={bodyTop} width="6" height="7" rx="1.5" fill={hue} />
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-        ) : null}
       </div>
 
-      {active ? (
-        <p className="tosv3-radar-focus tabular-nums">
-          <strong>{active.symbol}</strong> · {radarActionLabel(active)} · {active.reason}
-        </p>
+      {detail ? (
+        <RadarDetailCard
+          detail={detail}
+          pinned={pinnedSymbol === detail.symbol}
+          onDismissPin={() => setPinnedSymbol(null)}
+        />
       ) : null}
 
       <div className="tosv3-radar-bands">

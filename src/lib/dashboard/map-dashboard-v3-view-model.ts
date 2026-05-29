@@ -23,6 +23,13 @@ import type {
   V3RiskConsole,
   V3SetupCard,
 } from "./dashboard-v3-view-model";
+import {
+  formatBreadthSummary,
+  formatRadarReason,
+  formatScannerReasonForUser,
+  formatSetupDiagnosticCopy,
+  humanizeRsNearMissWatchlistPanel,
+} from "./v3-user-copy";
 
 export type MapDashboardV3Params = {
   cockpitDto: DecisionCockpitDto;
@@ -81,16 +88,7 @@ function formatBreadth(
   latestScan: LatestScanWithCandidates | null,
   gateFunnel: GateFunnelSnapshot | null
 ): string | null {
-  if (gateFunnel) {
-    if (gateFunnel.qualifiedTotal === 0 && gateFunnel.surfacedTotal === 0) return null;
-    return `G2 A ${gateFunnel.qualifiedCountA}·B ${gateFunnel.qualifiedCountB} · surfaced ${gateFunnel.surfacedTotal}`;
-  }
-  if (!latestScan) return null;
-  const { candidateCountA, candidateCountB, candidateCountSurfaced } = latestScan;
-  if (candidateCountA === 0 && candidateCountB === 0 && candidateCountSurfaced === 0) {
-    return null;
-  }
-  return `G2 qualified A ${candidateCountA}·B ${candidateCountB} · surfaced ${candidateCountSurfaced}`;
+  return formatBreadthSummary(latestScan, gateFunnel);
 }
 
 function healthLevelToRisk(healthLevel: string): number {
@@ -160,7 +158,9 @@ function candidateToMapDot(
     readiness: Math.max(10, Math.min(95, readiness)),
     risk: Math.max(10, Math.min(95, risk)),
     status: "qualified",
-    reason: c.healthSummary ?? (c.primaryReasons.join(" · ") || c.actionHint),
+    reason: formatRadarReason(
+      c.healthSummary ?? (c.primaryReasons.join(" · ") || c.actionHint)
+    ),
   };
 }
 
@@ -178,7 +178,7 @@ function nearMissToMapDot(n: DecisionCockpitDto["opportunity"]["nearMiss"][numbe
     readiness,
     risk,
     status: "near-miss",
-    reason: n.waitFor,
+    reason: formatRadarReason(n.waitFor),
   };
 }
 
@@ -199,11 +199,12 @@ function buildHighestQualitySetup(
 
 function buildMainRisk(dto: DecisionCockpitDto): string | null {
   const blocker = dto.blockers[0];
-  if (blocker) return blocker.meaning;
+  if (blocker) return formatScannerReasonForUser(blocker.meaning);
   if (dto.verdict.gate1Resolution.canonical === "FAIL") {
-    return "Gate 1 failed — new swing risk is suppressed.";
+    return "Market regime filter failed — new swing risk is suppressed.";
   }
-  return dto.tomorrow.avoidLine.value || null;
+  const avoid = dto.tomorrow.avoidLine.value;
+  return avoid ? formatScannerReasonForUser(avoid) : null;
 }
 
 function buildSetupCards(topSetups: SurfacedCandidateHealthView[]): V3SetupCard[] {
@@ -226,7 +227,7 @@ function buildSetupCards(topSetups: SurfacedCandidateHealthView[]): V3SetupCard[
       riskToReward: rr,
       confidenceLabel: s.healthScoreLabel,
       health: healthLevelToUi(s.healthLevel),
-      blocker: s.healthSummary,
+      blocker: formatSetupDiagnosticCopy(s.healthSummary),
       actionState,
     };
   });
@@ -244,7 +245,7 @@ function collectRejectedBandEntries(dto: DecisionCockpitDto): V3RadarBandEntry[]
       seen.add(symbol);
       entries.push({
         symbol,
-        reason: `${group.label} — ${group.subtitle}`,
+        reason: formatScannerReasonForUser(`${group.label} — ${group.subtitle}`),
       });
     }
   }
@@ -255,7 +256,7 @@ function collectRejectedBandEntries(dto: DecisionCockpitDto): V3RadarBandEntry[]
       seen.add(symbol);
       entries.push({
         symbol,
-        reason: blocker.title,
+        reason: formatScannerReasonForUser(blocker.title),
       });
     }
   }
@@ -299,7 +300,7 @@ function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): 
     const scan = dto.evidence.find((c) => c.id === "surfaced");
     items.push({
       label: "Scanner diagnostics",
-      value: scan?.display ?? "See latest scan",
+      value: formatScannerReasonForUser(scan?.display ?? "See latest scan"),
       state: "ok",
     });
   }
@@ -322,7 +323,7 @@ function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): 
       label: "Market blockers",
       value: dto.blockers
         .slice(0, 2)
-        .map((b) => b.title)
+        .map((b) => formatScannerReasonForUser(b.title))
         .join(" · "),
       state: dto.blockers.some((b) => b.severity === "market_off") ? "danger" : "warn",
     });
@@ -332,7 +333,7 @@ function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): 
   if (gate1) {
     items.push({
       label: "Technical evidence",
-      value: gate1.display,
+      value: formatScannerReasonForUser(gate1.display),
       state: dto.verdict.gate1Resolution.canonical === "PASS" ? "ok" : "warn",
     });
   }
@@ -341,7 +342,7 @@ function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): 
   if (topReject) {
     items.push({
       label: "Rejected reasons",
-      value: `${topReject.title} (${topReject.count})`,
+      value: `${formatScannerReasonForUser(topReject.title)} (${topReject.count})`,
       state: "warn",
     });
   }
@@ -368,12 +369,12 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
 
   const qualified: V3RadarBandEntry[] = cockpitDto.opportunity.candidates.map((c) => ({
     symbol: c.symbol,
-    reason: c.healthSummary ?? c.actionHint,
+    reason: formatRadarReason(c.healthSummary ?? c.actionHint),
   }));
 
   const nearMiss: V3RadarBandEntry[] = cockpitDto.opportunity.nearMiss.map((n) => ({
     symbol: n.symbol,
-    reason: `${n.executionStatusLabel} — ${n.waitFor}`,
+    reason: formatRadarReason(`${n.executionStatusLabel} — ${n.waitFor}`),
   }));
 
   const rejected = collectRejectedBandEntries(cockpitDto);
@@ -404,8 +405,8 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
   const signalPoints = recentCurve.map((p) => p.cumulativePnl);
 
   const blockers = [
-    ...cockpitDto.risk.rules.map((r) => r.text),
-    ...cockpitDto.blockers.map((b) => b.waitFor),
+    ...cockpitDto.risk.rules.map((r) => formatScannerReasonForUser(r.text)),
+    ...cockpitDto.blockers.map((b) => formatScannerReasonForUser(b.waitFor)),
   ].filter(Boolean);
 
   return {
@@ -426,17 +427,21 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       stanceLabel: cockpitDto.verdict.headline.value,
       confidenceBand: band,
       confidenceMeterWidth: confidenceBandMeterWidth(band),
-      primaryReason:
-        cockpitDto.verdict.subtitle.value || cockpitDto.verdict.explanation.value,
+      primaryReason: formatScannerReasonForUser(
+        cockpitDto.verdict.subtitle.value || cockpitDto.verdict.explanation.value
+      ),
       highestQualitySetup: buildHighestQualitySetup(cockpitDto.opportunity, topSetups),
       mainRisk: buildMainRisk(cockpitDto),
-      nextAction:
+      nextAction: formatScannerReasonForUser(
         cockpitDto.tomorrow.triggerLine.value ||
-        cockpitDto.opportunity.candidates[0]?.actionHint ||
-        null,
+          cockpitDto.opportunity.candidates[0]?.actionHint ||
+          null
+      ) || null,
       riskPosture: cockpitDto.risk.stanceCopy.value,
       capitalProtection:
-        cockpitDto.tomorrow.avoidLine.value || headroom.statusCopy || null,
+        formatScannerReasonForUser(
+          cockpitDto.tomorrow.avoidLine.value || headroom.statusCopy || null
+        ) || null,
     },
     signalTrajectory: {
       points: signalPoints,
@@ -474,7 +479,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       reviewLabel: "Review on Trades",
     },
     evidence: buildEvidence(cockpitDto, freshness),
-    rsNearMissWatchlist: cockpitDto.rsNearMissWatchlist,
+    rsNearMissWatchlist: humanizeRsNearMissWatchlistPanel(cockpitDto.rsNearMissWatchlist),
     partialError: params.dbLoadError ?? null,
   };
 }
