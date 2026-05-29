@@ -76,7 +76,7 @@ export function TradesLedgerTable({
   } as const;
 
   return (
-    <section className="ledger-deck-panel pipeline-deck-panel ledger-deck-table-section">
+    <section className="tosv3-glass-panel ledger-deck-panel pipeline-deck-panel ledger-deck-table-section">
       <header className="ledger-deck-table-section__header">
         <h2 className="dash-section-title">Trades ledger</h2>
         <p

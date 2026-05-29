@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { TradeForm } from "@/components/trade-form";
 import { StaleSetupCandidateWarning } from "@/components/trades/stale-setup-candidate-warning";
+import { V3PageHeader } from "@/components/trading-os-v3/shared/v3-page-header";
+import { V3WorkstationShell } from "@/components/trading-os-v3/shared/v3-workstation-shell";
 import { prisma } from "@/lib/prisma";
 import { getLatestDailyScanRun } from "@/lib/scanner/setups-queries";
 import { getSession } from "@/lib/session";
@@ -112,23 +115,23 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
     staleNotice.kind === "none";
 
   return (
-    <div className="page-container command-deck command-deck-form-page animate-in">
-      <div className="command-deck-form-page__inner mx-auto max-w-2xl">
-        <header className="command-deck-form-page__header mb-8">
-          <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Ledger deck</p>
-          <h1 className="dash-v2-page-header__title text-2xl font-semibold tracking-tight">
-            Log a Trade
-          </h1>
-          <p className="dash-v2-page-header__lead mt-1 text-sm">
-            Record your trade details. P&amp;L is computed automatically for closed
-            trades.
-          </p>
-        </header>
+    <V3WorkstationShell className="tosv3-workstation--ticket" testId="log-trade-workstation">
+      <div className="tosv3-ticket-page">
+        <V3PageHeader
+          kicker="Trading ticket"
+          title="Log a trade"
+          lead="Record execution, risk, and thesis. P&L is computed automatically when you close a position."
+          actions={
+            <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
+              Back to ledger
+            </Link>
+          }
+        />
 
         <StaleSetupCandidateWarning notice={staleNotice} />
 
         <div
-          className="ledger-deck-panel pipeline-deck-panel p-6"
+          className="tosv3-glass-panel tosv3-ticket-panel"
           {...(showCurrentSetupMarker
             ? { "data-testid": "trades-new-setup-current" }
             : {})}
@@ -136,6 +139,6 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
           <TradeForm initialValues={initialValues} setupContextLabel={setupContextLabel} />
         </div>
       </div>
-    </div>
+    </V3WorkstationShell>
   );
 }

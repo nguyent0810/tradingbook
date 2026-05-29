@@ -11,6 +11,7 @@ import { SignalBadge, qualityToTierVariant } from "@/components/command-deck/sig
 import { displayScanQualityTier } from "@/lib/trading-display-labels";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
+import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
 import { fmtThousands } from "./setups-shared-helpers";
 
 export type CandidateRowClientProps = {
@@ -41,6 +42,10 @@ export type CandidateRowClientProps = {
   rsDiagnostic: RsDiagnosticUi | null;
 };
 
+function humanizeLine(line: string): string {
+  return formatScannerReasonForUser(line);
+}
+
 export function CandidateRowClient({
   candidate,
   perfHint,
@@ -51,7 +56,9 @@ export function CandidateRowClient({
   rsDiagnostic,
 }: CandidateRowClientProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [techOpen, setTechOpen] = useState(false);
   const detailsId = useId();
+  const techId = useId();
   const tier = candidate.quality === "A" ? "A" : "B";
   const rowAttention =
     candidate.lifecycleSortLabel === "READY"
@@ -72,6 +79,11 @@ export function CandidateRowClient({
       toggle();
     }
   };
+
+  const hasTechnicalDetail =
+    rankBreakdownLines.length > 0 ||
+    rsRankPreviewLines.length > 0 ||
+    rsDiagnostic != null;
 
   return (
     <>
@@ -134,78 +146,33 @@ export function CandidateRowClient({
               >
                 <div className="dense-candidate-row__detail-grid">
                   <div className="dense-candidate-row__detail-col">
-                    <h4 className="dense-candidate-row__detail-title">
-                      Scanner diagnostic &amp; reasons
-                    </h4>
+                    <h4 className="dense-candidate-row__detail-title">Setup context</h4>
 
                     {candidate.healthLines.length > 0 ||
                     candidate.healthHint ||
                     candidate.healthSummary ? (
                       <div className="dense-candidate-row__detail-card">
                         {candidate.healthSummary ? (
-                          <p className="dense-candidate-row__summary">{candidate.healthSummary}</p>
+                          <p className="dense-candidate-row__summary">
+                            {humanizeLine(candidate.healthSummary)}
+                          </p>
                         ) : null}
                         {candidate.healthLines.length > 0 ? (
                           <ul className="dense-candidate-row__list">
                             {candidate.healthLines.map((line, i) => (
-                              <li key={i}>{line}</li>
+                              <li key={i}>{humanizeLine(line)}</li>
                             ))}
                           </ul>
                         ) : null}
                         {candidate.healthHint ? (
-                          <p className="dense-candidate-row__hint">{candidate.healthHint}</p>
+                          <p className="dense-candidate-row__hint">{humanizeLine(candidate.healthHint)}</p>
                         ) : null}
-                      </div>
-                    ) : null}
-
-                    <div
-                      className="dense-candidate-row__notes"
-                      data-testid="setups-candidate-rs-diagnostic"
-                    >
-                      <RelativeStrengthDiagnosticPanel
-                        diagnostic={rsDiagnostic}
-                        compact
-                        testId="setups-candidate-rs-panel"
-                      />
-                    </div>
-
-                    {rankBreakdownLines.length > 0 ? (
-                      <div
-                        className="dense-candidate-row__notes"
-                        data-testid="setups-candidate-rank-breakdown"
-                      >
-                        <span className="dense-candidate-row__notes-label">
-                          Rank breakdown (score {rankScore.toFixed(2)})
-                        </span>
-                        <ul className="dense-candidate-row__list">
-                          {rankBreakdownLines.map((line, i) => (
-                            <li key={`rank-${i}`}>{line}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : null}
-
-                    {rsRankPreviewLines.length > 0 ? (
-                      <div
-                        className="dense-candidate-row__notes dense-candidate-row__notes--preview"
-                        data-testid="setups-candidate-rs-rank-preview"
-                      >
-                        <span className="dense-candidate-row__notes-label">
-                          RS rank term preview
-                        </span>
-                        <ul className="dense-candidate-row__list">
-                          {rsRankPreviewLines.map((line, i) => (
-                            <li key={`rs-rank-${i}`}>{line}</li>
-                          ))}
-                        </ul>
                       </div>
                     ) : null}
 
                     {reasonsLines.length > 0 ? (
                       <div className="dense-candidate-row__notes">
-                        <span className="dense-candidate-row__notes-label">
-                          Scanner notes &amp; criteria
-                        </span>
+                        <span className="dense-candidate-row__notes-label">Why this setup surfaced</span>
                         <ul className="dense-candidate-row__list">
                           {reasonsLines.map((line, i) => (
                             <li key={i}>{line}</li>
@@ -213,8 +180,69 @@ export function CandidateRowClient({
                         </ul>
                       </div>
                     ) : (
-                      <p className="dense-candidate-row__empty-note">No extra scanner notes.</p>
+                      <p className="dense-candidate-row__empty-note">No extra notes for this candidate.</p>
                     )}
+
+                    {hasTechnicalDetail ? (
+                      <div className="tosv3-tech-detail">
+                        <button
+                          type="button"
+                          className="tosv3-tech-detail__toggle"
+                          aria-expanded={techOpen}
+                          aria-controls={techId}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setTechOpen((v) => !v);
+                          }}
+                        >
+                          {techOpen ? "Hide" : "Show"} technical evidence
+                        </button>
+                        {techOpen ? (
+                          <div id={techId} className="tosv3-tech-detail__body">
+                            <div
+                              className="dense-candidate-row__notes"
+                              data-testid="setups-candidate-rs-diagnostic"
+                            >
+                              <RelativeStrengthDiagnosticPanel
+                                diagnostic={rsDiagnostic}
+                                compact
+                                testId="setups-candidate-rs-panel"
+                              />
+                            </div>
+                            {rankBreakdownLines.length > 0 ? (
+                              <div
+                                className="dense-candidate-row__notes"
+                                data-testid="setups-candidate-rank-breakdown"
+                              >
+                                <span className="dense-candidate-row__notes-label">
+                                  Setup score breakdown ({rankScore.toFixed(1)})
+                                </span>
+                                <ul className="dense-candidate-row__list">
+                                  {rankBreakdownLines.map((line, i) => (
+                                    <li key={`rank-${i}`}>{line}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : null}
+                            {rsRankPreviewLines.length > 0 ? (
+                              <div
+                                className="dense-candidate-row__notes dense-candidate-row__notes--preview"
+                                data-testid="setups-candidate-rs-rank-preview"
+                              >
+                                <span className="dense-candidate-row__notes-label">
+                                  Relative strength context
+                                </span>
+                                <ul className="dense-candidate-row__list">
+                                  {rsRankPreviewLines.map((line, i) => (
+                                    <li key={`rs-rank-${i}`}>{line}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
 
                   <div className="dense-candidate-row__detail-col dense-candidate-row__detail-col--action">
@@ -222,10 +250,10 @@ export function CandidateRowClient({
                       <h4 className="dense-candidate-row__detail-title">Position sizing</h4>
                       <Link
                         href={`/trades/new?setupCandidateId=${candidate.id}`}
-                        className="btn btn-primary btn-sm"
+                        className="tosv3-btn tosv3-btn--primary tosv3-btn--sm"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Log trade from setup
+                        Log trade
                       </Link>
                     </div>
                     <div

@@ -13,7 +13,7 @@ export function SetupsPipelineSummaryStrip({
 }: SetupsPipelineSummaryStripProps) {
   if (!latestScan) {
     return (
-      <div className="tos-pipeline-summary dash-surface-1" data-testid="setups-pipeline-summary-empty">
+      <div className="tosv3-pipeline-command tos-pipeline-summary dash-surface-1" data-testid="setups-pipeline-summary-empty">
         <span className="dash-chip dash-chip--muted">No scan run — pipeline counts unavailable</span>
       </div>
     );
@@ -22,7 +22,7 @@ export function SetupsPipelineSummaryStrip({
   const gate1Label = displayGate1ScanLevel(String(latestScan.gate1Level));
 
   return (
-    <div className="tos-pipeline-summary dash-surface-1" data-testid="setups-pipeline-summary">
+    <div className="tosv3-pipeline-command tos-pipeline-summary dash-surface-1" data-testid="setups-pipeline-summary">
       <div className="tos-pipeline-summary__flow">
         <div className="tos-pipeline-summary__step">
           <span className="tos-pipeline-summary__label">Universe scanned</span>
@@ -35,7 +35,7 @@ export function SetupsPipelineSummaryStrip({
           →
         </span>
         <div className="tos-pipeline-summary__step">
-          <span className="tos-pipeline-summary__label">Gate 1</span>
+          <span className="tos-pipeline-summary__label">Regime filter</span>
           <span className="tos-pipeline-summary__value">{gate1Label}</span>
           <span className="tos-pipeline-summary__hint">
             {latestScan.symbolCountScanned} remaining after stage
