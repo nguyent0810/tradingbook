@@ -70,11 +70,11 @@ export function SetupsCandidatePositionSizing({
   ]);
 
   return (
-    <div className="card p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-tertiary)" }}>
+    <div className="tosv3-setups-sizing-panel">
+      <p className="tosv3-setups-sizing-panel__title">
         Position sizing · {symbolKey} · Tier {quality}
       </p>
-      <p className="mt-1 text-xs leading-snug" style={{ color: "var(--text-tertiary)" }}>
+      <p className="tosv3-setups-sizing-panel__hint">
         Scanner prices are k ₫; equity and exposures are full ₫. Guidance only — not a buy order.
       </p>
 

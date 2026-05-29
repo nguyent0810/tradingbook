@@ -4783,7 +4783,7 @@ body {
 }
 
 .tos-trades .ledger-deck-table-section {
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* ===== Command Deck — Motion, A11y, Charts, Forms (Big Batch 4) ===== */
@@ -8208,45 +8208,86 @@ body {
   font-size: 0.6rem;
 }
 
-/* Trades ledger — dense terminal grid */
+/* Trades ledger — dense terminal grid (stable row layout, no overlap) */
+.ledger-deck-table.ledger-deck-table--dense {
+  table-layout: auto;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
 .ledger-deck-table--dense td,
 .ledger-deck-table--dense th {
-  padding: 0.32rem 0.45rem;
-  vertical-align: middle;
-  line-height: 1.25;
+  padding: 0.48rem 0.55rem;
+  vertical-align: top;
+  line-height: 1.35;
+}
+
+.ledger-deck-table--dense tbody tr {
+  min-height: 2.75rem;
 }
 
 .ledger-deck-table--dense .ledger-deck-table__review-cell {
-  max-width: 11rem;
+  min-width: 11.5rem;
+  width: 13rem;
+  max-width: 15rem;
+  overflow: visible;
+  white-space: normal;
+}
+
+.ledger-deck-table--dense .ledger-sticky-symbol {
+  min-width: 5.75rem;
+  width: 5.75rem;
+  vertical-align: top;
+  background: var(--bg-secondary);
+}
+
+.tosv3-workstation .ledger-deck-table--dense .ledger-sticky-symbol {
+  background: rgba(10, 16, 26, 0.98);
+}
+
+.ledger-deck-table--dense .ledger-sticky-symbol .ledger-deck-table__symbol {
+  display: block;
+}
+
+.ledger-deck-table--dense .ledger-sticky-symbol .ledger-deck-table__unit-warn {
+  display: inline-flex;
+  margin-top: 0.2rem;
+  max-width: 100%;
 }
 
 .tos-ledger-review-cell {
   display: flex;
   flex-direction: column;
-  gap: 0.22rem;
-  max-width: 11rem;
+  align-items: flex-start;
+  gap: 0.32rem;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
 }
 
 .tos-ledger-review-cell__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.2rem;
+  gap: 0.28rem;
+  width: 100%;
 }
 
 .tos-ledger-review-chip {
   display: inline-flex;
   align-items: center;
   max-width: 100%;
-  padding: 0.1rem 0.35rem;
+  padding: 0.14rem 0.42rem;
   border-radius: 5px;
   border: 1px solid rgba(102, 128, 159, 0.35);
   background: rgba(15, 23, 42, 0.65);
-  font-size: 0.58rem;
-  line-height: 1.2;
+  font-size: 0.65rem;
+  line-height: 1.3;
   color: #c5d4e8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  word-break: break-word;
 }
 
 .tos-ledger-review-chip--priority {
@@ -8568,8 +8609,8 @@ body {
 }
 
 .tosv3-setups-cockpit__workspace {
-  padding: 0.45rem 0.55rem;
-  min-height: min(20rem, 52vh);
+  padding: 0.65rem 0.75rem;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -8601,9 +8642,9 @@ body {
 .tosv3-setups-dock {
   display: flex;
   flex-direction: column;
-  min-height: min(20rem, 52vh);
-  max-height: min(20rem, 52vh);
-  overflow: hidden;
+  min-height: 0;
+  max-height: none;
+  align-self: stretch;
   padding: 0;
 }
 
@@ -8644,12 +8685,13 @@ body {
 
 .tosv3-setups-dock__body {
   flex: 1;
-  min-height: 0;
+  min-height: 12rem;
+  max-height: min(22rem, 56vh);
   overflow: hidden;
 }
 
 .tosv3-setups-dock__panel {
-  padding: 0.5rem 0.55rem;
+  padding: 0.6rem 0.65rem;
   height: 100%;
   overflow-y: auto;
 }
@@ -8739,12 +8781,27 @@ body {
 .tosv3-setups-cockpit .tosv3-setups-master-detail {
   flex: 1;
   min-height: 0;
-  max-height: min(17rem, 44vh);
+  max-height: none;
+  align-items: stretch;
 }
 
-.tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap,
+.tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap {
+  max-height: min(16rem, 42vh);
+  overflow-y: auto;
+}
+
 .tosv3-setups-cockpit .tosv3-setups-master-detail__detail {
-  max-height: min(17rem, 44vh);
+  max-height: none;
+  overflow: visible;
+  position: static;
+}
+
+.tosv3-setups-master-detail--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tosv3-setups-master-detail--single .tosv3-setups-master-detail__list-wrap {
+  max-height: min(8rem, 22vh);
 }
 
 /* Trades ledger cockpit */
@@ -9000,17 +9057,18 @@ body {
 }
 
 .tosv3-setups-master-detail__list-wrap {
-  max-height: min(18rem, 48vh);
+  max-height: min(16rem, 42vh);
   overflow: auto;
   border: 1px solid rgba(102, 128, 159, 0.22);
   border-radius: 8px;
+  background: rgba(8, 13, 20, 0.55);
 }
 
 .tosv3-setups-master-detail__detail {
-  position: sticky;
-  top: 0;
-  max-height: min(18rem, 48vh);
-  overflow-y: auto;
+  position: static;
+  max-height: none;
+  overflow: visible;
+  min-width: 0;
 }
 
 .tosv3-setups-table {
@@ -9037,7 +9095,7 @@ body {
 }
 
 .tosv3-setups-table td {
-  padding: 0.26rem 0.4rem;
+  padding: 0.38rem 0.5rem;
   border-bottom: 1px solid rgba(102, 128, 159, 0.14);
   vertical-align: middle;
 }
@@ -9062,11 +9120,12 @@ body {
 }
 
 .tosv3-setups-detail {
-  padding: 0.55rem 0.65rem;
+  padding: 0.7rem 0.8rem;
   border: 1px solid rgba(102, 128, 159, 0.28);
   border-radius: 10px;
-  background: rgba(8, 13, 20, 0.85);
-  font-size: 0.68rem;
+  background: linear-gradient(165deg, rgba(14, 22, 36, 0.92), rgba(8, 13, 22, 0.96));
+  font-size: 0.72rem;
+  line-height: 1.4;
 }
 
 .tosv3-setups-detail__head {
@@ -9081,12 +9140,16 @@ body {
 .tosv3-setups-detail__metrics {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.25rem 0.45rem;
-  margin: 0 0 0.4rem;
+  gap: 0.4rem 0.65rem;
+  margin: 0 0 0.55rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 8px;
+  background: rgba(8, 13, 22, 0.65);
+  border: 1px solid rgba(102, 128, 159, 0.2);
 }
 
 .tosv3-setups-detail__metrics dt {
-  font-size: 0.52rem;
+  font-size: 0.58rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #8fa0bc;
@@ -9113,13 +9176,163 @@ body {
 }
 
 .tosv3-setups-chip {
-  padding: 0.12rem 0.34rem;
-  border-radius: 5px;
+  padding: 0.18rem 0.45rem;
+  border-radius: 6px;
   border: 1px solid rgba(102, 128, 159, 0.32);
   background: rgba(15, 23, 42, 0.6);
-  font-size: 0.58rem;
+  font-size: 0.65rem;
   color: #b6c8e2;
-  line-height: 1.25;
+  line-height: 1.35;
+}
+
+.tosv3-setups-detail__card {
+  margin: 0 0 0.5rem;
+  padding: 0.5rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(102, 128, 159, 0.22);
+  background: rgba(8, 13, 22, 0.55);
+}
+
+.tosv3-setups-detail__hint,
+.tosv3-setups-detail__meta {
+  margin: 0 0 0.35rem;
+  color: #b6c8e2;
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.tosv3-setups-detail__sizing {
+  margin-top: 0.55rem;
+}
+
+.tosv3-setups-detail__sizing-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-detail__sizing-details > summary {
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #c5d4e8;
+  list-style: none;
+  padding: 0.35rem 0;
+}
+
+.tosv3-setups-detail__sizing-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tosv3-setups-detail__sizing-details > summary:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.85);
+  outline-offset: 2px;
+}
+
+.tosv3-setups-detail .setup-health-strip__chips {
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.tosv3-setups-detail .setup-health-strip__symbol {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #eef6ff;
+}
+
+.tosv3-setups-detail .setup-health-strip__score {
+  font-size: 0.68rem;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-sizing-panel {
+  margin-top: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid rgba(102, 128, 159, 0.25);
+  background: rgba(8, 13, 22, 0.72);
+}
+
+.tosv3-setups-sizing-panel .label {
+  font-size: 0.62rem;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-sizing-panel .input {
+  font-size: 0.72rem;
+  padding: 0.35rem 0.45rem;
+}
+
+.tosv3-setups-sizing-panel__title {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-sizing-panel__hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  color: #8fa0bc;
+}
+
+/* Ledger column widths — prevent overlap */
+.ledger-deck-table--dense .ledger-col-symbol {
+  width: 6rem;
+}
+
+.ledger-deck-table--dense .ledger-col-setup {
+  width: 8.5rem;
+}
+
+.ledger-deck-table--dense .ledger-col-direction,
+.ledger-deck-table--dense .ledger-col-status {
+  width: 5.5rem;
+}
+
+.ledger-deck-table--dense .ledger-col-playbook {
+  width: 7.5rem;
+}
+
+.ledger-deck-table--dense .ledger-col-review {
+  width: 13rem;
+}
+
+.ledger-deck-table--dense .ledger-col-hold,
+.ledger-deck-table--dense .ledger-col-entry {
+  width: 5.25rem;
+}
+
+.ledger-deck-table--dense .ledger-col-price,
+.ledger-deck-table--dense .ledger-col-mark,
+.ledger-deck-table--dense .ledger-col-stop,
+.ledger-deck-table--dense .ledger-col-tp {
+  width: 5.75rem;
+}
+
+.ledger-deck-table--dense .ledger-col-qty,
+.ledger-deck-table--dense .ledger-col-r {
+  width: 4.5rem;
+}
+
+.ledger-deck-table--dense .ledger-col-pnl {
+  width: 7.5rem;
+}
+
+.ledger-deck-table--dense .ledger-col-actions {
+  width: 4.5rem;
+}
+
+.tosv3-workstation .ledger-deck-table-wrap,
+.tosv3-workstation .trades-ledger-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 .tosv3-setups-chip--ok {
@@ -9308,9 +9521,11 @@ body {
     max-height: none;
   }
 
-  .tosv3-setups-cockpit .tosv3-setups-master-detail,
-  .tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap,
-  .tosv3-setups-cockpit .tosv3-setups-master-detail__detail {
+  .tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap {
+    max-height: none;
+  }
+
+  .tosv3-setups-dock__body {
     max-height: none;
   }
 

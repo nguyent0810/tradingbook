@@ -167,15 +167,15 @@ function CandidateDetailPanel({
         </div>
       ) : null}
 
-      <div className="tosv3-setups-detail__sizing">
-        <h4 className="tosv3-setups-detail__sizing-title">Position sizing</h4>
+      <details className="tosv3-setups-detail__sizing-details">
+        <summary>Position sizing calculator</summary>
         <SetupsCandidatePositionSizing
           symbolKey={candidate.symbolKey}
           quality={tier}
           defaultEntryKVnd={candidate.close}
           defaultStopKVnd={candidate.stopLevel}
         />
-      </div>
+      </details>
     </div>
   );
 }
@@ -199,8 +199,13 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
 
   if (candidates.length === 0) return null;
 
+  const layoutClass =
+    candidates.length <= 1
+      ? "tosv3-setups-master-detail tosv3-setups-master-detail--single"
+      : "tosv3-setups-master-detail";
+
   return (
-    <div className="tosv3-setups-master-detail">
+    <div className={layoutClass}>
       <div className="tosv3-setups-master-detail__list-wrap">
         <table className="tosv3-setups-table dense-table">
           <thead>
