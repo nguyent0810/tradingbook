@@ -1,8 +1,62 @@
 import type { DailyScanGate2Notes, Gate2ClosestSymbolRow } from "./gate2-scan-diagnostics";
+import { isGate2RejectionCode } from "./gate2/rejection-codes";
+import type { ScanSessionCoverage } from "./scan-session-coverage";
 import { parsePersistedDailyDecision } from "./trading-decision";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+function parseScanSessionCoverage(raw: unknown): ScanSessionCoverage | undefined {
+  if (!isRecord(raw)) return undefined;
+  const expectedSessionDate = raw.expectedSessionDate;
+  const universeScanned = raw.universeScanned;
+  const tradabilityEvaluated = raw.tradabilityEvaluated;
+  const tradabilityPassed = raw.tradabilityPassed;
+  const staleSessionCount = raw.staleSessionCount;
+  const staleSessionFrac = raw.staleSessionFrac;
+  const sessionAlignedCount = raw.sessionAlignedCount;
+  const sessionAlignedFrac = raw.sessionAlignedFrac;
+  const weakCoverage = raw.weakCoverage;
+  const headline = raw.headline;
+  const operatorWarning = raw.operatorWarning;
+
+  const nums = [
+    universeScanned,
+    tradabilityEvaluated,
+    tradabilityPassed,
+    staleSessionCount,
+    staleSessionFrac,
+    sessionAlignedCount,
+    sessionAlignedFrac,
+  ];
+  if (
+    typeof expectedSessionDate !== "string" ||
+    !nums.every((n) => typeof n === "number" && Number.isFinite(n)) ||
+    typeof weakCoverage !== "boolean" ||
+    typeof headline !== "string"
+  ) {
+    return undefined;
+  }
+
+  return {
+    expectedSessionDate,
+    universeScanned,
+    tradabilityEvaluated,
+    tradabilityPassed,
+    staleSessionCount,
+    staleSessionFrac,
+    sessionAlignedCount,
+    sessionAlignedFrac,
+    weakCoverage,
+    headline,
+    operatorWarning:
+      operatorWarning === null
+        ? null
+        : typeof operatorWarning === "string"
+          ? operatorWarning
+          : null,
+  };
 }
 
 /** Safe parse for `DailyScanRun.notes` JSON persisted by run-daily-scanner. */
@@ -33,6 +87,11 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
         typeof item.reasonLineCount === "number" ? item.reasonLineCount : 0;
       const terminalCategory =
         typeof item.terminalCategory === "string" ? item.terminalCategory : "unknown";
+      const terminalCodeRaw = item.terminalCode;
+      const terminalCode =
+        typeof terminalCodeRaw === "string" && isGate2RejectionCode(terminalCodeRaw)
+          ? terminalCodeRaw
+          : null;
       const terminalReasonPreview =
         typeof item.terminalReasonPreview === "string" ? item.terminalReasonPreview : "";
       const rankScore = typeof item.rankScore === "number" && Number.isFinite(item.rankScore) ? item.rankScore : 0;
@@ -57,6 +116,7 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
         stageRank,
         reasonLineCount,
         terminalCategory: terminalCategory as Gate2ClosestSymbolRow["terminalCategory"],
+        ...(terminalCode ? { terminalCode } : {}),
         terminalReasonPreview,
         rankScore,
         close,
@@ -116,6 +176,8 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
     if (Object.keys(acc).length > 0) rejectionSymbolsByCategory = acc;
   }
 
+  const sessionCoverage = parseScanSessionCoverage(raw.sessionCoverage);
+
   const hasSignal =
     Object.keys(topRejectionCategories).length > 0 ||
     closestToValidSymbols.length > 0 ||
@@ -123,6 +185,7 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
     recommendation.likelyBottleneck !== "none_obvious" ||
     parsedDecision !== null ||
     benchmarkBackdrop?.delayedBackdrop === true ||
+    sessionCoverage?.weakCoverage === true ||
     (rejectionSymbolsByCategory !== undefined &&
       Object.keys(rejectionSymbolsByCategory).length > 0);
 
@@ -135,6 +198,7 @@ export function parseDailyScanGate2Notes(raw: unknown): DailyScanGate2Notes | nu
     ...(rejectionSymbolsByCategory ? { rejectionSymbolsByCategory } : {}),
     ...(parsedDecision ? { decision: parsedDecision } : {}),
     ...(benchmarkBackdrop ? { benchmarkBackdrop } : {}),
+    ...(sessionCoverage ? { sessionCoverage } : {}),
   };
 }
 

@@ -1,0 +1,23 @@
+﻿{
+  "reportSchemaVersion": "d2-rs-rank-comparison",
+  "generatedAt": "2026-05-29T02:45:40.534Z",
+  "source": "latest_scan_setup_candidates",
+  "formula": "rsTerm = clamp(RS20_pp ├ù 25, -250, +250)",
+  "productionRsRankEnabled": false,
+  "itemCount": 1,
+  "comparison": {
+    "entries": [
+      {
+        "symbol": "CTR",
+        "rankScoreBase": 2004.18382769962,
+        "rsTerm": 93.53898800416455,
+        "rankScoreWithRs": 2097.7228157037844,
+        "rs20SpreadPct": 3.741559520166582,
+        "baseRank": 1,
+        "rsAdjustedRank": 1
+      }
+    ],
+    "promoted": [],
+    "demoted": []
+  }
+}

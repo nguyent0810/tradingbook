@@ -173,6 +173,8 @@ describe("mapDashboardV3ViewModel — TRADE + candidates", () => {
     );
 
     expect(vm.decision.mode).toBe("TRADE");
+    expect(vm.decision.stanceLabel).toBe("TRADE MODE");
+    expect(vm.decision.primaryReason).toMatch(/not an automatic instruction/i);
     expect(vm.radar.qualified.length).toBeGreaterThan(0);
     expect(vm.radar.mapDots.some((d) => d.symbol === "FPT" && d.status === "qualified")).toBe(
       true

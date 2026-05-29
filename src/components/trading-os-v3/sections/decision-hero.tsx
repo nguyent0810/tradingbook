@@ -33,7 +33,7 @@ export function DecisionHero({ data }: Props) {
       </div>
 
       <div className="tosv3-hero__title-row">
-        <h2 className="tosv3-hero__mode">{data.mode}</h2>
+        <h2 className="tosv3-hero__mode">{data.stanceLabel}</h2>
         <span className="tosv3-hero__mode-tag">Today&apos;s stance</span>
       </div>
 

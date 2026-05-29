@@ -1,0 +1,263 @@
+﻿{
+  "generatedAt": "2026-05-29T02:34:48.401Z",
+  "tradableCount": 54,
+  "replayRowCount": 2160,
+  "report": {
+    "reportSchemaVersion": "d1.7-replay-fixed",
+    "disclaimer": "Forward-return validation is diagnostic only ΓÇö past outcomes do not guarantee future results. Do not change production thresholds from small samples.",
+    "anchorSession": "2026-03-31ΓÇª2026-05-28",
+    "evaluationRowCount": 2160,
+    "lookbackSessions": 40,
+    "includeSweepArms": true,
+    "includeSweepRejects": true,
+    "cohorts": [
+      {
+        "cohort": "baseline_tier_a",
+        "label": "Baseline Tier A",
+        "sampleSize": 2,
+        "smallSampleWarning": "Small sample (n=2) ΓÇö hypothesis generation only, not production proof.",
+        "missingFutureBars": 2,
+        "missingFuture20Pct": 1,
+        "highMissingFuture20Warning": ">30% of cohort missing 20-session forward labels (2/2).",
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 1,
+            "avgPct": -0.6191950464396134,
+            "medianPct": -0.6191950464396134,
+            "winRate": 0
+          },
+          {
+            "horizon": 10,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 20,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": null,
+        "avgMaxAdverseExcursion20Pct": null,
+        "hitPlus5BeforeMinus3Rate": null,
+        "hitPlus10Within20Rate": null,
+        "drawdownWorseThanMinus5Rate": null,
+        "rs20Split": null
+      },
+      {
+        "cohort": "invalid_rs20_positive",
+        "label": "INVALID + RS20>0",
+        "sampleSize": 1118,
+        "smallSampleWarning": null,
+        "missingFutureBars": 558,
+        "missingFuture20Pct": 0.4991055456171735,
+        "highMissingFuture20Warning": ">30% of cohort missing 20-session forward labels (558/1118).",
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 979,
+            "avgPct": 0.7810575964735473,
+            "medianPct": 0.3058103975535076,
+            "winRate": 0.5291113381001021
+          },
+          {
+            "horizon": 10,
+            "n": 840,
+            "avgPct": 1.6346883560516596,
+            "medianPct": 0.9041591320072317,
+            "winRate": 0.580952380952381
+          },
+          {
+            "horizon": 20,
+            "n": 560,
+            "avgPct": 3.081380081680052,
+            "medianPct": 0.8872933313231801,
+            "winRate": 0.5785714285714286
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": 9.265021336260366,
+        "avgMaxAdverseExcursion20Pct": -5.22194711963207,
+        "hitPlus5BeforeMinus3Rate": 0.39849624060150374,
+        "hitPlus10Within20Rate": 0.26071428571428573,
+        "drawdownWorseThanMinus5Rate": 0.4125,
+        "rs20Split": {
+          "positive": {
+            "n": 560,
+            "avgForward20Pct": 3.081380081680052
+          },
+          "negative": {
+            "n": 0,
+            "avgForward20Pct": null
+          }
+        }
+      },
+      {
+        "cohort": "invalid_rs20_negative",
+        "label": "INVALID + RS20<0",
+        "sampleSize": 1040,
+        "smallSampleWarning": null,
+        "missingFutureBars": 520,
+        "missingFuture20Pct": 0.5,
+        "highMissingFuture20Warning": ">30% of cohort missing 20-session forward labels (520/1040).",
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 910,
+            "avgPct": -0.15730666323775686,
+            "medianPct": -0.6266283705308018,
+            "winRate": 0.4010989010989011
+          },
+          {
+            "horizon": 10,
+            "n": 780,
+            "avgPct": -0.4018644581470533,
+            "medianPct": -1.6215419045568447,
+            "winRate": 0.3423076923076923
+          },
+          {
+            "horizon": 20,
+            "n": 520,
+            "avgPct": -1.2577766686733085,
+            "medianPct": -3.2258064516129115,
+            "winRate": 0.2826923076923077
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": 7.6356827619497825,
+        "avgMaxAdverseExcursion20Pct": -6.62164586611292,
+        "hitPlus5BeforeMinus3Rate": 0.3776908023483366,
+        "hitPlus10Within20Rate": 0.18846153846153846,
+        "drawdownWorseThanMinus5Rate": 0.6153846153846154,
+        "rs20Split": {
+          "positive": {
+            "n": 0,
+            "avgForward20Pct": null
+          },
+          "negative": {
+            "n": 520,
+            "avgForward20Pct": -1.2577766686733085
+          }
+        }
+      },
+      {
+        "cohort": "sweep_new_pass:breakoutRecencyBars:1.2",
+        "label": "Sweep new pass ┬╖ breakoutRecencyBars ├ù1.2",
+        "sampleSize": 1,
+        "smallSampleWarning": "Small sample (n=1) ΓÇö hypothesis generation only, not production proof.",
+        "missingFutureBars": 0,
+        "missingFuture20Pct": 0,
+        "highMissingFuture20Warning": null,
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 1,
+            "avgPct": -1.8130539887187713,
+            "medianPct": -1.8130539887187713,
+            "winRate": 0
+          },
+          {
+            "horizon": 10,
+            "n": 1,
+            "avgPct": -1.490733279613221,
+            "medianPct": -1.490733279613221,
+            "winRate": 0
+          },
+          {
+            "horizon": 20,
+            "n": 1,
+            "avgPct": -2.2965350523771133,
+            "medianPct": -2.2965350523771133,
+            "winRate": 0
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": 0.725221595487513,
+        "avgMaxAdverseExcursion20Pct": -5.680902497985496,
+        "hitPlus5BeforeMinus3Rate": 0,
+        "hitPlus10Within20Rate": 0,
+        "drawdownWorseThanMinus5Rate": 1,
+        "rs20Split": null
+      },
+      {
+        "cohort": "sweep_new_pass:maxPullbackDepthFrac:1.2",
+        "label": "Sweep new pass ┬╖ maxPullbackDepthFrac ├ù1.2",
+        "sampleSize": 1,
+        "smallSampleWarning": "Small sample (n=1) ΓÇö hypothesis generation only, not production proof.",
+        "missingFutureBars": 1,
+        "missingFuture20Pct": 1,
+        "highMissingFuture20Warning": ">30% of cohort missing 20-session forward labels (1/1).",
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 1,
+            "avgPct": 1.7142857142857126,
+            "medianPct": 1.7142857142857126,
+            "winRate": 1
+          },
+          {
+            "horizon": 10,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 20,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": null,
+        "avgMaxAdverseExcursion20Pct": null,
+        "hitPlus5BeforeMinus3Rate": null,
+        "hitPlus10Within20Rate": null,
+        "drawdownWorseThanMinus5Rate": null,
+        "rs20Split": null
+      },
+      {
+        "cohort": "sweep_new_pass:minVolumeRatioB:0.8",
+        "label": "Sweep new pass ┬╖ minVolumeRatioB ├ù0.8",
+        "sampleSize": 1,
+        "smallSampleWarning": "Small sample (n=1) ΓÇö hypothesis generation only, not production proof.",
+        "missingFutureBars": 1,
+        "missingFuture20Pct": 1,
+        "highMissingFuture20Warning": ">30% of cohort missing 20-session forward labels (1/1).",
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 10,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 20,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": null,
+        "avgMaxAdverseExcursion20Pct": null,
+        "hitPlus5BeforeMinus3Rate": null,
+        "hitPlus10Within20Rate": null,
+        "drawdownWorseThanMinus5Rate": null,
+        "rs20Split": null
+      }
+    ],
+    "sweepArmCount": 3
+  }
+}

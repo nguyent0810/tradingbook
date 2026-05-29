@@ -90,6 +90,7 @@ export function DashboardCommandCenter({
           diagnostics={cockpitDto.actionableDiagnostics}
           watchItems={activeWatchItems}
           latestCloseBySymbol={latestCloseBySymbol}
+          rsNearMissWatchlist={cockpitDto.rsNearMissWatchlist}
           embedded
         />
       </CommandDeckCollapsible>

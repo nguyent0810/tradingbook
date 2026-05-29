@@ -39,6 +39,8 @@ export type V3MarketPulse = {
 
 export type V3DecisionHero = {
   mode: V3DecisionMode;
+  /** Trader-facing stance headline (e.g. TRADE MODE vs persisted NORMAL). */
+  stanceLabel: string;
   confidenceBand: V3ConfidenceBand;
   /** UX-only meter width (not a stored confidence %). */
   confidenceMeterWidth: number;
@@ -95,6 +97,8 @@ export type V3SignalTrajectory = {
   emptyMessage: string | null;
 };
 
+import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+
 export type DashboardV3ViewModel = {
   marketPulse: V3MarketPulse;
   decision: V3DecisionHero;
@@ -110,5 +114,7 @@ export type DashboardV3ViewModel = {
   risk: V3RiskConsole;
   ledger: V3LedgerPulse;
   evidence: V3EvidenceItem[];
+  /** Batch D2.3 — diagnostic RS leaders (INVALID + RS20>0); not Tier A/B. */
+  rsNearMissWatchlist: RsNearMissWatchlistPanelDto;
   partialError: string | null;
 };

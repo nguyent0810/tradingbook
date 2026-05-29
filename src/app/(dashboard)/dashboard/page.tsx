@@ -22,6 +22,12 @@ import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { buildDecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
+import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagnostics";
+import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import {
+  buildRsNearMissWatchlistPanel,
+  computeRsNearMissWatchlistFromDb,
+} from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
 import { TradingOsDashboard } from "@/components/trading-os-v3/trading-os-dashboard";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
@@ -71,6 +77,7 @@ export default async function DashboardPage() {
     alignment: alignmentAnalysis,
     delayedBackdropFromScanNotes:
       scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
+    scanSessionCoverage: scanNotes?.sessionCoverage ?? null,
   });
   const rawCandidates = toCandidateRows(latestScan);
   const evalDate =
@@ -129,6 +136,55 @@ export default async function DashboardPage() {
   const accountEquityVnd = parseTradingAccountEquityVnd();
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
 
+  const rsSession =
+    marketSnapshot.benchmarkSessionDate ??
+    (rawCandidates.length > 0 ? evalDate : null);
+  let rsDiagnosticsBySymbol: Record<string, RsDiagnosticUi> | undefined;
+  if (rsSession) {
+    const rsSymbols = [
+      ...new Set([
+        ...candidatesWithHealth.map((c) => c.symbolKey),
+        ...(scanNotes?.closestToValidSymbols ?? [])
+          .slice(0, 12)
+          .map((r) => r.symbol),
+      ]),
+    ];
+    if (rsSymbols.length > 0) {
+      try {
+        const rsMap = await loadRsDiagnosticUiForSymbols(
+          prisma,
+          rsSymbols,
+          rsSession
+        );
+        rsDiagnosticsBySymbol = {};
+        for (const [sym, ui] of rsMap) {
+          if (ui) rsDiagnosticsBySymbol[sym] = ui;
+        }
+      } catch (e) {
+        console.error("[dashboard] RS diagnostic load failed:", e);
+      }
+    }
+  }
+
+  let rsNearMissWatchlist = buildRsNearMissWatchlistPanel([]);
+  if (rsSession) {
+    try {
+      const excludeSymbols = candidatesWithHealth.map((c) => c.symbolKey);
+      const { rows } = await computeRsNearMissWatchlistFromDb(prisma, {
+        limit: 12,
+        excludeSymbols,
+      });
+      const rsMap = await loadRsDiagnosticUiForSymbols(
+        prisma,
+        rows.map((r) => r.symbol),
+        rsSession
+      );
+      rsNearMissWatchlist = buildRsNearMissWatchlistPanel(rows, rsMap);
+    } catch (e) {
+      console.error("[dashboard] RS near-miss watchlist failed:", e);
+    }
+  }
+
   const cockpitDto = buildDecisionCockpitDto(
     buildDashboardCockpitInput({
       latestScan,
@@ -140,6 +196,8 @@ export default async function DashboardPage() {
       openExposureVnd: currentExposure,
       accountEquityVnd,
       portfolioRiskConfigured,
+      rsDiagnosticsBySymbol,
+      rsNearMissWatchlist,
     })
   );
 

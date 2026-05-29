@@ -1,139 +1,34 @@
 import { compareClosestRowsExecutionOrder } from "./closest-execution-metrics";
 import type { BreakoutPullbackEvaluation } from "./gate2/types";
+import {
+  resolveTerminalClassification,
+  type Gate2RejectionCode,
+  type TerminalCategory,
+} from "./gate2/rejection-codes";
+import type { ScanSessionCoverage } from "./scan-session-coverage";
 import type { DailyTradingDecision } from "./trading-decision";
 
-export type TerminalCategory =
-  | "insufficient_bars"
-  | "stale_or_session_mismatch"
-  | "ma_compute"
-  | "trend_below_ma50"
-  | "trend_ma20_below_ma50"
-  | "breakout_recency"
-  | "digestion"
-  | "breakout_not_holding"
-  | "mid_pullback_below_ma50"
-  | "swept_breakout_weak_close"
-  | "pullback_zone_two_closes"
-  | "pullback_zone_interaction"
-  | "pullback_zone_malformed"
-  | "volume_median_bad"
-  | "volume_ratio"
-  | "extension_cap"
-  | "depth_cap"
-  | "stop_structure"
-  | "unknown";
+export type { TerminalCategory } from "./gate2/rejection-codes";
 
-const CATEGORY_STAGE_RANK: Record<TerminalCategory, number> = {
-  insufficient_bars: 5,
-  stale_or_session_mismatch: 8,
-  ma_compute: 10,
-  trend_below_ma50: 15,
-  trend_ma20_below_ma50: 18,
-  breakout_recency: 25,
-  digestion: 32,
-  breakout_not_holding: 38,
-  mid_pullback_below_ma50: 42,
-  swept_breakout_weak_close: 46,
-  pullback_zone_two_closes: 52,
-  pullback_zone_interaction: 58,
-  pullback_zone_malformed: 59,
-  volume_median_bad: 62,
-  volume_ratio: 72,
-  extension_cap: 80,
-  depth_cap: 84,
-  stop_structure: 88,
-  unknown: 0,
-};
-
+/** Legacy message-based classification — delegates to stable code inference. */
 export function categorizeTerminalReason(msg: string): {
   category: TerminalCategory;
   stageRank: number;
 } {
-  const r = msg;
-  if (r.includes("Need at least 50 daily bars")) {
-    return { category: "insufficient_bars", stageRank: CATEGORY_STAGE_RANK.insufficient_bars };
-  }
-  if (r.includes("does not match expected session")) {
-    return {
-      category: "stale_or_session_mismatch",
-      stageRank: CATEGORY_STAGE_RANK.stale_or_session_mismatch,
-    };
-  }
-  if (r.includes("Could not compute MA20/MA50")) {
-    return { category: "ma_compute", stageRank: CATEGORY_STAGE_RANK.ma_compute };
-  }
-  if (r.includes("Trend not supportive for long swings")) {
-    return { category: "trend_below_ma50", stageRank: CATEGORY_STAGE_RANK.trend_below_ma50 };
-  }
-  if (r.includes("Intermediate trend weaker than slow trend")) {
-    return {
-      category: "trend_ma20_below_ma50",
-      stageRank: CATEGORY_STAGE_RANK.trend_ma20_below_ma50,
-    };
-  }
-  if (r.includes("No qualifying breakout in the last")) {
-    return { category: "breakout_recency", stageRank: CATEGORY_STAGE_RANK.breakout_recency };
-  }
-  if (r.includes("Need a digestion dip after the impulse")) {
-    return { category: "digestion", stageRank: CATEGORY_STAGE_RANK.digestion };
-  }
-  if (r.includes("Setup failed—session closed back under resistance")) {
-    return {
-      category: "breakout_not_holding",
-      stageRank: CATEGORY_STAGE_RANK.breakout_not_holding,
-    };
-  }
-  if (r.includes("Mid-pullback close dipped under the 50-day line")) {
-    return {
-      category: "mid_pullback_below_ma50",
-      stageRank: CATEGORY_STAGE_RANK.mid_pullback_below_ma50,
-    };
-  }
-  if (r.includes("Lower lows vs the breakout session")) {
-    return {
-      category: "swept_breakout_weak_close",
-      stageRank: CATEGORY_STAGE_RANK.swept_breakout_weak_close,
-    };
-  }
-  if (r.includes("Two closes in a row under the pullback zone floor")) {
-    return {
-      category: "pullback_zone_two_closes",
-      stageRank: CATEGORY_STAGE_RANK.pullback_zone_two_closes,
-    };
-  }
-  if (r.includes("Current bar does not interact with the pullback box")) {
-    return {
-      category: "pullback_zone_interaction",
-      stageRank: CATEGORY_STAGE_RANK.pullback_zone_interaction,
-    };
-  }
-  if (r.includes("Pullback zone is malformed")) {
-    return {
-      category: "pullback_zone_malformed",
-      stageRank: CATEGORY_STAGE_RANK.pullback_zone_malformed,
-    };
-  }
-  if (r.includes("Cannot score participation") || r.includes("median volume over the prior 20")) {
-    return { category: "volume_median_bad", stageRank: CATEGORY_STAGE_RANK.volume_median_bad };
-  }
-  if (r.includes("Participation too thin")) {
-    return { category: "volume_ratio", stageRank: CATEGORY_STAGE_RANK.volume_ratio };
-  }
-  if (r.includes("above the breakout level") && r.includes("swing cap")) {
-    return { category: "extension_cap", stageRank: CATEGORY_STAGE_RANK.extension_cap };
-  }
-  if (r.includes("max depth under the breakout")) {
-    return { category: "depth_cap", stageRank: CATEGORY_STAGE_RANK.depth_cap };
-  }
-  if (
-    r.includes("Stop would be at or above entry") ||
-    r.includes("Entry→stop distance") ||
-    r.includes("Incomplete setup") ||
-    r.includes("no actionable downside anchor")
-  ) {
-    return { category: "stop_structure", stageRank: CATEGORY_STAGE_RANK.stop_structure };
-  }
-  return { category: "unknown", stageRank: CATEGORY_STAGE_RANK.unknown };
+  const resolved = resolveTerminalClassification({ terminalMessage: msg });
+  return { category: resolved.category, stageRank: resolved.stageRank };
+}
+
+function classifyEvaluationTerminal(ev: BreakoutPullbackEvaluation): {
+  category: TerminalCategory;
+  stageRank: number;
+  code: Gate2RejectionCode | null;
+} {
+  const resolved = resolveTerminalClassification({
+    terminalCode: ev.terminalCode,
+    terminalMessage: terminalGate2Reason(ev),
+  });
+  return resolved;
 }
 
 export function terminalGate2Reason(ev: BreakoutPullbackEvaluation): string {
@@ -143,7 +38,7 @@ export function terminalGate2Reason(ev: BreakoutPullbackEvaluation): string {
 
 export function gate2PartialPipelineScore(ev: BreakoutPullbackEvaluation): number {
   if (ev.quality !== "INVALID") return ev.rankScore;
-  const { stageRank } = categorizeTerminalReason(terminalGate2Reason(ev));
+  const { stageRank } = classifyEvaluationTerminal(ev);
   return stageRank * 100 + ev.reasons.length;
 }
 
@@ -236,6 +131,8 @@ export type Gate2ClosestSymbolRow = {
   stageRank: number;
   reasonLineCount: number;
   terminalCategory: TerminalCategory | "N/A";
+  /** Stable code when evaluation carried `terminalCode` (Batch C). */
+  terminalCode?: Gate2RejectionCode | null;
   terminalReasonPreview: string;
   /** Gate 2 rank score at evaluation (sorting / display). */
   rankScore: number;
@@ -287,6 +184,7 @@ export function buildGate2ScanDiagnosticsSummary(
     stageRank: number;
     reasonLineCount: number;
     terminalCategory: TerminalCategory | "N/A";
+    terminalCode: Gate2RejectionCode | null;
     terminalReasonPreview: string;
     rankScore: number;
     close: number;
@@ -304,19 +202,21 @@ export function buildGate2ScanDiagnosticsSummary(
     else countInvalid++;
 
     const term = terminalGate2Reason(ev);
-    const { category, stageRank } =
+    const classified =
       ev.quality === "INVALID"
-        ? categorizeTerminalReason(term)
-        : { category: "N/A" as const, stageRank: ev.rankScore };
+        ? classifyEvaluationTerminal(ev)
+        : { category: "N/A" as const, stageRank: ev.rankScore, code: null as Gate2RejectionCode | null };
+    const { category, stageRank, code: terminalCode } = classified;
 
     rankRows.push({
       symbol,
       symbolId,
       quality: ev.quality,
       partialPipelineScore: gate2PartialPipelineScore(ev),
-      stageRank: ev.quality === "INVALID" ? stageRank : CATEGORY_STAGE_RANK.unknown,
+      stageRank: ev.quality === "INVALID" ? stageRank : 0,
       reasonLineCount: ev.reasons.length,
       terminalCategory: ev.quality === "INVALID" ? category : "N/A",
+      terminalCode: ev.quality === "INVALID" ? terminalCode : null,
       terminalReasonPreview: term.slice(0, 220),
       rankScore: ev.rankScore,
       close: ev.close,
@@ -381,6 +281,7 @@ export function buildGate2ScanDiagnosticsSummary(
       stageRank: r.stageRank,
       reasonLineCount: r.reasonLineCount,
       terminalCategory: r.terminalCategory,
+      terminalCode: r.terminalCode,
       terminalReasonPreview: r.terminalReasonPreview,
       rankScore: r.rankScore,
       close: r.close,
@@ -410,6 +311,8 @@ export type DailyScanGate2Notes = {
   decision?: DailyTradingDecision;
   /** Gate 1 uses VNINDEX through `vnindexSessionDate`; equity may be newer in DB. */
   benchmarkBackdrop?: ScanBenchmarkBackdrop;
+  /** Per-scan equity bar alignment vs expected VNINDEX session (tradability stale counts). */
+  sessionCoverage?: ScanSessionCoverage;
 };
 
 export function toDailyScanGate2Notes(d: Gate2ScanDiagnosticsSummary): DailyScanGate2Notes {

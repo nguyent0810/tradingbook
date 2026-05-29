@@ -13,6 +13,7 @@ import {
 } from "@/lib/dashboard/decision-cockpit-dto";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
+import type { GateFunnelSnapshot } from "@/lib/dashboard/gate-funnel-copy";
 import type {
   DashboardV3ViewModel,
   V3DecisionMode,
@@ -76,13 +77,20 @@ function momentumVolatilityLabel(momentum?: string): string | null {
   return null;
 }
 
-function formatBreadth(latestScan: LatestScanWithCandidates | null): string | null {
+function formatBreadth(
+  latestScan: LatestScanWithCandidates | null,
+  gateFunnel: GateFunnelSnapshot | null
+): string | null {
+  if (gateFunnel) {
+    if (gateFunnel.qualifiedTotal === 0 && gateFunnel.surfacedTotal === 0) return null;
+    return `G2 A ${gateFunnel.qualifiedCountA}·B ${gateFunnel.qualifiedCountB} · surfaced ${gateFunnel.surfacedTotal}`;
+  }
   if (!latestScan) return null;
   const { candidateCountA, candidateCountB, candidateCountSurfaced } = latestScan;
   if (candidateCountA === 0 && candidateCountB === 0 && candidateCountSurfaced === 0) {
     return null;
   }
-  return `A ${candidateCountA} · B ${candidateCountB} · surfaced ${candidateCountSurfaced}`;
+  return `G2 qualified A ${candidateCountA}·B ${candidateCountB} · surfaced ${candidateCountSurfaced}`;
 }
 
 function healthLevelToRisk(healthLevel: string): number {
@@ -365,7 +373,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
 
   const nearMiss: V3RadarBandEntry[] = cockpitDto.opportunity.nearMiss.map((n) => ({
     symbol: n.symbol,
-    reason: n.waitFor,
+    reason: `${n.executionStatusLabel} — ${n.waitFor}`,
   }));
 
   const rejected = collectRejectedBandEntries(cockpitDto);
@@ -408,16 +416,18 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       freshness: formatFreshnessLabel(freshness),
       vnindex: regime.latestBar ? regime.latestBar.close.toFixed(2) : null,
       regime: displayGate1ScanLevel(cockpitDto.verdict.gate1Resolution.canonical),
-      breadth: formatBreadth(latestScan),
+      breadth: formatBreadth(latestScan, cockpitDto.gateFunnel),
       volatility: momentumVolatilityLabel(regime.momentum),
       watchState:
         watchItemCount > 0 ? `${watchItemCount} symbols on watch` : "No active watch items",
     },
     decision: {
       mode: mapUxVerdictToDecisionMode(cockpitDto.verdict.uxLevel.value),
+      stanceLabel: cockpitDto.verdict.headline.value,
       confidenceBand: band,
       confidenceMeterWidth: confidenceBandMeterWidth(band),
-      primaryReason: cockpitDto.verdict.explanation.value,
+      primaryReason:
+        cockpitDto.verdict.subtitle.value || cockpitDto.verdict.explanation.value,
       highestQualitySetup: buildHighestQualitySetup(cockpitDto.opportunity, topSetups),
       mainRisk: buildMainRisk(cockpitDto),
       nextAction:
@@ -464,6 +474,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       reviewLabel: "Review on Trades",
     },
     evidence: buildEvidence(cockpitDto, freshness),
+    rsNearMissWatchlist: cockpitDto.rsNearMissWatchlist,
     partialError: params.dbLoadError ?? null,
   };
 }

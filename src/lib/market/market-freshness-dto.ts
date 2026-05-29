@@ -6,6 +6,7 @@ import {
   type MarketSessionSnapshot,
 } from "@/lib/market/market-session-snapshot";
 import { isBenchmarkStaleVsEquity } from "@/lib/market/market-data-freshness-report";
+import type { ScanSessionCoverage } from "@/lib/scanner/scan-session-coverage";
 
 export type MarketFreshnessStaleSeverity = "info" | "warning" | "error";
 
@@ -26,6 +27,8 @@ export type MarketFreshnessDto = {
   /** True when benchmark is behind equity and/or scan notes flagged delayed backdrop. */
   delayedBackdrop: boolean;
   staleFlags: MarketFreshnessStaleFlag[];
+  /** From latest scan `notes.sessionCoverage` when available. */
+  scanSessionCoverage: ScanSessionCoverage | null;
 };
 
 function isoDayUtc(d: Date | null): string | null {
@@ -74,6 +77,21 @@ function staleFlagsFromAlignment(
   return flags;
 }
 
+function staleFlagsFromScanSessionCoverage(
+  coverage: ScanSessionCoverage | null | undefined
+): MarketFreshnessStaleFlag[] {
+  if (!coverage?.weakCoverage) return [];
+  return [
+    {
+      code: "scan_weak_session_coverage",
+      severity: "warning",
+      message:
+        coverage.operatorWarning ??
+        "Data coverage is weak for the expected session. Scanner result may be incomplete because many symbols are stale.",
+    },
+  ];
+}
+
 /**
  * Builds the canonical freshness DTO from an existing snapshot + alignment analysis.
  * Preserves `analyzeMarketDataAlignment` / `isBenchmarkStaleVsEquity` semantics.
@@ -83,6 +101,8 @@ export function buildMarketFreshnessDto(params: {
   alignment?: MarketDataAlignmentAnalysis;
   /** When set (from latest scan `notes.benchmarkBackdrop.delayedBackdrop`), OR-combined with alignment stale signals. */
   delayedBackdropFromScanNotes?: boolean;
+  /** When set (from latest scan `notes.sessionCoverage`), adds weak-coverage warning flags. */
+  scanSessionCoverage?: ScanSessionCoverage | null;
 }): MarketFreshnessDto {
   const alignment =
     params.alignment ?? analyzeMarketDataAlignment(params.snapshot);
@@ -101,23 +121,33 @@ export function buildMarketFreshnessDto(params: {
     equityStale ||
     delayedFromAlignment;
 
+  const scanSessionCoverage = params.scanSessionCoverage ?? null;
+  const alignmentFlags = staleFlagsFromAlignment(alignment);
+  const coverageFlags = staleFlagsFromScanSessionCoverage(scanSessionCoverage);
+  const staleFlags = [...alignmentFlags, ...coverageFlags];
+
   return {
     benchmarkDate: alignment.benchmarkDay ?? isoDayUtc(params.snapshot.benchmarkSessionDate),
     equityMaxDate: alignment.equityDay ?? isoDayUtc(params.snapshot.latestEquityBarSessionDate),
     scanRunAt: params.snapshot.latestScanRunAt?.toISOString() ?? null,
     delayedBackdrop,
-    staleFlags: staleFlagsFromAlignment(alignment),
+    staleFlags,
+    scanSessionCoverage,
   };
 }
 
 /** Loads snapshot from DB and returns the normalized freshness DTO (read-only). */
 export async function fetchMarketFreshnessDto(
   prisma: PrismaClient,
-  options?: { delayedBackdropFromScanNotes?: boolean }
+  options?: {
+    delayedBackdropFromScanNotes?: boolean;
+    scanSessionCoverage?: ScanSessionCoverage | null;
+  }
 ): Promise<MarketFreshnessDto> {
   const snapshot = await fetchMarketSessionSnapshot(prisma);
   return buildMarketFreshnessDto({
     snapshot,
     delayedBackdropFromScanNotes: options?.delayedBackdropFromScanNotes,
+    scanSessionCoverage: options?.scanSessionCoverage,
   });
 }

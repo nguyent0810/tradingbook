@@ -32,6 +32,8 @@ import {
   type UniverseSource,
 } from "@/lib/tactical-universe";
 import { isBenchmarkStaleVsEquity } from "@/lib/market/market-data-freshness-report";
+import { computeScanSessionCoverage } from "@/lib/scanner/scan-session-coverage";
+import { serializeSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
 
 function toGate1ScanLevel(level: string): Gate1ScanLevel {
   switch (level) {
@@ -187,6 +189,19 @@ export async function runDailyScanJob(
     const aggregate = aggregateTradabilityResults(
       tradItems.map((item) => ({ symbolKey: item.symbolKey, result: item.result }))
     );
+    const sessionCoverage = computeScanSessionCoverage({
+      expectedLatestSession,
+      universeScanned: totalSymbols,
+      tradabilityItems: tradItems,
+    });
+    if (sessionCoverage.weakCoverage) {
+      console.warn("[runDailyScanJob] weak_session_coverage", {
+        expectedSession: sessionCoverage.expectedSessionDate,
+        staleSessionCount: sessionCoverage.staleSessionCount,
+        tradabilityEvaluated: sessionCoverage.tradabilityEvaluated,
+        staleSessionFrac: sessionCoverage.staleSessionFrac,
+      });
+    }
     const tradableSymbolIds = tradItems
       .filter((item) => item.result.passed)
       .map((item) => item.symbolId);
@@ -232,6 +247,7 @@ export async function runDailyScanJob(
           quality: ev.quality,
           close: ev.close,
           rankScore: ev.rankScore,
+          rankComponents: ev.rankComponents,
           breakoutLevel: ev.breakoutLevel,
           pullbackZoneLow: ev.pullbackZoneLow,
           pullbackZoneHigh: ev.pullbackZoneHigh,
@@ -285,6 +301,7 @@ export async function runDailyScanJob(
           : null,
         delayedBackdrop,
       },
+      sessionCoverage,
     };
     const failedCount = failedSymbolKeys.size;
     const scannedCount = Math.max(0, totalSymbols - failedCount);
@@ -331,7 +348,7 @@ export async function runDailyScanJob(
             pullbackZoneLow: c.pullbackZoneLow,
             pullbackZoneHigh: c.pullbackZoneHigh,
             stopLevel: c.stopLevel,
-            reasons: c.reasons,
+            reasons: serializeSetupCandidateReasons(c.reasons, c.rankComponents),
             rankScore: c.rankScore,
             barDate: c.barDate,
           })),
@@ -416,6 +433,7 @@ export async function runDailyScanJob(
       recommendation: diagnostics.recommendation,
       tradingDecision,
       benchmarkBackdrop: scanNotes.benchmarkBackdrop,
+      sessionCoverage,
       persistedNotesKeys: Object.keys(scanNotes),
     };
 

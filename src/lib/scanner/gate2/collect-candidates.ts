@@ -96,6 +96,7 @@ export async function collectGate2SetupCandidatesWithStats(
       quality: ev.quality,
       close: ev.close,
       rankScore: ev.rankScore,
+      rankComponents: ev.rankComponents,
       breakoutLevel: ev.breakoutLevel,
       pullbackZoneLow: ev.pullbackZoneLow,
       pullbackZoneHigh: ev.pullbackZoneHigh,

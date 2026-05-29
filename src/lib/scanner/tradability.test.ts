@@ -6,6 +6,7 @@ import {
   countWeekdaysExclusive,
   evaluateTradability,
 } from "./tradability";
+import { symbolIdsEligibleForGate2 } from "./scan-session-coverage";
 import type { TradabilityBarInput } from "./tradability-types";
 import { getExpectedLatestSessionFromIndexBars } from "./expected-session";
 
@@ -104,6 +105,19 @@ describe("evaluateTradability", () => {
     const r = evaluateTradability(bars, staleExpected);
     expect(r.passed).toBe(false);
     expect(r.reasons).toContain(TRADABILITY_REASON.STALE_DATA);
+  });
+
+  it("excludes stale symbols from Gate 2 eligibility (passed tradability only)", () => {
+    const { bars, expected } = passDefaults();
+    const pass = evaluateTradability(bars, expected);
+    const staleExpected = utc(2024, 12, 1);
+    const stale = evaluateTradability(bars, staleExpected);
+    const eligible = symbolIdsEligibleForGate2([
+      { symbolId: "ok", result: pass },
+      { symbolId: "stale", result: stale },
+    ]);
+    expect(eligible).toEqual(["ok"]);
+    expect(stale.passed).toBe(false);
   });
 
   it("fails when consecutive bar calendar gap exceeds 21 days (suspension)", () => {

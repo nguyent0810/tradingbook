@@ -21,10 +21,6 @@ function decisionModifier(uxLevel: VerdictUxLevel): string {
   }
 }
 
-function formatUxVerdictTitle(uxLevel: VerdictUxLevel): string {
-  return uxLevel.replace(/_/g, " ");
-}
-
 function formatConfidenceBand(band: "high" | "medium" | "low"): string {
   const label = band.charAt(0).toUpperCase() + band.slice(1);
   return label;
@@ -48,8 +44,25 @@ export function DashboardDecisionHero({
     >
       <p className="dash-eyebrow">Today&apos;s verdict</p>
       <h2 id="dashboard-decision-heading" className="dash-decision-hero__title">
-        {formatUxVerdictTitle(ux)}
+        {verdict.headline.value}
       </h2>
+      {verdict.subtitle.value ? (
+        <p
+          className="dash-decision-hero__subtitle text-sm leading-snug"
+          data-testid="dashboard-verdict-subtitle"
+        >
+          {verdict.subtitle.value}
+        </p>
+      ) : null}
+      {verdict.persistedLevelNote.value ? (
+        <p
+          className="dash-decision-hero__persisted-note text-xs"
+          data-testid="dashboard-verdict-persisted-note"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          {verdict.persistedLevelNote.value}
+        </p>
+      ) : null}
       {ux === "NO_TRADE" ? (
         <p className="dash-decision-hero__preservation" data-testid="dashboard-verdict-preservation">
           Capital preservation — no new swing risk today.
