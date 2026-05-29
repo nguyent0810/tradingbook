@@ -10,7 +10,9 @@ type Props = {
 export function DiagnosticsDock({ rsWatchlist, evidence }: Props) {
   return (
     <div className="tosv3-diagnostics-dock" data-testid="dashboard-v3-diagnostics-dock">
-      <RelativeStrengthRadar panel={rsWatchlist} />
+      <div className="tosv3-diagnostics-dock__intel">
+        <RelativeStrengthRadar panel={rsWatchlist} />
+      </div>
       <EvidenceLayer items={evidence} />
     </div>
   );

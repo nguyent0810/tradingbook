@@ -14,25 +14,25 @@ function priorityTierBadgeStyle(tier: ReviewPriorityTier): CSSProperties {
       return {
         borderColor: "color-mix(in srgb, #ea580c 42%, var(--border-color))",
         backgroundColor: "color-mix(in srgb, #ea580c 11%, transparent)",
-        color: "#9a3412",
+        color: "#fda4af",
       };
     case "high_attention":
       return {
         borderColor: "color-mix(in srgb, #ca8a04 38%, var(--border-color))",
         backgroundColor: "color-mix(in srgb, #eab308 10%, transparent)",
-        color: "#854d0e",
+        color: "#fcd34d",
       };
     case "routine_review":
       return {
         borderColor: "color-mix(in srgb, #64748b 35%, var(--border-color))",
-        backgroundColor: "var(--bg-tertiary)",
-        color: "var(--text-secondary)",
+        backgroundColor: "rgba(30, 41, 59, 0.55)",
+        color: "#b6c8e2",
       };
     default:
       return {
-        borderColor: "var(--border-color)",
-        backgroundColor: "var(--bg-tertiary)",
-        color: "var(--text-muted)",
+        borderColor: "rgba(102, 128, 159, 0.35)",
+        backgroundColor: "rgba(15, 23, 42, 0.55)",
+        color: "#9eb0c9",
       };
   }
 }
@@ -46,13 +46,15 @@ function escalationRailStyle(): CSSProperties {
 
 function checklistChipStyle(): CSSProperties {
   return {
-    borderColor: "var(--border-color)",
-    color: "var(--text-secondary)",
+    borderColor: "rgba(102, 128, 159, 0.35)",
+    color: "#b6c8e2",
   };
 }
 
 export type OpenPositionReviewCellProps = {
   compact: boolean;
+  /** Ledger grid: chips only; long copy in disclosure. */
+  ledgerDense?: boolean;
   tradeId: string;
   priorityTier: ReviewPriorityTier;
   escalationCues: readonly string[];
@@ -65,15 +67,38 @@ export type OpenPositionReviewCellProps = {
   sessionFocused?: boolean;
   operatingPostureLabel: string;
   latestOutcomeLabel: string | null;
-  /** Muted evolution label from same-visit rules (no extra badge). */
   evolutionStateLabel?: string;
   evolutionExplainLine?: string | null;
-  /** When true, hide long evolution explain (compact ledger scan). */
   compactReviewMode?: boolean;
 };
 
+function LedgerReviewChip({
+  label,
+  title,
+  tone = "neutral",
+}: {
+  label: string;
+  title?: string;
+  tone?: "neutral" | "warn" | "ok" | "risk";
+}) {
+  const toneClass =
+    tone === "warn"
+      ? "tos-ledger-review-chip--warn"
+      : tone === "ok"
+        ? "tos-ledger-review-chip--ok"
+        : tone === "risk"
+          ? "tos-ledger-review-chip--risk"
+          : "";
+  return (
+    <span className={`tos-ledger-review-chip ${toneClass}`} title={title}>
+      {label}
+    </span>
+  );
+}
+
 export function OpenPositionReviewCell({
   compact,
+  ledgerDense = false,
   tradeId,
   priorityTier,
   escalationCues,
@@ -98,43 +123,98 @@ export function OpenPositionReviewCell({
       ? formatVND(reviewDto.plannedCapitalAtRisk, false)
       : null;
 
+  const useDenseLedger = ledgerDense && !sessionFocused;
+
   if (sessionMode && !sessionFocused) {
     return (
-      <div className="flex max-w-[11rem] flex-col gap-1">
+      <div className="tos-ledger-review-cell tos-ledger-review-cell--session">
         <span
-          className="w-fit rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+          className="tos-ledger-review-chip tos-ledger-review-chip--priority"
           style={priorityTierBadgeStyle(priorityTier)}
         >
           {reviewPriorityTraderLabel(priorityTier)}
         </span>
-        <span
-          className="text-[10px] leading-snug"
-          style={{
-            color: reviewedToday ? "#166534" : "var(--text-muted)",
-            fontWeight: reviewedToday ? 600 : 400,
-          }}
-        >
-          {reviewedToday ? "Handled today" : "Pending today"}
-        </span>
-        <span className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
-          {operatingPostureLabel}
-          {latestOutcomeLabel ? ` · ${latestOutcomeLabel}` : ""}
-        </span>
+        <LedgerReviewChip
+          label={reviewedToday ? "Handled today" : "Pending today"}
+          tone={reviewedToday ? "ok" : "warn"}
+        />
+        <LedgerReviewChip label={operatingPostureLabel} title={latestOutcomeLabel ?? undefined} />
         {evolutionStateLabel ? (
-          <span className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
-            Evolution · {evolutionStateLabel}
-            {evolutionExplainLine && !compactReviewMode
-              ? ` — ${evolutionExplainLine}`
-              : ""}
-          </span>
+          <LedgerReviewChip label={`Evolution · ${evolutionStateLabel}`} />
         ) : null}
-        <Link
-          href={`/trades/${tradeId}`}
-          className="text-[11px] font-medium underline-offset-2 hover:underline"
-          style={{ color: "var(--accent-text)" }}
-        >
+        <Link href={`/trades/${tradeId}`} className="tos-ledger-review-cell__link">
           Trade sheet
         </Link>
+      </div>
+    );
+  }
+
+  if (useDenseLedger) {
+    const stopTone =
+      reviewDto.surface === "stop_violated" || reviewDto.stopBand === "breached"
+        ? "risk"
+        : reviewDto.stopBand === "tight"
+          ? "warn"
+          : "neutral";
+
+    return (
+      <div className="tos-ledger-review-cell" data-testid="trades-review-cell-dense">
+        <div className="tos-ledger-review-cell__chips">
+          <span
+            className="tos-ledger-review-chip tos-ledger-review-chip--priority"
+            style={priorityTierBadgeStyle(priorityTier)}
+          >
+            {reviewPriorityTraderLabel(priorityTier)}
+          </span>
+          <LedgerReviewChip label={reviewDto.stopBandLabel} tone={stopTone} title={reviewDto.cushionPctDisplay ?? undefined} />
+          <LedgerReviewChip
+            label={reviewedToday ? "Logged today" : "Review due"}
+            tone={reviewedToday ? "ok" : "warn"}
+          />
+          {evolutionStateLabel ? (
+            <LedgerReviewChip label={evolutionStateLabel} title={evolutionExplainLine ?? undefined} />
+          ) : null}
+          {meaningfulChange ? (
+            <LedgerReviewChip label="Δ since review" title={meaningfulChange} tone="warn" />
+          ) : null}
+        </div>
+        <details className="tos-ledger-review-cell__details">
+          <summary className="tos-ledger-review-cell__summary">Review detail</summary>
+          <div className="tos-ledger-review-cell__detail-body">
+            <p className="tos-ledger-review-cell__headline">{reviewDto.headline}</p>
+            {reviewDto.primaryReviewLabel ? (
+              <p className="tos-ledger-review-cell__meta">{reviewDto.primaryReviewLabel}</p>
+            ) : null}
+            {riskSnippet ? (
+              <p className="tos-ledger-review-cell__meta">At risk {riskSnippet}</p>
+            ) : null}
+            {escalationCues.length > 0 ? (
+              <ul className="tos-ledger-review-cell__list">
+                {escalationCues.map((c, i) => (
+                  <li key={`e-${i}`}>{c}</li>
+                ))}
+              </ul>
+            ) : null}
+            {memoryLines.length > 0 ? (
+              <ul className="tos-ledger-review-cell__list">
+                {memoryLines.map((line, mi) => (
+                  <li key={`m-${mi}`}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+            {reviewDto.setupValidityLine ? (
+              <p className="tos-ledger-review-cell__meta">Setup: {reviewDto.setupValidityLine}</p>
+            ) : null}
+            {latestBar ? (
+              <p className="tos-ledger-review-cell__meta">
+                Latest bar: {formatBarSessionDate(latestBar.date)}
+              </p>
+            ) : null}
+            <Link href={`/trades/${tradeId}`} className="tos-ledger-review-cell__link">
+              Open trade sheet
+            </Link>
+          </div>
+        </details>
       </div>
     );
   }
@@ -142,34 +222,28 @@ export function OpenPositionReviewCell({
   const effectiveCompact = compact && !(sessionMode && sessionFocused);
 
   const stopRiskLine = effectiveCompact ? (
-    <div
-      className="text-[10px] leading-snug"
-      style={{ color: "var(--text-primary)" }}
-    >
+    <div className="text-[10px] leading-snug text-[var(--text-primary)]">
       <span className="font-medium">{reviewDto.stopBandLabel}</span>
       {reviewDto.cushionPctDisplay ? (
-        <span className="tabular-nums" style={{ color: "var(--text-secondary)" }}>
+        <span className="tabular-nums text-[var(--text-secondary)]">
           {" "}
           · {reviewDto.cushionPctDisplay}
         </span>
       ) : null}
       {riskSnippet ? (
-        <span style={{ color: "var(--text-muted)" }}>
+        <span className="text-[var(--text-muted)]">
           {" "}
           · At risk {riskSnippet}
         </span>
       ) : null}
     </div>
   ) : sessionFocused ? (
-    <div
-      className="text-[12px] leading-snug"
-      style={{ color: "var(--text-primary)" }}
-    >
+    <div className="text-[12px] leading-snug text-[var(--text-primary)]">
       <span className="font-semibold">{reviewDto.stopBandLabel}</span>
       {reviewDto.cushionPctDisplay ? (
         <>
           {" · "}
-          <span className="tabular-nums" style={{ color: "var(--text-secondary)" }}>
+          <span className="tabular-nums text-[var(--text-secondary)]">
             {reviewDto.cushionPctDisplay}
           </span>
         </>
@@ -177,23 +251,16 @@ export function OpenPositionReviewCell({
       {riskSnippet ? (
         <>
           {" · "}
-          <span style={{ color: "var(--text-muted)" }}>
+          <span className="text-[var(--text-muted)]">
             Planned capital at risk{" "}
-            <span className="mono font-semibold" style={{ color: "var(--text-secondary)" }}>
-              {riskSnippet}
-            </span>
+            <span className="mono font-semibold text-[var(--text-secondary)]">{riskSnippet}</span>
           </span>
         </>
       ) : null}
     </div>
   ) : (
-    <div
-      className="text-[11px] leading-snug"
-      style={{ color: "var(--text-secondary)" }}
-    >
-      <span className="font-medium" style={{ color: "var(--text-primary)" }}>
-        {reviewDto.stopBandLabel}
-      </span>
+    <div className="text-[11px] leading-snug text-[var(--text-secondary)]">
+      <span className="font-medium text-[var(--text-primary)]">{reviewDto.stopBandLabel}</span>
       {reviewDto.cushionPctDisplay ? (
         <>
           {" · "}
@@ -203,11 +270,9 @@ export function OpenPositionReviewCell({
       {riskSnippet ? (
         <>
           {" · "}
-          <span style={{ color: "var(--text-muted)" }}>
+          <span className="text-[var(--text-muted)]">
             Planned capital at risk{" "}
-            <span className="mono font-medium" style={{ color: "var(--text-secondary)" }}>
-              {riskSnippet}
-            </span>
+            <span className="mono font-medium text-[var(--text-secondary)]">{riskSnippet}</span>
           </span>
         </>
       ) : null}
@@ -216,16 +281,14 @@ export function OpenPositionReviewCell({
 
   const reviewStatusLine = (
     <div
-      className={
-        effectiveCompact ? "text-[10px] leading-snug" : "text-[10px] leading-snug"
-      }
+      className="text-[10px] leading-snug"
       style={{
-        color: reviewedToday ? "#166534" : "var(--text-muted)",
+        color: reviewedToday ? "#6ee7b7" : "#9eb0c9",
         fontWeight: sessionFocused && reviewedToday ? 600 : 400,
       }}
     >
       {reviewedToday ? "Checkpoint logged today." : "Checkpoint pending today."}
-      <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>
+      <span className="text-[var(--text-muted)] font-normal">
         {" "}
         · {reviewDto.primaryReviewLabel}
       </span>
@@ -240,8 +303,9 @@ export function OpenPositionReviewCell({
       <div className="flex flex-col gap-1">
         {reviewDto.checklistSummaryLine ? (
           <div
-            className={sessionFocused ? "text-[11px] tabular-nums" : "text-[10px] tabular-nums"}
-            style={{ color: "var(--text-muted)" }}
+            className={
+              sessionFocused ? "text-[11px] tabular-nums text-[var(--text-muted)]" : "text-[10px] tabular-nums text-[var(--text-muted)]"
+            }
           >
             {reviewDto.checklistSummaryLine}
           </div>
@@ -249,42 +313,28 @@ export function OpenPositionReviewCell({
         {!effectiveCompact ? (
           <div className="flex flex-wrap gap-1">
             {reviewDto.latestChecklist.stopReviewed ? (
-              <span
-                className="rounded border px-1.5 py-0.5 text-[10px]"
-                style={checklistChipStyle()}
-              >
+              <span className="rounded border px-1.5 py-0.5 text-[10px]" style={checklistChipStyle()}>
                 Stop reviewed
               </span>
             ) : null}
             {reviewDto.latestChecklist.structureReviewed ? (
-              <span
-                className="rounded border px-1.5 py-0.5 text-[10px]"
-                style={checklistChipStyle()}
-              >
+              <span className="rounded border px-1.5 py-0.5 text-[10px]" style={checklistChipStyle()}>
                 Structure reviewed
               </span>
             ) : null}
             {reviewDto.latestChecklist.sizingReviewed ? (
-              <span
-                className="rounded border px-1.5 py-0.5 text-[10px]"
-                style={checklistChipStyle()}
-              >
+              <span className="rounded border px-1.5 py-0.5 text-[10px]" style={checklistChipStyle()}>
                 Sizing reviewed
               </span>
             ) : null}
             {reviewDto.latestChecklist.exitPlanReviewed ? (
-              <span
-                className="rounded border px-1.5 py-0.5 text-[10px]"
-                style={checklistChipStyle()}
-              >
+              <span className="rounded border px-1.5 py-0.5 text-[10px]" style={checklistChipStyle()}>
                 Exit plan reviewed
               </span>
             ) : null}
           </div>
         ) : includeCompactSummary && reviewDto.checklistSummaryLine ? (
-          <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-            {reviewDto.checklistSummaryLine}
-          </div>
+          <div className="text-[10px] text-[var(--text-muted)]">{reviewDto.checklistSummaryLine}</div>
         ) : null}
       </div>
     );
@@ -296,38 +346,32 @@ export function OpenPositionReviewCell({
   const supportingBlock = (
     <>
       {hintItems.length > 0 ? (
-        <ul
-          className="list-disc space-y-0.5 pl-3.5 text-[10px] leading-snug"
-          style={{ color: "var(--text-muted)" }}
-        >
+        <ul className="list-disc space-y-0.5 pl-3.5 text-[10px] leading-snug text-[var(--text-muted)]">
           {hintItems.map((h, hi) => (
             <li key={`${hi}-${h.slice(0, 32)}`}>{h}</li>
           ))}
         </ul>
       ) : null}
       {reviewDto.setupValidityLine ? (
-        <div className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
+        <div className="text-[10px] leading-snug text-[var(--text-muted)]">
           Setup: {reviewDto.setupValidityLine}
         </div>
       ) : null}
       <p
-        className={`leading-snug ${sessionFocused ? "line-clamp-2 text-[10px]" : "line-clamp-4 text-[10px]"}`}
-        style={{ color: "var(--text-muted)" }}
+        className={`leading-snug text-[var(--text-muted)] ${sessionFocused ? "line-clamp-2 text-[10px]" : "line-clamp-4 text-[10px]"}`}
       >
         {reviewDto.headline}
       </p>
       {!sessionFocused ? checklistSection : null}
       {latestBar ? (
-        <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+        <div className="text-[10px] text-[var(--text-muted)]">
           Latest bar: {formatBarSessionDate(latestBar.date)}
         </div>
       ) : (
-        <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-          No equity bar loaded.
-        </div>
+        <div className="text-[10px] text-[var(--text-muted)]">No equity bar loaded.</div>
       )}
       {!compactReviewMode ? (
-        <p className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[9px] leading-snug text-[var(--text-muted)]">
           Daily bars only — not live execution advice.
         </p>
       ) : null}
@@ -336,7 +380,10 @@ export function OpenPositionReviewCell({
 
   if (sessionFocused) {
     return (
-      <div className="flex max-w-[18rem] flex-col gap-2 border-l-2 pl-2" style={{ borderColor: "color-mix(in srgb, #0ea5e9 45%, var(--border-color))" }}>
+      <div
+        className="flex max-w-[18rem] flex-col gap-2 border-l-2 pl-2"
+        style={{ borderColor: "color-mix(in srgb, #0ea5e9 45%, var(--border-color))" }}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span
             className="rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
@@ -346,19 +393,18 @@ export function OpenPositionReviewCell({
           </span>
           <Link
             href={`/trades/${tradeId}`}
-            className="text-[11px] font-medium underline-offset-2 hover:underline"
-            style={{ color: "var(--accent-text)" }}
+            className="text-[11px] font-medium underline-offset-2 hover:underline text-[var(--accent-text)]"
           >
             Log checkpoint
           </Link>
         </div>
-        <p className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[10px] leading-snug text-[var(--text-muted)]">
           Posture: {operatingPostureLabel}
           {" · "}
           Outcome: {latestOutcomeLabel ?? "—"}
         </p>
         {evolutionStateLabel ? (
-          <p className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[10px] leading-snug text-[var(--text-muted)]">
             Evolution: {evolutionStateLabel}
             {evolutionExplainLine && !compactReviewMode ? ` — ${evolutionExplainLine}` : ""}
           </p>
@@ -367,15 +413,13 @@ export function OpenPositionReviewCell({
         {stopRiskLine}
 
         {meaningfulChange ? (
-          <div className="text-[11px] leading-snug" style={{ color: "var(--text-primary)" }}>
-            {meaningfulChange}
-          </div>
+          <div className="text-[11px] leading-snug text-[var(--text-primary)]">{meaningfulChange}</div>
         ) : null}
 
         {escalationCues.length > 0 ? (
           <div className="flex flex-col gap-0.5 text-[10px] leading-snug" style={escalationRailStyle()}>
             {escalationCues.map((c, i) => (
-              <div key={`${i}-${c.slice(0, 28)}`} style={{ color: "var(--text-secondary)" }}>
+              <div key={`${i}-${c.slice(0, 28)}`} className="text-[var(--text-secondary)]">
                 {c}
               </div>
             ))}
@@ -387,21 +431,14 @@ export function OpenPositionReviewCell({
         {reviewStatusLine}
 
         <details className="group">
-          <summary
-            className="cursor-pointer list-none text-[10px] font-medium underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden"
-            style={{ color: "var(--text-muted)" }}
-          >
+          <summary className="tos-ledger-review-cell__summary cursor-pointer list-none [&::-webkit-details-marker]:hidden">
             Supporting notes
           </summary>
-          <div className="mt-1.5 flex flex-col gap-1.5 border-t pt-1.5" style={{ borderColor: "var(--border-color)" }}>
+          <div className="mt-1.5 flex flex-col gap-1.5 border-t border-[var(--border-color)] pt-1.5">
             {memoryLines.length > 0 ? (
               <div className="flex flex-col gap-0.5">
                 {memoryLines.map((line, mi) => (
-                  <div
-                    key={`m-${mi}-${line.slice(0, 24)}`}
-                    className="text-[10px] leading-snug"
-                    style={{ color: "var(--text-muted)" }}
-                  >
+                  <div key={`m-${mi}-${line.slice(0, 24)}`} className="text-[10px] leading-snug text-[var(--text-muted)]">
                     {line}
                   </div>
                 ))}
@@ -430,76 +467,62 @@ export function OpenPositionReviewCell({
           {reviewPriorityTraderLabel(priorityTier)}
         </span>
       </div>
-      <p className="text-[9px] leading-snug" style={{ color: "var(--text-muted)" }}>
+      <p className="text-[9px] leading-snug text-[var(--text-muted)]">
         {operatingPostureLabel}
         {latestOutcomeLabel ? ` · ${latestOutcomeLabel}` : ""}
       </p>
       {evolutionStateLabel ? (
-        <p
-          className="text-[9px] leading-snug line-clamp-2"
-          style={{ color: "var(--text-muted)" }}
-        >
+        <p className="text-[9px] leading-snug line-clamp-2 text-[var(--text-muted)]">
           Evolution · {evolutionStateLabel}
-          {evolutionExplainLine && !compactReviewMode
-            ? ` — ${evolutionExplainLine}`
-            : ""}
+          {evolutionExplainLine && !compactReviewMode ? ` — ${evolutionExplainLine}` : ""}
         </p>
       ) : null}
 
-      {escalationCues.length > 0 ? (
-        <div className="flex flex-col gap-0.5 text-[10px] leading-snug" style={escalationRailStyle()}>
-          {escalationCues.map((c, i) => (
-            <div key={`${i}-${c.slice(0, 28)}`} style={{ color: "var(--text-secondary)" }}>
-              {c}
+      {effectiveCompact ? null : (
+        <>
+          {escalationCues.length > 0 ? (
+            <div className="flex flex-col gap-0.5 text-[10px] leading-snug" style={escalationRailStyle()}>
+              {escalationCues.map((c, i) => (
+                <div key={`${i}-${c.slice(0, 28)}`} className="text-[var(--text-secondary)]">
+                  {c}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : null}
-
-      {memoryLines.length > 0 ? (
-        <div className="flex flex-col gap-0.5">
-          {memoryLines.map((line, mi) => (
-            <div
-              key={`m-${mi}-${line.slice(0, 24)}`}
-              className="text-[10px] leading-snug"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {line}
+          ) : null}
+          {memoryLines.length > 0 ? (
+            <div className="flex flex-col gap-0.5">
+              {memoryLines.map((line, mi) => (
+                <div key={`m-${mi}-${line.slice(0, 24)}`} className="text-[10px] leading-snug text-[var(--text-muted)]">
+                  {line}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ) : null}
+          ) : null}
+        </>
+      )}
 
       {stopRiskLine}
 
       {reviewStatusLine}
 
-      {meaningfulChange ? (
-        <div
-          className={effectiveCompact ? "text-[10px] leading-snug" : "text-[10px] leading-snug"}
-          style={{ color: "var(--text-secondary)" }}
-        >
-          {meaningfulChange}
-        </div>
+      {meaningfulChange && effectiveCompact ? (
+        <LedgerReviewChip label="Δ change" title={meaningfulChange} tone="warn" />
+      ) : meaningfulChange ? (
+        <div className="text-[10px] leading-snug text-[var(--text-secondary)]">{meaningfulChange}</div>
       ) : null}
 
       {!effectiveCompact &&
       reviewDto.sessionDeltaLine &&
       reviewDto.sinceReviewDeltaLine &&
       reviewDto.sessionDeltaLine.trim() !== reviewDto.sinceReviewDeltaLine.trim() ? (
-        <div className="text-[10px] leading-snug" style={{ color: "var(--text-muted)" }}>
-          {reviewDto.sessionDeltaLine}
-        </div>
+        <div className="text-[10px] leading-snug text-[var(--text-muted)]">{reviewDto.sessionDeltaLine}</div>
       ) : null}
 
       <details className="group">
-        <summary
-          className="cursor-pointer list-none text-[10px] font-medium underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden"
-          style={{ color: "var(--text-muted)" }}
-        >
+        <summary className="tos-ledger-review-cell__summary cursor-pointer list-none [&::-webkit-details-marker]:hidden">
           Supporting notes
         </summary>
-        <div className="mt-1.5 flex flex-col gap-1.5 border-t pt-1.5" style={{ borderColor: "var(--border-color)" }}>
+        <div className="mt-1.5 flex flex-col gap-1.5 border-t border-[var(--border-color)] pt-1.5">
           {supportingBlock}
         </div>
       </details>

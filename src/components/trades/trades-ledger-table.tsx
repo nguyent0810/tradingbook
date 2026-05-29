@@ -99,7 +99,7 @@ export function TradesLedgerTable({
         ariaLabel="Trades ledger table"
         scrollHint="Scroll horizontally for full ledger columns. Symbol column stays pinned."
       >
-        <table className="table dense-table ledger-deck-table" data-testid="trades-table">
+        <table className="table dense-table ledger-deck-table ledger-deck-table--dense" data-testid="trades-table">
           <thead data-testid="trades-table-header">
             <tr>
               <th className="ledger-sticky-symbol">Symbol</th>
@@ -257,10 +257,11 @@ export function TradesLedgerTable({
                       {displayTradeStatus(trade.status)}
                     </SignalBadge>
                   </td>
-                  <td className="align-top">
+                  <td className="ledger-deck-table__review-cell">
                     {trade.status === "OPEN" && reviewDto && openPack ? (
                       <OpenPositionReviewCell
                         tradeId={trade.id}
+                        ledgerDense={!isSessionFocusRow}
                         compact={
                           compactReview ||
                           (reviewSessionActive && !isSessionFocusRow)
@@ -301,32 +302,29 @@ export function TradesLedgerTable({
                       <span className="ledger-deck-table__muted">—</span>
                     )}
                   </td>
-                  <td className="mono table-num">
+                  <td className="mono table-num ledger-deck-table__mark">
                     {trade.status === "OPEN" ? (
                       latestBar ? (
-                        <div className="ledger-deck-table__stack-end">
-                          <span>
-                            Latest close:{" "}
-                            {formatEquityThousandVndPerShare(latestBar.close)}
-                          </span>
-                          <span className="ledger-deck-table__sub">
-                            Data date: {formatBarDataDateUtcLong(latestBar.date)}
-                          </span>
-                        </div>
+                        <span
+                          className="ledger-deck-table__mark-value tabular-nums"
+                          title={`Data date: ${formatBarDataDateUtcLong(latestBar.date)}`}
+                        >
+                          {formatEquityThousandVndPerShare(latestBar.close)}
+                        </span>
                       ) : (
                         <span className="ledger-deck-table__muted">—</span>
                       )
                     ) : trade.exitPrice !== null && Number.isFinite(trade.exitPrice) ? (
-                      <div className="ledger-deck-table__stack-end">
-                        <span>
-                          Exit price: {formatEquityThousandVndPerShare(trade.exitPrice)}
-                        </span>
-                        {trade.exitDate ? (
-                          <span className="ledger-deck-table__sub">
-                            Exit date: {formatBarDataDateUtcLong(trade.exitDate)}
-                          </span>
-                        ) : null}
-                      </div>
+                      <span
+                        className="ledger-deck-table__mark-value tabular-nums"
+                        title={
+                          trade.exitDate
+                            ? `Exit ${formatBarDataDateUtcLong(trade.exitDate)}`
+                            : undefined
+                        }
+                      >
+                        {formatEquityThousandVndPerShare(trade.exitPrice)}
+                      </span>
                     ) : (
                       "—"
                     )}
@@ -354,80 +352,61 @@ export function TradesLedgerTable({
                       ? formatSignedVnd(distanceToTakeProfit)
                       : "—"}
                   </td>
-                  <td className="table-num align-top">
+                  <td className="table-num ledger-deck-table__pnl-cell">
                     {trade.status === "OPEN" ? (
                       latestBar ? (
-                        <div className="ledger-deck-table__pnl">
-                          <span className="ledger-deck-table__pnl-label">Unrealized</span>
-                          <span className="ledger-deck-table__pnl-note">
-                            Long bias: (latest close − entry) × qty. Short bias: (entry − latest
-                            close) × qty. Same price units as entry (thousand ₫ per share).
-                            {latestBar ? (
-                              <> Data date: {formatBarDataDateUtcLong(latestBar.date)}.</>
-                            ) : null}
-                          </span>
+                        <div
+                          className="ledger-deck-table__pnl ledger-deck-table__pnl--compact"
+                          title={
+                            priceUnitMismatch
+                              ? TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE
+                              : `Unrealized · ${formatBarDataDateUtcLong(latestBar.date)}`
+                          }
+                        >
                           {priceUnitMismatch ? (
-                            <>
-                              <span className="ledger-deck-table__pnl-warn">
-                                Unit check needed — unrealized P&amp;L not shown as valid.
-                              </span>
-                              <span className="ledger-deck-table__pnl-note">
-                                {TRADE_ENTRY_PRICE_UNIT_MISMATCH_MESSAGE}
-                              </span>
-                              <span className="mono ledger-deck-table__sub">
-                                Entry (raw): {trade.entryPrice.toFixed(4)} · Latest close (raw):{" "}
-                                {latestBar.close.toFixed(4)}
-                              </span>
-                            </>
+                            <span className="ledger-deck-table__pnl-warn">Unit check</span>
                           ) : unrealized?.pnlAmount != null ? (
-                            <span
-                              className={`mono ledger-deck-table__pnl-value${
-                                unrealized.pnlAmount >= 0
-                                  ? " ledger-deck-table__pnl-value--pos"
-                                  : " ledger-deck-table__pnl-value--neg"
-                              }`}
-                            >
-                              {unrealized.pnlAmount > 0 ? "+" : ""}
-                              {formatVND(unrealized.pnlAmount, false)}
-                            </span>
-                          ) : (
-                            <span className="mono ledger-deck-table__muted">—</span>
-                          )}
-                          {priceUnitMismatch ? (
-                            <span className="mono ledger-deck-table__sub">
-                              Raw % (do not use): {formatSignedPct(unrealized?.pnlPct ?? null)}
-                            </span>
-                          ) : (
-                            <span
-                              className={`mono ledger-deck-table__sub${
-                                unrealized?.pnlPct != null
-                                  ? unrealized.pnlPct >= 0
+                            <>
+                              <span
+                                className={`mono ledger-deck-table__pnl-value tabular-nums${
+                                  unrealized.pnlAmount >= 0
                                     ? " ledger-deck-table__pnl-value--pos"
                                     : " ledger-deck-table__pnl-value--neg"
-                                  : ""
-                              }`}
-                            >
-                              {formatSignedPct(unrealized?.pnlPct ?? null)}
-                            </span>
+                                }`}
+                              >
+                                {unrealized.pnlAmount > 0 ? "+" : ""}
+                                {formatVND(unrealized.pnlAmount, false)}
+                              </span>
+                              <span
+                                className={`mono ledger-deck-table__pnl-pct tabular-nums${
+                                  unrealized.pnlPct != null
+                                    ? unrealized.pnlPct >= 0
+                                      ? " ledger-deck-table__pnl-value--pos"
+                                      : " ledger-deck-table__pnl-value--neg"
+                                    : ""
+                                }`}
+                              >
+                                {formatSignedPct(unrealized?.pnlPct ?? null)}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="mono ledger-deck-table__muted">—</span>
                           )}
                         </div>
                       ) : (
                         <span className="ledger-deck-table__muted">—</span>
                       )
                     ) : trade.realizedPnl !== null ? (
-                      <div className="ledger-deck-table__stack-end">
-                        <span className="ledger-deck-table__pnl-label">Realized</span>
-                        <span
-                          className={`mono ledger-deck-table__pnl-value${
-                            trade.realizedPnl >= 0
-                              ? " ledger-deck-table__pnl-value--pos"
-                              : " ledger-deck-table__pnl-value--neg"
-                          }`}
-                        >
-                          {trade.realizedPnl > 0 ? "+" : ""}
-                          {formatVND(trade.realizedPnl, false)}
-                        </span>
-                      </div>
+                      <span
+                        className={`mono ledger-deck-table__pnl-value tabular-nums${
+                          trade.realizedPnl >= 0
+                            ? " ledger-deck-table__pnl-value--pos"
+                            : " ledger-deck-table__pnl-value--neg"
+                        }`}
+                      >
+                        {trade.realizedPnl > 0 ? "+" : ""}
+                        {formatVND(trade.realizedPnl, false)}
+                      </span>
                     ) : (
                       <span className="ledger-deck-table__muted">—</span>
                     )}
