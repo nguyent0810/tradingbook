@@ -263,7 +263,7 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
     expect(vm.marketPulse.breadth).not.toMatch(/surfaced 1$/);
   });
 
-  it("humanizes RS near-miss watchlist panel copy for dashboard", () => {
+  it("maps RS watchlist to V3 intelligence cards without raw diagnostics", () => {
     const vm = mapFromInput(
       baseInput({
         rsNearMissWatchlist: {
@@ -301,12 +301,15 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
         },
       })
     );
-    const row = vm.rsNearMissWatchlist.rows[0]!;
-    expect(row.failedGate2Because).not.toMatch(/Failed Gate 2 because/);
-    expect(row.failedGate2Because).not.toMatch(/breakout_recency/);
-    expect(row.topRejectionReason).not.toMatch(/SetupCandidate/);
-    expect(row.rsDiagnostic?.summary).not.toMatch(/RS20 \+/);
-    expect(row.rsDiagnostic?.disclaimer).not.toMatch(/rankScore/);
-    expect(vm.rsNearMissWatchlist.disclaimerLines.join(" ")).not.toMatch(/diagnostic only/i);
+    const card = vm.rsWatchlist.cards[0]!;
+    const serialized = JSON.stringify(vm.rsWatchlist);
+    expect(vm.rsWatchlist.title).toBe("Relative Strength Radar");
+    expect(card.primaryInsight).toMatch(/breakout/i);
+    expect(card.stateBadge).toBe("Awaiting breakout");
+    expect(serialized).not.toMatch(/Failed Gate 2 because/);
+    expect(serialized).not.toMatch(/SetupCandidate/);
+    expect(serialized).not.toMatch(/rankScore/);
+    expect(serialized).not.toMatch(/breakout_recency/);
+    expect(serialized).not.toMatch(/diagnostic only/i);
   });
 });

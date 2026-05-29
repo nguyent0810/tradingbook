@@ -28,7 +28,7 @@ import {
   formatRadarReason,
   formatScannerReasonForUser,
   formatSetupDiagnosticCopy,
-  humanizeRsNearMissWatchlistPanel,
+  mapRsWatchlistToV3Panel,
 } from "./v3-user-copy";
 
 export type MapDashboardV3Params = {
@@ -479,7 +479,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       reviewLabel: "Review on Trades",
     },
     evidence: buildEvidence(cockpitDto, freshness),
-    rsNearMissWatchlist: humanizeRsNearMissWatchlistPanel(cockpitDto.rsNearMissWatchlist),
+    rsWatchlist: mapRsWatchlistToV3Panel(cockpitDto.rsNearMissWatchlist),
     partialError: params.dbLoadError ?? null,
   };
 }
