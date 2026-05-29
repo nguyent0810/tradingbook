@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { DashboardV3ViewModel } from "@/lib/dashboard/dashboard-v3-view-model";
+import { truncateForChip } from "@/lib/dashboard/v3-user-copy";
 import {
   AVOID_PLACEHOLDER_POSITIONS,
   radarActionLabel,
@@ -84,9 +85,9 @@ function RadarDetailCard({
       </div>
       <svg
         viewBox="0 0 120 24"
-        className="tosv3-radar-tooltip__trace"
+        className="tosv3-radar-tooltip__trace tosv3-radar-tooltip__trace--desktop"
         role="img"
-        aria-label="Signal trace from current radar state"
+        aria-hidden
       >
         {signalTrace(detail).map((candle, index) => {
           const x = 12 + index * 24;
@@ -112,6 +113,7 @@ function RadarDetailCard({
 export function OpportunityRadar({ radar }: Props) {
   const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
   const [pinnedSymbol, setPinnedSymbol] = useState<string | null>(null);
+  const [bandsOpen, setBandsOpen] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   const detailSymbol = pinnedSymbol ?? hoveredSymbol;
@@ -121,7 +123,10 @@ export function OpportunityRadar({ radar }: Props) {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPinnedSymbol(null);
+      if (e.key === "Escape") {
+        setPinnedSymbol(null);
+        setHoveredSymbol(null);
+      }
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
@@ -262,11 +267,26 @@ export function OpportunityRadar({ radar }: Props) {
         <RadarDetailCard
           detail={detail}
           pinned={pinnedSymbol === detail.symbol}
-          onDismissPin={() => setPinnedSymbol(null)}
+          onDismissPin={() => {
+            setPinnedSymbol(null);
+            setHoveredSymbol(null);
+          }}
         />
       ) : null}
 
-      <div className="tosv3-radar-bands">
+      <div className="tosv3-radar-bands-wrap">
+        <button
+          type="button"
+          className="tosv3-radar-bands__toggle"
+          aria-expanded={bandsOpen}
+          onClick={() => setBandsOpen((open) => !open)}
+        >
+          {bandsOpen ? "Hide band lists" : "Show band lists"}
+          <span className="tabular-nums">
+            {radar.qualified.length + radar.nearMiss.length + radar.rejected.length} symbols
+          </span>
+        </button>
+        <div className={`tosv3-radar-bands ${bandsOpen ? "is-open" : ""}`}>
         <article className="tosv3-radar-band tosv3-radar-band--execute">
           <header>
             <strong>Actionable</strong>
@@ -279,7 +299,7 @@ export function OpportunityRadar({ radar }: Props) {
               radar.qualified.map((item) => (
                 <li key={item.symbol}>
                   <b>{item.symbol}</b>
-                  <em>{item.reason}</em>
+                  <em>{truncateForChip(item.reason, 64)}</em>
                 </li>
               ))
             )}
@@ -297,7 +317,7 @@ export function OpportunityRadar({ radar }: Props) {
               radar.nearMiss.map((item) => (
                 <li key={item.symbol}>
                   <b>{item.symbol}</b>
-                  <em>{item.reason}</em>
+                  <em>{truncateForChip(item.reason, 64)}</em>
                 </li>
               ))
             )}
@@ -315,12 +335,13 @@ export function OpportunityRadar({ radar }: Props) {
               radar.rejected.map((item) => (
                 <li key={item.symbol}>
                   <b>{item.symbol}</b>
-                  <em>{item.reason}</em>
+                  <em>{truncateForChip(item.reason, 64)}</em>
                 </li>
               ))
             )}
           </ul>
         </article>
+        </div>
       </div>
     </section>
   );

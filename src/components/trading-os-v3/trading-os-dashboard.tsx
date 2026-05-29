@@ -11,8 +11,7 @@ import { OpportunityRadar } from "./sections/opportunity-radar";
 import { SetupIntelligenceRail } from "./sections/setup-intelligence-rail";
 import { RiskConsole } from "./sections/risk-console";
 import { LedgerPulseStrip } from "./sections/ledger-pulse-strip";
-import { EvidenceLayer } from "./sections/evidence-layer";
-import { RelativeStrengthRadar } from "./sections/relative-strength-radar";
+import { DiagnosticsDock } from "./sections/diagnostics-dock";
 
 export type TradingOsDashboardProps = {
   viewModel: DashboardV3ViewModel;
@@ -74,11 +73,8 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
         <div className="tosv3-zone tosv3-zone--ledger">
           <LedgerPulseStrip data={viewModel.ledger} />
         </div>
-        <div className="tosv3-zone tosv3-zone--rs-watchlist">
-          <RelativeStrengthRadar panel={viewModel.rsWatchlist} />
-        </div>
-        <div className="tosv3-zone tosv3-zone--evidence">
-          <EvidenceLayer items={viewModel.evidence} />
+        <div className="tosv3-zone tosv3-zone--diagnostics">
+          <DiagnosticsDock rsWatchlist={viewModel.rsWatchlist} evidence={viewModel.evidence} />
         </div>
       </motion.div>
     </div>

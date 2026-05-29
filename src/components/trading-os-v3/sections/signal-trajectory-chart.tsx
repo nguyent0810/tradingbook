@@ -19,7 +19,8 @@ function sparkPath(values: number[], width: number, height: number): string {
 }
 
 export function SignalTrajectoryChart({ data }: Props) {
-  const path = sparkPath(data.points, 960, 220);
+  const chartHeight = 140;
+  const path = sparkPath(data.points, 960, chartHeight);
 
   return (
     <section className="tosv3-panel tosv3-chart" aria-label="Book P and L trajectory">
@@ -30,14 +31,14 @@ export function SignalTrajectoryChart({ data }: Props) {
       {data.emptyMessage ? (
         <p className="tosv3-empty-state tosv3-chart__empty">{data.emptyMessage}</p>
       ) : (
-        <svg viewBox="0 0 960 220" role="img" aria-label="Closed trades cumulative P and L">
+        <svg viewBox={`0 0 960 ${chartHeight}`} role="img" aria-label="Closed trades cumulative P and L">
           <defs>
             <linearGradient id="tosv3ProdChartGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="rgba(80, 227, 194, 0.9)" />
               <stop offset="100%" stopColor="rgba(80, 227, 194, 0.05)" />
             </linearGradient>
           </defs>
-          <path d={`${path} L 960 220 L 0 220 Z`} fill="url(#tosv3ProdChartGrad)" />
+          <path d={`${path} L 960 ${chartHeight} L 0 ${chartHeight} Z`} fill="url(#tosv3ProdChartGrad)" />
           <path d={path} className="tosv3-chart__line" />
         </svg>
       )}

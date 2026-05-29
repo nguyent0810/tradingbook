@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatActionHintForUser,
   formatGateFailureForUser,
   mapRsWatchlistEntryToV3Card,
   mapRsWatchlistToV3Panel,
@@ -87,12 +88,20 @@ describe("mapRsWatchlistToV3Panel", () => {
   });
 });
 
+describe("formatActionHintForUser", () => {
+  it("strips internal trade URLs from action hints", () => {
+    expect(
+      formatActionHintForUser("Log trade → /trades/new?setupCandidateId=abc-123")
+    ).toBe("Log trade when entry confirms.");
+  });
+});
+
 describe("formatGateFailureForUser", () => {
   it("rewrites breakout_recency failures", () => {
     const copy = formatGateFailureForUser(
       "Failed Gate 2 because: No recent breakout (breakout_recency)"
     );
-    expect(copy).toMatch(/not ready yet/i);
+    expect(copy).toMatch(/Not ready/i);
     expect(copy).not.toMatch(/breakout_recency/);
   });
 });
