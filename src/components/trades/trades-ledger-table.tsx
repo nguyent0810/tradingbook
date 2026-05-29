@@ -103,6 +103,24 @@ export function TradesLedgerTable({
           className="table dense-table ledger-deck-table ledger-deck-table--dense ledger-deck-table--financial"
           data-testid="trades-table"
         >
+          <colgroup>
+            <col className="ledger-col-symbol" />
+            <col className="ledger-col-setup" />
+            <col className="ledger-col-direction" />
+            <col className="ledger-col-playbook" />
+            <col className="ledger-col-status" />
+            <col className="ledger-col-review" />
+            <col className="ledger-col-hold" />
+            <col className="ledger-col-entry" />
+            <col className="ledger-col-price" />
+            <col className="ledger-col-mark" />
+            <col className="ledger-col-qty" />
+            <col className="ledger-col-r" />
+            <col className="ledger-col-stop" />
+            <col className="ledger-col-tp" />
+            <col className="ledger-col-pnl" />
+            <col className="ledger-col-actions" />
+          </colgroup>
           <thead data-testid="trades-table-header">
             <tr>
               <th className="ledger-sticky-symbol ledger-deck-table__th--text">Symbol</th>
