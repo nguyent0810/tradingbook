@@ -25,6 +25,9 @@ export function DashboardFreshnessStrip({ freshness }: DashboardFreshnessStripPr
     freshness.delayedBackdrop || freshness.staleFlags.length > 0;
 
   if (hasStale) {
+    const coverageLine = freshness.scanSessionCoverage
+      ? `Session coverage: ${freshness.scanSessionCoverage.headline}`
+      : null;
     const detail = [
       freshness.benchmarkDate
         ? `VNINDEX EOD: ${freshness.benchmarkDate}`
@@ -33,7 +36,10 @@ export function DashboardFreshnessStrip({ freshness }: DashboardFreshnessStripPr
         ? `Equity max session: ${freshness.equityMaxDate}`
         : "Equity bars: none",
       `Last scan: ${formatScanRunLabel(freshness.scanRunAt)}`,
-    ].join(" · ");
+      coverageLine,
+    ]
+      .filter(Boolean)
+      .join(" · ");
 
     const primaryMessage =
       freshness.staleFlags[0]?.message ??

@@ -3,6 +3,7 @@ import {
   evaluateBreakoutPullbackCandidate,
   validateSwingTradeStructure,
 } from "./breakout-pullback";
+import { computeGate2RankBreakdown } from "./rank-components";
 import {
   GATE2_MAX_BREAKOUT_EXTENSION_FRAC,
   GATE2_MAX_PULLBACK_DEPTH_FRAC,
@@ -76,6 +77,23 @@ describe("evaluateBreakoutPullbackCandidate", () => {
     expect(res.quality).not.toBe("INVALID");
     expect(res.rankScore).toBeGreaterThanOrEqual(0);
     expect(res.reasons.some((r) => r.includes("Tier A"))).toBe(true);
+  });
+
+  it("attaches rankComponents that reconcile to rankScore without changing score", () => {
+    const path = baselineValidPath(2_000_000);
+    const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+    expect(res.rankComponents).toBeDefined();
+    const parts = res.rankComponents!;
+    const sum = parts.volumeTerm + parts.extensionTerm + parts.maDistanceTerm - parts.depthPenalty;
+    expect(parts.rankScore).toBe(sum);
+    expect(parts.rankScore).toBe(res.rankScore);
+  });
+
+  it("sets stable terminalCode on INVALID evaluations", () => {
+    const path = baselineValidPath(500_000);
+    const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+    expect(res.quality).toBe("INVALID");
+    expect(res.terminalCode).toBe("volume_ratio");
   });
 
   it("returns INVALID when no clean breakout in recent window", () => {

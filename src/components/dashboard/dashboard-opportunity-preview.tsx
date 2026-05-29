@@ -5,6 +5,7 @@ import type {
   OpportunityNearMissDto,
   SetupLadderStage,
 } from "@/lib/dashboard/decision-cockpit-dto";
+import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { displayScanQualityTier } from "@/lib/trading-display-labels";
 import { rejectionBucketLabel } from "@/lib/scanner/setups-trader-copy";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
@@ -53,13 +54,25 @@ function NearMissRow({ row }: { row: OpportunityNearMissDto }) {
     <li className="dash-opportunity__row" data-testid="dashboard-opportunity-near-miss-row">
       <div className="dash-opportunity__row-head">
         <span className="font-mono font-semibold">{row.symbol}</span>
-        <span className="dash-opportunity__badge">{formatLadderStage(row.ladderStage)}</span>
+        <span
+          className="dash-opportunity__badge"
+          data-testid="dashboard-opportunity-near-miss-status"
+        >
+          {row.executionStatusLabel}
+        </span>
         {dist ? <span className="dash-opportunity__meta tabular-nums">{dist}</span> : null}
       </div>
       <p className="dash-opportunity__summary dash-opportunity__line-clamp">
         {rejectionBucketLabel(row.terminalCategory)} — {row.waitFor}
       </p>
       <p className="dash-opportunity__hint dash-opportunity__line-clamp">{row.actionHint}</p>
+      <div className="dash-opportunity__rs mt-2">
+        <RelativeStrengthDiagnosticPanel
+          diagnostic={row.rsDiagnostic}
+          compact
+          testId={`dashboard-opportunity-near-miss-rs-${row.symbol}`}
+        />
+      </div>
       <details className="dash-opportunity__details text-xs">
         <summary>Details</summary>
         <p className="mt-1">
@@ -87,6 +100,15 @@ function CandidateRow({ row }: { row: OpportunityCandidateDto }) {
       ) : null}
       {row.primaryReasons.length > 0 ? (
         <p className="dash-opportunity__hint dash-opportunity__line-clamp">{row.primaryReasons[0]}</p>
+      ) : null}
+      {row.rsDiagnostic ? (
+        <div className="dash-opportunity__rs mt-2">
+          <RelativeStrengthDiagnosticPanel
+            diagnostic={row.rsDiagnostic}
+            compact
+            testId={`dashboard-opportunity-candidate-rs-${row.symbol}`}
+          />
+        </div>
       ) : null}
       <div className="dash-opportunity__row-actions">
         {candidateAction(row)}
@@ -125,7 +147,7 @@ export function DashboardOpportunityPreview({ opportunity }: DashboardOpportunit
           Opportunity preview
         </h2>
         <p className="dash-panel__subtitle">
-          Actionable surfaced setups or closest watch names from latest scan notes
+          Surfaced SetupCandidates when present; otherwise near-miss diagnostics (watch only)
         </p>
       </header>
 

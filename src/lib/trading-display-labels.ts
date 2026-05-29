@@ -68,6 +68,35 @@ export function displayClosestExecutionStatus(status: ClosestExecutionStatus): s
   }
 }
 
+/**
+ * Near-miss / closest-invalid rows — avoid sounding like a trade signal.
+ * Internal status enum unchanged; display-only (Batch F).
+ */
+export function displayNearMissDiagnosticStatus(status: ClosestExecutionStatus): string {
+  switch (status) {
+    case "READY":
+      return "In zone (diagnostic only)";
+    case "WAIT":
+      return "Near setup, not validated";
+    case "INVALID":
+      return "Structure invalid (watch only)";
+    default:
+      return titleCaseWords(String(status));
+  }
+}
+
+/** Action hint for near-miss diagnostics (not SetupCandidate trade signals). */
+export function nearMissDiagnosticActionHint(status: ClosestExecutionStatus): string {
+  switch (status) {
+    case "READY":
+      return "Diagnostic only — price sits in the pullback zone but Gate 2 did not validate. Not a trade signal.";
+    case "WAIT":
+      return "Watch only — closest INVALID name; wait for template rules or regime to improve.";
+    case "INVALID":
+      return "Do not trade — structure failed Gate 2 for this template.";
+  }
+}
+
 /** Surfaced candidate lifecycle strip (READY | WATCHING from health view). */
 export function displayCandidateLifecycleSortLabel(label: "READY" | "WATCHING"): string {
   return label === "READY" ? "At entry zone" : "Waiting for pullback";

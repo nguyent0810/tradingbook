@@ -3,7 +3,6 @@ import type { DailyScanGate2Notes, Gate2ClosestSymbolRow } from "@/lib/scanner/g
 import {
   computeClosestExecutionStatus,
   computeDistanceToPullbackZoneFrac,
-  closestExecutionActionHint,
   isStructureBrokenCategory,
 } from "@/lib/scanner/closest-execution-metrics";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
@@ -18,7 +17,24 @@ import {
 } from "@/lib/scanner/setups-trader-copy";
 import type { SetupHealthFlag, SetupHealthLevelValue } from "@/lib/setup-health/types";
 import { healthFlagSummary } from "@/lib/setup-health/health-ui-copy";
-import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
+import {
+  buildVerdictUxCopy,
+  computeGateFunnelSnapshot,
+  formatGateFunnelSummaryLine,
+  type GateFunnelSnapshot,
+} from "@/lib/dashboard/gate-funnel-copy";
+import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+import { buildRsNearMissWatchlistPanel } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+import {
+  displayGate1ScanLevel,
+  displayNearMissDiagnosticStatus,
+  nearMissDiagnosticActionHint,
+} from "@/lib/trading-display-labels";
+
+export type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+
+export type { GateFunnelSnapshot } from "@/lib/dashboard/gate-funnel-copy";
 
 /** How a cockpit field is sourced (UX spec §10). */
 export type DataProvenance = "real" | "derived" | "static_copy" | "config" | "gap";
@@ -77,6 +93,8 @@ export type DecisionCockpitCandidateSnapshot = {
   healthFlags: SetupHealthFlag[];
   healthSummary: string | null;
   reasons: unknown[];
+  /** One-line rank decomposition when persisted on candidate (dashboard summary). */
+  rankSummary: string | null;
   close: number;
   pullbackZoneLow: number;
   pullbackZoneHigh: number;
@@ -106,6 +124,10 @@ export type DecisionCockpitInput = {
   portfolioRiskConfigured: boolean;
   /** When set, used for scan-age confidence (tests). */
   now?: Date;
+  /** Batch D1 — computed on demand; does not affect verdict or Gate 2. */
+  rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>;
+  /** Batch D2.3 — INVALID + RS20>0 diagnostic lane; does not affect Gate 2 or verdict. */
+  rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
 };
 
 export type ProvenanceField<T> = {
@@ -124,6 +146,9 @@ export type VerdictDto = {
   uxLevel: ProvenanceField<VerdictUxLevel>;
   persistedLevel: ProvenanceField<DailyTradingDecisionLevel>;
   headline: ProvenanceField<string>;
+  /** Clarifies UX headline vs persisted book stance (Batch F). */
+  subtitle: ProvenanceField<string>;
+  persistedLevelNote: ProvenanceField<string>;
   explanation: ProvenanceField<string>;
   allocation: ProvenanceField<string>;
   perTradeGuidance: ProvenanceField<string>;
@@ -139,6 +164,9 @@ export type OpportunityCandidateDto = {
   healthLevel: SetupHealthLevelValue;
   healthSummary: string | null;
   primaryReasons: string[];
+  rankSummary: string | null;
+  /** RS vs VNINDEX diagnostic (Batch D1); null when not computed or unavailable. */
+  rsDiagnostic: RsDiagnosticUi | null;
   actionHint: string;
   provenance: DataProvenance;
 };
@@ -146,10 +174,14 @@ export type OpportunityCandidateDto = {
 export type OpportunityNearMissDto = {
   symbol: string;
   terminalCategory: string;
+  terminalCode: string | null;
   ladderStage: SetupLadderStage;
   executionStatus: ReturnType<typeof computeClosestExecutionStatus>;
+  /** Trader-facing diagnostic label (not trade READY). */
+  executionStatusLabel: string;
   waitFor: string;
   distanceToZonePct: number | null;
+  rsDiagnostic: RsDiagnosticUi | null;
   actionHint: string;
   provenance: DataProvenance;
 };
@@ -255,6 +287,8 @@ export type ActionableDiagnosticsDto = {
 
 export type DecisionCockpitDto = {
   verdict: VerdictDto;
+  /** Gate 2 qualified vs Gate 1 surfaced counts from latest scan row. */
+  gateFunnel: GateFunnelSnapshot | null;
   evidence: EvidenceChipDto[];
   opportunity: OpportunityBoardDto;
   ladder: LadderRowDto[];
@@ -268,6 +302,8 @@ export type DecisionCockpitDto = {
   actionableDiagnostics: ActionableDiagnosticsDto;
   blockers: ActionableBlockerDto[];
   scanRunId: string | null;
+  /** Diagnostic RS leaders that failed Gate 2 — separate from Tier A/B opportunity board. */
+  rsNearMissWatchlist: RsNearMissWatchlistPanelDto;
 };
 
 const LADDER_STAGE_UI: Record<SetupLadderStage, { label: string; subtitle: string }> = {
@@ -400,11 +436,16 @@ export function computeConfidenceBand(params: {
     scanRunAt != null ? (now.getTime() - scanRunAt.getTime()) / (1000 * 60 * 60) : null;
   const scanStale = scanAgeHours != null && scanAgeHours > 36;
 
+  const weakSessionCoverage =
+    freshness.scanSessionCoverage?.weakCoverage === true ||
+    freshness.staleFlags.some((f) => f.code === "scan_weak_session_coverage");
+
   if (
     freshness.delayedBackdrop ||
     freshness.staleFlags.length > 0 ||
     scanStale ||
-    gate1 === "FAIL"
+    gate1 === "FAIL" ||
+    weakSessionCoverage
   ) {
     return "low";
   }
@@ -540,11 +581,11 @@ export function buildRiskBudgetHeadroom(params: {
 function stanceCopyForLevel(ux: VerdictUxLevel): string {
   switch (ux) {
     case "NO_TRADE":
-      return "Preserve capital — no new swing entries.";
+      return "Preserve capital — no new swing entries under current stance.";
     case "PROBE":
-      return "Small, selective probes only.";
+      return "Reduced book-risk — Tier A only when Gate 1 is cautious; not full-risk sizing.";
     default:
-      return "Normal risk with discipline.";
+      return "Normal book-risk mode when setups surface — follow per-trade caps; not an order to trade every name.";
   }
 }
 
@@ -552,7 +593,8 @@ function buildEvidenceStack(
   gate1: Gate1Resolution,
   latestScan: DecisionCockpitScanSnapshot | null,
   liveRegime: DecisionCockpitRegimeSnapshot,
-  freshness: MarketFreshnessDto
+  freshness: MarketFreshnessDto,
+  gateFunnel: GateFunnelSnapshot | null
 ): EvidenceChipDto[] {
   const chips: EvidenceChipDto[] = [
     {
@@ -581,27 +623,32 @@ function buildEvidenceStack(
     });
   }
 
-  if (latestScan) {
+  if (latestScan && gateFunnel) {
     chips.push(
       {
-        id: "tier_a",
-        label: "Tier A",
-        display: String(latestScan.candidateCountA),
+        id: "gate2_qualified",
+        label: "Gate 2 qualified",
+        display: `A ${gateFunnel.qualifiedCountA} · B ${gateFunnel.qualifiedCountB} (pre-regime)`,
         provenance: "real",
       },
       {
-        id: "tier_b",
-        label: "Tier B",
-        display: String(latestScan.candidateCountB),
-        provenance: "real",
-      },
-      {
-        id: "surfaced",
+        id: "gate2_surfaced",
         label: "Surfaced",
-        display: String(latestScan.candidateCountSurfaced),
+        display: `A ${gateFunnel.surfacedCountA} · B ${gateFunnel.surfacedCountB} (after Gate 1)`,
         provenance: "real",
       }
     );
+    if (gateFunnel.suppressedTotal > 0) {
+      chips.push({
+        id: "gate2_suppressed",
+        label: "Suppressed",
+        display:
+          gateFunnel.suppressedCountB > 0
+            ? `${gateFunnel.suppressedTotal} (incl. ${gateFunnel.suppressedCountB} Tier B hidden)`
+            : String(gateFunnel.suppressedTotal),
+        provenance: "derived",
+      });
+    }
     if (latestScan.universeScannedCount != null) {
       chips.push({
         id: "universe",
@@ -635,8 +682,11 @@ function buildEvidenceStack(
 function buildOpportunityBoard(
   candidates: DecisionCockpitCandidateSnapshot[],
   nearMiss: Gate2ClosestSymbolRow[],
-  latestScan: DecisionCockpitScanSnapshot | null
+  latestScan: DecisionCockpitScanSnapshot | null,
+  rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>
 ): OpportunityBoardDto {
+  const rsFor = (symbol: string): RsDiagnosticUi | null =>
+    rsDiagnosticsBySymbol?.[symbol] ?? null;
   const top = candidates.slice(0, 5);
   if (top.length > 0) {
     return {
@@ -662,6 +712,8 @@ function buildOpportunityBoard(
           healthLevel: c.healthLevel,
           healthSummary: summary,
           primaryReasons: reasons,
+          rankSummary: c.rankSummary,
+          rsDiagnostic: rsFor(c.symbolKey),
           actionHint,
           provenance: "derived",
         };
@@ -692,11 +744,14 @@ function buildOpportunityBoard(
         return {
           symbol: row.symbol,
           terminalCategory: row.terminalCategory,
+          terminalCode: row.terminalCode ?? null,
           ladderStage: resolveNearMissLadderStage(row, status),
           executionStatus: status,
+          executionStatusLabel: displayNearMissDiagnosticStatus(status),
           waitFor: guide.waitFor,
           distanceToZonePct: Number.isFinite(dist) ? dist * 100 : null,
-          actionHint: closestExecutionActionHint(status),
+          rsDiagnostic: rsFor(row.symbol),
+          actionHint: nearMissDiagnosticActionHint(status),
           provenance: "real",
         };
       }),
@@ -789,6 +844,7 @@ export function resolveBestSetupsPanelPresentation(params: {
   setupRowCount: number;
   opportunity: OpportunityBoardDto;
   latestScan: DecisionCockpitScanSnapshot | null;
+  gateFunnel?: GateFunnelSnapshot | null;
 }): BestSetupsPanelPresentation {
   if (params.setupRowCount > 0) {
     return {
@@ -798,7 +854,7 @@ export function resolveBestSetupsPanelPresentation(params: {
     };
   }
 
-  const { opportunity, latestScan } = params;
+  const { opportunity, latestScan, gateFunnel = null } = params;
 
   function emptyBestSetupsCopy(extraNearMissHint: boolean): BestSetupsPanelPresentation {
     if (!latestScan) {
@@ -808,22 +864,18 @@ export function resolveBestSetupsPanelPresentation(params: {
         emptyReason: "No daily scan yet — check Setups after the next scan run.",
       };
     }
-    const gate1 = latestScan.gate1Level;
-    const gate1Note =
-      gate1 === "WARNING"
-        ? "Gate 1 is WARNING (Tier B would not surface even if present)."
-        : gate1 === "FAIL"
-          ? "Gate 1 is FAIL — new swing setups are suppressed."
-          : "Gate 1 is PASS.";
+    const funnelLine = gateFunnel
+      ? formatGateFunnelSummaryLine(gateFunnel)
+      : `Surfaced after Gate 1: ${latestScan.candidateCountSurfaced} (Gate 2 qualified A ${latestScan.candidateCountA} · B ${latestScan.candidateCountB} before regime filter).`;
     const nearHint = extraNearMissHint
-      ? " See Near miss / rejection panel for closest names (e.g. VND pullback-box near-miss)."
-      : " See Near miss / rejection and Momentum Watch below for observational context.";
+      ? " Near-miss rows are Gate 2 diagnostics only — not trade signals."
+      : " See near-miss / rejection panels for observational context only.";
     return {
       mode: "compact_empty",
       emptyTitle: "No validated breakout-pullback setups today",
       emptyReason: [
-        "Coverage is fresh; the scanner found 0 Tier A/B candidates under current Gate2 rules.",
-        `${gate1Note} Surfaced: ${latestScan.candidateCountSurfaced} (Tier A ${latestScan.candidateCountA} · Tier B ${latestScan.candidateCountB}).`,
+        "No SetupCandidate rows surfaced for the detail table on this run.",
+        funnelLine,
         nearHint,
       ].join(" "),
     };
@@ -965,7 +1017,36 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
   });
 
   const decision = resolveDecision(input.scanNotes, gate1.canonical, input.latestScan);
+  const gateFunnel = input.latestScan
+    ? computeGateFunnelSnapshot(input.latestScan, gate1.canonical)
+    : null;
   const ux = mapDecisionLevelToUxVerdict(decision.level);
+  const verdictCopy = buildVerdictUxCopy({
+    uxLevel: ux,
+    persistedLevel: decision.level,
+    gate1: gate1.canonical,
+    funnel: gateFunnel ?? {
+      gate1Level: gate1.canonical,
+      qualifiedCountA: 0,
+      qualifiedCountB: 0,
+      qualifiedTotal: 0,
+      surfacedCountA: 0,
+      surfacedCountB: 0,
+      surfacedTotal: 0,
+      suppressedCountA: 0,
+      suppressedCountB: 0,
+      suppressedTotal: 0,
+    },
+  });
+
+  let explanation = decision.explanation;
+  if (input.freshness.scanSessionCoverage?.weakCoverage) {
+    explanation = `${explanation} Session coverage is weak — treat counts and setups cautiously until bars align.`;
+  }
+  if (gate1.canonical === "WARNING" && gateFunnel && gateFunnel.suppressedCountB > 0) {
+    explanation = `${explanation} Tier B (${gateFunnel.suppressedCountB}) qualified Gate 2 but is hidden while Gate 1 is cautious.`;
+  }
+
   const confidence = computeConfidenceBand({
     hasScan: input.latestScan != null,
     freshness: input.freshness,
@@ -979,7 +1060,8 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
   const opportunity = buildOpportunityBoard(
     input.surfacedCandidates,
     nearMiss,
-    input.latestScan
+    input.latestScan,
+    input.rsDiagnosticsBySymbol
   );
   const setupQualityLadder = buildSetupQualityLadder(
     input.surfacedCandidates,
@@ -994,11 +1076,19 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
       provenance: input.scanNotes?.decision ? "real" : "derived",
     },
     headline: {
-      value: ux.replace("_", " "),
+      value: verdictCopy.headline,
+      provenance: "derived",
+    },
+    subtitle: {
+      value: verdictCopy.subtitle,
+      provenance: "static_copy",
+    },
+    persistedLevelNote: {
+      value: verdictCopy.persistedLevelNote,
       provenance: "derived",
     },
     explanation: {
-      value: decision.explanation,
+      value: explanation,
       provenance: input.scanNotes?.decision ? "real" : "derived",
     },
     allocation: { value: decision.allocation, provenance: "real" },
@@ -1046,7 +1136,14 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
 
   return {
     verdict,
-    evidence: buildEvidenceStack(gate1, input.latestScan, input.liveRegime, input.freshness),
+    gateFunnel,
+    evidence: buildEvidenceStack(
+      gate1,
+      input.latestScan,
+      input.liveRegime,
+      input.freshness,
+      gateFunnel
+    ),
     opportunity,
     ladder: buildLadderRows(opportunity, input.surfacedCandidates),
     setupQualityLadder,
@@ -1065,5 +1162,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     },
     blockers,
     scanRunId: input.latestScan?.id ?? null,
+    rsNearMissWatchlist:
+      input.rsNearMissWatchlist ?? buildRsNearMissWatchlistPanel([]),
   };
 }

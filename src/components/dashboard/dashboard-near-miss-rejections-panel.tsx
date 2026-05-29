@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { OpportunityBoardDto, OpportunityNearMissDto } from "@/lib/dashboard/decision-cockpit-dto";
+import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { rejectionBucketLabel } from "@/lib/scanner/setups-trader-copy";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 
@@ -28,6 +29,12 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
     <li className="dash-near-miss__card" data-testid={`dashboard-near-miss-${row.symbol}`}>
       <div className="dash-near-miss__head">
         <span className="font-mono font-semibold">{row.symbol}</span>
+        <span
+          className="dash-chip dash-chip--muted text-xs"
+          data-testid="dashboard-near-miss-diagnostic-status"
+        >
+          {row.executionStatusLabel}
+        </span>
         <span className="dash-chip dash-chip--muted text-xs">
           {rejectionBucketLabel(row.terminalCategory)}
         </span>
@@ -35,6 +42,13 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
       {note ? <p className="dash-near-miss__note text-sm font-medium">{note}</p> : null}
       <p className="dash-near-miss__wait text-sm">{row.waitFor}</p>
       {dist ? <p className="dash-near-miss__meta text-xs tabular-nums">{dist}</p> : null}
+      <div className="dash-near-miss__rs mt-2">
+        <RelativeStrengthDiagnosticPanel
+          diagnostic={row.rsDiagnostic}
+          compact
+          testId={`dashboard-near-miss-rs-${row.symbol}`}
+        />
+      </div>
     </li>
   );
 }
@@ -50,7 +64,7 @@ export function DashboardNearMissRejectionsPanel({
       <header className="dash-v2-card__header">
         <h3 className="dash-v2-card__title">Near miss / rejection</h3>
         <p className="dash-v2-card__lead">
-          Closest names that did not become Tier A/B setups.
+          Gate 2 diagnostics only — closest INVALID names, not SetupCandidate trade signals.
         </p>
       </header>
 

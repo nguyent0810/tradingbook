@@ -1,0 +1,198 @@
+﻿{
+  "generatedAt": "2026-05-29T03:05:01.975Z",
+  "reportSchemaVersion": "d2.2-evidence-readiness",
+  "anchorSession": "2026-05-28",
+  "activeSymbolCount": 206,
+  "symbolsWithMinBars": 206,
+  "symbolsWithForward20Capacity": 206,
+  "tradableAtAnchorCount": 54,
+  "staleBarSymbolCount": 38,
+  "lookbackWindows": [
+    {
+      "lookbackSessions": 40,
+      "tradableSymbolCount": 54,
+      "replayRowCount": 2160,
+      "replayRowCountForward20Eligible": 1080,
+      "qualityCounts": {
+        "A": 2,
+        "B": 0,
+        "INVALID": 2158
+      },
+      "qualityCountsForward20Eligible": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 1080
+      },
+      "abCount": 2,
+      "abCountForward20Eligible": 0,
+      "missingForward20Count": 1080,
+      "missingForward20Rate": 0.5,
+      "rowsWithForward5": 1890,
+      "rowsWithForward10": 1620,
+      "rowsWithForward20": 1080,
+      "terminalCodeCounts": {
+        "trend_below_ma50": 1357,
+        "trend_ma20_below_ma50": 251,
+        "breakout_not_holding": 128,
+        "breakout_recency": 283,
+        "pullback_zone_interaction": 86,
+        "volume_ratio": 7,
+        "depth_cap": 2,
+        "extension_cap": 2,
+        "digestion": 42,
+        "VALID": 2
+      },
+      "decisionGradeAb": false
+    },
+    {
+      "lookbackSessions": 60,
+      "tradableSymbolCount": 54,
+      "replayRowCount": 3240,
+      "replayRowCountForward20Eligible": 2160,
+      "qualityCounts": {
+        "A": 7,
+        "B": 0,
+        "INVALID": 3233
+      },
+      "qualityCountsForward20Eligible": {
+        "A": 5,
+        "B": 0,
+        "INVALID": 2155
+      },
+      "abCount": 7,
+      "abCountForward20Eligible": 5,
+      "missingForward20Count": 1080,
+      "missingForward20Rate": 0.3333333333333333,
+      "rowsWithForward5": 2970,
+      "rowsWithForward10": 2700,
+      "rowsWithForward20": 2160,
+      "terminalCodeCounts": {
+        "trend_below_ma50": 2204,
+        "trend_ma20_below_ma50": 274,
+        "breakout_not_holding": 175,
+        "breakout_recency": 410,
+        "digestion": 57,
+        "pullback_zone_interaction": 102,
+        "VALID": 7,
+        "volume_ratio": 7,
+        "depth_cap": 2,
+        "extension_cap": 2
+      },
+      "decisionGradeAb": false
+    },
+    {
+      "lookbackSessions": 80,
+      "tradableSymbolCount": 54,
+      "replayRowCount": 4320,
+      "replayRowCountForward20Eligible": 3240,
+      "qualityCounts": {
+        "A": 7,
+        "B": 1,
+        "INVALID": 4312
+      },
+      "qualityCountsForward20Eligible": {
+        "A": 5,
+        "B": 1,
+        "INVALID": 3234
+      },
+      "abCount": 8,
+      "abCountForward20Eligible": 6,
+      "missingForward20Count": 1080,
+      "missingForward20Rate": 0.25,
+      "rowsWithForward5": 4050,
+      "rowsWithForward10": 3780,
+      "rowsWithForward20": 3240,
+      "terminalCodeCounts": {
+        "breakout_recency": 730,
+        "trend_below_ma50": 2681,
+        "trend_ma20_below_ma50": 331,
+        "breakout_not_holding": 320,
+        "pullback_zone_interaction": 153,
+        "extension_cap": 4,
+        "digestion": 78,
+        "VALID": 8,
+        "volume_ratio": 13,
+        "depth_cap": 2
+      },
+      "decisionGradeAb": false
+    },
+    {
+      "lookbackSessions": 120,
+      "tradableSymbolCount": 54,
+      "replayRowCount": 6378,
+      "replayRowCountForward20Eligible": 5298,
+      "qualityCounts": {
+        "A": 10,
+        "B": 5,
+        "INVALID": 6363
+      },
+      "qualityCountsForward20Eligible": {
+        "A": 8,
+        "B": 5,
+        "INVALID": 5285
+      },
+      "abCount": 15,
+      "abCountForward20Eligible": 13,
+      "missingForward20Count": 1080,
+      "missingForward20Rate": 0.16933207902163688,
+      "rowsWithForward5": 6108,
+      "rowsWithForward10": 5838,
+      "rowsWithForward20": 5298,
+      "terminalCodeCounts": {
+        "trend_below_ma50": 3882,
+        "trend_ma20_below_ma50": 626,
+        "breakout_not_holding": 522,
+        "breakout_recency": 884,
+        "pullback_zone_interaction": 277,
+        "digestion": 136,
+        "VALID": 15,
+        "extension_cap": 5,
+        "volume_ratio": 23,
+        "depth_cap": 8
+      },
+      "decisionGradeAb": false
+    },
+    {
+      "lookbackSessions": 160,
+      "tradableSymbolCount": 54,
+      "replayRowCount": 6642,
+      "replayRowCountForward20Eligible": 5562,
+      "qualityCounts": {
+        "A": 10,
+        "B": 5,
+        "INVALID": 6627
+      },
+      "qualityCountsForward20Eligible": {
+        "A": 8,
+        "B": 5,
+        "INVALID": 5549
+      },
+      "abCount": 15,
+      "abCountForward20Eligible": 13,
+      "missingForward20Count": 1080,
+      "missingForward20Rate": 0.16260162601626016,
+      "rowsWithForward5": 6372,
+      "rowsWithForward10": 6102,
+      "rowsWithForward20": 5562,
+      "terminalCodeCounts": {
+        "trend_below_ma50": 4060,
+        "trend_ma20_below_ma50": 659,
+        "breakout_not_holding": 537,
+        "breakout_recency": 921,
+        "pullback_zone_interaction": 278,
+        "digestion": 136,
+        "VALID": 15,
+        "extension_cap": 5,
+        "volume_ratio": 23,
+        "depth_cap": 8
+      },
+      "decisionGradeAb": false
+    }
+  ],
+  "bestAbCountForward20Eligible": 13,
+  "bestLookbackForAb": 120,
+  "recommendedLookbackForAb30": null,
+  "decisionGradeAbAchievable": false,
+  "readinessVerdict": "Bar freshness gaps on 38 symbols vs anchor 2026-05-28.",
+  "recommendation": "Improve data coverage/freshness first, then rerun readiness. Keep RS preview only."
+}

@@ -13,6 +13,14 @@ import type { Gate2CategoryBreakdownRow } from "@/lib/scanner/setups-gate2-break
 import { fetchGate2InvalidBreakdown } from "@/lib/scanner/setups-gate2-breakdown";
 import { ScanQuality, ScanSetupType } from "@/generated/prisma/client";
 import { prepareSurfacedCandidatesHealthView } from "@/lib/setup-health";
+import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagnostics";
+import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import {
+  buildRsNearMissWatchlistPanel,
+  computeRsNearMissWatchlistFromDb,
+  type RsNearMissWatchlistPanelDto,
+} from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+import { toCandidateRows } from "@/lib/scanner/setups-queries";
 
 export type SetupsBaseData = {
   latest: LatestScanWithCandidates | null;
@@ -115,6 +123,61 @@ export const loadSetupPerfRowsCached = cache(
       return {
         rows: [],
         error: "Database temporarily unavailable (setup performance stats).",
+      };
+    }
+  }
+);
+
+/** Batch D1 — RS vs VNINDEX on demand; does not affect Gate 2 or persistence. */
+export const loadRsDiagnosticsForSetupsCached = cache(
+  async (symbols: string[]): Promise<Map<string, RsDiagnosticUi | null>> => {
+    const base = await loadSetupsBaseData();
+    const session = base.expectedSession;
+    if (!session || symbols.length === 0) {
+      return new Map();
+    }
+    try {
+      return await loadRsDiagnosticUiForSymbols(prisma, symbols, session);
+    } catch (e) {
+      console.error("[setups] loadRsDiagnosticUiForSymbols failed:", e);
+      return new Map();
+    }
+  }
+);
+
+/** Batch D2.3 — RS near-miss watchlist (read-only; excludes latest scan Tier A/B). */
+export const loadRsNearMissWatchlistForSetupsCached = cache(
+  async (): Promise<{
+    panel: RsNearMissWatchlistPanelDto;
+    error: string | null;
+  }> => {
+    const base = await loadSetupsBaseData();
+    if (!base.expectedSession) {
+      return {
+        panel: buildRsNearMissWatchlistPanel([]),
+        error: base.sessionLoadError,
+      };
+    }
+    const excludeSymbols = toCandidateRows(base.latest).map((c) => c.symbolKey);
+    try {
+      const { rows } = await computeRsNearMissWatchlistFromDb(prisma, {
+        limit: 15,
+        excludeSymbols,
+      });
+      const rsMap = await loadRsDiagnosticUiForSymbols(
+        prisma,
+        rows.map((r) => r.symbol),
+        base.expectedSession
+      );
+      return {
+        panel: buildRsNearMissWatchlistPanel(rows, rsMap),
+        error: null,
+      };
+    } catch (e) {
+      console.error("[setups] computeRsNearMissWatchlistFromDb failed:", e);
+      return {
+        panel: buildRsNearMissWatchlistPanel([]),
+        error: "Database temporarily unavailable (RS watchlist).",
       };
     }
   }

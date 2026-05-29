@@ -1,0 +1,185 @@
+﻿{
+  "generatedAt": "2026-05-29T02:51:05.976Z",
+  "tradableCount": 54,
+  "evaluationRowCount": 2160,
+  "reportSchemaVersion": "d2.1-rs-rank-evidence",
+  "anchorSession": "2026-05-28",
+  "lookbackSessions": 40,
+  "mode": "walkforward_ab",
+  "formula": "rsTerm = clamp(RS20_pp ├ù 25, -250, +250)",
+  "productionRsRankEnabled": false,
+  "abCandidateCount": 2,
+  "tierCounts": {
+    "A": 2,
+    "B": 0
+  },
+  "ordering": {
+    "entries": [
+      {
+        "symbol": "CTR@2026-05-28",
+        "rankScoreBase": 2004.18382769962,
+        "rsTerm": 93.53898800416455,
+        "rankScoreWithRs": 2097.7228157037844,
+        "rs20SpreadPct": 3.741559520166582,
+        "baseRank": 2,
+        "rsAdjustedRank": 2
+      },
+      {
+        "symbol": "VCB@2026-05-20",
+        "rankScoreBase": 2787.6309720110235,
+        "rsTerm": 82.12966944676101,
+        "rankScoreWithRs": 2869.7606414577845,
+        "rs20SpreadPct": 3.2851867778704404,
+        "baseRank": 1,
+        "rsAdjustedRank": 1
+      }
+    ],
+    "promoted": [],
+    "demoted": []
+  },
+  "entriesDetailed": [
+    {
+      "symbol": "CTR@2026-05-28",
+      "rankScoreBase": 2004.18382769962,
+      "rsTerm": 93.53898800416455,
+      "rankScoreWithRs": 2097.7228157037844,
+      "rs20SpreadPct": 3.741559520166582,
+      "baseRank": 2,
+      "rsAdjustedRank": 2,
+      "underlying": "CTR",
+      "sessionDate": "2026-05-28",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 0.2268489680408603,
+      "rankDelta": 0,
+      "forward20Pct": null
+    },
+    {
+      "symbol": "VCB@2026-05-20",
+      "rankScoreBase": 2787.6309720110235,
+      "rsTerm": 82.12966944676101,
+      "rankScoreWithRs": 2869.7606414577845,
+      "rs20SpreadPct": 3.2851867778704404,
+      "baseRank": 1,
+      "rsAdjustedRank": 1,
+      "underlying": "VCB",
+      "sessionDate": "2026-05-20",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": -3.3540306873866435,
+      "rankDelta": 0,
+      "forward20Pct": null
+    }
+  ],
+  "forwardOutcomes": [
+    {
+      "group": "promoted",
+      "sampleSize": 0,
+      "missingFuture20": 0,
+      "missingFuture20Pct": null,
+      "highMissingFuture20Warning": null,
+      "horizons": [
+        {
+          "horizon": 5,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 10,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 20,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        }
+      ],
+      "avgMfe20Pct": null,
+      "avgMae20Pct": null,
+      "hitPlus5BeforeMinus3Rate": null,
+      "hitPlus10Within20Rate": null,
+      "drawdownWorseThanMinus5Rate": null
+    },
+    {
+      "group": "demoted",
+      "sampleSize": 0,
+      "missingFuture20": 0,
+      "missingFuture20Pct": null,
+      "highMissingFuture20Warning": null,
+      "horizons": [
+        {
+          "horizon": 5,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 10,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 20,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        }
+      ],
+      "avgMfe20Pct": null,
+      "avgMae20Pct": null,
+      "hitPlus5BeforeMinus3Rate": null,
+      "hitPlus10Within20Rate": null,
+      "drawdownWorseThanMinus5Rate": null
+    },
+    {
+      "group": "unchanged",
+      "sampleSize": 2,
+      "missingFuture20": 2,
+      "missingFuture20Pct": 1,
+      "highMissingFuture20Warning": ">30% missing 20-session forward labels (2/2).",
+      "horizons": [
+        {
+          "horizon": 5,
+          "n": 1,
+          "avgPct": -0.6191950464396134,
+          "medianPct": -0.6191950464396134,
+          "winRate": 0
+        },
+        {
+          "horizon": 10,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 20,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        }
+      ],
+      "avgMfe20Pct": null,
+      "avgMae20Pct": null,
+      "hitPlus5BeforeMinus3Rate": null,
+      "hitPlus10Within20Rate": null,
+      "drawdownWorseThanMinus5Rate": null
+    }
+  ],
+  "smallSampleWarning": "Very small A/B sample (n=2) ΓÇö hypothesis only.",
+  "enablementReadiness": "insufficient_ab_sample",
+  "enablementRecommendation": "Collect more walk-forward A/B samples (ΓëÑ30) before staging enablement.",
+  "rsAtAnchorLimitation": "RS20/RS50 computed at each replay session date."
+}

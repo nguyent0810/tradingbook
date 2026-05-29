@@ -23,6 +23,7 @@ export async function SetupsPipelineContextAsync() {
     alignment: marketAlignment,
     delayedBackdropFromScanNotes:
       base.notes?.benchmarkBackdrop?.delayedBackdrop === true,
+    scanSessionCoverage: base.notes?.sessionCoverage ?? null,
   });
 
   const nearMissCount = base.notes?.closestToValidSymbols?.length ?? 0;

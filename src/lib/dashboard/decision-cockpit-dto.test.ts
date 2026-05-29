@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import { RS_DIAGNOSTIC_DISCLAIMER } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import {
   buildDecisionCockpitDto,
   buildRiskBudgetHeadroom,
@@ -12,7 +13,6 @@ import {
   SETUP_LADDER_STAGE_ORDER,
   type DecisionCockpitInput,
 } from "./decision-cockpit-dto";
-
 const alignedFreshness = buildMarketFreshnessDto({
   snapshot: {
     benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
@@ -118,6 +118,8 @@ describe("buildDecisionCockpitDto — production-like zero surfaced", () => {
     expect(dto.opportunity.mode).toBe("near_miss");
     expect(dto.opportunity.nearMiss[0]?.symbol).toBe("HPG");
     expect(dto.opportunity.nearMiss[0]?.waitFor).toContain("pullback");
+    expect(dto.opportunity.nearMiss[0]?.executionStatusLabel).not.toBe("At entry zone");
+    expect(dto.opportunity.nearMiss[0]?.actionHint).toMatch(/not a trade signal|watch only|do not trade/i);
   });
 
   it("does not expose confidence percent — only band", () => {
@@ -187,6 +189,7 @@ describe("buildDecisionCockpitDto — TRADE day", () => {
             healthFlags: [],
             healthSummary: null,
             reasons: ["Tier A liquidity checks passed."],
+            rankSummary: null,
             close: 28,
             pullbackZoneLow: 27.5,
             pullbackZoneHigh: 28.2,
@@ -198,6 +201,8 @@ describe("buildDecisionCockpitDto — TRADE day", () => {
     );
     expect(dto.verdict.uxLevel.value).toBe("TRADE");
     expect(dto.verdict.persistedLevel.value).toBe("NORMAL");
+    expect(dto.verdict.headline.value).toBe("TRADE MODE");
+    expect(dto.verdict.subtitle.value).toMatch(/not an automatic instruction/i);
     expect(dto.opportunity.mode).toBe("candidates");
     expect(dto.opportunity.candidates[0]?.ladderStage).toBe("tier_a");
     expect(dto.opportunity.candidates[0]?.actionHint).toContain("setupCandidateId=cand-hpg");
@@ -218,6 +223,7 @@ describe("resolveSetupLadderStage", () => {
         healthFlags: ["CHASE"],
         healthSummary: null,
         reasons: [],
+        rankSummary: null,
         close: 1,
         pullbackZoneLow: 0.9,
         pullbackZoneHigh: 1.1,
@@ -279,6 +285,7 @@ describe("buildDecisionCockpitDto — tomorrow plan", () => {
             healthFlags: [],
             healthSummary: null,
             reasons: [],
+            rankSummary: null,
             close: 10,
             pullbackZoneLow: 9.5,
             pullbackZoneHigh: 10.2,
@@ -339,6 +346,7 @@ describe("buildDecisionCockpitDto — setup quality ladder (S5)", () => {
             healthFlags: [],
             healthSummary: null,
             reasons: [],
+            rankSummary: null,
             close: 10,
             pullbackZoneLow: 9.5,
             pullbackZoneHigh: 10.2,
@@ -385,6 +393,126 @@ describe("buildDecisionCockpitDto — setup quality ladder (S5)", () => {
   });
 });
 
+describe("buildDecisionCockpitDto — RS diagnostic (Batch D1)", () => {
+  it("omits rsDiagnostic when rsDiagnosticsBySymbol not provided", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    if (dto.opportunity.nearMiss.length > 0) {
+      expect(dto.opportunity.nearMiss[0]?.rsDiagnostic).toBeNull();
+    }
+  });
+
+  it("attaches RS copy without changing opportunity mode or rank fields", () => {
+    const rsDiagnostic = {
+      summary: "RS20 +6.00pp",
+      lines: ["RS20: +6.00 pp vs VNINDEX — Outperforming VNINDEX over 20 sessions."],
+      disclaimer: RS_DIAGNOSTIC_DISCLAIMER,
+    };
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        rsDiagnosticsBySymbol: { HPG: rsDiagnostic },
+      })
+    );
+    expect(dto.opportunity.mode).toBe("near_miss");
+    const row = dto.opportunity.nearMiss.find((n) => n.symbol === "HPG");
+    expect(row?.rsDiagnostic?.lines[0]).toMatch(/outperforming/i);
+    expect(row?.actionHint).toMatch(/not a trade signal|watch only|do not trade/i);
+  });
+
+  it("rsNearMissWatchlist panel uses non-actionable diagnostic copy", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        rsNearMissWatchlist: {
+          title: "Relative-strength watchlist",
+          subtitle: "test",
+          disclaimerLines: [
+            "Diagnostic only",
+            "Not a Gate 2 SetupCandidate",
+            "Not used in current trading decision",
+          ],
+          actionHint:
+            "Relative-strength watchlist — Diagnostic only. Not a Gate 2 SetupCandidate. Not used in current trading decision.",
+          rows: [
+            {
+              symbol: "HPG",
+              sessionDate: "2026-05-28",
+              rs20SpreadPct: 4.2,
+              rs50SpreadPct: 2.1,
+              terminalCode: "volume_ratio",
+              failedGate2Because: "Failed Gate 2 because: Participation too thin vs median volume (volume_ratio)",
+              topRejectionReason: "Participation too thin",
+              stageRank: 72,
+              distanceToPullbackZoneFrac: 0.02,
+              rsDiagnostic: null,
+              disclaimerLines: ["Diagnostic only", "Not a Gate 2 SetupCandidate", "Not used in current trading decision"],
+              actionHint:
+                "Relative-strength watchlist — Diagnostic only. Not a Gate 2 SetupCandidate. Not used in current trading decision.",
+            },
+          ],
+          emptyReason: null,
+        },
+      })
+    );
+    expect(dto.rsNearMissWatchlist.title).toBe("Relative-strength watchlist");
+    expect(dto.rsNearMissWatchlist.rows[0]?.failedGate2Because).toMatch(/^Failed Gate 2 because:/);
+    expect(dto.opportunity.mode).toBe("near_miss");
+  });
+
+  it("negative RS copy uses underperforming wording", () => {
+    const rsDiagnostic = {
+      summary: "RS20 -2.00pp",
+      lines: ["RS20: -2.00 pp vs VNINDEX — Underperforming VNINDEX over 20 sessions."],
+      disclaimer: RS_DIAGNOSTIC_DISCLAIMER,
+    };
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        rsDiagnosticsBySymbol: { HPG: rsDiagnostic },
+      })
+    );
+    expect(dto.opportunity.nearMiss[0]?.rsDiagnostic?.lines[0]).toMatch(/underperforming/i);
+  });
+});
+
+describe("buildDecisionCockpitDto — Gate funnel (Batch F)", () => {
+  it("WARNING + Tier B qualified: evidence shows suppressed Tier B, not actionable surfaced B", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        latestScan: {
+          ...baseInput().latestScan!,
+          gate1Level: "WARNING",
+          candidateCountA: 1,
+          candidateCountB: 2,
+          candidateCountSurfaced: 1,
+        },
+        liveRegime: { level: "WARNING", symbol: "VNINDEX", latestBar: null },
+      })
+    );
+    expect(dto.gateFunnel?.suppressedCountB).toBe(2);
+    expect(dto.gateFunnel?.surfacedCountB).toBe(0);
+    const suppressed = dto.evidence.find((c) => c.id === "gate2_suppressed");
+    expect(suppressed?.display).toMatch(/Tier B hidden/i);
+    const surfaced = dto.evidence.find((c) => c.id === "gate2_surfaced");
+    expect(surfaced?.display).toMatch(/B 0/);
+  });
+
+  it("FAIL: zero surfaced in funnel but qualified counts preserved", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        latestScan: {
+          ...baseInput().latestScan!,
+          gate1Level: "FAIL",
+          candidateCountA: 2,
+          candidateCountB: 1,
+          candidateCountSurfaced: 0,
+        },
+        liveRegime: { level: "FAIL", symbol: "VNINDEX", latestBar: null },
+      })
+    );
+    expect(dto.gateFunnel?.surfacedTotal).toBe(0);
+    expect(dto.gateFunnel?.qualifiedTotal).toBe(3);
+    expect(dto.gateFunnel?.suppressedTotal).toBe(3);
+  });
+});
+
 describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
   it("uses full table when setup rows exist", () => {
     const dto = buildDecisionCockpitDto(baseInput());
@@ -402,11 +530,12 @@ describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
       setupRowCount: 0,
       opportunity: dto.opportunity,
       latestScan: baseInput().latestScan!,
+      gateFunnel: dto.gateFunnel,
     });
     expect(p.mode).toBe("compact_empty");
     expect(p.emptyTitle).toMatch(/No validated breakout-pullback/i);
-    expect(p.emptyReason).toMatch(/Coverage is fresh|Gate2/i);
-    expect(p.emptyReason).toMatch(/Near miss/i);
+    expect(p.emptyReason).toMatch(/pre-regime|Gate 2 qualified/i);
+    expect(p.emptyReason).toMatch(/diagnostic/i);
   });
 });
 
@@ -501,6 +630,39 @@ describe("parseMaxBookFractionFromAllocation", () => {
 });
 
 describe("computeConfidenceBand", () => {
+  it("returns low when scan session coverage is weak", () => {
+    const fresh = buildMarketFreshnessDto({
+      snapshot: {
+        benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
+        latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
+        latestScanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 0, 0)),
+      },
+      scanSessionCoverage: {
+        expectedSessionDate: "2026-05-25",
+        universeScanned: 100,
+        tradabilityEvaluated: 100,
+        tradabilityPassed: 10,
+        staleSessionCount: 40,
+        staleSessionFrac: 0.4,
+        sessionAlignedCount: 60,
+        sessionAlignedFrac: 0.6,
+        weakCoverage: true,
+        headline: "Weak",
+        operatorWarning: "Data coverage is weak for the expected session.",
+      },
+    });
+    expect(
+      computeConfidenceBand({
+        hasScan: true,
+        freshness: fresh,
+        gate1: "PASS",
+        surfacedCount: 2,
+        now: new Date(Date.UTC(2026, 4, 25, 14, 0, 0)),
+        scanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 0, 0)),
+      })
+    ).toBe("low");
+  });
+
   it("returns low when benchmark missing", () => {
     const fresh = buildMarketFreshnessDto({
       snapshot: {

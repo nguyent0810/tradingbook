@@ -6,6 +6,10 @@ import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health";
 import type { SetupLifecycleStatus } from "@/generated/prisma/client";
 import type { SetupHealthLevelValue } from "@/lib/setup-health/types";
+import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
+import { formatGate2RankSummary } from "@/lib/scanner/gate2/rank-components";
+import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import {
   type DecisionCockpitInput,
   type DecisionCockpitCandidateSnapshot,
@@ -32,6 +36,8 @@ export type BuildDashboardCockpitInputParams = {
   accountEquityVnd: number | null;
   portfolioRiskConfigured: boolean;
   now?: Date;
+  rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>;
+  rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
 };
 
 function toScanSnapshot(
@@ -51,23 +57,31 @@ function toScanSnapshot(
 function toCandidateSnapshots(
   rows: SurfacedCandidateHealthView[]
 ): DecisionCockpitCandidateSnapshot[] {
-  return rows.map((c) => ({
-    id: c.id,
-    symbolKey: c.symbolKey,
-    quality: c.quality === "A" || c.quality === "B" ? c.quality : "B",
-    lifecycleSortLabel: c.lifecycleSortLabel,
-    healthLevel: c.healthLevel,
-    healthScore: c.healthScore,
-    healthScoreLabel: c.healthScoreLabel,
-    healthFlags: c.healthFlags,
-    healthSummary: c.healthSummary,
-    reasons: Array.isArray(c.reasons) ? c.reasons : [],
-    close: c.close,
-    pullbackZoneLow: c.pullbackZoneLow,
-    pullbackZoneHigh: c.pullbackZoneHigh,
-    stopLevel: c.stopLevel,
-    rankScore: c.rankScore,
-  }));
+  return rows.map((c) => {
+    const parsed = parseSetupCandidateReasons(c.reasons);
+    const rankSummary =
+      parsed.rankComponents != null
+        ? formatGate2RankSummary(parsed.rankComponents)
+        : null;
+    return {
+      id: c.id,
+      symbolKey: c.symbolKey,
+      quality: c.quality === "A" || c.quality === "B" ? c.quality : "B",
+      lifecycleSortLabel: c.lifecycleSortLabel,
+      healthLevel: c.healthLevel,
+      healthScore: c.healthScore,
+      healthScoreLabel: c.healthScoreLabel,
+      healthFlags: c.healthFlags,
+      healthSummary: c.healthSummary,
+      reasons: parsed.lines,
+      rankSummary,
+      close: c.close,
+      pullbackZoneLow: c.pullbackZoneLow,
+      pullbackZoneHigh: c.pullbackZoneHigh,
+      stopLevel: c.stopLevel,
+      rankScore: c.rankScore,
+    };
+  });
 }
 
 function toWatchSnapshots(
@@ -106,5 +120,7 @@ export function buildDashboardCockpitInput(
     accountEquityVnd: params.accountEquityVnd,
     portfolioRiskConfigured: params.portfolioRiskConfigured,
     now: params.now,
+    rsDiagnosticsBySymbol: params.rsDiagnosticsBySymbol,
+    rsNearMissWatchlist: params.rsNearMissWatchlist,
   };
 }

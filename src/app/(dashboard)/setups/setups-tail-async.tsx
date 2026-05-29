@@ -4,7 +4,12 @@ import { SetupsClosestSymbolsSection } from "@/components/setups-closest-symbols
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { compareClosestRowsExecutionOrder } from "@/lib/scanner/closest-execution-metrics";
 import { displayTradabilityBreakdownKey } from "@/lib/trading-display-labels";
-import { loadSetupsBaseData } from "./setups-cached-data";
+import {
+  loadRsDiagnosticsForSetupsCached,
+  loadRsNearMissWatchlistForSetupsCached,
+  loadSetupsBaseData,
+} from "./setups-cached-data";
+import { RsNearMissWatchlistPanel } from "@/components/rs-near-miss-watchlist-panel";
 
 export async function SetupsTailAsync() {
   const base = await loadSetupsBaseData();
@@ -37,6 +42,12 @@ export async function SetupsTailAsync() {
 
   const breakdown = base.latest.tradabilityBreakdown;
 
+  const nearMissSymbols = closestRows.map((r) => r.symbol);
+  const [rsMap, rsWatchlistRes] = await Promise.all([
+    loadRsDiagnosticsForSetupsCached(nearMissSymbols),
+    loadRsNearMissWatchlistForSetupsCached(),
+  ]);
+
   return (
     <div className="pipeline-deck__tail space-y-4">
       <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-near-miss-panel">
@@ -49,7 +60,7 @@ export async function SetupsTailAsync() {
           </p>
         </header>
         {closestRows.length > 0 ? (
-          <SetupsClosestSymbolsSection rows={closestRows} />
+          <SetupsClosestSymbolsSection rows={closestRows} rsBySymbol={rsMap} />
         ) : (
           <div className="dash-empty-compact">
             <EmptyStateWithReason
@@ -60,6 +71,16 @@ export async function SetupsTailAsync() {
           </div>
         )}
       </section>
+
+      <RsNearMissWatchlistPanel
+        panel={rsWatchlistRes.panel}
+        testId="setups-rs-near-miss-watchlist"
+      />
+      {rsWatchlistRes.error ? (
+        <p className="text-xs" style={{ color: "var(--text-tertiary)" }} role="status">
+          {rsWatchlistRes.error}
+        </p>
+      ) : null}
 
       {breakdown && typeof breakdown === "object" && breakdown !== null ? (
         <details className="tos-details-disclosure dash-surface-1 text-sm">

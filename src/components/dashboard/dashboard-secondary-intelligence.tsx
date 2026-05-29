@@ -1,12 +1,17 @@
 import { DashboardActionableBlockers } from "@/components/dashboard/dashboard-actionable-blockers";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import { DashboardWatchlistPanel } from "@/components/dashboard/dashboard-watchlist-panel";
-import type { ActionableDiagnosticsDto } from "@/lib/dashboard/decision-cockpit-dto";
+import type {
+  ActionableDiagnosticsDto,
+  DecisionCockpitDto,
+} from "@/lib/dashboard/decision-cockpit-dto";
+import { RsNearMissWatchlistPanel } from "@/components/rs-near-miss-watchlist-panel";
 
 export type DashboardSecondaryIntelligenceProps = {
   diagnostics: ActionableDiagnosticsDto;
   watchItems: DashboardWatchlistItem[];
   latestCloseBySymbol: Map<string, number>;
+  rsNearMissWatchlist?: DecisionCockpitDto["rsNearMissWatchlist"];
   /** Inside command-deck collapsible — omit duplicate zone chrome. */
   embedded?: boolean;
 };
@@ -15,6 +20,7 @@ export function DashboardSecondaryIntelligence({
   diagnostics,
   watchItems,
   latestCloseBySymbol,
+  rsNearMissWatchlist,
   embedded = false,
 }: DashboardSecondaryIntelligenceProps) {
   return (
@@ -47,6 +53,15 @@ export function DashboardSecondaryIntelligence({
           />
         </div>
       </div>
+
+      {rsNearMissWatchlist ? (
+        <div className="dash-v2-zone__body mt-4">
+          <RsNearMissWatchlistPanel
+            panel={rsNearMissWatchlist}
+            testId="dashboard-secondary-rs-watchlist"
+          />
+        </div>
+      ) : null}
 
       <details className="dash-v2-details dash-v2-details--diagnostics">
         <summary className="dash-v2-details__summary">

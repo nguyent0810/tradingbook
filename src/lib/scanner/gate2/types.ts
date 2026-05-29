@@ -13,9 +13,14 @@ export type Gate2BarInput = {
   volume: number;
 };
 
+import type { Gate2RankComponents } from "./rank-components";
+import type { Gate2RejectionCode } from "./rejection-codes";
+
 export type BreakoutPullbackEvaluation = {
   quality: Gate2Quality;
   rankScore: number;
+  /** Present for Tier A/B — decomposed rank terms (does not change rankScore). */
+  rankComponents?: Gate2RankComponents;
   breakoutLevel: number;
   pullbackZoneLow: number;
   pullbackZoneHigh: number;
@@ -23,6 +28,8 @@ export type BreakoutPullbackEvaluation = {
   /** Evaluation bar close (invalid runs may use last bar close when available). */
   close: number;
   reasons: string[];
+  /** Stable terminal code when `quality === INVALID`. */
+  terminalCode?: Gate2RejectionCode;
   barDate: Date;
 };
 
@@ -31,6 +38,7 @@ export type SetupCandidate = {
   quality: "A" | "B";
   close: number;
   rankScore: number;
+  rankComponents?: Gate2RankComponents;
   breakoutLevel: number;
   pullbackZoneLow: number;
   pullbackZoneHigh: number;

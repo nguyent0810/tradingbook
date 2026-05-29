@@ -194,6 +194,7 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
     alignment: alignmentAnalysis,
     delayedBackdropFromScanNotes:
       scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
+    scanSessionCoverage: scanNotes?.sessionCoverage ?? null,
   });
   const scanDelayedBackdrop =
     scanNotes?.benchmarkBackdrop?.delayedBackdrop ?? null;

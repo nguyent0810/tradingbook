@@ -11,6 +11,7 @@ export function DashboardDataIntegrityNotes({
   scanRunId,
 }: DashboardDataIntegrityNotesProps) {
   const aligned = !freshness.delayedBackdrop && freshness.staleFlags.length === 0;
+  const coverage = freshness.scanSessionCoverage;
 
   return (
     <aside
@@ -41,6 +42,24 @@ export function DashboardDataIntegrityNotes({
             </span>
           )}
         </li>
+        {coverage ? (
+          <li data-testid="dashboard-integrity-session-coverage">
+            <strong>Expected session coverage:</strong>{" "}
+            {coverage.weakCoverage ? (
+              <span data-testid="dashboard-integrity-weak-coverage">
+                {coverage.operatorWarning ?? coverage.headline} (
+                {coverage.staleSessionCount}/{coverage.tradabilityEvaluated} symbols
+                stale vs {coverage.expectedSessionDate}; {coverage.tradabilityPassed}{" "}
+                passed tradability.)
+              </span>
+            ) : (
+              <span>
+                {coverage.headline} — {coverage.tradabilityPassed}/
+                {coverage.tradabilityEvaluated} passed tradability.
+              </span>
+            )}
+          </li>
+        ) : null}
         {scanRunId ? (
           <li className="mono text-xs" style={{ color: "var(--text-tertiary)" }}>
             Latest scan id: {scanRunId}

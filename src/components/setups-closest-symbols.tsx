@@ -1,6 +1,5 @@
 import type { Gate2ClosestSymbolRow } from "@/lib/scanner/gate2-scan-diagnostics";
 import {
-  closestExecutionActionHint,
   computeClosestExecutionStatus,
   computeDistanceAboveBreakoutFrac,
   computeDistanceToPullbackZoneFrac,
@@ -9,7 +8,12 @@ import {
   hasExecutableZone,
   pullbackProximityLabel,
 } from "@/lib/scanner/closest-execution-metrics";
-import { displayClosestExecutionStatus } from "@/lib/trading-display-labels";
+import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
+import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import {
+  displayNearMissDiagnosticStatus,
+  nearMissDiagnosticActionHint,
+} from "@/lib/trading-display-labels";
 
 function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -23,7 +27,7 @@ function fmtPct1FromFrac(frac: number): string {
 function executionHeadline(status: ReturnType<typeof computeClosestExecutionStatus>): string {
   switch (status) {
     case "READY":
-      return "Price is inside the entry zone.";
+      return "Price is inside the pullback zone — diagnostic only, not a validated setup.";
     case "INVALID":
       return "Structure is no longer valid for this template.";
     default:
@@ -76,7 +80,13 @@ function statusStyle(status: ReturnType<typeof computeClosestExecutionStatus>): 
   }
 }
 
-export function SetupsClosestSymbolsSection({ rows }: { rows: Gate2ClosestSymbolRow[] }) {
+export function SetupsClosestSymbolsSection({
+  rows,
+  rsBySymbol,
+}: {
+  rows: Gate2ClosestSymbolRow[];
+  rsBySymbol?: Map<string, RsDiagnosticUi | null>;
+}) {
   if (rows.length === 0) return null;
 
   return (
@@ -118,11 +128,22 @@ export function SetupsClosestSymbolsSection({ rows }: { rows: Gate2ClosestSymbol
                     borderColor: pill.border,
                   }}
                 >
-                  {displayClosestExecutionStatus(status)}
+                  {displayNearMissDiagnosticStatus(status)}
                 </span>
               </div>
 
               <div className="mt-3 space-y-1.5 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                {row.terminalCode ? (
+                  <p className="text-xs font-mono" data-testid="closest-terminal-code">
+                    <span style={{ color: "var(--text-tertiary)" }}>Rejection code: </span>
+                    {row.terminalCode}
+                  </p>
+                ) : null}
+                {row.terminalReasonPreview ? (
+                  <p className="text-xs leading-snug" style={{ color: "var(--text-tertiary)" }}>
+                    {row.terminalReasonPreview}
+                  </p>
+                ) : null}
                 <p>
                   <span style={{ color: "var(--text-tertiary)" }}>→ </span>
                   {executionHeadline(status)}
@@ -137,8 +158,15 @@ export function SetupsClosestSymbolsSection({ rows }: { rows: Gate2ClosestSymbol
                 </p>
                 <p>
                   <span style={{ color: "var(--text-tertiary)" }}>→ </span>
-                  {closestExecutionActionHint(status)}
+                  {nearMissDiagnosticActionHint(status)}
                 </p>
+                <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border-primary)" }}>
+                  <RelativeStrengthDiagnosticPanel
+                    diagnostic={rsBySymbol?.get(row.symbol) ?? null}
+                    compact
+                    testId={`setups-closest-rs-${row.symbol}`}
+                  />
+                </div>
               </div>
 
               <details className="details-disclosure mt-3 border-t pt-3 text-xs" style={{ borderColor: "var(--border-primary)" }}>

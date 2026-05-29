@@ -9,6 +9,8 @@ import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health
 import { SetupsCandidatePositionSizing } from "@/components/setups-candidate-position-sizing";
 import { SignalBadge, qualityToTierVariant } from "@/components/command-deck/signal-badge";
 import { displayScanQualityTier } from "@/lib/trading-display-labels";
+import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { fmtThousands } from "./setups-shared-helpers";
 
 export type CandidateRowClientProps = {
@@ -33,9 +35,21 @@ export type CandidateRowClientProps = {
   };
   perfHint: string;
   reasonsLines: string[];
+  rankScore: number;
+  rankBreakdownLines: string[];
+  rsRankPreviewLines: string[];
+  rsDiagnostic: RsDiagnosticUi | null;
 };
 
-export function CandidateRowClient({ candidate, perfHint, reasonsLines }: CandidateRowClientProps) {
+export function CandidateRowClient({
+  candidate,
+  perfHint,
+  reasonsLines,
+  rankScore,
+  rankBreakdownLines,
+  rsRankPreviewLines,
+  rsDiagnostic,
+}: CandidateRowClientProps) {
   const [isOpen, setIsOpen] = useState(false);
   const detailsId = useId();
   const tier = candidate.quality === "A" ? "A" : "B";
@@ -141,6 +155,49 @@ export function CandidateRowClient({ candidate, perfHint, reasonsLines }: Candid
                         {candidate.healthHint ? (
                           <p className="dense-candidate-row__hint">{candidate.healthHint}</p>
                         ) : null}
+                      </div>
+                    ) : null}
+
+                    <div
+                      className="dense-candidate-row__notes"
+                      data-testid="setups-candidate-rs-diagnostic"
+                    >
+                      <RelativeStrengthDiagnosticPanel
+                        diagnostic={rsDiagnostic}
+                        compact
+                        testId="setups-candidate-rs-panel"
+                      />
+                    </div>
+
+                    {rankBreakdownLines.length > 0 ? (
+                      <div
+                        className="dense-candidate-row__notes"
+                        data-testid="setups-candidate-rank-breakdown"
+                      >
+                        <span className="dense-candidate-row__notes-label">
+                          Rank breakdown (score {rankScore.toFixed(2)})
+                        </span>
+                        <ul className="dense-candidate-row__list">
+                          {rankBreakdownLines.map((line, i) => (
+                            <li key={`rank-${i}`}>{line}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+
+                    {rsRankPreviewLines.length > 0 ? (
+                      <div
+                        className="dense-candidate-row__notes dense-candidate-row__notes--preview"
+                        data-testid="setups-candidate-rs-rank-preview"
+                      >
+                        <span className="dense-candidate-row__notes-label">
+                          RS rank term preview
+                        </span>
+                        <ul className="dense-candidate-row__list">
+                          {rsRankPreviewLines.map((line, i) => (
+                            <li key={`rs-rank-${i}`}>{line}</li>
+                          ))}
+                        </ul>
                       </div>
                     ) : null}
 

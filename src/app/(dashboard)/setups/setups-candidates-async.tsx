@@ -2,9 +2,15 @@ import "server-only";
 
 import Link from "next/link";
 import { ScanQuality } from "@/generated/prisma/client";
+import { formatGate2RankBreakdownLines } from "@/lib/scanner/gate2/rank-components";
+import {
+  buildGate2RankWithRsPreview,
+  formatRsRankPreviewLines,
+} from "@/lib/scanner/gate2/rs-rank-term";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
 import { toCandidateRows } from "@/lib/scanner/setups-queries";
 import {
+  loadRsDiagnosticsForSetupsCached,
   loadSetupsBaseData,
   loadSetupPerfRowsCached,
   loadSurfacedCandidatesHealthCached,
@@ -13,6 +19,7 @@ import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import {
   fmtSetupPerfHint,
+  rankComponentsFromReasons,
   reasonsToStrings,
   type SetupPerfHint,
 } from "./setups-shared-helpers";
@@ -23,9 +30,12 @@ export async function SetupsCandidatesAsync() {
   const base = await loadSetupsBaseData();
   if (!base.latest) return null;
 
-  const [{ candidatesWithHealth, healthError }, perfPack] = await Promise.all([
+  const symbolKeys = toCandidateRows(base.latest).map((c) => c.symbolKey);
+
+  const [{ candidatesWithHealth, healthError }, perfPack, rsMap] = await Promise.all([
     loadSurfacedCandidatesHealthCached(),
     loadSetupPerfRowsCached(),
+    loadRsDiagnosticsForSetupsCached(symbolKeys),
   ]);
 
   const perfBanner = [healthError, perfPack.error].filter(Boolean).join(" ") || null;
@@ -101,6 +111,20 @@ export async function SetupsCandidatesAsync() {
               <tbody>
                 {candidatesWithHealth.map((c) => {
                   const lines = reasonsToStrings(c.reasons);
+                  const rankComponents = rankComponentsFromReasons(c.reasons);
+                  const rankBreakdownLines = rankComponents
+                    ? formatGate2RankBreakdownLines(rankComponents)
+                    : [];
+                  const rsUi = rsMap.get(c.symbolKey) ?? null;
+                  const rsRankPreviewLines =
+                    rankComponents != null
+                      ? formatRsRankPreviewLines(
+                          buildGate2RankWithRsPreview(
+                            rankComponents.rankScore,
+                            rsUi?.rs20SpreadPct ?? null
+                          )
+                        )
+                      : [];
                   const tier = c.quality === ScanQuality.A ? "A" : "B";
                   const perfHint = setupPerfMap.get(`${c.setupType}:${c.quality}`) ?? null;
                   const perfHintStr = fmtSetupPerfHint(tier, perfHint);
@@ -128,6 +152,10 @@ export async function SetupsCandidatesAsync() {
                       }}
                       perfHint={perfHintStr}
                       reasonsLines={lines}
+                      rankScore={c.rankScore}
+                      rankBreakdownLines={rankBreakdownLines}
+                      rsRankPreviewLines={rsRankPreviewLines}
+                      rsDiagnostic={rsUi}
                     />
                   );
                 })}

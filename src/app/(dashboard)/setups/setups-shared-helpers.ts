@@ -5,6 +5,7 @@ import {
   rejectionBucketTraderGuide,
 } from "@/lib/scanner/setups-trader-copy";
 import type { SetupsRejectionAccordionItem } from "@/components/setups-rejection-accordion";
+import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
 
 export function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -18,8 +19,11 @@ export function fmtRunDate(d: Date): string {
 }
 
 export function reasonsToStrings(reasons: unknown): string[] {
-  if (!Array.isArray(reasons)) return [];
-  return reasons.filter((x): x is string => typeof x === "string");
+  return parseSetupCandidateReasons(reasons).lines;
+}
+
+export function rankComponentsFromReasons(reasons: unknown) {
+  return parseSetupCandidateReasons(reasons).rankComponents;
 }
 
 export type SetupPerfHint = {
