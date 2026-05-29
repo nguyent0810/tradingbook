@@ -99,37 +99,34 @@ export function TradesLedgerTable({
         ariaLabel="Trades ledger table"
         scrollHint="Scroll horizontally for full ledger columns. Symbol column stays pinned."
       >
-        <table className="table dense-table ledger-deck-table ledger-deck-table--dense" data-testid="trades-table">
+        <table
+          className="table dense-table ledger-deck-table ledger-deck-table--dense ledger-deck-table--financial"
+          data-testid="trades-table"
+        >
           <thead data-testid="trades-table-header">
             <tr>
-              <th className="ledger-sticky-symbol">Symbol</th>
-              <th>Setup</th>
-              <th>Direction</th>
-              <th>Playbook</th>
-              <th>Status</th>
-              <th>Position &amp; review</th>
-              <th className="table-num">Hold</th>
-              <th>Entry Date</th>
-              <th className="table-num">
-                <span className="block">Entry</span>
-                <span className="ledger-deck-table__th-sub">(1000 ₫)</span>
+              <th className="ledger-sticky-symbol ledger-deck-table__th--text">Symbol</th>
+              <th className="ledger-deck-table__th--text">Setup</th>
+              <th className="ledger-deck-table__th--center">Direction</th>
+              <th className="ledger-deck-table__th--text">Playbook</th>
+              <th className="ledger-deck-table__th--center">Status</th>
+              <th className="ledger-deck-table__th--center">Review</th>
+              <th className="ledger-deck-table__th--center table-num">Hold</th>
+              <th className="ledger-deck-table__th--center">Entry</th>
+              <th className="ledger-deck-table__th--num table-num">
+                <span className="block">Entry ₫</span>
+                <span className="ledger-deck-table__th-sub">k per share</span>
               </th>
-              <th className="table-num">
-                <span className="block">Session mark</span>
-                <span className="ledger-deck-table__th-sub">Open: EOD · Closed: exit</span>
+              <th className="ledger-deck-table__th--num table-num">
+                <span className="block">Mark</span>
+                <span className="ledger-deck-table__th-sub">EOD / exit</span>
               </th>
-              <th className="table-num">Qty</th>
-              <th className="table-num">R</th>
-              <th className="table-num">
-                <span className="block">Stop dist.</span>
-                <span className="ledger-deck-table__th-sub">(1000 ₫)</span>
-              </th>
-              <th className="table-num">
-                <span className="block">TP dist.</span>
-                <span className="ledger-deck-table__th-sub">(1000 ₫)</span>
-              </th>
-              <th className="table-num">P&amp;L</th>
-              <th aria-label="Actions" />
+              <th className="ledger-deck-table__th--num table-num">Qty</th>
+              <th className="ledger-deck-table__th--num table-num">R</th>
+              <th className="ledger-deck-table__th--num table-num">Stop</th>
+              <th className="ledger-deck-table__th--num table-num">TP</th>
+              <th className="ledger-deck-table__th--num table-num">P&amp;L</th>
+              <th className="ledger-deck-table__th--center" aria-label="Actions" />
             </tr>
           </thead>
           <tbody>
@@ -222,7 +219,7 @@ export function TradesLedgerTable({
                   data-review-session-focus={isSessionFocusRow ? "true" : undefined}
                   className={rowClass}
                 >
-                  <td className="ledger-sticky-symbol dense-candidate-row__symbol-cell">
+                  <td className="ledger-sticky-symbol ledger-deck-table__td--text dense-candidate-row__symbol-cell">
                     <span className="ledger-deck-table__symbol mono">{trade.symbol}</span>
                     {priceUnitMismatch ? (
                       <SignalBadge variant="at-risk" className="ledger-deck-table__unit-warn">
@@ -230,7 +227,7 @@ export function TradesLedgerTable({
                       </SignalBadge>
                     ) : null}
                   </td>
-                  <td>
+                  <td className="ledger-deck-table__td--text">
                     {trade.setupCandidate ? (
                       <span className="ledger-deck-table__chip">
                         {displayScanQualityTier(trade.setupCandidate.quality)} ·{" "}
@@ -240,24 +237,24 @@ export function TradesLedgerTable({
                       <span className="ledger-deck-table__muted">Manual</span>
                     )}
                   </td>
-                  <td>
+                  <td className="ledger-deck-table__td--center">
                     <SignalBadge
                       variant={trade.direction === "LONG" ? "healthy" : "at-risk"}
                     >
                       {displayTradeDirection(trade.direction)}
                     </SignalBadge>
                   </td>
-                  <td className="whitespace-nowrap">
+                  <td className="ledger-deck-table__td--text whitespace-nowrap">
                     <span className="ledger-deck-table__chip whitespace-nowrap">
                       {formatPlaybookLabel(trade.playbook)}
                     </span>
                   </td>
-                  <td>
+                  <td className="ledger-deck-table__td--center">
                     <SignalBadge variant={tradeStatusBadgeVariant(trade.status)}>
                       {displayTradeStatus(trade.status)}
                     </SignalBadge>
                   </td>
-                  <td className="ledger-deck-table__review-cell">
+                  <td className="ledger-deck-table__td--center ledger-deck-table__review-cell">
                     {trade.status === "OPEN" && reviewDto && openPack ? (
                       <OpenPositionReviewCell
                         tradeId={trade.id}
@@ -291,18 +288,20 @@ export function TradesLedgerTable({
                       <span className="ledger-deck-table__muted">—</span>
                     )}
                   </td>
-                  <td className="mono table-num">
+                  <td className="ledger-deck-table__td--center mono table-num tabular-nums">
                     {holdingDays != null ? holdingDays : "—"}
                   </td>
-                  <td className="mono">{formatTradeLedgerDate(trade.entryDate)}</td>
-                  <td className="mono table-num">
+                  <td className="ledger-deck-table__td--center mono">
+                    {formatTradeLedgerDate(trade.entryDate)}
+                  </td>
+                  <td className="ledger-deck-table__td--num mono table-num tabular-nums">
                     {Number.isFinite(trade.entryPrice) && trade.entryPrice > 0 ? (
                       formatEquityThousandVndPerShare(trade.entryPrice)
                     ) : (
                       <span className="ledger-deck-table__muted">—</span>
                     )}
                   </td>
-                  <td className="mono table-num ledger-deck-table__mark">
+                  <td className="ledger-deck-table__td--num mono table-num ledger-deck-table__mark tabular-nums">
                     {trade.status === "OPEN" ? (
                       latestBar ? (
                         <span
@@ -329,11 +328,13 @@ export function TradesLedgerTable({
                       "—"
                     )}
                   </td>
-                  <td className="mono table-num">{formatQuantityCell(trade.quantity)}</td>
-                  <td className="mono table-num ledger-deck-table__sub">
+                  <td className="ledger-deck-table__td--num mono table-num tabular-nums">
+                    {formatQuantityCell(trade.quantity)}
+                  </td>
+                  <td className="ledger-deck-table__td--num mono table-num ledger-deck-table__sub tabular-nums">
                     {trade.status === "OPEN" ? formatRMultiple(rMultiple) : "—"}
                   </td>
-                  <td className="mono table-num ledger-deck-table__sub align-top">
+                  <td className="ledger-deck-table__td--num mono table-num ledger-deck-table__sub tabular-nums">
                     {trade.status === "OPEN" ? (
                       <div className="ledger-deck-table__stack-end">
                         <span>{formatSignedVnd(distanceToStop)}</span>
@@ -347,12 +348,12 @@ export function TradesLedgerTable({
                       "—"
                     )}
                   </td>
-                  <td className="mono table-num ledger-deck-table__sub">
+                  <td className="ledger-deck-table__td--num mono table-num ledger-deck-table__sub tabular-nums">
                     {trade.status === "OPEN"
                       ? formatSignedVnd(distanceToTakeProfit)
                       : "—"}
                   </td>
-                  <td className="table-num ledger-deck-table__pnl-cell">
+                  <td className="ledger-deck-table__td--num table-num ledger-deck-table__pnl-cell tabular-nums">
                     {trade.status === "OPEN" ? (
                       latestBar ? (
                         <div
@@ -411,7 +412,7 @@ export function TradesLedgerTable({
                       <span className="ledger-deck-table__muted">—</span>
                     )}
                   </td>
-                  <td>
+                  <td className="ledger-deck-table__td--center">
                     <Link href={`/trades/${trade.id}`} className="btn btn-ghost btn-sm">
                       Edit
                     </Link>

@@ -29,10 +29,10 @@ export default async function SetupsPage() {
   if (!session) redirect("/login");
 
   return (
-    <V3WorkstationShell testId="setups-workstation">
+    <V3WorkstationShell testId="setups-workstation" className="tosv3-setups-workstation">
       <SetupsPageHeader />
 
-      <div className="tosv3-workstation-flow pipeline-deck__flow">
+      <div className="tosv3-workstation-flow tosv3-setups-flow">
         <Suspense fallback={<SetupsPipelineContextFallback />}>
           <SetupsPipelineContextAsync />
         </Suspense>
@@ -41,18 +41,10 @@ export default async function SetupsPage() {
           <SetupsOverviewAsync />
         </Suspense>
 
-        <div className="pipeline-deck__grid tosv3-workstation-grid">
-          <div className="pipeline-deck__main tosv3-workstation-main">
+        <div className="tosv3-setups-grid">
+          <div className="tosv3-setups-grid__primary">
             <Suspense fallback={<SetupsCandidatesFallback />}>
               <SetupsCandidatesAsync />
-            </Suspense>
-
-            <Suspense fallback={<SetupsTailFallback />}>
-              <SetupsTailAsync />
-            </Suspense>
-
-            <Suspense fallback={<SetupsMomentumFallback />}>
-              <SetupsMomentumDeckAsync />
             </Suspense>
           </div>
 
@@ -60,6 +52,14 @@ export default async function SetupsPage() {
             <SetupsSidebarAsync />
           </Suspense>
         </div>
+
+        <Suspense fallback={<SetupsTailFallback />}>
+          <SetupsTailAsync />
+        </Suspense>
+
+        <Suspense fallback={<SetupsMomentumFallback />}>
+          <SetupsMomentumDeckAsync />
+        </Suspense>
       </div>
     </V3WorkstationShell>
   );

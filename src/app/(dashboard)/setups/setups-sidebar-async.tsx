@@ -33,7 +33,7 @@ export async function SetupsSidebarAsync() {
     .slice(0, 8);
 
   return (
-    <aside className="pipeline-deck__sidebar space-y-4" data-testid="setups-sidebar">
+    <aside className="tosv3-setups-sidebar pipeline-deck__sidebar" data-testid="setups-sidebar">
       {dbBanner ? (
         <ErrorStateWithEvidence
           title="Partial scanner data unavailable"

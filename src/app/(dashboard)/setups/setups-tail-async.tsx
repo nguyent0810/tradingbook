@@ -1,6 +1,7 @@
 import "server-only";
 
 import { SetupsClosestSymbolsSection } from "@/components/setups-closest-symbols";
+import { SetupsRsWatchlistV3 } from "@/components/setups/setups-rs-watchlist-v3";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { compareClosestRowsExecutionOrder } from "@/lib/scanner/closest-execution-metrics";
 import { displayTradabilityBreakdownKey } from "@/lib/trading-display-labels";
@@ -9,7 +10,6 @@ import {
   loadRsNearMissWatchlistForSetupsCached,
   loadSetupsBaseData,
 } from "./setups-cached-data";
-import { RsNearMissWatchlistPanel } from "@/components/rs-near-miss-watchlist-panel";
 
 export async function SetupsTailAsync() {
   const base = await loadSetupsBaseData();
@@ -48,59 +48,71 @@ export async function SetupsTailAsync() {
     loadRsNearMissWatchlistForSetupsCached(),
   ]);
 
+  const hasTail =
+    closestRows.length > 0 ||
+    rsWatchlistRes.panel.rows.length > 0 ||
+    (breakdown && typeof breakdown === "object" && breakdown !== null);
+
+  if (!hasTail) return null;
+
   return (
-    <div className="pipeline-deck__tail space-y-4">
-      <section className="pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-near-miss-panel">
-        <header className="dash-panel__header">
-          <h2 className="dash-section-title">
-            Near-miss pipeline{closestRows.length > 0 ? ` (${closestRows.length})` : ""}
-          </h2>
-          <p className="dash-panel__subtitle">
-            Closest-to-valid symbols — not Tier A/B surfaced
-          </p>
-        </header>
-        {closestRows.length > 0 ? (
-          <SetupsClosestSymbolsSection rows={closestRows} rsBySymbol={rsMap} />
-        ) : (
-          <div className="dash-empty-compact">
+    <div className="tosv3-setups-tail" data-testid="setups-tail-section">
+      {closestRows.length > 0 ? (
+        <details className="tosv3-setups-tail__panel tosv3-glass-panel">
+          <summary className="tosv3-setups-tail__summary">
+            Near-miss pipeline
+            <span className="tosv3-setups-tail__count tabular-nums">{closestRows.length}</span>
+          </summary>
+          <div className="tosv3-setups-tail__body" data-testid="setups-near-miss-panel">
+            <SetupsClosestSymbolsSection rows={closestRows} rsBySymbol={rsMap} compact />
+          </div>
+        </details>
+      ) : (
+        <details className="tosv3-setups-tail__panel tosv3-glass-panel" data-testid="setups-near-miss-panel">
+          <summary className="tosv3-setups-tail__summary">Near-miss pipeline</summary>
+          <div className="tosv3-setups-tail__body">
             <EmptyStateWithReason
               title="No near-miss symbols saved"
-              reason="This scan did not persist closest-to-valid rows in notes, or none qualified. When present, symbols appear here with distance-to-zone context."
+              reason="This scan did not persist closest-to-valid rows in notes, or none qualified."
               data-testid="setups-near-miss-empty"
             />
           </div>
-        )}
-      </section>
+        </details>
+      )}
 
-      <RsNearMissWatchlistPanel
-        panel={rsWatchlistRes.panel}
-        testId="setups-rs-near-miss-watchlist"
-      />
+      {rsWatchlistRes.panel.rows.length > 0 ? (
+        <details className="tosv3-setups-tail__panel tosv3-glass-panel" open>
+          <summary className="tosv3-setups-tail__summary">
+            Relative strength watchlist
+            <span className="tosv3-setups-tail__count tabular-nums">
+              {rsWatchlistRes.panel.rows.length}
+            </span>
+          </summary>
+          <div className="tosv3-setups-tail__body">
+            <SetupsRsWatchlistV3 panel={rsWatchlistRes.panel} />
+          </div>
+        </details>
+      ) : null}
+
       {rsWatchlistRes.error ? (
-        <p className="text-xs" style={{ color: "var(--text-tertiary)" }} role="status">
+        <p className="tosv3-setups-tail__error" role="status">
           {rsWatchlistRes.error}
         </p>
       ) : null}
 
       {breakdown && typeof breakdown === "object" && breakdown !== null ? (
-        <details className="tos-details-disclosure dash-surface-1 text-sm">
-          <summary className="tos-details-disclosure__summary">
-            Liquidity &amp; session filter (technical detail)
-          </summary>
-          <p className="mt-2 text-xs leading-relaxed" style={{ color: "var(--text-tertiary)" }}>
-            Why symbols were excluded before setup scoring (scanner diagnostic keys shown as readable
-            labels).
-          </p>
-          <ul className="mt-3 space-y-1.5">
-            {Object.entries(breakdown as Record<string, number>).map(([reason, count]) => (
-              <li key={reason}>
-                <span className="font-medium tabular-nums" style={{ color: "var(--text-primary)" }}>
-                  {count}×
-                </span>{" "}
-                {displayTradabilityBreakdownKey(reason)}
-              </li>
-            ))}
-          </ul>
+        <details className="tosv3-setups-tail__panel tosv3-glass-panel">
+          <summary className="tosv3-setups-tail__summary">Liquidity &amp; session filters</summary>
+          <div className="tosv3-setups-tail__body">
+            <ul className="tosv3-setups-tail__breakdown">
+              {Object.entries(breakdown as Record<string, number>).map(([reason, count]) => (
+                <li key={reason}>
+                  <span className="tabular-nums">{count}×</span>{" "}
+                  {displayTradabilityBreakdownKey(reason)}
+                </li>
+              ))}
+            </ul>
+          </div>
         </details>
       ) : null}
     </div>

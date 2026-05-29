@@ -22,14 +22,21 @@ export function SignalTrajectoryChart({ data }: Props) {
   const chartHeight = 140;
   const path = sparkPath(data.points, 960, chartHeight);
 
+  const isEmpty = Boolean(data.emptyMessage);
+
   return (
-    <section className="tosv3-panel tosv3-chart" aria-label="Book P and L trajectory">
-      <div className="tosv3-section-head">
+    <section
+      className={`tosv3-panel tosv3-chart${isEmpty ? " tosv3-chart--compact" : ""}`}
+      aria-label="Book P and L trajectory"
+    >
+      <div className="tosv3-section-head tosv3-section-head--compact">
         <span className="tosv3-kicker">Book trajectory</span>
-        <p className="tosv3-type-muted">Closed trades cumulative P&amp;L</p>
+        {!isEmpty ? <p className="tosv3-type-muted">Closed trades cumulative P&amp;L</p> : null}
       </div>
-      {data.emptyMessage ? (
-        <p className="tosv3-empty-state tosv3-chart__empty">{data.emptyMessage}</p>
+      {isEmpty ? (
+        <p className="tosv3-chart__empty-line" role="status">
+          {data.emptyMessage}
+        </p>
       ) : (
         <svg viewBox={`0 0 960 ${chartHeight}`} role="img" aria-label="Closed trades cumulative P and L">
           <defs>
