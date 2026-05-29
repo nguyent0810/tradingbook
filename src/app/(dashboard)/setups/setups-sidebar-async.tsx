@@ -1,12 +1,11 @@
 import "server-only";
 
-import { SetupsTodaysActionBlock } from "@/components/setups-todays-action-block";
-import { SetupsPipelineFunnel } from "@/components/setups/setups-pipeline-funnel";
-import { SetupsDiagnosticsStack } from "@/components/setups/setups-diagnostics-stack";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
+import { SetupsPipelineDock } from "@/components/setups/setups-pipeline-dock";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { loadGate2BreakdownCached, loadSetupsBaseData } from "./setups-cached-data";
+
 export async function SetupsSidebarAsync() {
   const base = await loadSetupsBaseData();
   if (!base.latest) return null;
@@ -33,29 +32,23 @@ export async function SetupsSidebarAsync() {
     .slice(0, 8);
 
   return (
-    <aside className="tosv3-setups-sidebar pipeline-deck__sidebar" data-testid="setups-sidebar">
+    <>
       {dbBanner ? (
         <ErrorStateWithEvidence
+          className="tosv3-setups-cockpit__banner"
           title="Partial scanner data unavailable"
           message={dbBanner}
           evidence="src/app/(dashboard)/setups/setups-sidebar-async.tsx"
           data-testid="setups-overview-db-banner"
         />
       ) : null}
-
-      {tradingDecision ? (
-        <div className="dash-surface-1" data-testid="setups-todays-action">
-          <SetupsTodaysActionBlock decision={tradingDecision} />
-        </div>
-      ) : null}
-
-      <SetupsPipelineFunnel latestScan={latest} nearMissCount={nearMissCount} />
-
-      <SetupsDiagnosticsStack
+      <SetupsPipelineDock
+        tradingDecision={tradingDecision}
+        latestScan={latest}
+        nearMissCount={nearMissCount}
         rejectionBuckets={rejectionBuckets}
         scanNotes={notes}
-        latestScan={latest}
       />
-    </aside>
+    </>
   );
 }

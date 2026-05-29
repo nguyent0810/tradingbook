@@ -86,10 +86,10 @@ export function TradeFilters({
 
   return (
     <div
-      className="tosv3-glass-panel ledger-deck-filters pipeline-deck-panel tos-trades-filters dash-surface-1"
+      className="tosv3-glass-panel ledger-deck-filters ledger-deck-filters--compact pipeline-deck-panel tos-trades-filters dash-surface-1"
       data-testid="trades-filters-bar"
     >
-      <div className="ledger-deck-filters__row tos-trades-filters__row">
+      <div className="ledger-deck-filters__row ledger-deck-filters__row--compact tos-trades-filters__row">
         <div className="relative flex-1 sm:max-w-xs">
           <svg
             width="16"

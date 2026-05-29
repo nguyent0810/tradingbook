@@ -69,10 +69,10 @@ export async function SetupsCandidatesAsync() {
       ) : null}
 
       {candidates.length === 0 ? (
-        <section className="tosv3-glass-panel pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
-          <header className="dash-panel__header">
-            <h2 className="dash-section-title">Surfaced candidates</h2>
-            <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
+        <section className="tosv3-setups-cockpit__panel" data-testid="setups-candidates-panel">
+          <header className="tosv3-setups-cockpit__panel-head">
+            <h2 className="tosv3-setups-cockpit__panel-title">Surfaced candidates</h2>
+            <p className="tosv3-setups-cockpit__panel-sub">Qualified setups — core scanner Tier A/B only</p>
           </header>
           <div className="dash-empty-compact">
             <EmptyStateWithReason
@@ -91,12 +91,12 @@ export async function SetupsCandidatesAsync() {
           </div>
         </section>
       ) : (
-        <section className="tosv3-glass-panel pipeline-deck-panel dash-panel dash-surface-1" data-testid="setups-candidates-panel">
-          <header className="dash-panel__header">
-            <h2 className="dash-section-title">
+        <section className="tosv3-setups-cockpit__panel" data-testid="setups-candidates-panel">
+          <header className="tosv3-setups-cockpit__panel-head">
+            <h2 className="tosv3-setups-cockpit__panel-title">
               Surfaced candidates ({candidates.length})
             </h2>
-            <p className="dash-panel__subtitle">Qualified setups — core scanner Tier A/B only</p>
+            <p className="tosv3-setups-cockpit__panel-sub">Qualified setups — core scanner Tier A/B only</p>
           </header>
           <SetupsCandidatesMasterDetail
             candidates={candidatesWithHealth.map((c): SetupsCandidateBundle => {

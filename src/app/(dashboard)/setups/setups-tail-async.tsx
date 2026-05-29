@@ -81,7 +81,7 @@ export async function SetupsTailAsync() {
       )}
 
       {rsWatchlistRes.panel.rows.length > 0 ? (
-        <details className="tosv3-setups-tail__panel tosv3-glass-panel" open>
+        <details className="tosv3-setups-tail__panel tosv3-glass-panel">
           <summary className="tosv3-setups-tail__summary">
             Relative strength watchlist
             <span className="tosv3-setups-tail__count tabular-nums">
