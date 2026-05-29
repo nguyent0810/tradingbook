@@ -2,9 +2,7 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { V3WorkstationShell } from "@/components/trading-os-v3/shared/v3-workstation-shell";
 import { TradesPageHeader } from "@/components/trades/trades-page-header";
-import { TradesFreshnessContext } from "@/components/trades/trades-freshness-context";
-import { TradesReviewQueue } from "@/components/trades/trades-review-queue";
-import { TradesLedgerSummary } from "@/components/trades/trades-ledger-summary";
+import { TradesLedgerCockpit } from "@/components/trades/trades-ledger-cockpit";
 import { TradesLedgerTable } from "@/components/trades/trades-ledger-table";
 import { TradesLedgerEmpty } from "@/components/trades/trades-ledger-empty";
 import { TradeFilters, TradeFiltersSkeleton } from "@/components/trades/trades-ledger-filters";
@@ -87,25 +85,18 @@ export function TradesLedgerDeck({
 
   return (
     <div className="tosv3-workstation-flow ledger-deck__flow">
-      <TradesFreshnessContext
-        freshness={marketFreshness}
+      <TradesLedgerCockpit
+        marketFreshness={marketFreshness}
         latestScan={latestScan}
-        delayedBackdrop={scanDelayedBackdrop}
-      />
-
-      <TradesLedgerSummary
+        scanDelayedBackdrop={scanDelayedBackdrop}
         sessionBriefing={sessionBriefing}
+        reviewQueueModel={reviewQueueModel}
         bookOperatingContext={bookOperatingContext}
         bookOperatingBalanceLines={bookOperatingBalanceLines}
         sinceLastVisitLines={sinceLastVisitLines}
         compactReview={compactReview}
-        showSessionBriefing={Boolean(sessionBriefing && hasOpenTrades && !compactReview)}
-        showBookContext={Boolean(bookOperatingContext && hasOpenTrades)}
+        hasOpenTrades={hasOpenTrades}
       />
-
-      {reviewQueueModel && hasOpenTrades ? (
-        <TradesReviewQueue model={reviewQueueModel} compactReview={compactReview} />
-      ) : null}
 
       {dbLoadError ? (
         <ErrorStateWithEvidence

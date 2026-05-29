@@ -8560,6 +8560,425 @@ body {
   gap: 0.55rem;
 }
 
+.tosv3-setups-cockpit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.tosv3-setups-cockpit__workspace {
+  padding: 0.45rem 0.55rem;
+  min-height: min(20rem, 52vh);
+  display: flex;
+  flex-direction: column;
+}
+
+.tosv3-setups-cockpit__panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.tosv3-setups-cockpit__panel-head {
+  margin-bottom: 0.35rem;
+}
+
+.tosv3-setups-cockpit__panel-title {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #eef6ff;
+}
+
+.tosv3-setups-cockpit__panel-sub {
+  margin: 0.12rem 0 0;
+  font-size: 0.62rem;
+  color: #9eb0c9;
+}
+
+.tosv3-setups-dock {
+  display: flex;
+  flex-direction: column;
+  min-height: min(20rem, 52vh);
+  max-height: min(20rem, 52vh);
+  overflow: hidden;
+  padding: 0;
+}
+
+.tosv3-setups-dock__tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(102, 128, 159, 0.28);
+  flex-shrink: 0;
+}
+
+.tosv3-setups-dock__tab {
+  flex: 1;
+  padding: 0.38rem 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9eb0c9;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+.tosv3-setups-dock__tab:hover {
+  color: #dbe7f8;
+}
+
+.tosv3-setups-dock__tab.is-active {
+  color: #eef6ff;
+  border-bottom-color: #2dd4bf;
+}
+
+.tosv3-setups-dock__tab:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.85);
+  outline-offset: -2px;
+}
+
+.tosv3-setups-dock__body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tosv3-setups-dock__panel {
+  padding: 0.5rem 0.55rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.tosv3-setups-dock__panel--scroll .dash-diagnostics-stack {
+  max-height: none;
+}
+
+.tosv3-setups-stance__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.tosv3-setups-stance__mode {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #5eead4;
+  letter-spacing: 0.03em;
+}
+
+.tosv3-setups-stance__allocation {
+  margin: 0 0 0.28rem;
+  font-size: 0.68rem;
+  color: #c5d4e8;
+}
+
+.tosv3-setups-stance__reason {
+  margin: 0 0 0.28rem;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  color: #b6c8e2;
+}
+
+.tosv3-setups-stance__note {
+  margin: 0;
+  font-size: 0.58rem;
+  color: #8fa0bc;
+}
+
+.tosv3-setups-funnel-compact__intro {
+  margin: 0 0 0.35rem;
+  font-size: 0.58rem;
+  color: #8fa0bc;
+  line-height: 1.3;
+}
+
+.tosv3-setups-funnel-compact__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.tosv3-setups-funnel-compact__step {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.35rem;
+  align-items: baseline;
+  padding: 0.22rem 0.28rem;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.45);
+  font-size: 0.65rem;
+}
+
+.tosv3-setups-funnel-compact__label {
+  color: #9eb0c9;
+  text-transform: uppercase;
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+}
+
+.tosv3-setups-funnel-compact__value {
+  font-weight: 700;
+  color: #eef6ff;
+}
+
+.tosv3-setups-funnel-compact__hint {
+  font-size: 0.58rem;
+  color: #8fc8ff;
+}
+
+.tosv3-setups-cockpit .tosv3-setups-master-detail {
+  flex: 1;
+  min-height: 0;
+  max-height: min(17rem, 44vh);
+}
+
+.tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap,
+.tosv3-setups-cockpit .tosv3-setups-master-detail__detail {
+  max-height: min(17rem, 44vh);
+}
+
+/* Trades ledger cockpit */
+.tosv3-ledger-trust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid rgba(102, 128, 159, 0.22);
+  background: rgba(8, 13, 20, 0.65);
+}
+
+.tosv3-ledger-trust .dash-market-status,
+.tosv3-ledger-trust .dash-scan-strip {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tosv3-ledger-trust .dash-market-status__lead,
+.tosv3-ledger-trust .dash-scan-strip {
+  font-size: 0.62rem;
+}
+
+.tosv3-ledger-trust .dash-chip {
+  padding: 0.1rem 0.32rem;
+  font-size: 0.58rem;
+}
+
+.tosv3-ledger-cockpit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.55rem;
+  align-items: stretch;
+}
+
+.tosv3-ledger-cockpit__operating,
+.tosv3-ledger-cockpit__book {
+  padding: 0.55rem 0.65rem;
+  min-height: 6.5rem;
+}
+
+.tosv3-ledger-operating__head,
+.tosv3-ledger-book__head {
+  margin-bottom: 0.35rem;
+}
+
+.tosv3-ledger-operating__title,
+.tosv3-ledger-book__title {
+  margin: 0.1rem 0 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #eef6ff;
+}
+
+.tosv3-ledger-operating__lines,
+.tosv3-ledger-book__lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.65rem;
+  line-height: 1.35;
+  color: #c5d4e8;
+}
+
+.tosv3-ledger-book__lines--muted,
+.tosv3-ledger-operating__footnote {
+  color: #9eb0c9;
+  font-size: 0.6rem;
+}
+
+.tosv3-ledger-operating__footnote {
+  margin: 0.35rem 0 0;
+}
+
+.tosv3-ledger-book__headline {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #dbe7f8;
+}
+
+.tosv3-ledger-book__subsection {
+  margin-top: 0.45rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(102, 128, 159, 0.2);
+}
+
+.tosv3-ledger-book__subsection-title {
+  margin: 0 0 0.25rem;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8fa0bc;
+}
+
+.tosv3-ledger-book__queue {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.tosv3-ledger-book__queue-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.4rem;
+  font-size: 0.62rem;
+}
+
+.tosv3-ledger-book__queue-row.is-urgent .tosv3-ledger-book__queue-label {
+  color: #fda4af;
+}
+
+.tosv3-ledger-book__queue-row.is-high .tosv3-ledger-book__queue-label {
+  color: #fde68a;
+}
+
+.tosv3-ledger-book__queue-label {
+  font-weight: 600;
+}
+
+.tosv3-ledger-book__queue-symbols a {
+  color: #7dd3fc;
+  text-decoration: none;
+}
+
+.tosv3-ledger-book__queue-symbols a:hover {
+  text-decoration: underline;
+}
+
+.tosv3-ledger-book__delta {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.tosv3-ledger-book__empty,
+.tosv3-ledger-operating__placeholder {
+  margin: 0;
+  font-size: 0.65rem;
+  color: #9eb0c9;
+}
+
+.ledger-deck-filters--compact {
+  padding: 0.4rem 0.55rem;
+}
+
+.ledger-deck-filters__row--compact {
+  gap: 0.35rem;
+}
+
+.ledger-deck-filters--compact .input,
+.ledger-deck-filters--compact .select {
+  padding-top: 0.32rem;
+  padding-bottom: 0.32rem;
+  font-size: 0.72rem;
+  min-height: 2rem;
+}
+
+.tosv3-workstation .ledger-deck__flow {
+  gap: 0.45rem;
+}
+
+/* Premium trading ticket — analysis rail */
+.tosv3-ticket__analysis-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.tosv3-ticket__risk-head {
+  margin-bottom: 0.15rem;
+}
+
+.tosv3-ticket__risk-title {
+  margin: 0.12rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #eef6ff;
+}
+
+.tosv3-ticket__risk-hint {
+  margin: 0.1rem 0 0;
+  font-size: 0.58rem;
+  color: #8fa0bc;
+}
+
+.tosv3-ticket__risk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.tosv3-ticket__metric-block {
+  padding: 0.4rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid rgba(102, 128, 159, 0.28);
+  background: rgba(8, 13, 22, 0.75);
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.tosv3-ticket__metric-block--wide {
+  grid-column: 1 / -1;
+}
+
+.tosv3-ticket__section--thesis {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tosv3-ticket__textarea--thesis {
+  min-height: 4.5rem;
+}
+
+.tosv3-ticket--dense .tosv3-ticket__layout--dense {
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+}
+
+.tosv3-ticket--dense .tosv3-ticket__analysis-rail {
+  position: sticky;
+  top: 4.5rem;
+}
+
 .tosv3-setups-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.75fr);
@@ -8871,6 +9290,15 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .tosv3-setups-cockpit {
+    grid-template-columns: 1fr;
+  }
+
+  .tosv3-setups-dock {
+    max-height: none;
+    min-height: 0;
+  }
+
   .tosv3-setups-master-detail {
     grid-template-columns: 1fr;
   }
@@ -8878,5 +9306,19 @@ body {
   .tosv3-setups-master-detail__detail {
     position: static;
     max-height: none;
+  }
+
+  .tosv3-setups-cockpit .tosv3-setups-master-detail,
+  .tosv3-setups-cockpit .tosv3-setups-master-detail__list-wrap,
+  .tosv3-setups-cockpit .tosv3-setups-master-detail__detail {
+    max-height: none;
+  }
+
+  .tosv3-ledger-cockpit {
+    grid-template-columns: 1fr;
+  }
+
+  .tosv3-ticket--dense .tosv3-ticket__analysis-rail {
+    position: static;
   }
 }

@@ -9,10 +9,9 @@ export function SetupsPipelineContextFallback() {
 
 export function SetupsSidebarFallback() {
   return (
-    <aside className="tos-setups-sidebar space-y-4" aria-busy="true">
-      <div className="skeleton h-24 w-full rounded-lg" />
-      <div className="skeleton h-40 w-full rounded-lg" />
-      <div className="skeleton h-32 w-full rounded-lg" />
+    <aside className="tosv3-setups-dock tosv3-glass-panel" aria-busy="true">
+      <div className="skeleton h-8 w-full rounded-md" />
+      <div className="skeleton mt-2 h-36 w-full rounded-lg" />
     </aside>
   );
 }

@@ -478,38 +478,44 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
 
         </div>
 
-        <aside className="tosv3-ticket__aside">
+        <aside className="tosv3-ticket__aside tosv3-ticket__analysis-rail" aria-label="Live analysis and thesis">
           <FinancialStatsPreview
             formRef={formRef}
             direction={trade?.direction || initialValues?.direction || "LONG"}
           />
-          <div className="tosv3-ticket__aside-fields">
-            <div>
-              <label htmlFor="entryNote" className="label">
-                Entry note
-              </label>
-              <textarea
-                id="entryNote"
-                name="entryNote"
-                rows={2}
-                defaultValue={trade?.entryNote ?? ""}
-                className="input tosv3-ticket__textarea"
-              />
+          <section className="tosv3-ticket__section tosv3-ticket__section--thesis" aria-labelledby="tosv3-ticket-thesis">
+            <h2 id="tosv3-ticket-thesis" className="tosv3-ticket__section-title">
+              Thesis / notes
+            </h2>
+            <div className="tosv3-ticket__aside-fields">
+              <div>
+                <label htmlFor="entryNote" className="label">
+                  Entry note
+                </label>
+                <textarea
+                  id="entryNote"
+                  name="entryNote"
+                  rows={2}
+                  defaultValue={trade?.entryNote ?? ""}
+                  className="input tosv3-ticket__textarea"
+                  placeholder="Trigger, location, or execution detail…"
+                />
+              </div>
+              <div>
+                <label htmlFor="notes" className="label">
+                  Trade thesis
+                </label>
+                <textarea
+                  id="notes"
+                  name="notes"
+                  rows={4}
+                  placeholder="Why did you take this trade?"
+                  defaultValue={trade?.notes || ""}
+                  className="input tosv3-ticket__textarea tosv3-ticket__textarea--thesis"
+                />
+              </div>
             </div>
-            <div>
-              <label htmlFor="notes" className="label">
-                Thesis / notes
-              </label>
-              <textarea
-                id="notes"
-                name="notes"
-                rows={3}
-                placeholder="Why did you take this trade?"
-                defaultValue={trade?.notes || ""}
-                className="input tosv3-ticket__textarea"
-              />
-            </div>
-          </div>
+          </section>
         </aside>
       </div>
 
@@ -625,23 +631,22 @@ function FinancialStatsPreview({
   };
 
   return (
-    <div className="tosv3-ticket__risk-panel">
-      <div className="border-b border-[#1f1f23] pb-2">
-        <h3 className="text-xs font-bold text-[#fafafa] uppercase tracking-wider">
-          Position Live Analysis
-        </h3>
-        <p className="text-[10px] text-[#71717a] mt-0.5">Real-time calculations from inputs</p>
-      </div>
-      
-      <div className="tosv3-ticket__risk-metrics">
-        <div className="tosv3-ticket__risk-metric">
+    <div className="tosv3-ticket__risk-panel" data-testid="trade-live-analysis">
+      <header className="tosv3-ticket__risk-head">
+        <span className="tosv3-kicker">Live analysis</span>
+        <h3 className="tosv3-ticket__risk-title">Position metrics</h3>
+        <p className="tosv3-ticket__risk-hint">Updates as you edit execution fields</p>
+      </header>
+
+      <div className="tosv3-ticket__risk-grid">
+        <div className="tosv3-ticket__metric-block">
           <span className="tosv3-ticket__risk-label">Position value</span>
           <span className="tosv3-ticket__risk-value tabular-nums">
-            {totalValue > 0 ? formatVNDLocal(totalValue) : "0 ₫"}
+            {totalValue > 0 ? formatVNDLocal(totalValue) : "—"}
           </span>
         </div>
 
-        <div className="tosv3-ticket__risk-metric">
+        <div className="tosv3-ticket__metric-block">
           <span className="tosv3-ticket__risk-label">Capital at risk</span>
           {hasValidStop ? (
             <>
@@ -649,7 +654,7 @@ function FinancialStatsPreview({
                 {formatVNDLocal(capitalAtRisk)}
               </span>
               <span className="tosv3-ticket__risk-sub tabular-nums">
-                {((capitalAtRisk / totalValue) * 100).toFixed(1)}% of size
+                {totalValue > 0 ? `${((capitalAtRisk / totalValue) * 100).toFixed(1)}% of size` : ""}
               </span>
             </>
           ) : (
@@ -659,8 +664,8 @@ function FinancialStatsPreview({
           )}
         </div>
 
-        <div className="tosv3-ticket__risk-metric">
-          <span className="tosv3-ticket__risk-label">R target</span>
+        <div className="tosv3-ticket__metric-block tosv3-ticket__metric-block--wide">
+          <span className="tosv3-ticket__risk-label">Reward / risk</span>
           {hasValidReward ? (
             <span className="tosv3-ticket__risk-value tosv3-ticket__risk-value--gain tabular-nums">
               {rewardToRisk.toFixed(2)}R

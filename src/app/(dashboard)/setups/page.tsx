@@ -41,17 +41,16 @@ export default async function SetupsPage() {
           <SetupsOverviewAsync />
         </Suspense>
 
-        <div className="tosv3-setups-grid">
-          <div className="tosv3-setups-grid__primary">
+        <section className="tosv3-setups-cockpit" aria-label="Setup pipeline cockpit">
+          <div className="tosv3-setups-cockpit__workspace tosv3-glass-panel">
             <Suspense fallback={<SetupsCandidatesFallback />}>
               <SetupsCandidatesAsync />
             </Suspense>
           </div>
-
           <Suspense fallback={<SetupsSidebarFallback />}>
             <SetupsSidebarAsync />
           </Suspense>
-        </div>
+        </section>
 
         <Suspense fallback={<SetupsTailFallback />}>
           <SetupsTailAsync />
