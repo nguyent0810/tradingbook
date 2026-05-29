@@ -9,6 +9,10 @@ import {
   mapDashboardV3ViewModel,
   mapUxVerdictToDecisionMode,
 } from "./map-dashboard-v3-view-model";
+import {
+  formatGateFailureForUser,
+  formatRelativeStrengthSummaryForUser,
+} from "./v3-user-copy";
 
 const alignedFreshness = buildMarketFreshnessDto({
   snapshot: {
@@ -218,5 +222,91 @@ describe("mapDashboardV3ViewModel — ledger", () => {
 describe("mapUxVerdictToDecisionMode", () => {
   it("maps PROBE to WAIT", () => {
     expect(mapUxVerdictToDecisionMode("PROBE")).toBe("WAIT");
+  });
+});
+
+describe("v3 user-facing copy", () => {
+  it("humanizes breakout_recency gate failure without internal codes", () => {
+    const copy = formatGateFailureForUser(
+      "Failed Gate 2 because: No recent breakout (breakout_recency)"
+    );
+    expect(copy).toMatch(/not ready yet/i);
+    expect(copy).not.toMatch(/breakout_recency/);
+    expect(copy).not.toMatch(/Failed Gate 2 because/);
+  });
+
+  it("humanizes relative strength summary lines", () => {
+    const copy = formatRelativeStrengthSummaryForUser("RS20 +18.16 pp · RS50 +24.91 pp");
+    expect(copy).toMatch(/20 sessions/i);
+    expect(copy).not.toMatch(/RS20/);
+    expect(copy).not.toMatch(/pp · RS50/);
+  });
+});
+
+describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
+  it("formats breadth without G2 shorthand", () => {
+    const vm = mapFromInput(
+      baseInput({
+        latestScan: {
+          id: "scan-breadth",
+          runAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+          gate1Level: "PASS",
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+          universeScannedCount: 400,
+        },
+      })
+    );
+    expect(vm.marketPulse.breadth).toMatch(/1 strong setup/i);
+    expect(vm.marketPulse.breadth).not.toMatch(/G2/);
+    expect(vm.marketPulse.breadth).not.toMatch(/surfaced 1$/);
+  });
+
+  it("humanizes RS near-miss watchlist panel copy for dashboard", () => {
+    const vm = mapFromInput(
+      baseInput({
+        rsNearMissWatchlist: {
+          title: "Relative-strength watchlist",
+          subtitle: "Diagnostic only",
+          disclaimerLines: [
+            "Relative strength diagnostic only — not used in current Gate 2 pass/fail.",
+            "Not a Gate 2 SetupCandidate.",
+          ],
+          actionHint: "Not used in current trading decision.",
+          emptyReason: null,
+          rows: [
+            {
+              symbol: "CTR",
+              sessionDate: "2026-05-25",
+              failedGate2Because:
+                "Failed Gate 2 because: No recent breakout (breakout_recency)",
+              topRejectionReason: "Not a Gate 2 SetupCandidate.",
+              rs20SpreadPct: 18.16,
+              rs50SpreadPct: 24.91,
+              terminalCode: "breakout_recency",
+              stageRank: 58,
+              distanceToPullbackZoneFrac: null,
+              actionHint: "Diagnostic only",
+              disclaimerLines: ["Not part of rankScore yet."],
+              rsDiagnostic: {
+                summary: "RS20 +18.16 pp · RS50 +24.91 pp",
+                disclaimer:
+                  "Relative strength diagnostic only — not used in current Gate 2 pass/fail and not part of rankScore yet.",
+                lines: ["RS20 +18.16 pp vs VNINDEX"],
+                rs20SpreadPct: 18.16,
+              },
+            },
+          ],
+        },
+      })
+    );
+    const row = vm.rsNearMissWatchlist.rows[0]!;
+    expect(row.failedGate2Because).not.toMatch(/Failed Gate 2 because/);
+    expect(row.failedGate2Because).not.toMatch(/breakout_recency/);
+    expect(row.topRejectionReason).not.toMatch(/SetupCandidate/);
+    expect(row.rsDiagnostic?.summary).not.toMatch(/RS20 \+/);
+    expect(row.rsDiagnostic?.disclaimer).not.toMatch(/rankScore/);
+    expect(vm.rsNearMissWatchlist.disclaimerLines.join(" ")).not.toMatch(/diagnostic only/i);
   });
 });
