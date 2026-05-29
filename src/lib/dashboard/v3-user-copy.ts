@@ -47,20 +47,20 @@ export function formatGateFailureForUser(raw: string): string {
     const body = match[1]!.trim();
     const code = match[2] ?? extractCategoryKey(body);
     if (code === "breakout_recency") {
-      return "Setup is not ready yet — no fresh breakout confirmed.";
+      return "Not ready — no fresh breakout confirmed.";
     }
     if (code) {
       const label = rejectionBucketTraderGuide(code).meaning;
       const sentence = label.endsWith(".") ? label.slice(0, -1) : label;
-      return `Setup is not ready yet — ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}.`;
+      return `Not ready — ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}.`;
     }
-    return `Setup is not ready yet — ${body.replace(/\s*\([^)]+\)\s*$/, "")}.`;
+    return `Not ready — ${body.replace(/\s*\([^)]+\)\s*$/, "")}.`;
   }
 
   const category = extractCategoryKey(trimmed);
   if (category?.includes("_")) {
     const guide = rejectionBucketTraderGuide(category);
-    return `Setup is not ready yet — ${guide.meaning}`;
+    return `Not ready — ${guide.meaning}`;
   }
 
   return formatScannerReasonForUser(trimmed);
@@ -165,6 +165,23 @@ export function formatSetupDiagnosticCopy(raw: string | null | undefined): strin
   if (!raw) return null;
   const formatted = formatScannerReasonForUser(raw);
   return formatted || null;
+}
+
+/** Trader-facing action hints — strips internal URLs and setup IDs. */
+export function formatActionHintForUser(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (/Log trade → \/trades\/new/i.test(trimmed)) return "Log trade when entry confirms.";
+  if (/Wait for entry zone/i.test(trimmed)) return "Wait for pullback entry zone.";
+  if (/Review on Setups/i.test(trimmed)) return "Review full setup on Setups.";
+  return formatScannerReasonForUser(trimmed) || null;
+}
+
+export function truncateForChip(text: string, max = 48): string {
+  const cleaned = text.trim();
+  if (cleaned.length <= max) return cleaned;
+  return `${cleaned.slice(0, max - 1)}…`;
 }
 
 const NEXT_CONDITION_BY_CODE: Record<string, string> = {

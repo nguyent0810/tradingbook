@@ -24,6 +24,7 @@ import type {
   V3SetupCard,
 } from "./dashboard-v3-view-model";
 import {
+  formatActionHintForUser,
   formatBreadthSummary,
   formatRadarReason,
   formatScannerReasonForUser,
@@ -432,11 +433,11 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       ),
       highestQualitySetup: buildHighestQualitySetup(cockpitDto.opportunity, topSetups),
       mainRisk: buildMainRisk(cockpitDto),
-      nextAction: formatScannerReasonForUser(
+      nextAction: formatActionHintForUser(
         cockpitDto.tomorrow.triggerLine.value ||
           cockpitDto.opportunity.candidates[0]?.actionHint ||
           null
-      ) || null,
+      ),
       riskPosture: cockpitDto.risk.stanceCopy.value,
       capitalProtection:
         formatScannerReasonForUser(
@@ -463,7 +464,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       lossLimit: null,
       posture: cockpitDto.risk.stanceCopy.value,
       blockers,
-      capitalProtectionState: headroom.statusCopy,
+      capitalProtectionState: formatScannerReasonForUser(headroom.statusCopy) || headroom.statusCopy,
       utilizationPercent,
       utilizationTone,
     },

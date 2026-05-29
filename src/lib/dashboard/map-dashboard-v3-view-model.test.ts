@@ -230,7 +230,7 @@ describe("v3 user-facing copy", () => {
     const copy = formatGateFailureForUser(
       "Failed Gate 2 because: No recent breakout (breakout_recency)"
     );
-    expect(copy).toMatch(/not ready yet/i);
+    expect(copy).toMatch(/Not ready/i);
     expect(copy).not.toMatch(/breakout_recency/);
     expect(copy).not.toMatch(/Failed Gate 2 because/);
   });
