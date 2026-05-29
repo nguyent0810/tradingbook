@@ -262,7 +262,7 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
 
   return (
     <div
-      className={`tosv3-setups-workstation${manyCandidates ? " tosv3-setups-workstation--many" : ""}`}
+      className={`tosv3-setups-candidate-grid${manyCandidates ? " tosv3-setups-candidate-grid--many" : ""}`}
     >
       <aside className="tosv3-setups-selector" aria-label="Surfaced candidates">
         <p className="tosv3-setups-selector__label">
@@ -324,7 +324,7 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
       </aside>
 
       {selected ? (
-        <div className="tosv3-setups-workstation__main">
+        <div className="tosv3-setups-candidate-grid__main">
           <CandidateWorkstation
             bundle={selected}
             techOpen={techOpen}
