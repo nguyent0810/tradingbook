@@ -81,23 +81,20 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
   };
 
   return (
-    <form ref={formRef} action={formAction} className="tosv3-ticket">
+    <form ref={formRef} action={formAction} className="tosv3-ticket tosv3-ticket--dense">
       {state?.message && (
         <div className="tosv3-ticket__alert" role="alert">
           {state.message}
         </div>
       )}
 
-      <div className="tosv3-ticket__layout">
+      <div className="tosv3-ticket__layout tosv3-ticket__layout--dense">
         <div className="tosv3-ticket__main">
           <section className="tosv3-ticket__section" aria-labelledby="tosv3-ticket-instrument">
-            <header className="tosv3-ticket__section-head">
-              <h2 id="tosv3-ticket-instrument" className="tosv3-ticket__section-title">
-                Instrument
-              </h2>
-              <p className="tosv3-ticket__section-hint">Symbol, direction, and lifecycle status</p>
-            </header>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <h2 id="tosv3-ticket-instrument" className="tosv3-ticket__section-title">
+              Instrument
+            </h2>
+          <div className="tosv3-ticket__row tosv3-ticket__row--4">
             <div>
               <label htmlFor="symbol" className="label">
                 Ticker Symbol
@@ -156,39 +153,28 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
                 <option value="CANCELLED">Cancelled</option>
               </select>
             </div>
-          </div>
-
-          </section>
-
-          <section className="tosv3-ticket__section" aria-labelledby="tosv3-ticket-execution">
-            <header className="tosv3-ticket__section-head">
-              <h2 id="tosv3-ticket-execution" className="tosv3-ticket__section-title">
-                Execution
-              </h2>
-              <p className="tosv3-ticket__section-hint">Entry timing, price, size, and fees</p>
-            </header>
-
-          <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-tertiary)] px-4 py-3 text-sm tosv3-ticket__playbook">
-            <span className="font-medium text-[var(--text-primary)]">Playbook</span>
-            <span className="mx-2 text-[var(--text-muted)]">·</span>
-            <span className="text-[var(--text-secondary)]">
-              {formatPlaybookLabel(trade?.playbook ?? "BREAKOUT_PULLBACK")}
-            </span>
-            <p className="mt-1 text-xs text-[var(--text-muted)]">
-              This journal is locked to the Breakout pullback playbook only.
-            </p>
-            {setupContextLabel ? (
-              <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                Linked setup: {setupContextLabel}
+            <div className="tosv3-ticket__playbook-field">
+              <span className="label">Playbook</span>
+              <p className="tosv3-ticket__playbook-value">
+                {formatPlaybookLabel(trade?.playbook ?? "BREAKOUT_PULLBACK")}
               </p>
-            ) : null}
+              {setupContextLabel ? (
+                <p className="tosv3-ticket__playbook-setup" title={setupContextLabel}>
+                  {setupContextLabel}
+                </p>
+              ) : null}
+            </div>
           </div>
 
           <input type="hidden" name="setupId" value={trade?.setupId ?? initialValues?.setupId ?? ""} />
           <input type="hidden" name="setupSnapshot" value={initialValues?.setupSnapshot ?? ""} />
+          </section>
 
-          {/* Row 2: Entry Date (Exit Date moved to dynamically disclosed section) */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <section className="tosv3-ticket__section" aria-labelledby="tosv3-ticket-execution">
+            <h2 id="tosv3-ticket-execution" className="tosv3-ticket__section-title">
+              Execution
+            </h2>
+          <div className="tosv3-ticket__row tosv3-ticket__row--2">
             <div>
               <label htmlFor="entryDate" className="label">
                 Entry Date
@@ -229,11 +215,10 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             </div>
           </div>
 
-          {/* Row 3: Prices (Exit Price moved to dynamically disclosed section) */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="tosv3-ticket__row tosv3-ticket__row--3">
             <div>
               <label htmlFor="entryPrice" className="label">
-                Entry price <span style={{ color: "var(--text-muted)" }}>(1000 ₫ / share)</span>
+                Entry price <span className="tosv3-ticket__unit">(k ₫)</span>
               </label>
               <input
                 id="entryPrice"
@@ -249,34 +234,9 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
                 }}
               />
               {state?.errors?.entryPrice && (
-                <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
-                  {state.errors.entryPrice[0]}
-                </p>
+                <p className="tosv3-ticket__field-error">{state.errors.entryPrice[0]}</p>
               )}
-              <p className="mt-1.5 text-xs leading-snug" style={{ color: "var(--text-muted)" }}>
-                Same unit as imported closes (thousand VND per share) to ensure correct EOD unrealized calculations.
-              </p>
-              
-              {entryUnitHint ? (
-                <div className="mt-3 rounded-lg border border-[rgba(245,158,11,0.35)] bg-[rgba(245,158,11,0.08)] p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <div className="text-xs text-[#f59e0b] leading-relaxed">
-                    <span className="font-semibold block mb-0.5">⚠️ Đơn vị giá không khớp</span>
-                    Mã này có thể đang sử dụng VNĐ nominal thay vì đơn vị nghìn đồng (k ₫).
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleFixEntryPrice}
-                    className="bg-[rgba(245,158,11,0.15)] hover:bg-[rgba(245,158,11,0.25)] text-[#fbbf24] border border-[rgba(245,158,11,0.3)] text-[11px] font-semibold px-2.5 py-1 rounded transition-all whitespace-nowrap cursor-pointer"
-                  >
-                    Sửa nhanh đơn vị (k ₫)
-                  </button>
-                </div>
-              ) : null}
             </div>
-          </div>
-
-          {/* Row 4: Quantity + Fees */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="quantity" className="label">
                 Quantity
@@ -292,12 +252,9 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
                 className="input"
               />
               {state?.errors?.quantity && (
-                <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
-                  {state.errors.quantity[0]}
-                </p>
+                <p className="tosv3-ticket__field-error">{state.errors.quantity[0]}</p>
               )}
             </div>
-
             <div>
               <label htmlFor="fees" className="label">
                 Fees
@@ -314,11 +271,24 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             </div>
           </div>
 
-          {/* Row 5: Setup execution context */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {entryUnitHint ? (
+            <div className="tosv3-ticket__unit-warn">
+              <p className="tosv3-ticket__unit-warn-text">{entryUnitHint}</p>
+              <button type="button" onClick={handleFixEntryPrice} className="tosv3-btn tosv3-btn--sm tosv3-btn--secondary">
+                Fix unit (k ₫)
+              </button>
+            </div>
+          ) : null}
+          </section>
+
+          <section className="tosv3-ticket__section" aria-labelledby="tosv3-ticket-risk">
+            <h2 id="tosv3-ticket-risk" className="tosv3-ticket__section-title">
+              Risk
+            </h2>
+          <div className="tosv3-ticket__row tosv3-ticket__row--4">
             <div>
               <label htmlFor="stopLoss" className="label">
-                Stop loss <span style={{ color: "var(--text-muted)" }}>(optional, 1000 ₫ / share)</span>
+                Stop loss <span className="tosv3-ticket__unit">(k ₫)</span>
               </label>
               <input
                 id="stopLoss"
@@ -331,7 +301,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             </div>
             <div>
               <label htmlFor="takeProfit" className="label">
-                Take profit <span style={{ color: "var(--text-muted)" }}>(optional, 1000 ₫ / share)</span>
+                Take profit <span className="tosv3-ticket__unit">(k ₫)</span>
               </label>
               <input
                 id="takeProfit"
@@ -342,13 +312,9 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
                 className="input"
               />
             </div>
-          </div>
-
-          {/* Row 6: Position sizing & health */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="positionSize" className="label">
-                Position Size <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                Position size
               </label>
               <input
                 id="positionSize"
@@ -361,7 +327,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             </div>
             <div>
               <label htmlFor="healthScoreAtEntry" className="label">
-                Health Score at Entry <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+                Health score
               </label>
               <input
                 id="healthScoreAtEntry"
@@ -374,9 +340,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
               />
             </div>
           </div>
-
-          {/* Row 7: Entry settings */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="tosv3-ticket__row tosv3-ticket__row--2">
             <div>
               <label htmlFor="entryLocationVsZone" className="label">Entry vs Zone</label>
               <select
@@ -407,21 +371,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
               </select>
             </div>
           </div>
-
-          {/* Row 8: Entry Note */}
-          <div>
-            <label htmlFor="entryNote" className="label">
-              Entry Note <span style={{ color: "var(--text-muted)" }}>(optional)</span>
-            </label>
-            <textarea
-              id="entryNote"
-              name="entryNote"
-              rows={2}
-              defaultValue={trade?.entryNote ?? ""}
-              className="input"
-              style={{ resize: "vertical", minHeight: "64px" }}
-            />
-          </div>
+          </section>
 
           {/* DYNAMIC EXIT FIELDS DISCLOSURE PANEL (Only shown when status is CLOSED) */}
           <AnimatePresence initial={false}>
@@ -526,62 +476,68 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             )}
           </AnimatePresence>
 
-          {/* Row 9: General Notes */}
-          <div>
-            <label htmlFor="notes" className="label">
-              Notes <span style={{ color: "var(--text-muted)" }}>(optional)</span>
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              rows={3}
-              placeholder="Why did you take this trade? What was your thesis?"
-              defaultValue={trade?.notes || ""}
-              className="input"
-              style={{ resize: "vertical", minHeight: "80px" }}
-            />
-          </div>
-          </section>
-
-          <div className="tosv3-ticket__actions">
-            <button
-              type="submit"
-              disabled={pending}
-              className="tosv3-btn tosv3-btn--primary"
-            >
-              {pending ? (
-                <span className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 animate-spin"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" opacity="0.25" />
-                    <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75" />
-                  </svg>
-                  {isEditing ? "Updating…" : "Saving…"}
-                </span>
-              ) : isEditing ? (
-                "Update Trade"
-              ) : (
-                "Log Trade"
-              )}
-            </button>
-
-            <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
-              Cancel
-            </Link>
-          </div>
         </div>
 
         <aside className="tosv3-ticket__aside">
-          <FinancialStatsPreview 
-            formRef={formRef} 
-            direction={trade?.direction || initialValues?.direction || "LONG"} 
+          <FinancialStatsPreview
+            formRef={formRef}
+            direction={trade?.direction || initialValues?.direction || "LONG"}
           />
+          <div className="tosv3-ticket__aside-fields">
+            <div>
+              <label htmlFor="entryNote" className="label">
+                Entry note
+              </label>
+              <textarea
+                id="entryNote"
+                name="entryNote"
+                rows={2}
+                defaultValue={trade?.entryNote ?? ""}
+                className="input tosv3-ticket__textarea"
+              />
+            </div>
+            <div>
+              <label htmlFor="notes" className="label">
+                Thesis / notes
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows={3}
+                placeholder="Why did you take this trade?"
+                defaultValue={trade?.notes || ""}
+                className="input tosv3-ticket__textarea"
+              />
+            </div>
+          </div>
         </aside>
+      </div>
+
+      <div className="tosv3-ticket__sticky-bar">
+        <button type="submit" disabled={pending} className="tosv3-btn tosv3-btn--primary">
+          {pending ? (
+            <span className="flex items-center gap-2">
+              <svg
+                className="h-4 w-4 animate-spin"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle cx="12" cy="12" r="10" opacity="0.25" />
+                <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75" />
+              </svg>
+              {isEditing ? "Updating…" : "Saving…"}
+            </span>
+          ) : isEditing ? (
+            "Update Trade"
+          ) : (
+            "Log Trade"
+          )}
+        </button>
+        <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
+          Cancel
+        </Link>
       </div>
     </form>
   );
@@ -677,53 +633,41 @@ function FinancialStatsPreview({
         <p className="text-[10px] text-[#71717a] mt-0.5">Real-time calculations from inputs</p>
       </div>
       
-      <div className="space-y-4">
-        <div>
-          <span className="text-[10px] text-[#71717a] uppercase block mb-1 font-semibold tracking-wide">
-            Total Position Value
-          </span>
-          <span className="text-lg font-bold font-mono text-[#fafafa]">
+      <div className="tosv3-ticket__risk-metrics">
+        <div className="tosv3-ticket__risk-metric">
+          <span className="tosv3-ticket__risk-label">Position value</span>
+          <span className="tosv3-ticket__risk-value tabular-nums">
             {totalValue > 0 ? formatVNDLocal(totalValue) : "0 ₫"}
           </span>
         </div>
 
-        <div className="border-t border-[#1f1f23] pt-3">
-          <span className="text-[10px] text-[#71717a] uppercase block mb-1 font-semibold tracking-wide">
-            Capital at Risk (R-Size)
-          </span>
+        <div className="tosv3-ticket__risk-metric">
+          <span className="tosv3-ticket__risk-label">Capital at risk</span>
           {hasValidStop ? (
-            <div className="flex flex-col gap-1">
-              <span className="text-lg font-bold font-mono text-[#f87171]">
+            <>
+              <span className="tosv3-ticket__risk-value tosv3-ticket__risk-value--loss tabular-nums">
                 {formatVNDLocal(capitalAtRisk)}
               </span>
-              <span className="text-[11px] text-[#a1a1aa]">
-                Risk Ratio: <strong className="text-[#fafafa]">{((capitalAtRisk / totalValue) * 100).toFixed(2)}%</strong> of size
+              <span className="tosv3-ticket__risk-sub tabular-nums">
+                {((capitalAtRisk / totalValue) * 100).toFixed(1)}% of size
               </span>
-            </div>
+            </>
           ) : (
-            <span className="text-xs text-[#71717a] italic">
-              {entryPrice === 0 || quantity === 0 
-                ? "Waiting for Entry details..." 
-                : "No valid Stop Loss configured"}
+            <span className="tosv3-ticket__risk-sub">
+              {entryPrice === 0 || quantity === 0 ? "Enter price & qty" : "Set stop for risk"}
             </span>
           )}
         </div>
 
-        <div className="border-t border-[#1f1f23] pt-3">
-          <span className="text-[10px] text-[#71717a] uppercase block mb-1 font-semibold tracking-wide">
-            Reward to Risk (R Target)
-          </span>
+        <div className="tosv3-ticket__risk-metric">
+          <span className="tosv3-ticket__risk-label">R target</span>
           {hasValidReward ? (
-            <span className="text-base font-bold font-mono text-[#4ade80]">
+            <span className="tosv3-ticket__risk-value tosv3-ticket__risk-value--gain tabular-nums">
               {rewardToRisk.toFixed(2)}R
             </span>
           ) : (
-            <span className="text-xs text-[#71717a] italic">
-              {!hasValidStop 
-                ? "Requires Stop Loss" 
-                : takeProfit === 0 
-                  ? "Optional target not set" 
-                  : "Target price is invalid vs entry"}
+            <span className="tosv3-ticket__risk-sub">
+              {!hasValidStop ? "Needs stop" : takeProfit === 0 ? "No target" : "Invalid target"}
             </span>
           )}
         </div>

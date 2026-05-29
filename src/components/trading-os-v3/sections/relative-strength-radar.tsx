@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { V3RsWatchlistCard, V3RsWatchlistPanel } from "@/lib/dashboard/dashboard-v3-view-model";
+import { truncateForChip } from "@/lib/dashboard/v3-user-copy";
 
 type Props = {
   panel: V3RsWatchlistPanel;
@@ -33,8 +34,8 @@ function metricClass(tone: V3RsWatchlistCard["metrics"][number]["tone"]): string
   }
 }
 
-function rs20Metric(card: V3RsWatchlistCard): string | null {
-  return card.metrics.find((m) => m.label === "RS20")?.value ?? null;
+function metricValue(card: V3RsWatchlistCard, label: string): string {
+  return card.metrics.find((m) => m.label === label)?.value ?? "—";
 }
 
 function RsDetailPanel({
@@ -78,7 +79,9 @@ function RsDetailPanel({
         <span className="tosv3-rs-card__next-label">Next</span>
         {card.nextCondition}
       </p>
-      <p className="tosv3-rs-card__blocker">{card.blockerLabel}</p>
+      {card.blockerLabel ? (
+        <p className="tosv3-rs-card__blocker">{card.blockerLabel}</p>
+      ) : null}
       {card.technicalEvidence.length > 0 ? (
         <div className="tosv3-rs-card__evidence">
           <button
@@ -108,6 +111,8 @@ function RsDetailPanel({
 export function RelativeStrengthRadar({ panel }: Props) {
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(false);
+  const listId = useId();
 
   const activeSymbol =
     selectedSymbol && panel.cards.some((card) => card.symbol === selectedSymbol)
@@ -123,7 +128,7 @@ export function RelativeStrengthRadar({ panel }: Props) {
 
   return (
     <section
-      className="tosv3-panel tosv3-rs-radar"
+      className="tosv3-panel tosv3-rs-radar tosv3-rs-radar--compact"
       aria-label="Relative strength radar"
       data-testid="dashboard-v3-relative-strength-radar"
     >
@@ -136,47 +141,85 @@ export function RelativeStrengthRadar({ panel }: Props) {
           <span className="tosv3-rs-radar__count tabular-nums">{panel.cards.length} leaders</span>
         ) : null}
       </div>
-      <p className="tosv3-rs-radar__context">{panel.contextNote}</p>
+
+      {panel.contextNote ? (
+        <div className="tosv3-rs-radar__context-wrap">
+          <button
+            type="button"
+            className="tosv3-rs-radar__context-toggle"
+            aria-expanded={contextOpen}
+            onClick={() => setContextOpen((v) => !v)}
+          >
+            {contextOpen ? "Hide context" : "Session context"}
+          </button>
+          {contextOpen ? (
+            <p className="tosv3-rs-radar__context">{panel.contextNote}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       {panel.cards.length > 0 && selected ? (
         <div className="tosv3-rs-radar__master-detail">
-          <div
-            className="tosv3-rs-radar__list"
-            role="tablist"
-            aria-label="Relative strength leaders"
-            data-testid="dashboard-v3-rs-cards"
-          >
-            {panel.cards.map((card) => {
-              const isSelected = selected.symbol === card.symbol;
-              const rs20 = rs20Metric(card);
-              return (
-                <button
-                  key={card.symbol}
-                  type="button"
-                  role="tab"
-                  id={`tosv3-rs-tab-${card.symbol}`}
-                  aria-selected={isSelected}
-                  aria-controls={`tosv3-rs-detail-${card.symbol}`}
-                  className={`tosv3-rs-row ${isSelected ? "is-selected" : ""}`}
-                  data-testid={`dashboard-v3-rs-card-${card.symbol}`}
-                  onClick={() => selectSymbol(card.symbol)}
-                >
-                  <span className="tosv3-rs-row__symbol">{card.symbol}</span>
-                  <span className={`tosv3-rs-row__badge ${stateBadgeClass(card.stateTone)}`}>
-                    {card.stateBadge}
-                  </span>
-                  {rs20 ? (
-                    <span className="tosv3-rs-row__rs tabular-nums">{rs20}</span>
-                  ) : null}
-                </button>
-              );
-            })}
+          <div className="tosv3-rs-radar__master" id={listId}>
+            <table className="tosv3-rs-table" role="tablist" aria-label="Relative strength leaders">
+              <thead>
+                <tr>
+                  <th scope="col">Ticker</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" className="table-num">
+                    RS20
+                  </th>
+                  <th scope="col" className="table-num">
+                    RS50
+                  </th>
+                  <th scope="col">Blocker</th>
+                </tr>
+              </thead>
+              <tbody data-testid="dashboard-v3-rs-cards">
+                {panel.cards.map((card) => {
+                  const isSelected = selected.symbol === card.symbol;
+                  return (
+                    <tr
+                      key={card.symbol}
+                      role="tab"
+                      id={`tosv3-rs-tab-${card.symbol}`}
+                      aria-selected={isSelected}
+                      aria-controls={`tosv3-rs-detail-${card.symbol}`}
+                      tabIndex={isSelected ? 0 : -1}
+                      className={`tosv3-rs-table__row ${isSelected ? "is-selected" : ""}`}
+                      data-testid={`dashboard-v3-rs-card-${card.symbol}`}
+                      onClick={() => selectSymbol(card.symbol)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          selectSymbol(card.symbol);
+                        }
+                      }}
+                    >
+                      <td className="tosv3-rs-table__symbol">{card.symbol}</td>
+                      <td>
+                        <span className={`tosv3-rs-row__badge ${stateBadgeClass(card.stateTone)}`}>
+                          {card.stateBadge}
+                        </span>
+                      </td>
+                      <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS20")}</td>
+                      <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS50")}</td>
+                      <td className="tosv3-rs-table__blocker" title={card.blockerLabel}>
+                        {truncateForChip(card.blockerLabel, 28)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-          <RsDetailPanel
-            card={selected}
-            evidenceOpen={evidenceOpen}
-            onToggleEvidence={() => setEvidenceOpen((open) => !open)}
-          />
+          <div className="tosv3-rs-radar__detail-sticky">
+            <RsDetailPanel
+              card={selected}
+              evidenceOpen={evidenceOpen}
+              onToggleEvidence={() => setEvidenceOpen((open) => !open)}
+            />
+          </div>
         </div>
       ) : (
         <p className="tosv3-empty-state" data-testid="dashboard-v3-rs-empty">
