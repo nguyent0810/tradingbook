@@ -130,11 +130,11 @@ async function main(): Promise<void> {
       gate2Quality: ev.quality,
       terminalCategory: ev.quality === "INVALID" ? terminalGate2Reason(ev) : null,
       rankScore: ev.rankScore,
-      relativeStrength: rsUi
+      relativeStrength: rs
         ? {
-            summary: rsUi.summary,
-            lines: rsUi.lines,
-            disclaimer: rsUi.disclaimer,
+            summary: rsUi!.summary,
+            lines: rsUi!.lines,
+            disclaimer: rsUi!.disclaimer,
             rs20SpreadPct: rs20?.rsSpreadPct ?? null,
             rs50SpreadPct: rs50?.rsSpreadPct ?? null,
             dualUptrendMa50: rs.dualUptrendMa50,

@@ -4,6 +4,7 @@ import { FORWARD_RETURN_HORIZONS } from "./forward-returns";
 import { HIGH_MISSING_FUTURE_20D_RATE, SMALL_SAMPLE_THRESHOLD } from "./forward-return-validation";
 import {
   compareGate2RankOrdering,
+  type Gate2RankOrderingComparison,
   type Gate2RankOrderingEntry,
 } from "./rs-rank-term";
 

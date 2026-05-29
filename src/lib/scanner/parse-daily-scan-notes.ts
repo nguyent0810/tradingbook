@@ -41,13 +41,13 @@ function parseScanSessionCoverage(raw: unknown): ScanSessionCoverage | undefined
 
   return {
     expectedSessionDate,
-    universeScanned,
-    tradabilityEvaluated,
-    tradabilityPassed,
-    staleSessionCount,
-    staleSessionFrac,
-    sessionAlignedCount,
-    sessionAlignedFrac,
+    universeScanned: universeScanned as number,
+    tradabilityEvaluated: tradabilityEvaluated as number,
+    tradabilityPassed: tradabilityPassed as number,
+    staleSessionCount: staleSessionCount as number,
+    staleSessionFrac: staleSessionFrac as number,
+    sessionAlignedCount: sessionAlignedCount as number,
+    sessionAlignedFrac: sessionAlignedFrac as number,
     weakCoverage,
     headline,
     operatorWarning:
