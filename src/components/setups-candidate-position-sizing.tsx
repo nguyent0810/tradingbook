@@ -70,68 +70,89 @@ export function SetupsCandidatePositionSizing({
   ]);
 
   return (
-    <div className="tosv3-setups-sizing-panel">
-      <p className="tosv3-setups-sizing-panel__title">
-        Position sizing · {symbolKey} · Tier {quality}
-      </p>
+    <div className="tosv3-setups-sizing-panel" data-testid="setups-position-sizing">
       <p className="tosv3-setups-sizing-panel__hint">
-        Scanner prices are k ₫; equity and exposures are full ₫. Guidance only — not a buy order.
+        {symbolKey} · Tier {quality} · k ₫ prices · guidance only
       </p>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <label className="block">
-          <span className="label">Account equity (₫)</span>
-          <input className="input mt-1" value={equity} onChange={(e) => setEquity(e.target.value)} inputMode="decimal" />
-        </label>
-        <label className="block">
-          <span className="label">Max portfolio exposure (%)</span>
-          <input
-            className="input mt-1"
-            value={maxPortPct}
-            onChange={(e) => setMaxPortPct(e.target.value)}
-            inputMode="decimal"
-          />
-        </label>
-        <label className="block">
-          <span className="label">Current portfolio exposure (₫)</span>
-          <input
-            className="input mt-1"
-            value={currentExp}
-            onChange={(e) => setCurrentExp(e.target.value)}
-            inputMode="decimal"
-          />
-        </label>
-        <label className="block">
-          <span className="label">Max per-trade exposure (% of equity)</span>
-          <input
-            className="input mt-1"
-            value={maxTradePct}
-            onChange={(e) => setMaxTradePct(e.target.value)}
-            inputMode="decimal"
-          />
-        </label>
-        <label className="block">
-          <span className="label">Base risk per trade (% of equity)</span>
-          <input
-            className="input mt-1"
-            value={baseRiskPct}
-            onChange={(e) => setBaseRiskPct(e.target.value)}
-            inputMode="decimal"
-          />
-        </label>
-        <label className="block">
-          <span className="label">Entry (k ₫)</span>
-          <input className="input mt-1" value={entryK} onChange={(e) => setEntryK(e.target.value)} inputMode="decimal" />
-        </label>
-        <label className="block">
-          <span className="label">Stop (k ₫)</span>
-          <input className="input mt-1" value={stopK} onChange={(e) => setStopK(e.target.value)} inputMode="decimal" />
-        </label>
+      <div className="tosv3-setups-sizing-panel__group">
+        <p className="tosv3-setups-sizing-panel__group-title">Account &amp; exposure</p>
+        <div className="tosv3-setups-sizing-panel__fields">
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Equity (₫)</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={equity}
+              onChange={(e) => setEquity(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Max port %</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={maxPortPct}
+              onChange={(e) => setMaxPortPct(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Current exp (₫)</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={currentExp}
+              onChange={(e) => setCurrentExp(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Max trade %</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={maxTradePct}
+              onChange={(e) => setMaxTradePct(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Base risk %</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={baseRiskPct}
+              onChange={(e) => setBaseRiskPct(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+        </div>
       </div>
 
-      <div className="mt-4 border-t pt-4 text-sm" style={{ borderColor: "var(--border-primary)" }}>
+      <div className="tosv3-setups-sizing-panel__group">
+        <p className="tosv3-setups-sizing-panel__group-title">Entry &amp; stop</p>
+        <div className="tosv3-setups-sizing-panel__fields tosv3-setups-sizing-panel__fields--2">
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Entry (k ₫)</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={entryK}
+              onChange={(e) => setEntryK(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+          <label className="tosv3-setups-sizing-field">
+            <span className="tosv3-setups-sizing-field__label">Stop (k ₫)</span>
+            <input
+              className="input tosv3-setups-sizing-field__input"
+              value={stopK}
+              onChange={(e) => setStopK(e.target.value)}
+              inputMode="decimal"
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="tosv3-setups-sizing-panel__results">
         {!computed.ok ? (
-          <p style={{ color: "var(--danger)" }}>
+          <p className="tosv3-setups-sizing-panel__error">
             {computed.code === "ENTRY_NOT_ABOVE_STOP"
               ? "Entry must be above stop for long risk sizing."
               : computed.code === "ZERO_EQUITY"
@@ -139,62 +160,34 @@ export function SetupsCandidatePositionSizing({
                 : "Check numeric inputs."}
           </p>
         ) : (
-          <dl className="grid gap-2 sm:grid-cols-2">
-            <div style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Shares (floored)
-              </dt>
-              <dd className="mono font-semibold" style={{ color: "var(--text-primary)" }}>
-                {computed.value.qFinalShares.toLocaleString("en-US")}
-              </dd>
+          <dl className="tosv3-setups-sizing-results">
+            <div>
+              <dt>Shares</dt>
+              <dd className="mono tabular-nums">{computed.value.qFinalShares.toLocaleString("en-US")}</dd>
             </div>
-            <div style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Capital used (notional)
-              </dt>
-              <dd className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {formatVND(computed.value.notionalVnd)}
-              </dd>
+            <div>
+              <dt>Notional</dt>
+              <dd className="tabular-nums">{formatVND(computed.value.notionalVnd)}</dd>
             </div>
-            <div style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Risk at stop (₫)
-              </dt>
-              <dd className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {formatVND(computed.value.riskAtStopVnd)}
-              </dd>
+            <div>
+              <dt>Risk at stop</dt>
+              <dd className="tabular-nums">{formatVND(computed.value.riskAtStopVnd)}</dd>
             </div>
-            <div style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Stop distance (% of entry)
-              </dt>
-              <dd className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {computed.value.stopDistancePctOfEntry.toFixed(2)}%
-              </dd>
+            <div>
+              <dt>Stop dist</dt>
+              <dd className="tabular-nums">{computed.value.stopDistancePctOfEntry.toFixed(2)}%</dd>
             </div>
-            <div style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Position % of account
-              </dt>
-              <dd className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {computed.value.positionPctOfAccount.toFixed(2)}%
-              </dd>
+            <div>
+              <dt>Position %</dt>
+              <dd className="tabular-nums">{computed.value.positionPctOfAccount.toFixed(2)}%</dd>
             </div>
-            <div style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Exposure after trade (₫)
-              </dt>
-              <dd className="font-semibold" style={{ color: "var(--text-primary)" }}>
-                {formatVND(computed.value.exposureAfterTradeVnd)}
-              </dd>
+            <div>
+              <dt>Exp after</dt>
+              <dd className="tabular-nums">{formatVND(computed.value.exposureAfterTradeVnd)}</dd>
             </div>
-            <div className="sm:col-span-2" style={{ color: "var(--text-secondary)" }}>
-              <dt className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                Remaining portfolio exposure capacity after trade (₫)
-              </dt>
-              <dd className="font-semibold" style={{ color: "var(--accent-text)" }}>
-                {formatVND(computed.value.remainingExposureAfterTradeVnd)}
-              </dd>
+            <div className="tosv3-setups-sizing-results__wide">
+              <dt>Remaining capacity</dt>
+              <dd className="tabular-nums">{formatVND(computed.value.remainingExposureAfterTradeVnd)}</dd>
             </div>
           </dl>
         )}

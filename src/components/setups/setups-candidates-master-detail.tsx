@@ -4,10 +4,16 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import type { ScanQuality } from "@/generated/prisma/client";
 import type { SetupHealthLevelValue } from "@/lib/setup-health";
-import { SetupsCandidateHealthStrip } from "@/components/setups-candidate-health-strip";
 import { SetupsCandidatePositionSizing } from "@/components/setups-candidate-position-sizing";
-import { SignalBadge, qualityToTierVariant } from "@/components/command-deck/signal-badge";
-import { displayScanQualityTier } from "@/lib/trading-display-labels";
+import {
+  SignalBadge,
+  healthLevelToBadgeVariant,
+  qualityToTierVariant,
+} from "@/components/command-deck/signal-badge";
+import {
+  displayCandidateLifecycleSortLabel,
+  displayScanQualityTier,
+} from "@/lib/trading-display-labels";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
@@ -39,6 +45,8 @@ export type SetupsCandidateBundle = {
   rsDiagnostic: RsDiagnosticUi | null;
 };
 
+const EVIDENCE_PREVIEW_COUNT = 6;
+
 function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -47,7 +55,7 @@ function humanizeLine(line: string): string {
   return formatScannerReasonForUser(line);
 }
 
-function CandidateDetailPanel({
+function CandidateWorkstation({
   bundle,
   techOpen,
   techId,
@@ -60,22 +68,49 @@ function CandidateDetailPanel({
 }) {
   const { candidate, reasonsLines, rankBreakdownLines, rsRankPreviewLines, rsDiagnostic } = bundle;
   const tier = candidate.quality === "A" ? "A" : "B";
+  const lifecycleVariant = candidate.lifecycleSortLabel === "READY" ? "ready" : "watching";
+
+  const evidenceItems = [
+    ...reasonsLines.map((line) => ({ key: `reason-${line}`, text: line, tone: "ok" as const })),
+    ...candidate.healthLines.map((line, i) => ({
+      key: `health-${i}`,
+      text: humanizeLine(line),
+      tone: "neutral" as const,
+    })),
+  ];
+
+  const previewEvidence = evidenceItems.slice(0, EVIDENCE_PREVIEW_COUNT);
+  const hiddenEvidenceCount = evidenceItems.length - previewEvidence.length;
+
   const hasTechnicalDetail =
     rankBreakdownLines.length > 0 || rsRankPreviewLines.length > 0 || rsDiagnostic != null;
 
   return (
-    <div className="tosv3-setups-detail" data-testid={`setups-candidate-detail-${candidate.symbolKey}`}>
-      <header className="tosv3-setups-detail__head">
-        <SetupsCandidateHealthStrip
-          symbolKey={candidate.symbolKey}
-          lifecycleSortLabel={candidate.lifecycleSortLabel}
-          healthLevel={candidate.healthLevel}
-          healthScore={candidate.healthScore}
-          healthScoreLabel={candidate.healthScoreLabel}
-          healthLines={candidate.healthLines}
-          healthHint={candidate.healthHint}
-          compact
-        />
+    <article
+      className="tosv3-setups-workstation-panel"
+      data-testid={`setups-candidate-detail-${candidate.symbolKey}`}
+    >
+      <header className="tosv3-setups-workstation-panel__header">
+        <div className="tosv3-setups-workstation-panel__identity">
+          <h3 className="tosv3-setups-workstation-panel__symbol mono">{candidate.symbolKey}</h3>
+          <div className="tosv3-setups-workstation-panel__badges">
+            <SignalBadge variant={lifecycleVariant}>
+              {displayCandidateLifecycleSortLabel(candidate.lifecycleSortLabel)}
+            </SignalBadge>
+            <SignalBadge variant={qualityToTierVariant(tier)}>
+              {displayScanQualityTier(candidate.quality)}
+            </SignalBadge>
+            <SignalBadge
+              variant={healthLevelToBadgeVariant(candidate.healthLevel)}
+              title={`Health: ${candidate.healthLevel.replace("_", " ")}`}
+            >
+              {candidate.healthLevel.replace("_", " ")}
+            </SignalBadge>
+            <span className="tosv3-setups-workstation-panel__score tabular-nums">
+              {candidate.healthScoreLabel} · {candidate.healthScore}
+            </span>
+          </div>
+        </div>
         <Link
           href={`/trades/new?setupCandidateId=${candidate.id}`}
           className="tosv3-btn tosv3-btn--primary tosv3-btn--sm"
@@ -84,64 +119,68 @@ function CandidateDetailPanel({
         </Link>
       </header>
 
-      <dl className="tosv3-setups-detail__metrics">
-        <div>
+      <dl className="tosv3-setups-metric-strip" aria-label="Key levels">
+        <div className="tosv3-setups-metric-card">
           <dt>Close</dt>
           <dd className="tabular-nums">{fmtThousands(candidate.close)}</dd>
         </div>
-        <div>
+        <div className="tosv3-setups-metric-card">
+          <dt>Stop</dt>
+          <dd className="tabular-nums">{fmtThousands(candidate.stopLevel)}</dd>
+        </div>
+        <div className="tosv3-setups-metric-card">
           <dt>Zone</dt>
           <dd className="tabular-nums">
             {fmtThousands(candidate.pullbackZoneLow)} – {fmtThousands(candidate.pullbackZoneHigh)}
           </dd>
         </div>
-        <div>
-          <dt>Stop</dt>
-          <dd className="tabular-nums">{fmtThousands(candidate.stopLevel)}</dd>
-        </div>
-        <div>
+        <div className="tosv3-setups-metric-card">
           <dt>Bar</dt>
           <dd>{candidate.barDate}</dd>
         </div>
+        <div className="tosv3-setups-metric-card">
+          <dt>Rank</dt>
+          <dd className="tabular-nums">{bundle.rankScore.toFixed(2)}</dd>
+        </div>
       </dl>
 
-      {bundle.perfHint ? <p className="tosv3-setups-detail__hint">{bundle.perfHint}</p> : null}
+      {bundle.perfHint ? <p className="tosv3-setups-workstation-panel__hint">{bundle.perfHint}</p> : null}
 
-      {candidate.healthSummary || candidate.healthLines.length > 0 || candidate.healthHint ? (
-        <div className="tosv3-setups-detail__card">
-          {candidate.healthSummary ? (
-            <p className="tosv3-setups-detail__insight">{humanizeLine(candidate.healthSummary)}</p>
-          ) : null}
-          {candidate.healthLines.length > 0 ? (
-            <ul className="tosv3-setups-detail__chips">
-              {candidate.healthLines.map((line, i) => (
-                <li key={i} className="tosv3-setups-chip">
-                  {humanizeLine(line)}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {candidate.healthHint ? (
-            <p className="tosv3-setups-detail__meta">{humanizeLine(candidate.healthHint)}</p>
-          ) : null}
-        </div>
+      {candidate.healthSummary ? (
+        <p className="tosv3-setups-workstation-panel__summary">{humanizeLine(candidate.healthSummary)}</p>
       ) : null}
 
-      {reasonsLines.length > 0 ? (
-        <ul className="tosv3-setups-detail__chips" aria-label="Why this setup surfaced">
-          {reasonsLines.map((line, i) => (
-            <li key={i} className="tosv3-setups-chip tosv3-setups-chip--ok">
-              {line}
-            </li>
-          ))}
-        </ul>
+      {candidate.healthHint ? (
+        <p className="tosv3-setups-workstation-panel__meta">{humanizeLine(candidate.healthHint)}</p>
+      ) : null}
+
+      {previewEvidence.length > 0 ? (
+        <section className="tosv3-setups-workstation-panel__section" aria-label="Surfaced evidence">
+          <h4 className="tosv3-setups-workstation-panel__section-title">Evidence</h4>
+          <ul className="tosv3-setups-evidence-grid">
+            {previewEvidence.map((item) => (
+              <li
+                key={item.key}
+                className={`tosv3-setups-evidence-item${item.tone === "ok" ? " tosv3-setups-evidence-item--ok" : ""}`}
+                title={item.text}
+              >
+                {item.text}
+              </li>
+            ))}
+          </ul>
+          {hiddenEvidenceCount > 0 ? (
+            <p className="tosv3-setups-workstation-panel__more">
+              +{hiddenEvidenceCount} more in technical evidence
+            </p>
+          ) : null}
+        </section>
       ) : null}
 
       {hasTechnicalDetail ? (
-        <div className="tosv3-tech-detail">
+        <div className="tosv3-setups-tech-block">
           <button
             type="button"
-            className="tosv3-tech-detail__toggle"
+            className="tosv3-setups-tech-block__toggle"
             aria-expanded={techOpen}
             aria-controls={techId}
             onClick={onToggleTech}
@@ -149,16 +188,36 @@ function CandidateDetailPanel({
             {techOpen ? "Hide" : "Show"} technical evidence
           </button>
           {techOpen ? (
-            <div id={techId} className="tosv3-tech-detail__body">
+            <div id={techId} className="tosv3-setups-tech-block__body">
+              {evidenceItems.length > previewEvidence.length ? (
+                <ul className="tosv3-setups-evidence-grid tosv3-setups-evidence-grid--dense">
+                  {evidenceItems.slice(previewEvidence.length).map((item) => (
+                    <li
+                      key={`extra-${item.key}`}
+                      className={`tosv3-setups-evidence-item${item.tone === "ok" ? " tosv3-setups-evidence-item--ok" : ""}`}
+                      title={item.text}
+                    >
+                      {item.text}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               <RelativeStrengthDiagnosticPanel
                 diagnostic={rsDiagnostic}
                 compact
                 testId="setups-candidate-rs-panel"
               />
               {rankBreakdownLines.length > 0 ? (
-                <ul className="tosv3-setups-detail__list" data-testid="setups-candidate-rank-breakdown">
+                <ul className="tosv3-setups-tech-block__list" data-testid="setups-candidate-rank-breakdown">
                   {rankBreakdownLines.map((line, i) => (
                     <li key={`rank-${i}`}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {rsRankPreviewLines.length > 0 ? (
+                <ul className="tosv3-setups-tech-block__list">
+                  {rsRankPreviewLines.map((line, i) => (
+                    <li key={`rs-${i}`}>{line}</li>
                   ))}
                 </ul>
               ) : null}
@@ -167,16 +226,16 @@ function CandidateDetailPanel({
         </div>
       ) : null}
 
-      <details className="tosv3-setups-detail__sizing-details">
-        <summary>Position sizing calculator</summary>
+      <section className="tosv3-setups-workstation-panel__section tosv3-setups-workstation-panel__section--sizing">
+        <h4 className="tosv3-setups-workstation-panel__section-title">Position sizing</h4>
         <SetupsCandidatePositionSizing
           symbolKey={candidate.symbolKey}
           quality={tier}
           defaultEntryKVnd={candidate.close}
           defaultStopKVnd={candidate.stopLevel}
         />
-      </details>
-    </div>
+      </section>
+    </article>
   );
 }
 
@@ -199,68 +258,74 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
 
   if (candidates.length === 0) return null;
 
-  const layoutClass =
-    candidates.length <= 1
-      ? "tosv3-setups-master-detail tosv3-setups-master-detail--single"
-      : "tosv3-setups-master-detail";
+  const manyCandidates = candidates.length > 5;
 
   return (
-    <div className={layoutClass}>
-      <div className="tosv3-setups-master-detail__list-wrap">
-        <table className="tosv3-setups-table dense-table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Tier</th>
-              <th className="table-num">Score</th>
-              <th className="table-num">Close</th>
-              <th className="table-num">Stop</th>
-            </tr>
-          </thead>
-          <tbody>
-            {candidates.map((bundle) => {
-              const { candidate } = bundle;
-              const tier = candidate.quality === "A" ? "A" : "B";
-              const isSelected = selected?.candidate.id === candidate.id;
-              const rowAttention =
-                candidate.lifecycleSortLabel === "READY"
-                  ? "tosv3-setups-table__row--ready"
-                  : candidate.healthLevel === "AT_RISK"
-                    ? "tosv3-setups-table__row--at-risk"
-                    : "";
-              return (
-                <tr
-                  key={candidate.id}
-                  tabIndex={0}
-                  data-testid="setups-candidate-row"
-                  aria-current={isSelected ? "true" : undefined}
-                  className={`tosv3-setups-table__row ${rowAttention}${isSelected ? " is-selected" : ""}`}
-                  onClick={() => select(candidate.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      select(candidate.id);
-                    }
-                  }}
-                >
-                  <td className="tosv3-setups-table__symbol">{candidate.symbolKey}</td>
-                  <td>
-                    <SignalBadge variant={qualityToTierVariant(tier)}>
-                      {displayScanQualityTier(candidate.quality)}
-                    </SignalBadge>
-                  </td>
-                  <td className="table-num tabular-nums">{candidate.healthScore}</td>
-                  <td className="table-num tabular-nums">{fmtThousands(candidate.close)}</td>
-                  <td className="table-num tabular-nums">{fmtThousands(candidate.stopLevel)}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+    <div
+      className={`tosv3-setups-workstation${manyCandidates ? " tosv3-setups-workstation--many" : ""}`}
+    >
+      <aside className="tosv3-setups-selector" aria-label="Surfaced candidates">
+        <p className="tosv3-setups-selector__label">
+          <span className="tosv3-kicker">Candidates</span>
+          <span className="tosv3-setups-selector__count tabular-nums">{candidates.length}</span>
+        </p>
+        <div className="tosv3-setups-selector__scroll">
+          <table className="tosv3-setups-selector-table">
+            <thead>
+              <tr>
+                <th>Sym</th>
+                <th>Tier</th>
+                <th className="table-num">Scr</th>
+                <th className="table-num">Close</th>
+                <th className="table-num">Stop</th>
+              </tr>
+            </thead>
+            <tbody>
+              {candidates.map((bundle) => {
+                const { candidate } = bundle;
+                const tier = candidate.quality === "A" ? "A" : "B";
+                const isSelected = selected?.candidate.id === candidate.id;
+                const rowAttention =
+                  candidate.lifecycleSortLabel === "READY"
+                    ? "tosv3-setups-selector-table__row--ready"
+                    : candidate.healthLevel === "AT_RISK"
+                      ? "tosv3-setups-selector-table__row--at-risk"
+                      : "";
+                return (
+                  <tr
+                    key={candidate.id}
+                    tabIndex={0}
+                    data-testid="setups-candidate-row"
+                    aria-current={isSelected ? "true" : undefined}
+                    className={`tosv3-setups-selector-table__row ${rowAttention}${isSelected ? " is-selected" : ""}`}
+                    onClick={() => select(candidate.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        select(candidate.id);
+                      }
+                    }}
+                  >
+                    <td className="tosv3-setups-selector-table__symbol mono">{candidate.symbolKey}</td>
+                    <td>
+                      <SignalBadge variant={qualityToTierVariant(tier)} className="tosv3-setups-selector-table__tier">
+                        {tier}
+                      </SignalBadge>
+                    </td>
+                    <td className="table-num tabular-nums">{candidate.healthScore}</td>
+                    <td className="table-num tabular-nums">{fmtThousands(candidate.close)}</td>
+                    <td className="table-num tabular-nums">{fmtThousands(candidate.stopLevel)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </aside>
+
       {selected ? (
-        <div className="tosv3-setups-master-detail__detail">
-          <CandidateDetailPanel
+        <div className="tosv3-setups-workstation__main">
+          <CandidateWorkstation
             bundle={selected}
             techOpen={techOpen}
             techId={techId}
