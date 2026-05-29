@@ -97,7 +97,35 @@ export type V3SignalTrajectory = {
   emptyMessage: string | null;
 };
 
-import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+export type V3RsMetricTone = "strong" | "watch" | "blocker" | "context";
+
+export type V3RsWatchlistMetric = {
+  label: string;
+  value: string;
+  tone: V3RsMetricTone;
+};
+
+export type V3RsStateTone = "watch" | "not-ready" | "supportive" | "awaiting";
+
+export type V3RsWatchlistCard = {
+  symbol: string;
+  stateBadge: string;
+  stateTone: V3RsStateTone;
+  strengthLabel: string | null;
+  primaryInsight: string;
+  metrics: V3RsWatchlistMetric[];
+  blockerLabel: string;
+  nextCondition: string;
+  technicalEvidence: string[];
+};
+
+export type V3RsWatchlistPanel = {
+  title: string;
+  subtitle: string;
+  contextNote: string;
+  cards: V3RsWatchlistCard[];
+  emptyReason: string | null;
+};
 
 export type DashboardV3ViewModel = {
   marketPulse: V3MarketPulse;
@@ -114,7 +142,7 @@ export type DashboardV3ViewModel = {
   risk: V3RiskConsole;
   ledger: V3LedgerPulse;
   evidence: V3EvidenceItem[];
-  /** Batch D2.3 — diagnostic RS leaders (INVALID + RS20>0); not Tier A/B. */
-  rsNearMissWatchlist: RsNearMissWatchlistPanelDto;
+  /** Batch D2.3 — RS leaders that failed setup filters; V3 intelligence cards. */
+  rsWatchlist: V3RsWatchlistPanel;
   partialError: string | null;
 };

@@ -12,7 +12,7 @@ import { SetupIntelligenceRail } from "./sections/setup-intelligence-rail";
 import { RiskConsole } from "./sections/risk-console";
 import { LedgerPulseStrip } from "./sections/ledger-pulse-strip";
 import { EvidenceLayer } from "./sections/evidence-layer";
-import { RsNearMissWatchlistPanel } from "@/components/rs-near-miss-watchlist-panel";
+import { RelativeStrengthRadar } from "./sections/relative-strength-radar";
 
 export type TradingOsDashboardProps = {
   viewModel: DashboardV3ViewModel;
@@ -75,10 +75,7 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
           <LedgerPulseStrip data={viewModel.ledger} />
         </div>
         <div className="tosv3-zone tosv3-zone--rs-watchlist">
-          <RsNearMissWatchlistPanel
-            panel={viewModel.rsNearMissWatchlist}
-            testId="dashboard-rs-near-miss-watchlist"
-          />
+          <RelativeStrengthRadar panel={viewModel.rsWatchlist} />
         </div>
         <div className="tosv3-zone tosv3-zone--evidence">
           <EvidenceLayer items={viewModel.evidence} />
