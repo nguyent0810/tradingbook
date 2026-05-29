@@ -325,7 +325,6 @@ async function main(): Promise<void> {
   const payload = {
     generatedAt: new Date().toISOString(),
     tradableCount,
-    evaluationRowCount,
     ...report,
   };
 

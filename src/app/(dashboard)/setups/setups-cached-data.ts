@@ -20,7 +20,6 @@ import {
   computeRsNearMissWatchlistFromDb,
   type RsNearMissWatchlistPanelDto,
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
-import { toCandidateRows } from "@/lib/scanner/setups-queries";
 
 export type SetupsBaseData = {
   latest: LatestScanWithCandidates | null;

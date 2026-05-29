@@ -276,8 +276,8 @@ export function buildLabeledForwardRows(params: {
     })
   );
 
-  const passSets = new Map<string, Set<string>>();
-  const rejectSets = new Map<string, Set<string>>();
+  const passSets = new Map<CohortKey, Set<string>>();
+  const rejectSets = new Map<CohortKey, Set<string>>();
   if (params.includeSweepArms) {
     const arms = buildSweepArmsForReplayRows(params.replayRows, params.rsByUnderlying);
     for (const arm of arms) {
