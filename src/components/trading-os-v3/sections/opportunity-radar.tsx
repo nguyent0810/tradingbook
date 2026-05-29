@@ -70,7 +70,11 @@ export function OpportunityRadar({ radar }: Props) {
         </li>
       </ul>
 
-      <div className="tosv3-radar-map" role="application" aria-label="Readiness versus risk radar">
+      <div
+        className={`tosv3-radar-map ${radar.mapDots.length === 0 ? "tosv3-radar-map--empty" : ""}`}
+        role="application"
+        aria-label="Readiness versus risk radar"
+      >
         <div className="tosv3-radar-map__zones" aria-hidden>
           <span className="tosv3-radar-zone tosv3-radar-zone--execute">Execute</span>
           <span className="tosv3-radar-zone tosv3-radar-zone--watch">Watch</span>
@@ -132,8 +136,14 @@ export function OpportunityRadar({ radar }: Props) {
         <span className="tosv3-radar-map__axis tosv3-radar-map__axis--x">Readiness →</span>
         <span className="tosv3-radar-map__axis tosv3-radar-map__axis--y">Risk ↓</span>
 
+        {radar.mapDots.length === 0 ? (
+          <p className="tosv3-radar-map__empty-copy tosv3-empty-state">
+            No qualified or near-miss symbols in the latest scan.
+          </p>
+        ) : null}
+
         {active ? (
-          <div className="tosv3-radar-tooltip" role="status" aria-live="polite">
+          <div className="tosv3-radar-tooltip tosv3-radar-tooltip--inmap" role="status" aria-live="polite">
             <div className="tosv3-radar-tooltip__head">
               <strong>{active.symbol}</strong>
               <span>{radarActionLabel(active)}</span>
@@ -187,12 +197,16 @@ export function OpportunityRadar({ radar }: Props) {
             <span className="tabular-nums">{radar.qualified.length}</span>
           </header>
           <ul>
-            {radar.qualified.map((item) => (
-              <li key={item.symbol}>
-                <b>{item.symbol}</b>
-                <em>{item.reason}</em>
-              </li>
-            ))}
+            {radar.qualified.length === 0 ? (
+              <li className="tosv3-radar-band__empty">None in latest scan</li>
+            ) : (
+              radar.qualified.map((item) => (
+                <li key={item.symbol}>
+                  <b>{item.symbol}</b>
+                  <em>{item.reason}</em>
+                </li>
+              ))
+            )}
           </ul>
         </article>
         <article className="tosv3-radar-band tosv3-radar-band--watch">
@@ -201,12 +215,16 @@ export function OpportunityRadar({ radar }: Props) {
             <span className="tabular-nums">{radar.nearMiss.length}</span>
           </header>
           <ul>
-            {radar.nearMiss.map((item) => (
-              <li key={item.symbol}>
-                <b>{item.symbol}</b>
-                <em>{item.reason}</em>
-              </li>
-            ))}
+            {radar.nearMiss.length === 0 ? (
+              <li className="tosv3-radar-band__empty">None in latest scan</li>
+            ) : (
+              radar.nearMiss.map((item) => (
+                <li key={item.symbol}>
+                  <b>{item.symbol}</b>
+                  <em>{item.reason}</em>
+                </li>
+              ))
+            )}
           </ul>
         </article>
         <article className="tosv3-radar-band tosv3-radar-band--avoid">
@@ -215,12 +233,16 @@ export function OpportunityRadar({ radar }: Props) {
             <span className="tabular-nums">{radar.rejected.length}</span>
           </header>
           <ul>
-            {radar.rejected.map((item) => (
-              <li key={item.symbol}>
-                <b>{item.symbol}</b>
-                <em>{item.reason}</em>
-              </li>
-            ))}
+            {radar.rejected.length === 0 ? (
+              <li className="tosv3-radar-band__empty">None rejected</li>
+            ) : (
+              radar.rejected.map((item) => (
+                <li key={item.symbol}>
+                  <b>{item.symbol}</b>
+                  <em>{item.reason}</em>
+                </li>
+              ))
+            )}
           </ul>
         </article>
       </div>

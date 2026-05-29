@@ -52,7 +52,11 @@ export function LedgerPulseStrip({ data }: Props) {
 
       <div className="tosv3-ledger__review">
         <span className="tosv3-type-label">Trade review</span>
-        <Link href={data.reviewHref} className="tosv3-type-metric tosv3-ledger__review-link">
+        <Link
+          href={data.reviewHref}
+          className="tosv3-type-metric tosv3-ledger__review-link"
+          aria-label={`${data.reviewLabel} on trades page`}
+        >
           {data.reviewLabel}
         </Link>
       </div>

@@ -6999,3 +6999,147 @@ body {
     animation: none;
   }
 }
+
+/* Trading OS V3 final UI completion */
+.tosv3-type-muted {
+  color: #93a4bc;
+}
+
+.tosv3-empty-state {
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px dashed rgba(120, 145, 175, 0.32);
+  background: rgba(8, 12, 18, 0.55);
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: #9eb0c9;
+}
+
+.tosv3-page-header-slot .dash-v2-page-header {
+  margin-bottom: 0.15rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgba(105, 128, 157, 0.22);
+}
+
+.tosv3-page-header-slot .dash-v2-eyebrow {
+  color: #7ec8ff;
+  letter-spacing: 0.14em;
+}
+
+.tosv3-page-header-slot .dash-v2-page-header__title {
+  color: #eef6ff;
+}
+
+.tosv3-page-header-slot .dash-v2-page-header__lead {
+  color: #93a4bc;
+  max-width: 62ch;
+}
+
+.tosv3-hero__empty-copy {
+  margin-top: 0.65rem;
+}
+
+.tosv3-chart__empty {
+  min-height: 4.5rem;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.tosv3-radar-map--empty {
+  display: grid;
+  place-items: center;
+}
+
+.tosv3-radar-map__empty-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 18rem;
+  text-align: center;
+}
+
+.tosv3-radar-band__empty {
+  font-size: 0.62rem;
+  color: #8ea0b8;
+  font-style: italic;
+  list-style: none;
+}
+
+.tosv3-radar-focus {
+  display: none;
+}
+
+.tosv3-meter--confidence .tosv3-meter__fill {
+  background: linear-gradient(90deg, rgba(52, 211, 153, 0.92), rgba(45, 212, 191, 0.88));
+  box-shadow: 0 0 14px rgba(45, 212, 191, 0.28);
+}
+
+.tosv3-radar-dot:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 3px;
+  z-index: 6;
+}
+
+.tosv3-evidence__toggle:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 3px;
+}
+
+.tosv3-ledger__review-link:focus-visible {
+  outline: 2px solid #5eead4;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (min-width: 761px) {
+  .tosv3-radar-focus {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .tosv3-radar-tooltip--inmap {
+    display: none;
+  }
+
+  .tosv3-radar-focus {
+    display: block;
+  }
+
+  .tosv3-commandbar {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .tosv3-commandbar__metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .tosv3-radar-bands {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1200px) {
+  .tosv3-commandbar__metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .tosv3-radar-map {
+    min-height: 220px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tosv3-radar-dot,
+  .tosv3-panel,
+  .tosv3-meter--confidence .tosv3-meter__fill {
+    transition: none;
+    animation: none;
+  }
+
+  .tosv3-panel:hover {
+    transform: none;
+  }
+}

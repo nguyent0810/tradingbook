@@ -29,7 +29,7 @@ export function SetupIntelligenceRail({ cards }: Props) {
         <p className="tosv3-type-muted">Trigger · risk · action</p>
       </div>
       {cards.length === 0 ? (
-        <p className="tosv3-type-muted">No surfaced setups in the latest scan.</p>
+        <p className="tosv3-empty-state">No surfaced setups in the latest scan.</p>
       ) : (
         <div className="tosv3-setup-rail__list">
           {cards.map((card) => (
