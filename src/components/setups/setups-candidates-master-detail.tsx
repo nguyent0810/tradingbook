@@ -17,7 +17,15 @@ import {
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
-import { V3MasterDetail } from "@/components/trading-os-v3/layout";
+import {
+  V3MasterDetail,
+  type V3MasterDetailSelectorDensity,
+} from "@/components/trading-os-v3/layout";
+import {
+  buildSetupsEvidenceItems,
+  SetupsCandidateEvidence,
+  SETUPS_EVIDENCE_PREVIEW_COUNT,
+} from "@/components/setups/setups-candidate-evidence";
 
 export type SetupsCandidateBundle = {
   candidate: {
@@ -46,8 +54,6 @@ export type SetupsCandidateBundle = {
   rsDiagnostic: RsDiagnosticUi | null;
 };
 
-const EVIDENCE_PREVIEW_COUNT = 6;
-
 function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -56,35 +62,39 @@ function humanizeLine(line: string): string {
   return formatScannerReasonForUser(line);
 }
 
+function selectorDensityForCount(count: number): V3MasterDetailSelectorDensity {
+  if (count <= 1) return "single";
+  if (count <= 3) return "compact";
+  return "default";
+}
+
 function CandidateWorkstation({
   bundle,
   techOpen,
   techId,
   onToggleTech,
+  onOpenTechnical,
 }: {
   bundle: SetupsCandidateBundle;
   techOpen: boolean;
   techId: string;
   onToggleTech: () => void;
+  onOpenTechnical: () => void;
 }) {
   const { candidate, reasonsLines, rankBreakdownLines, rsRankPreviewLines, rsDiagnostic } = bundle;
   const tier = candidate.quality === "A" ? "A" : "B";
   const lifecycleVariant = candidate.lifecycleSortLabel === "READY" ? "ready" : "watching";
 
-  const evidenceItems = [
-    ...reasonsLines.map((line) => ({ key: `reason-${line}`, text: line, tone: "ok" as const })),
-    ...candidate.healthLines.map((line, i) => ({
-      key: `health-${i}`,
-      text: humanizeLine(line),
-      tone: "neutral" as const,
-    })),
-  ];
-
-  const previewEvidence = evidenceItems.slice(0, EVIDENCE_PREVIEW_COUNT);
-  const hiddenEvidenceCount = evidenceItems.length - previewEvidence.length;
+  const evidenceItems = buildSetupsEvidenceItems(reasonsLines, candidate.healthLines);
+  const previewEvidence = evidenceItems.slice(0, SETUPS_EVIDENCE_PREVIEW_COUNT);
 
   const hasTechnicalDetail =
-    rankBreakdownLines.length > 0 || rsRankPreviewLines.length > 0 || rsDiagnostic != null;
+    evidenceItems.length > previewEvidence.length ||
+    rankBreakdownLines.length > 0 ||
+    rsRankPreviewLines.length > 0 ||
+    rsDiagnostic != null;
+
+  const extraEvidence = evidenceItems.slice(SETUPS_EVIDENCE_PREVIEW_COUNT);
 
   return (
     <article
@@ -140,7 +150,7 @@ function CandidateWorkstation({
           <dd>{candidate.barDate}</dd>
         </div>
         <div className="tosv3-setups-metric-card">
-          <dt>Rank</dt>
+          <dt>Setup score</dt>
           <dd className="tabular-nums">{bundle.rankScore.toFixed(2)}</dd>
         </div>
       </dl>
@@ -155,27 +165,13 @@ function CandidateWorkstation({
         <p className="tosv3-setups-workstation-panel__meta">{humanizeLine(candidate.healthHint)}</p>
       ) : null}
 
-      {previewEvidence.length > 0 ? (
-        <section className="tosv3-setups-workstation-panel__section" aria-label="Surfaced evidence">
-          <h4 className="tosv3-setups-workstation-panel__section-title">Evidence</h4>
-          <ul className="tosv3-setups-evidence-grid">
-            {previewEvidence.map((item) => (
-              <li
-                key={item.key}
-                className={`tosv3-setups-evidence-item${item.tone === "ok" ? " tosv3-setups-evidence-item--ok" : ""}`}
-                title={item.text}
-              >
-                {item.text}
-              </li>
-            ))}
-          </ul>
-          {hiddenEvidenceCount > 0 ? (
-            <p className="tosv3-setups-workstation-panel__more">
-              +{hiddenEvidenceCount} more in technical evidence
-            </p>
-          ) : null}
-        </section>
-      ) : null}
+      <SetupsCandidateEvidence
+        items={evidenceItems}
+        technicalAvailable={hasTechnicalDetail}
+        onOpenTechnical={() => {
+          if (!techOpen) onOpenTechnical();
+        }}
+      />
 
       {hasTechnicalDetail ? (
         <div className="tosv3-setups-tech-block">
@@ -190,9 +186,9 @@ function CandidateWorkstation({
           </button>
           {techOpen ? (
             <div id={techId} className="tosv3-setups-tech-block__body">
-              {evidenceItems.length > previewEvidence.length ? (
+              {extraEvidence.length > 0 ? (
                 <ul className="tosv3-setups-evidence-grid tosv3-setups-evidence-grid--dense">
-                  {evidenceItems.slice(previewEvidence.length).map((item) => (
+                  {extraEvidence.map((item) => (
                     <li
                       key={`extra-${item.key}`}
                       className={`tosv3-setups-evidence-item${item.tone === "ok" ? " tosv3-setups-evidence-item--ok" : ""}`}
@@ -211,14 +207,14 @@ function CandidateWorkstation({
               {rankBreakdownLines.length > 0 ? (
                 <ul className="tosv3-setups-tech-block__list" data-testid="setups-candidate-rank-breakdown">
                   {rankBreakdownLines.map((line, i) => (
-                    <li key={`rank-${i}`}>{line}</li>
+                    <li key={`rank-${i}`}>{humanizeLine(line)}</li>
                   ))}
                 </ul>
               ) : null}
               {rsRankPreviewLines.length > 0 ? (
                 <ul className="tosv3-setups-tech-block__list">
                   {rsRankPreviewLines.map((line, i) => (
-                    <li key={`rs-${i}`}>{line}</li>
+                    <li key={`rs-${i}`}>{humanizeLine(line)}</li>
                   ))}
                 </ul>
               ) : null}
@@ -260,67 +256,75 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
   if (candidates.length === 0) return null;
 
   const manyCandidates = candidates.length > 5;
+  const selectorDensity = selectorDensityForCount(candidates.length);
 
   return (
-    <V3MasterDetail scrollSelector={manyCandidates}>
+    <V3MasterDetail
+      scrollSelector={manyCandidates}
+      selectorDensity={selectorDensity}
+      className="tosv3-setups-candidates-master-detail"
+    >
       <V3MasterDetail.Selector>
-        <div className="tosv3-setups-selector" aria-label="Surfaced candidates">
-        <p className="tosv3-setups-selector__label">
-          <span className="tosv3-kicker">Candidates</span>
-          <span className="tosv3-setups-selector__count tabular-nums">{candidates.length}</span>
-        </p>
-        <div className="tosv3-setups-selector__scroll">
-          <table className="tosv3-setups-selector-table">
-            <thead>
-              <tr>
-                <th>Sym</th>
-                <th>Tier</th>
-                <th className="table-num">Scr</th>
-                <th className="table-num">Close</th>
-                <th className="table-num">Stop</th>
-              </tr>
-            </thead>
-            <tbody>
-              {candidates.map((bundle) => {
-                const { candidate } = bundle;
-                const tier = candidate.quality === "A" ? "A" : "B";
-                const isSelected = selected?.candidate.id === candidate.id;
-                const rowAttention =
-                  candidate.lifecycleSortLabel === "READY"
-                    ? "tosv3-setups-selector-table__row--ready"
-                    : candidate.healthLevel === "AT_RISK"
-                      ? "tosv3-setups-selector-table__row--at-risk"
-                      : "";
-                return (
-                  <tr
-                    key={candidate.id}
-                    tabIndex={0}
-                    data-testid="setups-candidate-row"
-                    aria-current={isSelected ? "true" : undefined}
-                    className={`tosv3-setups-selector-table__row ${rowAttention}${isSelected ? " is-selected" : ""}`}
-                    onClick={() => select(candidate.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        select(candidate.id);
-                      }
-                    }}
-                  >
-                    <td className="tosv3-setups-selector-table__symbol mono">{candidate.symbolKey}</td>
-                    <td>
-                      <SignalBadge variant={qualityToTierVariant(tier)} className="tosv3-setups-selector-table__tier">
-                        {tier}
-                      </SignalBadge>
-                    </td>
-                    <td className="table-num tabular-nums">{candidate.healthScore}</td>
-                    <td className="table-num tabular-nums">{fmtThousands(candidate.close)}</td>
-                    <td className="table-num tabular-nums">{fmtThousands(candidate.stopLevel)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <div className="tosv3-setups-selector">
+          <p className="tosv3-setups-selector__label">
+            <span className="tosv3-kicker">Candidates</span>
+            <span className="tosv3-setups-selector__count tabular-nums">{candidates.length}</span>
+          </p>
+          <div className="tosv3-setups-selector__scroll">
+            <table className="tosv3-setups-selector-table" aria-label="Surfaced candidates">
+              <thead>
+                <tr>
+                  <th>Sym</th>
+                  <th>Tier</th>
+                  <th className="table-num">Scr</th>
+                  <th className="table-num">Close</th>
+                  <th className="table-num">Stop</th>
+                </tr>
+              </thead>
+              <tbody>
+                {candidates.map((bundle) => {
+                  const { candidate } = bundle;
+                  const tier = candidate.quality === "A" ? "A" : "B";
+                  const isSelected = selected?.candidate.id === candidate.id;
+                  const rowAttention =
+                    candidate.lifecycleSortLabel === "READY"
+                      ? "tosv3-setups-selector-table__row--ready"
+                      : candidate.healthLevel === "AT_RISK"
+                        ? "tosv3-setups-selector-table__row--at-risk"
+                        : "";
+                  return (
+                    <tr
+                      key={candidate.id}
+                      tabIndex={0}
+                      data-testid="setups-candidate-row"
+                      aria-current={isSelected ? "true" : undefined}
+                      className={`tosv3-setups-selector-table__row ${rowAttention}${isSelected ? " is-selected" : ""}`}
+                      onClick={() => select(candidate.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          select(candidate.id);
+                        }
+                      }}
+                    >
+                      <td className="tosv3-setups-selector-table__symbol mono">{candidate.symbolKey}</td>
+                      <td>
+                        <SignalBadge
+                          variant={qualityToTierVariant(tier)}
+                          className="tosv3-setups-selector-table__tier"
+                        >
+                          {tier}
+                        </SignalBadge>
+                      </td>
+                      <td className="table-num tabular-nums">{candidate.healthScore}</td>
+                      <td className="table-num tabular-nums">{fmtThousands(candidate.close)}</td>
+                      <td className="table-num tabular-nums">{fmtThousands(candidate.stopLevel)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </V3MasterDetail.Selector>
 
@@ -331,6 +335,7 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
             techOpen={techOpen}
             techId={techId}
             onToggleTech={() => setTechOpen((v) => !v)}
+            onOpenTechnical={() => setTechOpen(true)}
           />
         </V3MasterDetail.Detail>
       ) : null}

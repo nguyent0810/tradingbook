@@ -74,7 +74,7 @@ export async function SetupsCandidatesAsync() {
             <h2 className="tosv3-setups-cockpit__panel-title">Surfaced candidates</h2>
             <p className="tosv3-setups-cockpit__panel-sub">Qualified setups — core scanner Tier A/B only</p>
           </header>
-          <div className="dash-empty-compact">
+          <div className="tosv3-empty-state-wrap">
             <EmptyStateWithReason
               title="No surfaced candidates on this scan"
               reason={

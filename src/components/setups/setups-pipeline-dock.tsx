@@ -38,7 +38,7 @@ export function SetupsPipelineDock({
 
   return (
     <V3Dock testId="setups-sidebar" aria-label="Pipeline intelligence dock">
-      <div className="tosv3-setups-dock__tabs" role="tablist" aria-label="Pipeline intelligence">
+      <V3Dock.Tabs aria-label="Pipeline intelligence">
         {tabs.map((t) => (
           <button
             key={t.id}
@@ -47,44 +47,42 @@ export function SetupsPipelineDock({
             id={`${panelId}-tab-${t.id}`}
             aria-selected={tab === t.id}
             aria-controls={`${panelId}-panel-${t.id}`}
-            className={`tosv3-setups-dock__tab${tab === t.id ? " is-active" : ""}`}
+            className={`tosv3-layout-dock__tab tosv3-setups-dock__tab${tab === t.id ? " is-active" : ""}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
           </button>
         ))}
-      </div>
-      <div className="tosv3-setups-dock__body">
+      </V3Dock.Tabs>
+      <V3Dock.Body>
         {tab === "stance" ? (
-          <div
+          <V3Dock.Panel
             role="tabpanel"
             id={`${panelId}-panel-stance`}
             aria-labelledby={`${panelId}-tab-stance`}
-            className="tosv3-setups-dock__panel"
           >
             {tradingDecision ? (
               <SetupsStanceCompact decision={tradingDecision} />
             ) : (
               <p className="tosv3-empty-state">No trading stance for this scan.</p>
             )}
-          </div>
+          </V3Dock.Panel>
         ) : null}
         {tab === "funnel" ? (
-          <div
+          <V3Dock.Panel
             role="tabpanel"
             id={`${panelId}-panel-funnel`}
             aria-labelledby={`${panelId}-tab-funnel`}
-            className="tosv3-setups-dock__panel"
           >
             <SetupsFunnelCompact latestScan={latestScan} nearMissCount={nearMissCount} />
-          </div>
+          </V3Dock.Panel>
         ) : null}
         {tab === "diagnostics" ? (
-          <div
+          <V3Dock.Panel
             role="tabpanel"
             id={`${panelId}-panel-diagnostics`}
             aria-labelledby={`${panelId}-tab-diagnostics`}
-            className="tosv3-setups-dock__panel tosv3-setups-dock__panel--scroll"
+            className="tosv3-layout-dock__panel--scroll tosv3-setups-dock__panel--scroll"
           >
             <SetupsDiagnosticsStack
               rejectionBuckets={rejectionBuckets}
@@ -94,9 +92,9 @@ export function SetupsPipelineDock({
               subtitle="Why setups fell short"
               embedded
             />
-          </div>
+          </V3Dock.Panel>
         ) : null}
-      </div>
+      </V3Dock.Body>
     </V3Dock>
   );
 }
