@@ -12,6 +12,7 @@ import { SetupIntelligenceRail } from "./sections/setup-intelligence-rail";
 import { RiskConsole } from "./sections/risk-console";
 import { LedgerPulseStrip } from "./sections/ledger-pulse-strip";
 import { DiagnosticsDock } from "./sections/diagnostics-dock";
+import { V3PageShell } from "@/components/trading-os-v3/layout";
 
 export type TradingOsDashboardProps = {
   viewModel: DashboardV3ViewModel;
@@ -28,11 +29,8 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
       };
 
   return (
-    <div className="tosv3-page" data-testid="dashboard-v3">
-      <div className="tosv3-bg-grid" aria-hidden />
-      <div className="tosv3-bg-noise" aria-hidden />
-
-      <motion.div className="tosv3-shell" {...motionProps}>
+    <V3PageShell testId="dashboard-v3" pageClassName="tosv3-dashboard-page">
+      <motion.div className="tosv3-shell tosv3-dashboard-shell" {...motionProps}>
         <div className="tosv3-page-header-slot">
           <DashboardPageHeader />
         </div>
@@ -55,7 +53,7 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
           <SignalTrajectoryChart data={viewModel.signalTrajectory} />
         </motion.section>
 
-        <div className="tosv3-grid">
+        <div className="tosv3-dashboard-grid">
           <div className="tosv3-zone tosv3-zone--decision">
             <DecisionHero data={viewModel.decision} />
           </div>
@@ -77,6 +75,6 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
           <DiagnosticsDock rsWatchlist={viewModel.rsWatchlist} evidence={viewModel.evidence} />
         </div>
       </motion.div>
-    </div>
+    </V3PageShell>
   );
 }
