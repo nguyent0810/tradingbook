@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { DashboardV3ViewModel } from "@/lib/dashboard/dashboard-v3-view-model";
 import { truncateForChip } from "@/lib/dashboard/v3-user-copy";
@@ -48,17 +49,22 @@ function RadarDetailCard({
   detail,
   pinned,
   onDismissPin,
+  className = "",
+  style,
 }: {
   detail: DashboardV3ViewModel["radar"]["mapDots"][number];
   pinned: boolean;
   onDismissPin: () => void;
+  className?: string;
+  style?: CSSProperties;
 }) {
   return (
     <div
-      className="tosv3-radar-detail tosv3-radar-tooltip"
+      className={`tosv3-radar-detail tosv3-radar-tooltip ${className}`.trim()}
       role="status"
       aria-live="polite"
       id={`tosv3-radar-detail-${detail.symbol}`}
+      style={style}
     >
       <div className="tosv3-radar-tooltip__head">
         <strong>{detail.symbol}</strong>
@@ -114,12 +120,23 @@ export function OpportunityRadar({ radar }: Props) {
   const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
   const [pinnedSymbol, setPinnedSymbol] = useState<string | null>(null);
   const [bandsOpen, setBandsOpen] = useState(false);
+  const [touchLayout, setTouchLayout] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   const detailSymbol = pinnedSymbol ?? hoveredSymbol;
   const detail = detailSymbol
     ? radar.mapDots.find((d) => d.symbol === detailSymbol)
     : null;
+
+  useEffect(() => {
+    const updateLayoutMode = () => {
+      setTouchLayout(!prefersHoverDetail());
+    };
+
+    updateLayoutMode();
+    window.addEventListener("resize", updateLayoutMode);
+    return () => window.removeEventListener("resize", updateLayoutMode);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -147,6 +164,8 @@ export function OpportunityRadar({ radar }: Props) {
     if (pinnedSymbol === symbol) return;
     setHoveredSymbol((current) => (current === symbol ? null : current));
   };
+
+  const detailPosition = detail ? radarPosition(detail) : null;
 
   return (
     <section
@@ -256,6 +275,24 @@ export function OpportunityRadar({ radar }: Props) {
         <span className="tosv3-radar-map__axis tosv3-radar-map__axis--x">Readiness →</span>
         <span className="tosv3-radar-map__axis tosv3-radar-map__axis--y">Risk ↓</span>
 
+        {!touchLayout && detail && detailPosition ? (
+          <RadarDetailCard
+            detail={detail}
+            pinned={pinnedSymbol === detail.symbol}
+            onDismissPin={() => {
+              setPinnedSymbol(null);
+              setHoveredSymbol(null);
+            }}
+            className="tosv3-radar-tooltip--floating"
+            style={
+              {
+                "--popover-left": detailPosition.left,
+                "--popover-top": detailPosition.top,
+              } as CSSProperties
+            }
+          />
+        ) : null}
+
         {radar.mapDots.length === 0 ? (
           <p className="tosv3-radar-map__empty-copy tosv3-empty-state">
             No qualified or near-miss symbols in the latest scan.
@@ -263,7 +300,7 @@ export function OpportunityRadar({ radar }: Props) {
         ) : null}
       </div>
 
-      {detail ? (
+      {touchLayout && detail ? (
         <RadarDetailCard
           detail={detail}
           pinned={pinnedSymbol === detail.symbol}
