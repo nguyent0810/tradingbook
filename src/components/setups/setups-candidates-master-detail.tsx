@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { memo, useCallback, useEffect, useId, useMemo, useState, type KeyboardEvent } from "react";
 import Link from "next/link";
 import type { ScanQuality } from "@/generated/prisma/client";
 import type { SetupHealthLevelValue } from "@/lib/setup-health";
@@ -16,7 +16,6 @@ import {
 } from "@/lib/trading-display-labels";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
-import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
 import {
   V3MasterDetail,
   type V3MasterDetailSelectorDensity,
@@ -26,6 +25,7 @@ import {
   SetupsCandidateEvidence,
   SETUPS_EVIDENCE_PREVIEW_COUNT,
 } from "@/components/setups/setups-candidate-evidence";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
 export type SetupsCandidateBundle = {
   candidate: {
@@ -58,17 +58,100 @@ function fmtThousands(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function humanizeLine(line: string): string {
-  return formatScannerReasonForUser(line);
-}
-
 function selectorDensityForCount(count: number): V3MasterDetailSelectorDensity {
   if (count <= 1) return "single";
   if (count <= 3) return "compact";
   return "default";
 }
 
-function CandidateWorkstation({
+type CandidateSelectorRow = {
+  id: string;
+  symbolKey: string;
+  tier: "A" | "B";
+  healthScore: number;
+  closeDisplay: string;
+  stopDisplay: string;
+  rowAttention: string;
+};
+
+const CandidateSelectorRowItem = memo(function CandidateSelectorRowItem({
+  row,
+  isSelected,
+  onSelect,
+}: {
+  row: CandidateSelectorRow;
+  isSelected: boolean;
+  onSelect: (id: string) => void;
+}) {
+  const handleClick = useCallback(() => onSelect(row.id), [onSelect, row.id]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLTableRowElement>) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onSelect(row.id);
+      }
+    },
+    [onSelect, row.id]
+  );
+
+  return (
+    <tr
+      tabIndex={0}
+      data-testid="setups-candidate-row"
+      aria-current={isSelected ? "true" : undefined}
+      className={`tosv3-setups-selector-table__row ${row.rowAttention}${isSelected ? " is-selected" : ""}`}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
+      <td className="tosv3-setups-selector-table__symbol mono">{row.symbolKey}</td>
+      <td>
+        <SignalBadge
+          variant={qualityToTierVariant(row.tier)}
+          className="tosv3-setups-selector-table__tier"
+        >
+          {row.tier}
+        </SignalBadge>
+      </td>
+      <td className="table-num tabular-nums">{row.healthScore}</td>
+      <td className="table-num tabular-nums">{row.closeDisplay}</td>
+      <td className="table-num tabular-nums">{row.stopDisplay}</td>
+    </tr>
+  );
+});
+
+function DeferredPositionSizing({
+  symbolKey,
+  quality,
+  defaultEntryKVnd,
+  defaultStopKVnd,
+}: {
+  symbolKey: string;
+  quality: "A" | "B";
+  defaultEntryKVnd: number;
+  defaultStopKVnd: number;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setMounted(true), 0);
+    return () => window.clearTimeout(handle);
+  }, []);
+
+  if (!mounted) {
+    return <LoadingSkeleton className="min-h-[220px] w-full rounded-xl" aria-hidden />;
+  }
+
+  return (
+    <SetupsCandidatePositionSizing
+      symbolKey={symbolKey}
+      quality={quality}
+      defaultEntryKVnd={defaultEntryKVnd}
+      defaultStopKVnd={defaultStopKVnd}
+    />
+  );
+}
+
+const CandidateWorkstation = memo(function CandidateWorkstation({
   bundle,
   techOpen,
   techId,
@@ -85,8 +168,14 @@ function CandidateWorkstation({
   const tier = candidate.quality === "A" ? "A" : "B";
   const lifecycleVariant = candidate.lifecycleSortLabel === "READY" ? "ready" : "watching";
 
-  const evidenceItems = buildSetupsEvidenceItems(reasonsLines, candidate.healthLines);
-  const previewEvidence = evidenceItems.slice(0, SETUPS_EVIDENCE_PREVIEW_COUNT);
+  const evidenceItems = useMemo(
+    () => buildSetupsEvidenceItems(reasonsLines, candidate.healthLines),
+    [candidate.healthLines, reasonsLines]
+  );
+  const previewEvidence = useMemo(
+    () => evidenceItems.slice(0, SETUPS_EVIDENCE_PREVIEW_COUNT),
+    [evidenceItems]
+  );
 
   const hasTechnicalDetail =
     evidenceItems.length > previewEvidence.length ||
@@ -94,7 +183,10 @@ function CandidateWorkstation({
     rsRankPreviewLines.length > 0 ||
     rsDiagnostic != null;
 
-  const extraEvidence = evidenceItems.slice(SETUPS_EVIDENCE_PREVIEW_COUNT);
+  const extraEvidence = useMemo(
+    () => evidenceItems.slice(SETUPS_EVIDENCE_PREVIEW_COUNT),
+    [evidenceItems]
+  );
 
   return (
     <article
@@ -158,11 +250,11 @@ function CandidateWorkstation({
       {bundle.perfHint ? <p className="tosv3-setups-workstation-panel__hint">{bundle.perfHint}</p> : null}
 
       {candidate.healthSummary ? (
-        <p className="tosv3-setups-workstation-panel__summary">{humanizeLine(candidate.healthSummary)}</p>
+        <p className="tosv3-setups-workstation-panel__summary">{candidate.healthSummary}</p>
       ) : null}
 
       {candidate.healthHint ? (
-        <p className="tosv3-setups-workstation-panel__meta">{humanizeLine(candidate.healthHint)}</p>
+        <p className="tosv3-setups-workstation-panel__meta">{candidate.healthHint}</p>
       ) : null}
 
       <SetupsCandidateEvidence
@@ -207,14 +299,14 @@ function CandidateWorkstation({
               {rankBreakdownLines.length > 0 ? (
                 <ul className="tosv3-setups-tech-block__list" data-testid="setups-candidate-rank-breakdown">
                   {rankBreakdownLines.map((line, i) => (
-                    <li key={`rank-${i}`}>{humanizeLine(line)}</li>
+                    <li key={`rank-${i}`}>{line}</li>
                   ))}
                 </ul>
               ) : null}
               {rsRankPreviewLines.length > 0 ? (
                 <ul className="tosv3-setups-tech-block__list">
                   {rsRankPreviewLines.map((line, i) => (
-                    <li key={`rs-${i}`}>{humanizeLine(line)}</li>
+                    <li key={`rs-${i}`}>{line}</li>
                   ))}
                 </ul>
               ) : null}
@@ -225,7 +317,7 @@ function CandidateWorkstation({
 
       <section className="tosv3-setups-workstation-panel__section tosv3-setups-workstation-panel__section--sizing">
         <h4 className="tosv3-setups-workstation-panel__section-title">Position sizing</h4>
-        <SetupsCandidatePositionSizing
+        <DeferredPositionSizing
           symbolKey={candidate.symbolKey}
           quality={tier}
           defaultEntryKVnd={candidate.close}
@@ -234,7 +326,7 @@ function CandidateWorkstation({
       </section>
     </article>
   );
-}
+});
 
 type Props = {
   candidates: SetupsCandidateBundle[];
@@ -245,18 +337,45 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(candidates[0]?.candidate.id ?? null);
   const [techOpen, setTechOpen] = useState(false);
 
-  const selected =
-    candidates.find((c) => c.candidate.id === selectedId) ?? candidates[0] ?? null;
+  const selected = useMemo(
+    () => candidates.find((c) => c.candidate.id === selectedId) ?? candidates[0] ?? null,
+    [candidates, selectedId]
+  );
 
-  const select = (id: string) => {
+  const select = useCallback((id: string) => {
     setSelectedId(id);
     setTechOpen(false);
-  };
-
-  if (candidates.length === 0) return null;
+  }, []);
 
   const manyCandidates = candidates.length > 5;
   const selectorDensity = selectorDensityForCount(candidates.length);
+  const handleToggleTech = useCallback(() => setTechOpen((v) => !v), []);
+  const handleOpenTechnical = useCallback(() => setTechOpen(true), []);
+  const selectorRows = useMemo<CandidateSelectorRow[]>(
+    () =>
+      candidates.map((bundle) => {
+        const { candidate } = bundle;
+        const tier = candidate.quality === "A" ? "A" : "B";
+        const rowAttention =
+          candidate.lifecycleSortLabel === "READY"
+            ? "tosv3-setups-selector-table__row--ready"
+            : candidate.healthLevel === "AT_RISK"
+              ? "tosv3-setups-selector-table__row--at-risk"
+              : "";
+        return {
+          id: candidate.id,
+          symbolKey: candidate.symbolKey,
+          tier,
+          healthScore: candidate.healthScore,
+          closeDisplay: fmtThousands(candidate.close),
+          stopDisplay: fmtThousands(candidate.stopLevel),
+          rowAttention,
+        };
+      }),
+    [candidates]
+  );
+
+  if (candidates.length === 0) return null;
 
   return (
     <V3MasterDetail
@@ -282,46 +401,14 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((bundle) => {
-                  const { candidate } = bundle;
-                  const tier = candidate.quality === "A" ? "A" : "B";
-                  const isSelected = selected?.candidate.id === candidate.id;
-                  const rowAttention =
-                    candidate.lifecycleSortLabel === "READY"
-                      ? "tosv3-setups-selector-table__row--ready"
-                      : candidate.healthLevel === "AT_RISK"
-                        ? "tosv3-setups-selector-table__row--at-risk"
-                        : "";
-                  return (
-                    <tr
-                      key={candidate.id}
-                      tabIndex={0}
-                      data-testid="setups-candidate-row"
-                      aria-current={isSelected ? "true" : undefined}
-                      className={`tosv3-setups-selector-table__row ${rowAttention}${isSelected ? " is-selected" : ""}`}
-                      onClick={() => select(candidate.id)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          select(candidate.id);
-                        }
-                      }}
-                    >
-                      <td className="tosv3-setups-selector-table__symbol mono">{candidate.symbolKey}</td>
-                      <td>
-                        <SignalBadge
-                          variant={qualityToTierVariant(tier)}
-                          className="tosv3-setups-selector-table__tier"
-                        >
-                          {tier}
-                        </SignalBadge>
-                      </td>
-                      <td className="table-num tabular-nums">{candidate.healthScore}</td>
-                      <td className="table-num tabular-nums">{fmtThousands(candidate.close)}</td>
-                      <td className="table-num tabular-nums">{fmtThousands(candidate.stopLevel)}</td>
-                    </tr>
-                  );
-                })}
+                {selectorRows.map((row) => (
+                  <CandidateSelectorRowItem
+                    key={row.id}
+                    row={row}
+                    isSelected={selected?.candidate.id === row.id}
+                    onSelect={select}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
@@ -334,8 +421,8 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
             bundle={selected}
             techOpen={techOpen}
             techId={techId}
-            onToggleTech={() => setTechOpen((v) => !v)}
-            onOpenTechnical={() => setTechOpen(true)}
+            onToggleTech={handleToggleTech}
+            onOpenTechnical={handleOpenTechnical}
           />
         </V3MasterDetail.Detail>
       ) : null}

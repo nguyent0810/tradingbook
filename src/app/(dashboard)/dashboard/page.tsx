@@ -212,6 +212,5 @@ export default async function DashboardPage() {
     openPositionCount: openTrades.length,
     dbLoadError,
   });
-
   return <TradingOsDashboard viewModel={viewModel} />;
 }

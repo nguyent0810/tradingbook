@@ -945,7 +945,6 @@ export default async function TradesPage({ searchParams }: TradesPageProps) {
 
   const openCount = trades.filter((t) => t.status === "OPEN").length;
   const closedCount = trades.filter((t) => t.status === "CLOSED").length;
-
   return (
     <TradesLedgerPageShell
       tradeCount={trades.length}

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
+import { memo } from "react";
 
 export const SETUPS_EVIDENCE_PREVIEW_COUNT = 6;
 
@@ -17,12 +17,12 @@ export function buildSetupsEvidenceItems(
   return [
     ...reasonsLines.map((line) => ({
       key: `reason-${line}`,
-      text: formatScannerReasonForUser(line),
+      text: line,
       tone: "ok" as const,
     })),
     ...healthLines.map((line, i) => ({
       key: `health-${i}`,
-      text: formatScannerReasonForUser(line),
+      text: line,
       tone: "neutral" as const,
     })),
   ].filter((item) => item.text.length > 0);
@@ -35,7 +35,7 @@ type SetupsCandidateEvidenceProps = {
   technicalAvailable?: boolean;
 };
 
-export function SetupsCandidateEvidence({
+export const SetupsCandidateEvidence = memo(function SetupsCandidateEvidence({
   items,
   previewCount = SETUPS_EVIDENCE_PREVIEW_COUNT,
   onOpenTechnical,
@@ -78,4 +78,4 @@ export function SetupsCandidateEvidence({
       ) : null}
     </section>
   );
-}
+});

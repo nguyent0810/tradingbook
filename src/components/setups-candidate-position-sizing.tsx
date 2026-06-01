@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { formatVND } from "@/lib/formatters";
 import {
   computePositionSizing,
@@ -25,7 +25,7 @@ type Props = {
   defaultStopKVnd: number;
 };
 
-export function SetupsCandidatePositionSizing({
+export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositionSizing({
   symbolKey,
   quality,
   defaultEntryKVnd,
@@ -194,4 +194,4 @@ export function SetupsCandidatePositionSizing({
       </div>
     </div>
   );
-}
+});

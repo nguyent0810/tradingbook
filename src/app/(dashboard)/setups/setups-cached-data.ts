@@ -23,6 +23,7 @@ import {
 
 export type SetupsBaseData = {
   latest: LatestScanWithCandidates | null;
+  candidateRows: ReturnType<typeof toCandidateRows>;
   notes: ReturnType<typeof parseDailyScanGate2Notes>;
   expectedSession: Date | null;
   /** Max `StockDailyBar.date` in DB (UTC calendar). */
@@ -66,9 +67,11 @@ export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
   ]);
 
   const notes = parseDailyScanGate2Notes(scanRes.latest?.notes ?? null);
+  const candidateRows = toCandidateRows(scanRes.latest);
 
   return {
     latest: scanRes.latest,
+    candidateRows,
     notes,
     expectedSession: sessionRes.session,
     latestEquityBarSession: equityRes.maxDate,
@@ -157,7 +160,7 @@ export const loadRsNearMissWatchlistForSetupsCached = cache(
         error: base.sessionLoadError,
       };
     }
-    const excludeSymbols = toCandidateRows(base.latest).map((c) => c.symbolKey);
+    const excludeSymbols = base.candidateRows.map((c) => c.symbolKey);
     try {
       const { rows } = await computeRsNearMissWatchlistFromDb(prisma, {
         limit: 15,
@@ -191,7 +194,7 @@ export const loadSurfacedCandidatesHealthCached = cache(async () => {
     };
   }
 
-  const candidates = toCandidateRows(base.latest);
+  const candidates = base.candidateRows;
   const evalBarDateForHealth =
     base.expectedSession ??
     (candidates.length > 0

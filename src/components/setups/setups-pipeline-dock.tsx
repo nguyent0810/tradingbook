@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { memo, useCallback, useId, useMemo, useState } from "react";
 import type { DailyTradingDecision } from "@/lib/scanner/trading-decision";
 import type { DailyScanGate2Notes } from "@/lib/scanner/gate2-scan-diagnostics";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
@@ -30,28 +30,27 @@ export function SetupsPipelineDock({
   const [tab, setTab] = useState<TabId>(defaultTab);
   const panelId = useId();
 
-  const tabs: { id: TabId; label: string }[] = [
-    { id: "stance", label: "Stance" },
-    { id: "funnel", label: "Pipeline" },
-    { id: "diagnostics", label: "Diagnostics" },
-  ];
+  const tabs: { id: TabId; label: string }[] = useMemo(
+    () => [
+      { id: "stance", label: "Stance" },
+      { id: "funnel", label: "Pipeline" },
+      { id: "diagnostics", label: "Diagnostics" },
+    ],
+    []
+  );
+  const handleTabChange = useCallback((nextTab: TabId) => setTab(nextTab), []);
 
   return (
     <V3Dock testId="setups-sidebar" aria-label="Pipeline intelligence dock">
       <V3Dock.Tabs aria-label="Pipeline intelligence">
         {tabs.map((t) => (
-          <button
+          <DockTabButton
             key={t.id}
-            type="button"
-            role="tab"
-            id={`${panelId}-tab-${t.id}`}
-            aria-selected={tab === t.id}
-            aria-controls={`${panelId}-panel-${t.id}`}
-            className={`tosv3-layout-dock__tab tosv3-setups-dock__tab${tab === t.id ? " is-active" : ""}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
-          </button>
+            panelId={panelId}
+            tab={t}
+            active={tab === t.id}
+            onSelect={handleTabChange}
+          />
         ))}
       </V3Dock.Tabs>
       <V3Dock.Body>
@@ -98,3 +97,30 @@ export function SetupsPipelineDock({
     </V3Dock>
   );
 }
+
+const DockTabButton = memo(function DockTabButton({
+  panelId,
+  tab,
+  active,
+  onSelect,
+}: {
+  panelId: string;
+  tab: { id: TabId; label: string };
+  active: boolean;
+  onSelect: (tab: TabId) => void;
+}) {
+  const handleClick = useCallback(() => onSelect(tab.id), [onSelect, tab.id]);
+  return (
+    <button
+      type="button"
+      role="tab"
+      id={`${panelId}-tab-${tab.id}`}
+      aria-selected={active}
+      aria-controls={`${panelId}-panel-${tab.id}`}
+      className={`tosv3-layout-dock__tab tosv3-setups-dock__tab${active ? " is-active" : ""}`}
+      onClick={handleClick}
+    >
+      {tab.label}
+    </button>
+  );
+});

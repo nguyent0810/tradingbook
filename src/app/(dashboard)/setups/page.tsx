@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { redirect } from "next/navigation";
 import {
   V3ContentGrid,
   V3PageShell,
   V3Panel,
 } from "@/components/trading-os-v3/layout";
 import { SetupsPageHeader } from "@/components/setups/setups-page-header";
-import { getSession } from "@/lib/session";
 import { SetupsCandidatesAsync } from "./setups-candidates-async";
 import { SetupsOverviewAsync } from "./setups-overview-async";
 import { SetupsPipelineContextAsync } from "./setups-pipeline-context-async";
@@ -29,9 +27,6 @@ export const metadata: Metadata = {
 };
 
 export default async function SetupsPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
-
   return (
     <V3PageShell testId="setups-workstation" pageClassName="tosv3-setups-page">
       <SetupsPageHeader />
