@@ -6684,19 +6684,20 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 232, 220, 0.1),
     inset 0 -18px 28px rgba(17, 8, 8, 0.36),
-    0 0 0 1px rgba(251, 146, 60, 0.2),
+    0 0 0 1px rgba(251, 146, 60, 0.1),
     0 18px 36px rgba(0, 0, 0, 0.45),
-    0 0 34px rgba(251, 113, 133, 0.14);
+    0 0 22px rgba(251, 113, 133, 0.08);
 }
 
 .tosv3-hero--protect-capital::after {
   content: "";
   position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  border: 1px solid rgba(251, 146, 60, 0.35);
-  opacity: 0.4;
-  animation: tosv3ProtectPulse 3.8s ease-in-out infinite;
+  inset: auto 0 0 0;
+  height: 2px;
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(90deg, rgba(251, 146, 60, 0), rgba(251, 146, 60, 0.45), rgba(251, 146, 60, 0));
+  opacity: 0.7;
+  animation: tosv3ProtectPulse 4.4s ease-in-out infinite;
   pointer-events: none;
 }
 
@@ -6711,7 +6712,7 @@ body {
 }
 
 .tosv3-radar-map {
-  overflow: hidden;
+  overflow: visible;
 }
 
 .tosv3-radar-map__rings {
@@ -6824,6 +6825,18 @@ body {
   -webkit-backdrop-filter: blur(14px);
   box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(233, 242, 255, 0.1);
   padding: 0.5rem 0.58rem;
+}
+
+.tosv3-radar-tooltip--floating {
+  position: absolute;
+  left: var(--popover-left, 50%);
+  top: var(--popover-top, 50%);
+  width: min(300px, calc(100% - 18px));
+  max-width: 300px;
+  margin: 0;
+  transform: translate(16px, calc(-100% - 12px));
+  z-index: 8;
+  pointer-events: auto;
 }
 
 .tosv3-radar-tooltip__head {
@@ -6978,9 +6991,18 @@ body {
   .tosv3-radar-tooltip {
     width: min(260px, calc(100% - 24px));
   }
+
+  .tosv3-radar-tooltip--floating {
+    width: min(280px, calc(100% - 14px));
+    transform: translate(10px, calc(-100% - 10px));
+  }
 }
 
 @media (max-width: 760px) {
+  .tosv3-radar-tooltip--floating {
+    display: none;
+  }
+
   .tosv3-radar-tooltip {
     position: static;
     width: 100%;
@@ -8244,11 +8266,12 @@ body {
 }
 
 .ledger-deck-table--dense .ledger-deck-table__review-cell {
-  min-width: 11.5rem;
-  width: 13rem;
-  max-width: 15rem;
+  min-width: 10.25rem;
+  width: 11.5rem;
+  max-width: 13rem;
   overflow: visible;
   white-space: normal;
+  text-align: center;
 }
 
 .ledger-deck-table--dense .ledger-sticky-symbol {
@@ -8268,14 +8291,18 @@ body {
 
 .ledger-deck-table--dense .ledger-sticky-symbol .ledger-deck-table__unit-warn {
   display: inline-flex;
-  margin-top: 0.2rem;
+  margin-top: 0.16rem;
   max-width: 100%;
+  padding: 0.02rem 0.32rem;
+  font-size: 0.5rem;
+  letter-spacing: 0.05em;
+  opacity: 0.9;
 }
 
 .tos-ledger-review-cell {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.32rem;
   width: 100%;
   min-width: 0;
@@ -8287,6 +8314,7 @@ body {
   flex-wrap: wrap;
   gap: 0.28rem;
   width: 100%;
+  justify-content: center;
 }
 
 .tos-ledger-review-chip {
@@ -8304,6 +8332,7 @@ body {
   overflow: visible;
   text-overflow: unset;
   word-break: break-word;
+  justify-content: center;
 }
 
 .tos-ledger-review-chip--priority {
@@ -8332,6 +8361,7 @@ body {
   color: #8fa0bc;
   cursor: pointer;
   list-style: none;
+  margin-inline: auto;
 }
 
 .tos-ledger-review-cell__summary:hover {
@@ -8350,6 +8380,7 @@ body {
   font-size: 0.62rem;
   color: #b6c8e2;
   line-height: 1.35;
+  text-align: left;
 }
 
 .tos-ledger-review-cell__headline {

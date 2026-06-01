@@ -242,7 +242,7 @@ export function TradesLedgerTable({
                     <span className="ledger-deck-table__symbol mono">{trade.symbol}</span>
                     {priceUnitMismatch ? (
                       <SignalBadge variant="at-risk" className="ledger-deck-table__unit-warn">
-                        Unit check needed
+                        Unit issue
                       </SignalBadge>
                     ) : null}
                   </td>
