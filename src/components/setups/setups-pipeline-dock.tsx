@@ -7,6 +7,7 @@ import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import { SetupsStanceCompact } from "@/components/setups/setups-stance-compact";
 import { SetupsFunnelCompact } from "@/components/setups/setups-funnel-compact";
 import { SetupsDiagnosticsStack } from "@/components/setups/setups-diagnostics-stack";
+import { V3Dock } from "@/components/trading-os-v3/layout";
 
 export type SetupsPipelineDockProps = {
   tradingDecision: DailyTradingDecision | null;
@@ -36,7 +37,7 @@ export function SetupsPipelineDock({
   ];
 
   return (
-    <aside className="tosv3-setups-dock tosv3-glass-panel" data-testid="setups-sidebar">
+    <V3Dock testId="setups-sidebar" aria-label="Pipeline intelligence dock">
       <div className="tosv3-setups-dock__tabs" role="tablist" aria-label="Pipeline intelligence">
         {tabs.map((t) => (
           <button
@@ -96,6 +97,6 @@ export function SetupsPipelineDock({
           </div>
         ) : null}
       </div>
-    </aside>
+    </V3Dock>
   );
 }

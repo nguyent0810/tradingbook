@@ -1,0 +1,199 @@
+/* Trading OS V3 — layout foundation (Batch 1)
+   Canonical width, gutters, cockpit grids. Do not reuse page-shell class names on inner grids. */
+
+:root {
+  --v3-max-width: var(--command-deck-max-width);
+  --v3-gap-flow: 0.55rem;
+  --v3-gap-panel: 0.65rem;
+  --v3-gap-section: 0.85rem;
+}
+
+/* ── Page shell (all V3 routes) ── */
+.tosv3-page-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: hidden;
+  color: #e9edf6;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(79, 70, 229, 0.22), transparent 38%),
+    radial-gradient(circle at 85% -20%, rgba(16, 185, 129, 0.18), transparent 44%),
+    linear-gradient(145deg, #040507 0%, #080a0d 40%, #0a0b10 100%);
+}
+
+.tosv3-page-shell__bg-grid,
+.tosv3-page-shell__bg-noise {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.tosv3-page-shell__bg-grid {
+  opacity: 0.36;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
+}
+
+.tosv3-page-shell__bg-noise {
+  opacity: 0.12;
+  background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.5) 1px, transparent 0);
+  background-size: 4px 4px;
+}
+
+.tosv3-page-shell__inner,
+.tosv3-page-shell .tosv3-workstation__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--v3-max-width);
+  margin-inline: auto;
+  padding: clamp(0.85rem, 2vw, 1.35rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--v3-gap-section);
+}
+
+.tosv3-page-shell.tosv3-workstation {
+  color: #dbe7f8;
+}
+
+.tosv3-page-shell__flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--v3-gap-flow);
+  width: 100%;
+  min-width: 0;
+}
+
+/* Legacy alias: dashboard inner stack (no own max-width) */
+.tosv3-page-shell__inner > .tosv3-shell,
+.tosv3-dashboard-shell {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--v3-gap-panel);
+}
+
+/* Workstation flow inside shell */
+.tosv3-page-shell .tosv3-workstation-flow {
+  gap: var(--v3-gap-flow);
+  width: 100%;
+}
+
+/* ── Cockpit: workspace (70–72%) + dock (28–30%) ── */
+.tosv3-layout-cockpit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 28%);
+  gap: var(--v3-gap-panel);
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.tosv3-layout-cockpit__main,
+.tosv3-layout-cockpit__aside {
+  min-width: 0;
+}
+
+.tosv3-layout-cockpit__main {
+  display: flex;
+  flex-direction: column;
+}
+
+.tosv3-layout-cockpit__aside {
+  align-self: start;
+}
+
+/* ── Master-detail inside workspace: selector (32%) + detail (68%) ── */
+.tosv3-layout-master-detail {
+  display: grid;
+  grid-template-columns: minmax(220px, 32%) minmax(0, 1fr);
+  gap: var(--v3-gap-panel);
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.tosv3-layout-master-detail__selector {
+  align-self: start;
+  min-width: 0;
+}
+
+.tosv3-layout-master-detail__detail {
+  min-width: 0;
+  align-self: start;
+}
+
+.tosv3-layout-master-detail--scroll-selector .tosv3-setups-selector__scroll {
+  max-height: min(14rem, 38vh);
+  overflow-y: auto;
+}
+
+/* ── Right dock shell ── */
+.tosv3-layout-dock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+}
+
+.tosv3-layout-dock .tosv3-setups-dock__tabs {
+  flex-shrink: 0;
+}
+
+.tosv3-layout-dock .tosv3-setups-dock__body {
+  flex: 1;
+  min-height: 12rem;
+  max-height: min(22rem, 56vh);
+  overflow: hidden;
+}
+
+.tosv3-layout-dock .tosv3-setups-dock__panel {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Setups workspace panel fills cockpit main column */
+.tosv3-setups-cockpit-panel {
+  padding: 0.65rem 0.75rem;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.tosv3-setups-cockpit-panel .tosv3-layout-master-detail {
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .tosv3-layout-cockpit,
+  .tosv3-layout-cockpit--stack {
+    grid-template-columns: 1fr;
+  }
+
+  .tosv3-layout-master-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .tosv3-layout-dock .tosv3-setups-dock__body {
+    max-height: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .tosv3-page-shell__inner {
+    padding-inline: 1rem;
+  }
+}

@@ -17,6 +17,7 @@ import {
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { formatScannerReasonForUser } from "@/lib/dashboard/v3-user-copy";
+import { V3MasterDetail } from "@/components/trading-os-v3/layout";
 
 export type SetupsCandidateBundle = {
   candidate: {
@@ -261,10 +262,9 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
   const manyCandidates = candidates.length > 5;
 
   return (
-    <div
-      className={`tosv3-setups-candidate-grid${manyCandidates ? " tosv3-setups-candidate-grid--many" : ""}`}
-    >
-      <aside className="tosv3-setups-selector" aria-label="Surfaced candidates">
+    <V3MasterDetail scrollSelector={manyCandidates}>
+      <V3MasterDetail.Selector>
+        <div className="tosv3-setups-selector" aria-label="Surfaced candidates">
         <p className="tosv3-setups-selector__label">
           <span className="tosv3-kicker">Candidates</span>
           <span className="tosv3-setups-selector__count tabular-nums">{candidates.length}</span>
@@ -321,18 +321,19 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
             </tbody>
           </table>
         </div>
-      </aside>
+        </div>
+      </V3MasterDetail.Selector>
 
       {selected ? (
-        <div className="tosv3-setups-candidate-grid__main">
+        <V3MasterDetail.Detail>
           <CandidateWorkstation
             bundle={selected}
             techOpen={techOpen}
             techId={techId}
             onToggleTech={() => setTechOpen((v) => !v)}
           />
-        </div>
+        </V3MasterDetail.Detail>
       ) : null}
-    </div>
+    </V3MasterDetail>
   );
 }

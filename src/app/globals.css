@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./v3-layout-foundation.css";
 
 /* ─── Design Tokens ─── */
 :root {
@@ -5120,6 +5121,13 @@ body {
   gap: 0.65rem;
 }
 
+.tosv3-page-shell__inner > .tosv3-shell,
+.tosv3-page-shell__inner > .tosv3-dashboard-shell {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 .tosv3-panel {
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 14px;
@@ -5237,6 +5245,7 @@ body {
   filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.5));
 }
 
+.tosv3-dashboard-grid,
 .tosv3-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -5650,6 +5659,7 @@ body {
     grid-template-columns: repeat(3, minmax(120px, 1fr));
   }
 
+  .tosv3-dashboard-grid,
   .tosv3-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -6517,6 +6527,7 @@ body {
     flex-direction: column;
   }
 
+  .tosv3-dashboard-grid,
   .tosv3-grid {
     display: contents;
   }
@@ -8601,23 +8612,6 @@ body {
   gap: 0.55rem;
 }
 
-.tosv3-setups-cockpit {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 30%);
-  gap: 0.65rem;
-  align-items: start;
-  width: 100%;
-}
-
-.tosv3-setups-cockpit__workspace {
-  padding: 0.65rem 0.75rem;
-  min-height: 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
 .tosv3-setups-cockpit__panel {
   display: flex;
   flex-direction: column;
@@ -8642,18 +8636,8 @@ body {
   color: #9eb0c9;
 }
 
-.tosv3-setups-dock {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-  max-height: none;
-  align-self: start;
-  width: 100%;
-  padding: 0;
-}
-
-.tosv3-setups-dock__tabs {
+.tosv3-setups-dock__tabs,
+.tosv3-layout-dock .tosv3-setups-dock__tabs {
   display: flex;
   gap: 0;
   border-bottom: 1px solid rgba(102, 128, 159, 0.28);
@@ -8783,18 +8767,6 @@ body {
   color: #8fc8ff;
 }
 
-/* Surfaced candidates — selector + detail inside cockpit workspace only */
-.tosv3-setups-cockpit .tosv3-setups-candidate-grid {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  width: 100%;
-  display: grid;
-  grid-template-columns: minmax(220px, 35%) minmax(0, 65%);
-  gap: 0.65rem;
-  align-items: start;
-}
-
 .tosv3-setups-selector {
   align-self: start;
   min-width: 0;
@@ -8821,11 +8793,6 @@ body {
 .tosv3-setups-selector__scroll {
   overflow-x: auto;
   overflow-y: visible;
-}
-
-.tosv3-setups-candidate-grid--many .tosv3-setups-selector__scroll {
-  max-height: min(14rem, 38vh);
-  overflow-y: auto;
 }
 
 .tosv3-setups-selector-table {
@@ -8877,12 +8844,6 @@ body {
 .tosv3-setups-selector-table__tier {
   font-size: 0.58rem;
   padding: 0.06rem 0.28rem;
-}
-
-.tosv3-setups-candidate-grid__main {
-  min-width: 0;
-  align-self: start;
-  width: 100%;
 }
 
 .tosv3-setups-workstation-panel {
@@ -9301,89 +9262,6 @@ body {
   top: 4.5rem;
 }
 
-.tosv3-setups-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.75fr);
-  gap: 0.55rem;
-  align-items: start;
-}
-
-.tosv3-setups-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.tosv3-setups-master-detail {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 0.55rem;
-  min-height: 0;
-}
-
-.tosv3-setups-master-detail__list-wrap {
-  max-height: min(16rem, 42vh);
-  overflow: auto;
-  border: 1px solid rgba(102, 128, 159, 0.22);
-  border-radius: 8px;
-  background: rgba(8, 13, 20, 0.55);
-}
-
-.tosv3-setups-master-detail__detail {
-  position: static;
-  max-height: none;
-  overflow: visible;
-  min-width: 0;
-}
-
-.tosv3-setups-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.68rem;
-}
-
-.tosv3-setups-table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 0.28rem 0.4rem;
-  font-size: 0.52rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #9eb0c9;
-  background: rgba(8, 14, 24, 0.95);
-  text-align: left;
-}
-
-.tosv3-setups-table th.table-num {
-  text-align: right;
-}
-
-.tosv3-setups-table td {
-  padding: 0.38rem 0.5rem;
-  border-bottom: 1px solid rgba(102, 128, 159, 0.14);
-  vertical-align: middle;
-}
-
-.tosv3-setups-table__row {
-  cursor: pointer;
-}
-
-.tosv3-setups-table__row:hover td {
-  background: rgba(59, 130, 246, 0.07);
-}
-
-.tosv3-setups-table__row.is-selected td {
-  background: rgba(45, 212, 191, 0.1);
-  box-shadow: inset 2px 0 0 #2dd4bf;
-}
-
-.tosv3-setups-table__symbol {
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-weight: 600;
-  color: #eef6ff;
-}
-
 .tosv3-setups-detail {
   padding: 0.7rem 0.8rem;
   border: 1px solid rgba(102, 128, 159, 0.28);
@@ -9771,7 +9649,8 @@ body {
   color: #9eb0c9;
 }
 
-.tosv3-workstation.tosv3-setups-workstation .tosv3-workstation-flow {
+.tosv3-page-shell.tosv3-setups-page .tosv3-workstation-flow,
+.tosv3-page-shell.tosv3-setups-page .tosv3-setups-flow {
   gap: 0.5rem;
   width: 100%;
   max-width: 100%;
@@ -9825,21 +9704,9 @@ body {
 }
 
 @media (max-width: 900px) {
-  .tosv3-setups-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .tosv3-setups-cockpit {
-    grid-template-columns: 1fr;
-  }
-
-  .tosv3-setups-dock {
+  .tosv3-layout-dock {
     max-height: none;
     min-height: 0;
-  }
-
-  .tosv3-setups-cockpit .tosv3-setups-candidate-grid {
-    grid-template-columns: 1fr;
   }
 
   .tosv3-setups-metric-strip {
