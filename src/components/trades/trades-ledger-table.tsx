@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { DenseTable } from "@/components/command-deck";
 import { SignalBadge } from "@/components/command-deck/signal-badge";
+import { V3Panel } from "@/components/trading-os-v3/layout";
 import { OpenPositionReviewCell } from "@/app/(dashboard)/trades/open-position-review-cell";
 import { formatVND, formatEquityThousandVndPerShare, formatBarDataDateUtcLong } from "@/lib/formatters";
 import { formatPlaybookLabel } from "@/lib/playbook-config";
@@ -76,16 +77,16 @@ export function TradesLedgerTable({
   } as const;
 
   return (
-    <section className="tosv3-glass-panel ledger-deck-panel pipeline-deck-panel ledger-deck-table-section">
-      <header className="ledger-deck-table-section__header">
-        <h2 className="dash-section-title">Trades ledger</h2>
+    <V3Panel className="tosv3-ledger-table-section">
+      <header className="tosv3-ledger-table-section__header">
+        <h2 className="tosv3-ledger-table-section__title">Trades ledger</h2>
         <p
-          className="ledger-deck-table-section__hint"
+          className="tosv3-ledger-table-section__hint ledger-deck-table-section__hint"
           data-testid="trades-ledger-scroll-hint"
         >
           Scroll horizontally for the full ledger. The Symbol column stays pinned while you scroll.
         </p>
-        <p className="ledger-deck-table-section__units">
+        <p className="tosv3-ledger-table-section__units ledger-deck-table-section__units">
           Equity prices are{" "}
           <span className="ledger-deck-table-section__units-em">thousand VND per share</span> (imported
           EOD). P&amp;L uses the same numeric scale × quantity.
@@ -441,6 +442,6 @@ export function TradesLedgerTable({
           </tbody>
         </table>
       </DenseTable>
-    </section>
+    </V3Panel>
   );
 }

@@ -1,16 +1,18 @@
 import "server-only";
 
 import { MomentumWatchSection } from "@/components/momentum-watch-section";
-import { CommandDeckCollapsible } from "@/components/command-deck";
+import { V3Collapsible, V3Panel } from "@/components/trading-os-v3/layout";
 
 export async function SetupsMomentumDeckAsync() {
   return (
-    <CommandDeckCollapsible
+    <V3Collapsible
       summary="Extended momentum context — fresh breakouts audit"
       testId="setups-momentum-deck"
-      className="pipeline-deck__momentum"
+      className="tosv3-setups-momentum"
     >
-      <MomentumWatchSection embedded />
-    </CommandDeckCollapsible>
+      <V3Panel className="tosv3-setups-momentum__panel" glass={false}>
+        <MomentumWatchSection embedded />
+      </V3Panel>
+    </V3Collapsible>
   );
 }

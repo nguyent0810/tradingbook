@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Suspense } from "react";
-import { V3WorkstationShell } from "@/components/trading-os-v3/shared/v3-workstation-shell";
+import { V3PageShell, V3Panel, V3Section } from "@/components/trading-os-v3/layout";
 import { TradesPageHeader } from "@/components/trades/trades-page-header";
 import { TradesLedgerCockpit } from "@/components/trades/trades-ledger-cockpit";
 import { TradesLedgerTable } from "@/components/trades/trades-ledger-table";
@@ -8,7 +8,6 @@ import { TradesLedgerEmpty } from "@/components/trades/trades-ledger-empty";
 import { TradeFilters, TradeFiltersSkeleton } from "@/components/trades/trades-ledger-filters";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
-import { CommandDeckZone } from "@/components/command-deck";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { MarketDataAlignmentAnalysis } from "@/lib/market/market-data-alignment";
@@ -84,7 +83,7 @@ export function TradesLedgerDeck({
   const filteredEmpty = Boolean(search || statusFilter);
 
   return (
-    <div className="tosv3-workstation-flow ledger-deck__flow">
+    <div className="tosv3-page-shell__flow tosv3-workstation-flow">
       <TradesLedgerCockpit
         marketFreshness={marketFreshness}
         latestScan={latestScan}
@@ -100,7 +99,7 @@ export function TradesLedgerDeck({
 
       {dbLoadError ? (
         <ErrorStateWithEvidence
-          className="ledger-deck-alert"
+          className="tosv3-ledger-alert"
           title="Partial trades data unavailable"
           message={dbLoadError}
           evidence="src/app/(dashboard)/trades/page.tsx · trade list and/or position marks load failed; ledger may be incomplete."
@@ -122,24 +121,24 @@ export function TradesLedgerDeck({
       {focusReviewWorkspace}
 
       {alignmentAnalysis.showBanner ? (
-        <div className="ledger-deck-panel pipeline-deck-panel">
+        <V3Panel className="tosv3-ledger-alignment-banner">
           <MarketDataAlignmentBanner
             analysis={alignmentAnalysis}
             mentionOpenPositionMarks={hasOpenTrades}
           />
-        </div>
+        </V3Panel>
       ) : null}
 
       {barsLoadFailed && hasOpenTrades ? (
-        <CommandDeckZone
-          eyebrow="Data"
-          title="Position marks incomplete"
-          lead="Latest closes could not be loaded. Open-position marks may be incomplete until bars load."
-          variant="quiet"
-          className="ledger-deck-open-risk"
-        >
-          {null}
-        </CommandDeckZone>
+        <V3Panel className="tosv3-ledger-open-risk">
+          <V3Section
+            eyebrow="Data"
+            title="Position marks incomplete"
+            lead="Latest closes could not be loaded. Open-position marks may be incomplete until bars load."
+          >
+            {null}
+          </V3Section>
+        </V3Panel>
       ) : null}
 
       {tradesEmpty ? (
@@ -176,13 +175,13 @@ export function TradesLedgerPageShell({
   closedCount: number;
 }) {
   return (
-    <V3WorkstationShell className="ledger-deck" testId="trades-workstation">
+    <V3PageShell pageClassName="tosv3-trades-page" testId="trades-workstation">
       <TradesPageHeader
         tradeCount={tradeCount}
         openCount={openCount}
         closedCount={closedCount}
       />
       {children}
-    </V3WorkstationShell>
+    </V3PageShell>
   );
 }

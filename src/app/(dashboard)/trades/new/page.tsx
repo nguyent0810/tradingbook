@@ -3,7 +3,7 @@ import Link from "next/link";
 import { TradeForm } from "@/components/trade-form";
 import { StaleSetupCandidateWarning } from "@/components/trades/stale-setup-candidate-warning";
 import { V3PageHeader } from "@/components/trading-os-v3/shared/v3-page-header";
-import { V3WorkstationShell } from "@/components/trading-os-v3/shared/v3-workstation-shell";
+import { V3PageShell, V3Panel } from "@/components/trading-os-v3/layout";
 import { prisma } from "@/lib/prisma";
 import { getLatestDailyScanRun } from "@/lib/scanner/setups-queries";
 import { getSession } from "@/lib/session";
@@ -115,8 +115,8 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
     staleNotice.kind === "none";
 
   return (
-    <V3WorkstationShell className="tosv3-workstation--ticket" testId="log-trade-workstation">
-      <div className="tosv3-ticket-page">
+    <V3PageShell pageClassName="tosv3-ticket-page" testId="log-trade-workstation">
+      <div className="tosv3-ticket-page__inner">
         <V3PageHeader
           kicker="Trading ticket"
           title="Log a trade"
@@ -130,15 +130,15 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
 
         <StaleSetupCandidateWarning notice={staleNotice} />
 
-        <div
-          className="tosv3-glass-panel tosv3-ticket-panel"
+        <V3Panel
+          className="tosv3-ticket-panel"
           {...(showCurrentSetupMarker
-            ? { "data-testid": "trades-new-setup-current" }
+            ? { testId: "trades-new-setup-current" }
             : {})}
         >
           <TradeForm initialValues={initialValues} setupContextLabel={setupContextLabel} />
-        </div>
+        </V3Panel>
       </div>
-    </V3WorkstationShell>
+    </V3PageShell>
   );
 }

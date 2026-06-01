@@ -1,13 +1,11 @@
 import { LoadingSkeleton, LoadingSkeletonGroup } from "@/components/ui/loading-skeleton";
+import { V3PageShell, V3Panel } from "@/components/trading-os-v3/layout";
 
 export default function TradesLoading() {
   return (
-    <div
-      className="page-container command-deck ledger-deck pipeline-deck dash-cockpit dash-cockpit--v2 pb-10"
-      aria-busy="true"
-    >
-      <header className="dash-v2-page-header command-deck-page-header">
-        <div className="dash-v2-page-header__copy">
+    <V3PageShell pageClassName="tosv3-trades-page" testId="trades-workstation-loading">
+      <header className="tosv3-workstation-header" aria-hidden>
+        <div className="tosv3-workstation-header__copy">
           <LoadingSkeleton className="mb-2 h-3 w-28" />
           <LoadingSkeleton className="mb-3 h-9 w-48 max-w-full" />
           <LoadingSkeleton className="h-4 w-64 max-w-full" />
@@ -15,20 +13,17 @@ export default function TradesLoading() {
         <LoadingSkeleton className="h-9 w-28 rounded-lg" />
       </header>
 
-      <div className="ledger-deck__flow">
+      <div className="tosv3-page-shell__flow tosv3-workstation-flow" aria-busy="true">
         <LoadingSkeleton className="h-12 w-full rounded-lg" />
-        <div className="ledger-deck__summary-row">
+        <div className="tosv3-ledger-summary-row">
           <LoadingSkeleton className="h-24 w-full rounded-xl" />
           <LoadingSkeleton className="h-28 w-full rounded-xl" />
         </div>
-        <LoadingSkeleton className="h-32 w-full rounded-xl" />
-        <div className="ledger-deck-filters-skeleton">
+        <V3Panel className="tosv3-ledger-filters p-3">
           <LoadingSkeleton className="h-10 flex-1 rounded-lg sm:max-w-xs" />
-          <LoadingSkeleton className="h-10 w-32 rounded-lg" />
-          <LoadingSkeleton className="h-10 w-32 rounded-lg" />
-        </div>
-        <LoadingSkeletonGroup rows={6} className="ledger-deck-panel rounded-xl p-4" />
+        </V3Panel>
+        <LoadingSkeletonGroup rows={6} className="tosv3-ledger-table-section rounded-xl p-4" />
       </div>
-    </div>
+    </V3PageShell>
   );
 }

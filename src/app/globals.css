@@ -7885,7 +7885,8 @@ body {
 }
 
 .tosv3-workstation .dash-section-title,
-.tosv3-workstation .ledger-deck-table-section__header h2 {
+.tosv3-workstation .ledger-deck-table-section__header h2,
+.tosv3-page-shell .tosv3-ledger-table-section__title {
   color: #e8f0fa;
   font-size: 0.9rem;
   font-weight: 600;
@@ -7893,7 +7894,9 @@ body {
 
 .tosv3-workstation .dash-panel__subtitle,
 .tosv3-workstation .ledger-deck-table-section__hint,
-.tosv3-workstation .ledger-deck-table-section__units {
+.tosv3-workstation .ledger-deck-table-section__units,
+.tosv3-page-shell .tosv3-ledger-table-section__hint,
+.tosv3-page-shell .tosv3-ledger-table-section__units {
   color: #9eb0c9;
   font-size: 0.72rem;
 }
@@ -7986,6 +7989,8 @@ body {
 
 .tosv3-workstation .ledger-deck-filters .input,
 .tosv3-workstation .ledger-deck-filters .select,
+.tosv3-page-shell .tosv3-ledger-filters .input,
+.tosv3-page-shell .tosv3-ledger-filters .select,
 .tosv3-ticket .input,
 .tosv3-ticket .select,
 .tosv3-ticket .label {

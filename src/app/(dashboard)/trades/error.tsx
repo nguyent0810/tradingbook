@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { V3PageShell, V3Panel } from "@/components/trading-os-v3/layout";
 
 export default function TradesError({
   error,
@@ -15,28 +16,30 @@ export default function TradesError({
   }, [error]);
 
   return (
-    <div className="page-container command-deck ledger-deck pb-10">
-      <div className="ui-state-panel command-deck-route-error" role="alert">
-        <p className="ui-state-panel__eyebrow">Ledger deck unavailable</p>
-        <h1 className="ui-state-panel__title">Trades ledger could not load</h1>
-        <p className="ui-state-panel__body">
-          Your trade records and review session are unchanged — retry or return to a stable route.
-        </p>
-        {error.digest ? (
-          <p className="ui-state-panel__evidence">{error.digest}</p>
-        ) : null}
-        <div className="ui-state-actions mt-4 flex flex-wrap gap-3">
-          <button type="button" className="btn btn-primary" onClick={() => reset()}>
-            Try again
-          </button>
-          <Link href="/trades" className="btn btn-secondary">
-            Reload ledger
-          </Link>
-          <Link href="/dashboard" className="btn btn-ghost">
-            Command center
-          </Link>
+    <V3PageShell pageClassName="tosv3-trades-page">
+      <V3Panel className="tosv3-route-error" glass={false}>
+        <div className="ui-state-panel" role="alert">
+          <p className="ui-state-panel__eyebrow">Trades unavailable</p>
+          <h1 className="ui-state-panel__title">Trades could not load</h1>
+          <p className="ui-state-panel__body">
+            Your ledger data is unchanged — retry or return to the dashboard.
+          </p>
+          {error.digest ? (
+            <p className="ui-state-panel__evidence">{error.digest}</p>
+          ) : null}
+          <div className="ui-state-actions mt-4 flex flex-wrap gap-3">
+            <button type="button" className="tosv3-btn tosv3-btn--primary" onClick={() => reset()}>
+              Try again
+            </button>
+            <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
+              Reload trades
+            </Link>
+            <Link href="/dashboard" className="tosv3-btn tosv3-btn--ghost">
+              Dashboard
+            </Link>
+          </div>
         </div>
-      </div>
-    </div>
+      </V3Panel>
+    </V3PageShell>
   );
 }

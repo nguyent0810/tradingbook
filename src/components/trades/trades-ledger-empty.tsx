@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { V3Panel } from "@/components/trading-os-v3/layout";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 
 const ledgerEmptyIcon = (
@@ -24,7 +25,7 @@ export type TradesLedgerEmptyProps = {
 
 export function TradesLedgerEmpty({ filtered }: TradesLedgerEmptyProps) {
   return (
-    <div className="ledger-deck-panel pipeline-deck-panel">
+    <V3Panel className="tosv3-ledger-empty">
       <EmptyStateWithReason
         title={filtered ? "No matching trades" : "No trades yet"}
         reason={
@@ -36,11 +37,11 @@ export function TradesLedgerEmpty({ filtered }: TradesLedgerEmptyProps) {
         data-testid={filtered ? "trades-ledger-empty-filtered" : "trades-ledger-empty"}
       >
         {!filtered ? (
-          <Link href="/trades/new" className="btn btn-primary btn-sm">
+          <Link href="/trades/new" className="tosv3-btn tosv3-btn--primary tosv3-btn--sm">
             Log your first trade
           </Link>
         ) : null}
       </EmptyStateWithReason>
-    </div>
+    </V3Panel>
   );
 }
