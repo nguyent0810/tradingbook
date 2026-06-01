@@ -8,7 +8,6 @@ import {
   formatRsRankPreviewLines,
 } from "@/lib/scanner/gate2/rs-rank-term";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
-import { toCandidateRows } from "@/lib/scanner/setups-queries";
 import {
   loadRsDiagnosticsForSetupsCached,
   loadSetupsBaseData,
@@ -31,9 +30,12 @@ import {
 
 export async function SetupsCandidatesAsync() {
   const base = await loadSetupsBaseData();
-  if (!base.latest) return null;
+  if (!base.latest) {
+    return null;
+  }
 
-  const symbolKeys = toCandidateRows(base.latest).map((c) => c.symbolKey);
+  const candidateRows = base.candidateRows;
+  const symbolKeys = candidateRows.map((c) => c.symbolKey);
 
   const [{ candidatesWithHealth, healthError }, perfPack, rsMap] = await Promise.all([
     loadSurfacedCandidatesHealthCached(),
@@ -43,7 +45,7 @@ export async function SetupsCandidatesAsync() {
 
   const perfBanner = [healthError, perfPack.error].filter(Boolean).join(" ") || null;
 
-  const candidates = toCandidateRows(base.latest);
+  const candidates = candidateRows;
 
   const setupPerfMap = new Map<string, SetupPerfHint>();
   for (const r of perfPack.rows) {
@@ -57,7 +59,50 @@ export async function SetupsCandidatesAsync() {
     });
   }
 
-  return (
+  const candidateBundles = candidatesWithHealth.map((c): SetupsCandidateBundle => {
+    const lines = reasonsToStrings(c.reasons);
+    const rankComponents = rankComponentsFromReasons(c.reasons);
+    const rankBreakdownLines = rankComponents
+      ? formatGate2RankBreakdownLines(rankComponents).map(humanizeDisplayLine)
+      : [];
+    const rsUi = rsMap.get(c.symbolKey) ?? null;
+    const rsRankPreviewLines =
+      rankComponents != null
+        ? formatRsRankPreviewLines(
+            buildGate2RankWithRsPreview(rankComponents.rankScore, rsUi?.rs20SpreadPct ?? null)
+          ).map(humanizeDisplayLine)
+        : [];
+    const tier = c.quality === ScanQuality.A ? "A" : "B";
+    const perfHint = setupPerfMap.get(`${c.setupType}:${c.quality}`) ?? null;
+    return {
+      candidate: {
+        id: c.id,
+        symbolKey: c.symbolKey,
+        lifecycleSortLabel: c.lifecycleSortLabel,
+        healthLevel: c.healthLevel,
+        healthScore: c.healthScore,
+        healthScoreLabel: c.healthScoreLabel,
+        healthLines: c.healthLines.map(humanizeDisplayLine),
+        healthHint: c.healthHint ? humanizeDisplayLine(c.healthHint) : null,
+        healthSummary: c.healthSummary ? humanizeDisplayLine(c.healthSummary) : null,
+        quality: c.quality,
+        close: c.close,
+        pullbackZoneLow: c.pullbackZoneLow,
+        pullbackZoneHigh: c.pullbackZoneHigh,
+        stopLevel: c.stopLevel,
+        barDate: new Date(c.barDate).toLocaleDateString("en-CA"),
+        setupType: c.setupType,
+      },
+      perfHint: fmtSetupPerfHint(tier, perfHint),
+      reasonsLines: lines,
+      rankScore: c.rankScore,
+      rankBreakdownLines,
+      rsRankPreviewLines,
+      rsDiagnostic: rsUi,
+    };
+  });
+
+  const renderNode = (
     <>
       {perfBanner ? (
         <ErrorStateWithEvidence
@@ -99,54 +144,11 @@ export async function SetupsCandidatesAsync() {
             <p className="tosv3-setups-cockpit__panel-sub">Qualified setups — core scanner Tier A/B only</p>
           </header>
           <SetupsCandidatesMasterDetail
-            candidates={candidatesWithHealth.map((c): SetupsCandidateBundle => {
-              const lines = reasonsToStrings(c.reasons);
-              const rankComponents = rankComponentsFromReasons(c.reasons);
-              const rankBreakdownLines = rankComponents
-                ? formatGate2RankBreakdownLines(rankComponents).map(humanizeDisplayLine)
-                : [];
-              const rsUi = rsMap.get(c.symbolKey) ?? null;
-              const rsRankPreviewLines =
-                rankComponents != null
-                  ? formatRsRankPreviewLines(
-                      buildGate2RankWithRsPreview(
-                        rankComponents.rankScore,
-                        rsUi?.rs20SpreadPct ?? null
-                      )
-                    ).map(humanizeDisplayLine)
-                  : [];
-              const tier = c.quality === ScanQuality.A ? "A" : "B";
-              const perfHint = setupPerfMap.get(`${c.setupType}:${c.quality}`) ?? null;
-              return {
-                candidate: {
-                  id: c.id,
-                  symbolKey: c.symbolKey,
-                  lifecycleSortLabel: c.lifecycleSortLabel,
-                  healthLevel: c.healthLevel,
-                  healthScore: c.healthScore,
-                  healthScoreLabel: c.healthScoreLabel,
-                  healthLines: c.healthLines,
-                  healthHint: c.healthHint,
-                  healthSummary: c.healthSummary,
-                  quality: c.quality,
-                  close: c.close,
-                  pullbackZoneLow: c.pullbackZoneLow,
-                  pullbackZoneHigh: c.pullbackZoneHigh,
-                  stopLevel: c.stopLevel,
-                  barDate: new Date(c.barDate).toLocaleDateString("en-CA"),
-                  setupType: c.setupType,
-                },
-                perfHint: fmtSetupPerfHint(tier, perfHint),
-                reasonsLines: lines,
-                rankScore: c.rankScore,
-                rankBreakdownLines,
-                rsRankPreviewLines,
-                rsDiagnostic: rsUi,
-              };
-            })}
+            candidates={candidateBundles}
           />
         </section>
       )}
     </>
   );
+  return renderNode;
 }
