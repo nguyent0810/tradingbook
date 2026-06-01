@@ -58,7 +58,7 @@ export async function SetupsTailAsync() {
   return (
     <div className="tosv3-setups-tail" data-testid="setups-tail-section">
       {closestRows.length > 0 ? (
-        <details className="tosv3-setups-tail__panel tosv3-glass-panel">
+        <details className="tosv3-setups-tail__panel tosv3-panel tosv3-glass-panel">
           <summary className="tosv3-setups-tail__summary">
             Near-miss pipeline
             <span className="tosv3-setups-tail__count tabular-nums">{closestRows.length}</span>
@@ -68,7 +68,10 @@ export async function SetupsTailAsync() {
           </div>
         </details>
       ) : (
-        <details className="tosv3-setups-tail__panel tosv3-glass-panel" data-testid="setups-near-miss-panel">
+        <details
+          className="tosv3-setups-tail__panel tosv3-panel tosv3-glass-panel"
+          data-testid="setups-near-miss-panel"
+        >
           <summary className="tosv3-setups-tail__summary">Near-miss pipeline</summary>
           <div className="tosv3-setups-tail__body">
             <EmptyStateWithReason
@@ -81,7 +84,7 @@ export async function SetupsTailAsync() {
       )}
 
       {rsWatchlistRes.panel.rows.length > 0 ? (
-        <details className="tosv3-setups-tail__panel tosv3-glass-panel">
+        <details className="tosv3-setups-tail__panel tosv3-panel tosv3-glass-panel">
           <summary className="tosv3-setups-tail__summary">
             Relative strength watchlist
             <span className="tosv3-setups-tail__count tabular-nums">
@@ -101,7 +104,7 @@ export async function SetupsTailAsync() {
       ) : null}
 
       {breakdown && typeof breakdown === "object" && breakdown !== null ? (
-        <details className="tosv3-setups-tail__panel tosv3-glass-panel">
+        <details className="tosv3-setups-tail__panel tosv3-panel tosv3-glass-panel">
           <summary className="tosv3-setups-tail__summary">Liquidity &amp; session filters</summary>
           <div className="tosv3-setups-tail__body">
             <ul className="tosv3-setups-tail__breakdown">

@@ -1,6 +1,7 @@
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
 import { fmtRunDate } from "@/app/(dashboard)/setups/setups-shared-helpers";
+import { V3Panel } from "@/components/trading-os-v3/layout";
 
 export type SetupsPipelineSummaryStripProps = {
   latestScan: LatestScanWithCandidates | null;
@@ -13,16 +14,22 @@ export function SetupsPipelineSummaryStrip({
 }: SetupsPipelineSummaryStripProps) {
   if (!latestScan) {
     return (
-      <div className="tosv3-pipeline-command tos-pipeline-summary dash-surface-1" data-testid="setups-pipeline-summary-empty">
-        <span className="dash-chip dash-chip--muted">No scan run — pipeline counts unavailable</span>
-      </div>
+      <V3Panel className="tosv3-pipeline-command tos-pipeline-summary" glass={false}>
+        <span className="tosv3-meta-chip tosv3-meta-chip--muted" data-testid="setups-pipeline-summary-empty">
+          No scan run — pipeline counts unavailable
+        </span>
+      </V3Panel>
     );
   }
 
   const gate1Label = displayGate1ScanLevel(String(latestScan.gate1Level));
 
   return (
-    <div className="tosv3-pipeline-command tos-pipeline-summary dash-surface-1" data-testid="setups-pipeline-summary">
+    <V3Panel
+      className="tosv3-pipeline-command tos-pipeline-summary"
+      glass={false}
+      testId="setups-pipeline-summary"
+    >
       <div className="tos-pipeline-summary__flow">
         <div className="tos-pipeline-summary__step">
           <span className="tos-pipeline-summary__label">Universe scanned</span>
@@ -74,9 +81,9 @@ export function SetupsPipelineSummaryStrip({
           </>
         ) : null}
       </div>
-      <span className="tos-pipeline-summary__run dash-chip" title={latestScan.id}>
+      <span className="tos-pipeline-summary__run tosv3-meta-chip" title={latestScan.id}>
         Run {fmtRunDate(latestScan.runAt)}
       </span>
-    </div>
+    </V3Panel>
   );
 }

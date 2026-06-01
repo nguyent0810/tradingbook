@@ -16,8 +16,8 @@ export function SetupsPipelineContext({
   nearMissCount,
 }: SetupsPipelineContextProps) {
   return (
-    <div className="pipeline-deck__trust" data-testid="setups-pipeline-context">
-      <div className="pipeline-deck__trust-bar">
+    <div className="tosv3-setups-trust" data-testid="setups-pipeline-context">
+      <div className="tosv3-setups-trust__bar">
         <DashboardMarketStatusBar freshness={freshness} />
       </div>
       <SetupsPipelineSummaryStrip latestScan={latestScan} nearMissCount={nearMissCount} />
