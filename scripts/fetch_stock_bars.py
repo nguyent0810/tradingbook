@@ -171,6 +171,15 @@ def main() -> None:
             "(see: npx tsx scripts/report-bar-coverage.ts)."
         ),
     )
+    parser.add_argument(
+        "--retry-file",
+        type=Path,
+        default=None,
+        help=(
+            "Optional JSON {symbols: [...]} merged into the symbol list "
+            "(e.g. data/fetch-retry-queue.json from build-fetch-retry-queue.ts)."
+        ),
+    )
     args = parser.parse_args()
 
     if args.end_date.strip():
@@ -185,6 +194,9 @@ def main() -> None:
     end_s = end.isoformat()
 
     symbols = load_symbols(args.symbols_file)
+    if args.retry_file is not None:
+        extra = load_symbols(args.retry_file)
+        symbols = sorted({*symbols, *extra})
     if args.limit > 0:
         symbols = symbols[: args.limit]
 

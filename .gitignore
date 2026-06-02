@@ -51,6 +51,10 @@ next-env.d.ts
 # Fetched market data (regenerate with scripts/fetch_vnindex.py)
 /data/vnindex.json
 /data/stock-bars.json
+/data/stale-fetch-targets.json
+/data/fetch-retry-queue.json
+/data/stock-bars-shard-*.json
+/data/*-shard-*-symbols.json
 /data/active-symbol-keys.json
 /data/vn-symbols.json
 
