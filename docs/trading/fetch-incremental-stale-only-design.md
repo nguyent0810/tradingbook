@@ -107,8 +107,56 @@ npx tsx scripts/list-stale-fetch-targets.ts --active-only \
 - Batch D reduces **daily fetch cost** without changing who is active.
 - Expand toward 300 only after stale-only pipeline is proven and provider coverage allows more latest-session symbols.
 
+## GitHub Actions (`production-bar-import.yml`)
+
+Scheduled and manual production bar import uses **stale-only equity fetch** by default.
+
+### Flow (equity path)
+
+1. VNINDEX fetch + import (unchanged).
+2. `export-active-symbol-keys.ts` → full effective universe JSON (`SYMBOLS_JSON`).
+3. When `STALE_ONLY_FETCH=1` (default): `list-stale-fetch-targets.ts --production-read-only --active-only` (read-only DB).
+4. `Select equity symbol list`: use stale JSON if `0 < staleCount < fullCount`, else full universe.
+5. `fetch_stock_bars.py --symbols-file "$FETCH_SYMBOLS_JSON"` (unchanged sleep/end-date).
+6. `import-stock-bars.ts` (unchanged upsert).
+7. Health artifacts + optional scan trigger (unchanged).
+
+### Environment / rollback
+
+| Control | Effect |
+|---------|--------|
+| `STALE_ONLY_FETCH=1` (job default) | List stale targets; fetch subset when smaller than full universe |
+| `STALE_ONLY_FETCH=0` | **Rollback:** skip stale listing; always fetch full `SYMBOLS_JSON` |
+| `workflow_dispatch` → `stale_only_fetch: false` | Sets `STALE_ONLY_FETCH=0` for one run |
+
+To force full universe on a scheduled run, add a repository variable or temporarily change job `env.STALE_ONLY_FETCH` to `"0"` in the workflow file.
+
+### Artifacts
+
+| File | Content |
+|------|---------|
+| `stale-fetch-target-summary.json` | JSON from `list-stale-fetch-targets --json` (masked `databaseUrlHint`, counts) |
+| `pre-import-health.json` / `post-import-health.json` | Existing bar-import health |
+| `scan-response.json` | Daily scan HTTP response when triggered |
+
+Runner temp (not uploaded): `stale-fetch-targets.json` (symbol list passed to Python fetch).
+
+### Safety
+
+- `list-stale-fetch-targets` does **not** write to Postgres.
+- Logs print **masked** `databaseUrlHint` only (no credentials).
+- `BAR_IMPORT_REQUIRE_PRODUCTION_DB=1` unchanged.
+- Production universe activation (Batch B1) is **not** modified by this workflow.
+
+### Operational behavior
+
+- **~38 stale / 206 active (typical):** fetch ~2 min instead of ~12 min full.
+- **0 stale:** falls back to full universe fetch (health unchanged).
+- **stale ≥ full:** falls back to full (defensive).
+- **Listing step fails:** step skipped if `STALE_ONLY_FETCH=0`; if listing fails with exit 1, job fails before fetch (fix DB/network).
+
 ## Related
 
 - [universe-curation-spec.md](./universe-curation-spec.md)
 - [PRODUCTION_BAR_IMPORT_AUTOMATION.md](../integration/PRODUCTION_BAR_IMPORT_AUTOMATION.md)
-- `.github/workflows/production-bar-import.yml` (future: wire stale-only + shards)
+- `.github/workflows/production-bar-import.yml`
