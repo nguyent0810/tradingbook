@@ -1,6 +1,9 @@
 # Production bar import: VNINDEX + active equities (vnstock) → Neon, then daily scan.
 # Does not run on Vercel (Python + ~15–25 min equity fetch exceeds serverless limits).
 # Replaces the VNINDEX-only workflow; see docs/integration/PRODUCTION_BAR_IMPORT_AUTOMATION.md
+#
+# Equity fetch: by default fetches only stale/missing active symbols (Batch D).
+# Rollback to full universe: set job env STALE_ONLY_FETCH=0 (or workflow_dispatch input).
 
 name: Production bar import
 
@@ -18,6 +21,10 @@ on:
         description: "VNINDEX import only (skip equity fetch/import)"
         type: boolean
         default: false
+      stale_only_fetch:
+        description: "Fetch stale/missing active symbols only (set false for full universe)"
+        type: boolean
+        default: true
 
 concurrency:
   group: production-bar-import
@@ -35,6 +42,8 @@ jobs:
       DEPLOYMENT_URL: ${{ secrets.DEPLOYMENT_URL }}
       TRIGGER_SCAN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.trigger_scan == 'false' && '0' || '1' }}
       SKIP_EQUITY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_equity == 'true' && '1' || '0' }}
+      # Default 1 = stale-only when dispatch input not set (scheduled runs).
+      STALE_ONLY_FETCH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.stale_only_fetch == 'false' && '0' || '1' }}
 
     steps:
       - name: Checkout
@@ -45,6 +54,8 @@ jobs:
           echo "VNINDEX_JSON=${RUNNER_TEMP}/vnindex.json" >> "$GITHUB_ENV"
           echo "STOCK_JSON=${RUNNER_TEMP}/stock-bars.json" >> "$GITHUB_ENV"
           echo "SYMBOLS_JSON=${RUNNER_TEMP}/effective-universe-symbol-keys.json" >> "$GITHUB_ENV"
+          echo "STALE_SYMBOLS_JSON=${RUNNER_TEMP}/stale-fetch-targets.json" >> "$GITHUB_ENV"
+          echo "STALE_TARGET_SUMMARY_JSON=${RUNNER_TEMP}/stale-fetch-target-summary.json" >> "$GITHUB_ENV"
 
       - name: Validate required secrets
         run: |
@@ -87,6 +98,43 @@ jobs:
       - name: Export effective universe symbols (core + tactical, no smoke tickers)
         run: npx tsx scripts/export-active-symbol-keys.ts --out "$SYMBOLS_JSON"
 
+      - name: List stale equity fetch targets (read-only DB)
+        if: env.SKIP_EQUITY != '1' && env.STALE_ONLY_FETCH != '0'
+        env:
+          SMOKE_DATABASE: production
+        run: |
+          set -euo pipefail
+          npx tsx scripts/list-stale-fetch-targets.ts \
+            --production-read-only \
+            --active-only \
+            --write-symbols-file="$STALE_SYMBOLS_JSON" \
+            --json | tee "$STALE_TARGET_SUMMARY_JSON"
+          python3 -c "import json; d=json.load(open('$STALE_TARGET_SUMMARY_JSON')); print('stale_fetch_listing databaseUrlHint=', d.get('databaseUrlHint','(masked)')); print('fetchTargetCount=', d.get('fetchTargetCount')); print('universeSize=', d.get('universeSize'))"
+
+      - name: Select equity symbol list for fetch
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          set -euo pipefail
+          FULL_COUNT="$(python3 -c "import json; print(len(json.load(open('$SYMBOLS_JSON')).get('symbols',[])))")"
+          USE_STALE=0
+          if [ "${STALE_ONLY_FETCH:-1}" != "0" ] && [ -f "$STALE_TARGET_SUMMARY_JSON" ]; then
+            STALE_COUNT="$(python3 -c "import json; print(json.load(open('$STALE_TARGET_SUMMARY_JSON')).get('fetchTargetCount',0))")"
+            if [ "$STALE_COUNT" -gt 0 ] && [ "$STALE_COUNT" -lt "$FULL_COUNT" ]; then
+              USE_STALE=1
+            fi
+          fi
+          if [ "$USE_STALE" -eq 1 ]; then
+            echo "FETCH_SYMBOLS_JSON=$STALE_SYMBOLS_JSON" >> "$GITHUB_ENV"
+            echo "Equity fetch mode: stale-only ($STALE_COUNT of $FULL_COUNT symbols)"
+          else
+            echo "FETCH_SYMBOLS_JSON=$SYMBOLS_JSON" >> "$GITHUB_ENV"
+            if [ "${STALE_ONLY_FETCH:-1}" = "0" ]; then
+              echo "Equity fetch mode: full universe (STALE_ONLY_FETCH=0 rollback)"
+            else
+              echo "Equity fetch mode: full universe (stale-only skipped: count=$STALE_COUNT full=$FULL_COUNT)"
+            fi
+          fi
+
       - name: Resolve equity fetch end-date from VNINDEX session
         id: session
         run: echo "end_date=$(npx tsx scripts/print-expected-session-day.ts)" >> "$GITHUB_OUTPUT"
@@ -95,7 +143,7 @@ jobs:
         if: env.SKIP_EQUITY != '1'
         run: |
           python scripts/fetch_stock_bars.py \
-            --symbols-file "$SYMBOLS_JSON" \
+            --symbols-file "$FETCH_SYMBOLS_JSON" \
             --output "$STOCK_JSON" \
             --sleep 3.2 \
             --calendar-days 200 \
@@ -108,6 +156,13 @@ jobs:
       - name: Post-import health snapshot
         run: npx tsx scripts/verify-bar-import-health.ts --json | tee post-import-health.json
 
+      - name: Copy stale-target summary for artifacts
+        if: env.SKIP_EQUITY != '1' && env.STALE_ONLY_FETCH != '0'
+        run: |
+          if [ -f "$STALE_TARGET_SUMMARY_JSON" ]; then
+            cp "$STALE_TARGET_SUMMARY_JSON" stale-fetch-target-summary.json
+          fi
+
       - name: Upload monitoring artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -115,7 +170,9 @@ jobs:
           path: |
             pre-import-health.json
             post-import-health.json
+            stale-fetch-target-summary.json
           retention-days: 14
+          if-no-files-found: ignore
 
       - name: Trigger production daily scan
         if: env.TRIGGER_SCAN == '1'
