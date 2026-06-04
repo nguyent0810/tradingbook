@@ -14,7 +14,7 @@ const prodLikeContext: MarketContextUiDto = {
     foreignNetValue10d: null,
     foreignSymbolsOk: 159,
     foreignSymbolsTotal: 206,
-    foreignCoveragePct: 77.18,
+    foreignCoveragePct: 159 / 206,
     gate1Level: "PASS",
     vnindexVolRatioMa20: 1.1,
   },
@@ -31,6 +31,21 @@ describe("buildMarketContextCockpitChips", () => {
     expect(chips[0]?.display).toBe("−458.37B ₫ net");
     expect(chips[0]?.hint).toContain("5D/10D");
     expect(chips[1]?.display).toBe("159/206 OK (77%)");
+  });
+
+  it("formats DB fraction foreignCoveragePct as integer percent", () => {
+    const chips = buildMarketContextCockpitChips({
+      ...prodLikeContext,
+      market: {
+        ...prodLikeContext.market!,
+        foreignSymbolsOk: 159,
+        foreignSymbolsTotal: 206,
+        foreignCoveragePct: 0.7718,
+      },
+    });
+    expect(chips.find((c) => c.id === "market_foreign_coverage")?.display).toBe(
+      "159/206 OK (77%)"
+    );
   });
 
   it("omits 5D/10D chips while rollups are null", () => {
