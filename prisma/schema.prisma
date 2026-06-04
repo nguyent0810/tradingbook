@@ -189,6 +189,17 @@ enum TradeOutcome {
   BREAKEVEN
 }
 
+enum ForeignCaptureMethod {
+  PRICE_BOARD_EOD_SNAPSHOT
+}
+
+enum ForeignDataQuality {
+  OK
+  ALL_ZERO
+  PARTIAL
+  ERROR
+}
+
 model IndexDailyBar {
   id        String   @id @default(cuid())
   symbol    String
@@ -217,9 +228,11 @@ model StockSymbol {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  bars            StockDailyBar[]
-  setupCandidates SetupCandidate[]
-  setupWatchItems SetupWatchItem[]
+  bars                 StockDailyBar[]
+  setupCandidates      SetupCandidate[]
+  setupWatchItems      SetupWatchItem[]
+  foreignTradeDaily    ForeignTradeDaily[]
+  symbolMarketContexts SymbolMarketContextDaily[]
 
   @@map("stock_symbols")
 }
@@ -264,6 +277,82 @@ model StockDailyBar {
   @@unique([symbolId, date])
   @@index([symbolId, date(sort: Desc)])
   @@map("stock_daily_bars")
+}
+
+/// Forward-only VCI price_board EOD foreign snapshot (session-cumulative).
+model ForeignTradeDaily {
+  id            String               @id @default(cuid())
+  symbolId      String               @map("symbol_id")
+  symbol        StockSymbol          @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  sessionDate   DateTime             @db.Date @map("session_date")
+
+  buyVolume     Float?               @map("buy_volume")
+  sellVolume    Float?               @map("sell_volume")
+  netVolume     Float?               @map("net_volume")
+
+  buyValueVnd   Float?               @map("buy_value_vnd")
+  sellValueVnd  Float?               @map("sell_value_vnd")
+  netValueVnd   Float?               @map("net_value_vnd")
+
+  source        String               @default("vnstock:VCI")
+  captureMethod ForeignCaptureMethod @default(PRICE_BOARD_EOD_SNAPSHOT) @map("capture_method")
+  capturedAt    DateTime             @default(now()) @map("captured_at")
+  dataQuality   ForeignDataQuality   @default(PARTIAL) @map("data_quality")
+
+  @@unique([symbolId, sessionDate])
+  @@index([sessionDate])
+  @@index([symbolId, sessionDate(sort: Desc)])
+  @@map("foreign_trade_daily")
+}
+
+model MarketContextDaily {
+  sessionDate         DateTime        @id @db.Date @map("session_date")
+
+  vnindexClose        Float?          @map("vnindex_close")
+  vnindexMa20         Float?          @map("vnindex_ma20")
+  vnindexMa50         Float?          @map("vnindex_ma50")
+  vnindexVolume       Float?          @map("vnindex_volume")
+  vnindexVolMa20      Float?          @map("vnindex_vol_ma20")
+  vnindexVolRatioMa20 Float?          @map("vnindex_vol_ratio_ma20")
+
+  gate1Level          Gate1ScanLevel? @map("gate1_level")
+
+  foreignNetValue1d   Float?          @map("foreign_net_value_1d")
+  foreignNetValue5d   Float?          @map("foreign_net_value_5d")
+  foreignNetValue10d  Float?          @map("foreign_net_value_10d")
+
+  foreignSymbolsOk    Int             @default(0) @map("foreign_symbols_ok")
+  foreignSymbolsTotal Int             @default(0) @map("foreign_symbols_total")
+  foreignCoveragePct  Float?          @map("foreign_coverage_pct")
+
+  symbolsBuilt        Int             @default(0) @map("symbols_built")
+  builtAt             DateTime        @default(now()) @map("built_at")
+
+  symbolContexts SymbolMarketContextDaily[]
+
+  @@map("market_context_daily")
+}
+
+model SymbolMarketContextDaily {
+  id                 String              @id @default(cuid())
+  sessionDate        DateTime            @db.Date @map("session_date")
+  symbolId           String              @map("symbol_id")
+  symbol             StockSymbol         @relation(fields: [symbolId], references: [id], onDelete: Cascade)
+  marketContext      MarketContextDaily  @relation(fields: [sessionDate], references: [sessionDate], onDelete: Cascade)
+
+  close              Float?
+  volume             Float?
+  volMa20            Float?              @map("vol_ma20")
+  volRatioMa20       Float?              @map("vol_ratio_ma20")
+
+  foreignNetValue1d  Float?              @map("foreign_net_value_1d")
+  foreignNetValue5d  Float?              @map("foreign_net_value_5d")
+  foreignNetValue10d Float?              @map("foreign_net_value_10d")
+  foreignDataQuality ForeignDataQuality? @map("foreign_data_quality")
+
+  @@unique([sessionDate, symbolId])
+  @@index([symbolId, sessionDate(sort: Desc)])
+  @@map("symbol_market_context_daily")
 }
 
 model DailyScanRun {

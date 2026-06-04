@@ -156,6 +156,39 @@ jobs:
       - name: Post-import health snapshot
         run: npx tsx scripts/verify-bar-import-health.ts --json | tee post-import-health.json
 
+      - name: Resolve session date for foreign capture
+        id: foreign_session
+        run: echo "session_date=$(npx tsx scripts/print-expected-session-day.ts)" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch foreign snapshots (VCI price_board)
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          python scripts/fetch_foreign_snapshot.py \
+            --symbols-file "$SYMBOLS_JSON" \
+            --session-date "${{ steps.foreign_session.outputs.session_date }}" \
+            --output "$RUNNER_TEMP/foreign-snapshot.json" \
+            --batch-size 10 \
+            --sleep 3.2
+
+      - name: Import foreign snapshots
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          npx tsx scripts/import-foreign-flow.ts "$RUNNER_TEMP/foreign-snapshot.json" \
+            --expect-session "${{ steps.foreign_session.outputs.session_date }}"
+
+      - name: Build market context
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          npx tsx scripts/build-market-context.ts \
+            --session-date "${{ steps.foreign_session.outputs.session_date }}"
+
+      - name: Verify market context health
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          npx tsx scripts/verify-market-context-health.ts \
+            --session-date "${{ steps.foreign_session.outputs.session_date }}" \
+            --json | tee market-context-health.json || true
+
       - name: Copy stale-target summary for artifacts
         if: env.SKIP_EQUITY != '1' && env.STALE_ONLY_FETCH != '0'
         run: |
@@ -171,6 +204,7 @@ jobs:
             pre-import-health.json
             post-import-health.json
             stale-fetch-target-summary.json
+            market-context-health.json
           retention-days: 14
           if-no-files-found: ignore
 
