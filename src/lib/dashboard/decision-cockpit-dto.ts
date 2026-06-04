@@ -6,6 +6,8 @@ import {
   isStructureBrokenCategory,
 } from "@/lib/scanner/closest-execution-metrics";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import { buildMarketContextCockpitChips } from "@/lib/market/build-market-context-evidence";
+import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import {
   computeDailyTradingDecision,
   type DailyTradingDecision,
@@ -128,6 +130,8 @@ export type DecisionCockpitInput = {
   rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>;
   /** Batch D2.3 — INVALID + RS20>0 diagnostic lane; does not affect Gate 2 or verdict. */
   rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
+  /** Phase 1B — read-only market context; does not affect verdict, risk, or opportunity. */
+  marketContext?: MarketContextUiDto | null;
 };
 
 export type ProvenanceField<T> = {
@@ -140,6 +144,8 @@ export type EvidenceChipDto = {
   label: string;
   display: string;
   provenance: DataProvenance;
+  /** Optional tooltip detail (e.g. rollup accumulation note). */
+  hint?: string;
 };
 
 export type VerdictDto = {
@@ -594,7 +600,8 @@ function buildEvidenceStack(
   latestScan: DecisionCockpitScanSnapshot | null,
   liveRegime: DecisionCockpitRegimeSnapshot,
   freshness: MarketFreshnessDto,
-  gateFunnel: GateFunnelSnapshot | null
+  gateFunnel: GateFunnelSnapshot | null,
+  marketContext?: MarketContextUiDto | null
 ): EvidenceChipDto[] {
   const chips: EvidenceChipDto[] = [
     {
@@ -658,6 +665,8 @@ function buildEvidenceStack(
       });
     }
   }
+
+  chips.push(...buildMarketContextCockpitChips(marketContext));
 
   chips.push({
     id: "aligned",
@@ -1142,7 +1151,8 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
       input.latestScan,
       input.liveRegime,
       input.freshness,
-      gateFunnel
+      gateFunnel,
+      input.marketContext
     ),
     opportunity,
     ladder: buildLadderRows(opportunity, input.surfacedCandidates),

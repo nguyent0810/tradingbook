@@ -13,6 +13,10 @@ const INLINE_CHIP_ORDER = [
   "tier_b",
   "aligned",
   "vnindex",
+  "market_foreign_1d",
+  "market_foreign_coverage",
+  "market_foreign_5d",
+  "market_foreign_10d",
   "scan_at",
 ] as const;
 
@@ -43,7 +47,11 @@ export function DashboardEvidenceCompact({
             key={chip.id}
             className="dash-hint-chip"
             data-testid={`dashboard-evidence-chip-${chip.id}`}
-            title={`${chip.label}: ${chip.display} (${chip.provenance})`}
+            title={
+              chip.hint
+                ? `${chip.label}: ${chip.display} (${chip.provenance}) — ${chip.hint}`
+                : `${chip.label}: ${chip.display} (${chip.provenance})`
+            }
           >
             <span className="dash-hint-chip__label">{chip.label}</span>
             <span className="dash-hint-chip__value">{chip.display}</span>
@@ -73,7 +81,7 @@ export function DashboardEvidenceCompact({
                 key={chip.id}
                 className="dash-evidence-chip dash-evidence-chip--sm"
                 data-testid={`dashboard-evidence-chip-${chip.id}`}
-                title={`Source: ${chip.provenance}`}
+                title={chip.hint ? `Source: ${chip.provenance} — ${chip.hint}` : `Source: ${chip.provenance}`}
               >
                 <span className="dash-evidence-chip__label">{chip.label}</span>
                 <span className="dash-evidence-chip__value">{chip.display}</span>

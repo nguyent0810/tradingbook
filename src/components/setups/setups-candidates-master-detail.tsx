@@ -48,6 +48,7 @@ export type SetupsCandidateBundle = {
   };
   perfHint: string;
   reasonsLines: string[];
+  marketContextLines: string[];
   rankScore: number;
   rankBreakdownLines: string[];
   rsRankPreviewLines: string[];
@@ -164,13 +165,13 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
   onToggleTech: () => void;
   onOpenTechnical: () => void;
 }) {
-  const { candidate, reasonsLines, rankBreakdownLines, rsRankPreviewLines, rsDiagnostic } = bundle;
+  const { candidate, reasonsLines, marketContextLines, rankBreakdownLines, rsRankPreviewLines, rsDiagnostic } = bundle;
   const tier = candidate.quality === "A" ? "A" : "B";
   const lifecycleVariant = candidate.lifecycleSortLabel === "READY" ? "ready" : "watching";
 
   const evidenceItems = useMemo(
-    () => buildSetupsEvidenceItems(reasonsLines, candidate.healthLines),
-    [candidate.healthLines, reasonsLines]
+    () => buildSetupsEvidenceItems(reasonsLines, candidate.healthLines, marketContextLines),
+    [candidate.healthLines, marketContextLines, reasonsLines]
   );
   const previewEvidence = useMemo(
     () => evidenceItems.slice(0, SETUPS_EVIDENCE_PREVIEW_COUNT),

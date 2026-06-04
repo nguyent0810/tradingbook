@@ -12,13 +12,19 @@ export type SetupsEvidenceItem = {
 
 export function buildSetupsEvidenceItems(
   reasonsLines: string[],
-  healthLines: string[]
+  healthLines: string[],
+  marketContextLines: string[] = []
 ): SetupsEvidenceItem[] {
   return [
     ...reasonsLines.map((line) => ({
       key: `reason-${line}`,
       text: line,
       tone: "ok" as const,
+    })),
+    ...marketContextLines.map((line, i) => ({
+      key: `context-${i}-${line}`,
+      text: line,
+      tone: "neutral" as const,
     })),
     ...healthLines.map((line, i) => ({
       key: `health-${i}`,
