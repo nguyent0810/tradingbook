@@ -9,9 +9,12 @@ const FOREIGN_ROLLUP_HINT =
   "5D/10D rollups appear after 5–10 forward sessions.";
 
 function formatCoverageDisplay(ok: number, total: number, pct: number | null): string {
-  const pctLabel =
-    pct != null && Number.isFinite(pct) ? ` (${Math.round(pct)}%)` : "";
-  return `${ok}/${total} OK${pctLabel}`;
+  if (pct == null || !Number.isFinite(pct)) {
+    return `${ok}/${total} OK`;
+  }
+  // DB stores ok/total as a 0–1 fraction (e.g. 159/206 ≈ 0.7718).
+  const asPercent = pct <= 1 ? pct * 100 : pct;
+  return `${ok}/${total} OK (${Math.round(asPercent)}%)`;
 }
 
 function formatVolRatioMa20Context(ratio: number): string {
