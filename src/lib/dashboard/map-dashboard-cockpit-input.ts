@@ -3,6 +3,7 @@ import type { DailyScanGate2Notes } from "@/lib/scanner/gate2-scan-diagnostics";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { MarketRegimeFromDbResult } from "@/lib/playbook/get-market-regime";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health";
 import type { SetupLifecycleStatus } from "@/generated/prisma/client";
 import type { SetupHealthLevelValue } from "@/lib/setup-health/types";
@@ -38,6 +39,7 @@ export type BuildDashboardCockpitInputParams = {
   now?: Date;
   rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>;
   rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
+  marketContext?: MarketContextUiDto | null;
 };
 
 function toScanSnapshot(
@@ -122,5 +124,6 @@ export function buildDashboardCockpitInput(
     now: params.now,
     rsDiagnosticsBySymbol: params.rsDiagnosticsBySymbol,
     rsNearMissWatchlist: params.rsNearMissWatchlist,
+    marketContext: params.marketContext,
   };
 }

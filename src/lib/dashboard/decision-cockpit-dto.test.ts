@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { RS_DIAGNOSTIC_DISCLAIMER } from "@/lib/scanner/gate2/rs-diagnostic-format";
+import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import {
   buildDecisionCockpitDto,
   buildRiskBudgetHeadroom,
@@ -681,5 +682,54 @@ describe("computeConfidenceBand", () => {
         scanRunAt: null,
       })
     ).toBe("low");
+  });
+});
+
+const prodLikeMarketContext: MarketContextUiDto = {
+  sessionDate: "2026-06-03",
+  available: true,
+  market: {
+    foreignNetValue1d: -458_371_893_440,
+    foreignNetValue5d: null,
+    foreignNetValue10d: null,
+    foreignSymbolsOk: 159,
+    foreignSymbolsTotal: 206,
+    foreignCoveragePct: 77.18,
+    gate1Level: "PASS",
+    vnindexVolRatioMa20: 1.1,
+  },
+  bySymbol: {},
+};
+
+describe("buildDecisionCockpitDto — market context Phase 1B invariance", () => {
+  it("leaves verdict, risk, and opportunity unchanged when market context is present", () => {
+    const input = baseInput();
+    const without = buildDecisionCockpitDto(input);
+    const withContext = buildDecisionCockpitDto({
+      ...input,
+      marketContext: prodLikeMarketContext,
+    });
+
+    expect(withContext.verdict).toEqual(without.verdict);
+    expect(withContext.risk).toEqual(without.risk);
+    expect(withContext.opportunity).toEqual(without.opportunity);
+    expect(withContext.gateFunnel).toEqual(without.gateFunnel);
+    expect(withContext.ladder).toEqual(without.ladder);
+    expect(withContext.setupQualityLadder).toEqual(without.setupQualityLadder);
+    expect(withContext.tomorrow).toEqual(without.tomorrow);
+    expect(withContext.riskBudgetHeadroom).toEqual(without.riskBudgetHeadroom);
+  });
+
+  it("appends market foreign evidence chips without removing existing chips", () => {
+    const dto = buildDecisionCockpitDto({
+      ...baseInput(),
+      marketContext: prodLikeMarketContext,
+    });
+    const ids = dto.evidence.map((c) => c.id);
+    expect(ids).toContain("gate1");
+    expect(ids).toContain("market_foreign_1d");
+    expect(ids).toContain("market_foreign_coverage");
+    expect(ids).not.toContain("market_foreign_5d");
+    expect(ids).not.toContain("market_foreign_10d");
   });
 });

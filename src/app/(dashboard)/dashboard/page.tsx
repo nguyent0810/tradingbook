@@ -20,6 +20,8 @@ import {
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import { fetchMarketContextUi } from "@/lib/market/fetch-market-context-ui";
+import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import { buildDecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagnostics";
@@ -79,6 +81,28 @@ export default async function DashboardPage() {
       scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
     scanSessionCoverage: scanNotes?.sessionCoverage ?? null,
   });
+
+  let marketContext: MarketContextUiDto | null = null;
+  if (freshness.benchmarkDate) {
+    try {
+      const rsSymbolsForContext = [
+        ...new Set([
+          ...toCandidateRows(latestScan).map((c) => c.symbolKey),
+          ...(scanNotes?.closestToValidSymbols ?? [])
+            .slice(0, 12)
+            .map((r) => r.symbol),
+        ]),
+      ];
+      marketContext = await fetchMarketContextUi(
+        prisma,
+        freshness.benchmarkDate,
+        { symbols: rsSymbolsForContext }
+      );
+    } catch (e) {
+      console.error("[dashboard] market context load failed:", e);
+    }
+  }
+
   const rawCandidates = toCandidateRows(latestScan);
   const evalDate =
     rawCandidates.length > 0
@@ -198,6 +222,7 @@ export default async function DashboardPage() {
       portfolioRiskConfigured,
       rsDiagnosticsBySymbol,
       rsNearMissWatchlist,
+      marketContext,
     })
   );
 
