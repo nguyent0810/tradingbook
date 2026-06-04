@@ -43,9 +43,7 @@ async function main(): Promise<void> {
   }
 
   const universe = await loadEffectiveScanUniverse(prisma);
-  const symbolIds = universe.symbols
-    .map((s) => s.stockSymbolId)
-    .filter((id): id is string => Boolean(id));
+  const symbolIds = universe.symbols.map((s) => s.symbolId);
 
   const indexBars = await prisma.indexDailyBar.findMany({
     where: { symbol: "VNINDEX", date: { lte: sessionDate } },
@@ -104,10 +102,10 @@ async function main(): Promise<void> {
   }> = [];
 
   for (const u of universe.symbols) {
-    if (!u.stockSymbolId) continue;
+    const stockSymbolId = u.symbolId;
 
     const stockBars = await prisma.stockDailyBar.findMany({
-      where: { symbolId: u.stockSymbolId, date: { lte: sessionDate } },
+      where: { symbolId: stockSymbolId, date: { lte: sessionDate } },
       orderBy: { date: "asc" },
       select: { date: true, open: true, high: true, low: true, close: true, volume: true },
     });
@@ -122,11 +120,11 @@ async function main(): Promise<void> {
     }));
 
     const volCtx = computeSymbolVolumeContext(barPoints, sessionDate);
-    const foreignHistory = foreignHistoryBySymbol.get(u.stockSymbolId) ?? [];
+    const foreignHistory = foreignHistoryBySymbol.get(stockSymbolId) ?? [];
     const foreignRollup = computeSymbolForeignRollup(foreignHistory, sessionDate);
 
     symbolWrites.push({
-      symbolId: u.stockSymbolId,
+      symbolId: stockSymbolId,
       volCtx,
       foreignRollup,
     });
