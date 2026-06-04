@@ -23,6 +23,7 @@
     "import:foreign": "npx tsx scripts/import-foreign-flow.ts",
     "build:market-context": "npx tsx scripts/build-market-context.ts",
     "ops:verify-market-context": "npx tsx scripts/verify-market-context-health.ts",
+    "ops:monitor-market-context": "npx tsx scripts/monitor-market-context-sessions.ts",
     "data:market-context": "npx tsx scripts/import-foreign-flow.ts && npx tsx scripts/build-market-context.ts",
     "gate1:print": "npx tsx scripts/print-gate1-regime.ts",
     "gate1:check": "npx tsx scripts/print-gate1-regime.ts",
