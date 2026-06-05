@@ -25,6 +25,13 @@ on:
         description: "Fetch stale/missing active symbols only (set false for full universe)"
         type: boolean
         default: true
+      fetch_shard_count:
+        description: "Equity fetch shards (pilot: 2 splits stale-only targets). Scheduled runs always use 1."
+        type: choice
+        options:
+          - "1"
+          - "2"
+        default: "1"
 
 concurrency:
   group: production-bar-import
@@ -44,6 +51,10 @@ jobs:
       SKIP_EQUITY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.skip_equity == 'true' && '1' || '0' }}
       # Default 1 = stale-only when dispatch input not set (scheduled runs).
       STALE_ONLY_FETCH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.stale_only_fetch == 'false' && '0' || '1' }}
+      # Sharded stale fetch: workflow_dispatch only; cron always 1 (no input on schedule).
+      FETCH_SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.fetch_shard_count || '1' }}
+      FETCH_SHARD_MANIFEST_PATH: fetch-shard-manifest.json
+      FETCH_SHARD_FAIL_THRESHOLD_PCT: "5"
 
     steps:
       - name: Checkout
@@ -125,33 +136,41 @@ jobs:
           fi
           if [ "$USE_STALE" -eq 1 ]; then
             echo "FETCH_SYMBOLS_JSON=$STALE_SYMBOLS_JSON" >> "$GITHUB_ENV"
+            echo "USE_STALE=1" >> "$GITHUB_ENV"
             echo "Equity fetch mode: stale-only ($STALE_COUNT of $FULL_COUNT symbols)"
           else
             echo "FETCH_SYMBOLS_JSON=$SYMBOLS_JSON" >> "$GITHUB_ENV"
+            echo "USE_STALE=0" >> "$GITHUB_ENV"
             if [ "${STALE_ONLY_FETCH:-1}" = "0" ]; then
               echo "Equity fetch mode: full universe (STALE_ONLY_FETCH=0 rollback)"
             else
               echo "Equity fetch mode: full universe (stale-only skipped: count=$STALE_COUNT full=$FULL_COUNT)"
             fi
           fi
+          echo "fetch_shard_count=${FETCH_SHARD_COUNT:-1} (workflow_dispatch pilot; schedule uses 1)"
+
+      - name: Validate fetch shard configuration
+        if: env.SKIP_EQUITY != '1'
+        run: |
+          set -euo pipefail
+          if [ "${FETCH_SHARD_COUNT}" != "1" ] && [ "${FETCH_SHARD_COUNT}" != "2" ]; then
+            echo "fetch_shard_count must be 1 or 2 (got ${FETCH_SHARD_COUNT})" >&2
+            exit 1
+          fi
+          if [ "${FETCH_SHARD_COUNT}" = "2" ] && [ "${USE_STALE:-0}" != "1" ]; then
+            echo "fetch_shard_count=2 requires stale-only subset (0 < stale < full). Use fetch_shard_count=1." >&2
+            exit 1
+          fi
 
       - name: Resolve equity fetch end-date from VNINDEX session
         id: session
         run: echo "end_date=$(npx tsx scripts/print-expected-session-day.ts)" >> "$GITHUB_OUTPUT"
 
-      - name: Fetch equity bars
+      - name: Fetch and import equity bars
         if: env.SKIP_EQUITY != '1'
-        run: |
-          python scripts/fetch_stock_bars.py \
-            --symbols-file "$FETCH_SYMBOLS_JSON" \
-            --output "$STOCK_JSON" \
-            --sleep 3.2 \
-            --calendar-days 200 \
-            --end-date "${{ steps.session.outputs.end_date }}"
-
-      - name: Import equity bars into Postgres
-        if: env.SKIP_EQUITY != '1'
-        run: npx tsx scripts/import-stock-bars.ts "$STOCK_JSON"
+        env:
+          SMOKE_DATABASE: production
+        run: bash scripts/run-production-equity-fetch.sh "${{ steps.session.outputs.end_date }}"
 
       - name: Post-import health snapshot
         run: npx tsx scripts/verify-bar-import-health.ts --json | tee post-import-health.json
@@ -204,6 +223,14 @@ jobs:
             pre-import-health.json
             post-import-health.json
             stale-fetch-target-summary.json
+            fetch-shard-manifest.json
+            stale-fetch-targets-shard-0.json
+            stale-fetch-targets-shard-1.json
+            stock-bars-shard-0.json
+            stock-bars-shard-1.json
+            fetch-retry-queue-shard-0.json
+            fetch-retry-queue-shard-1.json
+            fetch-retry-queue.json
             market-context-health.json
           retention-days: 14
           if-no-files-found: ignore
