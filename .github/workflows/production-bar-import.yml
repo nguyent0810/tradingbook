@@ -224,6 +224,7 @@ jobs:
             post-import-health.json
             stale-fetch-target-summary.json
             fetch-shard-manifest.json
+            stale-fetch-targets-frozen.json
             stale-fetch-targets-shard-0.json
             stale-fetch-targets-shard-1.json
             stock-bars-shard-0.json
