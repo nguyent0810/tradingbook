@@ -87,6 +87,61 @@ npx tsx scripts/list-stale-fetch-targets.ts --active-only \
 
 **Retry:** upload failed list artifact → `workflow_dispatch` retry job with `--retry-file`.
 
+## Phase A: 2-shard stale plumbing pilot (206 universe)
+
+**Status:** Implemented in workflow + `scripts/run-production-equity-fetch.sh` on branch `ci/phase-a-sharded-stale-fetch` ([PR #6](https://github.com/nguyent0810/tradingbook/pull/6) → `main`). Production `workflow_dispatch` pilot not run yet.  
+**Scope:** `workflow_dispatch` only; **no** universe apply, Batch B1, or scanner changes.
+
+### Purpose
+
+Prove GHA can split the **stale-only** target list across two shards, fetch/import each shard, and emit a manifest — using the current **206** active universe (~35 stale targets typical).
+
+### Controls
+
+| Input | Default | Effect |
+|-------|---------|--------|
+| `fetch_shard_count` | `1` | `2` = two stale shards (pilot) |
+| `stale_only_fetch` | `true` | Required for `fetch_shard_count=2` |
+| `trigger_scan` | `true` | Unchanged |
+| `skip_equity` | `false` | Unchanged |
+
+**Scheduled cron:** always `fetch_shard_count=1` (dispatch input absent).
+
+### Flow when `fetch_shard_count=2`
+
+1. Full stale listing → `stale-fetch-target-summary.json` (unchanged).
+2. `Select equity symbol list` → must be stale-only (`0 < stale < full`).
+3. `scripts/run-production-equity-fetch.sh`:
+   - For each shard `i ∈ {0,1}`: `list-stale-fetch-targets.ts --shard-index=i --shard-count=2` → fetch → `build-fetch-retry-queue.ts` → fail if &gt;5% empty → `import-stock-bars.ts`.
+4. Upload `fetch-shard-manifest.json` + per-shard symbol/stock/retry artifacts.
+
+### Artifacts (pilot)
+
+| File | Content |
+|------|---------|
+| `fetch-shard-manifest.json` | `fetchTargetCount`, per-shard durations, failed counts, paths |
+| `stale-fetch-targets-shard-{0,1}.json` | Shard symbol lists |
+| `stock-bars-shard-{0,1}.json` | Fetch output per shard |
+| `fetch-retry-queue-shard-{0,1}.json` | Failed symbols per shard |
+
+### Manual pilot command (after merge to `main`; not started)
+
+```powershell
+gh workflow run production-bar-import.yml --ref main `
+  -f skip_equity=false `
+  -f stale_only_fetch=true `
+  -f fetch_shard_count=2 `
+  -f trigger_scan=false
+```
+
+Use `trigger_scan=false` for the first plumbing run to avoid an extra scan; set `true` when ready.
+
+### Rollback
+
+- `fetch_shard_count=1` (default) → previous single-fetch behavior.
+- `stale_only_fetch=false` → full universe single fetch (rollback smoke).
+- No DB delete required (upsert idempotent).
+
 ## Operational safeguards
 
 - `describeDatabaseUrl()` only (no credentials in logs).
