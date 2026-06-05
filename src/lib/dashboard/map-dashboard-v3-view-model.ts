@@ -294,6 +294,33 @@ function buildPulseBarHeights(trades: Trade[]): number[] {
   return values.map((v) => Math.max(12, Math.min(100, 50 + (v / max) * 50)));
 }
 
+/** Market-level foreign flow chips from Phase 1B — order preserved; 5D/10D omitted when absent in DTO. */
+const MARKET_FOREIGN_EVIDENCE_IDS = [
+  "market_foreign_1d",
+  "market_foreign_coverage",
+  "market_foreign_5d",
+  "market_foreign_10d",
+] as const;
+
+export function mapMarketForeignEvidenceFromDto(
+  dto: DecisionCockpitDto
+): DashboardV3ViewModel["evidence"] {
+  const byId = new Map(dto.evidence.map((chip) => [chip.id, chip]));
+  const items: DashboardV3ViewModel["evidence"] = [];
+
+  for (const id of MARKET_FOREIGN_EVIDENCE_IDS) {
+    const chip = byId.get(id);
+    if (!chip) continue;
+    items.push({
+      label: chip.label,
+      value: chip.display,
+      state: "ok",
+    });
+  }
+
+  return items;
+}
+
 function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): DashboardV3ViewModel["evidence"] {
   const items: DashboardV3ViewModel["evidence"] = [];
 
@@ -347,6 +374,8 @@ function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): 
       state: "warn",
     });
   }
+
+  items.push(...mapMarketForeignEvidenceFromDto(dto));
 
   return items;
 }
