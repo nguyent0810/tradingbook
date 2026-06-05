@@ -6,6 +6,9 @@
  *
  *   # Emergency only — allow baseline actives in fetch list (default: fail)
  *   ... --allow-baseline-fetch
+ *
+ * Missing symbols fail preflight so import-stock-bars never creates StockSymbol rows
+ * (new rows are created with active=true).
  */
 import { readFileSync } from "fs";
 import { resolve } from "path";

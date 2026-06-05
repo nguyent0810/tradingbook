@@ -27,8 +27,9 @@ Bars-only backfill for additive symbols in `data/expansion-300-cohort.json`. Exi
 2. **Offline shard build:** no duplicate symbols in tier list; no baseline overlap unless `--allow-baseline-fetch`.
 3. **Shard split:** `overlapCount` must be **0**.
 4. **Per-shard fetch:** failure rate must not exceed `FETCH_SHARD_FAIL_THRESHOLD_PCT` (default **5%**).
-5. **Import:** `import-stock-bars.ts` upserts bars only; it does not set `active=true` on existing rows.
-6. **Post-verify:** all tier symbols remain inactive; `activeCountInDb` must equal baseline **206**.
+5. **Import:** `import-stock-bars.ts` upserts bars only on existing rows; it does not flip `active` on existing symbols. **Preflight blocks missing symbols** so import never creates new `StockSymbol` rows (new rows would be created with `active=true`).
+6. **Manifest:** per-shard `importOk`, `importExitCode`, `importedSymbolCount`, and `importFailedSymbolCount` reflect the actual import command result (parsed from `import-stock-bars` stderr).
+7. **Post-verify:** all tier symbols remain inactive; `activeCountInDb` must equal baseline **206**.
 
 ## Tier A pilot — completed (local)
 

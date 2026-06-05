@@ -2,8 +2,11 @@
 # Cohort-only equity backfill: fetch + import upserts only. Never sets active=true on
 # existing symbols (import-stock-bars only sets active=true when creating a new row).
 #
-# Preflight (read-only DB) runs before fetch. Shards fail if overlapCount != 0 or
-# per-shard failure rate exceeds FETCH_SHARD_FAIL_THRESHOLD_PCT (default 5%).
+# Preflight (read-only DB, mandatory) runs before fetch. Missing tier symbols fail
+# preflight so import-stock-bars never creates new StockSymbol rows (which would set
+# active=true). Shards fail if overlapCount != 0 or per-shard failure rate exceeds
+# FETCH_SHARD_FAIL_THRESHOLD_PCT (default 5%). Manifest records importExitCode and
+# per-shard import counts from import-stock-bars stderr.
 #
 #   SMOKE_DATABASE=production bash scripts/run-cohort-equity-backfill.sh \
 #     --tier=a \
@@ -39,13 +42,11 @@ SHARD_COUNT="${FETCH_SHARD_COUNT:-2}"
 FAIL_THRESHOLD_PCT="${FETCH_SHARD_FAIL_THRESHOLD_PCT:-5}"
 ALLOW_BASELINE_FETCH=0
 WORK_DIR="${COHORT_BACKFILL_WORK_DIR:-$ROOT/reports/cohort-backfill}"
-WORK_DIR_REL="reports/cohort-backfill"
 if [ -n "${COHORT_BACKFILL_RUNNER_TEMP:-}" ]; then
   RUNNER_TEMP="$COHORT_BACKFILL_RUNNER_TEMP"
 else
   RUNNER_TEMP="$(mktemp -d -t cohort-backfill.XXXXXX)"
 fi
-MANIFEST_PATH="${COHORT_BACKFILL_MANIFEST:-$WORK_DIR/cohort-backfill-manifest.json}"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -60,6 +61,8 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
+
+MANIFEST_PATH="${COHORT_BACKFILL_MANIFEST:-$WORK_DIR/cohort-backfill-manifest.json}"
 
 if [ "$SHARD_COUNT" != "1" ] && [ "$SHARD_COUNT" != "2" ]; then
   echo "FETCH_SHARD_COUNT / --shard-count must be 1 or 2 (got $SHARD_COUNT)" >&2
@@ -142,12 +145,48 @@ fail_if_over_threshold() {
   return 0
 }
 
+parse_import_summary() {
+  local log_file="$1"
+  "${PYTHON[@]}" - "$log_file" <<'PY'
+import re, sys
+text = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+
+def grab(pattern: str, default: int = 0) -> int:
+    m = re.search(pattern, text)
+    return int(m.group(1)) if m else default
+
+total = grab(r"Total symbols \(in file\): (\d+)")
+imported = grab(r"Symbols imported .*?: (\d+)")
+failed = grab(r"Symbols failed / empty:\s+(\d+)")
+print(f"{imported} {failed} {total}")
+PY
+}
+
 append_shard_manifest() {
   "${PYTHON[@]}" - "$@" <<'PY'
 import json, sys
-path, idx, count, sym, stock, retry, target_count, failed, duration = sys.argv[1:10]
-target_count, failed, duration = int(target_count), int(failed), int(duration)
-fetched = max(0, target_count - failed)
+(
+    path,
+    idx,
+    count,
+    sym,
+    stock,
+    retry,
+    target_count,
+    fetch_failed,
+    duration,
+    import_exit,
+    import_imported,
+    import_failed,
+) = sys.argv[1:14]
+target_count = int(target_count)
+fetch_failed = int(fetch_failed)
+duration = int(duration)
+import_exit = int(import_exit)
+import_imported = int(import_imported)
+import_failed = int(import_failed)
+fetched = max(0, target_count - fetch_failed)
+import_ok = import_exit == 0 and import_failed == 0
 with open(path) as f:
     doc = json.load(f)
 doc["shards"].append({
@@ -155,13 +194,16 @@ doc["shards"].append({
     "shardCount": int(count),
     "targetSymbolCount": target_count,
     "fetchedSymbolCount": fetched,
-    "importedSymbolCount": fetched,
+    "fetchFailedSymbolCount": fetch_failed,
+    "importedSymbolCount": import_imported,
+    "importFailedSymbolCount": import_failed,
     "symbolsFile": sym,
     "stockBarsFile": stock,
     "retryQueueFile": retry,
-    "failedSymbolCount": failed,
+    "failedSymbolCount": fetch_failed,
     "fetchDurationSeconds": duration,
-    "importOk": True,
+    "importExitCode": import_exit,
+    "importOk": import_ok,
 })
 with open(path, "w") as f:
     json.dump(doc, f, indent=2)
@@ -171,7 +213,6 @@ PY
 i=0
 while [ "$i" -lt "$SHARD_COUNT" ]; do
   sym_file="$WORK_DIR/cohort-fetch-targets-shard-${i}.json"
-  sym_file_rel="$WORK_DIR_REL/cohort-fetch-targets-shard-${i}.json"
   stock_file="$WORK_DIR/cohort-stock-bars-shard-${i}.json"
   label="cohort-shard-${i}"
   start=$(date +%s)
@@ -185,14 +226,27 @@ while [ "$i" -lt "$SHARD_COUNT" ]; do
 
   retry_file="$WORK_DIR/cohort-retry-queue-shard-${i}.json"
   retry_meta="$(npx tsx scripts/build-fetch-retry-queue.ts "$stock_file" --out="$retry_file")"
-  failed="$(echo "$retry_meta" | "${PYTHON[@]}" -c "import json,sys; print(json.load(sys.stdin).get('failedSymbolCount',0))")"
-  sym_count="$(cd "$ROOT" && "${PYTHON[@]}" -c "import json; print(len(json.load(open('$sym_file_rel')).get('symbols',[])))")"
+  fetch_failed="$(echo "$retry_meta" | "${PYTHON[@]}" -c "import json,sys; print(json.load(sys.stdin).get('failedSymbolCount',0))")"
+  sym_count="$("${PYTHON[@]}" - "$sym_file" <<'PY'
+import json, sys
+print(len(json.load(open(sys.argv[1], encoding="utf-8")).get("symbols", [])))
+PY
+)"
 
-  if ! fail_if_over_threshold "$failed" "$sym_count" "$label"; then
+  if ! fail_if_over_threshold "$fetch_failed" "$sym_count" "$label"; then
     exit 1
   fi
 
-  npx tsx scripts/import-stock-bars.ts "$stock_file"
+  import_log="$(mktemp -t cohort-import-log.XXXXXX)"
+  set +e
+  npx tsx scripts/import-stock-bars.ts "$stock_file" 2>"$import_log"
+  import_exit=$?
+  set -e
+
+  import_stats="$(parse_import_summary "$import_log")"
+  import_imported="$(echo "$import_stats" | awk '{print $1}')"
+  import_failed_count="$(echo "$import_stats" | awk '{print $2}')"
+  rm -f "$import_log"
 
   end=$(date +%s)
   duration=$((end - start))
@@ -201,7 +255,13 @@ while [ "$i" -lt "$SHARD_COUNT" ]; do
     "$sym_file" \
     "$stock_file" \
     "$retry_file" \
-    "$sym_count" "$failed" "$duration"
+    "$sym_count" "$fetch_failed" "$duration" \
+    "$import_exit" "$import_imported" "$import_failed_count"
+
+  if [ "$import_exit" -ne 0 ] || [ "$import_failed_count" -gt 0 ]; then
+    echo "Shard $label import failed: exit=$import_exit imported=$import_imported import_failed=$import_failed_count" >&2
+    exit 1
+  fi
 
   i=$((i + 1))
 done
