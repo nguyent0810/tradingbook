@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-06-05T07:37:06.935Z",
+  "mode": "tier_a_additive_activation_dry_run",
+  "appliesChanges": false,
+  "expectedLatestSessionDay": "2026-06-05",
+  "goNoGo": {
+    "readyForActivation": true,
+    "criteria": {
+      "tierAAllInactive": true,
+      "tierAAllSessionAligned": true,
+      "baselineAllStillActive": true,
+      "projectedActiveCount229": true,
+      "noDuplicates": true,
+      "noBaselineOverlap": true,
+      "noTierBIncluded": true
+    }
+  },
+  "ok": true,
+  "errors": [],
+  "warnings": [],
+  "tierACount": 23,
+  "beforeActiveCount": 206,
+  "afterActiveCountIfApplied": 229,
+  "baselineActiveCount": 206,
+  "impact": {
+    "before": {
+      "activeCoreCount": 206,
+      "effectiveUniverseCount": 206,
+      "estimatedImportSymbolCount": 206
+    },
+    "afterProposedActivation": {
+      "activeCoreCount": 229,
+      "effectiveUniverseCount": 229,
+      "estimatedImportSymbolCount": 229,
+      "newlyActivatedSymbols": 23
+    }
+  },
+  "perSymbolSummary": {
+    "sessionAlignedCount": 23,
+    "inactiveCount": 23,
+    "symbols": [
+      "HDB", "GEX", "VCG", "VNM", "VJC", "PLX", "POW", "GMD", "TPB", "GAS",
+      "VIB", "GEE", "PNJ", "REE", "VGC", "SAB", "VTP", "SSB", "ACV", "ABB",
+      "AAS", "BCR", "BGE"
+    ]
+  }
+}
