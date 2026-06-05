@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "purpose": "tier_a_additive_only",
+  "sourceCohortFile": "data/expansion-300-cohort.json",
+  "baselineActiveCount": 206,
+  "expectedActiveCountAfter": 229,
+  "tierASymbols": [
+    "HDB",
+    "GEX",
+    "VCG",
+    "VNM",
+    "VJC",
+    "PLX",
+    "POW",
+    "GMD",
+    "TPB",
+    "GAS",
+    "VIB",
+    "GEE",
+    "PNJ",
+    "REE",
+    "VGC",
+    "SAB",
+    "VTP",
+    "SSB",
+    "ACV",
+    "ABB",
+    "AAS",
+    "BCR",
+    "BGE"
+  ]
+}
