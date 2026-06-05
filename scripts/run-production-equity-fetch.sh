@@ -32,6 +32,11 @@ if [ "$SHARD_COUNT" -eq 2 ] && [ "$USE_STALE" != "1" ]; then
   exit 1
 fi
 
+if [ "$SHARD_COUNT" -eq 2 ] && [ -z "${STALE_SYMBOLS_JSON:-}" ]; then
+  echo "Missing env STALE_SYMBOLS_JSON (frozen stale snapshot from workflow listing step)" >&2
+  exit 1
+fi
+
 python3 <<'PY' > "$MANIFEST_PATH.partial"
 import json, os, datetime
 summary_path = os.environ.get("STALE_TARGET_SUMMARY_JSON", "")
@@ -39,13 +44,19 @@ summary = {}
 if summary_path and os.path.isfile(summary_path):
     with open(summary_path) as f:
         summary = json.load(f)
+initial = summary.get("fetchTargetCount")
 print(json.dumps({
     "generatedAt": datetime.datetime.utcnow().isoformat() + "Z",
     "fetchShardCount": int(os.environ.get("FETCH_SHARD_COUNT", "1")),
-    "fetchTargetCount": summary.get("fetchTargetCount"),
+    "fetchTargetCount": initial,
+    "initialFetchTargetCount": initial,
     "universeSize": summary.get("universeSize"),
     "expectedLatestSessionDay": summary.get("expectedLatestSessionDay"),
     "equityFetchMode": "stale-only" if os.environ.get("USE_STALE") == "1" else "full-universe",
+    "frozenSnapshotPath": None,
+    "shardTargetCounts": [],
+    "uniqueTargetCount": None,
+    "overlapCount": None,
     "shards": [],
 }, indent=2))
 PY
@@ -74,26 +85,51 @@ append_shard_manifest() {
   local sym_file="$3"
   local stock_file="$4"
   local retry_file="$5"
-  local sym_count="$6"
+  local target_count="$6"
   local failed="$7"
   local duration="$8"
   local import_ok="$9"
-  python3 - "$MANIFEST_PATH.partial" "$idx" "$count" "$sym_file" "$stock_file" "$retry_file" "$sym_count" "$failed" "$duration" "$import_ok" <<'PY'
+  python3 - "$MANIFEST_PATH.partial" "$idx" "$count" "$sym_file" "$stock_file" "$retry_file" "$target_count" "$failed" "$duration" "$import_ok" <<'PY'
 import json, sys
-path, idx, count, sym, stock, retry, sym_count, failed, duration, import_ok = sys.argv[1:11]
+path, idx, count, sym, stock, retry, target_count, failed, duration, import_ok = sys.argv[1:11]
+target_count = int(target_count)
+failed = int(failed)
+fetched = max(0, target_count - failed)
 with open(path) as f:
     doc = json.load(f)
 doc["shards"].append({
     "shardIndex": int(idx),
     "shardCount": int(count),
-    "symbolCount": int(sym_count),
+    "targetSymbolCount": target_count,
+    "symbolCount": target_count,
+    "fetchedSymbolCount": fetched,
+    "importedSymbolCount": fetched if import_ok == "true" else 0,
     "symbolsFile": sym,
     "stockBarsFile": stock,
     "retryQueueFile": retry,
-    "failedSymbolCount": int(failed),
+    "failedSymbolCount": failed,
     "fetchDurationSeconds": int(duration),
     "importOk": import_ok == "true",
 })
+with open(path, "w") as f:
+    json.dump(doc, f, indent=2)
+PY
+}
+
+merge_frozen_split_into_manifest() {
+  local freeze_meta="$1"
+  python3 - "$MANIFEST_PATH.partial" "$freeze_meta" <<'PY'
+import json, sys
+path, meta_raw = sys.argv[1], sys.argv[2]
+meta = json.loads(meta_raw)
+with open(path) as f:
+    doc = json.load(f)
+doc["initialFetchTargetCount"] = meta["initialFetchTargetCount"]
+doc["fetchTargetCount"] = meta["initialFetchTargetCount"]
+doc["shardTargetCounts"] = meta["shardTargetCounts"]
+doc["uniqueTargetCount"] = meta["uniqueTargetCount"]
+doc["overlapCount"] = meta["overlapCount"]
+doc["frozenSnapshotPath"] = meta["frozenSnapshotPath"]
 with open(path, "w") as f:
     json.dump(doc, f, indent=2)
 PY
@@ -132,7 +168,6 @@ fetch_and_import_shard() {
   duration=$((end - start))
 
   if [ -n "$shard_index" ]; then
-    cp "$symbols_json" "${WORK_DIR}/stale-fetch-targets-shard-${shard_index}.json"
     cp "$stock_json" "${WORK_DIR}/stock-bars-shard-${shard_index}.json"
     cp "$retry_file" "${WORK_DIR}/fetch-retry-queue-shard-${shard_index}.json"
     append_shard_manifest "$shard_index" "$shard_count" \
@@ -154,18 +189,25 @@ if [ "$SHARD_COUNT" -eq 1 ]; then
     fetch_and_import_shard "" "1" "$SYMBOLS_JSON" "$STOCK_JSON" "single"
   fi
 else
-  export SMOKE_DATABASE=production
+  echo "Freezing stale targets from ${STALE_SYMBOLS_JSON} before shard fetch/import"
+  FREEZE_META="$(npx tsx scripts/write-frozen-stale-shard-files.ts \
+    --frozen-file="$STALE_SYMBOLS_JSON" \
+    --shard-count="$SHARD_COUNT" \
+    --work-dir="$WORK_DIR" \
+    --runner-temp="$RUNNER_TEMP")"
+  echo "$FREEZE_META"
+  merge_frozen_split_into_manifest "$FREEZE_META"
+
+  OVERLAP_COUNT="$(echo "$FREEZE_META" | python3 -c "import json,sys; print(json.load(sys.stdin)['overlapCount'])")"
+  if [ "$OVERLAP_COUNT" != "0" ]; then
+    echo "Frozen shard overlap count $OVERLAP_COUNT (expected 0)" >&2
+    exit 1
+  fi
+
   i=0
   while [ "$i" -lt "$SHARD_COUNT" ]; do
     shard_symbols="${RUNNER_TEMP}/stale-fetch-targets-shard-${i}.json"
     shard_stock="${RUNNER_TEMP}/stock-bars-shard-${i}.json"
-    npx tsx scripts/list-stale-fetch-targets.ts \
-      --production-read-only \
-      --active-only \
-      --shard-index="$i" \
-      --shard-count="$SHARD_COUNT" \
-      --write-symbols-file="$shard_symbols" \
-      --json > /dev/null
     fetch_and_import_shard "$i" "$SHARD_COUNT" "$shard_symbols" "$shard_stock" "shard-${i}"
     i=$((i + 1))
   done

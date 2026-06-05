@@ -89,7 +89,7 @@ npx tsx scripts/list-stale-fetch-targets.ts --active-only \
 
 ## Phase A: 2-shard stale plumbing pilot (206 universe)
 
-**Status:** Implemented in workflow + `scripts/run-production-equity-fetch.sh` on branch `ci/phase-a-sharded-stale-fetch` ([PR #6](https://github.com/nguyent0810/tradingbook/pull/6) → `main`). Production `workflow_dispatch` pilot not run yet.  
+**Status:** Merged to `main` (PR #6); pilots #1–#2 completed. Frozen-list shard split fix prevents per-shard DB re-list after imports.  
 **Scope:** `workflow_dispatch` only; **no** universe apply, Batch B1, or scanner changes.
 
 ### Purpose
@@ -112,29 +112,40 @@ Prove GHA can split the **stale-only** target list across two shards, fetch/impo
 1. Full stale listing → `stale-fetch-target-summary.json` (unchanged).
 2. `Select equity symbol list` → must be stale-only (`0 < stale < full`).
 3. `scripts/run-production-equity-fetch.sh`:
-   - For each shard `i ∈ {0,1}`: `list-stale-fetch-targets.ts --shard-index=i --shard-count=2` → fetch → `build-fetch-retry-queue.ts` → fail if &gt;5% empty → `import-stock-bars.ts`.
-4. Upload `fetch-shard-manifest.json` + per-shard symbol/stock/retry artifacts.
+   - Freeze `STALE_SYMBOLS_JSON` once (workflow listing step) → `stale-fetch-targets-frozen.json`.
+   - `scripts/write-frozen-stale-shard-files.ts` splits the frozen list (round-robin `i % shardCount`) into `stale-fetch-targets-shard-{i}.json` — **no** per-shard `list-stale-fetch-targets` after imports start.
+   - For each shard: fetch → `build-fetch-retry-queue.ts` → fail if &gt;5% empty → `import-stock-bars.ts` (sequential).
+4. Upload `fetch-shard-manifest.json` + frozen/shard symbol/stock/retry artifacts (`overlapCount` must be 0).
 
 ### Artifacts (pilot)
 
 | File | Content |
 |------|---------|
-| `fetch-shard-manifest.json` | `fetchTargetCount`, per-shard durations, failed counts, paths |
-| `stale-fetch-targets-shard-{0,1}.json` | Shard symbol lists |
+| `fetch-shard-manifest.json` | `initialFetchTargetCount`, `shardTargetCounts`, `uniqueTargetCount`, `overlapCount` (0), per-shard fetch/import counts |
+| `stale-fetch-targets-frozen.json` | Full stale snapshot before any shard fetch |
+| `stale-fetch-targets-shard-{0,1}.json` | Precomputed shard symbol lists from frozen snapshot |
 | `stock-bars-shard-{0,1}.json` | Fetch output per shard |
 | `fetch-retry-queue-shard-{0,1}.json` | Failed symbols per shard |
 
-### Manual pilot command (after merge to `main`; not started)
+### Manual pilot commands (re-validate after frozen-list fix)
 
 ```powershell
+# Plumbing only (no scan)
 gh workflow run production-bar-import.yml --ref main `
   -f skip_equity=false `
   -f stale_only_fetch=true `
   -f fetch_shard_count=2 `
   -f trigger_scan=false
+
+# Full path including scan
+gh workflow run production-bar-import.yml --ref main `
+  -f skip_equity=false `
+  -f stale_only_fetch=true `
+  -f fetch_shard_count=2 `
+  -f trigger_scan=true
 ```
 
-Use `trigger_scan=false` for the first plumbing run to avoid an extra scan; set `true` when ready.
+Expect manifest `overlapCount: 0` and `uniqueTargetCount` = `initialFetchTargetCount`.
 
 ### Rollback
 
