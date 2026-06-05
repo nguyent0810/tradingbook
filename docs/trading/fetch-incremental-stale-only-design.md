@@ -89,7 +89,7 @@ npx tsx scripts/list-stale-fetch-targets.ts --active-only \
 
 ## Phase A: 2-shard stale plumbing pilot (206 universe)
 
-**Status:** Implemented in workflow + `scripts/run-production-equity-fetch.sh` (not yet pushed).  
+**Status:** Implemented in workflow + `scripts/run-production-equity-fetch.sh` on branch `ci/phase-a-sharded-stale-fetch` ([PR #6](https://github.com/nguyent0810/tradingbook/pull/6) → `main`). Production `workflow_dispatch` pilot not run yet.  
 **Scope:** `workflow_dispatch` only; **no** universe apply, Batch B1, or scanner changes.
 
 ### Purpose
@@ -124,7 +124,7 @@ Prove GHA can split the **stale-only** target list across two shards, fetch/impo
 | `stock-bars-shard-{0,1}.json` | Fetch output per shard |
 | `fetch-retry-queue-shard-{0,1}.json` | Failed symbols per shard |
 
-### Manual pilot command (do not run until reviewed)
+### Manual pilot command (after merge to `main`; not started)
 
 ```powershell
 gh workflow run production-bar-import.yml --ref main `
