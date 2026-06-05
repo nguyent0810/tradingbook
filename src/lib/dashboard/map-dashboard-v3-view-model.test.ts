@@ -7,12 +7,30 @@ import {
 import {
   confidenceBandMeterWidth,
   mapDashboardV3ViewModel,
+  mapMarketForeignEvidenceFromDto,
   mapUxVerdictToDecisionMode,
 } from "./map-dashboard-v3-view-model";
 import {
   formatGateFailureForUser,
   formatRelativeStrengthSummaryForUser,
 } from "./v3-user-copy";
+import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
+
+const prodLikeMarketContext: MarketContextUiDto = {
+  sessionDate: "2026-06-03",
+  available: true,
+  market: {
+    foreignNetValue1d: -458_371_893_440,
+    foreignNetValue5d: null,
+    foreignNetValue10d: null,
+    foreignSymbolsOk: 159,
+    foreignSymbolsTotal: 206,
+    foreignCoveragePct: 159 / 206,
+    gate1Level: "PASS",
+    vnindexVolRatioMa20: 1.1,
+  },
+  bySymbol: {},
+};
 
 const alignedFreshness = buildMarketFreshnessDto({
   snapshot: {
@@ -311,5 +329,68 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
     expect(serialized).not.toMatch(/rankScore/);
     expect(serialized).not.toMatch(/breakout_recency/);
     expect(serialized).not.toMatch(/diagnostic only/i);
+  });
+});
+
+describe("mapDashboardV3ViewModel — market foreign evidence", () => {
+  it("maps Foreign 1D and Foreign cov. into V3 evidence when market context is present", () => {
+    const vm = mapFromInput(baseInput({ marketContext: prodLikeMarketContext }));
+    const foreign1d = vm.evidence.find((e) => e.label === "Foreign 1D");
+    const foreignCov = vm.evidence.find((e) => e.label === "Foreign cov.");
+
+    expect(foreign1d).toEqual({
+      label: "Foreign 1D",
+      value: "−458.37B ₫ net",
+      state: "ok",
+    });
+    expect(foreignCov).toEqual({
+      label: "Foreign cov.",
+      value: "159/206 OK (77%)",
+      state: "ok",
+    });
+  });
+
+  it("omits foreign evidence when market context is unavailable", () => {
+    const vm = mapFromInput(baseInput());
+    expect(vm.evidence.some((e) => e.label.startsWith("Foreign"))).toBe(false);
+  });
+
+  it("includes 5D/10D evidence items only when DTO chips exist", () => {
+    const withRollups: MarketContextUiDto = {
+      ...prodLikeMarketContext,
+      market: {
+        ...prodLikeMarketContext.market!,
+        foreignNetValue5d: -100_000_000_000,
+        foreignNetValue10d: 50_000_000_000,
+      },
+    };
+    const vm = mapFromInput(baseInput({ marketContext: withRollups }));
+    expect(vm.evidence.some((e) => e.label === "Foreign 5D")).toBe(true);
+    expect(vm.evidence.some((e) => e.label === "Foreign 10D")).toBe(true);
+
+    const vmBase = mapFromInput(baseInput({ marketContext: prodLikeMarketContext }));
+    expect(vmBase.evidence.some((e) => e.label === "Foreign 5D")).toBe(false);
+    expect(vmBase.evidence.some((e) => e.label === "Foreign 10D")).toBe(false);
+  });
+
+  it("mapMarketForeignEvidenceFromDto preserves chip order", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        marketContext: {
+          ...prodLikeMarketContext,
+          market: {
+            ...prodLikeMarketContext.market!,
+            foreignNetValue5d: -1,
+            foreignNetValue10d: 2,
+          },
+        },
+      })
+    );
+    expect(mapMarketForeignEvidenceFromDto(dto).map((e) => e.label)).toEqual([
+      "Foreign 1D",
+      "Foreign cov.",
+      "Foreign 5D",
+      "Foreign 10D",
+    ]);
   });
 });
