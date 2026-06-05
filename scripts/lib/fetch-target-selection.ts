@@ -43,6 +43,48 @@ export function sliceShard<T>(items: readonly T[], shardIndex: number, shardCoun
   return items.filter((_, i) => i % shardCount === shardIndex);
 }
 
+/** Deterministic round-robin partition of a frozen fetch-target list (no DB re-list). */
+export function partitionFetchTargets(
+  symbols: readonly string[],
+  shardCount: number
+): string[][] {
+  if (shardCount < 1) throw new Error("shardCount must be >= 1");
+  return Array.from({ length: shardCount }, (_, shardIndex) =>
+    sliceShard(symbols, shardIndex, shardCount)
+  );
+}
+
+/** Count symbols appearing in more than one shard (expected 0 for frozen split). */
+export function computeShardOverlapCount(shards: readonly (readonly string[])[]): number {
+  const seen = new Set<string>();
+  let overlap = 0;
+  for (const shard of shards) {
+    for (const symbol of shard) {
+      if (seen.has(symbol)) overlap += 1;
+      else seen.add(symbol);
+    }
+  }
+  return overlap;
+}
+
+export type FrozenShardSplitStats = {
+  initialFetchTargetCount: number;
+  shardTargetCounts: number[];
+  uniqueTargetCount: number;
+  overlapCount: number;
+};
+
+export function frozenShardSplitStats(shards: readonly (readonly string[])[]): FrozenShardSplitStats {
+  const flat = shards.flat();
+  const unique = new Set(flat);
+  return {
+    initialFetchTargetCount: flat.length,
+    shardTargetCounts: shards.map((s) => s.length),
+    uniqueTargetCount: unique.size,
+    overlapCount: flat.length - unique.size,
+  };
+}
+
 import { readFileSync } from "fs";
 
 export function loadSymbolsFromFetchJson(path: string): string[] {
