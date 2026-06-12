@@ -63,28 +63,28 @@ export function DataFlowLayer({
             <path
               d={d}
               fill="none"
-              stroke="rgba(0, 240, 255, 0.12)"
-              strokeWidth="2"
+              stroke="rgba(0, 240, 255, 0.06)"
+              strokeWidth="1.5"
             />
             <motion.path
               className="ccd-wire-path"
               d={d}
               fill="none"
               stroke="url(#ccd-wire-grad)"
-              strokeWidth="1.5"
+              strokeWidth="1"
               strokeLinecap="round"
               strokeDasharray={`${dashLength} ${gap}`}
               initial={
                 reducedMotion
-                  ? { pathLength: 1, opacity: 0.7 }
+                  ? { pathLength: 1, opacity: 0.35 }
                   : { pathLength: 0, opacity: 0 }
               }
               animate={
                 reducedMotion
-                  ? { pathLength: 1, opacity: 0.7 }
+                  ? { pathLength: 1, opacity: 0.35 }
                   : {
                       pathLength: bootComplete ? 1 : 0,
-                      opacity: bootComplete ? 0.85 : 0,
+                      opacity: bootComplete ? 0.45 : 0,
                     }
               }
               transition={

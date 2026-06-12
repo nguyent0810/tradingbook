@@ -13,6 +13,7 @@ type Props<T extends { id: string }> = {
   testId?: string;
   className?: string;
   headerExtra?: ReactNode;
+  fillHeight?: boolean;
 };
 
 export function TechTable<T extends { id: string }>({
@@ -24,20 +25,21 @@ export function TechTable<T extends { id: string }>({
   testId,
   className = "",
   headerExtra,
+  fillHeight = false,
 }: Props<T>) {
   const reducedMotion = useReducedMotion();
 
   return (
     <section
-      className={`ccd-panel p-3 ${className}`.trim()}
+      className={`ccd-panel p-4 ${fillHeight ? "ccd-panel-fill h-full" : ""} ${className}`.trim()}
       aria-label={title}
       data-testid={testId}
     >
-      <div className="flex items-start justify-between gap-2 mb-2 px-1">
+      <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <span className="ccd-kicker">{title}</span>
           {subtitle ? (
-            <p className="text-xs text-slate-500 m-0 mt-0.5">{subtitle}</p>
+            <p className="text-xs text-slate-500 m-0 mt-1">{subtitle}</p>
           ) : null}
         </div>
         {headerExtra}
@@ -53,7 +55,11 @@ export function TechTable<T extends { id: string }>({
                 {columns.map((col) => (
                   <th
                     key={col.key}
-                    className={col.align === "right" ? "ccd-tech-table__num" : ""}
+                    className={[
+                      col.align === "right" ? "ccd-tech-table__num" : "ccd-tech-table__text",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                   >
                     {col.header}
                   </th>
@@ -76,7 +82,7 @@ export function TechTable<T extends { id: string }>({
                     <td
                       key={col.key}
                       className={[
-                        col.mono ? "ccd-tech-table__mono" : "",
+                        col.mono ? "ccd-tech-table__mono" : "ccd-tech-table__text",
                         col.align === "right" ? "ccd-tech-table__num" : "",
                       ]
                         .filter(Boolean)

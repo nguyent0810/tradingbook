@@ -280,28 +280,28 @@ export function OpportunityRadar({ radar }: Props) {
 
   return (
     <section
-      className="ccd-panel p-3"
+      className="ccd-panel ccd-panel-fill p-4 h-full"
       aria-label="Opportunity radar"
       data-testid="dashboard-cyber-radar"
     >
-      <div className="flex items-center justify-between mb-2 px-1">
+      <div className="flex items-center justify-between mb-3">
         <div>
           <span className="ccd-kicker">Opportunity Radar</span>
           <p className="text-xs text-slate-500 m-0 mt-0.5">
             Readiness → · Risk ↓ · Size = priority
           </p>
         </div>
-        <ul className="flex gap-3 text-[10px] uppercase tracking-wider text-slate-500 list-none m-0 p-0">
-          <li className="flex items-center gap-1">
-            <i className="w-2 h-2 rounded-full bg-[#00F0FF] shadow-[0_0_6px_#00F0FF]" />
+        <ul className="ccd-radar-legend list-none m-0 p-0">
+          <li>
+            <i className="ccd-radar-legend__dot ccd-radar-legend__dot--actionable" />
             Actionable
           </li>
-          <li className="flex items-center gap-1">
-            <i className="w-2 h-2 rounded-full bg-[#F59E0B] shadow-[0_0_6px_#F59E0B]" />
+          <li>
+            <i className="ccd-radar-legend__dot ccd-radar-legend__dot--watch" />
             Watch
           </li>
-          <li className="flex items-center gap-1">
-            <i className="w-2 h-2 rounded-full bg-[#EF4444] shadow-[0_0_6px_#EF4444]" />
+          <li>
+            <i className="ccd-radar-legend__dot ccd-radar-legend__dot--avoid" />
             Avoid
           </li>
         </ul>
@@ -309,8 +309,7 @@ export function OpportunityRadar({ radar }: Props) {
 
       <div
         ref={wrapRef}
-        className="ccd-radar-canvas-wrap"
-        style={{ minHeight: 320 }}
+        className="ccd-radar-canvas-wrap ccd-radar-canvas-wrap--fill"
         onMouseMove={(e) => {
           const node = hitTest(e.clientX, e.clientY);
           setHovered(node);

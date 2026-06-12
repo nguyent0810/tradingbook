@@ -7,11 +7,12 @@ type Props = {
   children: ReactNode;
 };
 
+/** Subtle row status — dot indicator + low-contrast label (no neon pills). */
 export function StatusPill({ variant, children }: Props) {
   return (
-    <span className={`ccd-status-pill ccd-status-pill--${variant}`}>
-      <span className="ccd-status-pill__dot" aria-hidden />
-      {children}
+    <span className={`ccd-status ccd-status--${variant}`}>
+      <span className="ccd-status__dot" aria-hidden />
+      <span className="ccd-status__label">{children}</span>
     </span>
   );
 }
