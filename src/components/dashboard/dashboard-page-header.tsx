@@ -18,7 +18,7 @@ export function DashboardPageHeader({ cta }: Props) {
         <p className="dash-v2-page-header__lead">{cta.lead}</p>
       </div>
       <div className="dash-v2-page-header__actions">
-        {showSecondary ? (
+        {showSecondary && cta.secondaryHref && cta.secondaryLabel ? (
           <Link href={cta.secondaryHref} className="btn btn-secondary btn-sm dash-v2-btn-secondary">
             {cta.secondaryLabel}
           </Link>

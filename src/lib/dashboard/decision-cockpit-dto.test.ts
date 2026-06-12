@@ -62,7 +62,7 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
         },
       ],
       recommendation: {
-        likelyBottleneck: "pullback_zone_interaction",
+        likelyBottleneck: "pullback_zone",
         summary: "Largest bucket pullback_zone_interaction",
         note: "Use closest rows.",
       },

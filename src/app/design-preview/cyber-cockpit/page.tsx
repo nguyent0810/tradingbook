@@ -27,7 +27,6 @@ function noTradeFixture(): DecisionCockpitInput {
       universeScannedCount: 412,
     },
     scanNotes: {
-      invalidCountByCategory: {},
       topRejectionCategories: {
         pullback_zone_interaction: 42,
         extension_cap: 18,
@@ -36,7 +35,6 @@ function noTradeFixture(): DecisionCockpitInput {
         pullback_zone_interaction: ["HPG", "FPT", "VNM"],
         extension_cap: ["SSI", "VCB"],
       },
-      topRejectionTerminalReasons: {},
       closestToValidSymbols: [
         {
           symbol: "HPG",
@@ -54,7 +52,7 @@ function noTradeFixture(): DecisionCockpitInput {
         },
       ],
       recommendation: {
-        likelyBottleneck: "pullback_zone_interaction",
+        likelyBottleneck: "pullback_zone",
         summary: "Largest bucket pullback_zone_interaction",
         note: "Use closest rows.",
       },
