@@ -1,5 +1,5 @@
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
-import { SetupsPipelineSummaryStrip } from "@/components/setups/setups-pipeline-summary-strip";
+import { PipelineMetrics } from "@/components/setups-workstation";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 
@@ -20,7 +20,7 @@ export function SetupsPipelineContext({
       <div className="tosv3-setups-trust__bar">
         <DashboardMarketStatusBar freshness={freshness} />
       </div>
-      <SetupsPipelineSummaryStrip latestScan={latestScan} nearMissCount={nearMissCount} />
+      <PipelineMetrics latestScan={latestScan} nearMissCount={nearMissCount} />
     </div>
   );
 }
