@@ -2,8 +2,6 @@ import "server-only";
 
 
 
-import Link from "next/link";
-
 import { ScanQuality } from "@/generated/prisma/client";
 
 import { formatGate2RankBreakdownLines } from "@/lib/scanner/gate2/rank-components";
@@ -36,9 +34,8 @@ import { buildSymbolContextEvidenceLines } from "@/lib/market/build-market-conte
 
 import { prisma } from "@/lib/prisma";
 
-import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
-
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { CandidateScanner } from "@/components/setups-workstation";
 
 import {
 
@@ -54,13 +51,7 @@ import {
 
 } from "./setups-shared-helpers";
 
-import {
-
-  SetupsCandidatesMasterDetail,
-
-  type SetupsCandidateBundle,
-
-} from "@/components/setups/setups-candidates-master-detail";
+import type { SetupsCandidateBundle } from "@/components/setups/setups-candidates-master-detail";
 
 
 
@@ -228,103 +219,31 @@ export async function SetupsCandidatesAsync() {
 
 
 
-  const renderNode = (
+  const emptyReason =
+    base.latest.candidateCountSurfaced === 0
+      ? `Latest run ${base.latest.id.slice(0, 12)}… completed with Gate 1 ${displayGate1ScanLevel(String(base.latest.gate1Level))} and ${base.latest.symbolCountAfterTradability} symbols passing tradability — none met Tier A/B surfacing rules. Use Market & setup insight and rejection diagnostics above, or closest-to-valid symbols below.`
+      : "No Tier A/B candidates in this scan run.";
 
-    <>
-
-      {perfBanner ? (
-
-        <ErrorStateWithEvidence
-
-          title="Partial candidate data unavailable"
-
-          message={perfBanner}
-
-          evidence="src/app/(dashboard)/setups/setups-candidates-async.tsx · loadSurfacedCandidatesHealthCached / loadSetupPerfRowsCached"
-
-          data-testid="setups-candidates-partial-data"
-
-        />
-
-      ) : null}
-
-
-
-      {candidates.length === 0 ? (
-
-        <section className="tosv3-setups-cockpit__panel" data-testid="setups-candidates-panel">
-
-          <header className="tosv3-setups-cockpit__panel-head">
-
-            <h2 className="tosv3-setups-cockpit__panel-title">Surfaced candidates</h2>
-
-            <p className="tosv3-setups-cockpit__panel-sub">Qualified setups — core scanner Tier A/B only</p>
-
-          </header>
-
-          <div className="tosv3-empty-state-wrap">
-
-            <EmptyStateWithReason
-
-              title="No surfaced candidates on this scan"
-
-              reason={
-
-                base.latest.candidateCountSurfaced === 0
-
-                  ? `Latest run ${base.latest.id.slice(0, 12)}… completed with Gate 1 ${displayGate1ScanLevel(String(base.latest.gate1Level))} and ${base.latest.symbolCountAfterTradability} symbols passing tradability — none met Tier A/B surfacing rules. Use Market & setup insight and rejection diagnostics above, or closest-to-valid symbols below.`
-
-                  : "No Tier A/B candidates in this scan run."
-
-              }
-
-              data-testid="setups-candidates-empty"
-
-            >
-
-              <Link href="/dashboard" className="btn btn-secondary text-xs">
-
-                Back to Dashboard
-
-              </Link>
-
-            </EmptyStateWithReason>
-
-          </div>
-
-        </section>
-
-      ) : (
-
-        <section className="tosv3-setups-cockpit__panel" data-testid="setups-candidates-panel">
-
-          <header className="tosv3-setups-cockpit__panel-head">
-
-            <h2 className="tosv3-setups-cockpit__panel-title">
-
-              Surfaced candidates ({candidates.length})
-
-            </h2>
-
-            <p className="tosv3-setups-cockpit__panel-sub">Qualified setups — core scanner Tier A/B only</p>
-
-          </header>
-
-          <SetupsCandidatesMasterDetail
-
-            candidates={candidateBundles}
-
+  return (
+    <CandidateScanner
+      candidates={candidateBundles}
+      emptyReason={emptyReason}
+      scanMeta={{
+        gate1: displayGate1ScanLevel(String(base.latest.gate1Level)),
+        tradabilityCount: base.latest.symbolCountAfterTradability,
+        scanId: base.latest.id,
+      }}
+      partialBanner={
+        perfBanner ? (
+          <ErrorStateWithEvidence
+            title="Partial candidate data unavailable"
+            message={perfBanner}
+            evidence="src/app/(dashboard)/setups/setups-candidates-async.tsx · loadSurfacedCandidatesHealthCached / loadSetupPerfRowsCached"
+            data-testid="setups-candidates-partial-data"
           />
-
-        </section>
-
-      )}
-
-    </>
-
+        ) : null
+      }
+    />
   );
-
-  return renderNode;
-
 }
 

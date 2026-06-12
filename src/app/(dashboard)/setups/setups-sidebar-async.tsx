@@ -2,7 +2,7 @@ import "server-only";
 
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
-import { SetupsPipelineDock } from "@/components/setups/setups-pipeline-dock";
+import { IntelligenceSidebar } from "@/components/setups-workstation";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { loadGate2BreakdownCached, loadSetupsBaseData } from "./setups-cached-data";
 
@@ -42,7 +42,7 @@ export async function SetupsSidebarAsync() {
           data-testid="setups-overview-db-banner"
         />
       ) : null}
-      <SetupsPipelineDock
+      <IntelligenceSidebar
         tradingDecision={tradingDecision}
         latestScan={latest}
         nearMissCount={nearMissCount}
