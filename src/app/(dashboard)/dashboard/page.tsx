@@ -31,7 +31,7 @@ import {
   computeRsNearMissWatchlistFromDb,
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
-import { TradingOsDashboard } from "@/components/trading-os-v3/trading-os-dashboard";
+import { CyberCommandDeck } from "@/components/cyber-command-deck";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -237,5 +237,5 @@ export default async function DashboardPage() {
     openPositionCount: openTrades.length,
     dbLoadError,
   });
-  return <TradingOsDashboard viewModel={viewModel} />;
+  return <CyberCommandDeck viewModel={viewModel} />;
 }
