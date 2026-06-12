@@ -16,7 +16,9 @@ import type { RadarNode, RadarNodeClassification } from "./types";
 import { Card, CardHeader } from "./ui/card";
 import { Sparkline } from "./ui/sparkline";
 import {
-  clampRadarPixel,
+  RADAR_BUBBLE_OUTER_RADIUS,
+  RADAR_CHART_MARGIN,
+  clampRadarBubblePosition,
   type RadarPlotPoint,
   toRadarPlotPoint,
 } from "./radar-plot-utils";
@@ -33,8 +35,7 @@ const NODE_COLORS: Record<RadarNodeClassification, { fill: string; glow: string 
 };
 
 const AXIS_TICK = { fill: "#9ca3af", fontSize: 11 };
-const CHART_MARGIN = { top: 32, right: 28, bottom: 12, left: 12 };
-const PIXEL_PAD = 30;
+const CHART_MARGIN = RADAR_CHART_MARGIN;
 
 function CustomTooltip({
   active,
@@ -95,6 +96,7 @@ function PolarBackdrop() {
 export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Props) {
   const [mounted, setMounted] = useState(false);
   const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     setMounted(true);
@@ -146,12 +148,17 @@ export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Pr
       <div className="cd-radar-wrap flex-1 relative min-h-[300px]">
         <PolarBackdrop />
         {mounted ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minHeight={300}
+            onResize={(width, height) => setChartSize({ width, height })}
+          >
             <ScatterChart margin={CHART_MARGIN}>
               <CartesianGrid strokeDasharray="2 6" stroke="rgba(156, 163, 175, 0.1)" />
               <XAxis
                 type="number"
-                dataKey="readinessPlot"
+                dataKey="plotReadiness"
                 name="Readiness"
                 domain={[0, 100]}
                 tick={AXIS_TICK}
@@ -160,7 +167,7 @@ export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Pr
               />
               <YAxis
                 type="number"
-                dataKey="riskPlot"
+                dataKey="plotRisk"
                 name="Risk"
                 domain={[100, 0]}
                 tick={AXIS_TICK}
@@ -186,24 +193,28 @@ export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Pr
                     }}
                     onMouseLeave={() => setHoveredSymbol(null)}
                     shape={(props) => {
-                      const { cx, cy, payload, width, height } = props as {
+                      const { cx, cy, payload } = props as {
                         cx: number;
                         cy: number;
-                        width?: number;
-                        height?: number;
                         payload: RadarPlotPoint;
                       };
                       const active = hoveredSymbol === payload.symbol;
                       const colors = NODE_COLORS[payload.classification];
                       const r = active ? 22 : 18;
-                      const x =
-                        width != null
-                          ? clampRadarPixel(cx, 0, width, PIXEL_PAD)
-                          : cx;
-                      const y =
-                        height != null
-                          ? clampRadarPixel(cy, 0, height, PIXEL_PAD)
-                          : cy;
+                      const outerR = r + 6;
+                      let x = cx;
+                      let y = cy;
+                      if (chartSize.width > 0 && chartSize.height > 0) {
+                        const clamped = clampRadarBubblePosition(
+                          cx,
+                          cy,
+                          chartSize.width,
+                          chartSize.height,
+                          Math.max(outerR, RADAR_BUBBLE_OUTER_RADIUS)
+                        );
+                        x = clamped.x;
+                        y = clamped.y;
+                      }
                       return (
                         <g>
                           <circle
