@@ -5,13 +5,12 @@ const url = "http://127.0.0.1:3000/design-preview/cyber-cockpit";
 const outDir = path.join(process.cwd(), "screenshots");
 
 async function waitForDeckVisible(page) {
-  await page.waitForSelector('[data-testid="dashboard-cyber"]');
-  await page.waitForFunction(() => {
-    const grid = document.querySelector(".ccd-dashboard-grid");
-    if (!grid) return false;
-    const opacity = parseFloat(getComputedStyle(grid).opacity);
-    return opacity >= 0.99;
-  }, { timeout: 15_000 });
+  await page.waitForSelector('[data-testid="dashboard-cyber"]', { timeout: 30_000 });
+  await page.waitForSelector('[data-testid="command-deck-opportunity-radar"]', {
+    timeout: 30_000,
+  });
+  await page.waitForSelector('[data-testid="command-deck-rs-table"]', { timeout: 30_000 });
+  await page.waitForTimeout(800);
 }
 
 async function capture(name, contextOptions) {

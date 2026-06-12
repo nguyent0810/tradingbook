@@ -1128,7 +1128,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     rules: [
       { text: "No chasing when price is extended above breakout.", provenance: "static_copy" },
       {
-        text: "Stop levels from scanner — not portfolio R-multiple enforcement on this panel.",
+        text: "Stop levels are reference only; size risk separately.",
         provenance: "gap",
       },
       {

@@ -15,7 +15,7 @@ export type CommandBarData = {
   freshness: string;
   regime: string;
   regimeNote?: string;
-  breadth: string;
+  breadth?: string | null;
   volatility: string;
   watchState: string;
   stats: CommandBarStat[];
@@ -48,7 +48,6 @@ export type RelativeStrengthRow = {
   rs20: number;
   vsIndex: string;
   status: "watch" | "blocked" | "aligned";
-  sparkline: number[];
 };
 
 export type EvidenceItem = {

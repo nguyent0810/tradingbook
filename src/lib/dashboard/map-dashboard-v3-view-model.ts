@@ -696,7 +696,11 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       breadth: formatBreadth(latestScan, cockpitDto.gateFunnel),
       volatility: momentumVolatilityLabel(regime.momentum),
       watchState:
-        watchItemCount > 0 ? `${watchItemCount} symbols on watch` : "No active watch items",
+        watchItemCount === 1
+          ? "1 symbol on watch"
+          : watchItemCount > 0
+            ? `${watchItemCount} symbols on watch`
+            : "No active watch items",
       gate1Mismatch,
       gate1MismatchNote: buildGate1MismatchNote(
         cockpitDto.verdict.gate1Resolution,

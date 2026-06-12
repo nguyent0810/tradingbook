@@ -8,7 +8,7 @@ export const COMMAND_DECK_MOCK: CommandDeckMockData = {
     freshness: "Scan 2026-05-25",
     regime: "Favorable (scan)",
     regimeNote: "Scan tagged Favorable, live Caution — no new entries today",
-    breadth: "—",
+    breadth: null,
     volatility: "Momentum up",
     watchState: "2 symbols on watch",
     stats: [
@@ -69,10 +69,10 @@ export const COMMAND_DECK_MOCK: CommandDeckMockData = {
     },
   ],
   relativeStrength: [
-    { symbol: "ABB", rs20: 4.2, vsIndex: "+4.2%", status: "watch", sparkline: [1.1, 1.8, 2.4, 3.1, 3.8, 4.2] },
-    { symbol: "VND", rs20: 3.1, vsIndex: "+3.1%", status: "watch", sparkline: [0.8, 1.2, 1.9, 2.3, 2.8, 3.1] },
-    { symbol: "VGT", rs20: 2.4, vsIndex: "+2.4%", status: "aligned", sparkline: [1.5, 1.7, 1.9, 2.0, 2.2, 2.4] },
-    { symbol: "HDC", rs20: -1.8, vsIndex: "−1.8%", status: "blocked", sparkline: [0.5, 0.2, -0.4, -0.9, -1.4, -1.8] },
+    { symbol: "ABB", rs20: 4.2, vsIndex: "+4.2%", status: "watch" },
+    { symbol: "VND", rs20: 3.1, vsIndex: "+3.1%", status: "watch" },
+    { symbol: "VGT", rs20: 2.4, vsIndex: "+2.4%", status: "aligned" },
+    { symbol: "HDC", rs20: -1.8, vsIndex: "−1.8%", status: "blocked" },
   ],
   setupIntelligence: [],
   evidence: [
