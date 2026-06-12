@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { V3PageShell, V3Panel, V3Section } from "@/components/trading-os-v3/layout";
 import { TradesPageHeader } from "@/components/trades/trades-page-header";
-import { TradesLedgerCockpit } from "@/components/trades/trades-ledger-cockpit";
-import { TradesLedgerTable } from "@/components/trades/trades-ledger-table";
 import { TradesLedgerEmpty } from "@/components/trades/trades-ledger-empty";
 import { TradeFilters, TradeFiltersSkeleton } from "@/components/trades/trades-ledger-filters";
+import { SummaryMetrics } from "@/components/trades-workstation/SummaryMetrics";
+import { mapLedgerTableItems, mapOpenRowPacks } from "@/components/trades-workstation/map-ledger-rows";
+import { TradesTable } from "@/components/trades-workstation/TradesTable";
+import type { TradesLedgerTrade } from "@/components/trades/trades-ledger-types";
 import { MarketDataAlignmentBanner } from "@/components/market-data-alignment-banner";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
@@ -82,9 +84,18 @@ export function TradesLedgerDeck({
 }: TradesLedgerDeckProps) {
   const filteredEmpty = Boolean(search || statusFilter);
 
+  const openTradeIds = ledgerTableItems.filter(
+    (item): item is TradesLedgerTrade =>
+      item !== null && typeof item === "object" && !("kind" in item) && item.status === "OPEN"
+  );
+  const checkpointCompletion = {
+    openCount: openTradeIds.length,
+    reviewedCount: openTradeIds.filter((t) => checkedTodayTradeIds.has(t.id)).length,
+  };
+
   return (
-    <div className="tosv3-page-shell__flow tosv3-workstation-flow">
-      <TradesLedgerCockpit
+    <div className="tw-root tosv3-page-shell__flow tosv3-workstation-flow space-y-4">
+      <SummaryMetrics
         marketFreshness={marketFreshness}
         latestScan={latestScan}
         scanDelayedBackdrop={scanDelayedBackdrop}
@@ -95,6 +106,7 @@ export function TradesLedgerDeck({
         sinceLastVisitLines={sinceLastVisitLines}
         compactReview={compactReview}
         hasOpenTrades={hasOpenTrades}
+        checkpointCompletion={checkpointCompletion}
       />
 
       {dbLoadError ? (
@@ -144,9 +156,9 @@ export function TradesLedgerDeck({
       {tradesEmpty ? (
         <TradesLedgerEmpty filtered={filteredEmpty} />
       ) : (
-        <TradesLedgerTable
-          ledgerTableItems={ledgerTableItems}
-          openRowPackByTradeId={openRowPackByTradeId}
+        <TradesTable
+          ledgerTableItems={mapLedgerTableItems(ledgerTableItems)}
+          openRowPackByTradeId={mapOpenRowPacks(openRowPackByTradeId)}
           latestCloseBySymbol={latestCloseBySymbol}
           expectedSessionDate={expectedSessionDate}
           checkedTodayTradeIds={checkedTodayTradeIds}
@@ -175,7 +187,7 @@ export function TradesLedgerPageShell({
   closedCount: number;
 }) {
   return (
-    <V3PageShell pageClassName="tosv3-trades-page" testId="trades-workstation">
+    <V3PageShell pageClassName="tosv3-trades-page bg-[#07090E]" testId="trades-workstation">
       <TradesPageHeader
         tradeCount={tradeCount}
         openCount={openCount}
