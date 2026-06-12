@@ -95,7 +95,10 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
   };
 }
 
-function mapFromInput(input: DecisionCockpitInput) {
+function mapFromInput(
+  input: DecisionCockpitInput,
+  options: { watchItemCount?: number; openPositionCount?: number } = {}
+) {
   const dto = buildDecisionCockpitDto(input);
   return mapDashboardV3ViewModel({
     cockpitDto: dto,
@@ -124,8 +127,8 @@ function mapFromInput(input: DecisionCockpitInput) {
       : null,
     topSetups: [],
     trades: [],
-    watchItemCount: 2,
-    openPositionCount: 0,
+    watchItemCount: options.watchItemCount ?? 2,
+    openPositionCount: options.openPositionCount ?? 0,
     marketContext: input.marketContext ?? null,
   });
 }
@@ -348,6 +351,31 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
     expect(vm.headerCta.primaryLabel).toBe("Open pipeline");
     expect(vm.headerCta.secondaryHref).toBeNull();
     expect(vm.headerCta.secondaryLabel).toBeNull();
+  });
+
+  it("prioritizes review CTA when NO_TRADE and open positions exist", () => {
+    const vm = mapFromInput(baseInput(), { openPositionCount: 2 });
+    expect(vm.headerCta.primaryHref).toBe("/trades");
+    expect(vm.headerCta.primaryLabel).toBe("Review open positions");
+    expect(vm.headerCta.secondaryHref).toBe("/setups");
+    expect(vm.headerCta.secondaryLabel).toBe("Open pipeline");
+    expect(vm.headerCta.tertiaryHref).toBe("/trades/new");
+    expect(vm.headerCta.tertiaryLabel).toBe("Log exit or adjustment");
+  });
+
+  it("pluralizes watch state copy", () => {
+    expect(mapFromInput(baseInput(), { watchItemCount: 1 }).marketPulse.watchState).toBe(
+      "1 symbol on watch"
+    );
+    expect(mapFromInput(baseInput(), { watchItemCount: 3 }).marketPulse.watchState).toBe(
+      "3 symbols on watch"
+    );
+  });
+
+  it("humanizes trade gate stop-level copy", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    const stopRule = dto.risk.rules.find((r) => r.text.toLowerCase().includes("stop"));
+    expect(stopRule?.text).toBe("Stop levels are reference only; size risk separately.");
   });
 
   it("clarifies scan vs live regime mismatch on NO_TRADE", () => {

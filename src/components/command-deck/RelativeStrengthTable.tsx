@@ -3,7 +3,6 @@
 import type { RelativeStrengthRow } from "./types";
 import { Card, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Sparkline } from "./ui/sparkline";
 
 type Props = {
   rows: RelativeStrengthRow[];
@@ -47,7 +46,6 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
               <th>RS20</th>
               <th>vs VNINDEX</th>
               <th>Status</th>
-              <th className="text-right">Trace</th>
             </tr>
           </thead>
           <tbody>
@@ -64,12 +62,6 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
                   <Badge tone={statusTone(row.status)} pulse={row.status === "watch"}>
                     {statusLabel(row.status)}
                   </Badge>
-                </td>
-                <td className="text-right">
-                  <Sparkline
-                    values={row.sparkline}
-                    color={row.rs20 >= 0 ? "#00E676" : "#FF3366"}
-                  />
                 </td>
               </tr>
             ))}

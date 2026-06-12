@@ -69,10 +69,14 @@ export function CommandBar({ data, loading = false }: Props) {
           )}
         </div>
 
-        <div>
-          <label>Breadth</label>
-          <span className="cd-command-bar__value cd-mono">{loading ? "—" : data.breadth}</span>
-        </div>
+        {data.breadth ? (
+          <div>
+            <label>Breadth</label>
+            <span className="cd-command-bar__value cd-mono">
+              {loading ? "—" : data.breadth}
+            </span>
+          </div>
+        ) : null}
 
         <div>
           <label>Volatility</label>

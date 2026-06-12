@@ -36,6 +36,31 @@ function sparklineFromReadinessRisk(readiness: number, risk: number): number[] {
   ];
 }
 
+const RADAR_CLASSIFICATION_PRIORITY: Record<RadarNodeClassification, number> = {
+  avoid: 3,
+  watch: 2,
+  actionable: 1,
+};
+
+/** Merge radar nodes by symbol — strictest classification wins (avoid > watch > actionable). */
+export function dedupeRadarNodes(nodes: RadarNode[]): RadarNode[] {
+  const bySymbol = new Map<string, RadarNode>();
+  for (const node of nodes) {
+    const existing = bySymbol.get(node.symbol);
+    if (!existing) {
+      bySymbol.set(node.symbol, node);
+      continue;
+    }
+    if (
+      RADAR_CLASSIFICATION_PRIORITY[node.classification] >
+      RADAR_CLASSIFICATION_PRIORITY[existing.classification]
+    ) {
+      bySymbol.set(node.symbol, node);
+    }
+  }
+  return [...bySymbol.values()];
+}
+
 function mapRadarNodes(vm: DashboardV3ViewModel, decisionMode: V3DecisionMode): RadarNode[] {
   const dots: RadarNode[] = vm.radar.mapDots.map((dot) => {
     let classification: RadarNodeClassification = dot.status === "qualified" ? "actionable" : "watch";
@@ -57,13 +82,13 @@ function mapRadarNodes(vm: DashboardV3ViewModel, decisionMode: V3DecisionMode): 
     symbol: p.symbol,
     readiness: 22,
     risk: 88,
-    classification: "avoid",
+    classification: "avoid" as const,
     tier: "Rejected",
     reason: p.caption,
     sparkline: [48, 44, 38, 32, 28],
   }));
 
-  return [...dots, ...avoid];
+  return dedupeRadarNodes([...dots, ...avoid]);
 }
 
 function mapRelativeStrength(vm: DashboardV3ViewModel): RelativeStrengthRow[] {
@@ -84,13 +109,6 @@ function mapRelativeStrength(vm: DashboardV3ViewModel): RelativeStrengthRow[] {
       rs20: num,
       vsIndex: card.strengthLabel ?? rsStr,
       status,
-      sparkline: [
-        num * 0.55,
-        num * 0.68,
-        num * 0.8,
-        num * 0.92,
-        num,
-      ].map((v) => Math.round(v * 10) / 10),
     };
   });
 }
@@ -148,7 +166,7 @@ export function mapDashboardV3ToCommandDeck(vm: DashboardV3ViewModel): CommandDe
       freshness: vm.marketPulse.freshness,
       regime: vm.marketPulse.regime,
       regimeNote: vm.marketPulse.gate1MismatchNote ?? undefined,
-      breadth: vm.marketPulse.breadth ?? "—",
+      breadth: vm.marketPulse.breadth,
       volatility: vm.marketPulse.volatility ?? "—",
       watchState: vm.marketPulse.watchState,
       stats: foreignStats(vm),

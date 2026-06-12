@@ -19,5 +19,13 @@ test.describe("Cyber Command Deck — NO TRADE preview smoke", () => {
 
     await expect(page.getByRole("link", { name: "Open pipeline" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Log trade" })).toHaveCount(0);
+
+    const rsTable = page.getByTestId("command-deck-rs-table");
+    await expect(rsTable.getByRole("columnheader", { name: "Trace" })).toHaveCount(0);
+    await expect(rsTable.locator(".cd-sparkline")).toHaveCount(0);
+
+    await expect(page.getByTestId("command-deck-bar").getByText("Breadth", { exact: true })).toHaveCount(
+      0
+    );
   });
 });
