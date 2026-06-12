@@ -1,5 +1,6 @@
 "use client";
 
+import { Search } from "lucide-react";
 import type { SetupIntelligenceRow } from "./types";
 import { Card, CardHeader } from "./ui/card";
 import { Sparkline } from "./ui/sparkline";
@@ -16,9 +17,13 @@ export function SetupIntelligenceSection({ rows, emptyMessage, subtitle }: Props
       <CardHeader title="Setup Intelligence" subtitle={subtitle} />
 
       {rows.length === 0 ? (
-        <p className="text-sm m-0 text-center py-8" style={{ color: "var(--cd-text-muted)" }}>
-          {emptyMessage}
-        </p>
+        <div
+          className="flex flex-col items-center justify-center py-8 text-center"
+          data-testid="setup-intelligence-empty"
+        >
+          <Search className="mb-3 h-8 w-8 text-gray-600" aria-hidden />
+          <p className="m-0 max-w-md text-sm text-gray-500">{emptyMessage}</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="cd-rs-table">
