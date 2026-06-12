@@ -5,6 +5,7 @@ import { Card, CardHeader } from "./ui/card";
 
 type Props = {
   items: EvidenceItem[];
+  defaultOpen?: boolean;
 };
 
 function toneClass(tone: EvidenceItem["tone"]): string {
@@ -14,7 +15,7 @@ function toneClass(tone: EvidenceItem["tone"]): string {
   return "";
 }
 
-export function EvidenceGrid({ items }: Props) {
+export function EvidenceGrid({ items, defaultOpen = true }: Props) {
   return (
     <Card className="p-4 cd-span-12" data-testid="command-deck-evidence">
       <CardHeader title="Session Evidence" subtitle="Diagnostics · freshness · blockers" />

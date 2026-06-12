@@ -2,25 +2,28 @@
 
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import type { CommandDeckMockData } from "./types";
+import type { DashboardV3ViewModel } from "@/lib/dashboard/dashboard-v3-view-model";
+import { mapDashboardV3ToCommandDeck } from "./map-dashboard-v3-to-command-deck";
 import { CommandBar } from "./CommandBar";
 import { DecisionCoreCard } from "./DecisionCoreCard";
 import { OpportunityRadar } from "./OpportunityRadar";
 import { RelativeStrengthTable } from "./RelativeStrengthTable";
 import { EvidenceGrid } from "./EvidenceGrid";
+import { TradeGateCard } from "./TradeGateCard";
+import { SetupIntelligenceSection } from "./SetupIntelligenceSection";
+import { LedgerPulseBar } from "./LedgerPulseBar";
 import "./command-deck.css";
 
 export type DashboardLayoutProps = {
-  data: CommandDeckMockData;
+  viewModel: DashboardV3ViewModel;
   loading?: boolean;
   header?: ReactNode;
 };
 
-const RS_CONTEXT_NO_TRADE =
-  "Context only — relative strength does not qualify a setup and does not change today's no-trade stance.";
-
-export function DashboardLayout({ data, loading = false, header }: DashboardLayoutProps) {
+export function DashboardLayout({ viewModel, loading = false, header }: DashboardLayoutProps) {
   const reducedMotion = useReducedMotion() ?? false;
+  const data = mapDashboardV3ToCommandDeck(viewModel);
+  const decisionMode = viewModel.decision.mode;
 
   const container = reducedMotion
     ? {}
@@ -39,7 +42,7 @@ export function DashboardLayout({ data, loading = false, header }: DashboardLayo
       };
 
   return (
-    <div className="cd-root" data-testid="command-deck-root">
+    <div className="cd-root" data-testid="dashboard-cyber">
       <div className="cd-shell">
         {header}
 
@@ -53,15 +56,34 @@ export function DashboardLayout({ data, loading = false, header }: DashboardLayo
           </motion.div>
 
           <motion.div className="cd-span-6" {...item}>
-            <OpportunityRadar nodes={data.radar} />
+            <TradeGateCard risk={viewModel.risk} />
           </motion.div>
 
           <motion.div className="cd-span-6" {...item}>
-            <RelativeStrengthTable rows={data.relativeStrength} contextNote={RS_CONTEXT_NO_TRADE} />
+            <OpportunityRadar nodes={data.radar} decisionMode={decisionMode} />
+          </motion.div>
+
+          <motion.div className="cd-span-6" {...item}>
+            <RelativeStrengthTable
+              rows={data.relativeStrength}
+              contextNote={data.rsContextNote}
+            />
           </motion.div>
 
           <motion.div className="cd-span-12" {...item}>
-            <EvidenceGrid items={data.evidence} />
+            <SetupIntelligenceSection
+              rows={data.setupIntelligence}
+              emptyMessage={data.setupEmptyMessage}
+              subtitle={data.setupSubtitle}
+            />
+          </motion.div>
+
+          <motion.div className="cd-span-12" {...item}>
+            <LedgerPulseBar data={viewModel.ledger} />
+          </motion.div>
+
+          <motion.div className="cd-span-12" {...item}>
+            <EvidenceGrid items={data.evidence} defaultOpen={viewModel.evidenceDefaultOpen} />
           </motion.div>
         </motion.div>
       </div>

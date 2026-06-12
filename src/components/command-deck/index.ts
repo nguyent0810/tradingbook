@@ -7,11 +7,14 @@ export { ChartPlot } from "./chart-plot";
 export { SignalBadge, healthLevelToBadgeVariant, qualityToTierVariant } from "./signal-badge";
 export { DiagnosticsReasonStack } from "./diagnostics-reason-stack";
 
+export { CommandDeckDashboard } from "./CommandDeckDashboard";
 export { DashboardLayout } from "./DashboardLayout";
 export { DecisionCoreCard } from "./DecisionCoreCard";
 export { OpportunityRadar } from "./OpportunityRadar";
 export { CommandBar } from "./CommandBar";
 export { RelativeStrengthTable } from "./RelativeStrengthTable";
 export { EvidenceGrid } from "./EvidenceGrid";
+export { TradeGateCard } from "./TradeGateCard";
+export { mapDashboardV3ToCommandDeck } from "./map-dashboard-v3-to-command-deck";
 export { COMMAND_DECK_MOCK } from "./constants/mock-data";
 export type * from "./types";
