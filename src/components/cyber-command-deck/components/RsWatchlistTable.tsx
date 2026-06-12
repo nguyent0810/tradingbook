@@ -19,51 +19,62 @@ function toneToVariant(
 
 export function RsWatchlistTable({ panel }: Props) {
   const rows = mapRsTableRows(panel.cards);
+  const showBanner = panel.cards.length > 0 || panel.contextNote;
 
   return (
-    <TechTable
-      title={panel.title}
-      subtitle={panel.subtitle}
-      testId="dashboard-cyber-rs-table"
-      rows={rows}
-      fillHeight
-      emptyMessage={panel.emptyReason ?? "No relative strength watchlist entries."}
-      columns={[
-        {
-          key: "symbol",
-          header: "Symbol",
-          mono: true,
-          render: (row) => <span className="ccd-tech-table__symbol">{row.symbol}</span>,
-        },
-        {
-          key: "state",
-          header: "State",
-          render: (row) => (
-            <StatusPill variant={toneToVariant(row.stateTone)}>{row.stateBadge}</StatusPill>
-          ),
-        },
-        {
-          key: "strength",
-          header: "Strength",
-          render: (row) => row.strengthLabel ?? "—",
-        },
-        {
-          key: "rs",
-          header: "RS",
-          mono: true,
-          align: "right",
-          render: (row) => row.rsValue,
-        },
-        {
-          key: "blocker",
-          header: "Blocker",
-          render: (row) => (
-            <span className="text-slate-500 truncate max-w-[120px] inline-block">
-              {row.blockerLabel}
-            </span>
-          ),
-        },
-      ]}
-    />
+    <div className="flex flex-col h-full min-h-0 gap-2">
+      {showBanner ? (
+        <p
+          className="text-xs text-slate-500 m-0 px-1 leading-relaxed border-l-2 border-slate-600 pl-2"
+          data-testid="dashboard-rs-context-banner"
+        >
+          {panel.contextNote}
+        </p>
+      ) : null}
+      <TechTable
+        title={panel.title}
+        subtitle={panel.subtitle}
+        testId="dashboard-cyber-rs-table"
+        rows={rows}
+        fillHeight
+        emptyMessage={panel.emptyReason ?? "No relative strength watchlist entries."}
+        columns={[
+          {
+            key: "symbol",
+            header: "Symbol",
+            mono: true,
+            render: (row) => <span className="ccd-tech-table__symbol">{row.symbol}</span>,
+          },
+          {
+            key: "state",
+            header: "State",
+            render: (row) => (
+              <StatusPill variant={toneToVariant(row.stateTone)}>{row.stateBadge}</StatusPill>
+            ),
+          },
+          {
+            key: "strength",
+            header: "Strength",
+            render: (row) => row.strengthLabel ?? "—",
+          },
+          {
+            key: "rs",
+            header: "RS",
+            mono: true,
+            align: "right",
+            render: (row) => row.rsValue,
+          },
+          {
+            key: "blocker",
+            header: "Blocker",
+            render: (row) => (
+              <span className="text-slate-500 truncate max-w-[120px] inline-block">
+                {row.blockerLabel}
+              </span>
+            ),
+          },
+        ]}
+      />
+    </div>
   );
 }

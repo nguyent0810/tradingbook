@@ -1,51 +1,33 @@
-import type { V3RiskConsole, V3RsWatchlistCard, V3SetupCard } from "../types";
+import type {
+  V3RiskConsole,
+  V3RsWatchlistCard,
+  V3SetupCard,
+  V3TradeGateRow,
+} from "@/lib/dashboard/dashboard-v3-view-model";
 import type { RiskTableRow, RsTableRow, SetupTableRow } from "../types";
 
-type RuleState = "pass" | "caution" | "blocked";
-
-function inferRuleState(rule: string, data: V3RiskConsole): RuleState {
-  const lower = rule.toLowerCase();
-  if (
-    lower.includes("no averaging") ||
-    lower.includes("pause all new entries") ||
-    (data.utilizationTone === "critical" && lower.includes("add risk"))
-  ) {
-    return "blocked";
-  }
-  if (lower.includes("do not") || data.utilizationTone === "elevated") return "caution";
-  if (data.utilizationTone === "critical") return "caution";
-  return "pass";
+function gateStatusToVariant(
+  status: V3TradeGateRow["status"]
+): RiskTableRow["status"] {
+  if (status === "ready") return "pass";
+  if (status === "blocked") return "blocked";
+  return "caution";
 }
 
-function statusLabel(state: RuleState): string {
-  if (state === "blocked") return "Blocked";
-  if (state === "caution") return "Guard";
-  return "Ready";
+export function mapTradeGateRows(data: V3RiskConsole): RiskTableRow[] {
+  return data.tradeGate.rows.map((row) => ({
+    id: row.id,
+    rule: row.rule,
+    status: gateStatusToVariant(row.status),
+    statusLabel: row.statusLabel,
+    severity: row.severity,
+    action: row.action,
+  }));
 }
 
-function actionLabel(state: RuleState): string {
-  if (state === "blocked") return "Hold";
-  if (state === "caution") return "Watch";
-  return "Go";
-}
-
-function severityLabel(state: RuleState): string {
-  if (state === "blocked") return "High";
-  if (state === "caution") return "Med";
-  return "Low";
-}
-
+/** @deprecated Use mapTradeGateRows — server-driven trade gate rows. */
 export function mapRiskTableRows(data: V3RiskConsole): RiskTableRow[] {
-  return data.blockers.map((rule) => {
-    const state = inferRuleState(rule, data);
-    return {
-      id: rule,
-      rule,
-      status: state,
-      severity: severityLabel(state),
-      action: actionLabel(state),
-    };
-  });
+  return mapTradeGateRows(data);
 }
 
 function rsMetricValue(card: V3RsWatchlistCard, label: string): string {
@@ -69,14 +51,13 @@ export function mapSetupTableRows(cards: V3SetupCard[]): SetupTableRow[] {
     id: card.symbol,
     symbol: card.symbol,
     tier: card.tier,
-    setupType: card.setupType,
+    setupType:
+      card.setupTypeProvenance === "static_copy"
+        ? card.setupType
+        : card.setupType || "Pattern pending",
     entry: card.entry,
     stop: card.stop,
     actionState: card.actionState,
     health: card.health,
   }));
-}
-
-export function riskStatusLabel(state: RuleState): string {
-  return statusLabel(state);
 }

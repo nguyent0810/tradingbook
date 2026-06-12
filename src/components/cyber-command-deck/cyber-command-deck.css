@@ -102,9 +102,8 @@
 }
 
 .ccd-zone--header { grid-column: 1 / -1; }
-.ccd-zone--decision { grid-column: span 5; }
-.ccd-zone--ai { grid-column: span 2; }
-.ccd-zone--risk { grid-column: span 5; }
+.ccd-zone--decision { grid-column: span 6; }
+.ccd-zone--risk { grid-column: span 6; }
 .ccd-zone--radar { grid-column: span 6; }
 .ccd-zone--rs { grid-column: span 6; }
 
@@ -674,34 +673,10 @@
 
   .ccd-zone--header,
   .ccd-zone--decision,
-  .ccd-zone--ai,
   .ccd-zone--risk,
   .ccd-zone--radar,
   .ccd-zone--rs {
     grid-column: 1 / -1;
-  }
-
-  .ccd-zone--ai {
-    order: 3;
-  }
-
-  .ccd-ai-core-card {
-    flex-direction: row;
-    gap: 1rem;
-    padding: 0.75rem 1rem;
-    min-height: auto;
-  }
-
-  .ccd-ai-core-card__hint {
-    margin: 0;
-  }
-
-  .ccd-core-node-wrap--compact {
-    flex: 0 0 auto;
-  }
-
-  .ccd-intel-core--compact {
-    max-width: 56px;
   }
 
   .ccd-header-grid {

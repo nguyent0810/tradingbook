@@ -21,6 +21,7 @@ const INTERNAL_PHRASE_REPLACEMENTS: ReadonlyArray<[RegExp, string]> = [
   [/Diagnostic only\.?/gi, "Context only — not a trade signal."],
   [/Gate 2 SetupCandidate/gi, "qualified setup"],
   [/rankScore/gi, "setup score"],
+  [/extension_cap/gi, "extended above breakout"],
   [/Gate 2/gi, "setup filter"],
   [/Gate 1/gi, "market regime filter"],
 ];

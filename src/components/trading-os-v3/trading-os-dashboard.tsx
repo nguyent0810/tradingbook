@@ -32,7 +32,7 @@ export function TradingOsDashboard({ viewModel }: TradingOsDashboardProps) {
     <V3PageShell testId="dashboard-v3" pageClassName="tosv3-dashboard-page">
       <motion.div className="tosv3-shell tosv3-dashboard-shell" {...motionProps}>
         <div className="tosv3-page-header-slot">
-          <DashboardPageHeader />
+          <DashboardPageHeader cta={viewModel.headerCta} />
         </div>
 
         {viewModel.partialError ? (

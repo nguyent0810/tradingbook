@@ -7,10 +7,11 @@ import {
   radarDotSize,
   radarPosition,
 } from "@/components/trading-os-v3/v3-radar-utils";
-import type { DashboardV3ViewModel, NodeClassification } from "../types";
+import type { DashboardV3ViewModel, NodeClassification, V3DecisionMode } from "../types";
 
 type Props = {
   radar: DashboardV3ViewModel["radar"];
+  decisionMode: V3DecisionMode;
 };
 
 type DrawNode = {
@@ -79,7 +80,7 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
   );
 }
 
-export function OpportunityRadar({ radar }: Props) {
+export function OpportunityRadar({ radar, decisionMode }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const nodesRef = useRef<DrawNode[]>([]);
@@ -278,6 +279,8 @@ export function OpportunityRadar({ radar }: Props) {
     return null;
   };
 
+  const showActionableLegend = decisionMode === "TRADE";
+
   return (
     <section
       className="ccd-panel ccd-panel-fill p-4 h-full"
@@ -292,10 +295,12 @@ export function OpportunityRadar({ radar }: Props) {
           </p>
         </div>
         <ul className="ccd-radar-legend list-none m-0 p-0">
-          <li>
-            <i className="ccd-radar-legend__dot ccd-radar-legend__dot--actionable" />
-            Actionable
-          </li>
+          {showActionableLegend ? (
+            <li>
+              <i className="ccd-radar-legend__dot ccd-radar-legend__dot--actionable" />
+              Actionable
+            </li>
+          ) : null}
           <li>
             <i className="ccd-radar-legend__dot ccd-radar-legend__dot--watch" />
             Watch
@@ -355,6 +360,9 @@ export function OpportunityRadar({ radar }: Props) {
             <p className="text-[10px] font-mono text-slate-500 mt-1 mb-0">
               Readiness {hovered.readiness} · Risk {hovered.risk}
             </p>
+            {radar.sparklineProvenance === "derived" ? (
+              <p className="text-[9px] text-slate-600 m-0 mt-1 italic">Illustrative trace</p>
+            ) : null}
             <Sparkline
               values={signalTrace(hovered.readiness, hovered.risk)}
               color={nodeColor(hovered.classification).fill}

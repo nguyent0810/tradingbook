@@ -5,16 +5,19 @@ import type { V3EvidenceItem } from "../types";
 
 type Props = {
   items: V3EvidenceItem[];
+  defaultOpen?: boolean;
 };
 
 function stateClass(state: V3EvidenceItem["state"]): string {
   return `ccd-evidence__item--${state === "ok" ? "ok" : state === "warn" ? "warn" : "danger"}`;
 }
 
-export function EvidenceDock({ items }: Props) {
-  const [open, setOpen] = useState(false);
+export function EvidenceDock({ items, defaultOpen = false }: Props) {
+  const [open, setOpen] = useState(defaultOpen);
 
   if (items.length === 0) return null;
+
+  const summaryText = `${items.length} check${items.length === 1 ? "" : "s"}`;
 
   return (
     <section
@@ -30,7 +33,7 @@ export function EvidenceDock({ items }: Props) {
       >
         <span className="ccd-kicker">Session evidence</span>
         <strong className="text-sm">
-          {open ? "Hide details" : `${items.length} checks · expand`}
+          {open ? "Hide details" : `${summaryText} · expand`}
         </strong>
       </button>
 
