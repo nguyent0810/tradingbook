@@ -14,6 +14,7 @@ import {
   formatGateFailureForUser,
   formatRelativeStrengthSummaryForUser,
 } from "./v3-user-copy";
+import { buildEvidenceSummaryLine } from "./build-evidence-summary";
 import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 
 const prodLikeMarketContext: MarketContextUiDto = {
@@ -376,6 +377,13 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
     const dto = buildDecisionCockpitDto(baseInput());
     const stopRule = dto.risk.rules.find((r) => r.text.toLowerCase().includes("stop"));
     expect(stopRule?.text).toBe("Stop levels are reference only; size risk separately.");
+  });
+
+  it("builds NO TRADE evidence summary from view model evidence", () => {
+    const vm = mapFromInput(baseInput({ marketContext: prodLikeMarketContext }));
+    const summary = buildEvidenceSummaryLine(vm.decision.mode, vm.evidence);
+    expect(summary).toMatch(/^Why no trade today:/);
+    expect(summary).toMatch(/foreign flow negative/);
   });
 
   it("clarifies scan vs live regime mismatch on NO_TRADE", () => {

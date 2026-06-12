@@ -15,26 +15,33 @@ import type { V3DecisionMode } from "@/lib/dashboard/dashboard-v3-view-model";
 import type { RadarNode, RadarNodeClassification } from "./types";
 import { Card, CardHeader } from "./ui/card";
 import { Sparkline } from "./ui/sparkline";
+import {
+  clampRadarPixel,
+  type RadarPlotPoint,
+  toRadarPlotPoint,
+} from "./radar-plot-utils";
 
 type Props = {
   nodes: RadarNode[];
   decisionMode?: V3DecisionMode;
 };
 
-type ChartPoint = RadarNode & { z: number };
-
 const NODE_COLORS: Record<RadarNodeClassification, { fill: string; glow: string }> = {
   actionable: { fill: "#00E676", glow: "rgba(0, 230, 118, 0.55)" },
   watch: { fill: "#FFB800", glow: "rgba(255, 184, 0, 0.55)" },
-  avoid: { fill: "#FF3366", glow: "rgba(255, 51, 102, 0.6)" },
+  avoid: { fill: "#f43f5e", glow: "rgba(244, 63, 94, 0.55)" },
 };
+
+const AXIS_TICK = { fill: "#9ca3af", fontSize: 11 };
+const CHART_MARGIN = { top: 32, right: 28, bottom: 12, left: 12 };
+const PIXEL_PAD = 30;
 
 function CustomTooltip({
   active,
   payload,
 }: {
   active?: boolean;
-  payload?: Array<{ payload: ChartPoint }>;
+  payload?: Array<{ payload: RadarPlotPoint }>;
 }) {
   if (!active || !payload?.[0]) return null;
   const node = payload[0].payload;
@@ -62,7 +69,7 @@ function PolarBackdrop() {
     <svg className="absolute inset-0 w-full h-full pointer-events-none" aria-hidden>
       <defs>
         <radialGradient id="cd-radar-fade" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(0, 229, 255, 0.04)" />
+          <stop offset="0%" stopColor="rgba(0, 229, 255, 0.05)" />
           <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
         </radialGradient>
       </defs>
@@ -75,12 +82,12 @@ function PolarBackdrop() {
           rx={`${45 * scale}%`}
           ry={`${40 * scale}%`}
           fill="none"
-          stroke="rgba(0, 229, 255, 0.08)"
+          stroke="rgba(156, 163, 175, 0.14)"
           strokeWidth="1"
         />
       ))}
-      <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(255,255,255,0.06)" />
-      <line x1="50%" y1="0" x2="50%" y2="100%" stroke="rgba(255,255,255,0.06)" />
+      <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(156, 163, 175, 0.12)" />
+      <line x1="50%" y1="0" x2="50%" y2="100%" stroke="rgba(156, 163, 175, 0.12)" />
     </svg>
   );
 }
@@ -93,17 +100,13 @@ export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Pr
     setMounted(true);
   }, []);
 
-  const chartData: ChartPoint[] = useMemo(
-    () =>
-      nodes.map((n) => ({
-        ...n,
-        z: n.classification === "avoid" ? 140 : n.classification === "watch" ? 110 : 90,
-      })),
+  const chartData: RadarPlotPoint[] = useMemo(
+    () => nodes.map((n) => toRadarPlotPoint(n)),
     [nodes]
   );
 
   const grouped = useMemo(() => {
-    const map: Record<RadarNodeClassification, ChartPoint[]> = {
+    const map: Record<RadarNodeClassification, RadarPlotPoint[]> = {
       actionable: [],
       watch: [],
       avoid: [],
@@ -143,86 +146,99 @@ export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Pr
       <div className="cd-radar-wrap flex-1 relative min-h-[300px]">
         <PolarBackdrop />
         {mounted ? (
-        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-          <ScatterChart margin={{ top: 16, right: 16, bottom: 8, left: 8 }}>
-            <CartesianGrid strokeDasharray="2 6" stroke="rgba(255,255,255,0.04)" />
-            <XAxis
-              type="number"
-              dataKey="readiness"
-              name="Readiness"
-              domain={[0, 100]}
-              tick={{ fill: "#5c6378", fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              type="number"
-              dataKey="risk"
-              name="Risk"
-              domain={[100, 0]}
-              tick={{ fill: "#5c6378", fontSize: 10 }}
-              axisLine={false}
-              tickLine={false}
-              width={28}
-            />
-            <ZAxis type="number" dataKey="z" range={[80, 400]} />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.15)" }}
-            />
-            {(["actionable", "watch", "avoid"] as const).map((key) =>
-              grouped[key].length > 0 ? (
-                <Scatter
-                  key={key}
-                  name={key}
-                  data={grouped[key]}
-                  fill={NODE_COLORS[key].fill}
-                  onMouseEnter={(d) => {
-                    const point = (d as { payload?: ChartPoint }).payload;
-                    if (point?.symbol) setHoveredSymbol(point.symbol);
-                  }}
-                  onMouseLeave={() => setHoveredSymbol(null)}
-                  shape={(props) => {
-                    const { cx, cy, payload } = props as {
-                      cx: number;
-                      cy: number;
-                      payload: ChartPoint;
-                    };
-                    const active = hoveredSymbol === payload.symbol;
-                    const colors = NODE_COLORS[payload.classification];
-                    const r = active ? 22 : 18;
-                    return (
-                      <g>
-                        <circle
-                          cx={cx}
-                          cy={cy}
-                          r={r + 6}
-                          fill={colors.glow}
-                          opacity={active ? 0.9 : 0.5}
-                        />
-                        <circle cx={cx} cy={cy} r={r} fill={colors.fill} />
-                        <text
-                          x={cx}
-                          y={cy}
-                          textAnchor="middle"
-                          dominantBaseline="central"
-                          fill="#090a0f"
-                          fontSize={9}
-                          fontWeight={700}
-                          fontFamily="var(--font-geist-mono)"
-                        >
-                          {payload.symbol}
-                        </text>
-                      </g>
-                    );
-                  }}
-                />
-              ) : null
-            )}
-          </ScatterChart>
-        </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+            <ScatterChart margin={CHART_MARGIN}>
+              <CartesianGrid strokeDasharray="2 6" stroke="rgba(156, 163, 175, 0.1)" />
+              <XAxis
+                type="number"
+                dataKey="readinessPlot"
+                name="Readiness"
+                domain={[0, 100]}
+                tick={AXIS_TICK}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                type="number"
+                dataKey="riskPlot"
+                name="Risk"
+                domain={[100, 0]}
+                tick={AXIS_TICK}
+                axisLine={false}
+                tickLine={false}
+                width={32}
+              />
+              <ZAxis type="number" dataKey="z" range={[80, 400]} />
+              <Tooltip
+                content={<CustomTooltip />}
+                cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.18)" }}
+              />
+              {(["actionable", "watch", "avoid"] as const).map((key) =>
+                grouped[key].length > 0 ? (
+                  <Scatter
+                    key={key}
+                    name={key}
+                    data={grouped[key]}
+                    fill={NODE_COLORS[key].fill}
+                    onMouseEnter={(d) => {
+                      const point = (d as { payload?: RadarPlotPoint }).payload;
+                      if (point?.symbol) setHoveredSymbol(point.symbol);
+                    }}
+                    onMouseLeave={() => setHoveredSymbol(null)}
+                    shape={(props) => {
+                      const { cx, cy, payload, width, height } = props as {
+                        cx: number;
+                        cy: number;
+                        width?: number;
+                        height?: number;
+                        payload: RadarPlotPoint;
+                      };
+                      const active = hoveredSymbol === payload.symbol;
+                      const colors = NODE_COLORS[payload.classification];
+                      const r = active ? 22 : 18;
+                      const x =
+                        width != null
+                          ? clampRadarPixel(cx, 0, width, PIXEL_PAD)
+                          : cx;
+                      const y =
+                        height != null
+                          ? clampRadarPixel(cy, 0, height, PIXEL_PAD)
+                          : cy;
+                      return (
+                        <g>
+                          <circle
+                            cx={x}
+                            cy={y}
+                            r={r + 6}
+                            fill={colors.glow}
+                            opacity={active ? 0.9 : 0.5}
+                          />
+                          <circle cx={x} cy={y} r={r} fill={colors.fill} />
+                          <text
+                            x={x}
+                            y={y}
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            fill="#090a0f"
+                            fontSize={9}
+                            fontWeight={700}
+                            fontFamily="var(--font-geist-mono)"
+                          >
+                            {payload.symbol}
+                          </text>
+                        </g>
+                      );
+                    }}
+                  />
+                ) : null
+              )}
+            </ScatterChart>
+          </ResponsiveContainer>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-xs" style={{ color: "var(--cd-text-dim)" }}>
+          <div
+            className="absolute inset-0 flex items-center justify-center text-xs"
+            style={{ color: "var(--cd-text-dim)" }}
+          >
             Loading radar…
           </div>
         )}

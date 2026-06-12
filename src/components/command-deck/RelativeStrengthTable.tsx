@@ -43,8 +43,8 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
           <thead>
             <tr>
               <th>Symbol</th>
-              <th>RS20</th>
-              <th>vs VNINDEX</th>
+              <th className="text-right">RS20</th>
+              <th className="text-right">vs VNINDEX</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -52,9 +52,9 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
             {rows.map((row) => (
               <tr key={row.symbol}>
                 <td className="cd-rs-table__symbol cd-mono">{row.symbol}</td>
-                <td className="cd-mono">{row.rs20.toFixed(1)}</td>
+                <td className="cd-mono text-right tabular-nums">{row.rs20.toFixed(1)}</td>
                 <td
-                  className={`cd-mono ${row.rs20 >= 0 ? "cd-tone-success" : "cd-tone-danger"}`}
+                  className={`cd-mono text-right tabular-nums ${row.rs20 >= 0 ? "cd-tone-success" : "cd-tone-danger"}`}
                 >
                   {row.vsIndex}
                 </td>

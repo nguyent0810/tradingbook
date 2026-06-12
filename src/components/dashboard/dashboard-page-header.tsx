@@ -18,12 +18,11 @@ export function DashboardPageHeader({ cta }: Props) {
         <p className="dash-v2-page-header__lead">{cta.lead}</p>
       </div>
       <div className="dash-v2-page-header__actions">
-        {showSecondary && cta.secondaryHref && cta.secondaryLabel ? (
-          <Link href={cta.secondaryHref} className="btn btn-secondary btn-sm dash-v2-btn-secondary">
-            {cta.secondaryLabel}
-          </Link>
-        ) : null}
-        <Link href={cta.primaryHref} className="btn btn-primary btn-sm dash-v2-btn-primary">
+        <Link
+          href={cta.primaryHref}
+          className="btn btn-primary btn-sm dash-v2-btn-primary"
+          data-testid="dashboard-header-primary-cta"
+        >
           {cta.primaryLabel === "Log trade" ? (
             <>
               <svg
@@ -45,6 +44,15 @@ export function DashboardPageHeader({ cta }: Props) {
             cta.primaryLabel
           )}
         </Link>
+        {showSecondary && cta.secondaryHref && cta.secondaryLabel ? (
+          <Link
+            href={cta.secondaryHref}
+            className="btn btn-secondary btn-sm dash-v2-btn-secondary"
+            data-testid="dashboard-header-secondary-cta"
+          >
+            {cta.secondaryLabel}
+          </Link>
+        ) : null}
         {cta.tertiaryHref && cta.tertiaryLabel ? (
           <Link
             href={cta.tertiaryHref}

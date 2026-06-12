@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import type { DashboardV3ViewModel } from "@/lib/dashboard/dashboard-v3-view-model";
+import { buildEvidenceSummaryLine } from "@/lib/dashboard/build-evidence-summary";
 import { mapDashboardV3ToCommandDeck } from "./map-dashboard-v3-to-command-deck";
 import { CommandBar } from "./CommandBar";
 import { DecisionCoreCard } from "./DecisionCoreCard";
@@ -24,6 +25,10 @@ export function DashboardLayout({ viewModel, loading = false, header }: Dashboar
   const reducedMotion = useReducedMotion() ?? false;
   const data = mapDashboardV3ToCommandDeck(viewModel);
   const decisionMode = viewModel.decision.mode;
+  const evidenceSummary =
+    viewModel.evidenceDefaultOpen && decisionMode === "PROTECT CAPITAL"
+      ? buildEvidenceSummaryLine(decisionMode, viewModel.evidence)
+      : null;
 
   const container = reducedMotion
     ? {}
@@ -83,7 +88,11 @@ export function DashboardLayout({ viewModel, loading = false, header }: Dashboar
           </motion.div>
 
           <motion.div className="cd-span-12" {...item}>
-            <EvidenceGrid items={data.evidence} defaultOpen={viewModel.evidenceDefaultOpen} />
+            <EvidenceGrid
+              items={data.evidence}
+              defaultOpen={viewModel.evidenceDefaultOpen}
+              summaryLine={evidenceSummary}
+            />
           </motion.div>
         </motion.div>
       </div>

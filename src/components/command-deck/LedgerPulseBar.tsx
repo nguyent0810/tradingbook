@@ -24,7 +24,7 @@ export function LedgerPulseBar({ data }: Props) {
                 key={`${chip}-${i}`}
                 className={`cd-mono text-xs px-2 py-0.5 rounded ${chip === "W" ? "cd-tone-success" : "cd-tone-danger"}`}
                 style={{
-                  background: chip === "W" ? "rgba(0,230,118,0.12)" : "rgba(255,51,102,0.12)",
+                  background: chip === "W" ? "rgba(0,230,118,0.12)" : "rgba(244,63,94,0.12)",
                 }}
               >
                 {chip}
@@ -38,12 +38,12 @@ export function LedgerPulseBar({ data }: Props) {
 
       <div>
         <span className="cd-kicker">Open trades</span>
-        <strong className="cd-mono block mt-2 text-lg">{data.openTrades}</strong>
+        <strong className="cd-mono cd-ledger-value block mt-2">{data.openTrades}</strong>
       </div>
 
       <div>
         <span className="cd-kicker">P&amp;L pulse</span>
-        <strong className="cd-mono block mt-2 text-lg">{data.pnlPulse ?? "—"}</strong>
+        <strong className="cd-mono cd-ledger-value block mt-2">{data.pnlPulse ?? "—"}</strong>
       </div>
 
       <div>

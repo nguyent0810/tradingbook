@@ -59,7 +59,7 @@ export function DecisionCoreCard({ data }: Props) {
           </span>
         </div>
 
-        <p className="text-sm leading-relaxed m-0 mb-4" style={{ color: "var(--cd-text-muted)" }}>
+        <p className="text-sm leading-relaxed m-0 mb-4 cd-decision__reason">
           {data.primaryReason}
         </p>
 
@@ -80,9 +80,9 @@ export function DecisionCoreCard({ data }: Props) {
           </div>
         </div>
 
-        <div className="cd-metric-cell">
+        <div className="cd-metric-cell cd-metric-cell--next-action">
           <label>Next action</label>
-          <p className="text-xs m-0 leading-relaxed cd-mono" style={{ color: "var(--cd-text-muted)" }}>
+          <p className="cd-decision__next-action m-0 leading-relaxed">
             {data.nextAction}
           </p>
         </div>
