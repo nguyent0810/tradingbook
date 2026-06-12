@@ -19,7 +19,6 @@ const alignedFreshness = buildMarketFreshnessDto({
 });
 
 const noTradeScanNotes: DecisionCockpitInput["scanNotes"] = {
-  invalidCountByCategory: {},
   topRejectionCategories: {
     pullback_zone_interaction: 42,
     extension_cap: 18,
@@ -28,7 +27,6 @@ const noTradeScanNotes: DecisionCockpitInput["scanNotes"] = {
     pullback_zone_interaction: ["HPG", "FPT", "VNM"],
     extension_cap: ["SSI", "VCB"],
   },
-  topRejectionTerminalReasons: {},
   closestToValidSymbols: [
     {
       symbol: "HPG",
@@ -46,7 +44,7 @@ const noTradeScanNotes: DecisionCockpitInput["scanNotes"] = {
     },
   ],
   recommendation: {
-    likelyBottleneck: "pullback_zone_interaction",
+    likelyBottleneck: "pullback_zone",
     summary: "Largest bucket pullback_zone_interaction",
     note: "Use closest rows.",
   },

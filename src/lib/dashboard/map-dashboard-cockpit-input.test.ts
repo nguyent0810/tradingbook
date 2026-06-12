@@ -88,7 +88,7 @@ describe("buildDashboardCockpitInput", () => {
           },
         ],
         recommendation: {
-          likelyBottleneck: "pullback_zone_interaction",
+          likelyBottleneck: "pullback_zone",
           summary: "",
           note: "",
         },
