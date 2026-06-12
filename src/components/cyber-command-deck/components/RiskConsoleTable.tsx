@@ -28,9 +28,7 @@ export function RiskConsoleTable({ data, flashMap }: Props) {
         <>
           <span className="ccd-label mt-1">Utilization</span>
           <FlashValue flashKey="risk.utilizationPercent" flashMap={flashMap}>
-            <strong className="ccd-metric block text-[#00F0FF]">
-              {data.utilizationPercent}%
-            </strong>
+            <strong className="ccd-metric block">{data.utilizationPercent}%</strong>
           </FlashValue>
         </>
       ) : null}
@@ -43,6 +41,7 @@ export function RiskConsoleTable({ data, flashMap }: Props) {
       subtitle={data.posture}
       testId="dashboard-cyber-risk-table"
       rows={rows}
+      fillHeight
       headerExtra={headerExtra}
       emptyMessage={data.capitalProtectionState}
       columns={[
@@ -66,7 +65,6 @@ export function RiskConsoleTable({ data, flashMap }: Props) {
         {
           key: "action",
           header: "Action",
-          align: "right",
           render: (row) => row.action,
         },
       ]}

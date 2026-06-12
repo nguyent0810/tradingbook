@@ -73,7 +73,7 @@ export function DashboardContainer({ viewModel }: CyberCommandDeckProps) {
       <div className="ccd-bg-noise" aria-hidden />
 
       <div className="ccd-shell">
-        <div className="mb-4">
+        <div className="mb-6">
           <DashboardPageHeader />
         </div>
 
@@ -102,7 +102,7 @@ export function DashboardContainer({ viewModel }: CyberCommandDeckProps) {
             className="ccd-dashboard-grid relative z-[2]"
             {...motionProps}
           >
-            <motion.div className="ccd-zone--header" {...itemProps}>
+            <motion.div className="ccd-zone ccd-zone--header" {...itemProps}>
               <HeaderPulse
                 data={data.marketPulse}
                 decision={data.decision}
@@ -113,24 +113,29 @@ export function DashboardContainer({ viewModel }: CyberCommandDeckProps) {
 
             <motion.div
               ref={refs.decision}
-              className="ccd-zone--decision"
+              className="ccd-zone ccd-zone--decision"
               {...itemProps}
             >
               <DecisionCore data={data.decision} />
             </motion.div>
 
-            <motion.div className="ccd-zone--core ccd-core-stack" {...itemProps}>
-              <IntelligenceCore />
-              <div ref={refs.risk}>
-                <RiskConsoleTable data={data.risk} flashMap={flashMap} />
+            <motion.div className="ccd-zone ccd-zone--ai" {...itemProps}>
+              <div className="ccd-ai-core-card ccd-panel h-full" aria-label="AI intelligence core">
+                <span className="ccd-kicker">AI Core</span>
+                <p className="ccd-ai-core-card__hint">Signal mesh</p>
+                <IntelligenceCore compact />
               </div>
             </motion.div>
 
-            <motion.div ref={refs.radar} className="ccd-zone--radar" {...itemProps}>
+            <motion.div ref={refs.risk} className="ccd-zone ccd-zone--risk" {...itemProps}>
+              <RiskConsoleTable data={data.risk} flashMap={flashMap} />
+            </motion.div>
+
+            <motion.div ref={refs.radar} className="ccd-zone ccd-zone--radar" {...itemProps}>
               <OpportunityRadar radar={data.radar} />
             </motion.div>
 
-            <motion.div ref={refs.rs} className="ccd-zone--rs" {...itemProps}>
+            <motion.div ref={refs.rs} className="ccd-zone ccd-zone--rs" {...itemProps}>
               <RsWatchlistTable panel={data.rsWatchlist} />
             </motion.div>
           </motion.div>

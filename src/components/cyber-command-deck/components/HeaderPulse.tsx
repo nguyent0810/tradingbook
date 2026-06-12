@@ -14,15 +14,15 @@ type Props = {
 function watchBadgeClass(
   decision: V3DecisionHero,
   risk: V3RiskConsole
-): "ccd-badge--crimson" | "ccd-badge--amber" | "ccd-badge--cyan" | "ccd-badge--emerald" {
+): string {
   if (decision.mode === "PROTECT CAPITAL" || risk.utilizationTone === "critical") {
     return "ccd-badge--crimson";
   }
   if (decision.mode === "WAIT" || risk.utilizationTone === "elevated") {
-    return "ccd-badge--amber";
+    return "ccd-badge--subtle-amber";
   }
-  if (decision.mode === "TRADE") return "ccd-badge--emerald";
-  return "ccd-badge--cyan";
+  if (decision.mode === "TRADE") return "ccd-badge--subtle-emerald";
+  return "ccd-badge--subtle-cyan";
 }
 
 export function HeaderPulse({ data, decision, risk, flashMap }: Props) {
@@ -36,7 +36,7 @@ export function HeaderPulse({ data, decision, risk, flashMap }: Props) {
     >
       <div className="ccd-header-cell">
         <span className="ccd-label">
-          <Activity className="inline h-3 w-3 mr-1 opacity-60" aria-hidden />
+          <Activity className="inline h-3 w-3 mr-1 opacity-50" aria-hidden />
           Session
         </span>
         <strong className="ccd-metric text-sm truncate">{data.session}</strong>
@@ -44,7 +44,7 @@ export function HeaderPulse({ data, decision, risk, flashMap }: Props) {
 
       <div className="ccd-header-cell ccd-header-cell--primary">
         <span className="ccd-label">
-          <TrendingUp className="inline h-3 w-3 mr-1 opacity-60" aria-hidden />
+          <TrendingUp className="inline h-3 w-3 mr-1 opacity-50" aria-hidden />
           VNINDEX
         </span>
         <FlashValue flashKey="marketPulse.vnindex" flashMap={flashMap}>
@@ -69,7 +69,7 @@ export function HeaderPulse({ data, decision, risk, flashMap }: Props) {
 
       <div className="ccd-header-cell">
         <span className="ccd-label">
-          <Shield className="inline h-3 w-3 mr-1 opacity-60" aria-hidden />
+          <Shield className="inline h-3 w-3 mr-1 opacity-50" aria-hidden />
           Watch State
         </span>
         <span className={`ccd-badge ${badgeClass}`}>

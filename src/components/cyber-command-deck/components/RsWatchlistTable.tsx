@@ -26,13 +26,14 @@ export function RsWatchlistTable({ panel }: Props) {
       subtitle={panel.subtitle}
       testId="dashboard-cyber-rs-table"
       rows={rows}
+      fillHeight
       emptyMessage={panel.emptyReason ?? "No relative strength watchlist entries."}
       columns={[
         {
           key: "symbol",
           header: "Symbol",
           mono: true,
-          render: (row) => <strong className="text-cyan-300">{row.symbol}</strong>,
+          render: (row) => <span className="ccd-tech-table__symbol">{row.symbol}</span>,
         },
         {
           key: "state",
