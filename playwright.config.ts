@@ -50,10 +50,12 @@ export default defineConfig({
     },
     {
       name: "chromium-dashboard-smoke",
-      testMatch: /dashboard-cyber-cockpit\.spec\.ts$/,
+      testMatch: /dashboard-command-deck\.spec\.ts$/,
+      dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1280, height: 900 },
+        storageState: authState,
       },
     },
   ],
