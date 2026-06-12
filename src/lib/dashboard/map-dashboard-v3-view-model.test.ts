@@ -126,6 +126,7 @@ function mapFromInput(input: DecisionCockpitInput) {
     trades: [],
     watchItemCount: 2,
     openPositionCount: 0,
+    marketContext: input.marketContext ?? null,
   });
 }
 
@@ -332,6 +333,40 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
   });
 });
 
+describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
+  it("NO_TRADE never shows Go in trade gate and safe nextAction", () => {
+    const vm = mapFromInput(baseInput());
+    expect(vm.decision.mode).toBe("PROTECT CAPITAL");
+    expect(vm.decision.nextAction).not.toMatch(/HPG/);
+    expect(vm.risk.tradeGate.rows.every((r) => r.action !== "Go")).toBe(true);
+    expect(vm.setupCards).toHaveLength(0);
+    expect(JSON.stringify(vm.risk.tradeGate.rows)).not.toMatch(/extension_cap/);
+  });
+
+  it("hides duplicate Open pipeline CTA when NO_TRADE and no open positions", () => {
+    const vm = mapFromInput(baseInput());
+    expect(vm.headerCta.primaryLabel).toBe("Open pipeline");
+    expect(vm.headerCta.secondaryHref).toBeNull();
+    expect(vm.headerCta.secondaryLabel).toBeNull();
+  });
+
+  it("clarifies scan vs live regime mismatch on NO_TRADE", () => {
+    const vm = mapFromInput(
+      baseInput({
+        liveRegime: {
+          level: "WARNING",
+          symbol: "VNINDEX",
+          latestBar: { date: new Date(Date.UTC(2026, 4, 25)), close: 1245.5 },
+        },
+      })
+    );
+    expect(vm.marketPulse.regime).toBe("Favorable (scan)");
+    expect(vm.marketPulse.gate1MismatchNote).toMatch(/Scan tagged Favorable, live Caution/i);
+    expect(vm.decision.primaryReason).toMatch(/Live VNINDEX has weakened to Caution/i);
+    expect(vm.decision.mainRisk).toMatch(/Live regime is Caution while the scan was Favorable/i);
+  });
+});
+
 describe("mapDashboardV3ViewModel — market foreign evidence", () => {
   it("maps Foreign 1D and Foreign cov. into V3 evidence when market context is present", () => {
     const vm = mapFromInput(baseInput({ marketContext: prodLikeMarketContext }));
@@ -341,12 +376,14 @@ describe("mapDashboardV3ViewModel — market foreign evidence", () => {
     expect(foreign1d).toEqual({
       label: "Foreign 1D",
       value: "−458.37B ₫ net",
-      state: "ok",
+      state: "danger",
+      provenance: "real",
     });
     expect(foreignCov).toEqual({
       label: "Foreign cov.",
       value: "159/206 OK (77%)",
       state: "ok",
+      provenance: "derived",
     });
   });
 
@@ -386,7 +423,7 @@ describe("mapDashboardV3ViewModel — market foreign evidence", () => {
         },
       })
     );
-    expect(mapMarketForeignEvidenceFromDto(dto).map((e) => e.label)).toEqual([
+    expect(mapMarketForeignEvidenceFromDto(dto, prodLikeMarketContext).map((e) => e.label)).toEqual([
       "Foreign 1D",
       "Foreign cov.",
       "Foreign 5D",

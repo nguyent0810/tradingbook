@@ -28,6 +28,8 @@ function confidenceLabel(band: V3DecisionHero["confidenceBand"]): string {
 export function DecisionCore({ data }: Props) {
   const reducedMotion = useReducedMotion() ?? false;
   const glowClass = modeGlowClass(data.mode);
+  const showTopSetupFallback =
+    data.mode === "TRADE" && !data.nextAction && data.highestQualitySetup;
 
   return (
     <section
@@ -51,11 +53,7 @@ export function DecisionCore({ data }: Props) {
         {data.primaryReason}
       </p>
 
-      <div className="grid grid-cols-3 gap-3 mb-4 text-xs">
-        <div className="ccd-decision__metric-cell">
-          <span className="ccd-label">Risk posture</span>
-          <strong className="block mt-1.5 text-slate-200">{data.riskPosture}</strong>
-        </div>
+      <div className="grid grid-cols-2 gap-3 mb-4 text-xs">
         <div className="ccd-decision__metric-cell">
           <span className="ccd-label">Main risk</span>
           <strong className="block mt-1.5 text-slate-200">{data.mainRisk ?? "—"}</strong>
@@ -79,7 +77,7 @@ export function DecisionCore({ data }: Props) {
           <span className="ccd-label mb-1.5">Next action</span>
           <pre className="ccd-next-action m-0">{data.nextAction}</pre>
         </div>
-      ) : data.highestQualitySetup ? (
+      ) : showTopSetupFallback ? (
         <div className="mt-4">
           <span className="ccd-label mb-1.5">Top setup</span>
           <pre className="ccd-next-action m-0">{data.highestQualitySetup}</pre>

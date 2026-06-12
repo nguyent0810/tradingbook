@@ -48,6 +48,14 @@ export default defineConfig({
         storageState: authState,
       },
     },
+    {
+      name: "chromium-dashboard-smoke",
+      testMatch: /dashboard-cyber-cockpit\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 900 },
+      },
+    },
   ],
   webServer: {
     command: "npm run dev",

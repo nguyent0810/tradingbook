@@ -235,6 +235,7 @@ export default async function DashboardPage() {
     trades,
     watchItemCount: activeWatchItems.length,
     openPositionCount: openTrades.length,
+    marketContext,
     dbLoadError,
   });
   return <CyberCommandDeck viewModel={viewModel} />;

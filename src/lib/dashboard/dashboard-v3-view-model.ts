@@ -1,4 +1,4 @@
-import type { ConfidenceBand } from "./decision-cockpit-dto";
+import type { ConfidenceBand, DataProvenance } from "./decision-cockpit-dto";
 
 export type V3DecisionMode = "TRADE" | "WAIT" | "PROTECT CAPITAL" | "WATCHLIST ONLY";
 
@@ -35,6 +35,9 @@ export type V3MarketPulse = {
   breadth: string | null;
   volatility: string | null;
   watchState: string;
+  /** When scan Gate 1 differs from live regime — show mismatch note in header. */
+  gate1Mismatch: boolean;
+  gate1MismatchNote: string | null;
 };
 
 export type V3DecisionHero = {
@@ -48,6 +51,8 @@ export type V3DecisionHero = {
   highestQualitySetup: string | null;
   mainRisk: string | null;
   nextAction: string | null;
+  /** Where nextAction copy originated — drives watch-only labeling. */
+  nextActionProvenance: DataProvenance;
   riskPosture: string;
   capitalProtection: string | null;
 };
@@ -56,6 +61,7 @@ export type V3SetupCard = {
   symbol: string;
   tier: string;
   setupType: string;
+  setupTypeProvenance: DataProvenance;
   entry: string;
   stop: string;
   riskToReward: string | null;
@@ -65,16 +71,53 @@ export type V3SetupCard = {
   actionState: string;
 };
 
+export type V3TradeGateStatus = "blocked" | "waiting" | "setup_needed" | "ready";
+
+export type V3TradeGateRow = {
+  id: string;
+  rule: string;
+  status: V3TradeGateStatus;
+  statusLabel: string;
+  severity: "High" | "Med" | "Low";
+  action: string;
+  provenance: DataProvenance;
+};
+
+export type V3TradeGate = {
+  subtitle: string;
+  rows: V3TradeGateRow[];
+  budgetStatus: "configured" | "unavailable" | "partial";
+  budgetProvenance: DataProvenance;
+};
+
 export type V3RiskConsole = {
   exposurePercent: number | null;
   maxRiskPercent: number | null;
   openPositions: number;
   lossLimit: string | null;
   posture: string;
+  /** @deprecated Use tradeGate.rows — kept for transitional empty fallback. */
   blockers: string[];
   capitalProtectionState: string;
   utilizationPercent: number | null;
   utilizationTone: "normal" | "elevated" | "critical";
+  tradeGate: V3TradeGate;
+};
+
+export type V3SetupIntelligence = {
+  emptyMessage: string;
+  populatedSubtitle: string;
+};
+
+export type V3HeaderCta = {
+  lead: string;
+  primaryHref: string;
+  primaryLabel: string;
+  secondaryHref: string | null;
+  secondaryLabel: string | null;
+  /** Demoted link on NO TRADE when open positions exist; null when hidden. */
+  tertiaryHref: string | null;
+  tertiaryLabel: string | null;
 };
 
 export type V3LedgerPulse = {
@@ -90,6 +133,7 @@ export type V3EvidenceItem = {
   label: string;
   value: string;
   state: "ok" | "warn" | "danger";
+  provenance?: DataProvenance;
 };
 
 export type V3SignalTrajectory = {
@@ -130,6 +174,7 @@ export type V3RsWatchlistPanel = {
 export type DashboardV3ViewModel = {
   marketPulse: V3MarketPulse;
   decision: V3DecisionHero;
+  headerCta: V3HeaderCta;
   signalTrajectory: V3SignalTrajectory;
   radar: {
     mapDots: V3RadarMapDot[];
@@ -137,11 +182,16 @@ export type DashboardV3ViewModel = {
     nearMiss: V3RadarBandEntry[];
     rejected: V3RadarBandEntry[];
     avoidPlaceholders: V3RadarAvoidPlaceholder[];
+    /** Tooltip sparklines are synthetic — not price series. */
+    sparklineProvenance: DataProvenance;
   };
   setupCards: V3SetupCard[];
+  setupIntelligence: V3SetupIntelligence;
   risk: V3RiskConsole;
   ledger: V3LedgerPulse;
   evidence: V3EvidenceItem[];
+  /** Default expanded when true (NO TRADE / warn states). */
+  evidenceDefaultOpen: boolean;
   /** Batch D2.3 — RS leaders that failed setup filters; V3 intelligence cards. */
   rsWatchlist: V3RsWatchlistPanel;
   partialError: string | null;

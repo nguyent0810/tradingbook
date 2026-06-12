@@ -6,6 +6,7 @@ import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import {
   formatSetupLadderStageLabel,
   type ConfidenceBand,
+  type DataProvenance,
   type DecisionCockpitDto,
   type OpportunityCandidateDto,
   type SetupLadderStage,
@@ -17,6 +18,7 @@ import type { GateFunnelSnapshot } from "@/lib/dashboard/gate-funnel-copy";
 import type {
   DashboardV3ViewModel,
   V3DecisionMode,
+  V3HeaderCta,
   V3RadarAvoidPlaceholder,
   V3RadarBandEntry,
   V3RadarMapDot,
@@ -31,6 +33,9 @@ import {
   formatSetupDiagnosticCopy,
   mapRsWatchlistToV3Panel,
 } from "./v3-user-copy";
+import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
+import { buildTradeGate } from "./build-trade-gate";
+import { foreignFlowEvidenceState } from "./foreign-flow-evidence";
 
 export type MapDashboardV3Params = {
   cockpitDto: DecisionCockpitDto;
@@ -41,6 +46,7 @@ export type MapDashboardV3Params = {
   trades: Trade[];
   watchItemCount: number;
   openPositionCount: number;
+  marketContext?: MarketContextUiDto | null;
   dbLoadError?: string | null;
 };
 
@@ -183,6 +189,159 @@ function nearMissToMapDot(n: DecisionCockpitDto["opportunity"]["nearMiss"][numbe
   };
 }
 
+function buildNextAction(
+  cockpitDto: DecisionCockpitDto,
+  openPositionCount: number
+): { text: string | null; provenance: DataProvenance } {
+  const ux = cockpitDto.verdict.uxLevel.value;
+
+  if (ux === "NO_TRADE") {
+    if (openPositionCount > 0) {
+      return {
+        text: "Do not enter new trades today. Review open positions on Ledger, or open the pipeline to see what is developing.",
+        provenance: "static_copy",
+      };
+    }
+    return {
+      text: "Do not enter new trades today. Open the pipeline to see near-miss names and wait for the next scan.",
+      provenance: "static_copy",
+    };
+  }
+
+  if (ux === "PROBE") {
+    const raw =
+      cockpitDto.tomorrow.triggerLine.value ||
+      cockpitDto.opportunity.candidates[0]?.actionHint ||
+      null;
+    const formatted = formatActionHintForUser(raw);
+    if (!formatted) return { text: null, provenance: "derived" };
+    const suffix = " — watch only, not a trade signal.";
+    const text = formatted.toLowerCase().includes("watch only")
+      ? formatted
+      : `${formatted}${suffix}`;
+    return { text, provenance: "derived" };
+  }
+
+  const raw =
+    cockpitDto.tomorrow.triggerLine.value ||
+    cockpitDto.opportunity.candidates[0]?.actionHint ||
+    null;
+  return {
+    text: formatActionHintForUser(raw),
+    provenance: "derived",
+  };
+}
+
+function buildHeaderCta(
+  mode: V3DecisionMode,
+  openPositionCount: number
+): V3HeaderCta {
+  if (mode === "PROTECT CAPITAL") {
+    if (openPositionCount > 0) {
+      return {
+        lead: "No new swing entries today. Review risk, watch the pipeline, and wait for the next scan.",
+        primaryHref: "/trades",
+        primaryLabel: "Review open positions",
+        secondaryHref: "/setups",
+        secondaryLabel: "Open pipeline",
+        tertiaryHref: "/trades/new",
+        tertiaryLabel: "Log exit or adjustment",
+      };
+    }
+    return {
+      lead: "No new swing entries today. Review risk, watch the pipeline, and wait for the next scan.",
+      primaryHref: "/setups",
+      primaryLabel: "Open pipeline",
+      secondaryHref: null,
+      secondaryLabel: null,
+      tertiaryHref: null,
+      tertiaryLabel: null,
+    };
+  }
+
+  if (mode === "WAIT") {
+    return {
+      lead: "Reduced-risk day. Watch developing setups — nothing is confirmed for full-size entry yet.",
+      primaryHref: "/setups",
+      primaryLabel: "Open pipeline",
+      secondaryHref: "/trades/new",
+      secondaryLabel: "Log trade",
+      tertiaryHref: null,
+      tertiaryLabel: null,
+    };
+  }
+
+  if (mode === "TRADE") {
+    return {
+      lead: "Normal risk mode. Qualified setups passed filters — enter only when your playbook confirms.",
+      primaryHref: "/trades/new",
+      primaryLabel: "Log trade",
+      secondaryHref: "/setups",
+      secondaryLabel: "Open pipeline",
+      tertiaryHref: null,
+      tertiaryLabel: null,
+    };
+  }
+
+  return {
+    lead: "Watchlist-only day. Monitor names on your list — no new swing entries from the latest scan.",
+    primaryHref: "/setups",
+    primaryLabel: "Open pipeline",
+    secondaryHref: "/trades",
+    secondaryLabel: "Review trades",
+    tertiaryHref: null,
+    tertiaryLabel: null,
+  };
+}
+
+function buildSetupIntelligenceCopy(
+  ux: VerdictUxLevel,
+  setupCount: number
+): DashboardV3ViewModel["setupIntelligence"] {
+  if (setupCount > 0) {
+    return {
+      emptyMessage: "",
+      populatedSubtitle: `${setupCount} qualified setup${setupCount === 1 ? "" : "s"} — review entry, stop, and health before logging a trade.`,
+    };
+  }
+  if (ux === "PROBE") {
+    return {
+      emptyMessage:
+        "No setups cleared for full entry today. Use the pipeline to monitor watch-list names.",
+      populatedSubtitle: "Trigger · risk · action",
+    };
+  }
+  return {
+    emptyMessage:
+      "0 qualified setups in the latest scan. Open the pipeline to see near-miss names and rejection reasons.",
+    populatedSubtitle: "Trigger · risk · action",
+  };
+}
+
+function buildEvidenceDefaultOpen(
+  cockpitDto: DecisionCockpitDto,
+  freshness: MarketFreshnessDto,
+  evidence: DashboardV3ViewModel["evidence"]
+): boolean {
+  if (cockpitDto.verdict.uxLevel.value === "NO_TRADE") return true;
+  if (cockpitDto.verdict.gate1Resolution.mismatch) return true;
+  if (freshness.scanSessionCoverage?.weakCoverage) return true;
+  return evidence.some((e) => e.state === "warn" || e.state === "danger");
+}
+
+function rsWatchlistContextNote(ux: VerdictUxLevel): string {
+  switch (ux) {
+    case "NO_TRADE":
+      return "Context only — relative strength does not qualify a setup and does not change today's no-trade stance.";
+    case "PROBE":
+      return "Context only — strong relative strength does not override today's watch stance.";
+    case "TRADE":
+      return "Context only — use for relative strength background; qualified setups are listed below.";
+    default:
+      return "Context only — does not count as a qualified setup or change today's trade decision.";
+  }
+}
+
 function buildHighestQualitySetup(
   opportunity: DecisionCockpitDto["opportunity"],
   topSetups: SurfacedCandidateHealthView[]
@@ -198,10 +357,58 @@ function buildHighestQualitySetup(
   return null;
 }
 
+function buildGate1MismatchNote(
+  gate1: DecisionCockpitDto["verdict"]["gate1Resolution"],
+  ux: DecisionCockpitDto["verdict"]["uxLevel"]["value"]
+): string | null {
+  if (!gate1.mismatch || gate1.scanGate1 == null) return null;
+  const scan = displayGate1ScanLevel(gate1.scanGate1);
+  const live = displayGate1ScanLevel(gate1.liveRegimeGate1);
+  if (ux === "NO_TRADE" && gate1.scanGate1 === "PASS" && gate1.liveRegimeGate1 === "WARNING") {
+    return `Scan tagged ${scan}, live ${live} — no new entries today; treat live conditions as the higher bar.`;
+  }
+  return `Scan regime ${scan} · live ${live}`;
+}
+
+function buildMarketPulseRegimeLabel(
+  gate1: DecisionCockpitDto["verdict"]["gate1Resolution"]
+): string {
+  const label = displayGate1ScanLevel(gate1.canonical);
+  if (gate1.mismatch && gate1.scanGate1 != null) {
+    return `${label} (scan)`;
+  }
+  return label;
+}
+
+function augmentPrimaryReasonForMismatch(
+  primaryReason: string,
+  dto: DecisionCockpitDto
+): string {
+  const gate1 = dto.verdict.gate1Resolution;
+  if (
+    dto.verdict.uxLevel.value === "NO_TRADE" &&
+    gate1.mismatch &&
+    gate1.scanGate1 === "PASS" &&
+    gate1.liveRegimeGate1 === "WARNING"
+  ) {
+    return `${primaryReason} Live VNINDEX has weakened to Caution since the scan — that mismatch supports staying out.`;
+  }
+  return primaryReason;
+}
+
 function buildMainRisk(dto: DecisionCockpitDto): string | null {
+  const gate1 = dto.verdict.gate1Resolution;
+  if (
+    dto.verdict.uxLevel.value === "NO_TRADE" &&
+    gate1.mismatch &&
+    gate1.scanGate1 === "PASS" &&
+    gate1.liveRegimeGate1 === "WARNING"
+  ) {
+    return `Live regime is ${displayGate1ScanLevel(gate1.liveRegimeGate1)} while the scan was ${displayGate1ScanLevel(gate1.scanGate1!)} — prioritize capital preservation until conditions realign.`;
+  }
   const blocker = dto.blockers[0];
   if (blocker) return formatScannerReasonForUser(blocker.meaning);
-  if (dto.verdict.gate1Resolution.canonical === "FAIL") {
+  if (gate1.canonical === "FAIL") {
     return "Market regime filter failed — new swing risk is suppressed.";
   }
   const avoid = dto.tomorrow.avoidLine.value;
@@ -223,6 +430,7 @@ function buildSetupCards(topSetups: SurfacedCandidateHealthView[]): V3SetupCard[
       symbol: s.symbolKey,
       tier: s.quality === "A" ? "A" : "B",
       setupType: "Breakout pullback",
+      setupTypeProvenance: "static_copy",
       entry: formatZone(s.pullbackZoneLow, s.pullbackZoneHigh),
       stop: formatStop(s.stopLevel, entryMid),
       riskToReward: rr,
@@ -303,25 +511,42 @@ const MARKET_FOREIGN_EVIDENCE_IDS = [
 ] as const;
 
 export function mapMarketForeignEvidenceFromDto(
-  dto: DecisionCockpitDto
+  dto: DecisionCockpitDto,
+  marketContext?: MarketContextUiDto | null
 ): DashboardV3ViewModel["evidence"] {
   const byId = new Map(dto.evidence.map((chip) => [chip.id, chip]));
   const items: DashboardV3ViewModel["evidence"] = [];
+  const market = marketContext?.market;
 
   for (const id of MARKET_FOREIGN_EVIDENCE_IDS) {
     const chip = byId.get(id);
     if (!chip) continue;
+
+    let state: DashboardV3ViewModel["evidence"][number]["state"] = "ok";
+    if (id === "market_foreign_1d") {
+      state = foreignFlowEvidenceState(market?.foreignNetValue1d);
+    } else if (id === "market_foreign_5d") {
+      state = foreignFlowEvidenceState(market?.foreignNetValue5d);
+    } else if (id === "market_foreign_10d") {
+      state = foreignFlowEvidenceState(market?.foreignNetValue10d);
+    }
+
     items.push({
       label: chip.label,
       value: chip.display,
-      state: "ok",
+      state,
+      provenance: chip.provenance,
     });
   }
 
   return items;
 }
 
-function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): DashboardV3ViewModel["evidence"] {
+function buildEvidence(
+  dto: DecisionCockpitDto,
+  freshness: MarketFreshnessDto,
+  marketContext?: MarketContextUiDto | null
+): DashboardV3ViewModel["evidence"] {
   const items: DashboardV3ViewModel["evidence"] = [];
 
   if (dto.scanRunId) {
@@ -375,14 +600,22 @@ function buildEvidence(dto: DecisionCockpitDto, freshness: MarketFreshnessDto): 
     });
   }
 
-  items.push(...mapMarketForeignEvidenceFromDto(dto));
+  items.push(...mapMarketForeignEvidenceFromDto(dto, marketContext));
 
   return items;
 }
 
 export function mapDashboardV3ViewModel(params: MapDashboardV3Params): DashboardV3ViewModel {
-  const { cockpitDto, freshness, regime, latestScan, topSetups, trades, watchItemCount } =
-    params;
+  const {
+    cockpitDto,
+    freshness,
+    regime,
+    latestScan,
+    topSetups,
+    trades,
+    watchItemCount,
+    marketContext,
+  } = params;
   const band = cockpitDto.verdict.confidenceBand.value;
   const setupBySymbol = new Map(topSetups.map((s) => [s.symbolKey, s]));
 
@@ -439,6 +672,19 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
     ...cockpitDto.blockers.map((b) => formatScannerReasonForUser(b.waitFor)),
   ].filter(Boolean);
 
+  const decisionMode = mapUxVerdictToDecisionMode(cockpitDto.verdict.uxLevel.value);
+  const nextActionResult = buildNextAction(cockpitDto, params.openPositionCount);
+  const setupCards = buildSetupCards(topSetups);
+  const tradeGate = buildTradeGate({
+    cockpitDto,
+    freshness,
+    topSetups,
+    utilizationTone,
+  });
+  const evidence = buildEvidence(cockpitDto, freshness, marketContext);
+
+  const gate1Mismatch = cockpitDto.verdict.gate1Resolution.mismatch;
+
   return {
     marketPulse: {
       session: regime.latestBar
@@ -446,27 +692,36 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
         : "VNINDEX · session unknown",
       freshness: formatFreshnessLabel(freshness),
       vnindex: regime.latestBar ? regime.latestBar.close.toFixed(2) : null,
-      regime: displayGate1ScanLevel(cockpitDto.verdict.gate1Resolution.canonical),
+      regime: buildMarketPulseRegimeLabel(cockpitDto.verdict.gate1Resolution),
       breadth: formatBreadth(latestScan, cockpitDto.gateFunnel),
       volatility: momentumVolatilityLabel(regime.momentum),
       watchState:
         watchItemCount > 0 ? `${watchItemCount} symbols on watch` : "No active watch items",
+      gate1Mismatch,
+      gate1MismatchNote: buildGate1MismatchNote(
+        cockpitDto.verdict.gate1Resolution,
+        cockpitDto.verdict.uxLevel.value
+      ),
     },
+    headerCta: buildHeaderCta(decisionMode, params.openPositionCount),
     decision: {
-      mode: mapUxVerdictToDecisionMode(cockpitDto.verdict.uxLevel.value),
+      mode: decisionMode,
       stanceLabel: cockpitDto.verdict.headline.value,
       confidenceBand: band,
       confidenceMeterWidth: confidenceBandMeterWidth(band),
-      primaryReason: formatScannerReasonForUser(
-        cockpitDto.verdict.subtitle.value || cockpitDto.verdict.explanation.value
+      primaryReason: augmentPrimaryReasonForMismatch(
+        formatScannerReasonForUser(
+          cockpitDto.verdict.subtitle.value || cockpitDto.verdict.explanation.value
+        ),
+        cockpitDto
       ),
-      highestQualitySetup: buildHighestQualitySetup(cockpitDto.opportunity, topSetups),
+      highestQualitySetup:
+        decisionMode === "TRADE"
+          ? buildHighestQualitySetup(cockpitDto.opportunity, topSetups)
+          : null,
       mainRisk: buildMainRisk(cockpitDto),
-      nextAction: formatActionHintForUser(
-        cockpitDto.tomorrow.triggerLine.value ||
-          cockpitDto.opportunity.candidates[0]?.actionHint ||
-          null
-      ),
+      nextAction: nextActionResult.text,
+      nextActionProvenance: nextActionResult.provenance,
       riskPosture: cockpitDto.risk.stanceCopy.value,
       capitalProtection:
         formatScannerReasonForUser(
@@ -484,18 +739,24 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       nearMiss,
       rejected,
       avoidPlaceholders: collectAvoidPlaceholders(rejected),
+      sparklineProvenance: "derived",
     },
-    setupCards: buildSetupCards(topSetups),
+    setupCards,
+    setupIntelligence: buildSetupIntelligenceCopy(
+      cockpitDto.verdict.uxLevel.value,
+      setupCards.length
+    ),
     risk: {
       exposurePercent,
       maxRiskPercent,
       openPositions: params.openPositionCount,
       lossLimit: null,
-      posture: cockpitDto.risk.stanceCopy.value,
+      posture: tradeGate.subtitle,
       blockers,
       capitalProtectionState: formatScannerReasonForUser(headroom.statusCopy) || headroom.statusCopy,
       utilizationPercent,
       utilizationTone,
+      tradeGate,
     },
     ledger: {
       outcomeChips: buildRecentOutcomeChips(trades),
@@ -508,8 +769,12 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       reviewHref: "/trades",
       reviewLabel: "Review on Trades",
     },
-    evidence: buildEvidence(cockpitDto, freshness),
-    rsWatchlist: mapRsWatchlistToV3Panel(cockpitDto.rsNearMissWatchlist),
+    evidence,
+    evidenceDefaultOpen: buildEvidenceDefaultOpen(cockpitDto, freshness, evidence),
+    rsWatchlist: {
+      ...mapRsWatchlistToV3Panel(cockpitDto.rsNearMissWatchlist),
+      contextNote: rsWatchlistContextNote(cockpitDto.verdict.uxLevel.value),
+    },
     partialError: params.dbLoadError ?? null,
   };
 }

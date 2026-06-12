@@ -1,12 +1,14 @@
 "use client";
 
 import type { V3SetupCard } from "../types";
+import type { V3SetupIntelligence } from "@/lib/dashboard/dashboard-v3-view-model";
 import { mapSetupTableRows } from "../lib/table-mappers";
 import { StatusPill } from "./StatusPill";
 import { TechTable } from "./TechTable";
 
 type Props = {
   cards: V3SetupCard[];
+  intelligence: V3SetupIntelligence;
 };
 
 function healthVariant(health: V3SetupCard["health"]): "pass" | "caution" | "blocked" {
@@ -15,16 +17,16 @@ function healthVariant(health: V3SetupCard["health"]): "pass" | "caution" | "blo
   return "blocked";
 }
 
-export function SetupTable({ cards }: Props) {
+export function SetupTable({ cards, intelligence }: Props) {
   const rows = mapSetupTableRows(cards);
 
   return (
     <TechTable
       title="Setup Intelligence"
-      subtitle="Trigger · risk · action"
+      subtitle={cards.length > 0 ? intelligence.populatedSubtitle : "Trigger · risk · action"}
       testId="dashboard-cyber-setup-table"
       rows={rows}
-      emptyMessage="No surfaced setups in the latest scan."
+      emptyMessage={intelligence.emptyMessage}
       columns={[
         {
           key: "symbol",

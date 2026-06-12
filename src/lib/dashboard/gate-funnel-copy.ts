@@ -121,7 +121,7 @@ export function buildVerdictUxCopy(params: {
         ? ` Tier B (${funnel.suppressedCountB}) qualified Gate 2 but is hidden while Gate 1 is ${gate1}.`
         : "";
     return {
-      headline: "PROBE MODE",
+      headline: "WATCH",
       subtitle:
         `Reduced book-risk mode — only Tier A setups surface when Gate 1 is cautious.${bHidden} Not a full-risk day.`,
       persistedLevelNote,

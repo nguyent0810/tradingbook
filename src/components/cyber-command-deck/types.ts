@@ -53,6 +53,7 @@ export type RiskTableRow = {
   id: string;
   rule: string;
   status: "pass" | "caution" | "blocked";
+  statusLabel: string;
   severity: string;
   action: string;
 };

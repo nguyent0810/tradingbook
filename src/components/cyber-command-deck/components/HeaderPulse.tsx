@@ -11,22 +11,19 @@ type Props = {
   flashMap: FlashMap;
 };
 
-function watchBadgeClass(
-  decision: V3DecisionHero,
-  risk: V3RiskConsole
-): string {
-  if (decision.mode === "PROTECT CAPITAL" || risk.utilizationTone === "critical") {
+function watchBadgeClass(decision: V3DecisionHero): string {
+  if (decision.mode === "PROTECT CAPITAL") {
     return "ccd-badge--crimson";
   }
-  if (decision.mode === "WAIT" || risk.utilizationTone === "elevated") {
+  if (decision.mode === "WAIT") {
     return "ccd-badge--subtle-amber";
   }
   if (decision.mode === "TRADE") return "ccd-badge--subtle-emerald";
   return "ccd-badge--subtle-cyan";
 }
 
-export function HeaderPulse({ data, decision, risk, flashMap }: Props) {
-  const badgeClass = watchBadgeClass(decision, risk);
+export function HeaderPulse({ data, decision, flashMap }: Props) {
+  const badgeClass = watchBadgeClass(decision);
 
   return (
     <section
@@ -60,6 +57,19 @@ export function HeaderPulse({ data, decision, risk, flashMap }: Props) {
       <div className="ccd-header-cell">
         <span className="ccd-label">Regime</span>
         <strong className="ccd-metric text-sm">{data.regime}</strong>
+        {data.gate1Mismatch && data.gate1MismatchNote ? (
+          <span
+            className="block text-[10px] text-amber-400/90 mt-0.5 leading-tight"
+            data-testid="dashboard-gate1-mismatch"
+          >
+            {data.gate1MismatchNote}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="ccd-header-cell">
+        <span className="ccd-label">Breadth</span>
+        <strong className="ccd-metric text-sm">{data.breadth ?? "—"}</strong>
       </div>
 
       <div className="ccd-header-cell">

@@ -1126,7 +1126,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     openExposureVnd: { value: input.openExposureVnd, provenance: "derived" },
     stanceCopy: { value: stanceCopyForLevel(ux), provenance: "static_copy" },
     rules: [
-      { text: "No-chase when extended or extension_cap dominates.", provenance: "static_copy" },
+      { text: "No chasing when price is extended above breakout.", provenance: "static_copy" },
       {
         text: "Stop levels from scanner — not portfolio R-multiple enforcement on this panel.",
         provenance: "gap",
