@@ -82,4 +82,9 @@ export const COMMAND_DECK_MOCK: CommandDeckMockData = {
     { label: "Technical evidence", value: "Favorable", tone: "success" },
     { label: "Rejected reasons", value: "Extended above breakout (18)", tone: "warning" },
   ],
+  rsContextNote:
+    "Context only — relative strength does not qualify a setup and does not change today's no-trade stance.",
+  setupEmptyMessage:
+    "0 qualified setups in the latest scan. Open the pipeline to see near-miss names and rejection reasons.",
+  setupSubtitle: "Trigger · risk · action",
 };

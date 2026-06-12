@@ -65,11 +65,26 @@ export type SetupIntelligenceRow = {
   sparkline: number[];
 };
 
-export type CommandDeckMockData = {
+export type TradeGateRow = {
+  id: string;
+  rule: string;
+  statusLabel: string;
+  severity: string;
+  action: string;
+  tone: StatusTone;
+};
+
+export type CommandDeckData = {
   commandBar: CommandBarData;
   decision: DecisionCoreData;
   radar: RadarNode[];
   relativeStrength: RelativeStrengthRow[];
   setupIntelligence: SetupIntelligenceRow[];
   evidence: EvidenceItem[];
+  rsContextNote: string;
+  setupEmptyMessage: string;
+  setupSubtitle: string;
 };
+
+/** @deprecated Use CommandDeckData */
+export type CommandDeckMockData = CommandDeckData;

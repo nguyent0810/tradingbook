@@ -43,7 +43,7 @@ export function DecisionCoreCard({ data }: Props) {
     <Card
       glow={isNoTrade ? "danger" : "none"}
       className={`p-5 h-full ${isNoTrade && !reducedMotion ? "cd-pulse-border" : ""}`}
-      data-testid="command-deck-decision-core"
+      data-testid="dashboard-cyber-decision-core"
     >
       <CardHeader title="Decision Core" subtitle={data.confidenceLabel} />
 

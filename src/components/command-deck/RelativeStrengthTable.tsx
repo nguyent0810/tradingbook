@@ -30,7 +30,11 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
         subtitle="Leaders vs VNINDEX that have not cleared setup filters yet"
       />
       {contextNote ? (
-        <p className="text-xs m-0 mb-3 leading-relaxed" style={{ color: "var(--cd-text-muted)" }}>
+        <p
+          className="text-xs m-0 mb-3 leading-relaxed"
+          style={{ color: "var(--cd-text-muted)" }}
+          data-testid="dashboard-rs-context-banner"
+        >
           {contextNote}
         </p>
       ) : null}

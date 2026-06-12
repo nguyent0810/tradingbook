@@ -1,23 +1,28 @@
 import Link from "next/link";
-import { DashboardLayout, COMMAND_DECK_MOCK } from "@/components/command-deck";
+import { CommandDeckDashboard } from "@/components/command-deck";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import { buildNoTradePreviewViewModel } from "@/lib/dashboard/build-no-trade-preview-view-model";
 
 export default function CommandDeckPreviewPage() {
+  const viewModel = buildNoTradePreviewViewModel();
+
   return (
-    <DashboardLayout
-      data={COMMAND_DECK_MOCK}
+    <CommandDeckDashboard
+      viewModel={viewModel}
       header={
         <header className="mb-6">
           <p className="cd-kicker mb-1">Design preview</p>
           <h1 className="text-2xl font-semibold m-0 mb-1 tracking-tight">Command Deck</h1>
           <p className="text-sm m-0 mb-4" style={{ color: "var(--cd-text-muted)" }}>
-            Premium FinTech dark mode — mock VNINDEX NO TRADE session
+            Premium FinTech UI — same component as production /dashboard
           </p>
+          <DashboardPageHeader cta={viewModel.headerCta} />
           <Link
-            href="/design-preview/cyber-cockpit"
-            className="text-xs underline"
+            href="/dashboard"
+            className="inline-block mt-3 text-xs underline"
             style={{ color: "var(--cd-cyan)" }}
           >
-            Compare with wired Cyber Cockpit →
+            Open live dashboard →
           </Link>
         </header>
       }

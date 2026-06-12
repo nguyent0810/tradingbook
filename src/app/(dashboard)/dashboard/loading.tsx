@@ -1,39 +1,21 @@
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import "@/components/cyber-command-deck/cyber-command-deck.css";
+import "@/components/command-deck/command-deck.css";
 
 export default function DashboardLoading() {
   return (
-    <div
-      className="ccd-root pb-10"
-      aria-busy="true"
-      data-testid="dashboard-cyber-loading"
-    >
-      <div className="ccd-bg-grid" aria-hidden />
-      <div className="ccd-bg-noise" aria-hidden />
-      <div className="ccd-shell">
+    <div className="cd-root" aria-busy="true" data-testid="dashboard-cyber-loading">
+      <div className="cd-shell">
         <LoadingSkeleton className="mb-6 h-10 w-full max-w-2xl rounded-lg" />
-        <div className="ccd-dashboard-grid">
-          <div className="ccd-zone ccd-zone--header">
-            <LoadingSkeleton className="min-h-[72px] w-full rounded-xl" />
-          </div>
-          <div className="ccd-zone ccd-zone--decision">
-            <LoadingSkeleton className="min-h-[300px] w-full rounded-xl" />
-          </div>
-          <div className="ccd-zone ccd-zone--ai">
-            <LoadingSkeleton className="min-h-[300px] w-full rounded-xl" />
-          </div>
-          <div className="ccd-zone ccd-zone--risk">
-            <LoadingSkeleton className="min-h-[300px] w-full rounded-xl" />
-          </div>
-          <div className="ccd-zone ccd-zone--radar">
-            <LoadingSkeleton className="min-h-[360px] w-full rounded-xl" />
-          </div>
-          <div className="ccd-zone ccd-zone--rs">
-            <LoadingSkeleton className="min-h-[360px] w-full rounded-xl" />
-          </div>
+        <LoadingSkeleton className="mb-5 h-24 w-full rounded-xl" />
+        <div className="cd-grid cd-grid--main">
+          <LoadingSkeleton className="cd-span-6 min-h-[320px] rounded-xl" />
+          <LoadingSkeleton className="cd-span-6 min-h-[320px] rounded-xl" />
+          <LoadingSkeleton className="cd-span-6 min-h-[360px] rounded-xl" />
+          <LoadingSkeleton className="cd-span-6 min-h-[360px] rounded-xl" />
+          <LoadingSkeleton className="cd-span-12 min-h-[120px] rounded-xl" />
+          <LoadingSkeleton className="cd-span-12 min-h-[80px] rounded-xl" />
+          <LoadingSkeleton className="cd-span-12 min-h-[160px] rounded-xl" />
         </div>
-        <LoadingSkeleton className="mt-6 h-20 w-full rounded-xl" />
-        <LoadingSkeleton className="mt-6 h-12 w-full rounded-xl" />
       </div>
     </div>
   );

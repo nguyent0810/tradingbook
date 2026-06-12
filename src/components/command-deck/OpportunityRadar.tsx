@@ -11,12 +11,14 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
+import type { V3DecisionMode } from "@/lib/dashboard/dashboard-v3-view-model";
 import type { RadarNode, RadarNodeClassification } from "./types";
 import { Card, CardHeader } from "./ui/card";
 import { Sparkline } from "./ui/sparkline";
 
 type Props = {
   nodes: RadarNode[];
+  decisionMode?: V3DecisionMode;
 };
 
 type ChartPoint = RadarNode & { z: number };
@@ -83,7 +85,7 @@ function PolarBackdrop() {
   );
 }
 
-export function OpportunityRadar({ nodes }: Props) {
+export function OpportunityRadar({ nodes, decisionMode = "PROTECT CAPITAL" }: Props) {
   const [mounted, setMounted] = useState(false);
   const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
 
@@ -117,6 +119,15 @@ export function OpportunityRadar({ nodes }: Props) {
         subtitle="Readiness → · Risk ↓ · Size = priority"
         action={
           <ul className="cd-radar-legend">
+            {decisionMode === "TRADE" ? (
+              <li>
+                <i
+                  className="cd-radar-legend__dot"
+                  style={{ background: NODE_COLORS.actionable.fill }}
+                />
+                Actionable
+              </li>
+            ) : null}
             <li>
               <i className="cd-radar-legend__dot" style={{ background: NODE_COLORS.watch.fill }} />
               Watch

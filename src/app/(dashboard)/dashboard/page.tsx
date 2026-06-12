@@ -31,7 +31,8 @@ import {
   computeRsNearMissWatchlistFromDb,
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
-import { CyberCommandDeck } from "@/components/cyber-command-deck";
+import { CommandDeckDashboard } from "@/components/command-deck";
+import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -238,5 +239,14 @@ export default async function DashboardPage() {
     marketContext,
     dbLoadError,
   });
-  return <CyberCommandDeck viewModel={viewModel} />;
+  return (
+    <CommandDeckDashboard
+      viewModel={viewModel}
+      header={
+        <div className="mb-6">
+          <DashboardPageHeader cta={viewModel.headerCta} />
+        </div>
+      }
+    />
+  );
 }
