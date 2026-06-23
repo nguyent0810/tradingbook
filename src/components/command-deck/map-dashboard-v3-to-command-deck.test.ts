@@ -114,3 +114,63 @@ describe("mapDashboardV3ToCommandDeck — relative strength", () => {
     }
   });
 });
+
+describe("mapDashboardV3ToCommandDeck — session evidence", () => {
+  it("passes Foreign 1D and Foreign cov. through Session Evidence when present in view model", () => {
+    const vm = buildNoTradePreviewViewModel();
+    vm.evidence = [
+      ...vm.evidence,
+      { label: "Foreign 1D", value: "−458.37B ₫ net", state: "danger", provenance: "real" },
+      { label: "Foreign cov.", value: "159/206 OK (77%)", state: "ok", provenance: "derived" },
+    ];
+
+    const deck = mapDashboardV3ToCommandDeck(vm);
+    const labels = deck.evidence.map((e) => e.label);
+    expect(labels).toContain("Foreign 1D");
+    expect(labels).toContain("Foreign cov.");
+
+    const foreign1d = deck.evidence.find((e) => e.label === "Foreign 1D");
+    const foreignCov = deck.evidence.find((e) => e.label === "Foreign cov.");
+    expect(foreign1d?.value).toMatch(/₫ net$/);
+    expect(foreignCov?.value).toMatch(/OK \(\d+%\)$/);
+    expect(foreign1d?.tone).toBe("danger");
+    expect(foreignCov?.tone).toBe("success");
+  });
+
+  it("includes Foreign 5D/10D in evidence only when view model chips exist", () => {
+    const vm = buildNoTradePreviewViewModel();
+    vm.evidence = [
+      ...vm.evidence,
+      { label: "Foreign 1D", value: "+1.00B ₫ net", state: "ok", provenance: "real" },
+      { label: "Foreign cov.", value: "184/229 OK (80%)", state: "ok", provenance: "derived" },
+      { label: "Foreign 5D", value: "−7.55T ₫ net", state: "danger", provenance: "derived" },
+      { label: "Foreign 10D", value: "−5.20T ₫ net", state: "danger", provenance: "derived" },
+    ];
+
+    const deck = mapDashboardV3ToCommandDeck(vm);
+    expect(deck.evidence.some((e) => e.label === "Foreign 5D")).toBe(true);
+    expect(deck.evidence.some((e) => e.label === "Foreign 10D")).toBe(true);
+
+    const vmNoRollups = buildNoTradePreviewViewModel();
+    vmNoRollups.evidence = [
+      ...vmNoRollups.evidence,
+      { label: "Foreign 1D", value: "+1.00B ₫ net", state: "ok", provenance: "real" },
+      { label: "Foreign cov.", value: "184/229 OK (80%)", state: "ok", provenance: "derived" },
+    ];
+    const deckNoRollups = mapDashboardV3ToCommandDeck(vmNoRollups);
+    expect(deckNoRollups.evidence.some((e) => e.label === "Foreign 5D")).toBe(false);
+    expect(deckNoRollups.evidence.some((e) => e.label === "Foreign 10D")).toBe(false);
+  });
+
+  it("mirrors foreign chips into command bar stats", () => {
+    const vm = buildNoTradePreviewViewModel();
+    vm.evidence = [
+      ...vm.evidence,
+      { label: "Foreign 1D", value: "+7.59B ₫ net", state: "ok", provenance: "real" },
+      { label: "Foreign cov.", value: "184/229 OK (80%)", state: "ok", provenance: "derived" },
+    ];
+
+    const deck = mapDashboardV3ToCommandDeck(vm);
+    expect(deck.commandBar.stats.map((s) => s.label)).toEqual(["Foreign 1D", "Foreign cov."]);
+  });
+});

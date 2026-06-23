@@ -44,5 +44,39 @@ test.describe("Dashboard Command Deck — production route smoke", () => {
         expect(primaryBox.x).toBeLessThan(secondaryBox.x);
       }
     }
+
+    await expect(page.getByTestId("dashboard-v3-evidence-layer")).toHaveCount(0);
+
+    const sessionEvidence = page.getByTestId("command-deck-evidence");
+    await expect(sessionEvidence).toBeVisible();
+    await expect(sessionEvidence.getByRole("heading", { name: "Session Evidence" })).toBeVisible();
+
+    const foreign1dRow = sessionEvidence.locator(".cd-evidence-row").filter({ hasText: "Foreign 1D" });
+    const foreignCovRow = sessionEvidence.locator(".cd-evidence-row").filter({ hasText: "Foreign cov." });
+    await expect(foreign1dRow).toHaveCount(1);
+    await expect(foreignCovRow).toHaveCount(1);
+    await expect(foreign1dRow).toContainText(/₫ net/);
+    await expect(foreignCovRow).toContainText(/OK \(\d+%\)/);
+
+    const foreign5dRow = sessionEvidence.locator(".cd-evidence-row").filter({ hasText: "Foreign 5D" });
+    const foreign10dRow = sessionEvidence.locator(".cd-evidence-row").filter({ hasText: "Foreign 10D" });
+    if ((await foreign5dRow.count()) > 0) {
+      await expect(foreign5dRow).toContainText(/₫ net/);
+    }
+    if ((await foreign10dRow.count()) > 0) {
+      await expect(foreign10dRow).toContainText(/₫ net/);
+    }
+
+    await expect(sessionEvidence.getByText("Scanner diagnostics", { exact: true })).toBeVisible();
+    await expect(sessionEvidence.getByText("Data freshness", { exact: true })).toBeVisible();
+    await expect(sessionEvidence.getByText("Market blockers", { exact: true })).toBeVisible();
+    await expect(sessionEvidence.getByText("Technical evidence", { exact: true })).toBeVisible();
+
+    const evidenceBox = await sessionEvidence.boundingBox();
+    expect(evidenceBox).not.toBeNull();
+    if (evidenceBox) {
+      expect(evidenceBox.width).toBeGreaterThan(200);
+      expect(evidenceBox.height).toBeGreaterThan(80);
+    }
   });
 });
