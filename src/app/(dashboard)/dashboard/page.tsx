@@ -30,6 +30,10 @@ import {
   buildRsNearMissWatchlistPanel,
   computeRsNearMissWatchlistFromDb,
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+import {
+  isRsWatchlistSnapshotEnabled,
+  persistRsWatchlistSnapshot,
+} from "@/lib/scanner/gate2/rs-watchlist-snapshot";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
 import { CommandDeckDashboard } from "@/components/command-deck";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
@@ -192,19 +196,31 @@ export default async function DashboardPage() {
   }
 
   let rsNearMissWatchlist = buildRsNearMissWatchlistPanel([]);
+  let rsWatchlistRowsForSnapshot: Awaited<
+    ReturnType<typeof computeRsNearMissWatchlistFromDb>
+  >["rows"] = [];
+  let rsWatchlistTradabilityCount = 0;
+  let rsWatchlistUiMap: Map<string, RsDiagnosticUi | null> | undefined;
   if (rsSession) {
     try {
       const excludeSymbols = candidatesWithHealth.map((c) => c.symbolKey);
-      const { rows } = await computeRsNearMissWatchlistFromDb(prisma, {
-        limit: 12,
-        excludeSymbols,
-      });
+      const { rows, tradabilityPassedCount, earlyEntryBySymbol } =
+        await computeRsNearMissWatchlistFromDb(
+        prisma,
+        {
+          limit: 12,
+          excludeSymbols,
+        }
+      );
+      rsWatchlistRowsForSnapshot = rows;
+      rsWatchlistTradabilityCount = tradabilityPassedCount;
       const rsMap = await loadRsDiagnosticUiForSymbols(
         prisma,
         rows.map((r) => r.symbol),
         rsSession
       );
-      rsNearMissWatchlist = buildRsNearMissWatchlistPanel(rows, rsMap);
+      rsWatchlistUiMap = rsMap;
+      rsNearMissWatchlist = buildRsNearMissWatchlistPanel(rows, rsMap, earlyEntryBySymbol);
     } catch (e) {
       console.error("[dashboard] RS near-miss watchlist failed:", e);
     }
@@ -226,6 +242,24 @@ export default async function DashboardPage() {
       marketContext,
     })
   );
+
+  if (
+    isRsWatchlistSnapshotEnabled() &&
+    rsSession &&
+    rsWatchlistRowsForSnapshot.length > 0
+  ) {
+    try {
+      await persistRsWatchlistSnapshot(prisma, {
+        sessionDate: rsSession,
+        rows: rsWatchlistRowsForSnapshot,
+        verdictUxLevel: cockpitDto.verdict.uxLevel.value,
+        tradabilityPassedCount: rsWatchlistTradabilityCount,
+        rsUiBySymbol: rsWatchlistUiMap,
+      });
+    } catch (e) {
+      console.error("[dashboard] RS watchlist snapshot failed:", e);
+    }
+  }
 
   const viewModel = mapDashboardV3ViewModel({
     cockpitDto,

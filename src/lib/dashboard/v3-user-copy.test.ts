@@ -52,10 +52,14 @@ describe("mapRsWatchlistEntryToV3Card", () => {
     const serialized = JSON.stringify(card);
 
     expect(card.symbol).toBe("CDC");
-    expect(card.stateBadge).toBe("Awaiting breakout");
+    expect(card.stateBadge).toBe("Watch: breakout");
+    expect(card.setupState).toBe("Watch: breakout");
+    expect(card.setupReason).toBe("Needs fresh breakout");
+    expect(card.rs20SpreadPct).toBe(18.16);
     expect(card.strengthLabel).toBe("Strong RS");
     expect(card.primaryInsight).toMatch(/fresh breakout/i);
     expect(card.nextCondition).toBe("Needs fresh breakout");
+    expect(card.blockerLabel).toBe("Needs fresh breakout");
     expect(card.metrics.some((m) => m.label === "RS20")).toBe(true);
     expectNoForbidden(serialized);
     expect(serialized).not.toMatch(/RS20 \+/);
@@ -93,6 +97,28 @@ describe("formatActionHintForUser", () => {
     expect(
       formatActionHintForUser("Log trade → /trades/new?setupCandidateId=abc-123")
     ).toBe("Log trade when entry confirms.");
+  });
+});
+
+describe("mapRsWatchlistEntryToV3Card — setup reasons", () => {
+  it("maps positive RS + below MA50 to blocked MA50 with reason", () => {
+    const card = mapRsWatchlistEntryToV3Card({
+      symbol: "DCL",
+      sessionDate: "2026-05-28",
+      rs20SpreadPct: 2.8,
+      rs50SpreadPct: -42.5,
+      terminalCode: "trend_below_ma50",
+      failedGate2Because: "Failed Gate 2 because: Below long-term trend (trend_below_ma50)",
+      topRejectionReason: "Trend not supportive",
+      stageRank: 15,
+      distanceToPullbackZoneFrac: null,
+      actionHint: "",
+      disclaimerLines: [],
+      rsDiagnostic: null,
+    });
+    expect(card.setupState).toBe("Blocked: MA50");
+    expect(card.setupReason).toBe("Below 50-day average");
+    expect(card.strengthLabel).toBe("Mild RS");
   });
 });
 

@@ -38,6 +38,106 @@ function metricValue(card: V3RsWatchlistCard, label: string): string {
   return card.metrics.find((m) => m.label === label)?.value ?? "—";
 }
 
+function formatPrice(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return value.toFixed(2);
+}
+
+function formatPct(value: number | null | undefined, digits = 1): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value.toFixed(digits)}%`;
+}
+
+function formatRr(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return "—";
+  return `${value.toFixed(2)}:1`;
+}
+
+function earlyStateClass(state: string): string {
+  if (state.includes("Pilot")) return "tosv3-rs-chip--strong";
+  if (state.includes("Add Zone")) return "tosv3-rs-chip--watch";
+  if (state.includes("Extended") || state.includes("Failed") || state.includes("Blocked")) {
+    return "tosv3-rs-chip--blocker";
+  }
+  return "tosv3-rs-chip--context";
+}
+
+function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlistCard["earlyEntry"]> }) {
+  const chips = [
+    ...earlyEntry.reasonCodes.slice(0, 6),
+    ...earlyEntry.transitionReasonCodes.slice(0, 4),
+  ];
+
+  return (
+    <div
+      className="tosv3-rs-early-entry"
+      data-testid="dashboard-v3-rs-early-entry"
+      aria-label="Early entry display-only metadata"
+    >
+      <header className="tosv3-rs-early-entry__head">
+        <span className="tosv3-rs-early-entry__label">Early entry (display only)</span>
+        <span className={`tosv3-rs-chip ${earlyStateClass(earlyEntry.proposedTradeState)}`}>
+          {earlyEntry.proposedTradeState}
+        </span>
+      </header>
+      <ul className="tosv3-rs-card__metrics" aria-label="Early entry metrics">
+        <li className="tosv3-rs-chip tosv3-rs-chip--context">
+          <span className="tosv3-rs-chip__label">Score</span>
+          <span className="tosv3-rs-chip__value tabular-nums">{earlyEntry.earlyReversalScore}</span>
+        </li>
+        {earlyEntry.entryType ? (
+          <li className="tosv3-rs-chip tosv3-rs-chip--context">
+            <span className="tosv3-rs-chip__label">Entry type</span>
+            <span className="tosv3-rs-chip__value">{earlyEntry.entryType}</span>
+          </li>
+        ) : null}
+        <li className="tosv3-rs-chip tosv3-rs-chip--context">
+          <span className="tosv3-rs-chip__label">R:R</span>
+          <span className="tosv3-rs-chip__value tabular-nums">{formatRr(earlyEntry.estimatedRiskReward)}</span>
+        </li>
+        <li className="tosv3-rs-chip tosv3-rs-chip--context">
+          <span className="tosv3-rs-chip__label">Stop dist</span>
+          <span className="tosv3-rs-chip__value tabular-nums">{formatPct(earlyEntry.stopDistancePct)}</span>
+        </li>
+        <li className="tosv3-rs-chip tosv3-rs-chip--context">
+          <span className="tosv3-rs-chip__label">Target</span>
+          <span className="tosv3-rs-chip__value tabular-nums">{formatPrice(earlyEntry.targetPrice)}</span>
+        </li>
+        <li className="tosv3-rs-chip tosv3-rs-chip--context">
+          <span className="tosv3-rs-chip__label">Invalid</span>
+          <span className="tosv3-rs-chip__value tabular-nums">{formatPrice(earlyEntry.invalidLevel)}</span>
+        </li>
+      </ul>
+      {earlyEntry.targetReason || earlyEntry.invalidLevelReason ? (
+        <p className="tosv3-rs-early-entry__explain">
+          {earlyEntry.targetReason ? `Target: ${earlyEntry.targetReason}.` : ""}{" "}
+          {earlyEntry.invalidLevelReason ? `Stop: ${earlyEntry.invalidLevelReason}.` : ""}
+        </p>
+      ) : null}
+      {chips.length > 0 ? (
+        <ul className="tosv3-rs-early-entry__chips" aria-label="Early entry reason chips">
+          {chips.map((code) => (
+            <li key={code} className="tosv3-rs-early-entry__chip">
+              {truncateForChip(code.replace(/_/g, " "), 28)}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {earlyEntry.suggestedPilotSizePct != null ? (
+        <p className="tosv3-rs-early-entry__sizing">
+          Suggested size: ~{earlyEntry.suggestedPilotSizePct}%
+          {earlyEntry.sizingNote ? ` — ${earlyEntry.sizingNote}` : ""}
+        </p>
+      ) : null}
+      {earlyEntry.whyNotPilotYet ? (
+        <p className="tosv3-rs-early-entry__why-not" data-testid="dashboard-v3-rs-why-not-pilot">
+          Why not pilot yet: {earlyEntry.whyNotPilotYet}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function RsDetailPanel({
   card,
   evidenceOpen,
@@ -63,7 +163,7 @@ function RsDetailPanel({
           ) : null}
         </div>
         <span className={`tosv3-rs-card__badge ${stateBadgeClass(card.stateTone)}`}>
-          {card.stateBadge}
+          {card.setupState}
         </span>
       </header>
       <p className="tosv3-rs-card__insight">{card.primaryInsight}</p>
@@ -82,6 +182,7 @@ function RsDetailPanel({
       {card.blockerLabel ? (
         <p className="tosv3-rs-card__blocker">{card.blockerLabel}</p>
       ) : null}
+      {card.earlyEntry ? <EarlyEntryPanel earlyEntry={card.earlyEntry} /> : null}
       {card.technicalEvidence.length > 0 ? (
         <div className="tosv3-rs-card__evidence">
           <button
@@ -165,14 +266,17 @@ export function RelativeStrengthRadar({ panel }: Props) {
               <thead>
                 <tr>
                   <th scope="col">Ticker</th>
-                  <th scope="col">Status</th>
+                  <th scope="col">Setup state</th>
                   <th scope="col" className="table-num">
                     RS20
                   </th>
                   <th scope="col" className="table-num">
                     RS50
                   </th>
-                  <th scope="col">Blocker</th>
+                  <th scope="col">Reason</th>
+                  {panel.cards.some((c) => c.earlyEntry) ? (
+                    <th scope="col">Early state</th>
+                  ) : null}
                 </tr>
               </thead>
               <tbody data-testid="dashboard-v3-rs-cards">
@@ -199,14 +303,25 @@ export function RelativeStrengthRadar({ panel }: Props) {
                       <td className="tosv3-rs-table__symbol">{card.symbol}</td>
                       <td>
                         <span className={`tosv3-rs-row__badge ${stateBadgeClass(card.stateTone)}`}>
-                          {card.stateBadge}
+                          {card.setupState}
                         </span>
                       </td>
                       <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS20")}</td>
                       <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS50")}</td>
-                      <td className="tosv3-rs-table__blocker" title={card.blockerLabel}>
-                        {truncateForChip(card.blockerLabel, 28)}
+                      <td className="tosv3-rs-table__blocker" title={card.setupReason}>
+                        {truncateForChip(card.setupReason, 32)}
                       </td>
+                      {panel.cards.some((c) => c.earlyEntry) ? (
+                        <td className="tosv3-rs-table__early" title={card.earlyEntry?.whyNotPilotYet ?? undefined}>
+                          {card.earlyEntry ? (
+                            <span className={`tosv3-rs-row__badge ${earlyStateClass(card.earlyEntry.proposedTradeState)}`}>
+                              {truncateForChip(card.earlyEntry.proposedTradeState, 18)}
+                            </span>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                      ) : null}
                     </tr>
                   );
                 })}

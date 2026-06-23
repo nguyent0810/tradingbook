@@ -1,0 +1,6 @@
+{
+  "id": "weak-volume-fakeout",
+  "description": "Synthetic unit-test series — NOT real market evidence",
+  "purpose": "Breakout-like candle on thin volume",
+  "synthetic": true
+}

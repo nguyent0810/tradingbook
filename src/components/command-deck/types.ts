@@ -46,8 +46,16 @@ export type RadarNode = {
 export type RelativeStrengthRow = {
   symbol: string;
   rs20: number;
-  vsIndex: string;
+  rs50: number | null;
+  rsStrength: string;
+  setupState: string;
+  reason: string;
+  /** @deprecated Use setupState */
   status: "watch" | "blocked" | "aligned";
+  rsStrengthScore: number | null;
+  setupReadinessScore: number | null;
+  /** Display-only early-entry lane when EARLY_ENTRY_V1_ENABLED */
+  earlyEntry?: import("@/lib/dashboard/dashboard-v3-view-model").V3EarlyEntryDisplay | null;
 };
 
 export type EvidenceItem = {

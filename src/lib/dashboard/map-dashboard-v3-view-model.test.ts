@@ -328,7 +328,8 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
     const serialized = JSON.stringify(vm.rsWatchlist);
     expect(vm.rsWatchlist.title).toBe("Relative Strength Radar");
     expect(card.primaryInsight).toMatch(/breakout/i);
-    expect(card.stateBadge).toBe("Awaiting breakout");
+    expect(card.stateBadge).toBe("Watch: breakout");
+    expect(card.setupState).toBe("Watch: breakout");
     expect(serialized).not.toMatch(/Failed Gate 2 because/);
     expect(serialized).not.toMatch(/SetupCandidate/);
     expect(serialized).not.toMatch(/rankScore/);

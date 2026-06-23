@@ -93,22 +93,26 @@ function mapRadarNodes(vm: DashboardV3ViewModel, decisionMode: V3DecisionMode): 
 
 function mapRelativeStrength(vm: DashboardV3ViewModel): RelativeStrengthRow[] {
   return vm.rsWatchlist.cards.map((card) => {
-    const rsMetric =
-      card.metrics.find((m) => m.label === "RS rank") ??
-      card.metrics.find((m) => m.label === "RS vs bench") ??
-      card.metrics[0];
-    const rsStr = rsMetric?.value ?? "0";
-    const num = Number.parseFloat(rsStr.replace(/[^0-9.-]/g, "")) || 0;
-
     let status: RelativeStrengthRow["status"] = "watch";
     if (card.stateTone === "supportive") status = "aligned";
     if (card.stateTone === "not-ready") status = "blocked";
 
+    const rsStrength =
+      card.strengthLabel != null && card.rsStrengthScore != null
+        ? `${card.strengthLabel} · ${card.rsStrengthScore}`
+        : (card.strengthLabel ?? "—");
+
     return {
       symbol: card.symbol,
-      rs20: num,
-      vsIndex: card.strengthLabel ?? rsStr,
+      rs20: card.rs20SpreadPct,
+      rs50: card.rs50SpreadPct,
+      rsStrength,
+      setupState: card.setupState,
+      reason: card.setupReason,
       status,
+      rsStrengthScore: card.rsStrengthScore,
+      setupReadinessScore: card.setupReadinessScore,
+      earlyEntry: card.earlyEntry,
     };
   });
 }
