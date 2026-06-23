@@ -1,0 +1,5233 @@
+{
+  "generatedAt": "2026-06-23T02:19:38.111Z",
+  "status": "experimental_display_only",
+  "flagDefault": false,
+  "cohort": {
+    "symbolCount": 50,
+    "symbols": [
+      "ACB",
+      "CTG",
+      "BID",
+      "BSR",
+      "BVS",
+      "BCM",
+      "CII",
+      "CEO",
+      "BCG",
+      "CRC",
+      "DCM",
+      "DBC",
+      "BCR",
+      "BAF",
+      "BVB",
+      "AAA",
+      "ACM",
+      "DCL",
+      "AAV",
+      "CTD",
+      "ANV",
+      "CDC",
+      "BGE",
+      "ACV",
+      "ABB",
+      "APG",
+      "AAS",
+      "BVH",
+      "CTS",
+      "AAH",
+      "CTI",
+      "C69",
+      "BIG",
+      "BOT",
+      "CSV",
+      "DCS",
+      "CVN",
+      "AMV",
+      "ASM",
+      "BMI",
+      "C4G",
+      "BSI",
+      "AGG",
+      "CTF",
+      "DAG",
+      "CMG",
+      "AGR",
+      "CTR",
+      "APS",
+      "BFC"
+    ],
+    "observationCount": 700
+  },
+  "baseline": {
+    "variant": "baseline",
+    "pilotCount": 4,
+    "falsePilotCount": 2,
+    "falsePilotRate": 0.5,
+    "avgRet5d": -3.508016968651134,
+    "avgRet10d": 4.098252804141503,
+    "avgRet20d": 8.660087719298247,
+    "avgMae10d": -6.257010353753229,
+    "avgMfe10d": 9.592105263157897,
+    "extendedBlocked": 90,
+    "extendedNegative5d": 49
+  },
+  "bestCalibrationVariant": {
+    "variant": "block_dist_ma20_gt_4",
+    "pilotCount": 4,
+    "falsePilotCount": 2,
+    "falsePilotRate": 0.5,
+    "avgRet5d": -3.508016968651134,
+    "avgRet10d": 4.098252804141503,
+    "avgRet20d": 8.660087719298247,
+    "avgMae10d": -6.257010353753229,
+    "avgMfe10d": 9.592105263157897,
+    "extendedBlocked": 90,
+    "extendedNegative5d": 49
+  },
+  "variantSummaries": [
+    {
+      "variant": "baseline",
+      "pilotCount": 4,
+      "falsePilotCount": 2,
+      "falsePilotRate": 0.5,
+      "avgRet5d": -3.508016968651134,
+      "avgRet10d": 4.098252804141503,
+      "avgRet20d": 8.660087719298247,
+      "avgMae10d": -6.257010353753229,
+      "avgMfe10d": 9.592105263157897,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "rr_min_2_5",
+      "pilotCount": 1,
+      "falsePilotCount": 0,
+      "falsePilotRate": 0,
+      "avgRet5d": -1.6666666666666607,
+      "avgRet10d": 31.000000000000007,
+      "avgRet20d": 19.666666666666664,
+      "avgMae10d": -2.9999999999999956,
+      "avgMfe10d": 31.000000000000007,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "rs_improving_3d",
+      "pilotCount": 3,
+      "falsePilotCount": 2,
+      "falsePilotRate": 0.6666666666666666,
+      "avgRet5d": -4.121800402645959,
+      "avgRet10d": -4.868996261144665,
+      "avgRet20d": 4.991228070175441,
+      "avgMae10d": -7.342680471670974,
+      "avgMfe10d": 2.4561403508771944,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "next_day_confirmation",
+      "pilotCount": 0,
+      "falsePilotCount": 0,
+      "falsePilotRate": null,
+      "avgRet5d": null,
+      "avgRet10d": null,
+      "avgRet20d": null,
+      "avgMae10d": null,
+      "avgMfe10d": null,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "close_top_quartile",
+      "pilotCount": 0,
+      "falsePilotCount": 0,
+      "falsePilotRate": null,
+      "avgRet5d": null,
+      "avgRet10d": null,
+      "avgRet20d": null,
+      "avgMae10d": null,
+      "avgMfe10d": null,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "volume_ratio_1_5",
+      "pilotCount": 3,
+      "falsePilotCount": 2,
+      "falsePilotRate": 0.6666666666666666,
+      "avgRet5d": -4.121800402645959,
+      "avgRet10d": -4.868996261144665,
+      "avgRet20d": 4.991228070175441,
+      "avgMae10d": -7.342680471670974,
+      "avgMfe10d": 2.4561403508771944,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "block_dist_ma20_gt_4",
+      "pilotCount": 4,
+      "falsePilotCount": 2,
+      "falsePilotRate": 0.5,
+      "avgRet5d": -3.508016968651134,
+      "avgRet10d": 4.098252804141503,
+      "avgRet20d": 8.660087719298247,
+      "avgMae10d": -6.257010353753229,
+      "avgMfe10d": 9.592105263157897,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "block_weak_gate1",
+      "pilotCount": 4,
+      "falsePilotCount": 2,
+      "falsePilotRate": 0.5,
+      "avgRet5d": -3.508016968651134,
+      "avgRet10d": 4.098252804141503,
+      "avgRet20d": 8.660087719298247,
+      "avgMae10d": -6.257010353753229,
+      "avgMfe10d": 9.592105263157897,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "two_day_follow_through",
+      "pilotCount": 0,
+      "falsePilotCount": 0,
+      "falsePilotRate": null,
+      "avgRet5d": null,
+      "avgRet10d": null,
+      "avgRet20d": null,
+      "avgMae10d": null,
+      "avgMfe10d": null,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "demote_weak_regime",
+      "pilotCount": 2,
+      "falsePilotCount": 1,
+      "falsePilotRate": 0.5,
+      "avgRet5d": -5.083333333333329,
+      "avgRet10d": 12.75,
+      "avgRet20d": 0.0833333333333357,
+      "avgMae10d": -6.249999999999995,
+      "avgMfe10d": 16.750000000000004,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    },
+    {
+      "variant": "combined_tight",
+      "pilotCount": 0,
+      "falsePilotCount": 0,
+      "falsePilotRate": null,
+      "avgRet5d": null,
+      "avgRet10d": null,
+      "avgRet20d": null,
+      "avgMae10d": null,
+      "avgMfe10d": null,
+      "extendedBlocked": 90,
+      "extendedNegative5d": 49
+    }
+  ],
+  "buckets": {
+    "byState": [
+      {
+        "bucket": "Blocked",
+        "count": 357,
+        "avgRet5d": -0.41838443131616077,
+        "avgRet10d": -0.6967493774671393,
+        "avgRet20d": -0.6266427025688205,
+        "medianRet5d": -0.7194244604316521,
+        "medianRet10d": -1.4145810663764853,
+        "medianRet20d": -1.7006802721088436,
+        "winRate10d": 0.37254901960784315,
+        "falsePilotRate": null,
+        "avgMae10d": -8.142793286683368,
+        "avgMfe10d": 7.683197755395221,
+        "avgRMultiple": 0.9258768516193814,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-09-20",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-10-25",
+            "ret10d": 28.57142857142858
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-03",
+            "ret10d": -22.222222222222225
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-08-15",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-09-19",
+            "ret10d": -19.642857142857135
+          }
+        ]
+      },
+      {
+        "bucket": "Watch",
+        "count": 247,
+        "avgRet5d": -0.2616757438757404,
+        "avgRet10d": -0.34048736871188323,
+        "avgRet20d": -1.896501079787415,
+        "medianRet5d": -0.4530011325028417,
+        "medianRet10d": -0.20618556701031218,
+        "medianRet20d": -2.4312896405919706,
+        "winRate10d": 0.4089068825910931,
+        "falsePilotRate": null,
+        "avgMae10d": -7.140362079582567,
+        "avgMfe10d": 6.802946109658735,
+        "avgRMultiple": 0.6927473937586001,
+        "bestExamples": [
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 29.753521126760575
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-01-30",
+            "ret10d": 26.834381551362675
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-13",
+            "ret10d": 26.275510204081627
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.15527950310557
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-22",
+            "ret10d": 21.212121212121218
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-24",
+            "ret10d": 20.535714285714285
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-01-16",
+            "ret10d": 18.6147186147186
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2025-12-24",
+            "ret10d": -21.075268817204297
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-13",
+            "ret10d": -15.797317436661693
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-03-28",
+            "ret10d": -15.254237288135597
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.1356993736952
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-13",
+            "ret10d": -14.8148148148148
+          }
+        ]
+      },
+      {
+        "bucket": "Extended — Do Not Chase",
+        "count": 90,
+        "avgRet5d": 0.9166589769314037,
+        "avgRet10d": 0.06007529335658527,
+        "avgRet20d": 0.42296024405743426,
+        "medianRet5d": -0.5744409507684947,
+        "medianRet10d": -2.269678805536381,
+        "medianRet20d": -3.1979586394880286,
+        "winRate10d": 0.4444444444444444,
+        "falsePilotRate": null,
+        "avgMae10d": -10.869394393257695,
+        "avgMfe10d": 12.246670397656638,
+        "avgRMultiple": 0.5789382784087973,
+        "bestExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-06",
+            "ret10d": 27.08757637474541
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2026-01-09",
+            "ret10d": 25.35211267605635
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-01-03",
+            "ret10d": 22.22222222222223
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-24",
+            "ret10d": 21.981424148606816
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-23",
+            "ret10d": 18.886198547215507
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-13",
+            "ret10d": 15.537190082644637
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-13",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-06",
+            "ret10d": -20.743919885550795
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-23",
+            "ret10d": -16.666666666666664
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.294117647058822
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.285714285714288
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-09-19",
+            "ret10d": -14.285714285714283
+          }
+        ]
+      },
+      {
+        "bucket": "Pilot Candidate",
+        "count": 4,
+        "avgRet5d": -3.508016968651134,
+        "avgRet10d": 4.098252804141503,
+        "avgRet20d": 8.660087719298247,
+        "medianRet5d": -3.292349726775952,
+        "medianRet10d": -1.565789473684216,
+        "medianRet20d": 9.833333333333332,
+        "winRate10d": 0.5,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -6.257010353753229,
+        "avgMfe10d": 9.592105263157897,
+        "avgRMultiple": 1.7270889714742501,
+        "bestExamples": [
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-17",
+            "ret10d": 2.368421052631575
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.500000000000007
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-01-23",
+            "ret10d": -11.475409836065563
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-01-23",
+            "ret10d": -11.475409836065563
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.500000000000007
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-17",
+            "ret10d": 2.368421052631575
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          }
+        ]
+      },
+      {
+        "bucket": "Add Zone",
+        "count": 2,
+        "avgRet5d": -6.916963715172184,
+        "avgRet10d": -13.925255410388871,
+        "avgRet20d": -16.134930594584606,
+        "medianRet5d": -6.916963715172184,
+        "medianRet10d": -13.925255410388871,
+        "medianRet20d": -16.134930594584606,
+        "winRate10d": 0,
+        "falsePilotRate": null,
+        "avgMae10d": -14.184322767901818,
+        "avgMfe10d": 0.7962568038863974,
+        "avgRMultiple": 0.12510061203188455,
+        "bestExamples": [
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.642487046632132
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.642487046632132
+          }
+        ]
+      }
+    ],
+    "byEntryType": [
+      {
+        "bucket": "none",
+        "count": 598,
+        "avgRet5d": -0.21636231804130374,
+        "avgRet10d": -0.4500718345592295,
+        "avgRet20d": -0.8066960686035762,
+        "medianRet5d": -0.46459580434666237,
+        "medianRet10d": -0.9615606869611413,
+        "medianRet20d": -2.0184121552812706,
+        "winRate10d": 0.3979933110367893,
+        "falsePilotRate": null,
+        "avgMae10d": -8.057182659935657,
+        "avgMfe10d": 7.824204341280357,
+        "avgRMultiple": 0.8252341097667056,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          }
+        ]
+      },
+      {
+        "bucket": "Pocket Pivot",
+        "count": 56,
+        "avgRet5d": 0.5853255271705053,
+        "avgRet10d": -0.8641891442336421,
+        "avgRet20d": -0.14986536340635878,
+        "medianRet5d": -0.9749259499786103,
+        "medianRet10d": -1.9207726104277865,
+        "medianRet20d": -1.9068455906840196,
+        "winRate10d": 0.375,
+        "falsePilotRate": null,
+        "avgMae10d": -8.047472479526713,
+        "avgMfe10d": 9.24388676033792,
+        "avgRMultiple": 0.5878405377815491,
+        "bestExamples": [
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2026-01-09",
+            "ret10d": 25.35211267605635
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-01-09",
+            "ret10d": 15.326902465166128
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-20",
+            "ret10d": 11.842105263157894
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": 11.525029103608837
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-06",
+            "ret10d": 10.695876288659809
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-02-21",
+            "ret10d": 10.526315789473696
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-01-09",
+            "ret10d": 10.314875135722042
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-01-09",
+            "ret10d": 7.555555555555547
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2025-12-31",
+            "ret10d": 7.441860465116286
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.6964856230032
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-02-14",
+            "ret10d": -12.50000000000001
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-01-03",
+            "ret10d": -12.50000000000001
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-13",
+            "ret10d": -12.500000000000005
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-03-06",
+            "ret10d": -11.919191919191917
+          },
+          {
+            "symbol": "CSV",
+            "sessionDate": "2026-02-27",
+            "ret10d": -9.794628751974717
+          },
+          {
+            "symbol": "CTD",
+            "sessionDate": "2026-02-27",
+            "ret10d": -9.255747807537334
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-27",
+            "ret10d": -8.831521739130435
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2025-12-24",
+            "ret10d": -8.737864077669906
+          }
+        ]
+      },
+      {
+        "bucket": "Early Reclaim",
+        "count": 44,
+        "avgRet5d": -1.1118971363819117,
+        "avgRet10d": 0.14766883942177145,
+        "avgRet20d": -2.923721120602364,
+        "medianRet5d": -1.0908992474690045,
+        "medianRet10d": -1.2810890395848633,
+        "medianRet20d": -3.1973995271867617,
+        "winRate10d": 0.38636363636363635,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -9.206056461728247,
+        "avgMfe10d": 8.346958862248984,
+        "avgRMultiple": 0.7784176243846767,
+        "bestExamples": [
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-13",
+            "ret10d": 15.543328748280603
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-06",
+            "ret10d": 10.687022900763363
+          },
+          {
+            "symbol": "ACV",
+            "sessionDate": "2026-01-09",
+            "ret10d": 7.2202166064981945
+          },
+          {
+            "symbol": "BAF",
+            "sessionDate": "2026-01-30",
+            "ret10d": 6.694560669456062
+          },
+          {
+            "symbol": "CTD",
+            "sessionDate": "2026-03-13",
+            "ret10d": 6.595272299856355
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-02-27",
+            "ret10d": 4.918032786885258
+          },
+          {
+            "symbol": "CTI",
+            "sessionDate": "2026-01-16",
+            "ret10d": 4.56521739130435
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-23",
+            "ret10d": -16.666666666666664
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-03-28",
+            "ret10d": -15.254237288135597
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.987012987012985
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-01-23",
+            "ret10d": -11.475409836065563
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-07-11",
+            "ret10d": -9.090909090909099
+          },
+          {
+            "symbol": "C4G",
+            "sessionDate": "2026-01-16",
+            "ret10d": -6.896551724137928
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2025-12-31",
+            "ret10d": -6.553911205074006
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.500000000000007
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.437705407827907
+          }
+        ]
+      },
+      {
+        "bucket": "Pullback Add",
+        "count": 2,
+        "avgRet5d": -6.916963715172184,
+        "avgRet10d": -13.925255410388871,
+        "avgRet20d": -16.134930594584606,
+        "medianRet5d": -6.916963715172184,
+        "medianRet10d": -13.925255410388871,
+        "medianRet20d": -16.134930594584606,
+        "winRate10d": 0,
+        "falsePilotRate": null,
+        "avgMae10d": -14.184322767901818,
+        "avgMfe10d": 0.7962568038863974,
+        "avgRMultiple": 0.12510061203188455,
+        "bestExamples": [
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.642487046632132
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.642487046632132
+          }
+        ]
+      }
+    ],
+    "byScore": [
+      {
+        "bucket": "<35",
+        "count": 651,
+        "avgRet5d": -0.16757942877260362,
+        "avgRet10d": -0.46877643357091037,
+        "avgRet20d": -0.9132098910829298,
+        "medianRet5d": -0.49382716049383973,
+        "medianRet10d": -1.0067114093959666,
+        "medianRet20d": -2.1739130434782643,
+        "winRate10d": 0.39477726574500765,
+        "falsePilotRate": null,
+        "avgMae10d": -8.134369308495883,
+        "avgMfe10d": 8.017740067087596,
+        "avgRMultiple": 0.8009033928633438,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          }
+        ]
+      },
+      {
+        "bucket": "35-54",
+        "count": 39,
+        "avgRet5d": -0.8326239625819318,
+        "avgRet10d": -0.8468320883709376,
+        "avgRet20d": -2.509297321819542,
+        "medianRet5d": -0.9646302250803768,
+        "medianRet10d": -1.4354066985645797,
+        "medianRet20d": -3.617021276595743,
+        "winRate10d": 0.3333333333333333,
+        "falsePilotRate": null,
+        "avgMae10d": -8.210277683905696,
+        "avgMfe10d": 6.836129368735074,
+        "avgRMultiple": 0.7421572041251354,
+        "bestExamples": [
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-01-09",
+            "ret10d": 15.326902465166128
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2026-03-13",
+            "ret10d": 14.714714714714733
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-20",
+            "ret10d": 11.842105263157894
+          },
+          {
+            "symbol": "ACV",
+            "sessionDate": "2025-12-24",
+            "ret10d": 9.486166007905132
+          },
+          {
+            "symbol": "ABB",
+            "sessionDate": "2026-03-20",
+            "ret10d": 5.072463768115937
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-17",
+            "ret10d": 3.025936599423623
+          },
+          {
+            "symbol": "ANV",
+            "sessionDate": "2025-12-31",
+            "ret10d": 2.1400778210116758
+          },
+          {
+            "symbol": "BMI",
+            "sessionDate": "2026-01-09",
+            "ret10d": 1.923076923076931
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-01-16",
+            "ret10d": 1.4563106796116367
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-03-28",
+            "ret10d": -15.254237288135597
+          },
+          {
+            "symbol": "CTS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -13.934426229508196
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-04-05",
+            "ret10d": -10.256410256410266
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2025-12-31",
+            "ret10d": -9.47867298578199
+          },
+          {
+            "symbol": "AGG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -8.333333333333341
+          },
+          {
+            "symbol": "C4G",
+            "sessionDate": "2026-01-16",
+            "ret10d": -6.896551724137928
+          },
+          {
+            "symbol": "APS",
+            "sessionDate": "2025-12-24",
+            "ret10d": -5.194805194805199
+          },
+          {
+            "symbol": "CTI",
+            "sessionDate": "2026-03-13",
+            "ret10d": -4.7520661157024735
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-10",
+            "ret10d": -4.545454545454549
+          }
+        ]
+      },
+      {
+        "bucket": "55-69",
+        "count": 6,
+        "avgRet5d": -3.5260655513258037,
+        "avgRet10d": -6.843418083573954,
+        "avgRet20d": -5.1700487068408245,
+        "medianRet5d": -3.8860777042248698,
+        "medianRet10d": -6.026955602537006,
+        "medianRet20d": -1.2156448202959853,
+        "winRate10d": 0.3333333333333333,
+        "falsePilotRate": 1,
+        "avgMae10d": -12.320037980377213,
+        "avgMfe10d": 4.273149711320182,
+        "avgRMultiple": 0.3877442843559156,
+        "bestExamples": [
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-06",
+            "ret10d": 10.687022900763363
+          },
+          {
+            "symbol": "CTF",
+            "sessionDate": "2026-01-09",
+            "ret10d": 2.551020408163265
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.500000000000007
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2025-12-31",
+            "ret10d": -6.553911205074006
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-01-23",
+            "ret10d": -11.475409836065563
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-01-23",
+            "ret10d": -11.475409836065563
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2025-12-31",
+            "ret10d": -6.553911205074006
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.500000000000007
+          },
+          {
+            "symbol": "CTF",
+            "sessionDate": "2026-01-09",
+            "ret10d": 2.551020408163265
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-06",
+            "ret10d": 10.687022900763363
+          }
+        ]
+      },
+      {
+        "bucket": "70+",
+        "count": 4,
+        "avgRet5d": 0.8397744703288281,
+        "avgRet10d": 10.092446793212542,
+        "avgRet20d": 17.91805675390663,
+        "medianRet5d": 0.8735380116959034,
+        "medianRet10d": 3.6432269197584164,
+        "medianRet20d": 17.210382513661205,
+        "winRate10d": 1,
+        "falsePilotRate": 0,
+        "avgMae10d": -3.1733354903652544,
+        "avgMfe10d": 13.398457722174292,
+        "avgRMultiple": 2.062734758048419,
+        "bestExamples": [
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-02-27",
+            "ret10d": 4.918032786885258
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-17",
+            "ret10d": 2.368421052631575
+          },
+          {
+            "symbol": "ABB",
+            "sessionDate": "2026-03-27",
+            "ret10d": 2.083333333333326
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "ABB",
+            "sessionDate": "2026-03-27",
+            "ret10d": 2.083333333333326
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-17",
+            "ret10d": 2.368421052631575
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-02-27",
+            "ret10d": 4.918032786885258
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          }
+        ]
+      }
+    ],
+    "byRr": [
+      {
+        "bucket": "<1.5",
+        "count": 303,
+        "avgRet5d": 0.23637644919244455,
+        "avgRet10d": 0.15863909946896207,
+        "avgRet20d": -0.09915684462860323,
+        "medianRet5d": -0.4530011325028417,
+        "medianRet10d": -1.6085790884718347,
+        "medianRet20d": -2.631578947368412,
+        "winRate10d": 0.3927392739273927,
+        "falsePilotRate": null,
+        "avgMae10d": -8.17542314747314,
+        "avgMfe10d": 8.737726947952364,
+        "avgRMultiple": 0.6882888557891483,
+        "bestExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 29.753521126760575
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-10-25",
+            "ret10d": 28.57142857142858
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-13",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-06",
+            "ret10d": -20.743919885550795
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-09-19",
+            "ret10d": -19.642857142857135
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-10-24",
+            "ret10d": -16.666666666666664
+          }
+        ]
+      },
+      {
+        "bucket": "2.0-2.49",
+        "count": 242,
+        "avgRet5d": -0.5933920569635891,
+        "avgRet10d": -0.6091400332864119,
+        "avgRet20d": -0.9234196585408225,
+        "medianRet5d": -0.7675903671238014,
+        "medianRet10d": -0.24887262826512538,
+        "medianRet20d": -1.8429057076400146,
+        "winRate10d": 0.4380165289256198,
+        "falsePilotRate": 0.6666666666666666,
+        "avgMae10d": -7.3295892847134,
+        "avgMfe10d": 6.824876235863302,
+        "avgRMultiple": 0.8085187954591986,
+        "bestExamples": [
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-09-20",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-08",
+            "ret10d": 21.694915254237277
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-22",
+            "ret10d": 21.212121212121218
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-24",
+            "ret10d": 17.550951659087097
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2025-12-31",
+            "ret10d": 17.119901112484545
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-23",
+            "ret10d": 16.981132075471706
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-10-24",
+            "ret10d": 14.285714285714299
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-03",
+            "ret10d": -22.222222222222225
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2025-12-24",
+            "ret10d": -21.075268817204297
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-07-11",
+            "ret10d": -18.644067796610166
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -18.26923076923077
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.517241379310342
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.1356993736952
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-13",
+            "ret10d": -14.8148148148148
+          }
+        ]
+      },
+      {
+        "bucket": "2.5+",
+        "count": 145,
+        "avgRet5d": -0.35192217573104484,
+        "avgRet10d": -1.350984748307141,
+        "avgRet20d": -2.1259681217871527,
+        "medianRet5d": -0.35928143712574084,
+        "medianRet10d": -1.3793103448275874,
+        "medianRet20d": -1.904761904761898,
+        "winRate10d": 0.33793103448275863,
+        "falsePilotRate": 0,
+        "avgMae10d": -9.317643826556967,
+        "avgMfe10d": 8.526758287611633,
+        "avgRMultiple": 1.0477897003826642,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2025-12-31",
+            "ret10d": 26.984126984126988
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-12-06",
+            "ret10d": 26.66666666666666
+          },
+          {
+            "symbol": "ACV",
+            "sessionDate": "2025-12-31",
+            "ret10d": 24.33537832310838
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2025-12-17",
+            "ret10d": 23.809523809523807
+          },
+          {
+            "symbol": "CTR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 20.28135990621336
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-10-24",
+            "ret10d": 19.999999999999996
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-08-15",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-03-24",
+            "ret10d": -19.51219512195122
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2025-12-24",
+            "ret10d": -19.298245614035096
+          }
+        ]
+      },
+      {
+        "bucket": "1.5-1.99",
+        "count": 10,
+        "avgRet5d": -3.6356308937420465,
+        "avgRet10d": -4.365360160897123,
+        "avgRet20d": -8.993284092288436,
+        "medianRet5d": -1.7636774989716204,
+        "medianRet10d": -4.196382428940568,
+        "medianRet20d": -3.795306001188358,
+        "winRate10d": 0.2,
+        "falsePilotRate": null,
+        "avgMae10d": -10.031664391110306,
+        "avgMfe10d": 2.985929219913136,
+        "avgRMultiple": 0.4767066092521833,
+        "bestExamples": [
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-24",
+            "ret10d": 15.439093484419272
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 0.48309178743962045
+          },
+          {
+            "symbol": "AAH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 0
+          },
+          {
+            "symbol": "AAA",
+            "sessionDate": "2025-12-17",
+            "ret10d": -2.233250620347402
+          },
+          {
+            "symbol": "AGR",
+            "sessionDate": "2026-01-23",
+            "ret10d": -4.000000000000002
+          },
+          {
+            "symbol": "CDC",
+            "sessionDate": "2026-03-13",
+            "ret10d": -4.392764857881136
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-09-19",
+            "ret10d": -5.55555555555556
+          },
+          {
+            "symbol": "BAF",
+            "sessionDate": "2026-03-06",
+            "ret10d": -5.795148247978433
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-20",
+            "ret10d": -6.060606060606058
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-20",
+            "ret10d": -6.060606060606058
+          },
+          {
+            "symbol": "BAF",
+            "sessionDate": "2026-03-06",
+            "ret10d": -5.795148247978433
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-09-19",
+            "ret10d": -5.55555555555556
+          },
+          {
+            "symbol": "CDC",
+            "sessionDate": "2026-03-13",
+            "ret10d": -4.392764857881136
+          },
+          {
+            "symbol": "AGR",
+            "sessionDate": "2026-01-23",
+            "ret10d": -4.000000000000002
+          },
+          {
+            "symbol": "AAA",
+            "sessionDate": "2025-12-17",
+            "ret10d": -2.233250620347402
+          },
+          {
+            "symbol": "AAH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 0
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 0.48309178743962045
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-24",
+            "ret10d": 15.439093484419272
+          }
+        ]
+      }
+    ],
+    "byStop": [
+      {
+        "bucket": ">7%",
+        "count": 476,
+        "avgRet5d": -0.5106292350471062,
+        "avgRet10d": -0.8385431417338877,
+        "avgRet20d": -1.1089620537732066,
+        "medianRet5d": -0.7207230605407344,
+        "medianRet10d": -1.4633493846976942,
+        "medianRet20d": -2.64658795277167,
+        "winRate10d": 0.3739495798319328,
+        "falsePilotRate": 1,
+        "avgMae10d": -9.393608410844132,
+        "avgMfe10d": 8.96414986882799,
+        "avgRMultiple": 0.6442077203132,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          }
+        ]
+      },
+      {
+        "bucket": "4-7%",
+        "count": 191,
+        "avgRet5d": 0.4008347619241832,
+        "avgRet10d": 0.36267578477088325,
+        "avgRet20d": -0.617682380867347,
+        "medianRet5d": -0.476190476190483,
+        "medianRet10d": -0.7915567282321826,
+        "medianRet20d": -1.5086206896551633,
+        "winRate10d": 0.44502617801047123,
+        "falsePilotRate": 0,
+        "avgMae10d": -5.500703315640147,
+        "avgMfe10d": 5.892409408021653,
+        "avgRMultiple": 1.0689549276294088,
+        "bestExamples": [
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2025-12-31",
+            "ret10d": 26.984126984126988
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.39917695473252
+          },
+          {
+            "symbol": "ACV",
+            "sessionDate": "2025-12-31",
+            "ret10d": 24.33537832310838
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2025-12-17",
+            "ret10d": 23.809523809523807
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-08",
+            "ret10d": 21.694915254237277
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-24",
+            "ret10d": 19.921874999999996
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-24",
+            "ret10d": 17.550951659087097
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2025-12-31",
+            "ret10d": 17.119901112484545
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.517241379310342
+          },
+          {
+            "symbol": "CTR",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.480587618048265
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-07-02",
+            "ret10d": -12.499999999999993
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-05-16",
+            "ret10d": -12.280701754385968
+          },
+          {
+            "symbol": "DBC",
+            "sessionDate": "2026-02-27",
+            "ret10d": -11.487758945386066
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -11.11111111111111
+          },
+          {
+            "symbol": "BVB",
+            "sessionDate": "2026-02-27",
+            "ret10d": -10.370370370370372
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-04-12",
+            "ret10d": -10.256410256410266
+          }
+        ]
+      },
+      {
+        "bucket": "<=4%",
+        "count": 33,
+        "avgRet5d": 0.21624964413951528,
+        "avgRet10d": -0.27318698350396475,
+        "avgRet20d": -0.17778871301994115,
+        "medianRet5d": 0,
+        "medianRet10d": -0.6976744186046445,
+        "medianRet20d": -1.8633540372670823,
+        "winRate10d": 0.3939393939393939,
+        "falsePilotRate": 0,
+        "avgMae10d": -5.463541893872464,
+        "avgMfe10d": 5.242576476274066,
+        "avgRMultiple": 1.5180720729377488,
+        "bestExamples": [
+          {
+            "symbol": "CTR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 20.28135990621336
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2025-12-31",
+            "ret10d": 14.988290398126459
+          },
+          {
+            "symbol": "CTR",
+            "sessionDate": "2025-12-24",
+            "ret10d": 14.850299401197612
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2025-12-24",
+            "ret10d": 7.943925233644851
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2025-12-24",
+            "ret10d": 7.385697538100818
+          },
+          {
+            "symbol": "ACB",
+            "sessionDate": "2026-02-06",
+            "ret10d": 6.739130434782611
+          },
+          {
+            "symbol": "CTI",
+            "sessionDate": "2026-01-09",
+            "ret10d": 6.349206349206342
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-06-17",
+            "ret10d": 4.895104895104899
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-06-11",
+            "ret10d": 4.1666666666666705
+          },
+          {
+            "symbol": "ACB",
+            "sessionDate": "2025-12-31",
+            "ret10d": 3.5416666666666727
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-04-05",
+            "ret10d": -10.256410256410266
+          },
+          {
+            "symbol": "AAA",
+            "sessionDate": "2026-02-27",
+            "ret10d": -10.253164556962032
+          },
+          {
+            "symbol": "AGG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -8.333333333333341
+          },
+          {
+            "symbol": "BAF",
+            "sessionDate": "2026-02-27",
+            "ret10d": -6.63129973474801
+          },
+          {
+            "symbol": "BAF",
+            "sessionDate": "2026-03-06",
+            "ret10d": -5.795148247978433
+          },
+          {
+            "symbol": "ASM",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.06329113924051
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-07-16",
+            "ret10d": -4.761904761904765
+          },
+          {
+            "symbol": "AAA",
+            "sessionDate": "2026-02-13",
+            "ret10d": -4.73751600512163
+          },
+          {
+            "symbol": "ASM",
+            "sessionDate": "2026-01-23",
+            "ret10d": -4.388714733542324
+          }
+        ]
+      }
+    ],
+    "byExtension": [
+      {
+        "bucket": "<=2%",
+        "count": 528,
+        "avgRet5d": -0.412851656439889,
+        "avgRet10d": -0.6038822136228188,
+        "avgRet20d": -1.4211457888793517,
+        "medianRet5d": -0.5038582597217975,
+        "medianRet10d": -0.9615606869611413,
+        "medianRet20d": -2.0767461914343217,
+        "winRate10d": 0.38636363636363635,
+        "falsePilotRate": 0.3333333333333333,
+        "avgMae10d": -7.672565307315216,
+        "avgMfe10d": 7.188272154100189,
+        "avgRMultiple": 0.830880715078481,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          }
+        ]
+      },
+      {
+        "bucket": ">6%",
+        "count": 90,
+        "avgRet5d": 0.9166589769314037,
+        "avgRet10d": 0.06007529335658527,
+        "avgRet20d": 0.42296024405743426,
+        "medianRet5d": -0.5744409507684947,
+        "medianRet10d": -2.269678805536381,
+        "medianRet20d": -3.1979586394880286,
+        "winRate10d": 0.4444444444444444,
+        "falsePilotRate": null,
+        "avgMae10d": -10.869394393257695,
+        "avgMfe10d": 12.246670397656638,
+        "avgRMultiple": 0.5789382784087973,
+        "bestExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-06",
+            "ret10d": 27.08757637474541
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2026-01-09",
+            "ret10d": 25.35211267605635
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-01-03",
+            "ret10d": 22.22222222222223
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-24",
+            "ret10d": 21.981424148606816
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-23",
+            "ret10d": 18.886198547215507
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-13",
+            "ret10d": 15.537190082644637
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-13",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-06",
+            "ret10d": -20.743919885550795
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-23",
+            "ret10d": -16.666666666666664
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.294117647058822
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.285714285714288
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-09-19",
+            "ret10d": -14.285714285714283
+          }
+        ]
+      },
+      {
+        "bucket": "2-4%",
+        "count": 48,
+        "avgRet5d": -0.719052933178681,
+        "avgRet10d": -1.7782445758959433,
+        "avgRet20d": -1.7706401714647295,
+        "medianRet5d": -0.40887850467289055,
+        "medianRet10d": -1.4912798045328208,
+        "medianRet20d": -3.5395673429579513,
+        "winRate10d": 0.3541666666666667,
+        "falsePilotRate": 1,
+        "avgMae10d": -9.111601060429832,
+        "avgMfe10d": 7.860036467251827,
+        "avgRMultiple": 0.9428288734300324,
+        "bestExamples": [
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 29.753521126760575
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-01-30",
+            "ret10d": 26.834381551362675
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-01-23",
+            "ret10d": 15.811965811965825
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-31",
+            "ret10d": 10.769230769230772
+          },
+          {
+            "symbol": "CTD",
+            "sessionDate": "2026-02-06",
+            "ret10d": 10.604273168174059
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2025-12-31",
+            "ret10d": 7.441860465116286
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-01-30",
+            "ret10d": 7.103825136612025
+          },
+          {
+            "symbol": "CTI",
+            "sessionDate": "2026-01-16",
+            "ret10d": 4.56521739130435
+          },
+          {
+            "symbol": "ABB",
+            "sessionDate": "2025-12-17",
+            "ret10d": 3.8108680310515237
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-09-19",
+            "ret10d": -19.642857142857135
+          },
+          {
+            "symbol": "CTS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.118110236220476
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.6964856230032
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-03-21",
+            "ret10d": -14.285714285714283
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-08-16",
+            "ret10d": -14.285714285714283
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-07-24",
+            "ret10d": -14.285714285714283
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.987012987012985
+          },
+          {
+            "symbol": "AGR",
+            "sessionDate": "2026-02-27",
+            "ret10d": -12.574850299401197
+          },
+          {
+            "symbol": "APS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -10.144927536231886
+          }
+        ]
+      },
+      {
+        "bucket": "4-6%",
+        "count": 34,
+        "avgRet5d": 0.31285498149152624,
+        "avgRet10d": 1.7620041471775882,
+        "avgRet20d": 4.281734791825535,
+        "medianRet5d": -0.7700785456816185,
+        "medianRet10d": -1.9207726104277865,
+        "medianRet20d": 1.9086394086394096,
+        "winRate10d": 0.4411764705882353,
+        "falsePilotRate": null,
+        "avgMae10d": -6.928587964429615,
+        "avgMfe10d": 8.544140430271101,
+        "avgRMultiple": 0.7307175267757293,
+        "bestExamples": [
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-13",
+            "ret10d": 26.275510204081627
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.15527950310557
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-24",
+            "ret10d": 20.535714285714285
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-01-16",
+            "ret10d": 18.6147186147186
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2025-12-24",
+            "ret10d": 9.764705882352938
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-01-23",
+            "ret10d": 7.628294036061027
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2026-01-09",
+            "ret10d": 6.888361045130642
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2025-12-17",
+            "ret10d": 6.172839506172839
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-02-27",
+            "ret10d": 4.918032786885258
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-03-28",
+            "ret10d": -15.254237288135597
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-07-24",
+            "ret10d": -12.50000000000001
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-02-27",
+            "ret10d": -10.357583230579522
+          },
+          {
+            "symbol": "BVB",
+            "sessionDate": "2026-01-23",
+            "ret10d": -8.333333333333341
+          },
+          {
+            "symbol": "BAF",
+            "sessionDate": "2026-01-16",
+            "ret10d": -8.312020460358056
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-16",
+            "ret10d": -5.937499999999996
+          },
+          {
+            "symbol": "DBC",
+            "sessionDate": "2025-12-17",
+            "ret10d": -5.584642233856886
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-02-13",
+            "ret10d": -5.39130434782609
+          },
+          {
+            "symbol": "APS",
+            "sessionDate": "2025-12-24",
+            "ret10d": -5.194805194805199
+          },
+          {
+            "symbol": "BSI",
+            "sessionDate": "2026-01-16",
+            "ret10d": -4.390243902439018
+          }
+        ]
+      }
+    ],
+    "byVolume": [
+      {
+        "bucket": "normal",
+        "count": 553,
+        "avgRet5d": -0.25136851887476114,
+        "avgRet10d": -0.530302940456664,
+        "avgRet20d": -1.2685046193281309,
+        "medianRet5d": -0.5617977528089835,
+        "medianRet10d": -1.041666666666669,
+        "medianRet20d": -2.1739130434782643,
+        "winRate10d": 0.39059674502712477,
+        "falsePilotRate": null,
+        "avgMae10d": -7.861978177108511,
+        "avgMfe10d": 7.465278464287888,
+        "avgRMultiple": 0.7840303256665023,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          }
+        ]
+      },
+      {
+        "bucket": "expansion",
+        "count": 147,
+        "avgRet5d": -0.13848331401739447,
+        "avgRet10d": -0.3104292854230449,
+        "avgRet20d": 0.3385901674631885,
+        "medianRet5d": -0.5190311418685164,
+        "medianRet10d": -0.9661835748792237,
+        "medianRet20d": -2.040816326530623,
+        "winRate10d": 0.40816326530612246,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -9.21506726126436,
+        "avgMfe10d": 9.776133111973468,
+        "avgRMultiple": 0.8662644514263301,
+        "bestExamples": [
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-09-20",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2026-01-09",
+            "ret10d": 25.35211267605635
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-08",
+            "ret10d": 21.694915254237277
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-23",
+            "ret10d": 18.886198547215507
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-23",
+            "ret10d": 16.981132075471706
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-08-15",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-10-24",
+            "ret10d": -16.666666666666664
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-27",
+            "ret10d": -16.022099447513824
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-03-28",
+            "ret10d": -15.254237288135597
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.6964856230032
+          }
+        ]
+      }
+    ],
+    "byRsImproving": [
+      {
+        "bucket": "rs_flat",
+        "count": 428,
+        "avgRet5d": -0.7791804054347078,
+        "avgRet10d": -1.0957922871258323,
+        "avgRet20d": -2.197125620843013,
+        "medianRet5d": -0.866690804736426,
+        "medianRet10d": -1.3969457056020365,
+        "medianRet20d": -3.1386821366024593,
+        "winRate10d": 0.38317757009345793,
+        "falsePilotRate": 0,
+        "avgMae10d": -9.242169116139259,
+        "avgMfe10d": 8.027712338942102,
+        "avgRMultiple": 0.8435490212848932,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 29.753521126760575
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          }
+        ]
+      },
+      {
+        "bucket": "rs_improving",
+        "count": 272,
+        "avgRet5d": 0.6401668214255698,
+        "avgRet10d": 0.4783399553681374,
+        "avgRet20d": 1.0612480362111816,
+        "medianRet5d": 0,
+        "medianRet10d": -0.7446155734184136,
+        "medianRet20d": -1.4585356969402583,
+        "winRate10d": 0.4117647058823529,
+        "falsePilotRate": 0.6666666666666666,
+        "avgMae10d": -6.421472197203165,
+        "avgMfe10d": 7.829153224794428,
+        "avgRMultiple": 0.7348186152327634,
+        "bestExamples": [
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2025-12-31",
+            "ret10d": 26.984126984126988
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-01-30",
+            "ret10d": 26.834381551362675
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.39917695473252
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-10-24",
+            "ret10d": -16.666666666666664
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.6964856230032
+          },
+          {
+            "symbol": "CTR",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.480587618048265
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2025-09-19",
+            "ret10d": -14.285714285714283
+          },
+          {
+            "symbol": "CTS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -13.934426229508196
+          }
+        ]
+      }
+    ],
+    "byGate1": [
+      {
+        "bucket": "WARNING",
+        "count": 258,
+        "avgRet5d": 0.5154783077367644,
+        "avgRet10d": -0.3858877181465611,
+        "avgRet20d": 1.060448716570745,
+        "medianRet5d": 0,
+        "medianRet10d": 0,
+        "medianRet20d": -0.7184692731727224,
+        "winRate10d": 0.437984496124031,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -7.327152930622714,
+        "avgMfe10d": 8.211712181236992,
+        "avgRMultiple": 0.7219823309589296,
+        "bestExamples": [
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2026-01-09",
+            "ret10d": 25.35211267605635
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2025-12-17",
+            "ret10d": 23.809523809523807
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-22",
+            "ret10d": 21.212121212121218
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-10-24",
+            "ret10d": 19.999999999999996
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-08-15",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-09-19",
+            "ret10d": -19.642857142857135
+          }
+        ]
+      },
+      {
+        "bucket": "PASS",
+        "count": 220,
+        "avgRet5d": -0.3086193180396056,
+        "avgRet10d": -0.16984944484282566,
+        "avgRet20d": -1.6542634118986588,
+        "medianRet5d": -1.4281741065220352,
+        "medianRet10d": -2.068854912862176,
+        "medianRet20d": -3.567684935609474,
+        "winRate10d": 0.36363636363636365,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -7.568895675882476,
+        "avgMfe10d": 8.179942883129074,
+        "avgRMultiple": 1.0881215508835897,
+        "bestExamples": [
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 29.753521126760575
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2025-12-31",
+            "ret10d": 26.984126984126988
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-01-30",
+            "ret10d": 26.834381551362675
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-13",
+            "ret10d": 26.275510204081627
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.39917695473252
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.15527950310557
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2025-12-24",
+            "ret10d": -21.075268817204297
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-13",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2025-12-24",
+            "ret10d": -19.298245614035096
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -18.26923076923077
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-27",
+            "ret10d": -16.022099447513824
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.517241379310342
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.294117647058822
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.1356993736952
+          }
+        ]
+      },
+      {
+        "bucket": "FAIL",
+        "count": 167,
+        "avgRet5d": -0.8278217359342644,
+        "avgRet10d": -0.26539950462519885,
+        "avgRet20d": -1.6571238477109627,
+        "medianRet5d": -0.7102272727272727,
+        "medianRet10d": -0.37105751391464886,
+        "medianRet20d": -1.0638297872340425,
+        "winRate10d": 0.41317365269461076,
+        "falsePilotRate": null,
+        "avgMae10d": -7.201917128446084,
+        "avgMfe10d": 5.882953766183136,
+        "avgRMultiple": 0.5604149883770116,
+        "bestExamples": [
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-06",
+            "ret10d": 27.08757637474541
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-13",
+            "ret10d": 15.543328748280603
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2026-03-13",
+            "ret10d": 14.714714714714733
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-13",
+            "ret10d": 14.285714285714294
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-02-06",
+            "ret10d": 12.962962962962948
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-20",
+            "ret10d": 11.842105263157894
+          },
+          {
+            "symbol": "APS",
+            "sessionDate": "2026-02-06",
+            "ret10d": 11.290322580645164
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-06",
+            "ret10d": -20.743919885550795
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-13",
+            "ret10d": -19.24157303370787
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-13",
+            "ret10d": -15.797317436661693
+          },
+          {
+            "symbol": "CTS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -13.934426229508196
+          },
+          {
+            "symbol": "ACV",
+            "sessionDate": "2026-03-06",
+            "ret10d": -13.085937500000005
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.987012987012985
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.956810631229242
+          }
+        ]
+      },
+      {
+        "bucket": "unknown",
+        "count": 55,
+        "avgRet5d": -1.5675411204481744,
+        "avgRet10d": -2.866236447456005,
+        "avgRet20d": -5.1750624647488,
+        "medianRet5d": -2.0080321285140665,
+        "medianRet10d": -4.761904761904765,
+        "medianRet20d": -9.638554216867478,
+        "winRate10d": 0.2545454545454545,
+        "falsePilotRate": null,
+        "avgMae10d": -17.163748256392108,
+        "avgMfe10d": 12.08596549474871,
+        "avgRMultiple": 0.7574937965907557,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-09-20",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-10-25",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-12-06",
+            "ret10d": 26.66666666666666
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-01-03",
+            "ret10d": 22.22222222222223
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-11-29",
+            "ret10d": 11.111111111111107
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-02-21",
+            "ret10d": 10.526315789473696
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-02-14",
+            "ret10d": 10.000000000000009
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-03",
+            "ret10d": -22.222222222222225
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-03-24",
+            "ret10d": -19.51219512195122
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-17",
+            "ret10d": -19.04761904761905
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-07-11",
+            "ret10d": -18.644067796610166
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-31",
+            "ret10d": -18.51851851851852
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-11-01",
+            "ret10d": -17.647058823529417
+          }
+        ]
+      }
+    ],
+    "bySector": [
+      {
+        "bucket": "other",
+        "count": 616,
+        "avgRet5d": -0.331168219738854,
+        "avgRet10d": -0.7314698706620895,
+        "avgRet20d": -1.2997713727406366,
+        "medianRet5d": -0.5586766541822734,
+        "medianRet10d": -1.0938933429061493,
+        "medianRet20d": -2.310851041987469,
+        "winRate10d": 0.3782467532467532,
+        "falsePilotRate": 0.6666666666666666,
+        "avgMae10d": -8.432643305323468,
+        "avgMfe10d": 7.851934895878709,
+        "avgRMultiple": 0.7797707244577121,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          }
+        ]
+      },
+      {
+        "bucket": "bank",
+        "count": 42,
+        "avgRet5d": 0.0864175116290136,
+        "avgRet10d": 0.3568416862604286,
+        "avgRet20d": -0.030772851904893678,
+        "medianRet5d": -0.6140548948768167,
+        "medianRet10d": 0.10504201680672418,
+        "medianRet20d": -1.8018745959922475,
+        "winRate10d": 0.5,
+        "falsePilotRate": 0,
+        "avgMae10d": -5.028118562099486,
+        "avgMfe10d": 6.082824697178255,
+        "avgRMultiple": 0.9592359846437879,
+        "bestExamples": [
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-24",
+            "ret10d": 19.921874999999996
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-24",
+            "ret10d": 15.439093484419272
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-31",
+            "ret10d": 10.769230769230772
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-01-09",
+            "ret10d": 10.314875135722042
+          },
+          {
+            "symbol": "ACB",
+            "sessionDate": "2026-02-06",
+            "ret10d": 6.739130434782611
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-01-16",
+            "ret10d": 5.479452054794515
+          },
+          {
+            "symbol": "ACB",
+            "sessionDate": "2025-12-31",
+            "ret10d": 3.5416666666666727
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-17",
+            "ret10d": 3.025936599423623
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-03-27",
+            "ret10d": 2.3839397741530632
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.1356993736952
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-01-30",
+            "ret10d": -12.987012987012989
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -11.11111111111111
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-03-06",
+            "ret10d": -8.725602755453496
+          },
+          {
+            "symbol": "ACB",
+            "sessionDate": "2026-01-23",
+            "ret10d": -8.18363273453094
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.642487046632132
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.142857142857147
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-06",
+            "ret10d": -6.809338521400779
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -5.750350631136037
+          },
+          {
+            "symbol": "ACB",
+            "sessionDate": "2026-02-27",
+            "ret10d": -4.480651731160902
+          }
+        ]
+      },
+      {
+        "bucket": "oil_gas",
+        "count": 14,
+        "avgRet5d": 4.660356514760492,
+        "avgRet10d": 9.50500832406245,
+        "avgRet20d": 17.216971715494722,
+        "medianRet5d": 2.3828267687773157,
+        "medianRet10d": 10.27062655086849,
+        "medianRet20d": 23.103689335063176,
+        "winRate10d": 0.7142857142857143,
+        "falsePilotRate": null,
+        "avgMae10d": -7.060265346507838,
+        "avgMfe10d": 19.692113177863696,
+        "avgRMultiple": 1.036589628759759,
+        "bestExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-06",
+            "ret10d": 27.08757637474541
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.15527950310557
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-24",
+            "ret10d": 21.981424148606816
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-23",
+            "ret10d": 18.886198547215507
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-27",
+            "ret10d": 12.820512820512834
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-16",
+            "ret10d": 11.166253101736974
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-30",
+            "ret10d": 9.375000000000007
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-17",
+            "ret10d": 5.5737704918032875
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-09",
+            "ret10d": 4.822335025380707
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-20",
+            "ret10d": -6.060606060606058
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-27",
+            "ret10d": -3.079710144927541
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-09",
+            "ret10d": 4.822335025380707
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-17",
+            "ret10d": 5.5737704918032875
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-30",
+            "ret10d": 9.375000000000007
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-16",
+            "ret10d": 11.166253101736974
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-27",
+            "ret10d": 12.820512820512834
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-23",
+            "ret10d": 18.886198547215507
+          }
+        ]
+      },
+      {
+        "bucket": "securities",
+        "count": 14,
+        "avgRet5d": -0.9268470862696402,
+        "avgRet10d": -1.6574459611951389,
+        "avgRet20d": -3.3974309657195145,
+        "medianRet5d": -0.8169934640522877,
+        "medianRet10d": -1.5607519821002938,
+        "medianRet20d": -1.6554738037627745,
+        "winRate10d": 0.42857142857142855,
+        "falsePilotRate": null,
+        "avgMae10d": -6.461213474977891,
+        "avgMfe10d": 5.496324957484928,
+        "avgRMultiple": 0.8043531693234875,
+        "bestExamples": [
+          {
+            "symbol": "BVS",
+            "sessionDate": "2025-12-31",
+            "ret10d": 9.96563573883161
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-06",
+            "ret10d": 7.191780821917813
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-27",
+            "ret10d": 3.802281368821293
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-13",
+            "ret10d": 1.689189189189189
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-09",
+            "ret10d": 0.9900990099009923
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-20",
+            "ret10d": 0.38167938931298256
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-13",
+            "ret10d": -1.4981273408239646
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2025-12-24",
+            "ret10d": -1.6233766233766231
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-30",
+            "ret10d": -1.661129568106312
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2025-12-17",
+            "ret10d": -4.276315789473675
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -14.6964856230032
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.956810631229242
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-16",
+            "ret10d": -5.937499999999996
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-23",
+            "ret10d": -4.575163398692817
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2025-12-17",
+            "ret10d": -4.276315789473675
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-30",
+            "ret10d": -1.661129568106312
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2025-12-24",
+            "ret10d": -1.6233766233766231
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-13",
+            "ret10d": -1.4981273408239646
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-20",
+            "ret10d": 0.38167938931298256
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-01-09",
+            "ret10d": 0.9900990099009923
+          }
+        ]
+      },
+      {
+        "bucket": "industrial",
+        "count": 14,
+        "avgRet5d": -0.8044915876040253,
+        "avgRet10d": -0.9398867574968637,
+        "avgRet20d": -3.088017498570223,
+        "medianRet5d": -1.7125233354402294,
+        "medianRet10d": -2.069808927718902,
+        "medianRet20d": -4.470628141449776,
+        "winRate10d": 0.42857142857142855,
+        "falsePilotRate": null,
+        "avgMae10d": -7.66420429704502,
+        "avgMfe10d": 8.605849369546894,
+        "avgRMultiple": 1.036411975649368,
+        "bestExamples": [
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.39917695473252
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-24",
+            "ret10d": 17.550951659087097
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-06",
+            "ret10d": 4.5193353005124965
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-03-27",
+            "ret10d": 2.209944751381221
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-03-13",
+            "ret10d": 1.1173184357541792
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-03-20",
+            "ret10d": 0.7575757575757683
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-17",
+            "ret10d": -1.7467248908296915
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-09",
+            "ret10d": -2.3928929646081123
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.437705407827907
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-23",
+            "ret10d": -5.475631238990023
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-16",
+            "ret10d": -12.12916776056709
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-03-06",
+            "ret10d": -9.897610921501714
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-13",
+            "ret10d": -7.42496050552922
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-23",
+            "ret10d": -5.475631238990023
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-30",
+            "ret10d": -5.437705407827907
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-01-09",
+            "ret10d": -2.3928929646081123
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-17",
+            "ret10d": -1.7467248908296915
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-03-20",
+            "ret10d": 0.7575757575757683
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-03-13",
+            "ret10d": 1.1173184357541792
+          }
+        ]
+      }
+    ],
+    "byLiquidity": [
+      {
+        "bucket": "low",
+        "count": 504,
+        "avgRet5d": -0.3747495215517978,
+        "avgRet10d": -0.7531621159294473,
+        "avgRet20d": -1.3905422571943427,
+        "medianRet5d": -0.5933988764044973,
+        "medianRet10d": -1.1379964365768136,
+        "medianRet20d": -2.4000000000000012,
+        "winRate10d": 0.36904761904761907,
+        "falsePilotRate": 1,
+        "avgMae10d": -8.485540549656703,
+        "avgMfe10d": 7.979875358385993,
+        "avgRMultiple": 0.7888640415165349,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          }
+        ]
+      },
+      {
+        "bucket": "high",
+        "count": 98,
+        "avgRet5d": 0.47595405275856795,
+        "avgRet10d": 1.021333333396862,
+        "avgRet20d": 1.926163496881688,
+        "medianRet5d": -0.2888470189825449,
+        "medianRet10d": -0.19354838709677236,
+        "medianRet20d": -1.7565665009459361,
+        "winRate10d": 0.4897959183673469,
+        "falsePilotRate": 0.3333333333333333,
+        "avgMae10d": -6.858730787817245,
+        "avgMfe10d": 8.973295078706853,
+        "avgRMultiple": 0.9865914172722722,
+        "bestExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-06",
+            "ret10d": 27.08757637474541
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.15527950310557
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-24",
+            "ret10d": 21.981424148606816
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-08",
+            "ret10d": 21.694915254237277
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-24",
+            "ret10d": 19.921874999999996
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-01-23",
+            "ret10d": 18.886198547215507
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2025-12-24",
+            "ret10d": 15.439093484419272
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2025-12-24",
+            "ret10d": -21.075268817204297
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2025-12-24",
+            "ret10d": -19.298245614035096
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-27",
+            "ret10d": -16.022099447513824
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.1356993736952
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-13",
+            "ret10d": -14.8148148148148
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-01-30",
+            "ret10d": -12.987012987012989
+          },
+          {
+            "symbol": "CTG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -11.11111111111111
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2025-12-17",
+            "ret10d": -10.874200426439236
+          }
+        ]
+      },
+      {
+        "bucket": "medium",
+        "count": 98,
+        "avgRet5d": -0.17483241231156535,
+        "avgRet10d": -0.6059958293283048,
+        "avgRet20d": -1.4249084177533102,
+        "medianRet5d": -0.5933988764044906,
+        "medianRet10d": -1.197999364877734,
+        "medianRet20d": -1.3793103448275794,
+        "winRate10d": 0.42857142857142855,
+        "falsePilotRate": null,
+        "avgMae10d": -7.687966990957097,
+        "avgMfe10d": 6.777045508892763,
+        "avgRMultiple": 0.6799613126145924,
+        "bestExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-13",
+            "ret10d": 26.275510204081627
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-06-06",
+            "ret10d": 16.666666666666668
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-10-24",
+            "ret10d": 14.285714285714299
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-13",
+            "ret10d": 14.285714285714294
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": 11.525029103608837
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-06",
+            "ret10d": 10.695876288659809
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-06",
+            "ret10d": 10.687022900763363
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 10.419026047565119
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-31",
+            "ret10d": -18.51851851851852
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-23",
+            "ret10d": -16.666666666666664
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-15",
+            "ret10d": -13.636363636363647
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-03-06",
+            "ret10d": -11.919191919191917
+          },
+          {
+            "symbol": "DBC",
+            "sessionDate": "2026-02-27",
+            "ret10d": -11.487758945386066
+          },
+          {
+            "symbol": "BVB",
+            "sessionDate": "2026-02-27",
+            "ret10d": -10.370370370370372
+          },
+          {
+            "symbol": "AAA",
+            "sessionDate": "2026-02-27",
+            "ret10d": -10.253164556962032
+          }
+        ]
+      }
+    ],
+    "byIndexRegime": [
+      {
+        "bucket": "sideways",
+        "count": 258,
+        "avgRet5d": 0.5154783077367644,
+        "avgRet10d": -0.3858877181465611,
+        "avgRet20d": 1.060448716570745,
+        "medianRet5d": 0,
+        "medianRet10d": 0,
+        "medianRet20d": -0.7184692731727224,
+        "winRate10d": 0.437984496124031,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -7.327152930622714,
+        "avgMfe10d": 8.211712181236992,
+        "avgRMultiple": 0.7219823309589296,
+        "bestExamples": [
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-29",
+            "ret10d": 50.000000000000014
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-05-09",
+            "ret10d": 37.5
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-04-29",
+            "ret10d": 36.842105263157904
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-09",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-10-24",
+            "ret10d": 33.33333333333333
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-06-06",
+            "ret10d": 26.530612244897956
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2026-01-09",
+            "ret10d": 25.35211267605635
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2025-12-17",
+            "ret10d": 23.809523809523807
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-04-22",
+            "ret10d": 21.212121212121218
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-10-24",
+            "ret10d": 19.999999999999996
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-15",
+            "ret10d": -45.83333333333333
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-05-08",
+            "ret10d": -40.909090909090914
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-08-15",
+            "ret10d": -33.33333333333334
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-05-16",
+            "ret10d": -30.76923076923077
+          },
+          {
+            "symbol": "DCL",
+            "sessionDate": "2026-03-27",
+            "ret10d": -26.060070671378092
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-08-15",
+            "ret10d": -25.806451612903235
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-09-19",
+            "ret10d": -24.999999999999993
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2025-08-15",
+            "ret10d": -23.076923076923077
+          },
+          {
+            "symbol": "BOT",
+            "sessionDate": "2025-08-15",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-09-19",
+            "ret10d": -19.642857142857135
+          }
+        ]
+      },
+      {
+        "bucket": "uptrend",
+        "count": 220,
+        "avgRet5d": -0.3086193180396056,
+        "avgRet10d": -0.16984944484282566,
+        "avgRet20d": -1.6542634118986588,
+        "medianRet5d": -1.4281741065220352,
+        "medianRet10d": -2.068854912862176,
+        "medianRet20d": -3.567684935609474,
+        "winRate10d": 0.36363636363636365,
+        "falsePilotRate": 0.5,
+        "avgMae10d": -7.568895675882476,
+        "avgMfe10d": 8.179942883129074,
+        "avgRMultiple": 1.0881215508835897,
+        "bestExamples": [
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-01-30",
+            "ret10d": 66.03773584905662
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-13",
+            "ret10d": 51.22448979591836
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2025-12-31",
+            "ret10d": 31.362467866323918
+          },
+          {
+            "symbol": "BCG",
+            "sessionDate": "2025-07-01",
+            "ret10d": 31.000000000000007
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2025-12-31",
+            "ret10d": 29.753521126760575
+          },
+          {
+            "symbol": "C69",
+            "sessionDate": "2025-12-31",
+            "ret10d": 26.984126984126988
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-01-30",
+            "ret10d": 26.834381551362675
+          },
+          {
+            "symbol": "DCM",
+            "sessionDate": "2026-02-13",
+            "ret10d": 26.275510204081627
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.39917695473252
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2025-12-31",
+            "ret10d": 25.15527950310557
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -31.538461538461537
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2025-12-24",
+            "ret10d": -21.075268817204297
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2026-02-13",
+            "ret10d": -20.833333333333336
+          },
+          {
+            "symbol": "BCM",
+            "sessionDate": "2026-02-27",
+            "ret10d": -20.20802377414561
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2025-12-24",
+            "ret10d": -19.298245614035096
+          },
+          {
+            "symbol": "AAS",
+            "sessionDate": "2026-02-27",
+            "ret10d": -18.26923076923077
+          },
+          {
+            "symbol": "CEO",
+            "sessionDate": "2026-02-27",
+            "ret10d": -16.022099447513824
+          },
+          {
+            "symbol": "CMG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.517241379310342
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.294117647058822
+          },
+          {
+            "symbol": "BID",
+            "sessionDate": "2026-02-27",
+            "ret10d": -15.1356993736952
+          }
+        ]
+      },
+      {
+        "bucket": "correction",
+        "count": 167,
+        "avgRet5d": -0.8278217359342644,
+        "avgRet10d": -0.26539950462519885,
+        "avgRet20d": -1.6571238477109627,
+        "medianRet5d": -0.7102272727272727,
+        "medianRet10d": -0.37105751391464886,
+        "medianRet20d": -1.0638297872340425,
+        "winRate10d": 0.41317365269461076,
+        "falsePilotRate": null,
+        "avgMae10d": -7.201917128446084,
+        "avgMfe10d": 5.882953766183136,
+        "avgRMultiple": 0.5604149883770116,
+        "bestExamples": [
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-03-20",
+            "ret10d": 50
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-02-06",
+            "ret10d": 37.096774193548384
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-02-06",
+            "ret10d": 35.793357933579315
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-02-06",
+            "ret10d": 27.08757637474541
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-13",
+            "ret10d": 15.543328748280603
+          },
+          {
+            "symbol": "CII",
+            "sessionDate": "2026-03-13",
+            "ret10d": 14.714714714714733
+          },
+          {
+            "symbol": "CRC",
+            "sessionDate": "2026-03-13",
+            "ret10d": 14.285714285714294
+          },
+          {
+            "symbol": "AAV",
+            "sessionDate": "2026-02-06",
+            "ret10d": 12.962962962962948
+          },
+          {
+            "symbol": "BVH",
+            "sessionDate": "2026-03-20",
+            "ret10d": 11.842105263157894
+          },
+          {
+            "symbol": "APS",
+            "sessionDate": "2026-02-06",
+            "ret10d": 11.290322580645164
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -43.33333333333333
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-06",
+            "ret10d": -24.291497975708495
+          },
+          {
+            "symbol": "BSR",
+            "sessionDate": "2026-03-13",
+            "ret10d": -21.590909090909093
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-06",
+            "ret10d": -20.743919885550795
+          },
+          {
+            "symbol": "APG",
+            "sessionDate": "2026-03-13",
+            "ret10d": -19.24157303370787
+          },
+          {
+            "symbol": "BFC",
+            "sessionDate": "2026-03-13",
+            "ret10d": -15.797317436661693
+          },
+          {
+            "symbol": "CTS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -13.934426229508196
+          },
+          {
+            "symbol": "ACV",
+            "sessionDate": "2026-03-06",
+            "ret10d": -13.085937500000005
+          },
+          {
+            "symbol": "BIG",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.987012987012985
+          },
+          {
+            "symbol": "BVS",
+            "sessionDate": "2026-03-06",
+            "ret10d": -12.956810631229242
+          }
+        ]
+      },
+      {
+        "bucket": "unknown",
+        "count": 55,
+        "avgRet5d": -1.5675411204481744,
+        "avgRet10d": -2.866236447456005,
+        "avgRet20d": -5.1750624647488,
+        "medianRet5d": -2.0080321285140665,
+        "medianRet10d": -4.761904761904765,
+        "medianRet20d": -9.638554216867478,
+        "winRate10d": 0.2545454545454545,
+        "falsePilotRate": null,
+        "avgMae10d": -17.163748256392108,
+        "avgMfe10d": 12.08596549474871,
+        "avgRMultiple": 0.7574937965907557,
+        "bestExamples": [
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-01-10",
+            "ret10d": 71.42857142857143
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-10-25",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "ACM",
+            "sessionDate": "2024-11-29",
+            "ret10d": 33.33333333333335
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-09-20",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-10-25",
+            "ret10d": 28.57142857142858
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-12-06",
+            "ret10d": 26.66666666666666
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-01-03",
+            "ret10d": 22.22222222222223
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2024-11-29",
+            "ret10d": 11.111111111111107
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2025-02-21",
+            "ret10d": 10.526315789473696
+          },
+          {
+            "symbol": "DCS",
+            "sessionDate": "2025-02-14",
+            "ret10d": 10.000000000000009
+          }
+        ],
+        "worstExamples": [
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-09-13",
+            "ret10d": -31.578947368421044
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-24",
+            "ret10d": -29.62962962962964
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-24",
+            "ret10d": -28.571428571428577
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-03",
+            "ret10d": -22.222222222222225
+          },
+          {
+            "symbol": "CVN",
+            "sessionDate": "2024-08-09",
+            "ret10d": -19.999999999999996
+          },
+          {
+            "symbol": "BGE",
+            "sessionDate": "2025-03-24",
+            "ret10d": -19.51219512195122
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-10-17",
+            "ret10d": -19.04761904761905
+          },
+          {
+            "symbol": "DAG",
+            "sessionDate": "2024-07-11",
+            "ret10d": -18.644067796610166
+          },
+          {
+            "symbol": "BCR",
+            "sessionDate": "2025-03-31",
+            "ret10d": -18.51851851851852
+          },
+          {
+            "symbol": "AMV",
+            "sessionDate": "2024-11-01",
+            "ret10d": -17.647058823529417
+          }
+        ]
+      }
+    ]
+  },
+  "falsePilots": [
+    {
+      "symbol": "CEO",
+      "sessionDate": "2026-01-30",
+      "score": 62,
+      "rr": 2.227636616776887,
+      "reasonCodes": [
+        "RECLAIM_MA20",
+        "VOLUME_EXPANSION",
+        "POCKET_PIVOT",
+        "RR_ACCEPTABLE",
+        "RS_IMPROVING"
+      ],
+      "gate1Level": "PASS",
+      "sector": "other",
+      "ret10d": -5.500000000000007,
+      "mae10d": -9.499999999999993,
+      "mfe10d": 2.5,
+      "hypotheses": [
+        "rr_target_too_optimistic",
+        "stop_too_loose",
+        "volume_spike_failed",
+        "no_follow_through"
+      ]
+    },
+    {
+      "symbol": "AAV",
+      "sessionDate": "2026-01-23",
+      "score": 62,
+      "rr": 2.1212121212121207,
+      "reasonCodes": [
+        "RECLAIM_MA20",
+        "VOLUME_EXPANSION",
+        "POCKET_PIVOT",
+        "RR_ACCEPTABLE",
+        "RS_IMPROVING"
+      ],
+      "gate1Level": "WARNING",
+      "sector": "other",
+      "ret10d": -11.475409836065563,
+      "mae10d": -11.475409836065563,
+      "mfe10d": 0,
+      "hypotheses": [
+        "market_regime_weak",
+        "rr_target_too_optimistic",
+        "stop_too_loose",
+        "volume_spike_failed",
+        "liquidity_issue",
+        "resistance_too_near"
+      ]
+    }
+  ],
+  "recommendation": {
+    "enableDecisionSupport": false,
+    "renamePilotBuyTo": "Pilot Candidate",
+    "demotePilotUntilPaperValidation": true,
+    "extendedChaseBlockUseful": true,
+    "preferredCalibrationVariant": "block_dist_ma20_gt_4"
+  }
+}

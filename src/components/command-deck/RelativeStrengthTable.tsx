@@ -16,8 +16,10 @@ function setupStateTone(setupState: string): "success" | "warning" | "danger" | 
 }
 
 function earlyEntryTone(state: string): "success" | "warning" | "danger" | "neutral" {
-  if (state.includes("Pilot") || state.includes("Confirmed")) return "success";
-  if (state.includes("Add Zone") || state.includes("Watch")) return "warning";
+  if (state.includes("Confirmed")) return "success";
+  if (state.includes("Pilot Candidate") || state.includes("Add Zone") || state.includes("Watch")) {
+    return "warning";
+  }
   if (state.includes("Extended") || state.includes("Failed") || state.includes("Blocked")) {
     return "danger";
   }
@@ -46,6 +48,16 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
           data-testid="dashboard-rs-context-banner"
         >
           {contextNote}
+        </p>
+      ) : null}
+
+      {showEarlyEntry ? (
+        <p
+          className="text-xs m-0 mb-3 leading-relaxed cd-rs-early-research-warning"
+          style={{ color: "var(--cd-text-muted)" }}
+          data-testid="command-deck-rs-early-research-warning"
+        >
+          Early-entry chips are research-only signals — not buy recommendations. Needs validation.
         </p>
       ) : null}
 
