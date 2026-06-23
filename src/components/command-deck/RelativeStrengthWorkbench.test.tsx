@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { RelativeStrengthRow } from "./types";
-import { RelativeStrengthTable } from "./RelativeStrengthTable";
+import { RelativeStrengthWorkbench } from "./RelativeStrengthWorkbench";
 
 const ROW_WITH_EARLY: RelativeStrengthRow = {
   symbol: "ACB",
@@ -13,6 +13,9 @@ const ROW_WITH_EARLY: RelativeStrengthRow = {
   status: "watch",
   rsStrengthScore: null,
   setupReadinessScore: null,
+  terminalCode: "breakout_recency",
+  sectorLabel: "Bank",
+  actionLabel: "Wait for breakout",
   earlyEntry: {
     earlyReversalScore: 59,
     proposedTradeState: "Pilot Candidate",
@@ -30,6 +33,7 @@ const ROW_WITH_EARLY: RelativeStrengthRow = {
     sizingNote: null,
     whyNotPilotYet: null,
     rrRejectionReason: null,
+    distFromMa20Pct: 3.2,
   },
 };
 
@@ -39,29 +43,36 @@ const ROW_WITHOUT_EARLY: RelativeStrengthRow = {
   earlyEntry: null,
 };
 
-describe("RelativeStrengthTable early-entry UI", () => {
-  it("shows early columns and research warning when any row has earlyEntry", () => {
+describe("RelativeStrengthWorkbench", () => {
+  it("shows compact early line and help panel with full disclaimer", () => {
     const html = renderToStaticMarkup(
-      <RelativeStrengthTable rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
+      <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
     );
+    expect(html).toContain("Early Entry: research-only");
+    expect(html).toContain('data-testid="early-entry-help"');
     expect(html).toContain('data-testid="command-deck-rs-early-research-warning"');
-    expect(html).toContain('data-testid="command-deck-rs-early-research-section"');
     expect(html).toContain('data-testid="command-deck-rs-daily-checklist"');
-    expect(html).toContain('data-testid="command-deck-rs-paper-commands"');
-    expect(html).toContain("Early state");
-    expect(html).toContain("Pilot Candidate");
+    expect(html).toContain("Pilot Research");
+    expect(html).toContain("Wait Breakout");
     expect(html).toContain("2.04:1");
     expect(html).toContain("research-only signal");
-    expect(html).toContain("Compression Breakout");
-    expect(html).toContain("22.00");
   });
 
   it("hides early columns when no row has earlyEntry", () => {
     const html = renderToStaticMarkup(
-      <RelativeStrengthTable rows={[{ ...ROW_WITHOUT_EARLY, earlyEntry: null }]} />
+      <RelativeStrengthWorkbench rows={[{ ...ROW_WITHOUT_EARLY, earlyEntry: null }]} />
     );
-    expect(html).not.toContain('data-testid="command-deck-rs-early-research-warning"');
-    expect(html).not.toContain("Early state");
-    expect(html).not.toContain("Pilot Candidate");
+    expect(html).not.toContain("Early Entry: research-only");
+    expect(html).not.toContain("Early State");
+    expect(html).not.toContain("Pilot Research");
+  });
+
+  it("renders workbench as primary table", () => {
+    const html = renderToStaticMarkup(
+      <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY]} />
+    );
+    expect(html).toContain('data-testid="command-deck-rs-workbench"');
+    expect(html).toContain("Relative Strength Workbench");
+    expect(html).toContain("MA20 Dist");
   });
 });

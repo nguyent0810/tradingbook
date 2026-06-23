@@ -54,6 +54,9 @@ export type RelativeStrengthRow = {
   status: "watch" | "blocked" | "aligned";
   rsStrengthScore: number | null;
   setupReadinessScore: number | null;
+  terminalCode: string | null;
+  sectorLabel: string;
+  actionLabel: string;
   /** Display-only early-entry lane when EARLY_ENTRY_V1_ENABLED */
   earlyEntry?: import("@/lib/dashboard/dashboard-v3-view-model").V3EarlyEntryDisplay | null;
 };

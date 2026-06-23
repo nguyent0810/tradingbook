@@ -1,4 +1,5 @@
 import type { DashboardV3ViewModel, V3DecisionMode, V3EvidenceItem } from "@/lib/dashboard/dashboard-v3-view-model";
+import { sectorLabelForSymbol } from "@/lib/dashboard/rs-sector-display";
 import type {
   CommandDeckData,
   DecisionCoreData,
@@ -112,6 +113,9 @@ function mapRelativeStrength(vm: DashboardV3ViewModel): RelativeStrengthRow[] {
       status,
       rsStrengthScore: card.rsStrengthScore,
       setupReadinessScore: card.setupReadinessScore,
+      terminalCode: card.terminalCode,
+      sectorLabel: sectorLabelForSymbol(card.symbol),
+      actionLabel: card.nextCondition || card.blockerLabel || "—",
       earlyEntry: card.earlyEntry,
     };
   });

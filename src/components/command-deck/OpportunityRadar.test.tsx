@@ -17,12 +17,12 @@ const SAMPLE_NODES: RadarNode[] = [
 
 describe("OpportunityRadar layout", () => {
   it("uses square aspect-ratio plot container", () => {
-    const html = renderToStaticMarkup(<OpportunityRadar nodes={SAMPLE_NODES} />);
+    const html = renderToStaticMarkup(<OpportunityRadar nodes={SAMPLE_NODES} variant="mini" />);
     expect(html).toContain('data-testid="command-deck-radar-plot"');
     expect(html).toContain("cd-radar-plot");
     expect(html).toContain("aspect-square");
-    expect(html).not.toContain("cd-radar-wrap");
-    expect(html).not.toContain("flex-1 relative min-h-[300px]");
+    expect(html).toContain("cd-radar-plot--mini");
+    expect(html).toContain('data-testid="radar-mini-summary"');
   });
 
   it("renders circular backdrop circles not ellipses", () => {

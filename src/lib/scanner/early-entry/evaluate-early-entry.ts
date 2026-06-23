@@ -285,6 +285,7 @@ export function toEarlyEntryDisplayMetadata(params: {
       rrRejectionReason: params.rrRejectionReason,
     }),
     rrRejectionReason: params.rrRejectionReason,
+    distFromMa20Pct: params.metrics.distFromMa20Pct,
   };
 }
 
