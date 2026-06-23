@@ -26,6 +26,8 @@ const SECTOR_BY_SYMBOL: Record<string, RsDisplaySector> = {
   OCB: "bank",
   VIB: "bank",
   NVB: "bank",
+  BVB: "bank",
+  ABB: "bank",
   SSI: "securities",
   VND: "securities",
   HCM: "securities",

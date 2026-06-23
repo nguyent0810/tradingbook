@@ -56,3 +56,20 @@ export function statusTooltipForRow(row: RelativeStrengthRow): string | null {
   }
   return setupStateTooltip(row.setupState);
 }
+
+/** Action-oriented label for workbench table and radar tooltips. */
+export function workbenchActionLabel(row: RelativeStrengthRow): string {
+  if (row.earlyEntry) {
+    const early = friendlyEarlyStateLabel(row.earlyEntry.proposedTradeState);
+    if (early === "Too Extended") return "Avoid chase";
+    if (early === "Pilot Research") return "Paper watch only";
+    if (early === "Add Watch") return "Wait confirmation";
+    if (early === "Watch") return "Observe";
+  }
+  const setup = friendlySetupStateLabel(row.setupState);
+  if (setup === "Wait Breakout") return "Watch trigger";
+  if (setup === "Bad Zone") return "Wait better zone";
+  if (setup === "Below MA50") return "Too early";
+  if (setup === "Too Extended") return "Avoid chase";
+  return row.actionLabel && row.actionLabel !== "—" ? row.actionLabel : "Observe";
+}

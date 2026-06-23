@@ -6,6 +6,8 @@ import { Card, CardHeader } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { EarlyEntryHelpPanel } from "./EarlyEntryHelpPanel";
 import {
+  countWorkbenchRowsByFilter,
+  filterEmptyStateMessage,
   filterWorkbenchRows,
   formatReasonChip,
   hasAnyEarlyEntryRows,
@@ -19,6 +21,7 @@ import {
   friendlyEarlyStateLabel,
   friendlySetupStateLabel,
   statusTooltipForRow,
+  workbenchActionLabel,
 } from "@/lib/dashboard/rs-status-display";
 import { isExtendedDoNotChase } from "@/lib/dashboard/early-entry-ui";
 
@@ -70,15 +73,18 @@ export function RelativeStrengthWorkbench({
 
   const showEarlyEntry = hasAnyEarlyEntryRows(rows);
   const filterOptions = useMemo(() => visibleFilterOptions(rows), [rows]);
+  const filterCounts = useMemo(() => countWorkbenchRowsByFilter(rows), [rows]);
 
   const displayRows = useMemo(
     () => sortWorkbenchRows(filterWorkbenchRows(rows, filter), sort),
     [rows, filter, sort]
   );
 
+  const emptyMessage = filterEmptyStateMessage(filter, displayRows.length);
+
   const showSector = rows.some((r) => r.sectorLabel && r.sectorLabel !== "Other");
-  const baseCols = 5 + (showSector ? 1 : 0);
-  const earlyCols = showEarlyEntry ? 6 : 0;
+  const baseCols = 4 + (showSector ? 1 : 0);
+  const earlyCols = showEarlyEntry ? 5 : 0;
   const detailColSpan = baseCols + earlyCols;
 
   function toggleRow(symbol: string) {
@@ -106,7 +112,7 @@ export function RelativeStrengthWorkbench({
       {showEarlyEntry ? (
         <div className="cd-rs-early-compact mb-2" data-testid="command-deck-rs-early-research-section">
           <p className="m-0 text-xs cd-rs-early-compact__line">
-            Early Entry: research-only · not a buy signal · paper validation enabled
+            Early Entry Research · research-only · not a buy signal · paper validation enabled
           </p>
           <EarlyEntryHelpPanel />
         </div>
@@ -120,8 +126,9 @@ export function RelativeStrengthWorkbench({
               type="button"
               className={`cd-workbench__chip ${filter === opt.id ? "cd-workbench__chip--active" : ""}`}
               onClick={() => setFilter(opt.id)}
+              data-testid={`rs-filter-${opt.id}`}
             >
-              {opt.label}
+              {opt.label} {filterCounts[opt.id]}
             </button>
           ))}
         </div>
@@ -142,17 +149,27 @@ export function RelativeStrengthWorkbench({
         </label>
       </div>
 
+      {emptyMessage ? (
+        <p
+          className="text-xs m-0 mb-2 cd-workbench-empty"
+          data-testid="rs-workbench-empty-state"
+          style={{ color: "var(--cd-text-muted)" }}
+        >
+          {emptyMessage}
+        </p>
+      ) : null}
+
       <div className="cd-workbench-scroll" role="region" aria-label="Relative strength workbench">
         <table className="cd-rs-table cd-workbench-table">
           <thead>
             <tr>
               <th>Symbol</th>
               {showSector ? <th>Sector</th> : null}
+              <th>Action</th>
+              <th>Setup</th>
+              {showEarlyEntry ? <th className="cd-rs-table__col--hide-mobile">Early</th> : null}
               <th className="text-right">RS20</th>
               <th className="text-right cd-rs-table__col--hide-mobile">RS50</th>
-              <th className="cd-rs-table__col--hide-mobile">RS Strength</th>
-              <th>Setup Status</th>
-              {showEarlyEntry ? <th className="cd-rs-table__col--hide-mobile">Early State</th> : null}
               {showEarlyEntry ? (
                 <th className="text-right cd-rs-table__col--hide-mobile">Score</th>
               ) : null}
@@ -168,7 +185,6 @@ export function RelativeStrengthWorkbench({
               {showEarlyEntry ? (
                 <th className="text-right cd-rs-table__col--hide-mobile">Invalid</th>
               ) : null}
-              <th className="cd-rs-table__col--hide-mobile">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -200,17 +216,11 @@ export function RelativeStrengthWorkbench({
                       </td>
                     ) : null}
                     <td
-                      className={`cd-mono text-right tabular-nums ${row.rs20 >= 0 ? "cd-tone-success" : "cd-tone-danger"}`}
+                      className="text-xs cd-workbench-action"
+                      style={{ color: "var(--cd-text)" }}
+                      title={tooltip ?? undefined}
                     >
-                      {formatPp(row.rs20)}
-                    </td>
-                    <td
-                      className={`cd-mono text-right tabular-nums cd-rs-table__col--hide-mobile ${row.rs50 != null && row.rs50 >= 0 ? "cd-tone-success" : row.rs50 != null ? "cd-tone-danger" : ""}`}
-                    >
-                      {formatPp(row.rs50)}
-                    </td>
-                    <td className="cd-mono tabular-nums cd-rs-table__col--hide-mobile">
-                      {row.rsStrength}
+                      {workbenchActionLabel(row)}
                     </td>
                     <td title={tooltip ?? undefined}>
                       <Badge
@@ -238,6 +248,16 @@ export function RelativeStrengthWorkbench({
                         )}
                       </td>
                     ) : null}
+                    <td
+                      className={`cd-mono text-right tabular-nums ${row.rs20 >= 0 ? "cd-tone-success" : "cd-tone-danger"}`}
+                    >
+                      {formatPp(row.rs20)}
+                    </td>
+                    <td
+                      className={`cd-mono text-right tabular-nums cd-rs-table__col--hide-mobile ${row.rs50 != null && row.rs50 >= 0 ? "cd-tone-success" : row.rs50 != null ? "cd-tone-danger" : ""}`}
+                    >
+                      {formatPp(row.rs50)}
+                    </td>
                     {showEarlyEntry ? (
                       <td className="cd-mono text-right tabular-nums cd-rs-table__col--hide-mobile">
                         {row.earlyEntry?.earlyReversalScore ?? "—"}
@@ -265,12 +285,6 @@ export function RelativeStrengthWorkbench({
                         {row.earlyEntry?.invalidLevel?.toFixed(2) ?? "—"}
                       </td>
                     ) : null}
-                    <td
-                      className="text-xs cd-rs-table__col--hide-mobile"
-                      style={{ color: "var(--cd-text-muted)" }}
-                    >
-                      {row.actionLabel}
-                    </td>
                   </tr>
                   {isExpanded && row.earlyEntry ? (
                     <tr className="cd-workbench-detail-row">

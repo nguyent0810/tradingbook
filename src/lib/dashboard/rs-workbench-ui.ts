@@ -32,7 +32,7 @@ export const RS_WORKBENCH_FILTER_OPTIONS: ReadonlyArray<{
   { id: "below_ma50", label: "Below MA50" },
   { id: "too_extended", label: "Too Extended", requiresEarlyEntry: true },
   { id: "bad_rr", label: "Bad R:R", requiresEarlyEntry: true },
-  { id: "bank_only", label: "Bank only" },
+  { id: "bank_only", label: "Bank" },
 ];
 
 export const RS_WORKBENCH_SORT_OPTIONS: ReadonlyArray<{
@@ -55,12 +55,34 @@ export function visibleFilterOptions(
   rows: readonly RelativeStrengthRow[]
 ): typeof RS_WORKBENCH_FILTER_OPTIONS {
   const hasEarly = hasAnyEarlyEntryRows(rows);
-  const hasBank = rows.some((r) => sectorForSymbol(r.symbol) === "bank");
   return RS_WORKBENCH_FILTER_OPTIONS.filter((opt) => {
     if (opt.requiresEarlyEntry && !hasEarly) return false;
-    if (opt.id === "bank_only" && !hasBank) return false;
     return true;
   });
+}
+
+export function countWorkbenchRowsByFilter(
+  rows: readonly RelativeStrengthRow[]
+): Record<RsWorkbenchFilterId, number> {
+  const counts = {} as Record<RsWorkbenchFilterId, number>;
+  for (const opt of RS_WORKBENCH_FILTER_OPTIONS) {
+    counts[opt.id] = filterWorkbenchRows(rows, opt.id).length;
+  }
+  return counts;
+}
+
+export function filterEmptyStateMessage(
+  filter: RsWorkbenchFilterId,
+  resultCount: number
+): string | null {
+  if (resultCount > 0) return null;
+  if (filter === "pilot_research") {
+    return "No Pilot Research candidates today. This is normal. Do not force trades.";
+  }
+  if (filter === "bank_only") {
+    return "No bank symbols in the current filtered set.";
+  }
+  return "No symbols match this filter.";
 }
 
 function matchesTerminal(row: RelativeStrengthRow, code: string): boolean {
