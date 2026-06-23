@@ -3,6 +3,7 @@ import type {
   DashboardV3ViewModel,
   V3DecisionHero,
   V3DecisionMode,
+  V3EarlyEntryDisplay,
   V3EvidenceItem,
   V3LedgerPulse,
   V3MarketPulse,
@@ -61,11 +62,14 @@ export type RiskTableRow = {
 export type RsTableRow = {
   id: string;
   symbol: string;
-  stateBadge: string;
-  stateTone: V3RsWatchlistCard["stateTone"];
+  rs20: string;
+  rs50: string;
+  setupState: string;
   strengthLabel: string | null;
-  blockerLabel: string;
-  rsValue: string;
+  reason: string;
+  rsStrengthScore: number | null;
+  stateTone: V3RsWatchlistCard["stateTone"];
+  earlyEntry: V3EarlyEntryDisplay | null;
 };
 
 export type SetupTableRow = {

@@ -45,10 +45,15 @@ describe("RelativeStrengthTable early-entry UI", () => {
       <RelativeStrengthTable rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
     );
     expect(html).toContain('data-testid="command-deck-rs-early-research-warning"');
+    expect(html).toContain('data-testid="command-deck-rs-early-research-section"');
+    expect(html).toContain('data-testid="command-deck-rs-daily-checklist"');
+    expect(html).toContain('data-testid="command-deck-rs-paper-commands"');
     expect(html).toContain("Early state");
     expect(html).toContain("Pilot Candidate");
     expect(html).toContain("2.04:1");
-    expect(html).toContain("research-only");
+    expect(html).toContain("research-only signal");
+    expect(html).toContain("Compression Breakout");
+    expect(html).toContain("22.00");
   });
 
   it("hides early columns when no row has earlyEntry", () => {

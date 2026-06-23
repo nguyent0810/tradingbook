@@ -1,7 +1,20 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import type { V3RsWatchlistCard, V3RsWatchlistPanel } from "@/lib/dashboard/dashboard-v3-view-model";
+import {
+  EARLY_ENTRY_DAILY_CHECKLIST,
+  EARLY_ENTRY_FILTER_OPTIONS,
+  EARLY_ENTRY_PAPER_COMMANDS,
+  EARLY_ENTRY_SORT_OPTIONS,
+  filterRsWatchlistCards,
+  formatReasonChip,
+  hasAnyEarlyEntry,
+  isExtendedDoNotChase,
+  sortRsWatchlistCards,
+  type EarlyEntryFilterId,
+  type EarlyEntrySortId,
+} from "@/lib/dashboard/early-entry-ui";
 import { EARLY_ENTRY_RESEARCH_DISCLAIMER } from "@/lib/scanner/early-entry";
 import { truncateForChip } from "@/lib/dashboard/v3-user-copy";
 
@@ -55,23 +68,97 @@ function formatRr(value: number | null | undefined): string {
 }
 
 function earlyStateClass(state: string): string {
+  if (isExtendedDoNotChase(state)) return "tosv3-rs-chip--blocker tosv3-rs-chip--extended-warning";
   if (state.includes("Pilot Candidate")) return "tosv3-rs-chip--watch";
   if (state.includes("Add Zone")) return "tosv3-rs-chip--watch";
-  if (state.includes("Extended") || state.includes("Failed") || state.includes("Blocked")) {
+  if (state.includes("Failed") || state.includes("Blocked")) {
     return "tosv3-rs-chip--blocker";
   }
   return "tosv3-rs-chip--context";
 }
 
+function EarlyEntryResearchHeader({
+  filter,
+  sort,
+  onFilterChange,
+  onSortChange,
+}: {
+  filter: EarlyEntryFilterId;
+  sort: EarlyEntrySortId;
+  onFilterChange: (v: EarlyEntryFilterId) => void;
+  onSortChange: (v: EarlyEntrySortId) => void;
+}) {
+  return (
+    <div className="tosv3-rs-early-research" data-testid="dashboard-v3-rs-early-research-section">
+      <header className="tosv3-rs-early-research__head">
+        <h3 className="tosv3-rs-early-research__title">Early Entry Research</h3>
+        <span className="tosv3-rs-early-research__badge">Research only</span>
+      </header>
+      <p
+        className="tosv3-rs-early-research__disclaimer"
+        data-testid="dashboard-v3-rs-early-research-warning"
+      >
+        {EARLY_ENTRY_RESEARCH_DISCLAIMER}
+      </p>
+      <div className="tosv3-rs-early-research__controls">
+        <label className="tosv3-rs-early-research__control">
+          <span>Filter</span>
+          <select
+            value={filter}
+            onChange={(e) => onFilterChange(e.target.value as EarlyEntryFilterId)}
+            data-testid="dashboard-v3-rs-early-filter"
+          >
+            {EARLY_ENTRY_FILTER_OPTIONS.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="tosv3-rs-early-research__control">
+          <span>Sort</span>
+          <select
+            value={sort}
+            onChange={(e) => onSortChange(e.target.value as EarlyEntrySortId)}
+            data-testid="dashboard-v3-rs-early-sort"
+          >
+            {EARLY_ENTRY_SORT_OPTIONS.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="tosv3-rs-early-research__checklist" data-testid="dashboard-v3-rs-daily-checklist">
+        <p className="tosv3-rs-early-research__checklist-title">Daily research checklist</p>
+        <ul>
+          {EARLY_ENTRY_DAILY_CHECKLIST.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+      </div>
+      <p className="tosv3-rs-early-research__paper" data-testid="dashboard-v3-rs-paper-commands">
+        <span>Daily:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.daily}</code>
+        <span className="tosv3-rs-early-research__paper-sep">·</span>
+        <span>Weekly:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.weeklyValidate}</code>
+        <span className="tosv3-rs-early-research__paper-sep">·</span>
+        <code>{EARLY_ENTRY_PAPER_COMMANDS.weeklySummary}</code>
+      </p>
+    </div>
+  );
+}
+
 function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlistCard["earlyEntry"]> }) {
   const chips = [
-    ...earlyEntry.reasonCodes.slice(0, 6),
+    ...earlyEntry.reasonCodes.slice(0, 8),
     ...earlyEntry.transitionReasonCodes.slice(0, 4),
   ];
+  const extended = isExtendedDoNotChase(earlyEntry.proposedTradeState);
 
   return (
     <div
-      className="tosv3-rs-early-entry"
+      className={`tosv3-rs-early-entry ${extended ? "tosv3-rs-early-entry--extended" : ""}`}
       data-testid="dashboard-v3-rs-early-entry"
       aria-label="Early entry display-only metadata"
     >
@@ -80,28 +167,36 @@ function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlist
         <span className={`tosv3-rs-chip ${earlyStateClass(earlyEntry.proposedTradeState)}`}>
           {earlyEntry.proposedTradeState}
         </span>
+        {earlyEntry.entryType ? (
+          <span className="tosv3-rs-early-entry__entry-type">{earlyEntry.entryType}</span>
+        ) : null}
       </header>
-      <p className="tosv3-rs-early-entry__research-warning" data-testid="dashboard-v3-rs-early-research-warning">
-        {EARLY_ENTRY_RESEARCH_DISCLAIMER}
+      {extended ? (
+        <p className="tosv3-rs-early-entry__extended-banner" data-testid="dashboard-v3-rs-extended-warning">
+          Anti-FOMO caution — Extended — Do Not Chase. Not a buy signal.
+        </p>
+      ) : null}
+      <p className="tosv3-rs-early-entry__research-warning">
+        Not a buy recommendation · Needs forward validation
       </p>
       <ul className="tosv3-rs-card__metrics" aria-label="Early entry metrics">
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
           <span className="tosv3-rs-chip__label">Score</span>
           <span className="tosv3-rs-chip__value tabular-nums">{earlyEntry.earlyReversalScore}</span>
         </li>
-        {earlyEntry.entryType ? (
-          <li className="tosv3-rs-chip tosv3-rs-chip--context">
-            <span className="tosv3-rs-chip__label">Entry type</span>
-            <span className="tosv3-rs-chip__value">{earlyEntry.entryType}</span>
-          </li>
-        ) : null}
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
           <span className="tosv3-rs-chip__label">R:R</span>
           <span className="tosv3-rs-chip__value tabular-nums">{formatRr(earlyEntry.estimatedRiskReward)}</span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
-          <span className="tosv3-rs-chip__label">Stop dist</span>
+          <span className="tosv3-rs-chip__label">Stop %</span>
           <span className="tosv3-rs-chip__value tabular-nums">{formatPct(earlyEntry.stopDistancePct)}</span>
+        </li>
+        <li className="tosv3-rs-chip tosv3-rs-chip--context">
+          <span className="tosv3-rs-chip__label">Reward %</span>
+          <span className="tosv3-rs-chip__value tabular-nums">
+            {formatPct(earlyEntry.estimatedRewardPct)}
+          </span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
           <span className="tosv3-rs-chip__label">Target</span>
@@ -114,28 +209,35 @@ function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlist
       </ul>
       {earlyEntry.targetReason || earlyEntry.invalidLevelReason ? (
         <p className="tosv3-rs-early-entry__explain">
-          {earlyEntry.targetReason ? `Target: ${earlyEntry.targetReason}.` : ""}{" "}
-          {earlyEntry.invalidLevelReason ? `Stop: ${earlyEntry.invalidLevelReason}.` : ""}
+          {earlyEntry.targetReason ? (
+            <span>
+              <strong>Target reason:</strong> {earlyEntry.targetReason}.
+            </span>
+          ) : null}{" "}
+          {earlyEntry.invalidLevelReason ? (
+            <span>
+              <strong>Invalid reason:</strong> {earlyEntry.invalidLevelReason}.
+            </span>
+          ) : null}
         </p>
       ) : null}
       {chips.length > 0 ? (
         <ul className="tosv3-rs-early-entry__chips" aria-label="Early entry reason chips">
           {chips.map((code) => (
             <li key={code} className="tosv3-rs-early-entry__chip">
-              {truncateForChip(code.replace(/_/g, " "), 28)}
+              {truncateForChip(formatReasonChip(code), 28)}
             </li>
           ))}
         </ul>
       ) : null}
-      {earlyEntry.suggestedPilotSizePct != null ? (
-        <p className="tosv3-rs-early-entry__sizing">
-          Suggested size: ~{earlyEntry.suggestedPilotSizePct}%
-          {earlyEntry.sizingNote ? ` — ${earlyEntry.sizingNote}` : ""}
-        </p>
-      ) : null}
       {earlyEntry.whyNotPilotYet ? (
         <p className="tosv3-rs-early-entry__why-not" data-testid="dashboard-v3-rs-why-not-pilot">
-          Why not pilot yet: {earlyEntry.whyNotPilotYet}
+          <strong>Why not pilot yet:</strong> {earlyEntry.whyNotPilotYet}
+        </p>
+      ) : null}
+      {earlyEntry.rrRejectionReason ? (
+        <p className="tosv3-rs-early-entry__why-not">
+          <strong>R:R rejection:</strong> {earlyEntry.rrRejectionReason}
         </p>
       ) : null}
     </div>
@@ -217,14 +319,23 @@ export function RelativeStrengthRadar({ panel }: Props) {
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [contextOpen, setContextOpen] = useState(false);
+  const [filter, setFilter] = useState<EarlyEntryFilterId>("all");
+  const [sort, setSort] = useState<EarlyEntrySortId>("score_desc");
   const listId = useId();
 
-  const activeSymbol =
-    selectedSymbol && panel.cards.some((card) => card.symbol === selectedSymbol)
-      ? selectedSymbol
-      : (panel.cards[0]?.symbol ?? null);
+  const showEarlyEntry = hasAnyEarlyEntry(panel.cards);
 
-  const selected = panel.cards.find((card) => card.symbol === activeSymbol) ?? null;
+  const visibleCards = useMemo(() => {
+    const filtered = showEarlyEntry ? filterRsWatchlistCards(panel.cards, filter) : panel.cards;
+    return showEarlyEntry ? sortRsWatchlistCards(filtered, sort) : filtered;
+  }, [panel.cards, filter, sort, showEarlyEntry]);
+
+  const activeSymbol =
+    selectedSymbol && visibleCards.some((card) => card.symbol === selectedSymbol)
+      ? selectedSymbol
+      : (visibleCards[0]?.symbol ?? null);
+
+  const selected = visibleCards.find((card) => card.symbol === activeSymbol) ?? null;
 
   const selectSymbol = (symbol: string) => {
     setSelectedSymbol(symbol);
@@ -242,10 +353,19 @@ export function RelativeStrengthRadar({ panel }: Props) {
           <span className="tosv3-kicker">{panel.title}</span>
           <p className="tosv3-type-muted">{panel.subtitle}</p>
         </div>
-        {panel.cards.length > 0 ? (
-          <span className="tosv3-rs-radar__count tabular-nums">{panel.cards.length} leaders</span>
+        {visibleCards.length > 0 ? (
+          <span className="tosv3-rs-radar__count tabular-nums">{visibleCards.length} leaders</span>
         ) : null}
       </div>
+
+      {showEarlyEntry ? (
+        <EarlyEntryResearchHeader
+          filter={filter}
+          sort={sort}
+          onFilterChange={setFilter}
+          onSortChange={setSort}
+        />
+      ) : null}
 
       {panel.contextNote ? (
         <div className="tosv3-rs-radar__context-wrap">
@@ -263,7 +383,7 @@ export function RelativeStrengthRadar({ panel }: Props) {
         </div>
       ) : null}
 
-      {panel.cards.length > 0 && selected ? (
+      {visibleCards.length > 0 && selected ? (
         <div className="tosv3-rs-radar__master-detail">
           <div className="tosv3-rs-radar__master" id={listId}>
             <table className="tosv3-rs-table" role="tablist" aria-label="Relative strength leaders">
@@ -278,13 +398,22 @@ export function RelativeStrengthRadar({ panel }: Props) {
                     RS50
                   </th>
                   <th scope="col">Reason</th>
-                  {panel.cards.some((c) => c.earlyEntry) ? (
-                    <th scope="col">Early state</th>
+                  {showEarlyEntry ? (
+                    <>
+                      <th scope="col">Early state</th>
+                      <th scope="col" className="table-num">
+                        Score
+                      </th>
+                      <th scope="col" className="table-num">
+                        R:R
+                      </th>
+                      <th scope="col">Entry type</th>
+                    </>
                   ) : null}
                 </tr>
               </thead>
               <tbody data-testid="dashboard-v3-rs-cards">
-                {panel.cards.map((card) => {
+                {visibleCards.map((card) => {
                   const isSelected = selected.symbol === card.symbol;
                   return (
                     <tr
@@ -294,7 +423,11 @@ export function RelativeStrengthRadar({ panel }: Props) {
                       aria-selected={isSelected}
                       aria-controls={`tosv3-rs-detail-${card.symbol}`}
                       tabIndex={isSelected ? 0 : -1}
-                      className={`tosv3-rs-table__row ${isSelected ? "is-selected" : ""}`}
+                      className={`tosv3-rs-table__row ${isSelected ? "is-selected" : ""} ${
+                        card.earlyEntry && isExtendedDoNotChase(card.earlyEntry.proposedTradeState)
+                          ? "tosv3-rs-table__row--extended"
+                          : ""
+                      }`}
                       data-testid={`dashboard-v3-rs-card-${card.symbol}`}
                       onClick={() => selectSymbol(card.symbol)}
                       onKeyDown={(e) => {
@@ -315,16 +448,32 @@ export function RelativeStrengthRadar({ panel }: Props) {
                       <td className="tosv3-rs-table__blocker" title={card.setupReason}>
                         {truncateForChip(card.setupReason, 32)}
                       </td>
-                      {panel.cards.some((c) => c.earlyEntry) ? (
-                        <td className="tosv3-rs-table__early" title={card.earlyEntry?.whyNotPilotYet ?? undefined}>
-                          {card.earlyEntry ? (
-                            <span className={`tosv3-rs-row__badge ${earlyStateClass(card.earlyEntry.proposedTradeState)}`}>
-                              {truncateForChip(card.earlyEntry.proposedTradeState, 18)}
-                            </span>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
+                      {showEarlyEntry ? (
+                        <>
+                          <td
+                            className="tosv3-rs-table__early"
+                            title={card.earlyEntry?.whyNotPilotYet ?? undefined}
+                          >
+                            {card.earlyEntry ? (
+                              <span
+                                className={`tosv3-rs-row__badge ${earlyStateClass(card.earlyEntry.proposedTradeState)}`}
+                              >
+                                {truncateForChip(card.earlyEntry.proposedTradeState, 18)}
+                              </span>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                          <td className="table-num tosv3-rs-table__metric">
+                            {card.earlyEntry?.earlyReversalScore ?? "—"}
+                          </td>
+                          <td className="table-num tosv3-rs-table__metric">
+                            {formatRr(card.earlyEntry?.estimatedRiskReward)}
+                          </td>
+                          <td className="tosv3-rs-table__entry-type">
+                            {card.earlyEntry?.entryType ?? "—"}
+                          </td>
+                        </>
                       ) : null}
                     </tr>
                   );
@@ -342,7 +491,9 @@ export function RelativeStrengthRadar({ panel }: Props) {
         </div>
       ) : (
         <p className="tosv3-empty-state" data-testid="dashboard-v3-rs-empty">
-          {panel.emptyReason ?? "No relative-strength leaders on watch for this session."}
+          {showEarlyEntry && filter !== "all"
+            ? "No RS leaders match the selected Early Entry filter."
+            : (panel.emptyReason ?? "No relative-strength leaders on watch for this session.")}
         </p>
       )}
     </section>

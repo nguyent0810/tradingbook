@@ -22,7 +22,15 @@ const EARLY_ENTRY: V3EarlyEntryDisplay = {
   rrRejectionReason: null,
 };
 
-function panelWithEarlyEntry(includeEarly: boolean): V3RsWatchlistPanel {
+const EXTENDED_ENTRY: V3EarlyEntryDisplay = {
+  ...EARLY_ENTRY,
+  proposedTradeState: "Extended — Do Not Chase",
+  entryType: "Extended",
+  reasonCodes: ["EXTENDED_FROM_MA20", "CHASE_RISK"],
+  estimatedRiskReward: 0.9,
+};
+
+function panelWithEarlyEntry(includeEarly: boolean, extended = false): V3RsWatchlistPanel {
   return {
     title: "Relative Strength Radar",
     subtitle: "Leaders vs VNINDEX",
@@ -46,7 +54,7 @@ function panelWithEarlyEntry(includeEarly: boolean): V3RsWatchlistPanel {
         rsStrengthScore: null,
         setupReadinessScore: null,
         rsConfidence: null,
-        earlyEntry: includeEarly ? EARLY_ENTRY : null,
+        earlyEntry: includeEarly ? (extended ? EXTENDED_ENTRY : EARLY_ENTRY) : null,
       },
     ],
   };
@@ -57,12 +65,25 @@ describe("RelativeStrengthRadar early-entry UI", () => {
     const html = renderToStaticMarkup(<RelativeStrengthRadar panel={panelWithEarlyEntry(true)} />);
     expect(html).toContain('data-testid="dashboard-v3-rs-early-entry"');
     expect(html).toContain('data-testid="dashboard-v3-rs-early-research-warning"');
+    expect(html).toContain('data-testid="dashboard-v3-rs-early-research-section"');
+    expect(html).toContain('data-testid="dashboard-v3-rs-daily-checklist"');
+    expect(html).toContain('data-testid="dashboard-v3-rs-paper-commands"');
     expect(html).toContain("Pilot Candidate");
-    expect(html).toContain("Research signal only");
+    expect(html).toContain("research-only signal");
     expect(html).toContain("2.10:1");
     expect(html).toContain("60-day high");
     expect(html).toContain("Recent swing low");
     expect(html).toContain("RECLAIM MA20");
+    expect(html).toContain("audit:early-entry:paper-log");
+  });
+
+  it("highlights EXTENDED_DO_NOT_CHASE prominently", () => {
+    const html = renderToStaticMarkup(
+      <RelativeStrengthRadar panel={panelWithEarlyEntry(true, true)} />
+    );
+    expect(html).toContain("Extended — Do Not Chase");
+    expect(html).toContain('data-testid="dashboard-v3-rs-extended-warning"');
+    expect(html).toContain("Anti-FOMO caution");
   });
 
   it("does not render early-entry panel when metadata absent", () => {
@@ -70,6 +91,7 @@ describe("RelativeStrengthRadar early-entry UI", () => {
     expect(html).not.toContain('data-testid="dashboard-v3-rs-early-entry"');
     expect(html).not.toContain("Early state");
     expect(html).not.toContain("Pilot Candidate");
+    expect(html).not.toContain("dashboard-v3-rs-early-research-section");
   });
 });
 

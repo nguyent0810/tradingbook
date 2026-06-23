@@ -364,7 +364,7 @@ export function computeLevelHitOrder(
   sessionIdx: number,
   invalidLevel: number | null,
   targetPrice: number | null,
-  maxDays = PAPER_RESOLVE_HORIZONS.full
+  maxDays: number = PAPER_RESOLVE_HORIZONS.full
 ): LevelHitOrder {
   let invalidDay: number | null = null;
   let targetDay: number | null = null;

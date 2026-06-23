@@ -96,9 +96,10 @@ Do **not** mark `/setups` manual QA as **pass** until all of the following are d
 Deploying this app is completely automated toward Vercel logic.
 
 1. Create a new project in Vercel and link your GitHub repository.
-2. In the Vercel Environment Variables UI, add exactly two variables:
+2. In the Vercel Environment Variables UI, add these variables:
    - `DATABASE_URL` (Pointing to your production/Neon Postgres DB)
    - `SESSION_SECRET` (Secure random string)
+   - `EARLY_ENTRY_V1_ENABLED` = `true` (optional — enables **research-only** Early Entry metadata on the RS radar; does not affect Gate 2 or trade decisions)
 3. **Build Command Verification:** Our `package.json` relies on `"build": "prisma migrate deploy && next build"`. This strictly ensures that Prisma pushes physical database migrations safely *before* Next.js static generation binds to the Prisma Client. You do not need a custom build command.
 4. Deploy!
 
