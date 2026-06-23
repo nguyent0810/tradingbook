@@ -1,9 +1,9 @@
 /**
- * Log Early Entry paper-trading research signals to JSON evidence.
+ * Log Early Entry paper-trading research signals (idempotent daily).
  *
  * Usage:
  *   npm run audit:early-entry:paper-log
- *   npx tsx scripts/audit/early-entry-paper-log.ts --seed-historical
+ *   npm run audit:early-entry:paper-log:seed
  *   npx tsx scripts/audit/early-entry-paper-log.ts --session=2026-05-14
  */
 import "../load-env";
@@ -22,7 +22,9 @@ import {
   emptyPaperStore,
   isPaperWorthySignal,
   mergeSignalsIntoStore,
+  normalizePaperStore,
   type PaperSignalRecord,
+  type PaperSignalSource,
   type PaperSignalStore,
 } from "../../src/lib/scanner/early-entry/paper-signals";
 import type { CalibrationContext, Gate1RegimeLevel } from "../../src/lib/scanner/early-entry/calibration";
@@ -116,7 +118,9 @@ function gate1AtSession(
 
 function loadStore(): PaperSignalStore {
   if (!existsSync(SIGNALS_PATH)) return emptyPaperStore();
-  return JSON.parse(readFileSync(SIGNALS_PATH, "utf8")) as PaperSignalStore;
+  return normalizePaperStore(
+    JSON.parse(readFileSync(SIGNALS_PATH, "utf8")) as PaperSignalStore
+  );
 }
 
 function saveStore(store: PaperSignalStore): void {
@@ -129,8 +133,10 @@ function buildSignalAtSession(params: {
   bars: Gate2BarInput[];
   indexBars: Gate2BarInput[];
   sessionIdx: number;
+  source: PaperSignalSource;
 }): PaperSignalRecord | null {
   const session = params.bars[params.sessionIdx]!.date;
+  const sessionDate = session.toISOString().slice(0, 10);
   const gate2 = evaluateBreakoutPullbackCandidate(params.bars, session);
   const early = evaluateEarlyEntrySession({
     stockBars: params.bars,
@@ -153,14 +159,18 @@ function buildSignalAtSession(params: {
     indexRs20Positive: null,
   };
 
+  const daysAvailable = Math.max(0, params.bars.length - 1 - params.sessionIdx);
+
   return buildPaperSignal({
     symbol: params.symbol,
-    sessionDate: session.toISOString().slice(0, 10),
+    sessionDate,
+    source: params.source,
     evaluation: early,
     calibrationCtx: ctx,
     gate1RegimeLabel: g1.label,
     gate2Quality: gate2.quality,
     gate2TerminalCode: gate2.terminalCode ?? null,
+    daysAvailable,
   });
 }
 
@@ -188,6 +198,7 @@ function main() {
     10
   );
 
+  const source: PaperSignalSource = seedHistorical ? "historical_seed" : "live_paper";
   const { symbols, indexBars } = loadBars();
   const symbolList = selectSymbolList(symbols, minSymbols);
   const incoming: PaperSignalRecord[] = [];
@@ -196,18 +207,29 @@ function main() {
     for (const symbol of symbolList) {
       const bars = symbols.get(symbol)!;
       for (let idx = 55; idx < bars.length - 21; idx += 5) {
-        const sig = buildSignalAtSession({ symbol, bars, indexBars, sessionIdx: idx });
+        const sig = buildSignalAtSession({
+          symbol,
+          bars,
+          indexBars,
+          sessionIdx: idx,
+          source,
+        });
         if (sig) incoming.push(sig);
       }
     }
   } else if (sessionArg) {
     const sessionDate = sessionArg.split("=")[1]!;
-    const session = new Date(`${sessionDate}T00:00:00.000Z`);
     for (const symbol of symbolList) {
       const bars = symbols.get(symbol)!;
       const idx = bars.findIndex((b) => b.date.toISOString().slice(0, 10) === sessionDate);
       if (idx < 55) continue;
-      const sig = buildSignalAtSession({ symbol, bars, indexBars, sessionIdx: idx });
+      const sig = buildSignalAtSession({
+        symbol,
+        bars,
+        indexBars,
+        sessionIdx: idx,
+        source,
+      });
       if (sig) incoming.push(sig);
     }
   } else {
@@ -217,23 +239,41 @@ function main() {
       const bars = symbols.get(symbol)!;
       const idx = bars.findIndex((b) => b.date.getTime() === latest.getTime());
       if (idx < 55) continue;
-      const sig = buildSignalAtSession({ symbol, bars, indexBars, sessionIdx: idx });
+      const sig = buildSignalAtSession({
+        symbol,
+        bars,
+        indexBars,
+        sessionIdx: idx,
+        source,
+      });
       if (sig) incoming.push(sig);
     }
-    console.error(`Logging latest session: ${sessionDate}`);
+    console.error(`Logging live paper session: ${sessionDate}`);
   }
 
-  const store = mergeSignalsIntoStore(loadStore(), incoming);
+  const before = loadStore();
+  const { store, added, skipped } = mergeSignalsIntoStore(before, incoming);
   saveStore(store);
+
+  const live = store.signals.filter((s) => s.source === "live_paper");
+  const historical = store.signals.filter((s) => s.source === "historical_seed");
 
   console.log(
     JSON.stringify(
       {
         path: SIGNALS_PATH,
-        added: incoming.length,
+        mode: source,
+        candidatesScanned: incoming.length,
+        added,
+        skippedDuplicates: skipped,
         total: store.signals.length,
-        open: store.signals.filter((s) => !s.outcomes).length,
-        resolved: store.signals.filter((s) => s.outcomes).length,
+        historicalSeed: historical.length,
+        livePaper: live.length,
+        open: store.signals.filter((s) => !s.isResolved).length,
+        openLive: live.filter((s) => !s.isResolved).length,
+        resolved: store.signals.filter((s) => s.isResolved).length,
+        resolvedLive: live.filter((s) => s.isResolved).length,
+        partial: store.signals.filter((s) => s.validationStatus === "partial").length,
       },
       null,
       2

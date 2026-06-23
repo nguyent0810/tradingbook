@@ -8,17 +8,19 @@
 import "../load-env";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { resolve } from "path";
-import { evaluateBreakoutPullbackCandidate } from "../../src/lib/scanner/gate2/breakout-pullback";
 import type { Gate2BarInput } from "../../src/lib/scanner/gate2/types";
 import {
+  buildPaperSafetySummary,
+  detectGate2AbAfterSignal,
   evaluatePaperAcceptance,
+  filterSignalsBySource,
+  normalizePaperStore,
   PAPER_CALIBRATION_VARIANTS,
   resolvePaperSignalOutcomes,
   type PaperCalibrationVariantId,
   type PaperSignalRecord,
-  type PaperSignalStore,
+  type PaperSignalSource,
 } from "../../src/lib/scanner/early-entry/paper-signals";
-import { tradeStateDisplayLabel } from "../../src/lib/scanner/early-entry";
 
 const EVIDENCE_DIR = resolve(process.cwd(), "docs/trading/evidence");
 const SIGNALS_PATH = resolve(EVIDENCE_DIR, "early-entry-paper-signals.json");
@@ -78,15 +80,17 @@ function avg(vals: number[]): number | null {
   return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
 }
 
-function fmtPct(v: number | null): string {
+function fmtPct(v: number | null, digits = 2): string {
   if (v == null || !Number.isFinite(v)) return "—";
-  return `${v.toFixed(2)}%`;
+  return `${v.toFixed(digits)}%`;
 }
 
 type VariantStats = {
   variant: PaperCalibrationVariantId;
   signalCount: number;
   resolvedCount: number;
+  partialCount: number;
+  openCount: number;
   pilotQualifiedCount: number;
   winRate10d: number | null;
   falseSignalRate: number | null;
@@ -95,194 +99,256 @@ type VariantStats = {
   avgRet20d: number | null;
   medianRet10d: number | null;
   avgRMultiple: number | null;
-  medianRMultiple: number | null;
-  best5: Array<{ symbol: string; sessionDate: string; ret10d: number | null }>;
-  worst5: Array<{ symbol: string; sessionDate: string; ret10d: number | null }>;
   acceptance: ReturnType<typeof evaluatePaperAcceptance>;
 };
 
 function variantStats(
   signals: PaperSignalRecord[],
-  variant: PaperCalibrationVariantId
+  variant: PaperCalibrationVariantId,
+  scope: "live_only" | "all"
 ): VariantStats {
   const qualified = signals.filter((s) => s.calibration[variant].pilotQualified);
-  const resolved = qualified.filter((s) => s.outcomes != null);
-  const ret10 = resolved.map((s) => s.outcomes!.ret10d).filter((v): v is number => v != null);
-  const falseCount = resolved.filter((s) => (s.outcomes!.ret10d ?? 0) < 0).length;
-  const sorted = [...resolved].sort(
-    (a, b) => (b.outcomes?.ret10d ?? -999) - (a.outcomes?.ret10d ?? -999)
-  );
+  const resolved = qualified.filter((s) => s.isResolved);
+  const partial = qualified.filter((s) => s.validationStatus === "partial");
+  const open = qualified.filter((s) => s.validationStatus === "open");
+  const withRet10 = qualified.filter((s) => s.outcomes?.ret10d != null);
+  const falseCount = withRet10.filter((s) => (s.outcomes!.ret10d ?? 0) < 0).length;
 
   return {
     variant,
     signalCount: qualified.length,
     resolvedCount: resolved.length,
+    partialCount: partial.length,
+    openCount: open.length,
     pilotQualifiedCount: qualified.length,
-    winRate10d: ret10.length ? ret10.filter((r) => r > 0).length / ret10.length : null,
-    falseSignalRate: resolved.length ? falseCount / resolved.length : null,
-    avgRet5d: avg(resolved.map((s) => s.outcomes!.ret5d!).filter(Number.isFinite)),
-    avgRet10d: avg(ret10),
-    avgRet20d: avg(resolved.map((s) => s.outcomes!.ret20d!).filter(Number.isFinite)),
-    medianRet10d: median(ret10),
+    winRate10d: withRet10.length
+      ? withRet10.filter((s) => (s.outcomes!.ret10d ?? 0) > 0).length / withRet10.length
+      : null,
+    falseSignalRate: withRet10.length ? falseCount / withRet10.length : null,
+    avgRet5d: avg(
+      qualified.map((s) => s.outcomes?.ret5d).filter((v): v is number => v != null)
+    ),
+    avgRet10d: avg(withRet10.map((s) => s.outcomes!.ret10d!)),
+    avgRet20d: avg(
+      resolved.map((s) => s.outcomes?.ret20d).filter((v): v is number => v != null)
+    ),
+    medianRet10d: median(withRet10.map((s) => s.outcomes!.ret10d!)),
     avgRMultiple: avg(
-      resolved.map((s) => s.outcomes!.rMultiple).filter((v): v is number => v != null)
+      resolved.map((s) => s.outcomes?.rMultiple).filter((v): v is number => v != null)
     ),
-    medianRMultiple: median(
-      resolved.map((s) => s.outcomes!.rMultiple).filter((v): v is number => v != null)
-    ),
-    best5: sorted.slice(0, 5).map((s) => ({
-      symbol: s.symbol,
-      sessionDate: s.sessionDate,
-      ret10d: s.outcomes?.ret10d ?? null,
-    })),
-    worst5: sorted.slice(-5).reverse().map((s) => ({
-      symbol: s.symbol,
-      sessionDate: s.sessionDate,
-      ret10d: s.outcomes?.ret10d ?? null,
-    })),
-    acceptance: evaluatePaperAcceptance({ variant, resolvedPilots: resolved }),
+    acceptance: evaluatePaperAcceptance({
+      variant,
+      resolvedPilots: signals,
+      scope,
+    }),
   };
 }
 
-function buildMarkdown(store: PaperSignalStore, variants: VariantStats[]): string {
-  const open = store.signals.filter((s) => !s.outcomes);
-  const closed = store.signals.filter((s) => s.outcomes);
-  const extended = store.signals.filter((s) => s.baselineState === "EXTENDED_DO_NOT_CHASE");
-  const extendedResolved = extended.filter((s) => s.outcomes);
+function sourceSummary(signals: PaperSignalRecord[], label: string): string[] {
+  const pilots = signals.filter((s) => s.calibration.baseline.pilotQualified);
+  const resolved = signals.filter((s) => s.isResolved);
+  const open = signals.filter((s) => !s.isResolved);
+  const partial = signals.filter((s) => s.validationStatus === "partial");
+  const extended = signals.filter((s) => s.baselineState === "EXTENDED_DO_NOT_CHASE");
+  const extendedResolved = extended.filter((s) => s.outcomes?.ret5d != null);
   const extendedAvoided = extendedResolved.filter((s) => s.outcomes?.extendedAvoidedBad5d);
-  const extendedMissed = extendedResolved.filter(
-    (s) => (s.outcomes?.ret5d ?? 0) > 3 && !s.outcomes?.extendedAvoidedBad5d
-  );
 
-  const byState = new Map<string, PaperSignalRecord[]>();
-  for (const s of closed) {
-    const label = s.displayLabel;
-    const list = byState.get(label) ?? [];
-    list.push(s);
-    byState.set(label, list);
+  return [
+    `### ${label}`,
+    "",
+    `| Metric | Count |`,
+    `|--------|-------|`,
+    `| Total signals | ${signals.length} |`,
+    `| Baseline pilots | ${pilots.length} |`,
+    `| Open | ${open.length} |`,
+    `| Partial (5d/10d only) | ${partial.length} |`,
+    `| Fully resolved (20d) | ${resolved.length} |`,
+    `| EXTENDED_DO_NOT_CHASE | ${extended.length} |`,
+    `| EXTENDED 5d avoidance rate | ${
+      extendedResolved.length
+        ? fmtPct((extendedAvoided.length / extendedResolved.length) * 100, 0)
+        : "—"
+    } |`,
+    "",
+  ];
+}
+
+function leaderboardTable(variants: VariantStats[], scopeLabel: string): string[] {
+  const lines = [
+    `#### Variant leaderboard — ${scopeLabel}`,
+    "",
+    "| Variant | Pilots | Resolved | Partial | Open | False% 10d | Avg 10d | Med 10d | Staging ready? |",
+    "|---------|--------|----------|---------|------|------------|---------|---------|----------------|",
+  ];
+  for (const v of variants) {
+    lines.push(
+      `| ${v.variant} | ${v.pilotQualifiedCount} | ${v.resolvedCount} | ${v.partialCount} | ${v.openCount} | ${
+        v.falseSignalRate != null ? fmtPct(v.falseSignalRate * 100, 0) : "—"
+      } | ${fmtPct(v.avgRet10d)} | ${fmtPct(v.medianRet10d)} | ${
+        v.acceptance.ready ? "⚠️ review" : "❌ no"
+      } |`
+    );
   }
+  lines.push("");
+  return lines;
+}
+
+function signalTable(
+  signals: PaperSignalRecord[],
+  title: string,
+  limit = 25
+): string[] {
+  const lines = [`### ${title}`, ""];
+  if (signals.length === 0) {
+    lines.push("_None._", "");
+    return lines;
+  }
+  lines.push(
+    "| Date | Symbol | Source | State | Status | 5d | 10d | 20d | Inv→Tgt | Tgt→Inv | G2 A/B |",
+    "|------|--------|--------|-------|--------|----|-----|-----|---------|---------|--------|"
+  );
+  for (const s of signals.slice(0, limit)) {
+    const o = s.outcomes;
+    lines.push(
+      `| ${s.sessionDate} | ${s.symbol} | ${s.source} | ${s.displayLabel} | ${s.validationStatus} | ${fmtPct(
+        o?.ret5d ?? null
+      )} | ${fmtPct(o?.ret10d ?? null)} | ${fmtPct(o?.ret20d ?? null)} | ${
+        o?.invalidHitBeforeTarget == null ? "—" : o.invalidHitBeforeTarget ? "yes" : "no"
+      } | ${o?.targetHitBeforeInvalid == null ? "—" : o.targetHitBeforeInvalid ? "yes" : "no"} | ${
+        o?.gate2BecameAb ? `yes (${o.gate2BecameAbSession ?? "?"})` : "no"
+      } |`
+    );
+  }
+  if (signals.length > limit) lines.push(`_…and ${signals.length - limit} more_`, "");
+  else lines.push("");
+  return lines;
+}
+
+function buildMarkdown(
+  store: ReturnType<typeof normalizePaperStore>,
+  historical: PaperSignalRecord[],
+  live: PaperSignalRecord[],
+  allVariants: VariantStats[],
+  histVariants: VariantStats[],
+  liveVariants: VariantStats[],
+  safety: ReturnType<typeof buildPaperSafetySummary>
+): string {
+  const openLive = live.filter((s) => !s.isResolved);
+  const resolvedLive = live.filter((s) => s.isResolved);
+  const openAll = store.signals.filter((s) => !s.isResolved);
 
   const lines: string[] = [
     "# Early Entry Paper Validation",
     "",
-    `Generated: ${new Date().toISOString().slice(0, 10)}`,
+    `Generated: ${new Date().toISOString()}`,
     "",
     "## Status",
     "",
     "**Research lane only** — `EARLY_ENTRY_V1_ENABLED` defaults off. Not decision support.",
     "",
-    "## How to run",
+    "Pilot Candidate is **not** buy-ready. Use **EXTENDED_DO_NOT_CHASE** only as a cautionary anti-FOMO warning.",
     "",
-    "```bash",
-    "npm run audit:early-entry:paper-log          # log latest session",
-    "npm run audit:early-entry:paper-log -- --seed-historical  # backfill cohort",
-    "npm run audit:early-entry:paper-validate     # resolve outcomes + refresh report",
-    "```",
+    "## Weekly operating routine",
     "",
-    "## Signal inventory",
-    "",
-    `| Metric | Count |`,
-    `|--------|-------|`,
-    `| Total logged | ${store.signals.length} |`,
-    `| Open (awaiting 20d) | ${open.length} |`,
-    `| Resolved | ${closed.length} |`,
-    "",
-    "## Per-state summary (resolved)",
-    "",
+    "1. **After each market session** — `npm run audit:early-entry:paper-log` (idempotent; skips duplicates).",
+    "2. **Weekly** — `npm run audit:early-entry:paper-validate` to resolve partial/full horizons.",
+    "3. **Review** — `npm run audit:early-entry:paper-summary` for open counts and acceptance gates.",
+    "4. Read open vs resolved live signals in this report.",
+    "5. **Do not** enable staging or trade from Pilot Candidate until live acceptance gates pass.",
   ];
 
-  for (const [state, items] of byState) {
-    const r10 = items.map((s) => s.outcomes!.ret10d).filter((v): v is number => v != null);
-    lines.push(
-      `### ${state} (n=${items.length})`,
-      `- Avg 10d: ${fmtPct(avg(r10))} · Median 10d: ${fmtPct(median(r10))} · Win rate: ${
-        r10.length ? fmtPct((r10.filter((r) => r > 0).length / r10.length) * 100, 1) : "—"
-      }`,
-      ""
-    );
-  }
-
-  lines.push("## Calibration variant leaderboard", "");
+  lines.push("", "## Safety summary (live paper)", "");
+  lines.push(`| Metric | Value |`, `|--------|-------|`);
+  lines.push(`| Open signals (all) | ${safety.openSignals} |`);
+  lines.push(`| Open live signals | ${safety.openLiveSignals} |`);
   lines.push(
-    "| Variant | Pilots | Resolved | Win% 10d | False% | Avg 10d | Med 10d | Ready? |",
-    "|---------|--------|----------|----------|--------|---------|---------|--------|"
+    `| EXTENDED 5d avoidance (live) | ${
+      safety.extendedAvoidanceRate5d != null
+        ? fmtPct(safety.extendedAvoidanceRate5d * 100, 0)
+        : "—"
+    } (${safety.extendedTotal} live EXTENDED) |`
   );
-  for (const v of variants) {
-    lines.push(
-      `| ${v.variant} | ${v.pilotQualifiedCount} | ${v.resolvedCount} | ${
-        v.winRate10d != null ? fmtPct(v.winRate10d * 100, 1) : "—"
-      } | ${v.falseSignalRate != null ? fmtPct(v.falseSignalRate * 100, 1) : "—"} | ${fmtPct(
-        v.avgRet10d
-      )} | ${fmtPct(v.medianRet10d)} | ${v.acceptance.ready ? "⚠️ check" : "❌ no"} |`
-    );
-  }
+  lines.push(`| Any variant staging-ready | ${safety.anyVariantReady ? "yes (review)" : "no"} |`);
+  lines.push("");
 
-  lines.push("", "## EXTENDED_DO_NOT_CHASE defensive validation", "");
-  lines.push(`- Total signals: **${extended.length}**`);
-  lines.push(`- Resolved: **${extendedResolved.length}**`);
+  lines.push("## Historical seed summary", "");
+  lines.push(...sourceSummary(historical, "Historical seed cohort"));
+  lines.push(...leaderboardTable(histVariants, "historical seed only"));
+
+  lines.push("## Live paper summary", "");
+  lines.push(...sourceSummary(live, "Live forward paper"));
+  lines.push(...leaderboardTable(liveVariants, "live paper only"));
+
+  lines.push("## Combined view (historical + live)", "");
   lines.push(
-    `- Correctly avoided bad 5d (price down): **${extendedAvoided.length}** / ${extendedResolved.length}`
+    "_Combined metrics are for context only. **Staging acceptance gates apply to live paper only.**_",
+    ""
   );
-  lines.push("", "### Examples — correctly avoided chase", "");
-  for (const s of extendedAvoided.slice(0, 5)) {
-    lines.push(
-      `- **${s.symbol}** ${s.sessionDate} — 5d ${fmtPct(s.outcomes?.ret5d)}, 10d ${fmtPct(s.outcomes?.ret10d)}`
-    );
-  }
-  lines.push("", "### Examples — possibly too conservative (5d > +3%)", "");
-  for (const s of extendedMissed.slice(0, 5)) {
-    lines.push(
-      `- **${s.symbol}** ${s.sessionDate} — 5d ${fmtPct(s.outcomes?.ret5d)}, 10d ${fmtPct(s.outcomes?.ret10d)}`
-    );
-  }
+  lines.push(...sourceSummary(store.signals, "Combined"));
+  lines.push(...leaderboardTable(allVariants, "combined (not for staging)"));
 
-  lines.push("", "## Open signals (awaiting outcome)", "");
-  if (open.length === 0) {
-    lines.push("_None — all logged signals resolved._");
-  } else {
-    lines.push("| Date | Symbol | State | Score | R:R |", "|------|--------|-------|-------|-----|");
-    for (const s of open.slice(0, 30)) {
-      lines.push(
-        `| ${s.sessionDate} | ${s.symbol} | ${s.displayLabel} | ${s.earlyReversalScore} | ${
-          s.estimatedRiskReward?.toFixed(2) ?? "—"
-        } |`
-      );
+  lines.push("## Open live signals", "");
+  lines.push(...signalTable(openLive, "Awaiting forward data", 30));
+
+  lines.push("## Resolved live signals", "");
+  lines.push(...signalTable(resolvedLive, "Fully resolved (20 sessions)", 25));
+
+  lines.push("## Acceptance gates (staging enablement)", "");
+  lines.push(
+    "Do **not** recommend staging unless **all** pass on **live paper** resolved pilots:",
+    "",
+    "- ≥20 live resolved pilot-qualified signals per variant under review",
+    "- False pilot rate ≤ 35%",
+    "- Median 10d or 20d return > 0",
+    "- Average R multiple > 0",
+    "- No single outlier explains most gains",
+    "- ≥2 market regimes represented (or explicit regime filter required)",
+    ""
+  );
+
+  for (const v of liveVariants) {
+    if (v.pilotQualifiedCount === 0) continue;
+    lines.push(`### ${v.variant} (live)`, "");
+    lines.push(`- Staging ready: **${v.acceptance.ready ? "yes — review carefully" : "no"}**`);
+    if (!v.acceptance.ready) {
+      lines.push("- Blockers:");
+      for (const b of v.acceptance.blockers) lines.push(`  - ${b}`);
     }
-    if (open.length > 30) lines.push(`_…and ${open.length - 30} more_`);
+    lines.push("");
   }
 
-  lines.push("", "## Closed signals (sample)", "");
+  lines.push("## EXTENDED_DO_NOT_CHASE (all sources)", "");
+  const extended = store.signals.filter((s) => s.baselineState === "EXTENDED_DO_NOT_CHASE");
+  const extResolved = extended.filter((s) => s.outcomes?.ret5d != null);
+  const extAvoided = extResolved.filter((s) => s.outcomes?.extendedAvoidedBad5d);
+  lines.push(`- Total: **${extended.length}** · With 5d outcome: **${extResolved.length}**`);
   lines.push(
-    "| Date | Symbol | State | 5d | 10d | 20d | MAE | MFE | R |",
-    "|------|--------|-------|----|-----|-----|-----|-----|---|"
+    `- Correctly avoided bad 5d: **${extAvoided.length}** / ${extResolved.length} (${
+      extResolved.length ? fmtPct((extAvoided.length / extResolved.length) * 100, 0) : "—"
+    })`
   );
-  for (const s of closed.slice(0, 25)) {
-    const o = s.outcomes!;
-    lines.push(
-      `| ${s.sessionDate} | ${s.symbol} | ${s.displayLabel} | ${fmtPct(o.ret5d)} | ${fmtPct(
-        o.ret10d
-      )} | ${fmtPct(o.ret20d)} | ${fmtPct(o.mae10d)} | ${fmtPct(o.mfe10d)} | ${
-        o.rMultiple?.toFixed(2) ?? "—"
-      } |`
-    );
+  lines.push(
+    "",
+    "**Keep EXTENDED_DO_NOT_CHASE prominent** — strongest useful defensive signal in research."
+  );
+
+  lines.push("", "## Open signals (all sources)", "");
+  if (openAll.length === 0) {
+    lines.push("_None._");
+  } else {
+    lines.push(...signalTable(openAll, "All open", 20).slice(2));
   }
 
-  const bestBaseline = variants.find((v) => v.variant === "baseline");
   lines.push("", "## Current recommendation", "");
   lines.push(
-    "1. **Do not enable** for staging decision support.",
+    "1. **Do not enable** staging decision support.",
     "2. **Keep Pilot Candidate** as research-only UI label.",
-    "3. **Continue paper logging** until ≥20 resolved pilots per variant.",
-    `4. Baseline resolved pilots: **${bestBaseline?.resolvedCount ?? 0}** (need 20).`,
-    "5. **EXTENDED_DO_NOT_CHASE** remains the most useful defensive signal — keep prominent in UI."
+    "3. **Run paper-log daily** after each session; **paper-validate weekly**.",
+    `4. Live resolved pilots (baseline): **${
+      liveVariants.find((v) => v.variant === "baseline")?.resolvedCount ?? 0
+    }** (need 20 for staging).`,
+    "5. **EXTENDED_DO_NOT_CHASE** remains the most useful defensive signal."
   );
-
-  if (bestBaseline && !bestBaseline.acceptance.ready) {
-    lines.push("", "### Blockers", "");
-    for (const b of bestBaseline.acceptance.blockers) {
-      lines.push(`- ${b}`);
-    }
-  }
 
   return lines.join("\n");
 }
@@ -293,55 +359,89 @@ function main() {
     process.exit(1);
   }
 
-  const store = JSON.parse(readFileSync(SIGNALS_PATH, "utf8")) as PaperSignalStore;
+  const raw = JSON.parse(readFileSync(SIGNALS_PATH, "utf8"));
+  let store = normalizePaperStore(raw);
   const barsMap = loadBarsMap();
 
-  let resolvedCount = 0;
-  for (const signal of store.signals) {
-    if (signal.outcomes) continue;
-    const bars = barsMap.get(signal.symbol);
-    if (!bars) continue;
-    const idx = bars.findIndex((b) => b.date.toISOString().slice(0, 10) === signal.sessionDate);
-    if (idx < 0) continue;
+  let updated = 0;
+  let newlyFullyResolved = 0;
 
-    let gate2BecameAb = false;
-    for (let d = 1; d <= 20; d++) {
-      const future = bars[idx + d];
-      if (!future) break;
-      const ev = evaluateBreakoutPullbackCandidate(bars, future.date);
-      if (ev.quality === "A" || ev.quality === "B") {
-        gate2BecameAb = true;
-        break;
+  store = {
+    ...store,
+    signals: store.signals.map((signal) => {
+      const bars = barsMap.get(signal.symbol);
+      if (!bars) return signal;
+      const idx = bars.findIndex(
+        (b) => b.date.toISOString().slice(0, 10) === signal.sessionDate
+      );
+      if (idx < 0) return signal;
+
+      const wasResolved = signal.isResolved;
+      const gate2 = detectGate2AbAfterSignal(bars, idx);
+      const resolved = resolvePaperSignalOutcomes({
+        signal,
+        bars,
+        sessionIdx: idx,
+        gate2BecameAb: gate2.becameAb,
+        gate2BecameAbSession: gate2.session,
+      });
+
+      if (
+        resolved.daysAvailable !== signal.daysAvailable ||
+        resolved.validationStatus !== signal.validationStatus ||
+        JSON.stringify(resolved.outcomes) !== JSON.stringify(signal.outcomes)
+      ) {
+        updated++;
       }
-    }
+      if (!wasResolved && resolved.isResolved) newlyFullyResolved++;
 
-    const outcomes = resolvePaperSignalOutcomes({
-      signal,
-      bars,
-      sessionIdx: idx,
-      gate2BecameAb,
-    });
-    if (outcomes) {
-      signal.outcomes = outcomes;
-      resolvedCount++;
-    }
-  }
+      return resolved;
+    }),
+  };
 
   store.lastUpdated = new Date().toISOString();
   mkdirSync(EVIDENCE_DIR, { recursive: true });
   writeFileSync(SIGNALS_PATH, JSON.stringify(store, null, 2));
 
-  const variantSummaries = PAPER_CALIBRATION_VARIANTS.map((v) => variantStats(store.signals, v));
-  const markdown = buildMarkdown(store, variantSummaries);
+  const historical = filterSignalsBySource(store.signals, "historical_seed");
+  const live = filterSignalsBySource(store.signals, "live_paper");
+  const safety = buildPaperSafetySummary(store);
+
+  const allVariants = PAPER_CALIBRATION_VARIANTS.map((v) =>
+    variantStats(store.signals, v, "all")
+  );
+  const histVariants = PAPER_CALIBRATION_VARIANTS.map((v) =>
+    variantStats(historical, v, "all")
+  );
+  const liveVariants = PAPER_CALIBRATION_VARIANTS.map((v) =>
+    variantStats(live, v, "live_only")
+  );
+
+  const markdown = buildMarkdown(
+    store,
+    historical,
+    live,
+    allVariants,
+    histVariants,
+    liveVariants,
+    safety
+  );
   writeFileSync(REPORT_PATH, markdown);
 
   const payload = {
     generatedAt: new Date().toISOString(),
     totalSignals: store.signals.length,
-    openSignals: store.signals.filter((s) => !s.outcomes).length,
-    resolvedSignals: store.signals.filter((s) => s.outcomes).length,
-    newlyResolved: resolvedCount,
-    variantLeaderboard: variantSummaries.map((v) => ({
+    historicalSeed: historical.length,
+    livePaper: live.length,
+    openSignals: store.signals.filter((s) => !s.isResolved).length,
+    openLiveSignals: live.filter((s) => !s.isResolved).length,
+    partialSignals: store.signals.filter((s) => s.validationStatus === "partial").length,
+    resolvedSignals: store.signals.filter((s) => s.isResolved).length,
+    resolvedLiveSignals: live.filter((s) => s.isResolved).length,
+    signalsUpdated: updated,
+    newlyFullyResolved,
+    safety,
+    variantLeaderboardLive: liveVariants.map((v) => ({
       variant: v.variant,
       pilotQualifiedCount: v.pilotQualifiedCount,
       resolvedCount: v.resolvedCount,
@@ -351,15 +451,6 @@ function main() {
       acceptanceReady: v.acceptance.ready,
       blockers: v.acceptance.blockers,
     })),
-    extended: {
-      total: store.signals.filter((s) => s.baselineState === "EXTENDED_DO_NOT_CHASE").length,
-      resolved: store.signals.filter(
-        (s) => s.baselineState === "EXTENDED_DO_NOT_CHASE" && s.outcomes
-      ).length,
-      avoidedBad5d: store.signals.filter(
-        (s) => s.baselineState === "EXTENDED_DO_NOT_CHASE" && s.outcomes?.extendedAvoidedBad5d
-      ).length,
-    },
     reportPath: REPORT_PATH,
   };
 
