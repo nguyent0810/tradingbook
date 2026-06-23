@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "lastUpdated": "2026-06-23T02:29:35.030Z",
+  "version": 2,
+  "lastUpdated": "2026-06-23T02:35:55.952Z",
   "signals": [
     {
       "id": "AMV|2024-10-10",
@@ -79,7 +79,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.813Z",
+        "updatedAt": "2026-06-23T02:35:47.545Z",
         "ret5d": -4.545454545454549,
         "ret10d": -4.545454545454549,
         "ret20d": -31.818181818181824,
@@ -88,9 +88,18 @@
         "rMultiple": 0.3333333333333323,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2024-10-10",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.545Z"
     },
     {
       "id": "ACM|2025-01-03",
@@ -173,7 +182,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.815Z",
+        "updatedAt": "2026-06-23T02:35:47.548Z",
         "ret5d": 0,
         "ret10d": -12.50000000000001,
         "ret20d": -25.000000000000007,
@@ -182,9 +191,18 @@
         "rMultiple": 0.3278688524590163,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-01-03",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.548Z"
     },
     {
       "id": "ACM|2025-02-14",
@@ -268,7 +286,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.820Z",
+        "updatedAt": "2026-06-23T02:35:47.550Z",
         "ret5d": -12.50000000000001,
         "ret10d": -12.50000000000001,
         "ret20d": -12.50000000000001,
@@ -277,9 +295,18 @@
         "rMultiple": 0.3278688524590163,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-02-14",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.550Z"
     },
     {
       "id": "AMV|2025-02-21",
@@ -363,7 +390,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.822Z",
+        "updatedAt": "2026-06-23T02:35:47.552Z",
         "ret5d": 26.31578947368421,
         "ret10d": 10.526315789473696,
         "ret20d": -5.263157894736835,
@@ -372,9 +399,18 @@
         "rMultiple": 1.750972762645914,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-02-21",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.552Z"
     },
     {
       "id": "AGM|2025-04-10",
@@ -456,7 +492,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.824Z",
+        "updatedAt": "2026-06-23T02:35:47.554Z",
         "ret5d": -29.04761904761905,
         "ret10d": -22.38095238095239,
         "ret20d": 33.33333333333332,
@@ -465,9 +501,18 @@
         "rMultiple": 0.5028735632183913,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-04-10",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.554Z"
     },
     {
       "id": "AGM|2025-06-06",
@@ -551,7 +596,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.825Z",
+        "updatedAt": "2026-06-23T02:35:47.556Z",
         "ret5d": 14.285714285714299,
         "ret10d": 17.857142857142858,
         "ret20d": 17.857142857142858,
@@ -560,9 +605,18 @@
         "rMultiple": 0.7720815318097591,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-06-06",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.556Z"
     },
     {
       "id": "ACS|2025-06-24",
@@ -648,7 +702,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.827Z",
+        "updatedAt": "2026-06-23T02:35:47.558Z",
         "ret5d": -5.882352941176463,
         "ret10d": -13.23529411764705,
         "ret20d": -4.411764705882351,
@@ -657,9 +711,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-06-24",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.558Z"
     },
     {
       "id": "AGM|2025-07-11",
@@ -742,7 +805,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.829Z",
+        "updatedAt": "2026-06-23T02:35:47.559Z",
         "ret5d": 3.124999999999989,
         "ret10d": 3.124999999999989,
         "ret20d": -12.50000000000001,
@@ -751,9 +814,18 @@
         "rMultiple": 0.38545547989207224,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-07-11",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.559Z"
     },
     {
       "id": "AME|2025-07-25",
@@ -838,7 +910,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.831Z",
+        "updatedAt": "2026-06-23T02:35:47.561Z",
         "ret5d": 5.06329113924051,
         "ret10d": 15.189873417721508,
         "ret20d": 12.658227848101264,
@@ -847,9 +919,18 @@
         "rMultiple": 0.5028241959003062,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-07-25",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.561Z"
     },
     {
       "id": "AME|2025-08-01",
@@ -933,7 +1014,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.834Z",
+        "updatedAt": "2026-06-23T02:35:47.563Z",
         "ret5d": 9.638554216867457,
         "ret10d": 8.433734939759027,
         "ret20d": 7.228915662650598,
@@ -942,9 +1023,18 @@
         "rMultiple": 0.40342101016620935,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-08-01",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.563Z"
     },
     {
       "id": "AME|2025-08-12",
@@ -1027,7 +1117,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.835Z",
+        "updatedAt": "2026-06-23T02:35:47.565Z",
         "ret5d": -1.098901098901095,
         "ret10d": -2.19780219780219,
         "ret20d": -2.19780219780219,
@@ -1036,9 +1126,18 @@
         "rMultiple": 0.06858240175570991,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-08-12",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.565Z"
     },
     {
       "id": "AGM|2025-08-15",
@@ -1123,7 +1222,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.836Z",
+        "updatedAt": "2026-06-23T02:35:47.566Z",
         "ret5d": 0,
         "ret10d": 0,
         "ret20d": -33.33333333333333,
@@ -1132,9 +1231,18 @@
         "rMultiple": 1.128087575694672,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-08-15",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.566Z"
     },
     {
       "id": "AME|2025-08-19",
@@ -1218,7 +1326,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.838Z",
+        "updatedAt": "2026-06-23T02:35:47.569Z",
         "ret5d": -1.1111111111111072,
         "ret10d": -1.1111111111111072,
         "ret20d": 0,
@@ -1227,9 +1335,18 @@
         "rMultiple": 0.04131753350851959,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-08-19",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.569Z"
     },
     {
       "id": "A32|2025-09-19",
@@ -1312,7 +1429,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.839Z",
+        "updatedAt": "2026-06-23T02:35:47.570Z",
         "ret5d": -5.413659078289847,
         "ret10d": -1.6102165463631464,
         "ret20d": -9.189339255968912,
@@ -1321,9 +1438,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-09-19",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.570Z"
     },
     {
       "id": "ACM|2025-09-19",
@@ -1406,7 +1532,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.841Z",
+        "updatedAt": "2026-06-23T02:35:47.571Z",
         "ret5d": -14.285714285714283,
         "ret10d": -14.285714285714283,
         "ret20d": 0,
@@ -1415,9 +1541,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-09-19",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.571Z"
     },
     {
       "id": "AGM|2025-09-19",
@@ -1501,7 +1636,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.842Z",
+        "updatedAt": "2026-06-23T02:35:47.573Z",
         "ret5d": 0,
         "ret10d": -15.151515151515152,
         "ret20d": -30.303030303030305,
@@ -1510,9 +1645,18 @@
         "rMultiple": 1.1734940550791115,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-09-19",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.573Z"
     },
     {
       "id": "ALT|2025-09-29",
@@ -1597,7 +1741,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.844Z",
+        "updatedAt": "2026-06-23T02:35:47.574Z",
         "ret5d": 3.124999999999989,
         "ret10d": 5.468749999999995,
         "ret20d": 1.5624999999999944,
@@ -1606,9 +1750,18 @@
         "rMultiple": 1.7235976183014714,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-09-29",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.574Z"
     },
     {
       "id": "ALT|2025-10-06",
@@ -1692,7 +1845,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.845Z",
+        "updatedAt": "2026-06-23T02:35:47.576Z",
         "ret5d": 2.2727272727272783,
         "ret10d": -12.12121212121212,
         "ret20d": -7.575757575757576,
@@ -1701,9 +1854,18 @@
         "rMultiple": 1.0737294201861143,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-10-06",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.576Z"
     },
     {
       "id": "AIC|2025-10-15",
@@ -1785,7 +1947,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.847Z",
+        "updatedAt": "2026-06-23T02:35:47.577Z",
         "ret5d": -3.7735849056603805,
         "ret10d": -5.660377358490563,
         "ret20d": -5.660377358490563,
@@ -1794,9 +1956,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-10-15",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.577Z"
     },
     {
       "id": "ALT|2025-10-23",
@@ -1881,7 +2052,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.849Z",
+        "updatedAt": "2026-06-23T02:35:47.579Z",
         "ret5d": -14.074074074074078,
         "ret10d": -3.7037037037037033,
         "ret20d": -5.18518518518518,
@@ -1890,9 +2061,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-10-23",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.579Z"
     },
     {
       "id": "AMC|2025-11-04",
@@ -1974,7 +2154,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Early reversal forming — wait for R:R and confirmation",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.850Z",
+        "updatedAt": "2026-06-23T02:35:47.580Z",
         "ret5d": 9.677419354838705,
         "ret10d": 12.90322580645161,
         "ret20d": 8.87096774193548,
@@ -1983,9 +2163,18 @@
         "rMultiple": 2.5092183583539973,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-04",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.580Z"
     },
     {
       "id": "ALT|2025-11-05",
@@ -2066,7 +2255,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.851Z",
+        "updatedAt": "2026-06-23T02:35:47.582Z",
         "ret5d": 12.068965517241383,
         "ret10d": 5.172413793103446,
         "ret20d": 11.206896551724146,
@@ -2075,9 +2264,18 @@
         "rMultiple": 1.5647058823529423,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-05",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.582Z"
     },
     {
       "id": "AMC|2025-11-11",
@@ -2161,7 +2359,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.853Z",
+        "updatedAt": "2026-06-23T02:35:47.584Z",
         "ret5d": 2.941176470588238,
         "ret10d": 0,
         "ret20d": 0.7352941176470562,
@@ -2170,9 +2368,18 @@
         "rMultiple": 0.38465866423547473,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-11",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.584Z"
     },
     {
       "id": "ACS|2025-11-17",
@@ -2253,7 +2460,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.854Z",
+        "updatedAt": "2026-06-23T02:35:47.585Z",
         "ret5d": -10.638297872340425,
         "ret10d": -12.765957446808521,
         "ret20d": -10.638297872340425,
@@ -2262,9 +2469,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-17",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.585Z"
     },
     {
       "id": "AGX|2025-11-18",
@@ -2347,7 +2563,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.855Z",
+        "updatedAt": "2026-06-23T02:35:47.586Z",
         "ret5d": -11.25,
         "ret10d": -2.8125,
         "ret20d": -5.625,
@@ -2356,9 +2572,18 @@
         "rMultiple": 0.11585365853658568,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-18",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.586Z"
     },
     {
       "id": "AMC|2025-11-18",
@@ -2443,7 +2668,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.857Z",
+        "updatedAt": "2026-06-23T02:35:47.588Z",
         "ret5d": -2.85714285714286,
         "ret10d": -3.571428571428571,
         "ret20d": 0,
@@ -2452,9 +2677,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-18",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.588Z"
     },
     {
       "id": "A32|2025-11-28",
@@ -2536,7 +2770,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.858Z",
+        "updatedAt": "2026-06-23T02:35:47.589Z",
         "ret5d": -6.158273381294966,
         "ret10d": 0.28776978417266597,
         "ret20d": 0.43165467625898873,
@@ -2545,9 +2779,18 @@
         "rMultiple": 0.0986744729138563,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-11-28",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.589Z"
     },
     {
       "id": "AMP|2025-12-03",
@@ -2630,7 +2873,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.859Z",
+        "updatedAt": "2026-06-23T02:35:47.590Z",
         "ret5d": -7.499999999999996,
         "ret10d": -5.000000000000004,
         "ret20d": -6.874999999999998,
@@ -2639,9 +2882,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-03",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.590Z"
     },
     {
       "id": "ABR|2025-12-04",
@@ -2722,7 +2974,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.861Z",
+        "updatedAt": "2026-06-23T02:35:47.591Z",
         "ret5d": -5.925925925925931,
         "ret10d": -6.66666666666667,
         "ret20d": -7.4074074074074066,
@@ -2731,9 +2983,18 @@
         "rMultiple": 0.18596001859600117,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-04",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.591Z"
     },
     {
       "id": "ACC|2025-12-10",
@@ -2816,7 +3077,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "No structural resistance above entry — reward uses minimum floor only",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.863Z",
+        "updatedAt": "2026-06-23T02:35:47.593Z",
         "ret5d": 0.3610108303249149,
         "ret10d": 0.3610108303249149,
         "ret20d": -1.4440433212996338,
@@ -2825,9 +3086,18 @@
         "rMultiple": 0.1457017969888298,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-10",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.593Z"
     },
     {
       "id": "APC|2025-12-15",
@@ -2909,7 +3179,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.864Z",
+        "updatedAt": "2026-06-23T02:35:47.595Z",
         "ret5d": 6.060606060606066,
         "ret10d": -4.545454545454543,
         "ret20d": 0,
@@ -2918,9 +3188,18 @@
         "rMultiple": 1.2173913043478282,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-15",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.595Z"
     },
     {
       "id": "ABW|2025-12-17",
@@ -3003,7 +3282,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.865Z",
+        "updatedAt": "2026-06-23T02:35:47.596Z",
         "ret5d": -0.8403361344537785,
         "ret10d": 0,
         "ret20d": -0.8403361344537785,
@@ -3012,9 +3291,18 @@
         "rMultiple": 0.3117206982543639,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-17",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.596Z"
     },
     {
       "id": "ACG|2025-12-17",
@@ -3096,7 +3384,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.867Z",
+        "updatedAt": "2026-06-23T02:35:47.598Z",
         "ret5d": 2.3188405797101366,
         "ret10d": 3.043478260869557,
         "ret20d": 2.898550724637681,
@@ -3105,9 +3393,18 @@
         "rMultiple": 1.278538812785392,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-17",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.598Z"
     },
     {
       "id": "AIG|2025-12-17",
@@ -3190,7 +3487,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.868Z",
+        "updatedAt": "2026-06-23T02:35:47.599Z",
         "ret5d": 7.2234762979684035,
         "ret10d": 12.866817155756216,
         "ret20d": 0.6772009029345469,
@@ -3199,9 +3496,18 @@
         "rMultiple": 6.61956521739133,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-17",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.599Z"
     },
     {
       "id": "BID|2025-12-17",
@@ -3284,7 +3590,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.869Z",
+        "updatedAt": "2026-06-23T02:35:47.600Z",
         "ret5d": 1.0526315789473648,
         "ret10d": 2.368421052631575,
         "ret20d": 34.473684210526315,
@@ -3293,9 +3599,18 @@
         "rMultiple": 1.218307540335862,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-17",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.600Z"
     },
     {
       "id": "CTG|2025-12-17",
@@ -3374,7 +3689,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.871Z",
+        "updatedAt": "2026-06-23T02:35:47.601Z",
         "ret5d": 1.7291066282420584,
         "ret10d": 3.025936599423623,
         "ret20d": 14.12103746397694,
@@ -3383,9 +3698,18 @@
         "rMultiple": 1.0802469135802488,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-17",
+      "daysAvailable": 89,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.601Z"
     },
     {
       "id": "A32|2025-12-19",
@@ -3469,7 +3793,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.872Z",
+        "updatedAt": "2026-06-23T02:35:47.603Z",
         "ret5d": -5.1630434782608665,
         "ret10d": -5.1630434782608665,
         "ret20d": -10.054347826086946,
@@ -3478,9 +3802,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-19",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.603Z"
     },
     {
       "id": "ABR|2025-12-23",
@@ -3559,7 +3892,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.874Z",
+        "updatedAt": "2026-06-23T02:35:47.604Z",
         "ret5d": 2.3809523809523867,
         "ret10d": -0.7936507936507908,
         "ret20d": 17.063492063492067,
@@ -3568,9 +3901,18 @@
         "rMultiple": 1.123456790123458,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-23",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.604Z"
     },
     {
       "id": "AGX|2025-12-23",
@@ -3657,7 +3999,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.875Z",
+        "updatedAt": "2026-06-23T02:35:47.606Z",
         "ret5d": -10.650887573964498,
         "ret10d": 6.508875739644971,
         "ret20d": 18.28402366863906,
@@ -3666,9 +4008,18 @@
         "rMultiple": 0.2946691668899008,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-23",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.606Z"
     },
     {
       "id": "AAS|2025-12-24",
@@ -3752,7 +4103,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.876Z",
+        "updatedAt": "2026-06-23T02:35:47.607Z",
         "ret5d": 0.9708737864077635,
         "ret10d": -8.737864077669906,
         "ret20d": 3.883495145631054,
@@ -3761,9 +4112,18 @@
         "rMultiple": 0.5499541704857919,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-24",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.607Z"
     },
     {
       "id": "ACE|2025-12-24",
@@ -3846,7 +4206,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.878Z",
+        "updatedAt": "2026-06-23T02:35:47.608Z",
         "ret5d": 2.11793020457281,
         "ret10d": 1.8772563176895334,
         "ret20d": -0.6979542719614902,
@@ -3855,9 +4215,18 @@
         "rMultiple": 2.0882642998027654,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-24",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.608Z"
     },
     {
       "id": "ACV|2025-12-24",
@@ -3936,7 +4305,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.879Z",
+        "updatedAt": "2026-06-23T02:35:47.609Z",
         "ret5d": -3.3596837944664086,
         "ret10d": 9.486166007905132,
         "ret20d": 17.391304347826082,
@@ -3945,9 +4314,18 @@
         "rMultiple": 1.4681647940074902,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-24",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.609Z"
     },
     {
       "id": "AMP|2025-12-24",
@@ -4033,7 +4411,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.881Z",
+        "updatedAt": "2026-06-23T02:35:47.611Z",
         "ret5d": -9.696969696969694,
         "ret10d": -6.0606060606060606,
         "ret20d": -9.090909090909092,
@@ -4042,9 +4420,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-24",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.611Z"
     },
     {
       "id": "BSR|2025-12-24",
@@ -4126,7 +4513,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.882Z",
+        "updatedAt": "2026-06-23T02:35:47.613Z",
         "ret5d": -0.30959752321979667,
         "ret10d": 21.981424148606816,
         "ret20d": 27.86377708978328,
@@ -4135,9 +4522,18 @@
         "rMultiple": 1.3464991023339326,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-24",
+      "daysAvailable": 84,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.613Z"
     },
     {
       "id": "AAS|2025-12-31",
@@ -4219,7 +4615,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.884Z",
+        "updatedAt": "2026-06-23T02:35:47.614Z",
         "ret5d": -9.615384615384615,
         "ret10d": -7.692307692307699,
         "ret20d": 0.9615384615384581,
@@ -4228,9 +4624,18 @@
         "rMultiple": 0.2748511223087493,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-31",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.614Z"
     },
     {
       "id": "ABB|2025-12-31",
@@ -4314,7 +4719,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "No structural resistance above entry — reward uses minimum floor only",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.885Z",
+        "updatedAt": "2026-06-23T02:35:47.615Z",
         "ret5d": -1.8354860639021167,
         "ret10d": 1.2916383412644425,
         "ret20d": -5.506458191706325,
@@ -4323,9 +4728,18 @@
         "rMultiple": 0.9910837647577656,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-31",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.615Z"
     },
     {
       "id": "AIG|2025-12-31",
@@ -4412,7 +4826,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.886Z",
+        "updatedAt": "2026-06-23T02:35:47.616Z",
         "ret5d": -10,
         "ret10d": -10.799999999999997,
         "ret20d": -2.4000000000000057,
@@ -4421,9 +4835,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-31",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.616Z"
     },
     {
       "id": "ANV|2025-12-31",
@@ -4502,7 +4925,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.888Z",
+        "updatedAt": "2026-06-23T02:35:47.618Z",
         "ret5d": -2.9182879377431905,
         "ret10d": 2.1400778210116758,
         "ret20d": 11.089494163424131,
@@ -4511,9 +4934,18 @@
         "rMultiple": 1.2031250000000029,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2025-12-31",
+      "daysAvailable": 79,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.618Z"
     },
     {
       "id": "APC|2026-01-05",
@@ -4595,7 +5027,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.889Z",
+        "updatedAt": "2026-06-23T02:35:47.619Z",
         "ret5d": -10.000000000000002,
         "ret10d": -7.142857142857142,
         "ret20d": -2.85714285714286,
@@ -4604,9 +5036,18 @@
         "rMultiple": 0.9280742459396748,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-05",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.619Z"
     },
     {
       "id": "ABC|2026-01-09",
@@ -4688,7 +5129,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.890Z",
+        "updatedAt": "2026-06-23T02:35:47.621Z",
         "ret5d": 4.3478260869565215,
         "ret10d": -3.4782608695652204,
         "ret20d": -5.217391304347823,
@@ -4697,9 +5138,18 @@
         "rMultiple": 1.3574660633484157,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.621Z"
     },
     {
       "id": "ABT|2026-01-09",
@@ -4781,7 +5231,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.892Z",
+        "updatedAt": "2026-06-23T02:35:47.622Z",
         "ret5d": -0.7363092498849578,
         "ret10d": 3.942322442092357,
         "ret20d": -8.206780181009348,
@@ -4790,9 +5240,18 @@
         "rMultiple": 1.1957171314741062,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.622Z"
     },
     {
       "id": "ACV|2026-01-09",
@@ -4877,7 +5336,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.893Z",
+        "updatedAt": "2026-06-23T02:35:47.623Z",
         "ret5d": 9.747292418772561,
         "ret10d": 7.2202166064981945,
         "ret20d": -4.6931407942238295,
@@ -4886,9 +5345,18 @@
         "rMultiple": 1.326185101580135,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.623Z"
     },
     {
       "id": "AFX|2026-01-09",
@@ -4969,7 +5437,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.895Z",
+        "updatedAt": "2026-06-23T02:35:47.624Z",
         "ret5d": -4.7413793103448185,
         "ret10d": -4.310344827586207,
         "ret20d": -9.482758620689651,
@@ -4978,9 +5446,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.624Z"
     },
     {
       "id": "BID|2026-01-09",
@@ -5065,7 +5542,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.897Z",
+        "updatedAt": "2026-06-23T02:35:47.626Z",
         "ret5d": 10.966340933767654,
         "ret10d": 10.314875135722042,
         "ret20d": 11.61780673181325,
@@ -5074,9 +5551,18 @@
         "rMultiple": 1.2227630968938346,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.626Z"
     },
     {
       "id": "BSR|2026-01-09",
@@ -5161,7 +5647,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.898Z",
+        "updatedAt": "2026-06-23T02:35:47.627Z",
         "ret5d": 2.2842639593908594,
         "ret10d": 4.822335025380707,
         "ret20d": 24.61928934010153,
@@ -5170,9 +5656,18 @@
         "rMultiple": 0.8419533317296128,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.627Z"
     },
     {
       "id": "CTG|2026-01-09",
@@ -5257,7 +5752,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.899Z",
+        "updatedAt": "2026-06-23T02:35:47.629Z",
         "ret5d": -2.8220858895705487,
         "ret10d": -4.294478527607362,
         "ret20d": -8.220858895705526,
@@ -5266,9 +5761,18 @@
         "rMultiple": 0.40189989039093893,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-09",
+      "daysAvailable": 74,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.629Z"
     },
     {
       "id": "ABR|2026-01-12",
@@ -5347,7 +5851,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.901Z",
+        "updatedAt": "2026-06-23T02:35:47.631Z",
         "ret5d": 5.200000000000003,
         "ret10d": 18,
         "ret20d": -5.599999999999994,
@@ -5356,9 +5860,18 @@
         "rMultiple": 3.0270270270270268,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-12",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.631Z"
     },
     {
       "id": "ACL|2026-01-12",
@@ -5437,7 +5950,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.902Z",
+        "updatedAt": "2026-06-23T02:35:47.632Z",
         "ret5d": 9.49764521193092,
         "ret10d": 7.927786499215069,
         "ret20d": 5.965463108320249,
@@ -5446,9 +5959,18 @@
         "rMultiple": 0.9941314553990604,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-12",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.632Z"
     },
     {
       "id": "AIC|2026-01-12",
@@ -5530,7 +6052,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (resistance_cluster) too close — R:R 0.50 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.903Z",
+        "updatedAt": "2026-06-23T02:35:47.633Z",
         "ret5d": -3.000000000000007,
         "ret10d": 4.0000000000000036,
         "ret20d": -10,
@@ -5539,9 +6061,18 @@
         "rMultiple": 1.0092514718250625,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-12",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.633Z"
     },
     {
       "id": "ADC|2026-01-14",
@@ -5621,7 +6152,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.905Z",
+        "updatedAt": "2026-06-23T02:35:47.634Z",
         "ret5d": 1.666666666666652,
         "ret10d": 19.761904761904763,
         "ret20d": 4.404761904761895,
@@ -5630,9 +6161,18 @@
         "rMultiple": 20.89285714285722,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-14",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.634Z"
     },
     {
       "id": "AMC|2026-01-15",
@@ -5719,7 +6259,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_60d_high) too close — R:R 0.39 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.906Z",
+        "updatedAt": "2026-06-23T02:35:47.636Z",
         "ret5d": -2.097902097902103,
         "ret10d": 18.881118881118873,
         "ret20d": -18.881118881118887,
@@ -5728,9 +6268,18 @@
         "rMultiple": 1.896664486592543,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-15",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.636Z"
     },
     {
       "id": "ABC|2026-01-16",
@@ -5813,7 +6362,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.908Z",
+        "updatedAt": "2026-06-23T02:35:47.637Z",
         "ret5d": -7.500000000000003,
         "ret10d": -10.83333333333334,
         "ret20d": -5.833333333333327,
@@ -5822,9 +6371,18 @@
         "rMultiple": 0.6230529595015574,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-16",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.637Z"
     },
     {
       "id": "ACV|2026-01-16",
@@ -5906,7 +6464,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.910Z",
+        "updatedAt": "2026-06-23T02:35:47.638Z",
         "ret5d": -2.3026315789473664,
         "ret10d": -9.868421052631579,
         "ret20d": -11.348684210526313,
@@ -5915,9 +6473,18 @@
         "rMultiple": 0.2179352651545729,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-16",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.638Z"
     },
     {
       "id": "AGR|2026-01-16",
@@ -6001,7 +6568,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.911Z",
+        "updatedAt": "2026-06-23T02:35:47.639Z",
         "ret5d": -9.21787709497206,
         "ret10d": -9.21787709497206,
         "ret20d": -8.379888268156426,
@@ -6010,9 +6577,18 @@
         "rMultiple": 0.016663889351774947,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-16",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.639Z"
     },
     {
       "id": "BID|2026-01-16",
@@ -6095,7 +6671,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.913Z",
+        "updatedAt": "2026-06-23T02:35:47.641Z",
         "ret5d": -0.5870841487279926,
         "ret10d": 5.479452054794515,
         "ret20d": -8.219178082191785,
@@ -6104,9 +6680,18 @@
         "rMultiple": 0.4021055709899107,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-16",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.641Z"
     },
     {
       "id": "BSR|2026-01-16",
@@ -6188,7 +6773,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.915Z",
+        "updatedAt": "2026-06-23T02:35:47.642Z",
         "ret5d": 2.481389578163772,
         "ret10d": 11.166253101736974,
         "ret20d": 21.588089330024822,
@@ -6197,9 +6782,18 @@
         "rMultiple": 0.7242935169793405,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-16",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.642Z"
     },
     {
       "id": "CTG|2026-01-16",
@@ -6281,7 +6875,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.916Z",
+        "updatedAt": "2026-06-23T02:35:47.644Z",
         "ret5d": -1.5151515151515187,
         "ret10d": -2.1464646464646497,
         "ret20d": -2.525252525252525,
@@ -6290,9 +6884,18 @@
         "rMultiple": 0.3150773792975617,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-16",
+      "daysAvailable": 69,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.644Z"
     },
     {
       "id": "ABR|2026-01-19",
@@ -6373,7 +6976,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.918Z",
+        "updatedAt": "2026-06-23T02:35:47.645Z",
         "ret5d": 12.167300380228134,
         "ret10d": -6.8441064638783295,
         "ret20d": -2.281368821292781,
@@ -6382,9 +6985,18 @@
         "rMultiple": 2.9176201372997683,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-19",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.645Z"
     },
     {
       "id": "ADG|2026-01-20",
@@ -6469,7 +7081,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_60d_high) too close — R:R 0.41 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.919Z",
+        "updatedAt": "2026-06-23T02:35:47.647Z",
         "ret5d": -3.936170212765968,
         "ret10d": -6.382978723404251,
         "ret20d": -6.382978723404251,
@@ -6478,9 +7090,18 @@
         "rMultiple": 0.054019014693170886,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-20",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.647Z"
     },
     {
       "id": "AAS|2026-01-23",
@@ -6562,7 +7183,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.921Z",
+        "updatedAt": "2026-06-23T02:35:47.648Z",
         "ret5d": -1.8691588785046664,
         "ret10d": -6.542056074766349,
         "ret20d": -2.8037383177569994,
@@ -6571,9 +7192,18 @@
         "rMultiple": 0.18526294988019706,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.648Z"
     },
     {
       "id": "AAV|2026-01-23",
@@ -6654,7 +7284,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.923Z",
+        "updatedAt": "2026-06-23T02:35:47.649Z",
         "ret5d": -4.918032786885243,
         "ret10d": -11.475409836065563,
         "ret20d": 0,
@@ -6663,9 +7293,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.649Z"
     },
     {
       "id": "ACV|2026-01-23",
@@ -6748,7 +7387,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.924Z",
+        "updatedAt": "2026-06-23T02:35:47.651Z",
         "ret5d": -7.744107744107747,
         "ret10d": -11.111111111111112,
         "ret20d": -10.269360269360273,
@@ -6757,9 +7396,18 @@
         "rMultiple": 0.027397260273973004,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.651Z"
     },
     {
       "id": "AG1|2026-01-23",
@@ -6843,7 +7491,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.926Z",
+        "updatedAt": "2026-06-23T02:35:47.652Z",
         "ret5d": 0,
         "ret10d": -4.4500419815281225,
         "ret20d": -8.228379513014279,
@@ -6852,9 +7500,18 @@
         "rMultiple": 0.16026782534368483,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.652Z"
     },
     {
       "id": "AMP|2026-01-23",
@@ -6938,7 +7595,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Early reversal forming — wait for R:R and confirmation",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.927Z",
+        "updatedAt": "2026-06-23T02:35:47.654Z",
         "ret5d": 0,
         "ret10d": 0,
         "ret20d": -3.3333333333333335,
@@ -6947,9 +7604,18 @@
         "rMultiple": 1.5599650567827534,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.654Z"
     },
     {
       "id": "BID|2026-01-23",
@@ -7034,7 +7700,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.929Z",
+        "updatedAt": "2026-06-23T02:35:47.655Z",
         "ret5d": 6.102362204724413,
         "ret10d": 1.1811023622047274,
         "ret20d": -5.7086614173228325,
@@ -7043,9 +7709,18 @@
         "rMultiple": 0.5384622651312628,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.655Z"
     },
     {
       "id": "BSR|2026-01-23",
@@ -7128,7 +7803,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.931Z",
+        "updatedAt": "2026-06-23T02:35:47.656Z",
         "ret5d": 8.474576271186441,
         "ret10d": 18.886198547215507,
         "ret20d": 51.089588377723985,
@@ -7137,9 +7812,18 @@
         "rMultiple": 1.1641217671368445,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-23",
+      "daysAvailable": 64,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.656Z"
     },
     {
       "id": "ABR|2026-01-26",
@@ -7225,7 +7909,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.933Z",
+        "updatedAt": "2026-06-23T02:35:47.657Z",
         "ret5d": -16.94915254237288,
         "ret10d": -19.999999999999996,
         "ret20d": -13.898305084745768,
@@ -7234,9 +7918,18 @@
         "rMultiple": 0.282942603071948,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-26",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.657Z"
     },
     {
       "id": "ACS|2026-01-26",
@@ -7315,7 +8008,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.934Z",
+        "updatedAt": "2026-06-23T02:35:47.659Z",
         "ret5d": -7.1428571428571495,
         "ret10d": -11.904761904761903,
         "ret20d": -2.380952380952394,
@@ -7324,9 +8017,18 @@
         "rMultiple": 0.13725490196078383,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-26",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.659Z"
     },
     {
       "id": "AMC|2026-01-26",
@@ -7409,7 +8111,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_60d_high) too close — R:R 0.49 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.936Z",
+        "updatedAt": "2026-06-23T02:35:47.660Z",
         "ret5d": 21.428571428571427,
         "ret10d": -17.142857142857146,
         "ret20d": -10.714285714285714,
@@ -7418,9 +8120,18 @@
         "rMultiple": 1.627906976744187,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-26",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.660Z"
     },
     {
       "id": "AGX|2026-01-27",
@@ -7504,7 +8215,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.938Z",
+        "updatedAt": "2026-06-23T02:35:47.661Z",
         "ret5d": 1.6111111111111143,
         "ret10d": 11.055555555555559,
         "ret20d": 40.44444444444445,
@@ -7513,9 +8224,18 @@
         "rMultiple": 0.5459533607681759,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-27",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.661Z"
     },
     {
       "id": "ADC|2026-01-28",
@@ -7601,7 +8321,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.940Z",
+        "updatedAt": "2026-06-23T02:35:47.663Z",
         "ret5d": -14.214711729622262,
         "ret10d": -12.823061630218696,
         "ret20d": 0,
@@ -7610,9 +8330,18 @@
         "rMultiple": 0.5152448741102724,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-28",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.663Z"
     },
     {
       "id": "ANT|2026-01-30",
@@ -7697,7 +8426,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.942Z",
+        "updatedAt": "2026-06-23T02:35:47.664Z",
         "ret5d": -5.304165418040144,
         "ret10d": -5.933473179502538,
         "ret20d": -7.521726101288577,
@@ -7706,9 +8435,18 @@
         "rMultiple": 0.6620781527531099,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-30",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.664Z"
     },
     {
       "id": "ANV|2026-01-30",
@@ -7790,7 +8528,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.944Z",
+        "updatedAt": "2026-06-23T02:35:47.666Z",
         "ret5d": -4.378283712784588,
         "ret10d": -7.180385288966727,
         "ret20d": -13.660245183887923,
@@ -7799,9 +8537,18 @@
         "rMultiple": 0.5160142348754441,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-30",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.666Z"
     },
     {
       "id": "BID|2026-01-30",
@@ -7889,7 +8636,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.946Z",
+        "updatedAt": "2026-06-23T02:35:47.667Z",
         "ret5d": -4.63821892393321,
         "ret10d": -12.987012987012989,
         "ret20d": -19.202226345083492,
@@ -7898,9 +8645,18 @@
         "rMultiple": 0.2115678807408133,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-30",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.667Z"
     },
     {
       "id": "BSR|2026-01-30",
@@ -7984,7 +8740,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.947Z",
+        "updatedAt": "2026-06-23T02:35:47.668Z",
         "ret5d": 9.598214285714295,
         "ret10d": 9.375000000000007,
         "ret20d": 65.40178571428571,
@@ -7993,9 +8749,18 @@
         "rMultiple": 0.5717735102019397,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-01-30",
+      "daysAvailable": 59,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.668Z"
     },
     {
       "id": "ACC|2026-02-02",
@@ -8078,7 +8843,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_20d_high) too close — R:R 0.61 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.949Z",
+        "updatedAt": "2026-06-23T02:35:47.670Z",
         "ret5d": -3.787878787878788,
         "ret10d": -4.166666666666659,
         "ret20d": -6.818181818181808,
@@ -8087,9 +8852,18 @@
         "rMultiple": 0.09324009324009458,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-02",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.670Z"
     },
     {
       "id": "ACL|2026-02-02",
@@ -8176,7 +8950,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.951Z",
+        "updatedAt": "2026-06-23T02:35:47.671Z",
         "ret5d": -6.250000000000003,
         "ret10d": -4.861111111111118,
         "ret20d": -8.680555555555555,
@@ -8185,9 +8959,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-02",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.671Z"
     },
     {
       "id": "ALT|2026-02-02",
@@ -8271,7 +9054,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.953Z",
+        "updatedAt": "2026-06-23T02:35:47.672Z",
         "ret5d": -17.36111111111111,
         "ret10d": -11.111111111111107,
         "ret20d": -22.91666666666667,
@@ -8280,9 +9063,18 @@
         "rMultiple": 0.33250207813798816,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-02",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.672Z"
     },
     {
       "id": "AMP|2026-02-02",
@@ -8368,7 +9160,7 @@
       "suggestedAction": "Research signal only — display-only lane.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.955Z",
+        "updatedAt": "2026-06-23T02:35:47.673Z",
         "ret5d": 0,
         "ret10d": -8.666666666666671,
         "ret20d": -3.3333333333333335,
@@ -8377,9 +9169,18 @@
         "rMultiple": 2.3255813953488387,
         "invalidLevelHit": true,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-02",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.673Z"
     },
     {
       "id": "AMC|2026-02-03",
@@ -8466,7 +9267,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.956Z",
+        "updatedAt": "2026-06-23T02:35:47.675Z",
         "ret5d": -31.764705882352946,
         "ret10d": -31.764705882352946,
         "ret20d": -23.52941176470588,
@@ -8475,9 +9276,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-03",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.675Z"
     },
     {
       "id": "ADG|2026-02-04",
@@ -8560,7 +9370,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (resistance_cluster) too close — R:R 0.82 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.957Z",
+        "updatedAt": "2026-06-23T02:35:47.676Z",
         "ret5d": 2.2727272727272645,
         "ret10d": 0,
         "ret20d": 0.6818181818181672,
@@ -8569,9 +9379,18 @@
         "rMultiple": 0.9786407766990274,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-04",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.676Z"
     },
     {
       "id": "AAM|2026-02-05",
@@ -8650,7 +9469,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.958Z",
+        "updatedAt": "2026-06-23T02:35:47.678Z",
         "ret5d": 0,
         "ret10d": -0.8955223880597089,
         "ret20d": -4.477611940298504,
@@ -8659,9 +9478,18 @@
         "rMultiple": 0.9230769230769245,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-05",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.678Z"
     },
     {
       "id": "AAH|2026-02-06",
@@ -8740,7 +9568,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.960Z",
+        "updatedAt": "2026-06-23T02:35:47.679Z",
         "ret5d": 0,
         "ret10d": 0,
         "ret20d": 0,
@@ -8749,9 +9577,18 @@
         "rMultiple": 0.34999999999999987,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-06",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.679Z"
     },
     {
       "id": "ABS|2026-02-06",
@@ -8831,7 +9668,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.961Z",
+        "updatedAt": "2026-06-23T02:35:47.680Z",
         "ret5d": 0,
         "ret10d": 3.225806451612898,
         "ret20d": -6.451612903225811,
@@ -8840,9 +9677,18 @@
         "rMultiple": 1.4777777777777774,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-06",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.680Z"
     },
     {
       "id": "AGP|2026-02-06",
@@ -8925,7 +9771,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.963Z",
+        "updatedAt": "2026-06-23T02:35:47.682Z",
         "ret5d": -4.771260174010672,
         "ret10d": -2.020769014875122,
         "ret20d": -4.771260174010672,
@@ -8934,9 +9780,18 @@
         "rMultiple": 0.06658709717947031,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-06",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.682Z"
     },
     {
       "id": "AMS|2026-02-06",
@@ -9018,7 +9873,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.964Z",
+        "updatedAt": "2026-06-23T02:35:47.683Z",
         "ret5d": 8.108108108108103,
         "ret10d": 5.405405405405398,
         "ret20d": 18.918918918918923,
@@ -9027,9 +9882,18 @@
         "rMultiple": 1.8064516129032264,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-06",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.683Z"
     },
     {
       "id": "BSR|2026-02-06",
@@ -9110,7 +9974,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.966Z",
+        "updatedAt": "2026-06-23T02:35:47.684Z",
         "ret5d": -0.20366598778004363,
         "ret10d": 27.08757637474541,
         "ret20d": 43.38085539714868,
@@ -9119,9 +9983,18 @@
         "rMultiple": 1.1194254117081377,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-06",
+      "daysAvailable": 54,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.684Z"
     },
     {
       "id": "AGX|2026-02-11",
@@ -9205,7 +10078,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.967Z",
+        "updatedAt": "2026-06-23T02:35:47.686Z",
         "ret5d": 9.294696555494806,
         "ret10d": 10.442864953526513,
         "ret20d": 50.9021323127392,
@@ -9214,9 +10087,18 @@
         "rMultiple": 0.5568350776945273,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-11",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.686Z"
     },
     {
       "id": "ABB|2026-02-13",
@@ -9298,7 +10180,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.969Z",
+        "updatedAt": "2026-06-23T02:35:47.687Z",
         "ret5d": -1.4184397163120517,
         "ret10d": -2.127659574468078,
         "ret20d": -2.127659574468078,
@@ -9307,9 +10189,18 @@
         "rMultiple": 0.14583333333333295,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.687Z"
     },
     {
       "id": "AGR|2026-02-13",
@@ -9390,7 +10281,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.970Z",
+        "updatedAt": "2026-06-23T02:35:47.688Z",
         "ret5d": 1.8292682926829311,
         "ret10d": -3.963414634146333,
         "ret20d": -12.195121951219502,
@@ -9399,9 +10290,18 @@
         "rMultiple": 1.392342118349085,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.688Z"
     },
     {
       "id": "ALV|2026-02-13",
@@ -9485,7 +10385,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.971Z",
+        "updatedAt": "2026-06-23T02:35:47.690Z",
         "ret5d": 6.8493150684931505,
         "ret10d": -1.3698630136986254,
         "ret20d": 0,
@@ -9494,9 +10394,18 @@
         "rMultiple": 1.6184971098265888,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.690Z"
     },
     {
       "id": "AMS|2026-02-13",
@@ -9578,7 +10487,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "No structural resistance above entry — reward uses minimum floor only",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.973Z",
+        "updatedAt": "2026-06-23T02:35:47.691Z",
         "ret5d": -2.500000000000002,
         "ret10d": 5.000000000000004,
         "ret20d": 5.000000000000004,
@@ -9587,9 +10496,18 @@
         "rMultiple": 0.4587155963302757,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.691Z"
     },
     {
       "id": "AMV|2026-02-13",
@@ -9670,7 +10588,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.974Z",
+        "updatedAt": "2026-06-23T02:35:47.692Z",
         "ret5d": -12.499999999999993,
         "ret10d": -20.833333333333336,
         "ret20d": -24.999999999999993,
@@ -9679,9 +10597,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.692Z"
     },
     {
       "id": "BSR|2026-02-13",
@@ -9769,7 +10696,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.975Z",
+        "updatedAt": "2026-06-23T02:35:47.694Z",
         "ret5d": 27.3469387755102,
         "ret10d": 51.22448979591836,
         "ret20d": 14.48979591836735,
@@ -9778,9 +10705,18 @@
         "rMultiple": 2.4179877488620747,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.694Z"
     },
     {
       "id": "CTG|2026-02-13",
@@ -9866,7 +10802,7 @@
       "suggestedAction": "Research signal only — display-only lane.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.977Z",
+        "updatedAt": "2026-06-23T02:35:47.695Z",
         "ret5d": -0.9067357512953403,
         "ret10d": -7.642487046632132,
         "ret20d": -12.953367875647666,
@@ -9875,9 +10811,18 @@
         "rMultiple": 0.21584286639326525,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-13",
+      "daysAvailable": 49,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.695Z"
     },
     {
       "id": "AMC|2026-02-24",
@@ -9956,7 +10901,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.979Z",
+        "updatedAt": "2026-06-23T02:35:47.696Z",
         "ret5d": 7.758620689655175,
         "ret10d": 12.068965517241383,
         "ret20d": 10.344827586206906,
@@ -9965,9 +10910,18 @@
         "rMultiple": 1.3196721311475421,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-24",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.696Z"
     },
     {
       "id": "ADC|2026-02-25",
@@ -10054,7 +11008,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.980Z",
+        "updatedAt": "2026-06-23T02:35:47.698Z",
         "ret5d": -0.4945598417408401,
         "ret10d": 1.8298714144411525,
         "ret20d": -10.979228486646878,
@@ -10063,9 +11017,18 @@
         "rMultiple": 0.11811274979250509,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-25",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.698Z"
     },
     {
       "id": "AMP|2026-02-25",
@@ -10144,7 +11107,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.981Z",
+        "updatedAt": "2026-06-23T02:35:47.699Z",
         "ret5d": 5.839416058394166,
         "ret10d": 5.839416058394166,
         "ret20d": 5.839416058394166,
@@ -10153,9 +11116,18 @@
         "rMultiple": 1.8000000000000007,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-25",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.699Z"
     },
     {
       "id": "AGX|2026-02-26",
@@ -10239,7 +11211,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.983Z",
+        "updatedAt": "2026-06-23T02:35:47.701Z",
         "ret5d": 1.0505252626313129,
         "ret10d": 26.46323161580791,
         "ret20d": 28.064032016008,
@@ -10248,9 +11220,18 @@
         "rMultiple": 1.34499777782976,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-26",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.701Z"
     },
     {
       "id": "AAV|2026-02-27",
@@ -10335,7 +11316,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (resistance_cluster) too close — R:R 0.40 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.984Z",
+        "updatedAt": "2026-06-23T02:35:47.702Z",
         "ret5d": 3.2786885245901667,
         "ret10d": 4.918032786885258,
         "ret20d": 14.754098360655746,
@@ -10344,9 +11325,18 @@
         "rMultiple": 0.9283819628647222,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.702Z"
     },
     {
       "id": "AGG|2026-02-27",
@@ -10427,7 +11417,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.985Z",
+        "updatedAt": "2026-06-23T02:35:47.703Z",
         "ret5d": -6.597222222222229,
         "ret10d": -8.333333333333341,
         "ret20d": -7.638888888888887,
@@ -10436,9 +11426,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.703Z"
     },
     {
       "id": "ALV|2026-02-27",
@@ -10521,7 +11520,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.987Z",
+        "updatedAt": "2026-06-23T02:35:47.704Z",
         "ret5d": -7.692307692307689,
         "ret10d": -8.974358974358978,
         "ret20d": -1.2820512820512775,
@@ -10530,9 +11529,18 @@
         "rMultiple": 0.15797788309636662,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.704Z"
     },
     {
       "id": "AMV|2026-02-27",
@@ -10614,7 +11622,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.988Z",
+        "updatedAt": "2026-06-23T02:35:47.706Z",
         "ret5d": -9.52380952380953,
         "ret10d": -14.285714285714288,
         "ret20d": -14.285714285714288,
@@ -10623,9 +11631,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.706Z"
     },
     {
       "id": "ANT|2026-02-27",
@@ -10709,7 +11726,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.990Z",
+        "updatedAt": "2026-06-23T02:35:47.707Z",
         "ret5d": -5.162876459741855,
         "ret10d": -9.096496619545178,
         "ret20d": -10.356484326982168,
@@ -10718,9 +11735,18 @@
         "rMultiple": 0.16511794138670405,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.707Z"
     },
     {
       "id": "APF|2026-02-27",
@@ -10805,7 +11831,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.991Z",
+        "updatedAt": "2026-06-23T02:35:47.708Z",
         "ret5d": -2.102747909199528,
         "ret10d": 3.1541218637992836,
         "ret20d": 9.46236559139785,
@@ -10814,9 +11840,18 @@
         "rMultiple": 0.2701245888274011,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.708Z"
     },
     {
       "id": "BSR|2026-02-27",
@@ -10900,7 +11935,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.992Z",
+        "updatedAt": "2026-06-23T02:35:47.710Z",
         "ret5d": 18.749999999999993,
         "ret10d": 12.820512820512834,
         "ret20d": -11.538461538461533,
@@ -10909,9 +11944,18 @@
         "rMultiple": 0.7574118156243241,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-02-27",
+      "daysAvailable": 44,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.710Z"
     },
     {
       "id": "ABR|2026-03-02",
@@ -10992,7 +12036,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.993Z",
+        "updatedAt": "2026-06-23T02:35:47.711Z",
         "ret5d": -5.905511811023622,
         "ret10d": 2.755905511811035,
         "ret20d": 0.7874015748031609,
@@ -11001,9 +12045,18 @@
         "rMultiple": 0.2878289473684224,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-02",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.711Z"
     },
     {
       "id": "ADG|2026-03-04",
@@ -11087,7 +12140,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_20d_high) too close — R:R 0.65 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.995Z",
+        "updatedAt": "2026-06-23T02:35:47.713Z",
         "ret5d": -1.4460511679644135,
         "ret10d": 2.0022246941045574,
         "ret20d": -1.7797552836484998,
@@ -11096,9 +12149,18 @@
         "rMultiple": 1.1564147627416523,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-04",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.713Z"
     },
     {
       "id": "AAV|2026-03-06",
@@ -11180,7 +12242,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.996Z",
+        "updatedAt": "2026-06-23T02:35:47.714Z",
         "ret5d": 1.5873015873015959,
         "ret10d": -4.761904761904759,
         "ret20d": 42.85714285714286,
@@ -11189,9 +12251,18 @@
         "rMultiple": 0.5847953216374272,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-06",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.714Z"
     },
     {
       "id": "AMS|2026-03-06",
@@ -11275,7 +12346,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.998Z",
+        "updatedAt": "2026-06-23T02:35:47.716Z",
         "ret5d": 4.761904761904765,
         "ret10d": 0,
         "ret20d": 11.904761904761903,
@@ -11284,9 +12355,18 @@
         "rMultiple": 0.5586592178770947,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-06",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.716Z"
     },
     {
       "id": "BSR|2026-03-06",
@@ -11369,7 +12449,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:34.999Z",
+        "updatedAt": "2026-06-23T02:35:47.717Z",
         "ret5d": -4.9932523616734,
         "ret10d": -24.291497975708495,
         "ret20d": -28.879892037786764,
@@ -11378,9 +12458,18 @@
         "rMultiple": 0.1717278107465246,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-06",
+      "daysAvailable": 39,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.717Z"
     },
     {
       "id": "ABR|2026-03-09",
@@ -11460,7 +12549,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.000Z",
+        "updatedAt": "2026-06-23T02:35:47.718Z",
         "ret5d": 9.205020920502104,
         "ret10d": 2.9288702928870416,
         "ret20d": 12.13389121338913,
@@ -11469,9 +12558,18 @@
         "rMultiple": 1.638297872340429,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-09",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.718Z"
     },
     {
       "id": "APC|2026-03-09",
@@ -11552,7 +12650,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.002Z",
+        "updatedAt": "2026-06-23T02:35:47.719Z",
         "ret5d": 4.918032786885258,
         "ret10d": 3.2786885245901667,
         "ret20d": -1.6393442622950762,
@@ -11561,9 +12659,18 @@
         "rMultiple": 0.844827586206897,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-09",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.719Z"
     },
     {
       "id": "ADC|2026-03-11",
@@ -11647,7 +12754,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.003Z",
+        "updatedAt": "2026-06-23T02:35:47.721Z",
         "ret5d": -3.5939776590577877,
         "ret10d": -12.578921806702281,
         "ret20d": -18.40699368625546,
@@ -11656,9 +12763,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-11",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.721Z"
     },
     {
       "id": "AAV|2026-03-13",
@@ -11744,7 +12860,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.004Z",
+        "updatedAt": "2026-06-23T02:35:47.722Z",
         "ret5d": -6.250000000000005,
         "ret10d": 9.374999999999995,
         "ret20d": 10.93749999999999,
@@ -11753,9 +12869,18 @@
         "rMultiple": 1.2565445026178002,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-13",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.722Z"
     },
     {
       "id": "AMS|2026-03-13",
@@ -11840,7 +12965,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.006Z",
+        "updatedAt": "2026-06-23T02:35:47.724Z",
         "ret5d": -4.545454545454549,
         "ret10d": 5.681818181818182,
         "ret20d": 4.545454545454529,
@@ -11849,9 +12974,18 @@
         "rMultiple": 0.8141112618724554,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-13",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.724Z"
     },
     {
       "id": "APF|2026-03-13",
@@ -11935,7 +13069,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.007Z",
+        "updatedAt": "2026-06-23T02:35:47.725Z",
         "ret5d": 6.115357887421822,
         "ret10d": 6.115357887421822,
         "ret20d": 0.4169562195969417,
@@ -11944,9 +13078,18 @@
         "rMultiple": 0.6676653321452936,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-13",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.725Z"
     },
     {
       "id": "BSR|2026-03-13",
@@ -12028,7 +13171,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.008Z",
+        "updatedAt": "2026-06-23T02:35:47.727Z",
         "ret5d": -20.312500000000007,
         "ret10d": -21.590909090909093,
         "ret20d": -24.005681818181824,
@@ -12037,9 +13180,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-13",
+      "daysAvailable": 34,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.727Z"
     },
     {
       "id": "ABR|2026-03-17",
@@ -12121,7 +13273,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.010Z",
+        "updatedAt": "2026-06-23T02:35:47.729Z",
         "ret5d": -5.747126436781609,
         "ret10d": -1.9157088122605364,
         "ret20d": -0.38314176245211273,
@@ -12130,9 +13282,18 @@
         "rMultiple": 0.08200082000819968,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-17",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.729Z"
     },
     {
       "id": "ABB|2026-03-20",
@@ -12213,7 +13374,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.011Z",
+        "updatedAt": "2026-06-23T02:35:47.730Z",
         "ret5d": 4.347826086956519,
         "ret10d": 5.072463768115937,
         "ret20d": 5.797101449275354,
@@ -12222,9 +13383,18 @@
         "rMultiple": 0.9779951100244477,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-20",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.730Z"
     },
     {
       "id": "ABC|2026-03-20",
@@ -12305,7 +13475,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.012Z",
+        "updatedAt": "2026-06-23T02:35:47.731Z",
         "ret5d": 19.000000000000004,
         "ret10d": 10,
         "ret20d": 14.000000000000004,
@@ -12314,9 +13484,18 @@
         "rMultiple": 2.6905829596412523,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-20",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.731Z"
     },
     {
       "id": "ACE|2026-03-20",
@@ -12401,7 +13580,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.014Z",
+        "updatedAt": "2026-06-23T02:35:47.733Z",
         "ret5d": -12.643678160919542,
         "ret10d": -13.333333333333327,
         "ret20d": -14.942528735632186,
@@ -12410,9 +13589,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-20",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.733Z"
     },
     {
       "id": "APF|2026-03-20",
@@ -12496,7 +13684,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.015Z",
+        "updatedAt": "2026-06-23T02:35:47.734Z",
         "ret5d": 0,
         "ret10d": -0.960488976206079,
         "ret20d": -5.762933857236412,
@@ -12505,9 +13693,18 @@
         "rMultiple": 0.16167602182920238,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-20",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.734Z"
     },
     {
       "id": "BID|2026-03-20",
@@ -12588,7 +13785,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Below MA50 — early reclaim not fully confirmed",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.017Z",
+        "updatedAt": "2026-06-23T02:35:47.735Z",
         "ret5d": 0.25157232704402877,
         "ret10d": -1.7610062893081833,
         "ret20d": 1.3836477987421314,
@@ -12597,9 +13794,18 @@
         "rMultiple": 0.23196881091617993,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-20",
+      "daysAvailable": 29,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.735Z"
     },
     {
       "id": "AGX|2026-03-23",
@@ -12684,7 +13890,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.018Z",
+        "updatedAt": "2026-06-23T02:35:47.737Z",
         "ret5d": 25.148514851485153,
         "ret10d": 36.633663366336634,
         "ret20d": 29.207920792079207,
@@ -12693,9 +13899,18 @@
         "rMultiple": 2.0032181428760176,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-23",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.737Z"
     },
     {
       "id": "ADG|2026-03-25",
@@ -12784,7 +13999,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_60d_high) too close — R:R 0.73 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.019Z",
+        "updatedAt": "2026-06-23T02:35:47.738Z",
         "ret5d": -4.54054054054054,
         "ret10d": -2.8108108108108083,
         "ret20d": -3.7837837837837798,
@@ -12793,9 +14008,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-25",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.738Z"
     },
     {
       "id": "AAV|2026-03-27",
@@ -12878,7 +14102,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.020Z",
+        "updatedAt": "2026-06-23T02:35:47.740Z",
         "ret5d": 28.57142857142857,
         "ret10d": 1.4285714285714235,
         "ret20d": 2.85714285714286,
@@ -12887,9 +14111,18 @@
         "rMultiple": 2.0754716981132058,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.740Z"
     },
     {
       "id": "ABB|2026-03-27",
@@ -12973,7 +14206,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (prior_60d_high) too close — R:R 1.31 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.022Z",
+        "updatedAt": "2026-06-23T02:35:47.741Z",
         "ret5d": 0.694444444444442,
         "ret10d": 2.083333333333326,
         "ret20d": 2.77777777777778,
@@ -12982,9 +14215,18 @@
         "rMultiple": 0.5882352941176469,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.741Z"
     },
     {
       "id": "ABC|2026-03-27",
@@ -13070,7 +14312,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.023Z",
+        "updatedAt": "2026-06-23T02:35:47.742Z",
         "ret5d": -7.563025210084036,
         "ret10d": -2.5210084033613507,
         "ret20d": -6.7226890756302575,
@@ -13079,9 +14321,18 @@
         "rMultiple": 0.21767522855898988,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.742Z"
     },
     {
       "id": "AGG|2026-03-27",
@@ -13163,7 +14414,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Nearest resistance (resistance_cluster) too close — R:R 0.63 < 2",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.024Z",
+        "updatedAt": "2026-06-23T02:35:47.744Z",
         "ret5d": -5.639097744360902,
         "ret10d": -2.255639097744366,
         "ret20d": -5.2631578947368505,
@@ -13172,9 +14423,18 @@
         "rMultiple": 0,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.744Z"
     },
     {
       "id": "AIG|2026-03-27",
@@ -13257,7 +14517,7 @@
       "suggestedAction": "Research: Pilot Candidate under review — not a buy recommendation.",
       "whyNotPilotYet": null,
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.026Z",
+        "updatedAt": "2026-06-23T02:35:47.746Z",
         "ret5d": -2.0044543429844066,
         "ret10d": -2.2271714922048997,
         "ret20d": -2.449888641425393,
@@ -13266,9 +14526,18 @@
         "rMultiple": 0,
         "invalidLevelHit": true,
         "targetHit": false,
+        "invalidHitBeforeTarget": true,
+        "targetHitBeforeInvalid": false,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.746Z"
     },
     {
       "id": "ALV|2026-03-27",
@@ -13354,7 +14623,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.027Z",
+        "updatedAt": "2026-06-23T02:35:47.748Z",
         "ret5d": -2.5974025974025996,
         "ret10d": -2.5974025974025996,
         "ret20d": -2.5974025974025996,
@@ -13363,9 +14632,18 @@
         "rMultiple": 0.2597402597402598,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": true
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.748Z"
     },
     {
       "id": "AMS|2026-03-27",
@@ -13448,7 +14726,7 @@
       "suggestedAction": "Research: avoid chasing — defensive signal only; needs forward validation.",
       "whyNotPilotYet": "Price extended from moving averages — do not chase",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.029Z",
+        "updatedAt": "2026-06-23T02:35:47.749Z",
         "ret5d": 1.0752688172042972,
         "ret10d": -1.0752688172043163,
         "ret20d": -2.1505376344086136,
@@ -13457,9 +14735,18 @@
         "rMultiple": 0.39414414414414356,
         "invalidLevelHit": false,
         "targetHit": true,
+        "invalidHitBeforeTarget": false,
+        "targetHitBeforeInvalid": true,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": false
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.749Z"
     },
     {
       "id": "CTG|2026-03-27",
@@ -13540,7 +14827,7 @@
       "suggestedAction": "Research: watch early structure — wait for R:R and confirmation.",
       "whyNotPilotYet": "Volume below recent average",
       "outcomes": {
-        "resolvedAt": "2026-06-23T02:29:35.030Z",
+        "updatedAt": "2026-06-23T02:35:47.751Z",
         "ret5d": -2.873563218390805,
         "ret10d": 0.5747126436781691,
         "ret20d": 0.5747126436781691,
@@ -13549,9 +14836,18 @@
         "rMultiple": 0.3205128205128208,
         "invalidLevelHit": false,
         "targetHit": false,
+        "invalidHitBeforeTarget": null,
+        "targetHitBeforeInvalid": null,
         "gate2BecameAb": false,
+        "gate2BecameAbSession": null,
         "extendedAvoidedBad5d": null
-      }
+      },
+      "source": "historical_seed",
+      "dataSession": "2026-03-27",
+      "daysAvailable": 24,
+      "validationStatus": "resolved",
+      "isResolved": true,
+      "resolvedAt": "2026-06-23T02:35:47.751Z"
     }
   ]
 }

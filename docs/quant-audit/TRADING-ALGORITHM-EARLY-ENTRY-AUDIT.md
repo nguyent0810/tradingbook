@@ -650,6 +650,33 @@ Extend [`v3-user-copy.ts`](../src/lib/dashboard/v3-user-copy.ts) and [`SignalBad
 | Acceptance | ≥20 resolved pilots, false rate ≤35%, positive median 10d, multi-regime |
 | Recommendation | Keep display-only until paper acceptance criteria met |
 
+### Phase 7B: Live paper-validation workflow ✅ (2026-06-23)
+
+| Item | Detail |
+|------|--------|
+| Files | `paper-signals.ts` (v2 store), `early-entry-paper-summary.ts` |
+| Separation | `source: historical_seed \| live_paper` — staging gates use **live only** |
+| Idempotency | `paper-log` skips duplicate `symbol\|sessionDate`; safe to run daily |
+| Resolution | Partial 5d/10d horizons; full resolve at 20 sessions; level-hit order + Gate 2 A/B |
+| Commands | `audit:early-entry:paper-log`, `audit:early-entry:paper-validate` (weekly), `audit:early-entry:paper-summary` |
+
+**Operating routine**
+
+1. After each market session → `npm run audit:early-entry:paper-log`
+2. Weekly → `npm run audit:early-entry:paper-validate` then `npm run audit:early-entry:paper-summary`
+3. Review open/resolved live signals in `early-entry-paper-validation.md`
+4. **Do not** trade from Pilot Candidate — research only
+5. Use **EXTENDED_DO_NOT_CHASE** only as cautionary anti-FOMO warning
+
+**Staging acceptance (live paper only)**
+
+- ≥20 live resolved pilot-qualified signals
+- False pilot rate ≤ 35%
+- Median 10d or 20d return > 0
+- Average R multiple > 0
+- No single-outlier dominance
+- ≥2 market regimes (or explicit regime filter)
+
 ### Phase 8: Staging enablement (not started)
 
 **Do not change until Phase 6 validates:** Gate 2 thresholds, Tier A/B surfacing, [`trading-decision.ts`](../src/lib/scanner/trading-decision.ts) allocation percentages.

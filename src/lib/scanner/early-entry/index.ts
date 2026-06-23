@@ -50,24 +50,36 @@ export {
 export type { CalibrationContext, CalibrationVariantId } from "./calibration";
 export {
   buildPaperCalibrationMap,
+  buildPaperSafetySummary,
   buildPaperSignal,
+  computeLevelHitOrder,
+  computeValidationStatus,
+  detectGate2AbAfterSignal,
   emptyPaperStore,
   evaluatePaperAcceptance,
+  filterSignalsBySource,
   isPaperWorthySignal,
   mergeSignalsIntoStore,
+  normalizePaperStore,
   PAPER_CALIBRATION_VARIANTS,
+  PAPER_RESOLVE_HORIZONS,
   PAPER_SIGNALS_PATH,
   paperSignalId,
   paperSuggestedAction,
   resolvePaperSignalOutcomes,
 } from "./paper-signals";
 export type {
+  MergeSignalsResult,
   PaperAcceptanceResult,
+  PaperAcceptanceScope,
   PaperCalibrationResult,
   PaperCalibrationVariantId,
+  PaperSafetySummary,
   PaperSignalOutcomes,
   PaperSignalRecord,
+  PaperSignalSource,
   PaperSignalStore,
+  PaperValidationStatus,
 } from "./paper-signals";
 export { EARLY_ENTRY_RESEARCH_DISCLAIMER } from "./state-machine";
 export {
