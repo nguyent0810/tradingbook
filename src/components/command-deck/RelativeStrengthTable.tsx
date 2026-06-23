@@ -38,16 +38,11 @@ function formatPp(value: number | null): string {
   return `${sign}${value.toFixed(1)}pp`;
 }
 
-function formatPct(value: number | null | undefined): string {
-  if (value == null || !Number.isFinite(value)) return "—";
-  return `${value.toFixed(1)}%`;
-}
-
 export function RelativeStrengthTable({ rows, contextNote }: Props) {
   const showEarlyEntry = rows.some((row) => row.earlyEntry);
 
   return (
-    <Card className="p-4 h-full" data-testid="command-deck-rs-table">
+    <Card className="p-4" data-testid="command-deck-rs-table">
       <CardHeader
         title="Relative Strength Radar"
         subtitle="Leaders vs VNINDEX that have not cleared setup filters yet"
@@ -64,37 +59,32 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
 
       {showEarlyEntry ? (
         <div
-          className="cd-rs-early-research mb-3"
+          className="cd-rs-early-research"
           data-testid="command-deck-rs-early-research-section"
         >
+          <div className="cd-rs-early-research__head">
+            <p className="cd-rs-early-research__title">Early Entry Research</p>
+            <span className="cd-rs-early-research__badge">Research only</span>
+          </div>
           <p
-            className="text-xs m-0 mb-2 leading-relaxed cd-rs-early-research-warning"
-            style={{ color: "var(--cd-text-muted)" }}
+            className="cd-rs-early-research-warning"
             data-testid="command-deck-rs-early-research-warning"
           >
             {EARLY_ENTRY_RESEARCH_DISCLAIMER}
           </p>
-          <ul
-            className="text-xs m-0 mb-2 pl-4 leading-relaxed"
-            style={{ color: "var(--cd-text-dim)" }}
-            data-testid="command-deck-rs-daily-checklist"
-          >
+          <ul data-testid="command-deck-rs-daily-checklist">
             {EARLY_ENTRY_DAILY_CHECKLIST.map((line) => (
               <li key={line}>{line}</li>
             ))}
           </ul>
-          <p
-            className="text-xs m-0 leading-relaxed cd-mono"
-            style={{ color: "var(--cd-text-dim)" }}
-            data-testid="command-deck-rs-paper-commands"
-          >
+          <p className="cd-mono m-0" data-testid="command-deck-rs-paper-commands">
             Daily: {EARLY_ENTRY_PAPER_COMMANDS.daily} · Weekly:{" "}
             {EARLY_ENTRY_PAPER_COMMANDS.weeklyValidate} · {EARLY_ENTRY_PAPER_COMMANDS.weeklySummary}
           </p>
         </div>
       ) : null}
 
-      <div className="overflow-x-auto">
+      <div className="cd-table-scroll" role="region" aria-label="Relative strength leaders">
         <table className="cd-rs-table">
           <thead>
             <tr>
@@ -143,14 +133,21 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
                   </td>
                   <td className="cd-mono tabular-nums">{row.rsStrength}</td>
                   <td>
-                    <Badge tone={setupStateTone(row.setupState)} pulse={row.setupState.startsWith("Watch")}>
+                    <Badge
+                      tone={setupStateTone(row.setupState)}
+                      pulse={row.setupState.startsWith("Watch")}
+                      size="compact"
+                    >
                       {row.setupState}
                     </Badge>
                   </td>
                   {showEarlyEntry ? (
                     <td className="cd-rs-table__col--hide-mobile">
                       {row.earlyEntry ? (
-                        <Badge tone={earlyEntryTone(row.earlyEntry.proposedTradeState)}>
+                        <Badge
+                          tone={earlyEntryTone(row.earlyEntry.proposedTradeState)}
+                          size="compact"
+                        >
                           {row.earlyEntry.proposedTradeState}
                         </Badge>
                       ) : (

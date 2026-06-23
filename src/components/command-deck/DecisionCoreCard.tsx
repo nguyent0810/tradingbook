@@ -41,8 +41,9 @@ export function DecisionCoreCard({ data }: Props) {
 
   return (
     <Card
+      variant="glass"
       glow={isNoTrade ? "danger" : "none"}
-      className={`p-5 h-full ${isNoTrade && !reducedMotion ? "cd-pulse-border" : ""}`}
+      className={`p-5 ${isNoTrade ? "cd-card--decision-danger" : ""} ${isNoTrade && !reducedMotion ? "cd-pulse-border" : ""}`}
       data-testid="dashboard-cyber-decision-core"
     >
       <CardHeader title="Decision Core" subtitle={data.confidenceLabel} />
@@ -64,14 +65,14 @@ export function DecisionCoreCard({ data }: Props) {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div className="cd-metric-cell">
+          <div className="cd-metric-cell cd-metric-cell--glass">
             <label>Main risk</label>
             <p className="text-xs m-0 mb-1 leading-snug" style={{ color: "var(--cd-text)" }}>
               {data.mainRisk}
             </p>
             <AnimatedBar percent={data.mainRiskPercent} tone={mainRiskTone} reducedMotion={reducedMotion} />
           </div>
-          <div className="cd-metric-cell">
+          <div className="cd-metric-cell cd-metric-cell--glass">
             <label>Capital</label>
             <p className="text-xs m-0 mb-1 leading-snug" style={{ color: "var(--cd-text)" }}>
               {data.capital}
@@ -80,7 +81,7 @@ export function DecisionCoreCard({ data }: Props) {
           </div>
         </div>
 
-        <div className="cd-metric-cell cd-metric-cell--next-action">
+        <div className="cd-metric-cell cd-metric-cell--glass cd-metric-cell--next-action">
           <label>Next action</label>
           <p className="cd-decision__next-action m-0 leading-relaxed">
             {data.nextAction}

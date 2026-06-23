@@ -52,30 +52,30 @@ export function DashboardLayout({ viewModel, loading = false, header }: Dashboar
         {header}
 
         <motion.div className="cd-grid cd-grid--main" {...container}>
-          <motion.div className="cd-span-12" {...item}>
+          <motion.div className="cd-span-12 cd-zone" {...item}>
             <CommandBar data={data.commandBar} loading={loading} />
           </motion.div>
 
-          <motion.div className="cd-span-6" {...item}>
+          <motion.div className="cd-span-6 cd-zone" {...item}>
             <DecisionCoreCard data={data.decision} />
           </motion.div>
 
-          <motion.div className="cd-span-6" {...item}>
+          <motion.div className="cd-span-6 cd-zone" {...item}>
             <TradeGateCard risk={viewModel.risk} />
           </motion.div>
 
-          <motion.div className="cd-span-6" {...item}>
+          <motion.div className="cd-span-6 cd-zone" {...item}>
             <OpportunityRadar nodes={data.radar} decisionMode={decisionMode} />
           </motion.div>
 
-          <motion.div className="cd-span-6" {...item}>
+          <motion.div className="cd-span-6 cd-zone" {...item}>
             <RelativeStrengthTable
               rows={data.relativeStrength}
               contextNote={data.rsContextNote}
             />
           </motion.div>
 
-          <motion.div className="cd-span-12" {...item}>
+          <motion.div className="cd-span-12 cd-zone" {...item}>
             <SetupIntelligenceSection
               rows={data.setupIntelligence}
               emptyMessage={data.setupEmptyMessage}
@@ -83,11 +83,11 @@ export function DashboardLayout({ viewModel, loading = false, header }: Dashboar
             />
           </motion.div>
 
-          <motion.div className="cd-span-12" {...item}>
+          <motion.div className="cd-span-12 cd-zone" {...item}>
             <LedgerPulseBar data={viewModel.ledger} />
           </motion.div>
 
-          <motion.div className="cd-span-12" {...item}>
+          <motion.div className="cd-span-12 cd-zone" {...item}>
             <EvidenceGrid
               items={data.evidence}
               defaultOpen={viewModel.evidenceDefaultOpen}

@@ -34,6 +34,13 @@ describe("radar plot utils", () => {
     ).toBe(true);
   });
 
+  it("keeps high-risk avoid bubble inside square plot bounds", () => {
+    const plot = toRadarPlotPoint(vjcAvoid);
+    expect(
+      isRadarBubbleInsideBounds(plot.plotReadiness, plot.plotRisk, 352, 352)
+    ).toBe(true);
+  });
+
   it("caps extreme risk for visual positioning only", () => {
     expect(clampPlotRisk(88)).toBe(86);
     expect(clampPlotRisk(95)).toBe(86);

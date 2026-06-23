@@ -20,7 +20,7 @@ export function TradeGateCard({ risk }: Props) {
   const rows = mapTradeGateRows(risk);
 
   return (
-    <Card className="p-4 h-full flex flex-col" data-testid="dashboard-cyber-trade-gate">
+    <Card className="p-4" data-testid="dashboard-cyber-trade-gate">
       <CardHeader
         title="Trade Gate"
         subtitle={risk.tradeGate.subtitle}
@@ -42,7 +42,7 @@ export function TradeGateCard({ risk }: Props) {
         }
       />
 
-      <div className="overflow-x-auto flex-1" role="region" aria-label="Trade Gate">
+      <div className="cd-table-scroll" role="region" aria-label="Trade Gate">
         <table className="cd-rs-table">
           <thead>
             <tr>
@@ -57,7 +57,9 @@ export function TradeGateCard({ risk }: Props) {
               <tr key={row.id}>
                 <td>{row.rule}</td>
                 <td>
-                  <Badge tone={actionTone(row.action)}>{row.statusLabel}</Badge>
+                  <Badge tone={actionTone(row.action)} size="compact">
+                    {row.statusLabel}
+                  </Badge>
                 </td>
                 <td className="cd-mono">{row.severity}</td>
                 <td className={`cd-mono ${actionTone(row.action) === "success" ? "cd-tone-success" : actionTone(row.action) === "danger" ? "cd-tone-danger" : actionTone(row.action) === "warning" ? "cd-tone-warning" : ""}`}>
