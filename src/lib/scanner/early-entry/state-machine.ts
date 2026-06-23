@@ -328,7 +328,7 @@ export function tradeStateDisplayLabel(state: EarlyEntryTradeState): string {
 
 /** Cautious UI copy — research lane, not a buy signal. */
 export const EARLY_ENTRY_RESEARCH_DISCLAIMER =
-  "Research signal only — display-only, needs validation. Not a buy recommendation.";
+  "Research signal only — display-only, needs forward validation. Not a buy recommendation.";
 
 export function computeMa10Series(closes: readonly number[]): (number | undefined)[] {
   return sma([...closes], 10);

@@ -28,7 +28,10 @@
     "gate1:print": "npx tsx scripts/print-gate1-regime.ts",
     "gate1:check": "npx tsx scripts/print-gate1-regime.ts",
     "scanner:near-miss": "npx tsx scripts/scanner-near-miss.ts",
-    "verify:market-data": "npx tsx scripts/verify-market-data.ts"
+    "verify:market-data": "npx tsx scripts/verify-market-data.ts",
+    "audit:early-entry:paper-log": "npx tsx scripts/audit/early-entry-paper-log.ts",
+    "audit:early-entry:paper-log:seed": "npx tsx scripts/audit/early-entry-paper-log.ts --seed-historical",
+    "audit:early-entry:paper-validate": "npx tsx scripts/audit/early-entry-paper-validation.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",

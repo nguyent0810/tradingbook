@@ -8,12 +8,14 @@ export type CalibrationVariantId =
   | "rr_min_2_5"
   | "rs_improving_3d"
   | "next_day_confirmation"
+  | "next_day_confirmation_candidate"
   | "close_top_quartile"
   | "volume_ratio_1_5"
   | "block_dist_ma20_gt_4"
   | "block_weak_gate1"
   | "two_day_follow_through"
   | "demote_weak_regime"
+  | "rr_min_2_5_plus_demote_weak_regime"
   | "combined_tight";
 
 export type Gate1RegimeLevel = "PASS" | "WARNING" | "FAIL";
@@ -130,6 +132,25 @@ export function applyCalibrationVariant(
     if (base === "PILOT_BUY" && ctx.gate1Level !== "PASS") {
       return demotePilot(base, "Gate 1 not PASS");
     }
+  }
+
+  if (variant === "next_day_confirmation_candidate") {
+    if (base === "PILOT_BUY") {
+      const nb = ctx.nextBar;
+      if (!nb || nb.close <= m.close) {
+        return demotePilot(base, "No next-day close confirmation");
+      }
+    }
+    return { state: base, demotedFromPilot: false, calibrationNote: null };
+  }
+
+  if (variant === "rr_min_2_5_plus_demote_weak_regime") {
+    const afterRr = applyCalibrationVariant(evaluation, "rr_min_2_5", ctx);
+    const stacked: EarlyEntryEvaluationResult = {
+      ...evaluation,
+      proposedTradeState: afterRr.state,
+    };
+    return applyCalibrationVariant(stacked, "demote_weak_regime", ctx);
   }
 
   if (variant === "combined_tight") {

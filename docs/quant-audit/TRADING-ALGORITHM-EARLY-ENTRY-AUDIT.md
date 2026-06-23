@@ -640,14 +640,17 @@ Extend [`v3-user-copy.ts`](../src/lib/dashboard/v3-user-copy.ts) and [`SignalBad
 | Calibration | `rr_min_2_5` promising but n=1; `combined_tight` eliminates all pilots |
 | Recommendation | Keep display-only; paper-validate 20+ signals before staging |
 
-### Phase 7: Paper trading validation
+### Phase 7: Paper-trading validation ✅ (2026-06-23)
 
 | Item | Detail |
 |------|--------|
-| Files | Snapshot logging extension in `rs-watchlist-snapshot.ts` |
-| Tests | Manual checklist |
-| Acceptance | 20+ paper pilot trades logged with outcome review |
-| Risk | Low |
+| Files | `paper-signals.ts`, `early-entry-paper-log.ts`, `early-entry-paper-validation.ts` |
+| Evidence | `early-entry-paper-signals.json`, `early-entry-paper-validation.md` |
+| Commands | `npm run audit:early-entry:paper-log`, `npm run audit:early-entry:paper-validate` |
+| Acceptance | ≥20 resolved pilots, false rate ≤35%, positive median 10d, multi-regime |
+| Recommendation | Keep display-only until paper acceptance criteria met |
+
+### Phase 8: Staging enablement (not started)
 
 **Do not change until Phase 6 validates:** Gate 2 thresholds, Tier A/B surfacing, [`trading-decision.ts`](../src/lib/scanner/trading-decision.ts) allocation percentages.
 
