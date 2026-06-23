@@ -57,7 +57,7 @@ export function RelativeStrengthTable({ rows, contextNote }: Props) {
           style={{ color: "var(--cd-text-muted)" }}
           data-testid="command-deck-rs-early-research-warning"
         >
-          Early-entry chips are research-only signals — not buy recommendations. Needs validation.
+          Early-entry chips are research-only signals — not buy recommendations. Needs forward validation.
         </p>
       ) : null}
 

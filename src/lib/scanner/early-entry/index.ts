@@ -48,6 +48,27 @@ export {
   isProductionPilotAcceptable,
 } from "./calibration";
 export type { CalibrationContext, CalibrationVariantId } from "./calibration";
+export {
+  buildPaperCalibrationMap,
+  buildPaperSignal,
+  emptyPaperStore,
+  evaluatePaperAcceptance,
+  isPaperWorthySignal,
+  mergeSignalsIntoStore,
+  PAPER_CALIBRATION_VARIANTS,
+  PAPER_SIGNALS_PATH,
+  paperSignalId,
+  paperSuggestedAction,
+  resolvePaperSignalOutcomes,
+} from "./paper-signals";
+export type {
+  PaperAcceptanceResult,
+  PaperCalibrationResult,
+  PaperCalibrationVariantId,
+  PaperSignalOutcomes,
+  PaperSignalRecord,
+  PaperSignalStore,
+} from "./paper-signals";
 export { EARLY_ENTRY_RESEARCH_DISCLAIMER } from "./state-machine";
 export {
   deriveEarlyEntryTradeState,
