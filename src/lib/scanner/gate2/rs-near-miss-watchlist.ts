@@ -27,6 +27,11 @@ import {
   type Gate2RejectionCode,
 } from "./rejection-codes";
 import { formatRelativeStrengthDiagnosticForUi, type RsDiagnosticUi } from "./rs-diagnostic-format";
+import {
+  evaluateEarlyEntryForSymbol,
+  isEarlyEntryV1Enabled,
+  type EarlyEntryDisplayMetadata,
+} from "@/lib/scanner/early-entry";
 
 /** Primary UI title — diagnostic lane only. */
 export const RS_NEAR_MISS_WATCHLIST_TITLE = "Relative-strength watchlist";
@@ -96,6 +101,8 @@ export type RsNearMissWatchlistEntryDto = {
   rsDiagnostic: RsDiagnosticUi | null;
   disclaimerLines: readonly string[];
   actionHint: string;
+  /** Display-only when EARLY_ENTRY_V1_ENABLED — does not affect Gate 2 or trade decisions. */
+  earlyEntry?: EarlyEntryDisplayMetadata | null;
 };
 
 export type RsNearMissWatchlistPanelDto = {
@@ -245,7 +252,8 @@ export function buildRsNearMissWatchlistRow(params: {
 
 export function toRsNearMissWatchlistEntryDto(
   row: RsNearMissWatchlistRow,
-  rsDiagnostic: RsDiagnosticUi | null
+  rsDiagnostic: RsDiagnosticUi | null,
+  earlyEntry?: EarlyEntryDisplayMetadata | null
 ): RsNearMissWatchlistEntryDto {
   return {
     symbol: row.symbol,
@@ -264,12 +272,14 @@ export function toRsNearMissWatchlistEntryDto(
       RS_NEAR_MISS_WATCHLIST_COPY.notInTradingDecision,
     ],
     actionHint: rsNearMissWatchlistActionHint(),
+    earlyEntry: earlyEntry ?? undefined,
   };
 }
 
 export function buildRsNearMissWatchlistPanel(
   rows: readonly RsNearMissWatchlistRow[],
-  rsUiBySymbol?: ReadonlyMap<string, RsDiagnosticUi | null>
+  rsUiBySymbol?: ReadonlyMap<string, RsDiagnosticUi | null>,
+  earlyEntryBySymbol?: ReadonlyMap<string, EarlyEntryDisplayMetadata | null>
 ): RsNearMissWatchlistPanelDto {
   const sorted = sortRsNearMissWatchlist(rows);
   return {
@@ -283,13 +293,45 @@ export function buildRsNearMissWatchlistPanel(
     ],
     actionHint: rsNearMissWatchlistActionHint(),
     rows: sorted.map((r) =>
-      toRsNearMissWatchlistEntryDto(r, rsUiBySymbol?.get(r.symbol) ?? null)
+      toRsNearMissWatchlistEntryDto(
+        r,
+        rsUiBySymbol?.get(r.symbol) ?? null,
+        earlyEntryBySymbol?.get(r.symbol) ?? null
+      )
     ),
     emptyReason:
       sorted.length === 0
         ? "No INVALID symbols with positive RS20 and a monitor terminal code on this session."
         : null,
   };
+}
+
+export function buildEarlyEntryMapForWatchlistRows(params: {
+  rows: readonly RsNearMissWatchlistRow[];
+  barsBySymbol: ReadonlyMap<string, readonly BarRow[]>;
+  indexBars: readonly BarRow[];
+  sessionDate: Date;
+}): Map<string, EarlyEntryDisplayMetadata | null> {
+  const out = new Map<string, EarlyEntryDisplayMetadata | null>();
+  if (!isEarlyEntryV1Enabled()) return out;
+
+  for (const row of params.rows) {
+    const bars = params.barsBySymbol.get(row.symbol);
+    if (!bars || bars.length < 50) {
+      out.set(row.symbol, null);
+      continue;
+    }
+    out.set(
+      row.symbol,
+      evaluateEarlyEntryForSymbol({
+        symbol: row.symbol,
+        stockBars: bars,
+        indexBars: params.indexBars,
+        sessionDate: params.sessionDate,
+      })
+    );
+  }
+  return out;
 }
 
 export type ComputeRsNearMissWatchlistOptions = {
@@ -308,6 +350,7 @@ export async function computeRsNearMissWatchlistFromDb(
   expectedLatestSession: Date;
   tradabilityPassedCount: number;
   rows: RsNearMissWatchlistRow[];
+  earlyEntryBySymbol?: Map<string, EarlyEntryDisplayMetadata | null>;
 }> {
   const expectedLatestSession = await getExpectedLatestSessionFromIndexBars(prisma);
   if (!expectedLatestSession) {
@@ -341,6 +384,7 @@ export async function computeRsNearMissWatchlistFromDb(
   }
 
   const eligible: RsNearMissWatchlistRow[] = [];
+  const barsBySymbol = new Map<string, BarRow[]>();
 
   for (const t of tradable) {
     if (excludeSet.has(t.symbol)) continue;
@@ -377,6 +421,7 @@ export async function computeRsNearMissWatchlistFromDb(
       continue;
     }
 
+    barsBySymbol.set(t.symbol, rows);
     eligible.push(
       buildRsNearMissWatchlistRow({
         symbol: t.symbol,
@@ -388,10 +433,20 @@ export async function computeRsNearMissWatchlistFromDb(
     );
   }
 
+  const sortedRows = sortRsNearMissWatchlist(eligible).slice(0, limit);
+
   return {
     expectedLatestSession,
     tradabilityPassedCount: tradable.length,
-    rows: sortRsNearMissWatchlist(eligible).slice(0, limit),
+    rows: sortedRows,
+    earlyEntryBySymbol: isEarlyEntryV1Enabled()
+      ? buildEarlyEntryMapForWatchlistRows({
+          rows: sortedRows,
+          barsBySymbol,
+          indexBars,
+          sessionDate: expectedLatestSession,
+        })
+      : undefined,
   };
 }
 

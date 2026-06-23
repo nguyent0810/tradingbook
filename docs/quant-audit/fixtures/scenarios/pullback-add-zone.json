@@ -1,0 +1,6 @@
+{
+  "id": "pullback-add-zone",
+  "description": "Synthetic unit-test series — placeholder for Phase 4 ADD_ZONE",
+  "purpose": "Pullback to MA after trend confirm (test-only)",
+  "synthetic": true
+}

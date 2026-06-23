@@ -151,16 +151,49 @@ export type V3RsWatchlistMetric = {
 
 export type V3RsStateTone = "watch" | "not-ready" | "supportive" | "awaiting";
 
+export type V3RsConfidence = "high" | "medium" | "low";
+
 export type V3RsWatchlistCard = {
   symbol: string;
+  rs20SpreadPct: number;
+  rs50SpreadPct: number | null;
   stateBadge: string;
   stateTone: V3RsStateTone;
+  /** Reason-first setup state (e.g. "Watch: breakout", "Blocked: zone"). */
+  setupState: string;
+  /** Terminal-specific reason shown in table. */
+  setupReason: string;
   strengthLabel: string | null;
   primaryInsight: string;
   metrics: V3RsWatchlistMetric[];
   blockerLabel: string;
   nextCondition: string;
   technicalEvidence: string[];
+  /** Populated when RS_SCORING_V1_ENABLED. */
+  rsStrengthScore: number | null;
+  setupReadinessScore: number | null;
+  rsConfidence: V3RsConfidence | null;
+  /** Display-only when EARLY_ENTRY_V1_ENABLED — separate early-entry lane. */
+  earlyEntry: V3EarlyEntryDisplay | null;
+};
+
+export type V3EarlyEntryDisplay = {
+  earlyReversalScore: number;
+  proposedTradeState: string;
+  entryType: string | null;
+  reasonCodes: string[];
+  transitionReasonCodes: string[];
+  invalidLevel: number | null;
+  invalidLevelReason: string | null;
+  stopDistancePct: number | null;
+  targetPrice: number | null;
+  targetReason: string | null;
+  estimatedRewardPct: number | null;
+  estimatedRiskReward: number | null;
+  suggestedPilotSizePct: number | null;
+  sizingNote: string | null;
+  whyNotPilotYet: string | null;
+  rrRejectionReason: string | null;
 };
 
 export type V3RsWatchlistPanel = {

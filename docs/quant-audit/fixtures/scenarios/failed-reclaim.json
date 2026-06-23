@@ -1,0 +1,6 @@
+{
+  "id": "failed-reclaim",
+  "description": "Synthetic unit-test series — NOT real market evidence",
+  "purpose": "Reclaim that fades (test-only)",
+  "synthetic": true
+}

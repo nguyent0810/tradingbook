@@ -6,11 +6,19 @@ import type {
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import { rejectionBucketTraderGuide } from "@/lib/scanner/setups-trader-copy";
 import type {
+  V3EarlyEntryDisplay,
   V3RsStateTone,
   V3RsWatchlistCard,
   V3RsWatchlistMetric,
   V3RsWatchlistPanel,
 } from "./dashboard-v3-view-model";
+import type { EarlyEntryDisplayMetadata } from "@/lib/scanner/early-entry";
+import { tradeStateDisplayLabel } from "@/lib/scanner/early-entry";
+import {
+  buildSetupReason,
+  buildSetupStateLabel,
+  rsStrengthLabelFromRs20,
+} from "./rs-setup-labels";
 
 const INTERNAL_PHRASE_REPLACEMENTS: ReadonlyArray<[RegExp, string]> = [
   [/Relative strength diagnostic only[^.]*\.?/gi, "Relative strength is for context only — it does not change the setup score."],
@@ -196,20 +204,15 @@ const NEXT_CONDITION_BY_CODE: Record<string, string> = {
 };
 
 const STATE_BADGE_BY_CODE: Record<string, { badge: string; tone: V3RsStateTone }> = {
-  breakout_recency: { badge: "Awaiting breakout", tone: "awaiting" },
-  pullback_zone_interaction: { badge: "Not ready", tone: "not-ready" },
-  volume_ratio: { badge: "Needs volume", tone: "watch" },
-  trend_below_ma50: { badge: "Trend weak", tone: "not-ready" },
-  trend_ma20_below_ma50: { badge: "Momentum lagging", tone: "watch" },
+  breakout_recency: { badge: "Watch: breakout", tone: "awaiting" },
+  pullback_zone_interaction: { badge: "Blocked: zone", tone: "not-ready" },
+  volume_ratio: { badge: "Watch: volume", tone: "watch" },
+  trend_below_ma50: { badge: "Blocked: MA50", tone: "not-ready" },
+  trend_ma20_below_ma50: { badge: "Watch: momentum", tone: "watch" },
+  extension_cap: { badge: "Blocked: extended", tone: "not-ready" },
 };
 
-function rsStrengthLabel(rs20: number): string | null {
-  if (rs20 >= 15) return "Strong RS";
-  if (rs20 >= 5) return "Positive RS";
-  if (rs20 > 0) return "Mild RS";
-  if (rs20 < 0) return "Weak RS";
-  return null;
-}
+export { buildSetupReason, buildSetupStateLabel, rsStrengthLabelFromRs20 };
 
 function formatRsSpreadChip(label: string, spread: number): V3RsWatchlistMetric {
   const sign = spread >= 0 ? "+" : "";
@@ -338,33 +341,103 @@ function buildTechnicalEvidence(row: RsNearMissWatchlistEntryDto): string[] {
   return [...new Set(lines.filter(Boolean))];
 }
 
-export function mapRsWatchlistEntryToV3Card(row: RsNearMissWatchlistEntryDto): V3RsWatchlistCard {
+function humanizeTargetReason(reason: string | null | undefined): string | null {
+  if (!reason) return null;
+  const labels: Record<string, string> = {
+    resistance_cluster: "Resistance cluster",
+    prior_60d_high: "60-day high",
+    prior_20d_high: "20-day high",
+    pivot_high: "Pivot high",
+    congestion_ceiling: "Congestion ceiling",
+    atr_floor: "ATR minimum target",
+    pct_floor: "Minimum % target",
+  };
+  return labels[reason] ?? reason.replace(/_/g, " ");
+}
+
+function humanizeInvalidReason(reason: string | null | undefined): string | null {
+  if (!reason) return null;
+  const labels: Record<string, string> = {
+    swing_low: "Recent swing low",
+    compression_low: "Compression low",
+    reclaim_candle_low: "Reclaim candle low",
+    ma20_failure: "MA20 failure",
+    ma50_failure: "MA50 failure",
+    atr_stop_floor: "ATR stop floor",
+  };
+  return labels[reason] ?? reason.replace(/_/g, " ");
+}
+
+function mapEarlyEntryToV3(entry: EarlyEntryDisplayMetadata | null | undefined): V3EarlyEntryDisplay | null {
+  if (!entry) return null;
+  return {
+    earlyReversalScore: entry.earlyReversalScore,
+    proposedTradeState: tradeStateDisplayLabel(entry.proposedTradeState),
+    entryType: entry.entryType,
+    reasonCodes: [...entry.reasonCodes],
+    transitionReasonCodes: [...entry.transitionReasonCodes],
+    invalidLevel: entry.invalidLevel,
+    invalidLevelReason: humanizeInvalidReason(entry.invalidLevelReason),
+    stopDistancePct: entry.stopDistancePct,
+    targetPrice: entry.targetPrice,
+    targetReason: humanizeTargetReason(entry.targetReason),
+    estimatedRewardPct: entry.estimatedRewardPct,
+    estimatedRiskReward: entry.estimatedRiskReward,
+    suggestedPilotSizePct: entry.suggestedPilotSizePct,
+    sizingNote: entry.sizingNote,
+    whyNotPilotYet: entry.whyNotPilotYet,
+    rrRejectionReason: entry.rrRejectionReason,
+  };
+}
+
+export function mapRsWatchlistEntryToV3Card(
+  row: RsNearMissWatchlistEntryDto,
+  scoring?: { rsStrengthScore: number; setupReadinessScore: number; rsConfidence: string } | null
+): V3RsWatchlistCard {
   const code = row.terminalCode ?? extractCategoryKey(row.failedGate2Because) ?? "";
   const state =
-    STATE_BADGE_BY_CODE[code] ?? ({ badge: "Watchlist only", tone: "watch" } as const);
+    STATE_BADGE_BY_CODE[code] ?? ({ badge: "Watch: monitor", tone: "watch" } as const);
+  const setupState = buildSetupStateLabel(code || null);
+  const setupReason = buildSetupReason(row);
 
   return {
     symbol: row.symbol,
+    rs20SpreadPct: row.rs20SpreadPct,
+    rs50SpreadPct: row.rs50SpreadPct,
     stateBadge: state.badge,
     stateTone: state.tone,
-    strengthLabel: rsStrengthLabel(row.rs20SpreadPct),
+    setupState,
+    setupReason,
+    strengthLabel: rsStrengthLabelFromRs20(row.rs20SpreadPct),
     primaryInsight: buildPrimaryInsight(row),
     metrics: metricsFromDiagnostic(row),
-    blockerLabel: "Watch only — not a qualified setup",
+    blockerLabel: setupReason,
     nextCondition: buildNextCondition(row),
     technicalEvidence: buildTechnicalEvidence(row),
+    rsStrengthScore: scoring?.rsStrengthScore ?? null,
+    setupReadinessScore: scoring?.setupReadinessScore ?? null,
+    rsConfidence: (scoring?.rsConfidence as V3RsWatchlistCard["rsConfidence"]) ?? null,
+    earlyEntry: mapEarlyEntryToV3(row.earlyEntry),
   };
 }
 
 export function mapRsWatchlistToV3Panel(
-  panel: RsNearMissWatchlistPanelDto
+  panel: RsNearMissWatchlistPanelDto,
+  options?: {
+    scoringBySymbol?: ReadonlyMap<
+      string,
+      { rsStrengthScore: number; setupReadinessScore: number; rsConfidence: string }
+    >;
+  }
 ): V3RsWatchlistPanel {
   return {
     title: "Relative Strength Radar",
     subtitle: "Leaders vs VNINDEX that have not cleared setup filters yet.",
     contextNote:
-      "Context only — does not count as a qualified setup or change today’s trade decision.",
-    cards: panel.rows.map(mapRsWatchlistEntryToV3Card),
+      "Context only — relative strength does not qualify a setup and does not change today’s stance.",
+    cards: panel.rows.map((row) =>
+      mapRsWatchlistEntryToV3Card(row, options?.scoringBySymbol?.get(row.symbol) ?? null)
+    ),
     emptyReason: panel.emptyReason
       ? formatScannerReasonForUser(panel.emptyReason)
       : null,

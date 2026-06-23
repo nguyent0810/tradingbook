@@ -33,6 +33,10 @@ import {
   formatSetupDiagnosticCopy,
   mapRsWatchlistToV3Panel,
 } from "./v3-user-copy";
+import {
+  buildRsScoringMapFromEntries,
+  isRsScoringV1Enabled,
+} from "@/lib/scanner/gate2/rs-scoring-v1";
 import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import { buildTradeGate } from "./build-trade-gate";
 import { foreignFlowEvidenceState } from "./foreign-flow-evidence";
@@ -775,10 +779,30 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
     },
     evidence,
     evidenceDefaultOpen: buildEvidenceDefaultOpen(cockpitDto, freshness, evidence),
-    rsWatchlist: {
-      ...mapRsWatchlistToV3Panel(cockpitDto.rsNearMissWatchlist),
-      contextNote: rsWatchlistContextNote(cockpitDto.verdict.uxLevel.value),
-    },
+    rsWatchlist: (() => {
+      const scoringBySymbol = isRsScoringV1Enabled()
+        ? buildRsScoringMapFromEntries(cockpitDto.rsNearMissWatchlist.rows, {
+            gate1Level: cockpitDto.verdict.gate1Resolution.canonical,
+          })
+        : undefined;
+      return {
+        ...mapRsWatchlistToV3Panel(cockpitDto.rsNearMissWatchlist, {
+          scoringBySymbol: scoringBySymbol
+            ? new Map(
+                [...scoringBySymbol.entries()].map(([sym, s]) => [
+                  sym,
+                  {
+                    rsStrengthScore: s.rsStrengthScore,
+                    setupReadinessScore: s.setupReadinessScore,
+                    rsConfidence: s.rsConfidence,
+                  },
+                ])
+              )
+            : undefined,
+        }),
+        contextNote: rsWatchlistContextNote(cockpitDto.verdict.uxLevel.value),
+      };
+    })(),
     partialError: params.dbLoadError ?? null,
   };
 }

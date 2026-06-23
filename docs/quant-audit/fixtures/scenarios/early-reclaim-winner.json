@@ -1,0 +1,6 @@
+{
+  "id": "early-reclaim-winner",
+  "description": "Synthetic unit-test series — NOT real market evidence",
+  "purpose": "Clean early reclaim with volume (test-only)",
+  "synthetic": true
+}

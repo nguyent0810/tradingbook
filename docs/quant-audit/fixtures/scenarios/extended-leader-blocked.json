@@ -1,0 +1,6 @@
+{
+  "id": "extended-leader-blocked",
+  "description": "Synthetic unit-test series — NOT real market evidence",
+  "purpose": "Extended leader should map to EXTENDED_DO_NOT_CHASE",
+  "synthetic": true
+}
