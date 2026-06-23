@@ -162,6 +162,7 @@ function emptyEarly(): V3EarlyEntryDisplay {
     sizingNote: null,
     whyNotPilotYet: null,
     rrRejectionReason: null,
+    distFromMa20Pct: null,
   };
 }
 

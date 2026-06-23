@@ -387,6 +387,7 @@ function mapEarlyEntryToV3(entry: EarlyEntryDisplayMetadata | null | undefined):
     sizingNote: entry.sizingNote,
     whyNotPilotYet: entry.whyNotPilotYet,
     rrRejectionReason: entry.rrRejectionReason,
+    distFromMa20Pct: entry.distFromMa20Pct,
   };
 }
 
@@ -417,6 +418,7 @@ export function mapRsWatchlistEntryToV3Card(
     rsStrengthScore: scoring?.rsStrengthScore ?? null,
     setupReadinessScore: scoring?.setupReadinessScore ?? null,
     rsConfidence: (scoring?.rsConfidence as V3RsWatchlistCard["rsConfidence"]) ?? null,
+    terminalCode: code || null,
     earlyEntry: mapEarlyEntryToV3(row.earlyEntry),
   };
 }

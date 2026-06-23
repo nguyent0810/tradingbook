@@ -173,6 +173,8 @@ export type V3RsWatchlistCard = {
   rsStrengthScore: number | null;
   setupReadinessScore: number | null;
   rsConfidence: V3RsConfidence | null;
+  /** Terminal code for filter matching (display-only). */
+  terminalCode: string | null;
   /** Display-only when EARLY_ENTRY_V1_ENABLED — separate early-entry lane. */
   earlyEntry: V3EarlyEntryDisplay | null;
 };
@@ -194,6 +196,7 @@ export type V3EarlyEntryDisplay = {
   sizingNote: string | null;
   whyNotPilotYet: string | null;
   rrRejectionReason: string | null;
+  distFromMa20Pct: number | null;
 };
 
 export type V3RsWatchlistPanel = {

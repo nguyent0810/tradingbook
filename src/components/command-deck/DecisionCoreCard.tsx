@@ -43,7 +43,7 @@ export function DecisionCoreCard({ data }: Props) {
     <Card
       variant="glass"
       glow={isNoTrade ? "danger" : "none"}
-      className={`p-5 ${isNoTrade ? "cd-card--decision-danger" : ""} ${isNoTrade && !reducedMotion ? "cd-pulse-border" : ""}`}
+      className={`p-3 cd-decision--compact ${isNoTrade ? "cd-card--decision-danger" : ""} ${isNoTrade && !reducedMotion ? "cd-pulse-border" : ""}`}
       data-testid="dashboard-cyber-decision-core"
     >
       <CardHeader title="Decision Core" subtitle={data.confidenceLabel} />
@@ -53,39 +53,37 @@ export function DecisionCoreCard({ data }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <div className="flex items-baseline gap-2 flex-wrap mb-2">
-          <h2 className="cd-decision__stance">{data.stance}</h2>
-          <span className="cd-kicker" style={{ letterSpacing: "0.08em" }}>
-            Today&apos;s stance
-          </span>
+        <div className="flex items-baseline gap-2 flex-wrap mb-1">
+          <h2 className={`${isNoTrade ? "cd-decision__stance" : "cd-decision__stance cd-decision__stance--compact"}`}>
+            {data.stance}
+          </h2>
         </div>
 
-        <p className="text-sm leading-relaxed m-0 mb-4 cd-decision__reason">
+        <p className="text-xs leading-relaxed m-0 mb-3 cd-decision__reason">
           {data.primaryReason}
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div className="cd-metric-cell cd-metric-cell--glass">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="cd-metric-cell cd-metric-cell--glass cd-metric-cell--compact">
             <label>Main risk</label>
-            <p className="text-xs m-0 mb-1 leading-snug" style={{ color: "var(--cd-text)" }}>
+            <p className="text-[11px] m-0 mb-1 leading-snug" style={{ color: "var(--cd-text)" }}>
               {data.mainRisk}
             </p>
             <AnimatedBar percent={data.mainRiskPercent} tone={mainRiskTone} reducedMotion={reducedMotion} />
           </div>
-          <div className="cd-metric-cell cd-metric-cell--glass">
+          <div className="cd-metric-cell cd-metric-cell--glass cd-metric-cell--compact">
             <label>Capital</label>
-            <p className="text-xs m-0 mb-1 leading-snug" style={{ color: "var(--cd-text)" }}>
+            <p className="text-[11px] m-0 mb-1 leading-snug" style={{ color: "var(--cd-text)" }}>
               {data.capital}
             </p>
             <AnimatedBar percent={data.capitalPercent} tone={capitalTone} reducedMotion={reducedMotion} />
           </div>
-        </div>
-
-        <div className="cd-metric-cell cd-metric-cell--glass cd-metric-cell--next-action">
-          <label>Next action</label>
-          <p className="cd-decision__next-action m-0 leading-relaxed">
-            {data.nextAction}
-          </p>
+          <div className="cd-metric-cell cd-metric-cell--glass cd-metric-cell--compact cd-metric-cell--next-action">
+            <label>Next action</label>
+            <p className="cd-decision__next-action cd-decision__next-action--compact m-0 leading-snug">
+              {data.nextAction}
+            </p>
+          </div>
         </div>
       </motion.div>
     </Card>

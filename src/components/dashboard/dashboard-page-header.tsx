@@ -3,9 +3,22 @@ import type { V3HeaderCta } from "@/lib/dashboard/dashboard-v3-view-model";
 
 type Props = {
   cta: V3HeaderCta;
+  slim?: boolean;
 };
 
-export function DashboardPageHeader({ cta }: Props) {
+export function DashboardPageHeader({ cta, slim = false }: Props) {
+  if (slim) {
+    return (
+      <header className="dash-v2-page-header command-deck-page-header command-deck-page-header--slim" data-testid="dashboard-page-header">
+        <div className="dash-v2-page-header__copy">
+          <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Command deck</p>
+          <h1 className="dash-v2-page-header__title">Today&apos;s decision</h1>
+          <p className="dash-v2-page-header__lead">{cta.lead}</p>
+        </div>
+      </header>
+    );
+  }
+
   const showSecondary =
     Boolean(cta.secondaryHref && cta.secondaryLabel) &&
     (cta.secondaryHref !== cta.primaryHref || cta.secondaryLabel !== cta.primaryLabel);

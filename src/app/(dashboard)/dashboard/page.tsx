@@ -35,6 +35,7 @@ import {
   persistRsWatchlistSnapshot,
 } from "@/lib/scanner/gate2/rs-watchlist-snapshot";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
+import { loadPaperValidationSummary } from "@/lib/dashboard/load-paper-validation-summary";
 import { CommandDeckDashboard } from "@/components/command-deck";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
@@ -273,12 +274,16 @@ export default async function DashboardPage() {
     marketContext,
     dbLoadError,
   });
+
+  const paperValidation = await loadPaperValidationSummary();
+
   return (
     <CommandDeckDashboard
       viewModel={viewModel}
+      paperValidation={paperValidation}
       header={
-        <div className="mb-6">
-          <DashboardPageHeader cta={viewModel.headerCta} />
+        <div className="mb-4">
+          <DashboardPageHeader cta={viewModel.headerCta} slim />
         </div>
       }
     />

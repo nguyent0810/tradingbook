@@ -17,6 +17,10 @@ import {
 } from "@/lib/dashboard/early-entry-ui";
 import { EARLY_ENTRY_RESEARCH_DISCLAIMER } from "@/lib/scanner/early-entry";
 import { truncateForChip } from "@/lib/dashboard/v3-user-copy";
+import {
+  friendlyEarlyStateLabel,
+  friendlySetupStateLabel,
+} from "@/lib/dashboard/rs-status-display";
 
 type Props = {
   panel: V3RsWatchlistPanel;
@@ -165,7 +169,7 @@ function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlist
       <header className="tosv3-rs-early-entry__head">
         <span className="tosv3-rs-early-entry__label">Early entry research</span>
         <span className={`tosv3-rs-chip ${earlyStateClass(earlyEntry.proposedTradeState)}`}>
-          {earlyEntry.proposedTradeState}
+          {friendlyEarlyStateLabel(earlyEntry.proposedTradeState)}
         </span>
         {earlyEntry.entryType ? (
           <span className="tosv3-rs-early-entry__entry-type">{earlyEntry.entryType}</span>
@@ -269,7 +273,7 @@ function RsDetailPanel({
           ) : null}
         </div>
         <span className={`tosv3-rs-card__badge ${stateBadgeClass(card.stateTone)}`}>
-          {card.setupState}
+          {friendlySetupStateLabel(card.setupState)}
         </span>
       </header>
       <p className="tosv3-rs-card__insight">{card.primaryInsight}</p>
@@ -440,7 +444,7 @@ export function RelativeStrengthRadar({ panel }: Props) {
                       <td className="tosv3-rs-table__symbol">{card.symbol}</td>
                       <td>
                         <span className={`tosv3-rs-row__badge ${stateBadgeClass(card.stateTone)}`}>
-                          {card.setupState}
+                          {friendlySetupStateLabel(card.setupState)}
                         </span>
                       </td>
                       <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS20")}</td>
@@ -458,7 +462,10 @@ export function RelativeStrengthRadar({ panel }: Props) {
                               <span
                                 className={`tosv3-rs-row__badge ${earlyStateClass(card.earlyEntry.proposedTradeState)}`}
                               >
-                                {truncateForChip(card.earlyEntry.proposedTradeState, 18)}
+                                {truncateForChip(
+                                  friendlyEarlyStateLabel(card.earlyEntry.proposedTradeState),
+                                  18
+                                )}
                               </span>
                             ) : (
                               "—"

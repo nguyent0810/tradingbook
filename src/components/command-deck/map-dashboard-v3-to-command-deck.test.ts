@@ -1,10 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { buildNoTradePreviewViewModel } from "@/lib/dashboard/build-no-trade-preview-view-model";
+import { mapRsWatchlistEntryToV3Card } from "@/lib/dashboard/v3-user-copy";
 import type { RadarNode } from "./types";
 import {
   dedupeRadarNodes,
   mapDashboardV3ToCommandDeck,
 } from "./map-dashboard-v3-to-command-deck";
+
+const RS_ROW_FIXTURE = {
+  symbol: "VND",
+  sessionDate: "2026-05-28",
+  rs20SpreadPct: 11.6,
+  rs50SpreadPct: -0.2,
+  terminalCode: "pullback_zone_interaction",
+  failedGate2Because: "Failed Gate 2 because: Not in pullback entry zone (pullback_zone_interaction)",
+  topRejectionReason: "Trend OK",
+  stageRank: 58,
+  distanceToPullbackZoneFrac: 0.02,
+  actionHint: "",
+  disclaimerLines: [],
+  rsDiagnostic: null,
+};
 
 describe("dedupeRadarNodes", () => {
   it("keeps one node per symbol with strictest classification", () => {
@@ -112,6 +128,22 @@ describe("mapDashboardV3ToCommandDeck — relative strength", () => {
     for (const row of deck.relativeStrength) {
       expect(row).not.toHaveProperty("sparkline");
     }
+  });
+
+  it("maps RS50, setup state, and reason from V3 cards", () => {
+    const vm = buildNoTradePreviewViewModel();
+    vm.rsWatchlist.cards = [mapRsWatchlistEntryToV3Card(RS_ROW_FIXTURE)];
+
+    const deck = mapDashboardV3ToCommandDeck(vm);
+    const row = deck.relativeStrength[0]!;
+    expect(row.symbol).toBe("VND");
+    expect(row.rs20).toBe(11.6);
+    expect(row.rs50).toBe(-0.2);
+    expect(row.setupState).toBe("Blocked: zone");
+    expect(row.reason).toBe("Not in pullback entry zone");
+    expect(row.rsStrength).toBe("Positive RS");
+    expect(row.status).toBe("blocked");
+    expect(row.reason).not.toMatch(/^Blocked$/);
   });
 });
 

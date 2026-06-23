@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { DashboardV3ViewModel } from "@/lib/dashboard/dashboard-v3-view-model";
+import type { PaperValidationSummaryUi } from "@/lib/dashboard/load-paper-validation-summary";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { DashboardLayout } from "./DashboardLayout";
 
@@ -9,9 +10,15 @@ type Props = {
   viewModel: DashboardV3ViewModel;
   header?: ReactNode;
   loading?: boolean;
+  paperValidation?: PaperValidationSummaryUi | null;
 };
 
-export function CommandDeckDashboard({ viewModel, header, loading = false }: Props) {
+export function CommandDeckDashboard({
+  viewModel,
+  header,
+  loading = false,
+  paperValidation = null,
+}: Props) {
   return (
     <DashboardLayout
       viewModel={viewModel}
@@ -31,6 +38,7 @@ export function CommandDeckDashboard({ viewModel, header, loading = false }: Pro
         </>
       }
       loading={loading}
+      paperValidation={paperValidation}
     />
   );
 }

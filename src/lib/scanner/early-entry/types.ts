@@ -100,6 +100,8 @@ export type EarlyEntryDisplayMetadata = {
   sizingNote: string | null;
   whyNotPilotYet: string | null;
   rrRejectionReason: string | null;
+  /** Display-only distance from MA20 for workbench sort/column. */
+  distFromMa20Pct: number | null;
 };
 
 export type EarlyEntryEvaluationResult = EarlyEntryDisplayMetadata & {
