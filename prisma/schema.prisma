@@ -461,3 +461,45 @@ model SetupWatchItem {
   @@index([lifecycleStatus])
   @@map("setup_watch_items")
 }
+
+/// Daily RS near-miss watchlist scoring snapshot (diagnostic lane — not trade signals).
+model RsWatchlistSnapshotRun {
+  id                      String                   @id @default(cuid())
+  sessionDate             DateTime                 @map("session_date") @db.Date
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  verdictUxLevel          String?                  @map("verdict_ux_level")
+  tradePermission         String?                  @map("trade_permission")
+  tradabilityPassedCount  Int?                     @map("tradability_passed_count")
+  scoringVersion          String                   @default("v0") @map("scoring_version")
+  rows                    RsWatchlistSnapshotRow[]
+
+  @@unique([sessionDate])
+  @@index([sessionDate(sort: Desc)])
+  @@map("rs_watchlist_snapshot_runs")
+}
+
+model RsWatchlistSnapshotRow {
+  id                         String               @id @default(cuid())
+  runId                      String               @map("run_id")
+  run                        RsWatchlistSnapshotRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  rankPosition               Int                  @map("rank_position")
+  symbol                     String
+  rs20SpreadPct              Float                @map("rs20_spread_pct")
+  rs50SpreadPct              Float?               @map("rs50_spread_pct")
+  terminalCode               String?              @map("terminal_code")
+  setupState                 String               @map("setup_state")
+  setupReason                String               @map("setup_reason") @db.Text
+  stageRank                  Int?                 @map("stage_rank")
+  distanceToPullbackZoneFrac Float?               @map("distance_to_pullback_zone_frac")
+  rsStrengthScore            Int?                 @map("rs_strength_score")
+  setupReadinessScore        Int?                 @map("setup_readiness_score")
+  rsConfidence               String?              @map("rs_confidence")
+  forwardReturn3dPct         Float?               @map("forward_return_3d_pct")
+  forwardReturn5dPct         Float?               @map("forward_return_5d_pct")
+  forwardReturn10dPct        Float?               @map("forward_return_10d_pct")
+  maxDrawdown10dPct          Float?               @map("max_drawdown_10d_pct")
+
+  @@index([runId, rankPosition])
+  @@index([symbol])
+  @@map("rs_watchlist_snapshot_rows")
+}
