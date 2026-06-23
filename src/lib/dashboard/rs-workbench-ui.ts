@@ -1,16 +1,20 @@
 import type { RelativeStrengthRow } from "@/components/command-deck/types";
 import { formatReasonChip, isExtendedDoNotChase } from "./early-entry-ui";
+import {
+  rowMatchesAvoidChase,
+  workbenchActionLabel,
+} from "./rs-status-display";
 import { sectorForSymbol } from "./rs-sector-display";
 
 export type RsWorkbenchFilterId =
   | "all"
-  | "pilot_research"
-  | "wait_breakout"
-  | "bad_zone"
+  | "avoid_chase"
+  | "watch_trigger"
+  | "wait_better_zone"
   | "below_ma50"
-  | "too_extended"
-  | "bad_rr"
-  | "bank_only";
+  | "pilot_research"
+  | "bank_only"
+  | "bad_rr";
 
 export type RsWorkbenchSortId =
   | "rs20_desc"
@@ -26,13 +30,13 @@ export const RS_WORKBENCH_FILTER_OPTIONS: ReadonlyArray<{
   requiresEarlyEntry?: boolean;
 }> = [
   { id: "all", label: "All" },
-  { id: "pilot_research", label: "Pilot Research", requiresEarlyEntry: true },
-  { id: "wait_breakout", label: "Wait Breakout" },
-  { id: "bad_zone", label: "Bad Zone" },
+  { id: "avoid_chase", label: "Avoid Chase", requiresEarlyEntry: true },
+  { id: "watch_trigger", label: "Watch Trigger" },
+  { id: "wait_better_zone", label: "Wait Better Zone" },
   { id: "below_ma50", label: "Below MA50" },
-  { id: "too_extended", label: "Too Extended", requiresEarlyEntry: true },
-  { id: "bad_rr", label: "Bad R:R", requiresEarlyEntry: true },
+  { id: "pilot_research", label: "Pilot Research", requiresEarlyEntry: true },
   { id: "bank_only", label: "Bank" },
+  { id: "bad_rr", label: "Bad R:R", requiresEarlyEntry: true },
 ];
 
 export const RS_WORKBENCH_SORT_OPTIONS: ReadonlyArray<{
@@ -82,6 +86,9 @@ export function filterEmptyStateMessage(
   if (filter === "bank_only") {
     return "No bank symbols in the current filtered set.";
   }
+  if (filter === "avoid_chase") {
+    return "No overextended symbols in the current scan.";
+  }
   return "No symbols match this filter.";
 }
 
@@ -111,28 +118,16 @@ export function filterWorkbenchRows(
   if (filter === "all") return [...rows];
   return rows.filter((row) => {
     switch (filter) {
+      case "avoid_chase":
+        return rowMatchesAvoidChase(row);
+      case "watch_trigger":
+        return workbenchActionLabel(row) === "Watch trigger";
+      case "wait_better_zone":
+        return workbenchActionLabel(row) === "Wait better zone";
+      case "below_ma50":
+        return workbenchActionLabel(row) === "Too early";
       case "pilot_research":
         return row.earlyEntry?.proposedTradeState.includes("Pilot Candidate") ?? false;
-      case "wait_breakout":
-        return (
-          matchesTerminal(row, "breakout_recency") ||
-          matchesSetupState(row, "Watch: breakout")
-        );
-      case "bad_zone":
-        return (
-          matchesTerminal(row, "pullback_zone_interaction") ||
-          matchesSetupState(row, "Blocked: zone")
-        );
-      case "below_ma50":
-        return (
-          matchesTerminal(row, "trend_below_ma50") ||
-          matchesSetupState(row, "Blocked: MA50")
-        );
-      case "too_extended":
-        return (
-          row.earlyEntry != null &&
-          isExtendedDoNotChase(row.earlyEntry.proposedTradeState)
-        );
       case "bad_rr":
         return (
           row.earlyEntry != null &&
