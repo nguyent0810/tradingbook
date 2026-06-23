@@ -620,22 +620,25 @@ Extend [`v3-user-copy.ts`](../src/lib/dashboard/v3-user-copy.ts) and [`SignalBad
 | Acceptance | Display-only when flag on; Gate 2 unchanged when flag off |
 | Risk | Medium — ADD_ZONE false positives until paper validation (Phase 6) |
 
-### Phase 5: UI explainability (partial)
+### Phase 5: UI polish & regression tests ✅ (2026-06-23)
 
 | Item | Detail |
 |------|--------|
-| Files | RS radar early-entry panel (trade state, R:R, invalid level, target, reason chips, sizing note, why-not) |
-| Remaining | Chip styling polish, mobile layout, component snapshot tests |
-| Risk | Low |
+| Files | `relative-strength-radar.tsx`, `RelativeStrengthTable.tsx`, component tests |
+| Label | **Pilot Buy → Pilot Candidate** (research signal, not buy) |
+| Tests | Vitest SSR tests; early-entry chips only when flag on + metadata present |
+| Disclaimer | `EARLY_ENTRY_RESEARCH_DISCLAIMER` on RS radar + command deck |
 
-### Phase 6: Backtest / reporting (partial)
+### Phase 6: Validation & calibration ✅ (2026-06-23)
 
 | Item | Detail |
 |------|--------|
-| Files | [`scripts/audit/early-entry-backtest.ts`](../../scripts/audit/early-entry-backtest.ts) |
-| Tests | Cohort replay from `data/stock-bars.json` + `data/vnindex.json` |
-| Acceptance | Old Gate 2 vs Early Entry state comparison with forward returns |
-| Risk | Low |
+| Files | `early-entry-backtest.ts`, `lib/early-entry-backtest-core.ts`, `calibration.ts` |
+| Evidence | [`docs/trading/evidence/early-entry-backtest.json`](../trading/evidence/early-entry-backtest.json) |
+| Cohort | 50 symbols, 700 observations |
+| Finding | Baseline pilots weak (50% false on n=4); EXTENDED_DO_NOT_CHASE defensive value high |
+| Calibration | `rr_min_2_5` promising but n=1; `combined_tight` eliminates all pilots |
+| Recommendation | Keep display-only; paper-validate 20+ signals before staging |
 
 ### Phase 7: Paper trading validation
 
