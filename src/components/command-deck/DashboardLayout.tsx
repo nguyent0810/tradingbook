@@ -82,10 +82,7 @@ export function DashboardLayout({
                 variant="mini"
                 selectedSymbol={selectedSymbol}
                 onNodeClick={setSelectedSymbol}
-                rsRows={data.relativeStrength.map((r) => ({
-                  symbol: r.symbol,
-                  rs20: r.rs20,
-                }))}
+                workbenchRows={data.relativeStrength}
               />
             </motion.aside>
 

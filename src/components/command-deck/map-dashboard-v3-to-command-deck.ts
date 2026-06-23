@@ -1,5 +1,6 @@
 import type { DashboardV3ViewModel, V3DecisionMode, V3EvidenceItem } from "@/lib/dashboard/dashboard-v3-view-model";
 import { sectorLabelForSymbol } from "@/lib/dashboard/rs-sector-display";
+import { buildRadarNodesFromWorkbenchRows } from "@/lib/dashboard/rs-radar-from-workbench";
 import type {
   CommandDeckData,
   DecisionCoreData,
@@ -167,6 +168,12 @@ function foreignStats(vm: DashboardV3ViewModel) {
 }
 
 export function mapDashboardV3ToCommandDeck(vm: DashboardV3ViewModel): CommandDeckData {
+  const relativeStrength = mapRelativeStrength(vm);
+  const radar =
+    relativeStrength.length > 0
+      ? buildRadarNodesFromWorkbenchRows(relativeStrength, vm.decision.mode)
+      : mapRadarNodes(vm, vm.decision.mode);
+
   return {
     commandBar: {
       session: vm.marketPulse.session,
@@ -180,8 +187,8 @@ export function mapDashboardV3ToCommandDeck(vm: DashboardV3ViewModel): CommandDe
       stats: foreignStats(vm),
     },
     decision: mapDecision(vm),
-    radar: mapRadarNodes(vm, vm.decision.mode),
-    relativeStrength: mapRelativeStrength(vm),
+    radar,
+    relativeStrength,
     setupIntelligence: mapSetupRows(vm),
     evidence: vm.evidence.map((e) => ({
       label: e.label,

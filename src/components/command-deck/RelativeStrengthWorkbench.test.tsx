@@ -44,11 +44,11 @@ const ROW_WITHOUT_EARLY: RelativeStrengthRow = {
 };
 
 describe("RelativeStrengthWorkbench", () => {
-  it("shows compact early line and help panel with full disclaimer", () => {
+  it("shows compact early line and collapsible help panel with full disclaimer", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
     );
-    expect(html).toContain("Early Entry: research-only");
+    expect(html).toContain("Early Entry Research · research-only · not a buy signal · paper validation enabled");
     expect(html).toContain('data-testid="early-entry-help"');
     expect(html).toContain('data-testid="command-deck-rs-early-research-warning"');
     expect(html).toContain('data-testid="command-deck-rs-daily-checklist"');
@@ -56,13 +56,33 @@ describe("RelativeStrengthWorkbench", () => {
     expect(html).toContain("Wait Breakout");
     expect(html).toContain("2.04:1");
     expect(html).toContain("research-only signal");
+    expect(html).toContain("Safety details");
+  });
+
+  it("shows filter counts on chips", () => {
+    const html = renderToStaticMarkup(
+      <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
+    );
+    expect(html).toContain('data-testid="rs-filter-all"');
+    expect(html).toContain("All 2");
+    expect(html).toContain("Pilot Research 1");
+    expect(html).toContain("Bank 2");
+  });
+
+  it("renders action-oriented column before RS metrics", () => {
+    const html = renderToStaticMarkup(
+      <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY]} />
+    );
+    expect(html).toContain("Paper watch only");
+    expect(html).toContain("<th>Action</th>");
+    expect(html).not.toContain("RS Strength");
   });
 
   it("hides early columns when no row has earlyEntry", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[{ ...ROW_WITHOUT_EARLY, earlyEntry: null }]} />
     );
-    expect(html).not.toContain("Early Entry: research-only");
+    expect(html).not.toContain("Early Entry Research · research-only");
     expect(html).not.toContain("Early State");
     expect(html).not.toContain("Pilot Research");
   });

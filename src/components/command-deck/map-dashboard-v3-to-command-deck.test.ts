@@ -119,6 +119,19 @@ describe("mapDashboardV3ToCommandDeck — opportunity radar", () => {
     const deck = mapDashboardV3ToCommandDeck(vm);
     expect(deck.radar.find((n) => n.symbol === "FPT")?.classification).toBe("watch");
   });
+
+  it("uses workbench rows for radar when relative strength is populated", () => {
+    const vm = buildNoTradePreviewViewModel();
+    vm.rsWatchlist.cards = [mapRsWatchlistEntryToV3Card(RS_ROW_FIXTURE)];
+
+    const deck = mapDashboardV3ToCommandDeck(vm);
+    expect(deck.relativeStrength.length).toBeGreaterThan(0);
+    const workbenchSymbols = deck.relativeStrength.map((r) => r.symbol);
+    expect(deck.radar.map((n) => n.symbol)).toEqual(workbenchSymbols);
+    for (const node of deck.radar) {
+      expect(node.reason).not.toContain("Blocked sample");
+    }
+  });
 });
 
 describe("mapDashboardV3ToCommandDeck — relative strength", () => {
