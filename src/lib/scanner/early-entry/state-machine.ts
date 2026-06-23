@@ -297,7 +297,7 @@ export function resolveSuggestedPilotSizePct(
 export function resolveSizingNote(state: EarlyEntryTradeState): string | null {
   switch (state) {
     case "PILOT_BUY":
-      return "Display-only: pilot ~25% of intended size if all gates pass";
+      return "Display-only research: pilot candidate ~25% — not validated for live trading";
     case "ADD_ZONE":
       return "Display-only: add ~35% after confirmation — not execution advice";
     case "CONFIRMED_BUY":
@@ -310,7 +310,7 @@ export function resolveSizingNote(state: EarlyEntryTradeState): string | null {
 export function tradeStateDisplayLabel(state: EarlyEntryTradeState): string {
   switch (state) {
     case "PILOT_BUY":
-      return "Pilot Buy";
+      return "Pilot Candidate";
     case "ADD_ZONE":
       return "Add Zone";
     case "CONFIRMED_BUY":
@@ -325,6 +325,10 @@ export function tradeStateDisplayLabel(state: EarlyEntryTradeState): string {
       return "Blocked";
   }
 }
+
+/** Cautious UI copy — research lane, not a buy signal. */
+export const EARLY_ENTRY_RESEARCH_DISCLAIMER =
+  "Research signal only — display-only, needs validation. Not a buy recommendation.";
 
 export function computeMa10Series(closes: readonly number[]): (number | undefined)[] {
   return sma([...closes], 10);

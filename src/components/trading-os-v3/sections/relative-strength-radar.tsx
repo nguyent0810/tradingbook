@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import type { V3RsWatchlistCard, V3RsWatchlistPanel } from "@/lib/dashboard/dashboard-v3-view-model";
+import { EARLY_ENTRY_RESEARCH_DISCLAIMER } from "@/lib/scanner/early-entry";
 import { truncateForChip } from "@/lib/dashboard/v3-user-copy";
 
 type Props = {
@@ -54,7 +55,7 @@ function formatRr(value: number | null | undefined): string {
 }
 
 function earlyStateClass(state: string): string {
-  if (state.includes("Pilot")) return "tosv3-rs-chip--strong";
+  if (state.includes("Pilot Candidate")) return "tosv3-rs-chip--watch";
   if (state.includes("Add Zone")) return "tosv3-rs-chip--watch";
   if (state.includes("Extended") || state.includes("Failed") || state.includes("Blocked")) {
     return "tosv3-rs-chip--blocker";
@@ -75,11 +76,14 @@ function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlist
       aria-label="Early entry display-only metadata"
     >
       <header className="tosv3-rs-early-entry__head">
-        <span className="tosv3-rs-early-entry__label">Early entry (display only)</span>
+        <span className="tosv3-rs-early-entry__label">Early entry research</span>
         <span className={`tosv3-rs-chip ${earlyStateClass(earlyEntry.proposedTradeState)}`}>
           {earlyEntry.proposedTradeState}
         </span>
       </header>
+      <p className="tosv3-rs-early-entry__research-warning" data-testid="dashboard-v3-rs-early-research-warning">
+        {EARLY_ENTRY_RESEARCH_DISCLAIMER}
+      </p>
       <ul className="tosv3-rs-card__metrics" aria-label="Early entry metrics">
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
           <span className="tosv3-rs-chip__label">Score</span>
