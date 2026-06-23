@@ -34,6 +34,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const reducedMotion = useReducedMotion() ?? false;
   const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
+  const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
   const data = mapDashboardV3ToCommandDeck(viewModel);
   const decisionMode = viewModel.decision.mode;
   const evidenceSummary =
@@ -81,6 +82,7 @@ export function DashboardLayout({
                 decisionMode={decisionMode}
                 variant="mini"
                 selectedSymbol={selectedSymbol}
+                highlightedSymbol={hoveredSymbol}
                 onNodeClick={setSelectedSymbol}
                 workbenchRows={data.relativeStrength}
               />
@@ -92,6 +94,7 @@ export function DashboardLayout({
                 contextNote={data.rsContextNote}
                 selectedSymbol={selectedSymbol}
                 onSelectSymbol={setSelectedSymbol}
+                onHoverSymbol={setHoveredSymbol}
               />
             </motion.main>
           </div>

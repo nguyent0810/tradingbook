@@ -13,19 +13,18 @@ import {
 } from "recharts";
 import type { V3DecisionMode } from "@/lib/dashboard/dashboard-v3-view-model";
 import { summarizeWorkbenchRadar } from "@/lib/dashboard/rs-radar-from-workbench";
-import {
-  friendlyEarlyStateLabel,
-  friendlySetupStateLabel,
-  workbenchActionLabel,
-} from "@/lib/dashboard/rs-status-display";
 import type { RadarNode, RadarNodeClassification, RelativeStrengthRow } from "./types";
 import { Card, CardHeader } from "./ui/card";
 import {
-  RADAR_BUBBLE_OUTER_RADIUS,
   RADAR_CHART_MARGIN,
-  clampRadarBubblePosition,
+  bubbleRadiusFromNode,
+  formatRadarWorkbenchTooltip,
+  layoutRadarBubbles,
+  mergeLayoutIntoChartData,
+  prepareRadarChartData,
+  selectRadarLabelSymbols,
+  shouldShowRadarLabel,
   type RadarPlotPoint,
-  toRadarPlotPoint,
 } from "./radar-plot-utils";
 
 type Props = {
@@ -33,23 +32,19 @@ type Props = {
   decisionMode?: V3DecisionMode;
   variant?: "default" | "mini";
   selectedSymbol?: string | null;
+  highlightedSymbol?: string | null;
   onNodeClick?: (symbol: string) => void;
   workbenchRows?: RelativeStrengthRow[];
 };
 
 const NODE_COLORS: Record<RadarNodeClassification, { fill: string; glow: string }> = {
-  actionable: { fill: "#00E676", glow: "rgba(0, 230, 118, 0.55)" },
-  watch: { fill: "#FFB800", glow: "rgba(255, 184, 0, 0.55)" },
-  avoid: { fill: "#f43f5e", glow: "rgba(244, 63, 94, 0.55)" },
+  actionable: { fill: "#00E676", glow: "rgba(0, 230, 118, 0.35)" },
+  watch: { fill: "#FFB800", glow: "rgba(255, 184, 0, 0.32)" },
+  avoid: { fill: "#f43f5e", glow: "rgba(244, 63, 94, 0.32)" },
 };
 
-const AXIS_TICK = { fill: "#9ca3af", fontSize: 11 };
+const AXIS_TICK = { fill: "#9ca3af", fontSize: 10 };
 const CHART_MARGIN = RADAR_CHART_MARGIN;
-
-function formatPp(value: number): string {
-  const sign = value >= 0 ? "+" : "";
-  return `${sign}${value.toFixed(1)}pp`;
-}
 
 function WorkbenchTooltip({
   active,
@@ -65,43 +60,36 @@ function WorkbenchTooltip({
   const row = workbenchBySymbol.get(node.symbol);
 
   if (row) {
-    const early = row.earlyEntry
-      ? friendlyEarlyStateLabel(row.earlyEntry.proposedTradeState)
-      : null;
-    const setup = friendlySetupStateLabel(row.setupState);
-    const rr =
-      row.earlyEntry?.estimatedRiskReward != null
-        ? `${row.earlyEntry.estimatedRiskReward.toFixed(2)}:1`
-        : "—";
-
+    const tip = formatRadarWorkbenchTooltip(row);
     return (
-      <div className="cd-radar-tooltip" data-testid="radar-workbench-tooltip">
-        <strong className="cd-mono text-sm block">{row.symbol}</strong>
-        {early ? (
-          <p className="text-xs m-0 mt-0.5 cd-tone-warning">{early}</p>
+      <div className="cd-radar-tooltip cd-radar-tooltip--compact" data-testid="radar-workbench-tooltip">
+        <strong className="cd-mono text-sm block">{tip.symbol}</strong>
+        {tip.state ? (
+          <p className="text-xs m-0 mt-0.5 cd-tone-warning">{tip.state}</p>
         ) : null}
         <p className="text-[10px] cd-mono m-0 mt-1" style={{ color: "var(--cd-text-muted)" }}>
-          RS20 {formatPp(row.rs20)} · R:R {rr}
+          {tip.metrics}
         </p>
         <p className="text-[10px] m-0 mt-0.5" style={{ color: "var(--cd-text-dim)" }}>
-          {setup} · {workbenchActionLabel(row)}
+          {tip.action}
+          {tip.setup && tip.setup !== tip.state ? ` · ${tip.setup}` : ""}
         </p>
       </div>
     );
   }
 
   return (
-    <div className="cd-radar-tooltip">
+    <div className="cd-radar-tooltip cd-radar-tooltip--compact">
       <strong className="cd-mono text-sm">{node.symbol}</strong>
       <p className="text-xs m-0 mt-1" style={{ color: "var(--cd-text-muted)" }}>
-        {node.reason}
+        {node.tier}
       </p>
     </div>
   );
 }
 
 function PolarBackdrop({ mini = false }: { mini?: boolean }) {
-  const strokeOpacity = mini ? 0.08 : 0.14;
+  const strokeOpacity = mini ? 0.05 : 0.1;
   return (
     <svg
       className="cd-radar-grid absolute inset-0 w-full h-full pointer-events-none"
@@ -111,7 +99,7 @@ function PolarBackdrop({ mini = false }: { mini?: boolean }) {
     >
       <defs>
         <radialGradient id="cd-radar-fade" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(0, 229, 255, 0.06)" />
+          <stop offset="0%" stopColor="rgba(0, 229, 255, 0.04)" />
           <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
         </radialGradient>
       </defs>
@@ -121,10 +109,10 @@ function PolarBackdrop({ mini = false }: { mini?: boolean }) {
           key={scale}
           cx="50"
           cy="50"
-          r={45 * scale}
+          r={42 * scale}
           fill="none"
           stroke={`rgba(156, 163, 175, ${strokeOpacity})`}
-          strokeWidth="0.4"
+          strokeWidth="0.35"
           vectorEffect="non-scaling-stroke"
         />
       ))}
@@ -134,7 +122,7 @@ function PolarBackdrop({ mini = false }: { mini?: boolean }) {
         x2="100"
         y2="50"
         stroke={`rgba(156, 163, 175, ${strokeOpacity})`}
-        strokeWidth="0.4"
+        strokeWidth="0.35"
         vectorEffect="non-scaling-stroke"
       />
       <line
@@ -143,7 +131,7 @@ function PolarBackdrop({ mini = false }: { mini?: boolean }) {
         x2="50"
         y2="100"
         stroke={`rgba(156, 163, 175, ${strokeOpacity})`}
-        strokeWidth="0.4"
+        strokeWidth="0.35"
         vectorEffect="non-scaling-stroke"
       />
     </svg>
@@ -155,6 +143,7 @@ export function OpportunityRadar({
   decisionMode = "PROTECT CAPITAL",
   variant = "default",
   selectedSymbol = null,
+  highlightedSymbol = null,
   onNodeClick,
   workbenchRows = [],
 }: Props) {
@@ -172,21 +161,33 @@ export function OpportunityRadar({
     setMounted(true);
   }, []);
 
-  const chartData: RadarPlotPoint[] = useMemo(
-    () => nodes.map((n) => toRadarPlotPoint(n)),
-    [nodes]
-  );
+  const baseChartData = useMemo(() => prepareRadarChartData(nodes), [nodes]);
 
-  const labelSymbols = useMemo(() => {
-    const top = [...chartData]
-      .sort((a, b) => b.readiness - a.readiness)
-      .slice(0, mini ? 5 : chartData.length)
-      .map((n) => n.symbol);
-    const labels = new Set(top);
-    if (hoveredSymbol) labels.add(hoveredSymbol);
-    if (selectedSymbol) labels.add(selectedSymbol);
-    return labels;
-  }, [mini, chartData, selectedSymbol, hoveredSymbol]);
+  const focusSymbol = hoveredSymbol ?? highlightedSymbol ?? selectedSymbol;
+
+  const layoutMap = useMemo(() => {
+    if (chartSize.width <= 0 || chartSize.height <= 0) return new Map();
+    return layoutRadarBubbles(baseChartData, chartSize.width, chartSize.height, {
+      mini,
+      activeSymbol: focusSymbol,
+    });
+  }, [baseChartData, chartSize.width, chartSize.height, mini, focusSymbol]);
+
+  const chartData: RadarPlotPoint[] = useMemo(() => {
+    if (layoutMap.size === 0) return baseChartData;
+    return mergeLayoutIntoChartData(baseChartData, layoutMap);
+  }, [baseChartData, layoutMap]);
+
+  const labelSymbols = useMemo(
+    () =>
+      selectRadarLabelSymbols(chartData, {
+        maxLabels: mini ? 4 : chartData.length,
+        hovered: hoveredSymbol,
+        selected: selectedSymbol,
+        highlighted: highlightedSymbol,
+      }),
+    [chartData, mini, hoveredSymbol, selectedSymbol, highlightedSymbol]
+  );
 
   const summary = useMemo(() => {
     if (workbenchRows.length > 0) {
@@ -214,7 +215,7 @@ export function OpportunityRadar({
     <Card className={`${mini ? "p-3" : "p-4"}`} data-testid="command-deck-opportunity-radar">
       <CardHeader
         title="Opportunity Radar"
-        subtitle={mini ? "RS workbench map" : "Readiness → · Risk ↓ · Size = priority"}
+        subtitle={mini ? "RS workbench map" : "Readiness → · Risk ↓"}
         action={
           mini ? null : (
             <ul className="cd-radar-legend">
@@ -254,34 +255,32 @@ export function OpportunityRadar({
             >
               <ScatterChart margin={CHART_MARGIN}>
                 <CartesianGrid
-                  strokeDasharray="2 6"
-                  stroke={mini ? "rgba(156, 163, 175, 0.06)" : "rgba(156, 163, 175, 0.1)"}
+                  strokeDasharray="2 8"
+                  stroke={mini ? "rgba(156, 163, 175, 0.04)" : "rgba(156, 163, 175, 0.07)"}
                 />
                 <XAxis
                   type="number"
-                  dataKey="plotReadiness"
+                  dataKey="layoutReadiness"
                   name="Readiness"
                   domain={[0, 100]}
-                  tick={AXIS_TICK}
+                  tick={mini ? false : AXIS_TICK}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
                   type="number"
-                  dataKey="plotRisk"
+                  dataKey="layoutRisk"
                   name="Risk"
                   domain={[100, 0]}
-                  tick={AXIS_TICK}
+                  tick={mini ? false : AXIS_TICK}
                   axisLine={false}
                   tickLine={false}
-                  width={32}
+                  width={mini ? 8 : 28}
                 />
-                <ZAxis type="number" dataKey="z" range={[80, 400]} />
+                <ZAxis type="number" dataKey="z" range={[48, 48]} />
                 <Tooltip
-                  content={
-                    <WorkbenchTooltip workbenchBySymbol={workbenchBySymbol} />
-                  }
-                  cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.18)" }}
+                  content={<WorkbenchTooltip workbenchBySymbol={workbenchBySymbol} />}
+                  cursor={{ strokeDasharray: "3 3", stroke: "rgba(255,255,255,0.12)" }}
                 />
                 {(["actionable", "watch", "avoid"] as const).map((key) =>
                   grouped[key].length > 0 ? (
@@ -306,35 +305,40 @@ export function OpportunityRadar({
                           payload: RadarPlotPoint;
                         };
                         const active =
-                          hoveredSymbol === payload.symbol || selectedSymbol === payload.symbol;
+                          hoveredSymbol === payload.symbol ||
+                          selectedSymbol === payload.symbol ||
+                          highlightedSymbol === payload.symbol;
                         const colors = NODE_COLORS[payload.classification];
-                        const r = active ? 22 : mini ? 14 : 18;
-                        const outerR = r + 6;
-                        let x = cx;
-                        let y = cy;
-                        if (chartSize.width > 0 && chartSize.height > 0) {
-                          const clamped = clampRadarBubblePosition(
-                            cx,
-                            cy,
-                            chartSize.width,
-                            chartSize.height,
-                            Math.max(outerR, RADAR_BUBBLE_OUTER_RADIUS)
-                          );
-                          x = clamped.x;
-                          y = clamped.y;
-                        }
-                        const showLabel =
-                          !mini || labelSymbols.has(payload.symbol) || active;
+                        const layout = layoutMap.get(payload.symbol);
+                        const r =
+                          layout?.radius ??
+                          bubbleRadiusFromNode(payload, { mini, active });
+                        const glowR = r + (active ? 4 : 3);
+                        const x = layout?.pixelX ?? cx;
+                        const y = layout?.pixelY ?? cy;
+                        const showLabel = shouldShowRadarLabel(
+                          payload.symbol,
+                          labelSymbols,
+                          active,
+                          mini
+                        );
                         return (
-                          <g>
+                          <g data-testid={`radar-node-${payload.symbol}`}>
                             <circle
                               cx={x}
                               cy={y}
-                              r={r + 6}
+                              r={glowR}
                               fill={colors.glow}
-                              opacity={active ? 0.9 : 0.5}
+                              opacity={active ? 0.5 : 0.28}
                             />
-                            <circle cx={x} cy={y} r={r} fill={colors.fill} />
+                            <circle
+                              cx={x}
+                              cy={y}
+                              r={r}
+                              fill={colors.fill}
+                              stroke={active ? "rgba(255,255,255,0.45)" : "transparent"}
+                              strokeWidth={active ? 1.5 : 0}
+                            />
                             {showLabel ? (
                               <text
                                 x={x}
@@ -342,9 +346,10 @@ export function OpportunityRadar({
                                 textAnchor="middle"
                                 dominantBaseline="central"
                                 fill="#090a0f"
-                                fontSize={mini ? 7 : 9}
+                                fontSize={mini ? (active ? 8 : 7) : 9}
                                 fontWeight={700}
                                 fontFamily="var(--font-geist-mono)"
+                                pointerEvents="none"
                               >
                                 {payload.symbol}
                               </text>
@@ -374,6 +379,11 @@ export function OpportunityRadar({
           <span>Watch: {summary.watch}</span>
           <span>Too Extended: {summary.tooExtended}</span>
           <span>Best RS: {summary.bestRs.join(", ") || "—"}</span>
+          {selectedSymbol ? (
+            <span className="cd-radar-mini-summary__focus" data-testid="radar-selected-summary">
+              Focus: {selectedSymbol}
+            </span>
+          ) : null}
         </div>
       ) : null}
 

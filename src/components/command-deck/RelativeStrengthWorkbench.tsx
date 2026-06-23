@@ -30,6 +30,7 @@ type Props = {
   contextNote?: string;
   selectedSymbol?: string | null;
   onSelectSymbol?: (symbol: string | null) => void;
+  onHoverSymbol?: (symbol: string | null) => void;
 };
 
 function setupStateTone(setupState: string): "success" | "warning" | "danger" | "neutral" {
@@ -66,6 +67,7 @@ export function RelativeStrengthWorkbench({
   contextNote,
   selectedSymbol,
   onSelectSymbol,
+  onHoverSymbol,
 }: Props) {
   const [filter, setFilter] = useState<RsWorkbenchFilterId>("all");
   const [sort, setSort] = useState<RsWorkbenchSortId>("rs20_desc");
@@ -208,6 +210,8 @@ export function RelativeStrengthWorkbench({
                       .filter(Boolean)
                       .join(" ")}
                     onClick={() => toggleRow(row.symbol)}
+                    onMouseEnter={() => onHoverSymbol?.(row.symbol)}
+                    onMouseLeave={() => onHoverSymbol?.(null)}
                   >
                     <td className="cd-rs-table__symbol cd-mono">{row.symbol}</td>
                     {showSector ? (

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { buildRadarNodesFromWorkbenchRows } from "@/lib/dashboard/rs-radar-from-workbench";
+import { formatRadarWorkbenchTooltip } from "./radar-plot-utils";
 import type { RadarNode, RelativeStrengthRow } from "./types";
 import { OpportunityRadar } from "./OpportunityRadar";
 
@@ -73,12 +74,22 @@ describe("OpportunityRadar layout", () => {
         nodes={nodes}
         workbenchRows={[WORKBENCH_ROW]}
         variant="mini"
+        selectedSymbol="BVB"
       />
     );
     expect(html).toContain("Pilot Research: 0");
     expect(html).toContain("Too Extended: 1");
     expect(html).toContain("Best RS: BVB");
+    expect(html).toContain('data-testid="radar-selected-summary"');
+    expect(html).toContain("Focus: BVB");
     expect(html).not.toContain("Blocked sample");
     expect(html).not.toContain("Leaders:");
+  });
+
+  it("exposes compact tooltip formatter for real workbench rows", () => {
+    const tip = formatRadarWorkbenchTooltip(WORKBENCH_ROW);
+    expect(tip.symbol).toBe("BVB");
+    expect(tip.action).toBe("Avoid chase");
+    expect(tip.setup).toBe("Bad Zone");
   });
 });
