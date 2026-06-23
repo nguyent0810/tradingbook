@@ -328,7 +328,7 @@ export function tradeStateDisplayLabel(state: EarlyEntryTradeState): string {
 
 /** Cautious UI copy — research lane, not a buy signal. */
 export const EARLY_ENTRY_RESEARCH_DISCLAIMER =
-  "Research signal only — display-only, needs forward validation. Not a buy recommendation.";
+  "Early Entry is a research-only signal. It is shown for daily observation and paper validation. It is not a buy recommendation and does not affect trading decisions or allocation.";
 
 export function computeMa10Series(closes: readonly number[]): (number | undefined)[] {
   return sma([...closes], 10);
