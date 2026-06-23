@@ -5,6 +5,7 @@ const toneClass: Record<StatusTone, string> = {
   warning: "cd-badge--warning",
   success: "cd-badge--success",
   neutral: "cd-badge--neutral",
+  info: "cd-badge--info",
 };
 
 export function Badge({
@@ -12,15 +13,17 @@ export function Badge({
   tone = "neutral",
   pulse = false,
   size = "default",
+  titleCase = false,
 }: {
   children: React.ReactNode;
   tone?: StatusTone;
   pulse?: boolean;
   size?: "default" | "compact";
+  titleCase?: boolean;
 }) {
   return (
     <span
-      className={`cd-badge ${toneClass[tone]} ${size === "compact" ? "cd-badge--compact" : ""} ${pulse ? "cd-badge--pulse" : ""}`.trim()}
+      className={`cd-badge ${toneClass[tone]} ${size === "compact" ? "cd-badge--compact" : ""} ${titleCase ? "cd-badge--title" : ""} ${pulse ? "cd-badge--pulse" : ""}`.trim()}
     >
       <span className="cd-badge__dot" aria-hidden />
       {children}

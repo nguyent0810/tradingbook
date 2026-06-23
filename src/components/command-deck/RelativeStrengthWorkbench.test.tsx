@@ -2,18 +2,19 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { RelativeStrengthRow } from "./types";
 import { RelativeStrengthWorkbench } from "./RelativeStrengthWorkbench";
+import { WorkbenchRowQuickActions } from "./WorkbenchRowQuickActions";
 
 const ROW_WITH_EARLY: RelativeStrengthRow = {
   symbol: "ACB",
   rs20: 3.2,
   rs50: 1.1,
   rsStrength: "Strong RS",
-  setupState: "Watch: breakout",
+  setupState: "Qualified",
   reason: "Needs fresh breakout",
   status: "watch",
   rsStrengthScore: null,
   setupReadinessScore: null,
-  terminalCode: "breakout_recency",
+  terminalCode: "other",
   sectorLabel: "Bank",
   actionLabel: "Wait for breakout",
   earlyEntry: {
@@ -50,16 +51,15 @@ describe("RelativeStrengthWorkbench", () => {
     );
     expect(html).toContain("Early Entry Research · research-only · not a buy signal · paper validation enabled");
     expect(html).toContain('data-testid="early-entry-help"');
-    expect(html).toContain('data-testid="command-deck-rs-early-research-warning"');
-    expect(html).toContain('data-testid="command-deck-rs-daily-checklist"');
     expect(html).toContain("Pilot Research");
-    expect(html).toContain("Wait Breakout");
+    expect(html).toContain("Main Setup");
+    expect(html).toContain("Early Research");
+    expect(html).toContain("Early Score");
     expect(html).toContain("2.04:1");
-    expect(html).toContain("research-only signal");
     expect(html).toContain("Safety details");
   });
 
-  it("shows filter counts on chips", () => {
+  it("shows practical filter counts on chips", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
     );
@@ -67,14 +67,16 @@ describe("RelativeStrengthWorkbench", () => {
     expect(html).toContain("All 2");
     expect(html).toContain("Pilot Research 1");
     expect(html).toContain("Bank 2");
+    expect(html).toContain('data-testid="rs-filter-watch_trigger"');
   });
 
-  it("renders action-oriented column before RS metrics", () => {
+  it("renders priority-based action and separate setup lanes", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY]} />
     );
     expect(html).toContain("Paper watch only");
-    expect(html).toContain("<th>Action</th>");
+    expect(html).toContain("<th>Main Setup</th>");
+    expect(html).toContain("Early Research");
     expect(html).not.toContain("RS Strength");
   });
 
@@ -83,16 +85,27 @@ describe("RelativeStrengthWorkbench", () => {
       <RelativeStrengthWorkbench rows={[{ ...ROW_WITHOUT_EARLY, earlyEntry: null }]} />
     );
     expect(html).not.toContain("Early Entry Research · research-only");
-    expect(html).not.toContain("Early State");
+    expect(html).not.toContain("Early Research");
     expect(html).not.toContain("Pilot Research");
   });
 
-  it("renders workbench as primary table", () => {
+  it("renders workbench as primary table with formatted columns", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY]} />
     );
     expect(html).toContain('data-testid="command-deck-rs-workbench"');
-    expect(html).toContain("Relative Strength Workbench");
     expect(html).toContain("MA20 Dist");
+    expect(html).toContain("+3.2%");
+  });
+});
+
+describe("WorkbenchRowQuickActions", () => {
+  it("shows allowed quick actions and no trade execution buttons", () => {
+    const html = renderToStaticMarkup(<WorkbenchRowQuickActions symbol="ACB" />);
+    expect(html).toContain("View chart");
+    expect(html).toContain("Add to watchlist");
+    expect(html).toContain("Create alert");
+    expect(html).toContain("Paper log");
+    expect(html).not.toMatch(/>(Buy|Execute|Place order)</);
   });
 });

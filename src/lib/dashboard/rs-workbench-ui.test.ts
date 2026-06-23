@@ -4,7 +4,9 @@ import {
   countWorkbenchRowsByFilter,
   filterEmptyStateMessage,
   filterWorkbenchRows,
+  hasAnyEarlyEntryRows,
   sortWorkbenchRows,
+  visibleFilterOptions,
 } from "./rs-workbench-ui";
 import { sectorForSymbol } from "./rs-sector-display";
 
@@ -60,9 +62,14 @@ describe("rs-workbench-ui", () => {
     }),
   ];
 
-  it("filters wait breakout rows", () => {
-    const filtered = filterWorkbenchRows(rows, "wait_breakout");
+  it("filters watch trigger rows", () => {
+    const filtered = filterWorkbenchRows(rows, "watch_trigger");
     expect(filtered.map((r) => r.symbol)).toEqual(["ACB"]);
+  });
+
+  it("filters wait better zone rows", () => {
+    const filtered = filterWorkbenchRows(rows, "wait_better_zone");
+    expect(filtered.map((r) => r.symbol)).toEqual(["VND"]);
   });
 
   it("filters bank only rows", () => {
@@ -78,7 +85,7 @@ describe("rs-workbench-ui", () => {
   it("counts rows per filter chip", () => {
     const counts = countWorkbenchRowsByFilter(rows);
     expect(counts.all).toBe(3);
-    expect(counts.wait_breakout).toBe(1);
+    expect(counts.watch_trigger).toBe(1);
     expect(counts.pilot_research).toBe(1);
     expect(counts.bank_only).toBe(1);
   });
@@ -94,6 +101,21 @@ describe("rs-workbench-ui", () => {
     expect(filterEmptyStateMessage("bank_only", 0)).toBe(
       "No bank symbols in the current filtered set."
     );
+  });
+
+  it("returns avoid chase empty state copy", () => {
+    expect(filterEmptyStateMessage("avoid_chase", 0)).toBe(
+      "No overextended symbols in the current scan."
+    );
+  });
+
+  it("hides early-entry filters when flag-off / no early rows", () => {
+    const noEarly = rows.map((r) => ({ ...r, earlyEntry: null }));
+    expect(hasAnyEarlyEntryRows(noEarly)).toBe(false);
+    const options = visibleFilterOptions(noEarly);
+    expect(options.some((o) => o.id === "pilot_research")).toBe(false);
+    expect(options.some((o) => o.id === "avoid_chase")).toBe(false);
+    expect(options.some((o) => o.id === "watch_trigger")).toBe(true);
   });
 
   it("maps BVB and ABB as bank for bank-only filter", () => {

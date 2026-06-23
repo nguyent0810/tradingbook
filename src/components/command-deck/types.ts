@@ -1,4 +1,4 @@
-export type StatusTone = "danger" | "warning" | "success" | "neutral";
+export type StatusTone = "danger" | "warning" | "success" | "neutral" | "info";
 
 export type RadarNodeClassification = "actionable" | "watch" | "avoid";
 

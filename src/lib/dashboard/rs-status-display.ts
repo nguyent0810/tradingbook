@@ -1,4 +1,5 @@
 import type { RelativeStrengthRow } from "@/components/command-deck/types";
+import { isExtendedDoNotChase } from "./early-entry-ui";
 
 const SETUP_STATE_LABELS: Record<string, string> = {
   "Watch: breakout": "Wait Breakout",
@@ -31,6 +32,18 @@ const EARLY_STATE_TOOLTIPS: Record<string, string> = {
   Watch: "Monitor for confirmation — not a buy signal.",
 };
 
+export const WORKBENCH_ACTION_TOOLTIPS: Record<string, string> = {
+  "Avoid chase": "Price is extended or R:R is poor. Do not FOMO.",
+  "Wait better zone": "Price is outside a valid entry zone.",
+  "Watch trigger": "Wait for breakout confirmation.",
+  "Too early": "Trend filter has not confirmed.",
+  "Paper watch only": "Research signal only, not a buy recommendation.",
+  "Wait confirmation": "Add only after confirmation.",
+  Observe: "Monitor only.",
+};
+
+export type WorkbenchBadgeTone = "danger" | "warning" | "info" | "neutral";
+
 export function friendlySetupStateLabel(setupState: string): string {
   return SETUP_STATE_LABELS[setupState] ?? setupState;
 }
@@ -57,19 +70,62 @@ export function statusTooltipForRow(row: RelativeStrengthRow): string | null {
   return setupStateTooltip(row.setupState);
 }
 
-/** Action-oriented label for workbench table and radar tooltips. */
+export function hasBadRiskReward(row: RelativeStrengthRow): boolean {
+  const early = row.earlyEntry;
+  if (!early) return false;
+  return early.reasonCodes.includes("BAD_RR") || early.rrRejectionReason != null;
+}
+
+/** Priority-based action label for RS Workbench — display only. */
 export function workbenchActionLabel(row: RelativeStrengthRow): string {
-  if (row.earlyEntry) {
-    const early = friendlyEarlyStateLabel(row.earlyEntry.proposedTradeState);
-    if (early === "Too Extended") return "Avoid chase";
-    if (early === "Pilot Research") return "Paper watch only";
-    if (early === "Add Watch") return "Wait confirmation";
-    if (early === "Watch") return "Observe";
+  const setup = friendlySetupStateLabel(row.setupState);
+  const early = row.earlyEntry
+    ? friendlyEarlyStateLabel(row.earlyEntry.proposedTradeState)
+    : null;
+
+  if (early === "Too Extended") return "Avoid chase";
+  if (setup === "Bad Zone" && hasBadRiskReward(row)) return "Avoid chase";
+  if (setup === "Too Extended") return "Avoid chase";
+
+  if (setup === "Bad Zone") return "Wait better zone";
+  if (setup === "Wait Breakout") return "Watch trigger";
+  if (setup === "Below MA50") return "Too early";
+
+  if (early === "Pilot Research") return "Paper watch only";
+  if (early === "Add Watch") return "Wait confirmation";
+
+  return "Observe";
+}
+
+export function workbenchActionTooltip(row: RelativeStrengthRow): string {
+  const label = workbenchActionLabel(row);
+  return WORKBENCH_ACTION_TOOLTIPS[label] ?? WORKBENCH_ACTION_TOOLTIPS.Observe;
+}
+
+export function setupBadgeTone(setupState: string): WorkbenchBadgeTone {
+  const friendly = friendlySetupStateLabel(setupState);
+  if (friendly === "Bad Zone" || friendly === "Below MA50" || friendly === "Too Extended") {
+    return "danger";
+  }
+  if (friendly === "Wait Breakout") return "warning";
+  return "neutral";
+}
+
+export function earlyResearchBadgeTone(proposedTradeState: string): WorkbenchBadgeTone {
+  const friendly = friendlyEarlyStateLabel(proposedTradeState);
+  if (friendly === "Too Extended") return "danger";
+  if (friendly === "Pilot Research" || friendly === "Add Watch" || friendly === "Watch") {
+    return "info";
+  }
+  return "neutral";
+}
+
+export function rowMatchesAvoidChase(row: RelativeStrengthRow): boolean {
+  if (row.earlyEntry && isExtendedDoNotChase(row.earlyEntry.proposedTradeState)) {
+    return true;
   }
   const setup = friendlySetupStateLabel(row.setupState);
-  if (setup === "Wait Breakout") return "Watch trigger";
-  if (setup === "Bad Zone") return "Wait better zone";
-  if (setup === "Below MA50") return "Too early";
-  if (setup === "Too Extended") return "Avoid chase";
-  return row.actionLabel && row.actionLabel !== "—" ? row.actionLabel : "Observe";
+  if (setup === "Bad Zone" && hasBadRiskReward(row)) return true;
+  if (setup === "Too Extended") return true;
+  return false;
 }
