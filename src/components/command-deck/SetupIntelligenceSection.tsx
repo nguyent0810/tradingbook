@@ -21,11 +21,13 @@ export function SetupIntelligenceSection({ rows, emptyMessage, subtitle }: Props
           className="flex flex-col items-center justify-center py-8 text-center"
           data-testid="setup-intelligence-empty"
         >
-          <Search className="mb-3 h-8 w-8 text-gray-600" aria-hidden />
-          <p className="m-0 max-w-md text-sm text-gray-500">{emptyMessage}</p>
+          <Search className="mb-3 h-8 w-8" style={{ color: "var(--cd-text-dim)" }} aria-hidden />
+          <p className="m-0 max-w-md text-sm" style={{ color: "var(--cd-text-muted)" }}>
+            {emptyMessage}
+          </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="cd-table-scroll" role="region" aria-label="Setup intelligence">
           <table className="cd-rs-table">
             <thead>
               <tr>

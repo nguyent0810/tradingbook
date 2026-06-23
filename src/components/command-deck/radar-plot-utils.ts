@@ -57,11 +57,18 @@ export function clampRadarBubblePosition(
   bubbleRadius = RADAR_BUBBLE_OUTER_RADIUS,
   margin = RADAR_CHART_MARGIN
 ): { x: number; y: number } {
+  const plotSide = Math.min(
+    chartWidth - margin.left - margin.right,
+    chartHeight - margin.top - margin.bottom
+  );
   const pad = bubbleRadius + 8;
-  const minX = margin.left + pad;
-  const maxX = chartWidth - margin.right - pad;
-  const minY = margin.top + pad;
-  const maxY = chartHeight - margin.bottom - pad;
+  const plotCenterX = margin.left + (chartWidth - margin.left - margin.right) / 2;
+  const plotCenterY = margin.top + (chartHeight - margin.top - margin.bottom) / 2;
+  const half = plotSide / 2 - pad;
+  const minX = plotCenterX - half;
+  const maxX = plotCenterX + half;
+  const minY = plotCenterY - half;
+  const maxY = plotCenterY + half;
   return {
     x: Math.min(maxX, Math.max(minX, cx)),
     y: Math.min(maxY, Math.max(minY, cy)),

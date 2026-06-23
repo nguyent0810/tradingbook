@@ -297,7 +297,7 @@ export function CommandBar({ data, loading = false }: Props) {
       : "up";
 
   return (
-    <Card className="cd-card--glass cd-span-12 overflow-hidden" data-testid="command-deck-bar">
+    <Card className="cd-span-12 overflow-hidden" data-testid="command-deck-bar">
       <div className="flex items-center gap-4 overflow-x-auto px-4 py-3 sm:gap-6">
         {/* Session & benchmark */}
         <div className="flex shrink-0 items-center gap-2 sm:gap-4">

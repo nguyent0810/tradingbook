@@ -3910,7 +3910,7 @@ body {
 }
 
 .command-deck-shell__main {
-  background: var(--bg-primary);
+  background: transparent;
 }
 
 .command-deck-panel__verdict .dash-decision-hero {
@@ -8164,7 +8164,7 @@ body {
 .tosv3-rs-radar__master {
   min-height: 0;
   overflow: auto;
-  max-height: min(14rem, 32vh);
+  max-height: min(18rem, 42vh);
 }
 
 .tosv3-rs-table {
@@ -8226,13 +8226,18 @@ body {
   color: #b6c8e2;
 }
 
-/* Early Entry research lane — display-only */
+/* Early Entry research lane — display-only (glass sync with command deck) */
 .tosv3-rs-early-research {
   margin: 0.75rem 0 1rem;
   padding: 0.75rem 0.85rem;
-  border: 1px solid rgba(120, 160, 220, 0.22);
-  border-radius: 0.5rem;
-  background: rgba(12, 24, 44, 0.45);
+  border: 1px solid rgba(120, 160, 220, 0.18);
+  border-radius: 10px;
+  background: rgba(14, 20, 36, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 6px 24px rgba(0, 0, 0, 0.25);
 }
 
 .tosv3-rs-early-research__head {
@@ -8331,9 +8336,12 @@ body {
 .tosv3-rs-early-entry {
   margin-top: 0.5rem;
   padding: 0.55rem 0.6rem;
-  border: 1px solid rgba(120, 160, 220, 0.18);
-  border-radius: 0.4rem;
-  background: rgba(10, 20, 38, 0.55);
+  border: 1px solid rgba(120, 160, 220, 0.16);
+  border-radius: 10px;
+  background: rgba(14, 20, 36, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .tosv3-rs-early-entry--extended {
@@ -8428,7 +8436,7 @@ body {
   position: sticky;
   top: 0.5rem;
   align-self: start;
-  max-height: min(14rem, 32vh);
+  max-height: min(22rem, 48vh);
   overflow-y: auto;
 }
 

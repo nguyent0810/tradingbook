@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 type CardProps = {
   children: ReactNode;
   className?: string;
+  variant?: "glass" | "solid";
   glow?: "danger" | "warning" | "success" | "none";
   "data-testid"?: string;
 };
@@ -14,10 +15,21 @@ const glowClass: Record<NonNullable<CardProps["glow"]>, string> = {
   none: "",
 };
 
-export function Card({ children, className = "", glow = "none", "data-testid": testId }: CardProps) {
+const variantClass: Record<NonNullable<CardProps["variant"]>, string> = {
+  glass: "cd-card--glass cd-card--depth",
+  solid: "",
+};
+
+export function Card({
+  children,
+  className = "",
+  variant = "glass",
+  glow = "none",
+  "data-testid": testId,
+}: CardProps) {
   return (
     <div
-      className={`cd-card ${glowClass[glow]} ${className}`.trim()}
+      className={`cd-card ${variantClass[variant]} ${glowClass[glow]} ${className}`.trim()}
       data-testid={testId}
     >
       {children}
