@@ -122,7 +122,7 @@ export default async function NewTradePage({ searchParams }: NewTradePageProps) 
           title="Log a trade"
           lead="Record execution, risk, and thesis. P&L is computed automatically when you close a position."
           actions={
-            <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
+            <Link href="/trades/journal" className="tosv3-btn tosv3-btn--secondary">
               Back to ledger
             </Link>
           }

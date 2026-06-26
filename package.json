@@ -33,7 +33,11 @@
     "audit:early-entry:paper-log:seed": "npx tsx scripts/audit/early-entry-paper-log.ts --seed-historical",
     "audit:early-entry:paper-validate": "npx tsx scripts/audit/early-entry-paper-validation.ts",
     "audit:early-entry:paper-summary": "npx tsx scripts/audit/early-entry-paper-summary.ts",
-    "ops:vercel:enable-early-entry": "bash scripts/ops/enable-early-entry-vercel.sh"
+    "ops:vercel:enable-early-entry": "bash scripts/ops/enable-early-entry-vercel.sh",
+    "seed:paper-agents": "npx tsx scripts/seed-paper-agents.ts",
+    "paper-lab:daily": "npx tsx scripts/run-paper-lab-daily.ts",
+    "lab-analytics:daily": "npx tsx scripts/run-lab-analytics-daily.ts",
+    "paper-lab:validate": "npx tsx scripts/validate-paper-lab-data.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",

@@ -320,9 +320,9 @@ export async function createTrade(
     await writeSetupOutcomeFromTrade(created.id);
   }
 
-  revalidatePath("/trades");
+  revalidatePath("/trades/journal");
   revalidatePath("/dashboard");
-  redirect("/trades");
+  redirect("/trades/journal");
 }
 
 // ─── Update Trade ───
@@ -466,9 +466,9 @@ export async function updateTrade(
     await writeSetupOutcomeFromTrade(tradeId);
   }
 
-  revalidatePath("/trades");
+  revalidatePath("/trades/journal");
   revalidatePath("/dashboard");
-  redirect("/trades");
+  redirect("/trades/journal");
 }
 
 // ─── Delete Trade ───
@@ -486,9 +486,9 @@ export async function deleteTrade(tradeId: string) {
 
   await prisma.trade.delete({ where: { id: tradeId } });
 
-  revalidatePath("/trades");
+  revalidatePath("/trades/journal");
   revalidatePath("/dashboard");
-  redirect("/trades");
+  redirect("/trades/journal");
 }
 
 // ─── Manual Trade Health Checkpoint ───
@@ -501,7 +501,7 @@ export async function addTradeHealthCheckpoint(tradeId: string, formData: FormDa
     select: { id: true, status: true },
   });
   if (!trade) {
-    redirect("/trades");
+    redirect("/trades/journal");
   }
   if (trade.status !== "OPEN") {
     revalidatePath(`/trades/${trade.id}`);
@@ -546,6 +546,6 @@ export async function addTradeHealthCheckpoint(tradeId: string, formData: FormDa
   });
 
   revalidatePath(`/trades/${trade.id}`);
-  revalidatePath("/trades");
+  revalidatePath("/trades/journal");
   redirect(`/trades/${trade.id}`);
 }

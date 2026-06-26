@@ -6,11 +6,15 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", deck: "Command" },
   { href: "/setups", label: "Setups", deck: "Pipeline" },
-  { href: "/trades", label: "Trades", deck: "Ledger" },
+  { href: "/paper-lab", label: "Arena", deck: "Paper Lab" },
+  { href: "/trades/journal", label: "Journal", deck: "Ledger" },
 ] as const;
 
 function isNavActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
+  if (href === "/trades/journal") {
+    return pathname === "/trades/journal" || pathname.startsWith("/trades/");
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

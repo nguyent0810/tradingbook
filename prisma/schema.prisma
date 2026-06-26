@@ -503,3 +503,751 @@ model RsWatchlistSnapshotRow {
   @@index([symbol])
   @@map("rs_watchlist_snapshot_rows")
 }
+
+// ─── Paper Trading Lab (AI Arena) ───
+
+enum PaperPortfolioStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum PaperOrderSide {
+  BUY
+  SELL
+}
+
+enum PaperOrderType {
+  MARKET_LIMIT_SIM
+}
+
+enum PaperOrderStatus {
+  PENDING
+  FILLED
+  REJECTED
+  CANCELLED
+}
+
+enum PaperPositionStatus {
+  OPEN
+  PARTIAL
+  CLOSED
+}
+
+enum PaperExitReason {
+  STOP_LOSS_HIT
+  TAKE_PROFIT_HIT
+  INVALIDATION_EXIT
+  TIME_EXIT
+  AGENT_EXIT
+  MANUAL_SIM
+}
+
+enum AgentDecisionValidationStatus {
+  VALID
+  INVALID
+  SKIPPED
+}
+
+enum PaperAgentAction {
+  BUY
+  SELL
+  HOLD
+  EXIT
+  REDUCE
+  ADD
+}
+
+enum ExperimentRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum BacktestRunStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum PaperAgentClass {
+  AI
+  HUMAN
+}
+
+enum PromptVersionStatus {
+  DRAFT
+  SHADOW
+  CHALLENGER
+  ACTIVE
+  CHAMPION
+  DEPRECATED
+}
+
+enum ExperimentType {
+  PROMPT_AB
+  PARAM_AB
+  MODEL_AB
+  TEMPERATURE_AB
+}
+
+enum ArenaBattleStatus {
+  OPEN
+  RESOLVED
+  ARCHIVED
+}
+
+enum BattleOutcomeVerdict {
+  PENDING
+  CORRECT_BUY
+  WRONG_BUY
+  CORRECT_AVOID
+  WRONG_AVOID
+  CORRECT_RISK
+  OPEN
+  NEUTRAL
+}
+
+enum HallOfFameAchievementType {
+  GREATEST_TRADE
+  HIGHEST_R_MULTIPLE
+  BEST_MONTHLY_RETURN
+  LONGEST_WIN_STREAK
+  MOST_ACCURATE_AGENT
+  BEST_RECOVERY
+  HIGHEST_CONFIDENCE_CORRECT
+  WORST_PREDICTION
+  LUCKIEST_TRADE
+  UNLUCKIEST_TRADE
+}
+
+enum EvolutionTrend {
+  IMPROVING
+  STABLE
+  DEGRADING
+}
+
+model PaperAgent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  displayName String   @map("display_name")
+  style       String
+  active      Boolean  @default(true)
+  configJson  Json     @default("{}") @map("config_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  versions     PaperAgentVersion[]
+  portfolio    PaperPortfolio?
+  decisions    AgentDecision[]
+  performance  AgentPerformanceDaily[]
+  rankings     AgentRanking[]
+  errors       AgentError[]
+
+  activePromptVersionId String?            @map("active_prompt_version_id") @db.Uuid
+  agentClass            PaperAgentClass    @default(AI) @map("agent_class")
+  userId                String?            @map("user_id")
+
+  activePromptVersion   PromptVersion?     @relation("ActivePromptVersion", fields: [activePromptVersionId], references: [id], onDelete: SetNull)
+  promptVersions        PromptVersion[]    @relation("AgentPromptVersions")
+  memoryStats           AgentMemoryStats[]
+  setupMemory           AgentSetupMemory[]
+  memoryProfiles        AgentMemoryProfile[]
+  regimePerformance     AgentRegimePerformanceDaily[]
+  calibration           AgentCalibrationDaily[]
+  evolution             AgentEvolutionDaily[]
+  dnaProfiles           AgentDnaProfile[]
+  battleDecisions       ArenaBattleDecision[]
+  hofEntries            HallOfFameEntry[]
+  experimentPortfolios  ExperimentPortfolio[]
+
+  @@index([active])
+  @@index([agentClass])
+  @@map("paper_agents")
+}
+
+model PaperAgentVersion {
+  id            String     @id @default(uuid()) @db.Uuid
+  agentId       String     @map("agent_id")
+  agent         PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  version       String
+  promptHash    String     @map("prompt_hash")
+  paramsJson    Json       @default("{}") @map("params_json")
+  effectiveFrom DateTime   @map("effective_from") @db.Date
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  @@unique([agentId, version])
+  @@map("paper_agent_versions")
+}
+
+model PaperPortfolio {
+  id                 String               @id @default(uuid()) @db.Uuid
+  agentId            String               @unique @map("agent_id")
+  agent              PaperAgent           @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  initialCapitalVnd  BigInt               @default(500000000) @map("initial_capital_vnd")
+  cashVnd            BigInt               @default(500000000) @map("cash_vnd")
+  status             PaperPortfolioStatus @default(ACTIVE)
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+
+  orders    PaperOrder[]
+  positions PaperPosition[]
+  snapshots PortfolioSnapshot[]
+  experimentPortfolio ExperimentPortfolio?
+
+  @@map("paper_portfolios")
+}
+
+model PaperOrder {
+  id              String           @id @default(uuid()) @db.Uuid
+  portfolioId     String           @map("portfolio_id")
+  portfolio       PaperPortfolio   @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  decisionId      String?          @unique @map("decision_id")
+  decision        AgentDecision?   @relation(fields: [decisionId], references: [id], onDelete: SetNull)
+  symbol          String
+  side            PaperOrderSide
+  orderType       PaperOrderType   @default(MARKET_LIMIT_SIM) @map("order_type")
+  quantity        Int
+  priceKvnd       Float            @map("price_kvnd")
+  status          PaperOrderStatus @default(PENDING)
+  rejectionReason String?          @map("rejection_reason") @db.Text
+  sessionDate     DateTime         @map("session_date") @db.Date
+  filledAt        DateTime?        @map("filled_at")
+  feesVnd         BigInt           @default(0) @map("fees_vnd")
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  @@index([portfolioId, sessionDate])
+  @@index([symbol, sessionDate])
+  @@index([status])
+  @@map("paper_orders")
+}
+
+model PaperPosition {
+  id              String              @id @default(uuid()) @db.Uuid
+  portfolioId     String              @map("portfolio_id")
+  portfolio       PaperPortfolio      @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  symbol          String
+  quantity        Int
+  avgEntryKvnd    Float               @map("avg_entry_kvnd")
+  stopLossKvnd    Float               @map("stop_loss_kvnd")
+  takeProfitKvnd  Float               @map("take_profit_kvnd")
+  riskAmountVnd   BigInt              @map("risk_amount_vnd")
+  status          PaperPositionStatus @default(OPEN)
+  openedAt        DateTime            @map("opened_at") @db.Date
+  closedAt        DateTime?           @map("closed_at") @db.Date
+  entryDecisionId String?             @map("entry_decision_id")
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+
+  trades PaperTrade[]
+
+  @@index([portfolioId, status])
+  @@index([symbol, status])
+  @@map("paper_positions")
+}
+
+model PaperTrade {
+  id                String          @id @default(uuid()) @db.Uuid
+  positionId        String          @map("position_id")
+  position          PaperPosition   @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  exitReason        PaperExitReason @map("exit_reason")
+  quantity          Int
+  entryKvnd         Float           @map("entry_kvnd")
+  exitKvnd          Float           @map("exit_kvnd")
+  realizedPnlVnd    BigInt          @map("realized_pnl_vnd")
+  rMultiple         Float?          @map("r_multiple")
+  holdingDays       Int             @map("holding_days")
+  closedSessionDate DateTime        @map("closed_session_date") @db.Date
+  createdAt         DateTime        @default(now()) @map("created_at")
+
+  @@index([positionId])
+  @@index([closedSessionDate])
+  @@map("paper_trades")
+}
+
+model AgentDecision {
+  id               String                        @id @default(uuid()) @db.Uuid
+  agentId          String                        @map("agent_id")
+  agent            PaperAgent                    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  agentVersion     String                        @map("agent_version")
+  sessionDate      DateTime                      @map("session_date") @db.Date
+  symbol           String
+  action           PaperAgentAction
+  confidence       Float
+  validationStatus AgentDecisionValidationStatus @map("validation_status")
+  validationErrors Json?                         @map("validation_errors")
+  inputHash        String?                       @map("input_hash")
+  experimentRunId  String?                       @map("experiment_run_id")
+  experimentRun    ExperimentRun?                @relation(fields: [experimentRunId], references: [id], onDelete: SetNull)
+  reasoningSummary String?                       @map("reasoning_summary") @db.Text
+  regimeSnapshotSessionDate DateTime?             @map("regime_snapshot_id") @db.Date
+  battleId         String?                       @map("battle_id") @db.Uuid
+  promptVersionId  String?                       @map("prompt_version_id") @db.Uuid
+  memorySnapshotJson Json?                       @map("memory_snapshot_json")
+  createdAt        DateTime                      @default(now()) @map("created_at")
+
+  regimeSnapshot MarketRegimeSnapshot? @relation(fields: [regimeSnapshotSessionDate], references: [sessionDate], onDelete: SetNull)
+  battle         ArenaBattle?          @relation(fields: [battleId], references: [id], onDelete: SetNull)
+  promptVersion  PromptVersion?        @relation(fields: [promptVersionId], references: [id], onDelete: SetNull)
+  explanationTrace ExplanationTrace?
+  battleDecision ArenaBattleDecision?
+
+  input  AgentDecisionInput?
+  output AgentDecisionOutput?
+  order  PaperOrder?
+
+  @@index([sessionDate, agentId])
+  @@index([symbol, sessionDate])
+  @@index([validationStatus])
+  @@map("agent_decisions")
+}
+
+model AgentDecisionInput {
+  id         String        @id @default(uuid()) @db.Uuid
+  decisionId String        @unique @map("decision_id")
+  decision   AgentDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  payload    Json
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@map("agent_decision_inputs")
+}
+
+model AgentDecisionOutput {
+  id         String        @id @default(uuid()) @db.Uuid
+  decisionId String        @unique @map("decision_id")
+  decision   AgentDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  payload    Json
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@map("agent_decision_outputs")
+}
+
+model PortfolioSnapshot {
+  id                  String         @id @default(uuid()) @db.Uuid
+  portfolioId         String         @map("portfolio_id")
+  portfolio           PaperPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  sessionDate         DateTime       @map("session_date") @db.Date
+  navVnd              BigInt         @map("nav_vnd")
+  cashVnd             BigInt         @map("cash_vnd")
+  exposurePct         Float          @map("exposure_pct")
+  holdingsJson        Json           @default("[]") @map("holdings_json")
+  sectorExposureJson  Json           @default("{}") @map("sector_exposure_json")
+  createdAt           DateTime       @default(now()) @map("created_at")
+
+  @@unique([portfolioId, sessionDate])
+  @@index([sessionDate])
+  @@map("portfolio_snapshots")
+}
+
+model AgentPerformanceDaily {
+  id               String     @id @default(uuid()) @db.Uuid
+  agentId          String     @map("agent_id")
+  agent            PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  sessionDate      DateTime   @map("session_date") @db.Date
+  navVnd           BigInt     @map("nav_vnd")
+  totalReturnPct   Float      @map("total_return_pct")
+  realizedPnlVnd   BigInt     @map("realized_pnl_vnd")
+  unrealizedPnlVnd BigInt     @map("unrealized_pnl_vnd")
+  winRate          Float      @map("win_rate")
+  maxDrawdownPct   Float      @map("max_drawdown_pct")
+  sharpeLike       Float      @map("sharpe_like")
+  tradeCount       Int        @map("trade_count")
+  openPositions    Int        @map("open_positions")
+  metricsJson      Json       @default("{}") @map("metrics_json")
+  createdAt        DateTime   @default(now()) @map("created_at")
+
+  @@unique([agentId, sessionDate])
+  @@index([sessionDate])
+  @@map("agent_performance_daily")
+}
+
+model AgentRanking {
+  id             String     @id @default(uuid()) @db.Uuid
+  sessionDate    DateTime   @map("session_date") @db.Date
+  agentId        String     @map("agent_id")
+  agent          PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  rank           Int
+  rankChange     Int        @default(0) @map("rank_change")
+  compositeScore Float      @map("composite_score")
+  scoreBreakdown Json       @default("{}") @map("score_breakdown")
+  createdAt      DateTime   @default(now()) @map("created_at")
+
+  @@unique([sessionDate, agentId])
+  @@index([sessionDate, rank])
+  @@map("agent_rankings")
+}
+
+model CioRecommendation {
+  id          String   @id @default(uuid()) @db.Uuid
+  sessionDate DateTime @map("session_date") @db.Date
+  symbol      String
+  payload     Json
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@unique([sessionDate, symbol])
+  @@index([sessionDate])
+  @@map("cio_recommendations")
+}
+
+model ExperimentRun {
+  id              String              @id @default(uuid()) @db.Uuid
+  name            String
+  agentVersionMap Json                @map("agent_version_map")
+  startedAt       DateTime            @default(now()) @map("started_at")
+  finishedAt      DateTime?           @map("finished_at")
+  status          ExperimentRunStatus @default(RUNNING)
+  notes           String?             @db.Text
+
+  decisions AgentDecision[]
+
+  experimentPortfolios ExperimentPortfolio[]
+
+  @@map("experiment_runs")
+}
+
+model BacktestRun {
+  id          String            @id @default(uuid()) @db.Uuid
+  configJson  Json              @map("config_json")
+  startDate   DateTime          @map("start_date") @db.Date
+  endDate     DateTime          @map("end_date") @db.Date
+  resultsJson Json?             @map("results_json")
+  status      BacktestRunStatus @default(RUNNING)
+  startedAt   DateTime          @default(now()) @map("started_at")
+  finishedAt  DateTime?         @map("finished_at")
+
+  @@map("backtest_runs")
+}
+
+model SystemLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  jobName   String   @map("job_name")
+  level     String
+  message   String   @db.Text
+  contextJson Json?  @map("context_json")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([jobName, createdAt(sort: Desc)])
+  @@map("system_logs")
+}
+
+model AgentError {
+  id        String     @id @default(uuid()) @db.Uuid
+  agentId   String?    @map("agent_id")
+  agent     PaperAgent? @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  jobName   String     @map("job_name")
+  message   String     @db.Text
+  contextJson Json?    @map("context_json")
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  @@index([agentId, createdAt(sort: Desc)])
+  @@map("agent_errors")
+}
+
+// ─── Phase 2: AI Investment Laboratory ───
+
+model MarketRegimeSnapshot {
+  sessionDate    DateTime        @id @db.Date @map("session_date")
+  gate1Level     Gate1ScanLevel? @map("gate1_level")
+  dimensionsJson Json            @map("dimensions_json")
+  confidence     Float           @default(0.7)
+  schemaVersion  String          @default("1.0.0") @map("schema_version")
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  decisions         AgentDecision[]
+  regimePerformance AgentRegimePerformanceDaily[]
+  replayBundles     SessionReplayBundle[]
+
+  @@map("market_regime_snapshots")
+}
+
+model AgentRegimePerformanceDaily {
+  id           String               @id @default(uuid()) @db.Uuid
+  agentId      String               @map("agent_id")
+  agent        PaperAgent           @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  sessionDate  DateTime             @map("session_date") @db.Date
+  regimeId     DateTime             @map("regime_id") @db.Date
+  regime       MarketRegimeSnapshot @relation(fields: [regimeId], references: [sessionDate], onDelete: Cascade)
+  trendRegime  String               @map("trend_regime")
+  returnPct    Float                @map("return_pct")
+  winRate      Float                @map("win_rate")
+  tradeCount   Int                  @map("trade_count")
+  createdAt    DateTime             @default(now()) @map("created_at")
+
+  @@unique([agentId, sessionDate, trendRegime])
+  @@index([agentId, trendRegime])
+  @@map("agent_regime_performance_daily")
+}
+
+model AgentMemoryStats {
+  id              String     @id @default(uuid()) @db.Uuid
+  agentId         String     @map("agent_id")
+  agent           PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  asOfSession     DateTime   @map("as_of_session") @db.Date
+  windowDays      Int        @map("window_days")
+  statsJson       Json       @map("stats_json")
+  createdAt       DateTime   @default(now()) @map("created_at")
+
+  @@unique([agentId, asOfSession, windowDays])
+  @@map("agent_memory_stats")
+}
+
+model AgentSetupMemory {
+  id              String     @id @default(uuid()) @db.Uuid
+  agentId         String     @map("agent_id")
+  agent           PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  setupSignature  String     @map("setup_signature")
+  sampleSize      Int        @map("sample_size")
+  winRate         Float      @map("win_rate")
+  avgReturnPct    Float      @map("avg_return_pct")
+  avgRMultiple    Float      @map("avg_r_multiple")
+  avgHoldingDays  Float      @map("avg_holding_days")
+  failureRate     Float      @map("failure_rate")
+  regimeBreakdown Json       @default("{}") @map("regime_breakdown")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  @@unique([agentId, setupSignature])
+  @@map("agent_setup_memory")
+}
+
+model AgentMemoryProfile {
+  id          String     @id @default(uuid()) @db.Uuid
+  agentId     String     @map("agent_id")
+  agent       PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  asOfSession DateTime   @map("as_of_session") @db.Date
+  profileJson Json       @map("profile_json")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  @@unique([agentId, asOfSession])
+  @@map("agent_memory_profiles")
+}
+
+model PromptVersion {
+  id            String              @id @default(uuid()) @db.Uuid
+  agentId       String              @map("agent_id")
+  agent         PaperAgent          @relation("AgentPromptVersions", fields: [agentId], references: [id], onDelete: Cascade)
+  activeForAgents PaperAgent[]      @relation("ActivePromptVersion")
+  versionLabel  String              @map("version_label")
+  promptHash    String              @map("prompt_hash")
+  promptText    String              @map("prompt_text") @db.Text
+  paramsJson    Json                @default("{}") @map("params_json")
+  status        PromptVersionStatus @default(DRAFT)
+  modelId       String?             @map("model_id")
+  temperature   Float?
+  effectiveFrom DateTime            @map("effective_from") @db.Date
+  createdAt     DateTime            @default(now()) @map("created_at")
+
+  decisions     AgentDecision[]
+  experimentArms PromptExperimentArm[]
+  promotionEvents PromptPromotionEvent[]
+
+  @@unique([agentId, versionLabel])
+  @@map("prompt_versions")
+}
+
+model PromptExperiment {
+  id          String         @id @default(uuid()) @db.Uuid
+  name        String
+  type        ExperimentType
+  status      ExperimentRunStatus @default(RUNNING)
+  configJson  Json           @default("{}") @map("config_json")
+  startedAt   DateTime       @default(now()) @map("started_at")
+  finishedAt  DateTime?      @map("finished_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+
+  arms        PromptExperimentArm[]
+  promotions  PromptPromotionEvent[]
+
+  @@map("prompt_experiments")
+}
+
+model PromptExperimentArm {
+  id              String           @id @default(uuid()) @db.Uuid
+  experimentId    String           @map("experiment_id")
+  experiment      PromptExperiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+  armLabel        String           @map("arm_label")
+  promptVersionId String           @map("prompt_version_id")
+  promptVersion   PromptVersion    @relation(fields: [promptVersionId], references: [id], onDelete: Cascade)
+  isControl       Boolean          @default(false) @map("is_control")
+  metricsJson     Json?            @map("metrics_json")
+
+  @@unique([experimentId, armLabel])
+  @@map("prompt_experiment_arms")
+}
+
+model PromptPromotionEvent {
+  id              String           @id @default(uuid()) @db.Uuid
+  experimentId    String?          @map("experiment_id")
+  experiment      PromptExperiment? @relation(fields: [experimentId], references: [id], onDelete: SetNull)
+  agentId         String           @map("agent_id")
+  fromVersionId   String?          @map("from_version_id") @db.Uuid
+  toVersionId     String           @map("to_version_id") @db.Uuid
+  toVersion       PromptVersion    @relation(fields: [toVersionId], references: [id], onDelete: Cascade)
+  reason          String           @db.Text
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  @@index([agentId, createdAt(sort: Desc)])
+  @@map("prompt_promotion_events")
+}
+
+model ArenaBattle {
+  id          String            @id @default(uuid()) @db.Uuid
+  sessionDate DateTime          @map("session_date") @db.Date
+  symbol      String
+  status      ArenaBattleStatus @default(OPEN)
+  benchmarkReturn5dPct Float?   @map("benchmark_return_5d_pct")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  resolvedAt  DateTime?         @map("resolved_at")
+
+  decisions AgentDecision[]
+  battleDecisions ArenaBattleDecision[]
+  outcomes  ArenaBattleOutcome[]
+
+  @@unique([sessionDate, symbol])
+  @@index([sessionDate])
+  @@map("arena_battles")
+}
+
+model ArenaBattleDecision {
+  id          String            @id @default(uuid()) @db.Uuid
+  battleId    String            @map("battle_id")
+  battle      ArenaBattle       @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  decisionId  String            @unique @map("decision_id")
+  decision    AgentDecision     @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  agentId     String            @map("agent_id")
+  agent       PaperAgent        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  action      PaperAgentAction
+  confidence  Float
+  reasoning   String?           @db.Text
+
+  outcome ArenaBattleOutcome?
+
+  @@index([battleId])
+  @@map("arena_battle_decisions")
+}
+
+model ArenaBattleOutcome {
+  id               String               @id @default(uuid()) @db.Uuid
+  battleId         String               @map("battle_id")
+  battle           ArenaBattle          @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  battleDecisionId String               @unique @map("battle_decision_id")
+  battleDecision   ArenaBattleDecision  @relation(fields: [battleDecisionId], references: [id], onDelete: Cascade)
+  agentId          String               @map("agent_id")
+  verdict          BattleOutcomeVerdict @default(PENDING)
+  rMultiple        Float?               @map("r_multiple")
+  forwardReturn5dPct Float?             @map("forward_return_5d_pct")
+  explanation      String?              @db.Text
+  resolvedAt       DateTime?            @map("resolved_at")
+  createdAt        DateTime             @default(now()) @map("created_at")
+
+  @@index([battleId, verdict])
+  @@map("arena_battle_outcomes")
+}
+
+model HallOfFameEntry {
+  id              String                    @id @default(uuid()) @db.Uuid
+  achievementType HallOfFameAchievementType @map("achievement_type")
+  agentId         String?                   @map("agent_id")
+  agent           PaperAgent?               @relation(fields: [agentId], references: [id], onDelete: SetNull)
+  seasonId        String?                   @map("season_id")
+  sessionDate     DateTime?                 @map("session_date") @db.Date
+  symbol          String?
+  value           Float
+  metadataJson    Json                      @default("{}") @map("metadata_json")
+  createdAt       DateTime                  @default(now()) @map("created_at")
+
+  @@index([achievementType, value(sort: Desc)])
+  @@index([agentId])
+  @@map("hall_of_fame_entries")
+}
+
+model AgentDnaProfile {
+  id          String     @id @default(uuid()) @db.Uuid
+  agentId     String     @map("agent_id")
+  agent       PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  asOfSession DateTime   @map("as_of_session") @db.Date
+  profileJson Json       @map("profile_json")
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  @@unique([agentId, asOfSession])
+  @@map("agent_dna_profiles")
+}
+
+model AgentCalibrationDaily {
+  id               String     @id @default(uuid()) @db.Uuid
+  agentId          String     @map("agent_id")
+  agent            PaperAgent @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  sessionDate      DateTime   @map("session_date") @db.Date
+  brierScore       Float      @map("brier_score")
+  overconfidence   Float
+  bucketJson       Json       @map("bucket_json")
+  sampleSize       Int        @map("sample_size")
+  createdAt        DateTime   @default(now()) @map("created_at")
+
+  @@unique([agentId, sessionDate])
+  @@map("agent_calibration_daily")
+}
+
+model AgentEvolutionDaily {
+  id           String          @id @default(uuid()) @db.Uuid
+  agentId      String          @map("agent_id")
+  agent        PaperAgent      @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  sessionDate  DateTime        @map("session_date") @db.Date
+  score        Float
+  trend        EvolutionTrend
+  componentsJson Json          @map("components_json")
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  @@unique([agentId, sessionDate])
+  @@map("agent_evolution_daily")
+}
+
+model ExplanationTrace {
+  id         String        @id @default(uuid()) @db.Uuid
+  decisionId String        @unique @map("decision_id")
+  decision   AgentDecision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  traceJson  Json          @map("trace_json")
+  createdAt  DateTime      @default(now()) @map("created_at")
+
+  @@map("explanation_traces")
+}
+
+model SessionReplayBundle {
+  id              String               @id @default(uuid()) @db.Uuid
+  sessionDate     DateTime             @unique @map("session_date") @db.Date
+  regimeId        DateTime?            @map("regime_id") @db.Date
+  regime          MarketRegimeSnapshot? @relation(fields: [regimeId], references: [sessionDate], onDelete: SetNull)
+  bundleJson      Json                 @map("bundle_json")
+  createdAt       DateTime             @default(now()) @map("created_at")
+
+  @@map("session_replay_bundles")
+}
+
+model ExperimentPortfolio {
+  id              String        @id @default(uuid()) @db.Uuid
+  experimentRunId String        @map("experiment_run_id")
+  experimentRun   ExperimentRun @relation(fields: [experimentRunId], references: [id], onDelete: Cascade)
+  agentId         String        @map("agent_id")
+  agent           PaperAgent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  portfolioId     String        @unique @map("portfolio_id") @db.Uuid
+  portfolio       PaperPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  armLabel        String?       @map("arm_label")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@map("experiment_portfolios")
+}
+
+model LabTelemetryEvent {
+  id          String   @id @default(uuid()) @db.Uuid
+  jobName     String   @map("job_name")
+  agentId     String?  @map("agent_id")
+  eventType   String   @map("event_type")
+  latencyMs   Int?     @map("latency_ms")
+  tokenCount  Int?     @map("token_count")
+  costUsd     Float?   @map("cost_usd")
+  success     Boolean  @default(true)
+  contextJson Json?    @map("context_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([jobName, createdAt(sort: Desc)])
+  @@index([eventType, createdAt(sort: Desc)])
+  @@map("lab_telemetry_events")
+}
