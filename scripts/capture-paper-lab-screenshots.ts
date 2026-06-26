@@ -54,11 +54,16 @@ async function main() {
       height: 720,
       run: async (page) => {
         await page.evaluate(() => window.scrollTo(0, 0));
-        const rHelp = page
-          .getByTestId("paper-lab-positions")
-          .locator("thead th", { hasText: "R" })
-          .locator(".paper-lab-help-icon");
-        await rHelp.hover();
+        const positions = page.getByTestId("paper-lab-positions");
+        if ((await positions.count()) > 0) {
+          const rHelp = positions
+            .locator("thead th")
+            .filter({ hasText: /^R$/ })
+            .locator(".paper-lab-help-icon");
+          if ((await rHelp.count()) > 0) {
+            await rHelp.first().hover();
+          }
+        }
       },
     },
     {

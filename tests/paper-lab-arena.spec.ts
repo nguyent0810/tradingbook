@@ -58,7 +58,7 @@ test.describe("/paper-lab arena", () => {
 
   test("open positions R column has help tooltip", async ({ page }) => {
     await page.goto("/paper-lab");
-    const rHeader = page.getByTestId("paper-lab-positions").locator("thead th", { hasText: "R" });
+    const rHeader = page.getByTestId("paper-lab-positions").locator("thead th").filter({ hasText: /^R$/ });
     await expect(rHeader.locator(".paper-lab-help-icon")).toBeVisible();
     await expect(rHeader.locator(".paper-lab-help-icon")).toHaveAttribute(
       "title",
