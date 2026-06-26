@@ -25,7 +25,7 @@ export function TradePreviewTable({ trades }: TradePreviewTableProps) {
           Recent trades
         </h2>
         <Link
-          href="/trades"
+          href="/trades/journal"
           className="text-sm font-medium text-[var(--accent-text)] hover:underline"
         >
           View all trades →

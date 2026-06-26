@@ -31,7 +31,7 @@ export default function TradesError({
             <button type="button" className="tosv3-btn tosv3-btn--primary" onClick={() => reset()}>
               Try again
             </button>
-            <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
+            <Link href="/trades/journal" className="tosv3-btn tosv3-btn--secondary">
               Reload trades
             </Link>
             <Link href="/dashboard" className="tosv3-btn tosv3-btn--ghost">

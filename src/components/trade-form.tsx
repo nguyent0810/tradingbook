@@ -541,7 +541,7 @@ export function TradeForm({ trade, initialValues, setupContextLabel }: TradeForm
             "Log Trade"
           )}
         </button>
-        <Link href="/trades" className="tosv3-btn tosv3-btn--secondary">
+        <Link href="/trades/journal" className="tosv3-btn tosv3-btn--secondary">
           Cancel
         </Link>
       </div>

@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/daily-scan",
       "schedule": "0 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/paper-lab-daily",
+      "schedule": "15 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/lab-analytics-daily",
+      "schedule": "45 14 * * 1-5"
     }
   ]
 }
