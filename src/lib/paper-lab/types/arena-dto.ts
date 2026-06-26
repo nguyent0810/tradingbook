@@ -1,4 +1,5 @@
 import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
+import type { DecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
 
 export type ArenaOverviewDto = {
   totalAgents: number;
@@ -53,6 +54,10 @@ export type PortfolioCardDto = {
   sectorExposure: Record<string, number>;
   openRiskVnd: number;
   buyingPowerVnd: number;
+  pnlPct: number;
+  winRate: number;
+  maxDrawdownPct: number;
+  navSparkline: number[];
 };
 
 export type OpenPositionRowDto = {
@@ -83,7 +88,8 @@ export type DecisionLogRowDto = {
   action: AgentAction;
   confidence: number;
   reasoningSummary: string;
-  jsonPreview: string;
+  explanation: DecisionExplanation;
+  jsonPayload: Record<string, unknown> | null;
   validationStatus: "VALID" | "INVALID" | "SKIPPED";
   linkedOrderId: string | null;
   linkedPositionId: string | null;
@@ -92,22 +98,33 @@ export type DecisionLogRowDto = {
 export type BattleReplayRowDto = {
   agentId: string;
   agentName: string;
+  style: string;
   action: AgentAction;
   confidence: number;
   reasoning: string;
+  explanation: DecisionExplanation;
   outcome: "WIN" | "LOSS" | "OPEN" | "N/A";
+};
+
+export type CioRecommendationDto = {
+  symbol: string;
+  finalAction: AgentAction;
+  confidence: number;
+  reasoning: string;
+  risks: string[];
+  consensusScore: number;
+  consensusLabel: "Weak" | "Medium" | "Strong";
+  consensusScoreDisplay: string;
+  regimeContext: string;
+  decisionSummary: string;
+  supportingReasons: string[];
+  actionVotes: { buy: number; hold: number; sell: number; reduce: number; exit: number };
+  dissentingAgents: Array<{ agentId: string; agentName: string; action: AgentAction; reason: string; humanReason: string }>;
 };
 
 export type CioPanelDto = {
   sessionDate: string;
-  recommendations: Array<{
-    symbol: string;
-    finalAction: AgentAction;
-    confidence: number;
-    reasoning: string;
-    risks: string[];
-    dissentingAgents: Array<{ agentId: string; reason: string }>;
-  }>;
+  recommendations: CioRecommendationDto[];
 };
 
 export type PaperLabPageDto = {
@@ -120,6 +137,7 @@ export type PaperLabPageDto = {
   battleReplay: {
     sessionDate: string;
     symbol: string;
+    insight: string;
     rows: BattleReplayRowDto[];
   };
 };

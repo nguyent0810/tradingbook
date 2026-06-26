@@ -1,15 +1,38 @@
 import { prisma } from "@/lib/prisma";
-import { PAPER_INITIAL_CAPITAL_VND } from "@/lib/paper-lab/constants";
+import { PAPER_AGENT_SEEDS, PAPER_INITIAL_CAPITAL_VND } from "@/lib/paper-lab/constants";
 import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
-import type { CioRecommendation } from "@/lib/paper-lab/types/agent-decision.schema";
+import type {
+  AgentDecisionOutput,
+  CioRecommendation,
+} from "@/lib/paper-lab/types/agent-decision.schema";
 import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
 import type { RegimeDimensions } from "@/lib/lab/types/regime";
 import { getPaperLabExecutionMode } from "@/lib/paper-lab/llm-config";
+import {
+  buildBattleInsight,
+  buildCioPresentation,
+  buildDecisionExplanation,
+} from "@/lib/paper-lab/ui/arena-copy";
 
 function tableExistsError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);
   return msg.includes("paper_agents") || msg.includes("does not exist");
+}
+
+function agentDisplayName(slug: string): string {
+  return PAPER_AGENT_SEEDS.find((a) => a.slug === slug)?.displayName ?? slug;
+}
+
+function utcDayDiff(later: Date, earlier: Date): number {
+  const a = Date.UTC(later.getUTCFullYear(), later.getUTCMonth(), later.getUTCDate());
+  const b = Date.UTC(earlier.getUTCFullYear(), earlier.getUTCMonth(), earlier.getUTCDate());
+  return Math.floor((a - b) / 86_400_000);
+}
+
+function parsePayload(raw: unknown): Partial<AgentDecisionOutput> | null {
+  if (!raw || typeof raw !== "object") return null;
+  return raw as Partial<AgentDecisionOutput>;
 }
 
 export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> {
@@ -70,20 +93,57 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
           orderBy: { sessionDate: "desc" },
         });
         const perf = a.performance[0];
+        const sparkSnaps = a.portfolio
+          ? await prisma.portfolioSnapshot.findMany({
+              where: { portfolioId: a.portfolio.id },
+              orderBy: { sessionDate: "desc" },
+              take: 14,
+              select: { navVnd: true },
+            })
+          : [];
+        const navSparkline = sparkSnaps.reverse().map((s) => Number(s.navVnd));
+        const lb = leaderboard.find((r) => r.agentId === a.slug);
+
+        let openRiskVnd = 0;
+        if (a.portfolio) {
+          const openPos = await prisma.paperPosition.findMany({
+            where: {
+              portfolioId: a.portfolio.id,
+              status: { in: ["OPEN", "PARTIAL"] },
+            },
+          });
+          openRiskVnd = openPos.reduce((sum, p) => sum + Number(p.riskAmountVnd), 0);
+        }
+
         return {
           agentId: a.slug,
           agentName: a.displayName,
           style: a.style,
-          startingCapitalVnd: a.portfolio ? Number(a.portfolio.initialCapitalVnd) : PAPER_INITIAL_CAPITAL_VND,
-          cashVnd: snap ? Number(snap.cashVnd) : Number(a.portfolio?.cashVnd ?? PAPER_INITIAL_CAPITAL_VND),
-          investedVnd: snap
-            ? Number(snap.navVnd) - Number(snap.cashVnd)
-            : 0,
-          navVnd: snap ? Number(snap.navVnd) : perf ? Number(perf.navVnd) : PAPER_INITIAL_CAPITAL_VND,
+          startingCapitalVnd: a.portfolio
+            ? Number(a.portfolio.initialCapitalVnd)
+            : PAPER_INITIAL_CAPITAL_VND,
+          cashVnd: snap
+            ? Number(snap.cashVnd)
+            : Number(a.portfolio?.cashVnd ?? PAPER_INITIAL_CAPITAL_VND),
+          investedVnd: snap ? Number(snap.navVnd) - Number(snap.cashVnd) : 0,
+          navVnd: snap
+            ? Number(snap.navVnd)
+            : perf
+              ? Number(perf.navVnd)
+              : PAPER_INITIAL_CAPITAL_VND,
           exposurePct: snap?.exposurePct ?? 0,
           sectorExposure: (snap?.sectorExposureJson as Record<string, number>) ?? {},
-          openRiskVnd: 0,
-          buyingPowerVnd: snap ? Math.floor(Number(snap.cashVnd) * 0.99) : PAPER_INITIAL_CAPITAL_VND,
+          openRiskVnd,
+          buyingPowerVnd: snap
+            ? Math.floor(Number(snap.cashVnd) * 0.99)
+            : PAPER_INITIAL_CAPITAL_VND,
+          pnlPct: lb?.pnlPct ?? perf?.totalReturnPct ?? 0,
+          winRate: lb?.winRate ?? perf?.winRate ?? 0,
+          maxDrawdownPct: lb?.maxDrawdownPct ?? perf?.maxDrawdownPct ?? 0,
+          navSparkline:
+            navSparkline.length >= 2
+              ? navSparkline
+              : [PAPER_INITIAL_CAPITAL_VND, snap ? Number(snap.navVnd) : PAPER_INITIAL_CAPITAL_VND],
         };
       })
     );
@@ -121,7 +181,7 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
             p.avgEntryKvnd > p.stopLossKvnd
               ? (mark - p.avgEntryKvnd) / (p.avgEntryKvnd - p.stopLossKvnd)
               : 0,
-          holdingDays: 0,
+          holdingDays: utcDayDiff(sessionDate, p.openedAt),
           status: p.status === "PARTIAL" ? ("PARTIAL" as const) : ("OPEN" as const),
         };
       })
@@ -134,20 +194,31 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       include: { agent: true, output: true, order: true },
     });
 
-    const decisionRows = decisions.map((d) => ({
-      id: d.id,
-      date: d.sessionDate.toISOString().slice(0, 10),
-      agentId: d.agent.slug,
-      agentName: d.agent.displayName,
-      symbol: d.symbol,
-      action: d.action as AgentAction,
-      confidence: d.confidence,
-      reasoningSummary: d.reasoningSummary ?? "",
-      jsonPreview: JSON.stringify(d.output?.payload ?? {}).slice(0, 120),
-      validationStatus: d.validationStatus as "VALID" | "INVALID" | "SKIPPED",
-      linkedOrderId: d.order?.id ?? null,
-      linkedPositionId: null,
-    }));
+    const decisionRows = decisions.map((d) => {
+      const payload = parsePayload(d.output?.payload);
+      const explanation = buildDecisionExplanation({
+        agentId: d.agent.slug,
+        action: d.action as AgentAction,
+        symbol: d.symbol,
+        reasoningSummary: d.reasoningSummary,
+        payload,
+      });
+      return {
+        id: d.id,
+        date: d.sessionDate.toISOString().slice(0, 10),
+        agentId: d.agent.slug,
+        agentName: d.agent.displayName,
+        symbol: d.symbol,
+        action: d.action as AgentAction,
+        confidence: d.confidence,
+        reasoningSummary: explanation.summary,
+        explanation,
+        jsonPayload: (d.output?.payload as Record<string, unknown>) ?? null,
+        validationStatus: d.validationStatus as "VALID" | "INVALID" | "SKIPPED",
+        linkedOrderId: d.order?.id ?? null,
+        linkedPositionId: null,
+      };
+    });
 
     const cioRows = await prisma.cioRecommendation.findMany({
       where: { sessionDate },
@@ -177,36 +248,65 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
         battleDecisions: {
           include: {
             outcome: true,
-            decision: { include: { agent: true } },
+            decision: { include: { agent: true, output: true } },
           },
         },
       },
     });
 
     const battleSymbol = battle?.symbol ?? decisions[0]?.symbol ?? "FPT";
-    const battleRows =
-      battle?.battleDecisions.map((bd) => ({
-        agentId: bd.decision.agent.slug,
-        agentName: bd.decision.agent.displayName,
-        action: bd.action as AgentAction,
-        confidence: bd.confidence,
-        reasoning: bd.reasoning ?? bd.decision.reasoningSummary ?? "",
-        outcome: battleOutcomeToDisplay(bd.outcome?.verdict ?? "PENDING") as
-          | "WIN"
-          | "LOSS"
-          | "OPEN"
-          | "N/A",
-      })) ??
+
+    const battleRowsRaw =
+      battle?.battleDecisions.map((bd) => {
+        const payload = parsePayload(bd.decision.output?.payload);
+        const explanation = buildDecisionExplanation({
+          agentId: bd.decision.agent.slug,
+          action: bd.action as AgentAction,
+          symbol: battleSymbol,
+          reasoningSummary: bd.reasoning ?? bd.decision.reasoningSummary,
+          payload,
+        });
+        return {
+          agentId: bd.decision.agent.slug,
+          agentName: bd.decision.agent.displayName,
+          style: bd.decision.agent.style,
+          action: bd.action as AgentAction,
+          confidence: bd.confidence,
+          reasoning: explanation.summary,
+          explanation,
+          outcome: battleOutcomeToDisplay(bd.outcome?.verdict ?? "PENDING") as
+            | "WIN"
+            | "LOSS"
+            | "OPEN"
+            | "N/A",
+        };
+      }) ??
       decisions
         .filter((d) => d.symbol === battleSymbol)
-        .map((d) => ({
-          agentId: d.agent.slug,
-          agentName: d.agent.displayName,
-          action: d.action as AgentAction,
-          confidence: d.confidence,
-          reasoning: d.reasoningSummary ?? "",
-          outcome: "N/A" as const,
-        }));
+        .map((d) => {
+          const payload = parsePayload(d.output?.payload);
+          const explanation = buildDecisionExplanation({
+            agentId: d.agent.slug,
+            action: d.action as AgentAction,
+            symbol: d.symbol,
+            reasoningSummary: d.reasoningSummary,
+            payload,
+          });
+          return {
+            agentId: d.agent.slug,
+            agentName: d.agent.displayName,
+            style: d.agent.style,
+            action: d.action as AgentAction,
+            confidence: d.confidence,
+            reasoning: explanation.summary,
+            explanation,
+            outcome: "N/A" as const,
+          };
+        });
+
+    const panelDecisionsForCio = decisions
+      .filter((d) => d.symbol === battleSymbol && d.agent.slug !== "cio")
+      .map((d) => ({ action: d.action as AgentAction, agent_id: d.agent.slug }));
 
     return {
       overview: {
@@ -242,16 +342,33 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       cio: {
         sessionDate: sessionDate.toISOString().slice(0, 10),
         recommendations: cioRows.map((c) => {
-          const p = c.payload as CioRecommendation;
+          const p = c.payload as CioRecommendation & { regime_context?: string };
+          const regimeContext =
+            p.regime_context ?? regimeLabels.join(" · ") ?? p.metadata?.regime ?? "Unknown";
+          const pres = buildCioPresentation(
+            { ...p, regime_context: regimeContext },
+            panelDecisionsForCio
+          );
           return {
             symbol: c.symbol,
             finalAction: p.final_action,
             confidence: p.confidence,
             reasoning: p.reasoning,
             risks: p.risks,
+            consensusScore: p.consensus_score,
+            consensusLabel: pres.consensusLabel,
+            consensusScoreDisplay: pres.consensusScoreDisplay,
+            regimeContext,
+            decisionSummary: pres.decisionSummary,
+            supportingReasons: pres.supportingReasons,
+            actionVotes: pres.actionVotes,
             dissentingAgents: p.dissenting_agents.map((d) => ({
               agentId: d.agent_id,
+              agentName: agentDisplayName(d.agent_id),
+              action: d.action,
               reason: d.reason,
+              humanReason: pres.dissent.find((x) => x.agentName === agentDisplayName(d.agent_id))
+                ?.humanReason ?? d.reason,
             })),
           };
         }),
@@ -259,7 +376,8 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       battleReplay: {
         sessionDate: sessionDate.toISOString().slice(0, 10),
         symbol: battleSymbol,
-        rows: battleRows,
+        insight: buildBattleInsight(battleRowsRaw, battleSymbol),
+        rows: battleRowsRaw,
       },
     };
   } catch (err) {
