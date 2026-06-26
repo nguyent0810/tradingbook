@@ -35,6 +35,20 @@ function parsePayload(raw: unknown): Partial<AgentDecisionOutput> | null {
   return raw as Partial<AgentDecisionOutput>;
 }
 
+function formatRegimeContext(
+  raw: unknown,
+  fallbackLabels: string[]
+): string {
+  if (typeof raw === "string" && raw.trim()) return raw;
+  if (raw && typeof raw === "object") {
+    const dims = raw as Partial<RegimeDimensions>;
+    const parts = [dims.trendRegime, dims.volatilityRegime, dims.breadthRegime].filter(Boolean);
+    if (parts.length > 0) return parts.join(" · ");
+  }
+  if (fallbackLabels.length > 0) return fallbackLabels.join(" · ");
+  return "Unknown";
+}
+
 export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> {
   try {
     const agentCount = await prisma.paperAgent.count();
@@ -342,9 +356,11 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       cio: {
         sessionDate: sessionDate.toISOString().slice(0, 10),
         recommendations: cioRows.map((c) => {
-          const p = c.payload as CioRecommendation & { regime_context?: string };
-          const regimeContext =
-            p.regime_context ?? regimeLabels.join(" · ") ?? p.metadata?.regime ?? "Unknown";
+          const p = c.payload as CioRecommendation & { regime_context?: unknown };
+          const regimeContext = formatRegimeContext(
+            p.regime_context ?? p.metadata?.regime,
+            regimeLabels
+          );
           const pres = buildCioPresentation(
             { ...p, regime_context: regimeContext },
             panelDecisionsForCio
