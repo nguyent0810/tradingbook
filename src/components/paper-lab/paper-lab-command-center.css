@@ -60,9 +60,9 @@
 }
 
 .paper-lab-main {
-  max-width: 1600px;
+  max-width: 1680px;
   margin: 0 auto;
-  padding: 16px 20px 32px;
+  padding: 12px 20px 32px;
   min-width: 0;
 }
 
@@ -214,49 +214,70 @@
   margin-bottom: 2px;
 }
 
-/* Top nav */
-.paper-lab-top-nav {
+/* Utility bar (compact — no duplicate nav) */
+.paper-lab-utility-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
+  gap: 10px;
+  padding: 8px 0 12px;
+  margin-bottom: 12px;
   border-bottom: 1px solid var(--pl-border);
+  min-height: 40px;
 }
 
-.paper-lab-top-nav__links {
+.paper-lab-utility-bar__left {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
 
-.paper-lab-top-nav__link {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
+.paper-lab-utility-bar__crumb {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pl-faint);
+}
+
+.paper-lab-utility-bar__sep {
+  color: var(--pl-faint);
+  font-size: 0.75rem;
+}
+
+.paper-lab-utility-bar__page {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--pl-text);
+}
+
+.paper-lab-utility-bar__dashboard {
+  font-size: 0.7rem;
   color: var(--pl-muted);
   text-decoration: none;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 6px;
   border: 1px solid transparent;
 }
 
-.paper-lab-top-nav__link:hover {
-  color: var(--pl-text);
-  background: rgba(148, 163, 184, 0.08);
-}
-
-.paper-lab-top-nav__link--active {
+.paper-lab-utility-bar__dashboard:hover {
   color: var(--pl-cyan);
-  border-color: var(--pl-border-cyan);
-  background: rgba(34, 211, 238, 0.08);
+  border-color: var(--pl-border);
 }
 
-.paper-lab-top-nav__right {
+.paper-lab-utility-bar__right {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+}
+
+/* Top nav (legacy class names reused for badge/user) */
+.paper-lab-top-nav {
+  display: none;
 }
 
 .paper-lab-top-nav__badge {
@@ -362,21 +383,61 @@
 }
 
 .paper-lab-middle-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
+  display: none;
+}
+
+/* Workspace tabs */
+.paper-lab-workspace {
   margin-bottom: 20px;
 }
 
-@media (min-width: 1280px) {
-  .paper-lab-middle-grid {
-    grid-template-columns: minmax(280px, 1fr) minmax(0, 1fr);
-  }
+.paper-lab-workspace-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--pl-border);
+  padding: 0 4px;
 }
 
-@media (min-width: 1440px) {
-  .paper-lab-middle-grid {
-    grid-template-columns: 300px minmax(400px, 1fr) minmax(380px, 520px);
+.paper-lab-workspace-tab {
+  padding: 10px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pl-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.paper-lab-workspace-tab:hover {
+  color: var(--pl-text);
+}
+
+.paper-lab-workspace-tab--active {
+  color: var(--pl-cyan);
+  border-bottom-color: var(--pl-cyan);
+}
+
+.paper-lab-workspace-body {
+  border-radius: 0 0 16px 16px;
+  border-top: none;
+  padding: 16px 18px;
+  min-height: 320px;
+}
+
+.paper-lab-recent-battles-strip {
+  margin-bottom: 16px;
+  max-width: 480px;
+}
+
+@media (min-width: 1280px) {
+  .paper-lab-recent-battles-strip {
+    max-width: 420px;
   }
 }
 

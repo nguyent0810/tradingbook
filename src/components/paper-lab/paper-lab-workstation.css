@@ -320,11 +320,51 @@
   scroll-snap-type: x proximity;
 }
 
+.paper-lab-agent-tile--wide {
+  flex: 0 0 200px;
+  width: 200px;
+  min-height: 108px;
+  max-height: none;
+}
+
+.paper-lab-agent-tile__head--wide {
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.paper-lab-agent-tile__name--full {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--pl-text, #f8fafc);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.paper-lab-agent-rail--wide {
+  gap: 0.65rem;
+  padding-bottom: 0.5rem;
+}
+
+.positions-table-wrapper--full {
+  border: none;
+  border-radius: 0;
+}
+
+.positions-table--full {
+  min-width: 1000px;
+}
+
+.paper-lab-battle-cards-wrap--tab {
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .paper-lab-agent-tile {
-  flex: 0 0 156px;
-  width: 156px;
-  min-height: 96px;
-  max-height: 96px;
   scroll-snap-align: start;
   padding: 0.5rem 0.55rem;
   border-radius: 10px;

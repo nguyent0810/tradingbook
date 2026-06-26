@@ -1,12 +1,7 @@
 import type { OpenPositionRowDto } from "@/lib/paper-lab/types/arena-dto";
 import { formatEquityThousandVndPerShare } from "@/lib/formatters";
 import { POSITION_GLOSSARY } from "@/lib/paper-lab/ui/arena-copy";
-import {
-  formatArenaVndCompact,
-  formatBoardLotQty,
-  formatPctFromEntry,
-  formatPctSigned,
-} from "@/lib/paper-lab/ui/arena-format";
+import { formatBoardLotQty, formatPctFromEntry } from "@/lib/paper-lab/ui/arena-format";
 import { PaperLabHelpIcon } from "./ui/PaperLabHelpIcon";
 import { StatusPill } from "./ui/StatusPill";
 import { PaperLabPanel } from "./ui/PaperLabPanel";
@@ -15,14 +10,12 @@ import "./paper-lab-command-center.css";
 
 function HeaderCell({
   label,
-  className,
 }: {
   label: keyof typeof POSITION_GLOSSARY | string;
-  className?: string;
 }) {
   const tip = POSITION_GLOSSARY[label as keyof typeof POSITION_GLOSSARY];
   return (
-    <th className={className}>
+    <th>
       {label}
       {tip ? <PaperLabHelpIcon text={tip} /> : null}
     </th>
@@ -61,19 +54,18 @@ function RrBadge({ rMultiple }: { rMultiple: number }) {
   );
 }
 
-export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
+function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
   if (positions.length === 0) {
-    return (
-      <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
-        <p className="text-sm text-slate-400">No open positions.</p>
-      </PaperLabPanel>
-    );
+    return <p className="text-sm text-slate-400">No open positions.</p>;
   }
 
   return (
-    <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
-      <div className="safe-table-wrap positions-table-wrapper">
-        <table className="paper-lab-table paper-lab-table--positions positions-table safe-table">
+    <>
+      <div className="safe-table-wrap positions-table-wrapper positions-table-wrapper--full">
+        <table
+          className="paper-lab-table paper-lab-table--positions positions-table positions-table--full safe-table"
+          data-testid="paper-lab-positions"
+        >
           <thead>
             <tr>
               <th>Agent</th>
@@ -82,10 +74,7 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
               <HeaderCell label="Stop" />
               <HeaderCell label="TP" />
               <HeaderCell label="Qty (Lot)" />
-              <HeaderCell label="Alloc %" className="paper-lab-col-alloc" />
-              <HeaderCell label="Risk" className="paper-lab-col-risk" />
-              <HeaderCell label="UPNL" className="paper-lab-col-upnl" />
-              <HeaderCell label="UPNL %" className="paper-lab-col-upnl" />
+              <HeaderCell label="Alloc %" />
               <HeaderCell label="R" />
               <HeaderCell label="Days" />
               <HeaderCell label="Status" />
@@ -94,7 +83,6 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
           <tbody>
             {positions.map((p) => {
               const lot = formatBoardLotQty(p.quantity);
-              const pnlClass = p.unrealizedPnlVnd >= 0 ? "paper-lab-positive" : "paper-lab-negative";
               return (
                 <tr key={p.id}>
                   <td className="paper-lab-agent-col">
@@ -112,14 +100,7 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
                     <div className="paper-lab-qty-cell__primary">{lot.sharesLabel}</div>
                     <div className="paper-lab-qty-cell__sub">{lot.lots} lots</div>
                   </td>
-                  <td className="paper-lab-tabular paper-lab-col-alloc">{p.allocationPct.toFixed(1)}%</td>
-                  <td className="paper-lab-tabular paper-lab-col-risk">{formatArenaVndCompact(p.riskAmountVnd)}</td>
-                  <td className={`paper-lab-tabular paper-lab-col-upnl ${pnlClass}`}>
-                    {formatArenaVndCompact(p.unrealizedPnlVnd)}
-                  </td>
-                  <td className={`paper-lab-tabular paper-lab-col-upnl ${pnlClass}`}>
-                    {formatPctSigned(p.unrealizedPnlPct)}
-                  </td>
+                  <td className="paper-lab-tabular">{p.allocationPct.toFixed(1)}%</td>
                   <td className={p.rMultiple >= 0 ? "paper-lab-positive" : "paper-lab-negative"}>
                     <RrBadge rMultiple={p.rMultiple} />
                   </td>
@@ -134,6 +115,32 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
       <footer className="paper-lab-table-glossary paper-lab-table-glossary--subtle mt-2">
         <StatusPill status="OPEN" /> active · <StatusPill status="PARTIAL" /> partial · Qty in 100-share board lots
       </footer>
+    </>
+  );
+}
+
+export function OpenPositionsTable({
+  positions,
+  embedded = false,
+}: {
+  positions: OpenPositionRowDto[];
+  embedded?: boolean;
+}) {
+  if (embedded) {
+    return <PositionsTable positions={positions} />;
+  }
+
+  if (positions.length === 0) {
+    return (
+      <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
+        <p className="text-sm text-slate-400">No open positions.</p>
+      </PaperLabPanel>
+    );
+  }
+
+  return (
+    <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
+      <PositionsTable positions={positions} />
     </PaperLabPanel>
   );
 }

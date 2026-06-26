@@ -10,14 +10,43 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByText("Paper Only")).toBeVisible();
   });
 
-  test("command center panels visible without tabs", async ({ page }) => {
+  test("utility bar has no duplicate lab nav links", async ({ page }) => {
+    await page.goto("/paper-lab");
+    const utilityBar = page.getByTestId("paper-lab-top-nav");
+    await expect(utilityBar.getByRole("link", { name: "Arena" })).toHaveCount(0);
+    await expect(utilityBar.getByRole("link", { name: "Battles" })).toHaveCount(0);
+    await expect(utilityBar.getByRole("link", { name: "Hall of Fame" })).toHaveCount(0);
+    await expect(utilityBar.getByText("← Dashboard")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-sidebar").locator('a[href="/paper-lab"]')).toBeVisible();
+  });
+
+  test("workspace defaults to open positions tab", async ({ page }) => {
+    await page.goto("/paper-lab");
+    await expect(page.getByTestId("paper-lab-workspace")).toBeVisible();
+    await expect(page.getByTestId("workspace-tab-positions")).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByTestId("paper-lab-positions")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-battle-replay")).toBeHidden();
+  });
+
+  test("battle replay accessible via workspace tab", async ({ page }) => {
+    await page.goto("/paper-lab");
+    await page.getByTestId("workspace-tab-battle").click();
+    await expect(page.getByTestId("paper-lab-battle-replay")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-battle-cards")).toBeVisible();
+    await expect(page.locator(".paper-lab-battle-table-wrap")).toBeHidden();
+  });
+
+  test("agent portfolio cards show full names", async ({ page }) => {
+    await page.goto("/paper-lab");
+    await expect(page.getByTestId("paper-lab-portfolios").getByText("Swing Trader")).toBeVisible();
+  });
+
+  test("command center bottom panels visible", async ({ page }) => {
     await page.goto("/paper-lab");
     await expect(page.getByTestId("paper-lab-header-grid")).toBeVisible();
     await expect(page.getByTestId("paper-lab-portfolios")).toBeVisible();
     await expect(page.getByTestId("paper-lab-cio")).toBeVisible();
     await expect(page.getByTestId("paper-lab-recent-battles")).toBeVisible();
-    await expect(page.getByTestId("paper-lab-positions")).toBeVisible();
-    await expect(page.getByTestId("paper-lab-battle-replay")).toBeVisible();
     await expect(page.getByTestId("paper-lab-decisions")).toBeVisible();
     await expect(page.getByTestId("paper-lab-regime-explanation")).toBeVisible();
     await expect(page.getByText("View JSON").first()).toBeVisible();
@@ -40,20 +69,6 @@ test.describe("/paper-lab arena", () => {
     await expect(drawer).not.toBeVisible();
   });
 
-  test("battle replay uses cards at 1280px viewport", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 720 });
-    await page.goto("/paper-lab");
-    await expect(page.getByTestId("paper-lab-battle-cards")).toBeVisible();
-    await expect(page.locator(".paper-lab-battle-table-wrap")).toBeHidden();
-  });
-
-  test("battle replay uses cards at 1920px viewport", async ({ page }) => {
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto("/paper-lab");
-    await expect(page.getByTestId("paper-lab-battle-cards")).toBeVisible();
-    await expect(page.locator(".paper-lab-battle-table-wrap")).toBeHidden();
-  });
-
   test("CIO panel shows human consensus label not raw weighted text", async ({ page }) => {
     await page.goto("/paper-lab");
     const cio = page.getByTestId("paper-lab-cio");
@@ -66,13 +81,21 @@ test.describe("/paper-lab arena", () => {
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto("/paper-lab");
     await expect(page.getByTestId("paper-lab-arena")).toBeVisible();
-    await page.screenshot({ path: "test-results/paper-lab-arena-1280.png", fullPage: true });
+    await page.screenshot({ path: "screenshots/paper-lab-arena/layout-1280-positions.png", fullPage: true });
   });
 
   test("arena layout screenshot at 1440px", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/paper-lab");
     await expect(page.getByTestId("paper-lab-arena")).toBeVisible();
-    await page.screenshot({ path: "test-results/paper-lab-arena-1440.png", fullPage: true });
+    await page.screenshot({ path: "screenshots/paper-lab-arena/layout-1440-positions.png", fullPage: true });
+  });
+
+  test("battle tab screenshot at 1280px", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/paper-lab");
+    await page.getByTestId("workspace-tab-battle").click();
+    await expect(page.getByTestId("paper-lab-battle-replay")).toBeVisible();
+    await page.screenshot({ path: "screenshots/paper-lab-arena/layout-1280-battle.png", fullPage: true });
   });
 });
