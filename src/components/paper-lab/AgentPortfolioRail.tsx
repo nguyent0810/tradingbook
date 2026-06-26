@@ -20,20 +20,25 @@ export function AgentPortfolioRail({
   portfolios,
   activeAgentId,
   onSelectAgent,
+  variant = "default",
 }: {
   portfolios: PortfolioCardDto[];
   activeAgentId?: string | null;
   onSelectAgent?: (agentId: string) => void;
+  variant?: "default" | "fund-strip";
 }) {
   const [drawerAgentId, setDrawerAgentId] = useState<string | null>(null);
   const drawerPortfolio = portfolios.find((p) => p.agentId === drawerAgentId) ?? null;
 
   return (
     <>
-      <section className="paper-lab-portfolio-section" data-testid="paper-lab-portfolios">
+      <section
+        className={`paper-lab-portfolio-section ${variant === "fund-strip" ? "paper-lab-portfolio-section--fund-strip" : ""}`}
+        data-testid="paper-lab-portfolios"
+      >
         <div className="paper-lab-portfolio-section__head">
           <h2 className="paper-lab-panel__title" style={{ marginBottom: 0 }}>
-            Agent Portfolios ({portfolios.length})
+            {variant === "fund-strip" ? "Agent League" : `Agent Portfolios (${portfolios.length})`}
           </h2>
           <span className="text-xs text-[var(--pl-faint)]">Click to filter · i for details</span>
         </div>

@@ -1,5 +1,5 @@
 /**
- * Capture Paper Lab layout simplification screenshots.
+ * Capture Paper Lab layout refinement screenshots.
  * Usage: npx tsx scripts/capture-paper-lab-screenshots.ts
  */
 import fs from "node:fs";
@@ -54,6 +54,11 @@ async function main() {
       height: 720,
       run: async (page) => {
         await page.evaluate(() => window.scrollTo(0, 0));
+        const rHelp = page
+          .getByTestId("paper-lab-positions")
+          .locator("thead th", { hasText: "R" })
+          .locator(".paper-lab-help-icon");
+        await rHelp.hover();
       },
     },
     {

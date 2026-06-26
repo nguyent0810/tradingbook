@@ -41,16 +41,26 @@ function PriceWithPct({
   );
 }
 
-function RrBadge({ rMultiple }: { rMultiple: number }) {
+function isFlatR(position: OpenPositionRowDto): boolean {
+  return Math.abs(position.rMultiple) < 0.05 && Math.abs(position.unrealizedPnlVnd) < 1;
+}
+
+function RMultipleCell({ position }: { position: OpenPositionRowDto }) {
+  const flat = isFlatR(position);
+  const { rMultiple } = position;
   let dotClass = "paper-lab-rr-badge__dot--mid";
-  if (rMultiple >= 2) dotClass = "paper-lab-rr-badge__dot--strong";
+  if (flat) dotClass = "paper-lab-rr-badge__dot--flat";
+  else if (rMultiple >= 2) dotClass = "paper-lab-rr-badge__dot--strong";
   else if (rMultiple < 0) dotClass = "paper-lab-rr-badge__dot--weak";
 
   return (
-    <span className="paper-lab-rr-badge">
-      <span className={`paper-lab-rr-badge__dot ${dotClass}`} aria-hidden />
-      {rMultiple.toFixed(1)}R
-    </span>
+    <div className="paper-lab-r-cell">
+      <span className={`paper-lab-rr-badge ${flat ? "paper-lab-rr-badge--flat" : ""}`}>
+        <span className={`paper-lab-rr-badge__dot ${dotClass}`} aria-hidden />
+        {rMultiple.toFixed(1)}R
+      </span>
+      {flat && <span className="paper-lab-r-flat-hint">Flat / no progress yet</span>}
+    </div>
   );
 }
 
@@ -101,8 +111,8 @@ function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
                     <div className="paper-lab-qty-cell__sub">{lot.lots} lots</div>
                   </td>
                   <td className="paper-lab-tabular">{p.allocationPct.toFixed(1)}%</td>
-                  <td className={p.rMultiple >= 0 ? "paper-lab-positive" : "paper-lab-negative"}>
-                    <RrBadge rMultiple={p.rMultiple} />
+                  <td className={isFlatR(p) ? "" : p.rMultiple >= 0 ? "paper-lab-positive" : "paper-lab-negative"}>
+                    <RMultipleCell position={p} />
                   </td>
                   <td className="paper-lab-tabular">{p.holdingDays}</td>
                   <td><StatusPill status={p.status} /></td>

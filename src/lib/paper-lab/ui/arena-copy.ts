@@ -270,7 +270,7 @@ export const POSITION_GLOSSARY: Record<string, string> = {
   Risk: "Maximum capital at risk if stop-loss is hit.",
   UPNL: "Unrealized profit/loss in VND at latest mark.",
   "UPNL %": "Unrealized return on position cost.",
-  R: "Current profit/loss expressed in units of initial risk (R-multiple).",
+  R: "R = current profit or loss divided by the initial risk from entry to stop loss.",
   Days: "Calendar days since position was opened.",
   Status: "OPEN = fully filled; PARTIAL = partially filled.",
 };

@@ -268,6 +268,27 @@
   border-color: var(--pl-border);
 }
 
+.paper-lab-utility-bar__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid var(--pl-border);
+  background: rgba(15, 23, 42, 0.5);
+  color: var(--pl-muted);
+  text-decoration: none;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.paper-lab-utility-bar__back:hover {
+  color: var(--pl-cyan);
+  border-color: rgba(34, 211, 238, 0.35);
+  background: rgba(34, 211, 238, 0.08);
+}
+
 .paper-lab-utility-bar__right {
   display: flex;
   flex-wrap: wrap;
@@ -363,6 +384,14 @@
 }
 
 /* Layout grids */
+.paper-lab-arena-hero {
+  margin-bottom: 20px;
+}
+
+.paper-lab-arena-hero .paper-lab-header-grid {
+  margin-bottom: 12px;
+}
+
 .paper-lab-header-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -430,15 +459,34 @@
   min-height: 320px;
 }
 
-.paper-lab-recent-battles-strip {
+.paper-lab-recent-battles-compact {
   margin-bottom: 16px;
-  max-width: 480px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(15, 23, 42, 0.45);
 }
 
-@media (min-width: 1280px) {
-  .paper-lab-recent-battles-strip {
-    max-width: 420px;
-  }
+.paper-lab-recent-battles-compact__label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pl-faint);
+  margin-bottom: 8px;
+}
+
+.paper-lab-recent-battles-compact__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.paper-lab-battle-replay__session {
+  margin-bottom: 12px;
+  padding-top: 4px;
 }
 
 .paper-lab-bottom-grid {
@@ -720,6 +768,25 @@
   margin-bottom: 20px;
 }
 
+.paper-lab-portfolio-section--fund-strip {
+  margin-bottom: 0;
+  padding: 14px 16px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--pl-border);
+  background: linear-gradient(180deg, rgba(20, 28, 48, 0.55), rgba(11, 17, 33, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.paper-lab-portfolio-section--fund-strip .paper-lab-panel__title {
+  color: var(--pl-text);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.paper-lab-portfolio-section--fund-strip .paper-lab-agent-rail--wide {
+  padding-bottom: 0.25rem;
+}
+
 /* Typography */
 .paper-lab-label {
   font-size: 0.65rem;
@@ -833,6 +900,29 @@
 
 .paper-lab-rr-badge__dot--weak {
   background: var(--pl-red);
+}
+
+.paper-lab-rr-badge__dot--flat {
+  background: var(--pl-muted);
+  opacity: 0.65;
+}
+
+.paper-lab-rr-badge--flat {
+  color: var(--pl-muted);
+}
+
+.paper-lab-r-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.paper-lab-r-flat-hint {
+  font-size: 0.6rem;
+  color: var(--pl-faint);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 /* Positions footer */
