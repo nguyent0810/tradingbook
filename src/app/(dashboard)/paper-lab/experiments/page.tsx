@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
@@ -18,13 +17,9 @@ export default async function ExperimentsPage() {
   });
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <h2 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">
-        Prompt Experiments
-      </h2>
-      <div className="paper-lab-table-wrap">
-        <table className="paper-lab-table">
+    <PaperLabPanel title="Prompt Experiments">
+      <div className="safe-table-wrap paper-lab-table-wrap">
+        <table className="paper-lab-table safe-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -52,6 +47,6 @@ export default async function ExperimentsPage() {
           No experiments yet. Create via POST /api/lab/experiments.
         </p>
       )}
-    </PaperLabPageShell>
+    </PaperLabPanel>
   );
 }

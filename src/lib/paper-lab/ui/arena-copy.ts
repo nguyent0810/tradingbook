@@ -299,3 +299,48 @@ export function buildBattleInsight(
   }
   return `Mixed panel on ${symbol}: ${buy} BUY, ${hold} HOLD, ${sell} reduce/exit.`;
 }
+
+const DIMENSION_LABELS: Record<string, string> = {
+  WeakBull: "Weak bull trend",
+  StrongBull: "Strong bull trend",
+  Bear: "Bear trend",
+  Sideways: "Sideways trend",
+  Contracting: "Contracting volatility",
+  Expanding: "Expanding volatility",
+  Rotation: "Sector rotation",
+  Broad: "Broad participation",
+  Narrow: "Narrow leadership",
+  HighLiquidity: "High liquidity",
+  LowLiquidity: "Low liquidity",
+};
+
+export function formatRegimeDimension(value: string): string {
+  return DIMENSION_LABELS[value] ?? value.replace(/([A-Z])/g, " $1").trim();
+}
+
+export function buildRegimeExplanation(input: {
+  level: "PASS" | "WARNING" | "FAIL";
+  label: string;
+  confidence?: number;
+  dimensions?: Record<string, string>;
+}): string {
+  const conf = input.confidence != null ? `${Math.round(input.confidence)}% model confidence` : "confidence pending";
+  const trend = input.dimensions?.trendRegime
+    ? formatRegimeDimension(input.dimensions.trendRegime)
+    : "mixed trend";
+  const vol = input.dimensions?.volatilityRegime
+    ? formatRegimeDimension(input.dimensions.volatilityRegime)
+    : "neutral volatility";
+  const breadth = input.dimensions?.breadthRegime
+    ? formatRegimeDimension(input.dimensions.breadthRegime)
+    : "mixed breadth";
+
+  const gate =
+    input.level === "PASS"
+      ? "Gate 1 market scan is supportive for selective risk-taking."
+      : input.level === "WARNING"
+        ? "Gate 1 is in WARNING — agents apply stricter filters before committing capital."
+        : "Gate 1 is FAIL — most agents defer new entries until conditions improve.";
+
+  return `${input.label} (${conf}). ${trend}, ${vol}, and ${breadth} shape today's panel. ${gate}`;
+}

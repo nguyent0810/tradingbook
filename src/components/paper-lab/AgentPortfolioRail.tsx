@@ -5,7 +5,9 @@ import { Sparkline } from "@/components/command-deck/ui/sparkline";
 import type { PortfolioCardDto } from "@/lib/paper-lab/types/arena-dto";
 import { formatArenaVndCompact, formatPctSigned } from "@/lib/paper-lab/ui/arena-format";
 import { AgentDetailDrawer } from "./AgentDetailDrawer";
+import { PaperLabPanel } from "./ui/PaperLabPanel";
 import "./paper-lab-workstation.css";
+import "./paper-lab-command-center.css";
 
 function styleInitial(style: string): string {
   return style.slice(0, 2).toUpperCase();
@@ -25,7 +27,14 @@ export function AgentPortfolioRail({
 
   return (
     <>
-      <section className="paper-lab-agent-rail" data-testid="paper-lab-portfolios">
+      <section className="paper-lab-portfolio-section" data-testid="paper-lab-portfolios">
+        <div className="paper-lab-portfolio-section__head">
+          <h2 className="paper-lab-panel__title" style={{ marginBottom: 0 }}>
+            Agent Portfolios ({portfolios.length})
+          </h2>
+          <span className="text-xs text-[var(--pl-faint)]">Click to filter · i for details</span>
+        </div>
+        <div className="paper-lab-agent-rail">
         {portfolios.map((p) => {
           const pnlClass = p.pnlPct >= 0 ? "paper-lab-positive" : "paper-lab-negative";
           const sparkColor = p.pnlPct >= 0 ? "rgb(74,222,128)" : "rgb(248,113,113)";
@@ -86,6 +95,7 @@ export function AgentPortfolioRail({
             </article>
           );
         })}
+        </div>
       </section>
 
       <AgentDetailDrawer

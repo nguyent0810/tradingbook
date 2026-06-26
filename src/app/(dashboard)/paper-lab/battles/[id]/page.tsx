@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
 import { buildDecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
@@ -33,13 +32,12 @@ export default async function BattleDetailPage({
   if (!battle) notFound();
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <p className="text-sm text-slate-400 mb-2">
-        {battle.sessionDate.toISOString().slice(0, 10)} — {battle.symbol}
-      </p>
-      <div className="paper-lab-table-wrap" data-testid="battle-replay-detail">
-        <table className="paper-lab-table">
+    <PaperLabPanel
+      title={`${battle.sessionDate.toISOString().slice(0, 10)} — ${battle.symbol}`}
+      testId="battle-replay-detail"
+    >
+      <div className="safe-table-wrap paper-lab-table-wrap">
+        <table className="paper-lab-table safe-table">
           <thead>
             <tr>
               <th>Agent</th>
@@ -83,6 +81,6 @@ export default async function BattleDetailPage({
           </tbody>
         </table>
       </div>
-    </PaperLabPageShell>
+    </PaperLabPanel>
   );
 }

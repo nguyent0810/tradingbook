@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
@@ -32,20 +31,19 @@ export default async function TimelineSessionPage({
   };
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <h2 className="text-lg font-semibold text-slate-200 mb-1">Session {raw}</h2>
-      {data.regime && (
-        <p className="text-sm text-slate-400 mb-4">
-          Regime: {data.regime.gate1Level} —{" "}
-          {Object.values(data.regime.dimensions ?? {}).join(" · ")}
-        </p>
-      )}
+    <>
+      <PaperLabPanel title={`Session ${raw}`} className="mb-4">
+        {data.regime && (
+          <p className="text-sm text-slate-400">
+            Regime: {data.regime.gate1Level} —{" "}
+            {Object.values(data.regime.dimensions ?? {}).join(" · ")}
+          </p>
+        )}
+      </PaperLabPanel>
       <div className="paper-lab-grid-2">
-        <div>
-          <h3 className="text-sm font-semibold text-slate-300 mb-2">Decisions</h3>
-          <div className="paper-lab-table-wrap">
-            <table className="paper-lab-table">
+        <PaperLabPanel title="Decisions">
+          <div className="safe-table-wrap paper-lab-table-wrap">
+            <table className="paper-lab-table safe-table">
               <thead>
                 <tr>
                   <th>Agent</th>
@@ -66,11 +64,10 @@ export default async function TimelineSessionPage({
               </tbody>
             </table>
           </div>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-slate-300 mb-2">Rankings</h3>
-          <div className="paper-lab-table-wrap">
-            <table className="paper-lab-table">
+        </PaperLabPanel>
+        <PaperLabPanel title="Rankings">
+          <div className="safe-table-wrap paper-lab-table-wrap">
+            <table className="paper-lab-table safe-table">
               <thead>
                 <tr>
                   <th>#</th>
@@ -89,8 +86,8 @@ export default async function TimelineSessionPage({
               </tbody>
             </table>
           </div>
-        </div>
+        </PaperLabPanel>
       </div>
-    </PaperLabPageShell>
+    </>
   );
 }
