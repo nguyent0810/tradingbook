@@ -1,5 +1,5 @@
 /**
- * Capture Paper Lab Arena smoke screenshots at required viewports.
+ * Capture Paper Lab layout simplification screenshots.
  * Usage: npx tsx scripts/capture-paper-lab-screenshots.ts
  */
 import fs from "node:fs";
@@ -42,9 +42,14 @@ async function main() {
   );
   await ensureAuth(context);
 
-  const shots: Array<{ name: string; width: number; height: number; run: (page: import("playwright").Page) => Promise<void> }> = [
+  const shots: Array<{
+    name: string;
+    width: number;
+    height: number;
+    run: (page: import("playwright").Page) => Promise<void>;
+  }> = [
     {
-      name: "1280-top",
+      name: "layout-1280-positions",
       width: 1280,
       height: 720,
       run: async (page) => {
@@ -52,36 +57,29 @@ async function main() {
       },
     },
     {
-      name: "1280-battle-positions",
+      name: "layout-1280-battle",
       width: 1280,
       height: 720,
       run: async (page) => {
-        await page.getByTestId("paper-lab-battle-replay").scrollIntoViewIfNeeded();
-        await page.getByTestId("paper-lab-positions").scrollIntoViewIfNeeded();
+        await page.getByTestId("workspace-tab-battle").click();
+        await page.waitForSelector('[data-testid="paper-lab-battle-replay"]');
       },
     },
     {
-      name: "1366-top",
-      width: 1366,
-      height: 768,
-      run: async (page) => {
-        await page.evaluate(() => window.scrollTo(0, 0));
-      },
-    },
-    {
-      name: "1440-workspace",
+      name: "layout-1440-positions",
       width: 1440,
       height: 900,
       run: async (page) => {
-        await page.getByTestId("paper-lab-middle-grid").scrollIntoViewIfNeeded();
+        await page.getByTestId("workspace-tab-positions").click();
+        await page.evaluate(() => window.scrollTo(0, 0));
       },
     },
     {
-      name: "1920-full",
-      width: 1920,
-      height: 1080,
+      name: "layout-1440-workspace",
+      width: 1440,
+      height: 900,
       run: async (page) => {
-        await page.evaluate(() => window.scrollTo(0, 0));
+        await page.getByTestId("paper-lab-workspace").scrollIntoViewIfNeeded();
       },
     },
   ];
@@ -92,11 +90,9 @@ async function main() {
     await gotoArena(page);
     await shot.run(page);
     await page.waitForTimeout(200);
-
-    const fullPage = shot.name === "1920-full";
     await page.screenshot({
       path: path.join(outDir, `${shot.name}.png`),
-      fullPage,
+      fullPage: shot.name.includes("1440-workspace") ? false : true,
     });
     await page.close();
     console.log(`Captured ${shot.name}`);
