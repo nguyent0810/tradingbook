@@ -6,7 +6,9 @@ import { ActionBadge } from "./ui/ActionBadge";
 import { JsonAuditViewer } from "./ui/JsonAuditViewer";
 import { PaperLabDetailsDialog } from "./ui/PaperLabDetailsDialog";
 import { ValidationBadge } from "./ui/ValidationBadge";
+import { PaperLabPanel } from "./ui/PaperLabPanel";
 import "./paper-lab-workstation.css";
+import "./paper-lab-command-center.css";
 
 function OrderRef({ orderId }: { orderId: string | null }) {
   if (!orderId) return <span className="text-slate-500">—</span>;
@@ -83,12 +85,17 @@ function ReasoningCell({ decision }: { decision: DecisionLogRowDto }) {
 
 export function DecisionsLogTable({ decisions }: { decisions: DecisionLogRowDto[] }) {
   if (decisions.length === 0) {
-    return <p className="text-sm text-slate-400">No agent decisions logged yet.</p>;
+    return (
+      <PaperLabPanel title="Decisions Log" testId="paper-lab-decisions">
+        <p className="text-sm text-slate-400">No agent decisions logged yet.</p>
+      </PaperLabPanel>
+    );
   }
 
   return (
-    <div className="paper-lab-table-wrap" data-testid="paper-lab-decisions">
-      <table className="paper-lab-table paper-lab-table--decisions" style={{ minWidth: "960px" }}>
+    <PaperLabPanel title="Decisions Log" testId="paper-lab-decisions">
+      <div className="safe-table-wrap paper-lab-table-wrap">
+        <table className="paper-lab-table paper-lab-table--decisions safe-table">
         <thead>
           <tr>
             <th>Date</th>
@@ -118,6 +125,7 @@ export function DecisionsLogTable({ decisions }: { decisions: DecisionLogRowDto[
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </PaperLabPanel>
   );
 }

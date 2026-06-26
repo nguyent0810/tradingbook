@@ -323,8 +323,8 @@
 .paper-lab-agent-tile {
   flex: 0 0 156px;
   width: 156px;
-  min-height: 80px;
-  max-height: 88px;
+  min-height: 96px;
+  max-height: 96px;
   scroll-snap-align: start;
   padding: 0.5rem 0.55rem;
   border-radius: 0.5rem;

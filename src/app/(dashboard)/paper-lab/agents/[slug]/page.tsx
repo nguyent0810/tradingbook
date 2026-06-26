@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import type { AgentDnaProfile } from "@/lib/lab/types/regime";
 import "@/components/paper-lab/paper-lab-workstation.css";
@@ -34,14 +33,12 @@ export default async function AgentProfilePage({
   const dna = agent.dnaProfiles[0]?.profileJson as AgentDnaProfile | undefined;
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <h2 className="text-lg font-semibold text-slate-200">{agent.displayName}</h2>
-      <p className="text-sm text-slate-400 mb-4">{agent.style} · {agent.slug}</p>
-
+    <>
+      <PaperLabPanel title={agent.displayName} className="mb-4">
+        <p className="text-sm text-slate-400">{agent.style} · {agent.slug}</p>
+      </PaperLabPanel>
       <div className="paper-lab-grid-2">
-        <div className="paper-lab-cio-panel">
-          <h3 className="text-sm font-semibold text-cyan-300 mb-2">Agent DNA</h3>
+        <PaperLabPanel title="Agent DNA">
           {dna ? (
             <ul className="text-sm text-slate-300 space-y-1">
               <li>Avg confidence: {(dna.avgConfidence * 100).toFixed(0)}%</li>
@@ -53,9 +50,8 @@ export default async function AgentProfilePage({
           ) : (
             <p className="text-sm text-slate-500">DNA not computed yet.</p>
           )}
-        </div>
-        <div className="paper-lab-cio-panel">
-          <h3 className="text-sm font-semibold text-cyan-300 mb-2">Calibration & Evolution</h3>
+        </PaperLabPanel>
+        <PaperLabPanel title="Calibration & Evolution">
           <p className="text-sm text-slate-300">
             Brier: {agent.calibration[0]?.brierScore.toFixed(3) ?? "—"}
           </p>
@@ -69,8 +65,8 @@ export default async function AgentProfilePage({
             Evolution: {agent.evolution[0]?.score.toFixed(3) ?? "—"} (
             {agent.evolution[0]?.trend ?? "—"})
           </p>
-        </div>
+        </PaperLabPanel>
       </div>
-    </PaperLabPageShell>
+    </>
   );
 }

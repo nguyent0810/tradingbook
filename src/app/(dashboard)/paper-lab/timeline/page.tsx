@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
@@ -17,13 +16,9 @@ export default async function TimelinePage() {
   });
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <h2 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">
-        Session Replay Timeline
-      </h2>
-      <div className="paper-lab-table-wrap">
-        <table className="paper-lab-table">
+    <PaperLabPanel title="Session Replay Timeline">
+      <div className="safe-table-wrap paper-lab-table-wrap">
+        <table className="paper-lab-table safe-table">
           <thead>
             <tr>
               <th>Session</th>
@@ -55,6 +50,6 @@ export default async function TimelinePage() {
           </tbody>
         </table>
       </div>
-    </PaperLabPageShell>
+    </PaperLabPanel>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export default function HumanPmPage() {
@@ -40,11 +39,7 @@ export default function HumanPmPage() {
   }
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <h2 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">
-        Human Portfolio Manager
-      </h2>
+    <PaperLabPanel title="Human Portfolio Manager">
       <p className="text-sm text-slate-400 mb-4">
         Same 500M ₫ virtual capital and engine validation as AI agents.
       </p>
@@ -77,6 +72,6 @@ export default function HumanPmPage() {
         </button>
         {message && <p className="text-sm text-slate-300">{message}</p>}
       </div>
-    </PaperLabPageShell>
+    </PaperLabPanel>
   );
 }

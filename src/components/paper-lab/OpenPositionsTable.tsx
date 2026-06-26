@@ -9,12 +9,20 @@ import {
 } from "@/lib/paper-lab/ui/arena-format";
 import { PaperLabHelpIcon } from "./ui/PaperLabHelpIcon";
 import { StatusPill } from "./ui/StatusPill";
+import { PaperLabPanel } from "./ui/PaperLabPanel";
 import "./paper-lab-workstation.css";
+import "./paper-lab-command-center.css";
 
-function HeaderCell({ label }: { label: keyof typeof POSITION_GLOSSARY | string }) {
-  const tip = POSITION_GLOSSARY[label];
+function HeaderCell({
+  label,
+  className,
+}: {
+  label: keyof typeof POSITION_GLOSSARY | string;
+  className?: string;
+}) {
+  const tip = POSITION_GLOSSARY[label as keyof typeof POSITION_GLOSSARY];
   return (
-    <th>
+    <th className={className}>
       {label}
       {tip ? <PaperLabHelpIcon text={tip} /> : null}
     </th>
@@ -39,13 +47,17 @@ function PriceWithPct({
 
 export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
   if (positions.length === 0) {
-    return <p className="text-sm text-slate-400">No open positions.</p>;
+    return (
+      <PaperLabPanel title="Open Positions" testId="paper-lab-positions">
+        <p className="text-sm text-slate-400">No open positions.</p>
+      </PaperLabPanel>
+    );
   }
 
   return (
-    <div data-testid="paper-lab-positions">
-      <div className="positions-table-wrapper">
-        <table className="paper-lab-table paper-lab-table--positions positions-table">
+    <PaperLabPanel title="Open Positions" testId="paper-lab-positions">
+      <div className="safe-table-wrap positions-table-wrapper">
+        <table className="paper-lab-table paper-lab-table--positions positions-table safe-table">
           <thead>
             <tr>
               <th>Agent</th>
@@ -54,10 +66,10 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
               <HeaderCell label="Stop" />
               <HeaderCell label="TP" />
               <HeaderCell label="Qty (Lot)" />
-              <HeaderCell label="Alloc %" />
-              <HeaderCell label="Risk" />
-              <HeaderCell label="UPNL" />
-              <HeaderCell label="UPNL %" />
+              <HeaderCell label="Alloc %" className="paper-lab-col-alloc" />
+              <HeaderCell label="Risk" className="paper-lab-col-risk" />
+              <HeaderCell label="UPNL" className="paper-lab-col-upnl" />
+              <HeaderCell label="UPNL %" className="paper-lab-col-upnl" />
               <HeaderCell label="R" />
               <HeaderCell label="Days" />
               <HeaderCell label="Status" />
@@ -79,12 +91,12 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
                   <td className="tabular-nums" title={lot.isRounded ? "Quantity not on 100-share board lot" : undefined}>
                     {lot.display}
                   </td>
-                  <td className="tabular-nums">{p.allocationPct.toFixed(1)}%</td>
-                  <td className="tabular-nums">{formatArenaVndCompact(p.riskAmountVnd)}</td>
-                  <td className={`tabular-nums ${pnlClass}`}>
+                  <td className="tabular-nums paper-lab-col-alloc">{p.allocationPct.toFixed(1)}%</td>
+                  <td className="tabular-nums paper-lab-col-risk">{formatArenaVndCompact(p.riskAmountVnd)}</td>
+                  <td className={`tabular-nums paper-lab-col-upnl ${pnlClass}`}>
                     {formatArenaVndCompact(p.unrealizedPnlVnd)}
                   </td>
-                  <td className={`tabular-nums ${pnlClass}`}>
+                  <td className={`tabular-nums paper-lab-col-upnl ${pnlClass}`}>
                     {formatPctSigned(p.unrealizedPnlPct)}
                   </td>
                   <td className={`tabular-nums ${p.rMultiple >= 0 ? "paper-lab-positive" : "paper-lab-negative"}`}>
@@ -103,6 +115,6 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
         <StatusPill status="OPEN" /> active ·{" "}
         <StatusPill status="PARTIAL" /> partially filled · Qty shown in 100-share board lots (VN market).
       </footer>
-    </div>
+    </PaperLabPanel>
   );
 }

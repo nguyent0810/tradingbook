@@ -1,21 +1,31 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("/paper-lab arena", () => {
-  test("shows disclaimer and mock agents", async ({ page }) => {
+  test("shows command shell and paper-only badge", async ({ page }) => {
     await page.goto("/paper-lab");
+    await expect(page.getByTestId("paper-lab-command-shell")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-sidebar")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-top-nav")).toBeVisible();
     await expect(page.getByTestId("paper-lab-disclaimer")).toBeVisible();
-    await expect(page.getByTestId("paper-lab-leaderboard")).toBeVisible();
-    await expect(page.getByTestId("leaderboard-row-swing_trader")).toBeVisible();
     await expect(page.getByText("Paper only")).toBeVisible();
   });
 
-  test("compact portfolio rail and workspace sections", async ({ page }) => {
+  test("command center panels visible without tabs", async ({ page }) => {
     await page.goto("/paper-lab");
+    await expect(page.getByTestId("paper-lab-header-grid")).toBeVisible();
     await expect(page.getByTestId("paper-lab-portfolios")).toBeVisible();
     await expect(page.getByTestId("paper-lab-cio")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-recent-battles")).toBeVisible();
     await expect(page.getByTestId("paper-lab-positions")).toBeVisible();
     await expect(page.getByTestId("paper-lab-battle-replay")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-decisions")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-regime-explanation")).toBeVisible();
     await expect(page.getByText("View JSON").first()).toBeVisible();
+  });
+
+  test("hall of fame route accessible for leaderboard data", async ({ page }) => {
+    await page.goto("/paper-lab/hof");
+    await expect(page.getByTestId("paper-lab-leaderboard")).toBeVisible();
   });
 
   test("agent details drawer opens and is not clipped", async ({ page }) => {

@@ -3,7 +3,9 @@ import { formatConfidencePct, confidenceBand } from "@/lib/paper-lab/ui/arena-fo
 import { BattleReplayCardList } from "./BattleReplayCardList";
 import { ActionBadge } from "./ui/ActionBadge";
 import { StatusPill } from "./ui/StatusPill";
+import { PaperLabPanel } from "./ui/PaperLabPanel";
 import "./paper-lab-workstation.css";
+import "./paper-lab-command-center.css";
 
 function BattleVoteSummary({ rows }: { rows: PaperLabPageDto["battleReplay"]["rows"] }) {
   const buy = rows.filter((r) => r.action === "BUY" || r.action === "ADD").length;
@@ -37,14 +39,14 @@ export function BattleReplayPanel({
 
   if (rows.length === 0) {
     return (
-      <div data-testid="paper-lab-battle-replay">
+      <PaperLabPanel title="Battle Replay" testId="paper-lab-battle-replay">
         <p className="text-sm text-slate-400">No battle replay data for this session.</p>
-      </div>
+      </PaperLabPanel>
     );
   }
 
   return (
-    <div data-testid="paper-lab-battle-replay">
+    <PaperLabPanel title="Battle Replay" testId="paper-lab-battle-replay">
       <div className="mb-3">
         <p className="text-sm text-slate-300 font-medium">
           {sessionDate} — <span className="font-mono">{symbol}</span>
@@ -57,7 +59,7 @@ export function BattleReplayPanel({
         <BattleReplayCardList rows={rows} />
       </div>
 
-      <div className="paper-lab-battle-table-wrap paper-lab-table-wrap">
+      <div className="paper-lab-battle-table-wrap paper-lab-table-wrap paper-lab-battle-table--wide">
         <table className="paper-lab-table paper-lab-table--battle">
           <thead>
             <tr>
@@ -113,6 +115,6 @@ export function BattleReplayPanel({
           </tbody>
         </table>
       </div>
-    </div>
+    </PaperLabPanel>
   );
 }

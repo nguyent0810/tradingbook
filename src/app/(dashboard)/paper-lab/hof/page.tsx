@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
-import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
+import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { queryHallOfFame } from "@/lib/lab/hall-of-fame/detect-achievements";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
@@ -15,13 +14,9 @@ export default async function HofPage() {
   const entries = await queryHallOfFame(prisma, { limit: 100 });
 
   return (
-    <PaperLabPageShell>
-      <PaperOnlyDisclaimerBanner />
-      <h2 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">
-        Hall of Fame
-      </h2>
-      <div className="paper-lab-table-wrap">
-        <table className="paper-lab-table">
+    <PaperLabPanel title="Hall of Fame" testId="paper-lab-leaderboard">
+      <div className="safe-table-wrap paper-lab-table-wrap">
+        <table className="paper-lab-table safe-table">
           <thead>
             <tr>
               <th>Achievement</th>
@@ -44,6 +39,6 @@ export default async function HofPage() {
           </tbody>
         </table>
       </div>
-    </PaperLabPageShell>
+    </PaperLabPanel>
   );
 }

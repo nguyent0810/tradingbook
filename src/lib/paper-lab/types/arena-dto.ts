@@ -1,6 +1,26 @@
 import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import type { DecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
 
+export type MarketPulseDto = {
+  vnindexClose: number | null;
+  vnindexChangePct: number | null;
+  liquidityLabel: string;
+  volatilityLabel: string;
+  breadthLabel: string;
+};
+
+export type RecentBattleSummaryDto = {
+  id: string;
+  sessionDate: string;
+  symbol: string;
+  status: string;
+  agentCount: number;
+  consensusAction?: AgentAction;
+  consensusConfidence?: number;
+  voteCounts: { buy: number; hold: number; sell: number; reduce: number };
+  insight: string;
+};
+
 export type ArenaOverviewDto = {
   totalAgents: number;
   totalVirtualCapitalVnd: number;
@@ -14,6 +34,7 @@ export type ArenaOverviewDto = {
     labels?: string[];
     confidence?: number;
   };
+  marketPulse: MarketPulseDto;
   executionMode?: {
     agentType: "rule" | "llm";
     llmEnabled: boolean;
@@ -134,6 +155,7 @@ export type PaperLabPageDto = {
   positions: OpenPositionRowDto[];
   decisions: DecisionLogRowDto[];
   cio: CioPanelDto;
+  recentBattles: RecentBattleSummaryDto[];
   battleReplay: {
     sessionDate: string;
     symbol: string;

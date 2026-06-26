@@ -13,6 +13,7 @@ import {
   buildBattleInsight,
   buildCioPresentation,
   buildDecisionExplanation,
+  formatRegimeDimension,
 } from "@/lib/paper-lab/ui/arena-copy";
 
 function tableExistsError(err: unknown): boolean {
@@ -47,6 +48,44 @@ function formatRegimeContext(
   }
   if (fallbackLabels.length > 0) return fallbackLabels.join(" · ");
   return "Unknown";
+}
+
+function buildMarketPulse(
+  regimeCtx: { vnindexClose: number | null; vnindexMa20: number | null } | null,
+  dimensions: RegimeDimensions | undefined
+) {
+  const close = regimeCtx?.vnindexClose ?? null;
+  const ma20 = regimeCtx?.vnindexMa20 ?? null;
+  const changePct =
+    close != null && ma20 != null && ma20 > 0 ? ((close - ma20) / ma20) * 100 : null;
+
+  return {
+    vnindexClose: close,
+    vnindexChangePct: changePct,
+    liquidityLabel: dimensions?.liquidityRegime
+      ? formatRegimeDimension(dimensions.liquidityRegime)
+      : "—",
+    volatilityLabel: dimensions?.volatilityRegime
+      ? formatRegimeDimension(dimensions.volatilityRegime)
+      : "—",
+    breadthLabel: dimensions?.breadthRegime
+      ? formatRegimeDimension(dimensions.breadthRegime)
+      : "—",
+  };
+}
+
+function countBattleVotes(decisions: Array<{ action: string }>) {
+  let buy = 0;
+  let hold = 0;
+  let sell = 0;
+  let reduce = 0;
+  for (const d of decisions) {
+    if (d.action === "BUY" || d.action === "ADD") buy++;
+    else if (d.action === "HOLD") hold++;
+    else if (d.action === "SELL" || d.action === "EXIT") sell++;
+    else if (d.action === "REDUCE") reduce++;
+  }
+  return { buy, hold, sell, reduce };
 }
 
 export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> {
@@ -268,6 +307,14 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       },
     });
 
+    const recentBattleRows = await prisma.arenaBattle.findMany({
+      orderBy: { sessionDate: "desc" },
+      take: 3,
+      include: {
+        battleDecisions: { select: { action: true } },
+      },
+    });
+
     const battleSymbol = battle?.symbol ?? decisions[0]?.symbol ?? "FPT";
 
     const battleRowsRaw =
@@ -322,6 +369,57 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       .filter((d) => d.symbol === battleSymbol && d.agent.slug !== "cio")
       .map((d) => ({ action: d.action as AgentAction, agent_id: d.agent.slug }));
 
+    const cioRecommendations = cioRows.map((c) => {
+      const p = c.payload as CioRecommendation & { regime_context?: unknown };
+      const regimeContext = formatRegimeContext(
+        p.regime_context ?? p.metadata?.regime,
+        regimeLabels
+      );
+      const pres = buildCioPresentation(
+        { ...p, regime_context: regimeContext },
+        panelDecisionsForCio
+      );
+      return {
+        symbol: c.symbol,
+        finalAction: p.final_action,
+        confidence: p.confidence,
+        reasoning: p.reasoning,
+        risks: p.risks,
+        consensusScore: p.consensus_score,
+        consensusLabel: pres.consensusLabel,
+        consensusScoreDisplay: pres.consensusScoreDisplay,
+        regimeContext,
+        decisionSummary: pres.decisionSummary,
+        supportingReasons: pres.supportingReasons,
+        actionVotes: pres.actionVotes,
+        dissentingAgents: p.dissenting_agents.map((d) => ({
+          agentId: d.agent_id,
+          agentName: agentDisplayName(d.agent_id),
+          action: d.action,
+          reason: d.reason,
+          humanReason: pres.dissent.find((x) => x.agentName === agentDisplayName(d.agent_id))
+            ?.humanReason ?? d.reason,
+        })),
+      };
+    });
+
+    const recentBattles = recentBattleRows.map((b) => {
+      const votes = countBattleVotes(b.battleDecisions);
+      const cioForSymbol = cioRecommendations.find((c) => c.symbol === b.symbol);
+      const rowsForInsight = b.battleDecisions.map((d) => ({ action: d.action as AgentAction }));
+      return {
+        id: b.id,
+        sessionDate: b.sessionDate.toISOString().slice(0, 10),
+        symbol: b.symbol,
+        status: b.status,
+        agentCount: b.battleDecisions.length,
+        consensusAction: cioForSymbol?.finalAction,
+        consensusConfidence: cioForSymbol?.confidence,
+        voteCounts: votes,
+        insight: buildBattleInsight(rowsForInsight, b.symbol),
+      };
+    });
+
     return {
       overview: {
         totalAgents: agentCount,
@@ -345,6 +443,7 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
           labels: regimeLabels,
           confidence: regimeSnapshot?.confidence,
         },
+        marketPulse: buildMarketPulse(regimeCtx, dimensions),
         latestEvaluationAt: latestPerf?.createdAt.toISOString() ?? null,
         disclaimer: "PAPER_TRADING_ONLY",
         executionMode: getPaperLabExecutionMode(),
@@ -355,40 +454,9 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       decisions: decisionRows,
       cio: {
         sessionDate: sessionDate.toISOString().slice(0, 10),
-        recommendations: cioRows.map((c) => {
-          const p = c.payload as CioRecommendation & { regime_context?: unknown };
-          const regimeContext = formatRegimeContext(
-            p.regime_context ?? p.metadata?.regime,
-            regimeLabels
-          );
-          const pres = buildCioPresentation(
-            { ...p, regime_context: regimeContext },
-            panelDecisionsForCio
-          );
-          return {
-            symbol: c.symbol,
-            finalAction: p.final_action,
-            confidence: p.confidence,
-            reasoning: p.reasoning,
-            risks: p.risks,
-            consensusScore: p.consensus_score,
-            consensusLabel: pres.consensusLabel,
-            consensusScoreDisplay: pres.consensusScoreDisplay,
-            regimeContext,
-            decisionSummary: pres.decisionSummary,
-            supportingReasons: pres.supportingReasons,
-            actionVotes: pres.actionVotes,
-            dissentingAgents: p.dissenting_agents.map((d) => ({
-              agentId: d.agent_id,
-              agentName: agentDisplayName(d.agent_id),
-              action: d.action,
-              reason: d.reason,
-              humanReason: pres.dissent.find((x) => x.agentName === agentDisplayName(d.agent_id))
-                ?.humanReason ?? d.reason,
-            })),
-          };
-        }),
+        recommendations: cioRecommendations,
       },
+      recentBattles,
       battleReplay: {
         sessionDate: sessionDate.toISOString().slice(0, 10),
         symbol: battleSymbol,
