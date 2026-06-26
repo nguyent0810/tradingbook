@@ -10,13 +10,17 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByText("Paper Only")).toBeVisible();
   });
 
-  test("utility bar has no duplicate lab nav links", async ({ page }) => {
+  test("utility bar has compact back to dashboard control", async ({ page }) => {
     await page.goto("/paper-lab");
     const utilityBar = page.getByTestId("paper-lab-top-nav");
     await expect(utilityBar.getByRole("link", { name: "Arena" })).toHaveCount(0);
     await expect(utilityBar.getByRole("link", { name: "Battles" })).toHaveCount(0);
     await expect(utilityBar.getByRole("link", { name: "Hall of Fame" })).toHaveCount(0);
-    await expect(utilityBar.getByText("← Dashboard")).toBeVisible();
+    await expect(utilityBar.getByText("← Dashboard")).toHaveCount(0);
+    const back = page.getByTestId("paper-lab-back-dashboard");
+    await expect(back).toBeVisible();
+    await expect(back).toHaveAttribute("href", "/dashboard");
+    await expect(back).toHaveAttribute("title", "Back to Dashboard");
     await expect(page.getByTestId("paper-lab-sidebar").locator('a[href="/paper-lab"]')).toBeVisible();
   });
 
@@ -26,14 +30,25 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByTestId("workspace-tab-positions")).toHaveAttribute("aria-selected", "true");
     await expect(page.getByTestId("paper-lab-positions")).toBeVisible();
     await expect(page.getByTestId("paper-lab-battle-replay")).toBeHidden();
+    await expect(page.getByTestId("paper-lab-recent-battles")).toBeHidden();
   });
 
-  test("battle replay accessible via workspace tab", async ({ page }) => {
+  test("battle replay tab includes recent battles summary", async ({ page }) => {
     await page.goto("/paper-lab");
     await page.getByTestId("workspace-tab-battle").click();
     await expect(page.getByTestId("paper-lab-battle-replay")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-recent-battles")).toBeVisible();
     await expect(page.getByTestId("paper-lab-battle-cards")).toBeVisible();
     await expect(page.locator(".paper-lab-battle-table-wrap")).toBeHidden();
+  });
+
+  test("agent league strip sits below header cards", async ({ page }) => {
+    await page.goto("/paper-lab");
+    const hero = page.getByTestId("paper-lab-arena-hero");
+    await expect(hero).toBeVisible();
+    await expect(hero.getByTestId("paper-lab-header-grid")).toBeVisible();
+    await expect(hero.getByTestId("paper-lab-portfolios")).toBeVisible();
+    await expect(hero.getByText("Agent League")).toBeVisible();
   });
 
   test("agent portfolio cards show full names", async ({ page }) => {
@@ -41,12 +56,21 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByTestId("paper-lab-portfolios").getByText("Swing Trader")).toBeVisible();
   });
 
+  test("open positions R column has help tooltip", async ({ page }) => {
+    await page.goto("/paper-lab");
+    const rHeader = page.getByTestId("paper-lab-positions").locator("thead th", { hasText: "R" });
+    await expect(rHeader.locator(".paper-lab-help-icon")).toBeVisible();
+    await expect(rHeader.locator(".paper-lab-help-icon")).toHaveAttribute(
+      "title",
+      "R = current profit or loss divided by the initial risk from entry to stop loss."
+    );
+  });
+
   test("command center bottom panels visible", async ({ page }) => {
     await page.goto("/paper-lab");
     await expect(page.getByTestId("paper-lab-header-grid")).toBeVisible();
     await expect(page.getByTestId("paper-lab-portfolios")).toBeVisible();
     await expect(page.getByTestId("paper-lab-cio")).toBeVisible();
-    await expect(page.getByTestId("paper-lab-recent-battles")).toBeVisible();
     await expect(page.getByTestId("paper-lab-decisions")).toBeVisible();
     await expect(page.getByTestId("paper-lab-regime-explanation")).toBeVisible();
     await expect(page.getByText("View JSON").first()).toBeVisible();

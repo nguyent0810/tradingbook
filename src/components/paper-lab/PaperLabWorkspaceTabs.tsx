@@ -1,6 +1,6 @@
 "use client";
 
-import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
+import type { PaperLabPageDto, RecentBattleSummaryDto } from "@/lib/paper-lab/types/arena-dto";
 import type { OpenPositionRowDto } from "@/lib/paper-lab/types/arena-dto";
 import { useState } from "react";
 import { BattleReplayPanel } from "./BattleReplayPanel";
@@ -13,9 +13,11 @@ type WorkspaceTab = "positions" | "battle";
 export function PaperLabWorkspaceTabs({
   positions,
   battleReplay,
+  recentBattles,
 }: {
   positions: OpenPositionRowDto[];
   battleReplay: PaperLabPageDto["battleReplay"];
+  recentBattles: RecentBattleSummaryDto[];
 }) {
   const [tab, setTab] = useState<WorkspaceTab>("positions");
 
@@ -52,7 +54,11 @@ export function PaperLabWorkspaceTabs({
         )}
         {tab === "battle" && (
           <div role="tabpanel" data-testid="paper-lab-battle-panel">
-            <BattleReplayPanel battleReplay={battleReplay} embedded />
+            <BattleReplayPanel
+              battleReplay={battleReplay}
+              recentBattles={recentBattles}
+              embedded
+            />
           </div>
         )}
       </div>

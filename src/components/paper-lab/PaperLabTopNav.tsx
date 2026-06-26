@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LayoutGrid } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 import "./paper-lab-command-center.css";
 
@@ -36,14 +37,20 @@ export function PaperLabTopNav({
   return (
     <header className="paper-lab-utility-bar" data-testid="paper-lab-top-nav">
       <div className="paper-lab-utility-bar__left">
+        <Link
+          href="/dashboard"
+          className="paper-lab-utility-bar__back"
+          aria-label="Back to Dashboard"
+          title="Back to Dashboard"
+          data-testid="paper-lab-back-dashboard"
+        >
+          <LayoutGrid size={15} strokeWidth={2} aria-hidden />
+        </Link>
         <span className="paper-lab-utility-bar__crumb">AI Investment Lab</span>
         <span className="paper-lab-utility-bar__sep" aria-hidden>
           /
         </span>
         <span className="paper-lab-utility-bar__page">{pageLabel}</span>
-        <Link href="/dashboard" className="paper-lab-utility-bar__dashboard">
-          ← Dashboard
-        </Link>
       </div>
 
       <div className="paper-lab-utility-bar__right">

@@ -1,5 +1,6 @@
-import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
+import type { PaperLabPageDto, RecentBattleSummaryDto } from "@/lib/paper-lab/types/arena-dto";
 import { BattleReplayCardList } from "./BattleReplayCardList";
+import { RecentBattlesCard } from "./RecentBattlesCard";
 import { PaperLabPanel } from "./ui/PaperLabPanel";
 import { VoteSegmentBar } from "./ui/VoteSegmentBar";
 import "./paper-lab-workstation.css";
@@ -16,8 +17,10 @@ function countVotes(rows: PaperLabPageDto["battleReplay"]["rows"]) {
 
 function BattleReplayContent({
   battleReplay,
+  recentBattles,
 }: {
   battleReplay: PaperLabPageDto["battleReplay"];
+  recentBattles?: RecentBattleSummaryDto[];
 }) {
   const { sessionDate, symbol, insight, rows } = battleReplay;
 
@@ -29,9 +32,13 @@ function BattleReplayContent({
 
   return (
     <div data-testid="paper-lab-battle-replay">
-      <div className="mb-3">
+      {recentBattles && recentBattles.length > 0 && (
+        <RecentBattlesCard battles={recentBattles} variant="compact" />
+      )}
+
+      <div className="paper-lab-battle-replay__session">
         <p className="text-sm text-slate-300 font-medium">
-          {sessionDate} — <span className="font-mono">{symbol}</span>
+          Session replay — {sessionDate} · <span className="font-mono">{symbol}</span>
         </p>
         <p className="text-xs text-slate-400 mt-1 line-clamp-2">{insight}</p>
       </div>
@@ -45,13 +52,15 @@ function BattleReplayContent({
 
 export function BattleReplayPanel({
   battleReplay,
+  recentBattles = [],
   embedded = false,
 }: {
   battleReplay: PaperLabPageDto["battleReplay"];
+  recentBattles?: RecentBattleSummaryDto[];
   embedded?: boolean;
 }) {
   if (embedded) {
-    return <BattleReplayContent battleReplay={battleReplay} />;
+    return <BattleReplayContent battleReplay={battleReplay} recentBattles={recentBattles} />;
   }
 
   if (battleReplay.rows.length === 0) {
@@ -64,7 +73,7 @@ export function BattleReplayPanel({
 
   return (
     <PaperLabPanel title="Battle Replay" testId="paper-lab-battle-replay">
-      <BattleReplayContent battleReplay={battleReplay} />
+      <BattleReplayContent battleReplay={battleReplay} recentBattles={recentBattles} />
     </PaperLabPanel>
   );
 }
