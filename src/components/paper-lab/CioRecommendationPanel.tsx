@@ -5,6 +5,7 @@ import { ActionBadge } from "./ui/ActionBadge";
 import { PaperLabDetailsDialog } from "./ui/PaperLabDetailsDialog";
 import { PaperLabHelpIcon } from "./ui/PaperLabHelpIcon";
 import { PaperLabPanel } from "./ui/PaperLabPanel";
+import { VoteSegmentBar } from "./ui/VoteSegmentBar";
 import "./paper-lab-workstation.css";
 import "./paper-lab-command-center.css";
 
@@ -86,26 +87,35 @@ function CioRecBody({ rec }: { rec: Rec }) {
 
 function CioCompactCard({ rec }: { rec: Rec }) {
   return (
-    <PaperLabPanel title="CIO Recommendation" testId="paper-lab-cio">
+    <PaperLabPanel title="CIO Recommendation" testId="paper-lab-cio" tone="elevated">
       <div className="flex flex-wrap items-center gap-2 mb-1">
         <span className="paper-lab-cio-compact__symbol">{rec.symbol}</span>
         <ActionBadge action={rec.finalAction} />
-        <span className="text-xs tabular-nums text-[var(--pl-muted)]">
+        <span className="text-xs paper-lab-tabular text-[var(--pl-muted)]">
           {formatConfidencePct(rec.confidence)} confidence
         </span>
       </div>
       <p className="paper-lab-cio-compact__meta">
         <strong className="text-[var(--pl-text)]">{rec.consensusLabel}</strong>{" "}
-        ({rec.consensusScoreDisplay}) · <VoteSplit votes={rec.actionVotes} />
+        ({rec.consensusScoreDisplay})
       </p>
+      <VoteSegmentBar
+        votes={{
+          buy: rec.actionVotes.buy,
+          hold: rec.actionVotes.hold,
+          sell: rec.actionVotes.sell,
+          reduce: rec.actionVotes.reduce + rec.actionVotes.exit,
+        }}
+        className="mb-2"
+      />
       <p className="text-xs text-[var(--pl-muted)] line-clamp-2 mb-2">{rec.decisionSummary}</p>
       {rec.risks.length > 0 && (
-        <p className="text-[0.65rem] text-[var(--pl-amber)] line-clamp-2 mb-2">
+        <p className="text-[0.7rem] text-[var(--pl-amber)] line-clamp-2 mb-1">
           Risks: {rec.risks.join("; ")}
         </p>
       )}
       {rec.dissentingAgents.length > 0 && (
-        <p className="text-[0.65rem] text-[var(--pl-faint)] line-clamp-2 mb-2">
+        <p className="text-[0.7rem] text-[var(--pl-faint)] line-clamp-1 mb-2">
           Dissent: {rec.dissentingAgents.map((d) => `${d.agentName} (${d.action})`).join(", ")}
         </p>
       )}

@@ -15,13 +15,6 @@ const email =
 const password =
   process.env.PLAYWRIGHT_TRADES_LAYOUT_PASSWORD ?? "PlaywrightTradesLayout!99";
 
-const viewports = [
-  { name: "1280x720", width: 1280, height: 720 },
-  { name: "1366x768", width: 1366, height: 768 },
-  { name: "1440x900", width: 1440, height: 900 },
-  { name: "1920x1080", width: 1920, height: 1080 },
-] as const;
-
 async function ensureAuth(context: import("playwright").BrowserContext) {
   if (fs.existsSync(authFile)) return;
   const page = await context.newPage();
@@ -35,6 +28,12 @@ async function ensureAuth(context: import("playwright").BrowserContext) {
   await page.close();
 }
 
+async function gotoArena(page: import("playwright").Page) {
+  await page.goto(`${baseURL}/paper-lab`, { waitUntil: "networkidle" });
+  await page.waitForSelector('[data-testid="paper-lab-command-shell"]');
+  await page.waitForSelector('[data-testid="paper-lab-arena"]');
+}
+
 async function main() {
   fs.mkdirSync(outDir, { recursive: true });
   const browser = await chromium.launch();
@@ -43,45 +42,64 @@ async function main() {
   );
   await ensureAuth(context);
 
-  for (const vp of viewports) {
+  const shots: Array<{ name: string; width: number; height: number; run: (page: import("playwright").Page) => Promise<void> }> = [
+    {
+      name: "1280-top",
+      width: 1280,
+      height: 720,
+      run: async (page) => {
+        await page.evaluate(() => window.scrollTo(0, 0));
+      },
+    },
+    {
+      name: "1280-battle-positions",
+      width: 1280,
+      height: 720,
+      run: async (page) => {
+        await page.getByTestId("paper-lab-battle-replay").scrollIntoViewIfNeeded();
+        await page.getByTestId("paper-lab-positions").scrollIntoViewIfNeeded();
+      },
+    },
+    {
+      name: "1366-top",
+      width: 1366,
+      height: 768,
+      run: async (page) => {
+        await page.evaluate(() => window.scrollTo(0, 0));
+      },
+    },
+    {
+      name: "1440-workspace",
+      width: 1440,
+      height: 900,
+      run: async (page) => {
+        await page.getByTestId("paper-lab-middle-grid").scrollIntoViewIfNeeded();
+      },
+    },
+    {
+      name: "1920-full",
+      width: 1920,
+      height: 1080,
+      run: async (page) => {
+        await page.evaluate(() => window.scrollTo(0, 0));
+      },
+    },
+  ];
+
+  for (const shot of shots) {
     const page = await context.newPage();
-    await page.setViewportSize({ width: vp.width, height: vp.height });
-    await page.goto(`${baseURL}/paper-lab`, { waitUntil: "networkidle" });
-    await page.waitForSelector('[data-testid="paper-lab-command-shell"]');
-    await page.waitForSelector('[data-testid="paper-lab-arena"]');
-
-    await page.screenshot({
-      path: path.join(outDir, `${vp.name}-top.png`),
-      fullPage: false,
-    });
-
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    await page.waitForTimeout(300);
-    await page.screenshot({
-      path: path.join(outDir, `${vp.name}-workspace.png`),
-      fullPage: false,
-    });
-
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.getByTestId("agent-details-btn-swing_trader").click();
-    await page.waitForSelector('[data-testid="paper-lab-agent-drawer"]', {
-      state: "visible",
-    });
-    await page.screenshot({
-      path: path.join(outDir, `${vp.name}-drawer.png`),
-      fullPage: false,
-    });
-    await page.getByTestId("paper-lab-agent-drawer").getByRole("button", { name: "Close" }).click();
-
-    await page.getByTestId("paper-lab-decisions").scrollIntoViewIfNeeded();
+    await page.setViewportSize({ width: shot.width, height: shot.height });
+    await gotoArena(page);
+    await shot.run(page);
     await page.waitForTimeout(200);
-    await page.screenshot({
-      path: path.join(outDir, `${vp.name}-decisions.png`),
-      fullPage: false,
-    });
 
+    const fullPage = shot.name === "1920-full";
+    await page.screenshot({
+      path: path.join(outDir, `${shot.name}.png`),
+      fullPage,
+    });
     await page.close();
-    console.log(`Captured ${vp.name}`);
+    console.log(`Captured ${shot.name}`);
   }
 
   await browser.close();

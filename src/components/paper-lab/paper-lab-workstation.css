@@ -327,15 +327,32 @@
   max-height: 96px;
   scroll-snap-align: start;
   padding: 0.5rem 0.55rem;
-  border-radius: 0.5rem;
+  border-radius: 10px;
   border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(11, 17, 33, 0.85);
+  background: linear-gradient(145deg, rgba(20, 28, 48, 0.9), rgba(11, 17, 33, 0.92));
   cursor: default;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.paper-lab-agent-tile[data-style*="swing"] {
+  background: linear-gradient(145deg, rgba(14, 116, 144, 0.22), rgba(11, 17, 33, 0.92));
+}
+
+.paper-lab-agent-tile[data-style*="momentum"] {
+  background: linear-gradient(145deg, rgba(52, 211, 153, 0.14), rgba(11, 17, 33, 0.92));
+}
+
+.paper-lab-agent-tile[data-style*="contrarian"],
+.paper-lab-agent-tile[data-style*="devil"] {
+  background: linear-gradient(145deg, rgba(167, 139, 250, 0.14), rgba(11, 17, 33, 0.92));
+}
+
+.paper-lab-agent-tile[data-style*="trend"] {
+  background: linear-gradient(145deg, rgba(96, 165, 250, 0.14), rgba(11, 17, 33, 0.92));
 }
 
 .paper-lab-agent-tile[role="button"] {
@@ -344,12 +361,14 @@
 
 .paper-lab-agent-tile:hover {
   border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
 }
 
 .paper-lab-agent-tile--active {
-  border-color: rgba(56, 189, 248, 0.55);
-  background: rgba(8, 47, 73, 0.55);
+  border-color: rgba(34, 211, 238, 0.55);
+  box-shadow: 0 0 22px rgba(34, 211, 238, 0.2), 0 8px 28px rgba(0, 0, 0, 0.35);
+  transform: translateY(-1px);
 }
 
 .paper-lab-agent-tile__head {
@@ -387,16 +406,18 @@
 
 .paper-lab-agent-tile__avatar {
   flex-shrink: 0;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 0.35rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  background: rgba(34, 211, 238, 0.15);
+  background: rgba(34, 211, 238, 0.12);
   color: rgb(165, 243, 252);
+  border: 2px solid rgba(34, 211, 238, 0.35);
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.15);
 }
 
 .paper-lab-agent-tile__name {
@@ -721,10 +742,11 @@
 
 /* ── Battle replay cards ── */
 .paper-lab-battle-card {
-  padding: 0.85rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(11, 17, 33, 0.85);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background: linear-gradient(180deg, rgba(22, 30, 48, 0.75), rgba(11, 17, 33, 0.88));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .paper-lab-battle-card__header {
@@ -740,17 +762,25 @@
 }
 
 .paper-lab-battle-table-wrap {
-  display: none;
+  display: none !important;
 }
 
-@media (min-width: 1920px) {
-  .paper-lab-battle-cards-wrap {
-    display: none;
-  }
+/* ── Decisions log row emphasis ── */
+.paper-lab-decision-row--active {
+  background: rgba(34, 211, 238, 0.04);
+  border-left: 3px solid rgba(34, 211, 238, 0.45);
+}
 
-  .paper-lab-battle-table-wrap {
-    display: block;
-  }
+.paper-lab-decision-row--active td:first-child {
+  padding-left: 0.65rem;
+}
+
+.paper-lab-decision-row--muted {
+  opacity: 0.72;
+}
+
+.paper-lab-decision-row--muted .paper-lab-reasoning-cell {
+  color: var(--pl-faint, #64748b);
 }
 
 .paper-lab-help-icon {

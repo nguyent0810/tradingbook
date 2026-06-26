@@ -2,11 +2,15 @@
 
 :root {
   --pl-bg: #050914;
+  --pl-bg-radial-1: rgba(14, 165, 233, 0.1);
+  --pl-bg-radial-2: rgba(16, 185, 129, 0.08);
   --pl-bg-soft: #0b1121;
-  --pl-panel: rgba(15, 23, 42, 0.86);
+  --pl-panel: rgba(15, 23, 42, 0.82);
   --pl-panel-strong: rgba(17, 24, 39, 0.94);
+  --pl-panel-soft: rgba(15, 23, 42, 0.62);
   --pl-border: rgba(148, 163, 184, 0.16);
-  --pl-border-cyan: rgba(34, 211, 238, 0.28);
+  --pl-border-strong: rgba(148, 163, 184, 0.26);
+  --pl-border-cyan: rgba(34, 211, 238, 0.34);
   --pl-text: #f8fafc;
   --pl-muted: #94a3b8;
   --pl-faint: #64748b;
@@ -16,6 +20,10 @@
   --pl-amber: #fbbf24;
   --pl-blue: #60a5fa;
   --pl-purple: #a78bfa;
+  --pl-shadow-panel: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --pl-shadow-elevated: 0 24px 70px rgba(0, 0, 0, 0.45);
+  --pl-glow-green: 0 0 18px rgba(52, 211, 153, 0.22);
+  --pl-glow-cyan: 0 0 22px rgba(34, 211, 238, 0.2);
 }
 
 /* Hide global app header when Paper Lab command shell is active */
@@ -31,7 +39,10 @@
 
 .paper-lab-command-root {
   min-height: 100vh;
-  background: var(--pl-bg);
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 0%, var(--pl-bg-radial-1), transparent),
+    radial-gradient(ellipse 60% 40% at 90% 10%, var(--pl-bg-radial-2), transparent),
+    var(--pl-bg);
   color: var(--pl-text);
   font-family: Inter, system-ui, sans-serif;
 }
@@ -270,15 +281,47 @@
 
 /* Panels */
 .paper-lab-panel {
-  background: var(--pl-panel);
+  position: relative;
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.88));
   border: 1px solid var(--pl-border);
-  border-radius: 14px;
+  border-radius: 16px;
   padding: 14px 16px;
   min-width: 0;
+  box-shadow: var(--pl-shadow-panel);
+  backdrop-filter: blur(14px);
 }
 
-.paper-lab-panel:hover {
-  border-color: rgba(148, 163, 184, 0.22);
+.paper-lab-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  border-radius: 16px 16px 0 0;
+  pointer-events: none;
+}
+
+.paper-lab-panel--elevated {
+  border-color: var(--pl-border-cyan);
+  box-shadow: var(--pl-shadow-elevated), var(--pl-glow-cyan);
+}
+
+.paper-lab-panel--soft {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.75));
+  border-color: rgba(148, 163, 184, 0.1);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+.paper-lab-panel--muted {
+  background: var(--pl-panel-soft);
+  border-color: rgba(148, 163, 184, 0.08);
+  box-shadow: none;
+}
+
+.paper-lab-panel:hover:not(.paper-lab-panel--muted) {
+  border-color: var(--pl-border-strong);
 }
 
 .paper-lab-panel__title {
@@ -302,8 +345,8 @@
 .paper-lab-header-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 @media (min-width: 1280px) {
@@ -321,8 +364,8 @@
 .paper-lab-middle-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 @media (min-width: 1280px) {
@@ -340,7 +383,7 @@
 .paper-lab-bottom-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 16px;
+  gap: 20px;
 }
 
 @media (min-width: 1440px) {
@@ -350,17 +393,61 @@
 }
 
 /* Title block */
+.paper-lab-title-block {
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 .paper-lab-title-block h1 {
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 0 0 4px;
+  margin: 0 0 6px;
   line-height: 1.2;
 }
 
-.paper-lab-title-block__lead {
-  font-size: 0.8rem;
-  color: var(--pl-muted);
+.paper-lab-title-block__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-bottom: 10px;
+}
+
+.paper-lab-title-chip {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--pl-border);
+  background: rgba(148, 163, 184, 0.08);
+  color: var(--pl-muted);
+}
+
+.paper-lab-title-chip--paper {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--pl-amber);
+}
+
+.paper-lab-title-chip--mode {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.08);
+  color: var(--pl-green);
+}
+
+.paper-lab-title-block__status {
+  font-size: 0.75rem;
+  color: var(--pl-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.paper-lab-title-block__lead {
+  font-size: 0.75rem;
+  color: var(--pl-faint);
+  margin-bottom: 0;
 }
 
 .paper-lab-paper-only-badge {
@@ -396,8 +483,8 @@
 
 .paper-lab-confidence-ring {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   flex-shrink: 0;
 }
 
@@ -407,9 +494,81 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--pl-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.paper-lab-gate-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+.paper-lab-gate-pill--warning {
+  color: var(--pl-amber);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.paper-lab-gate-pill--pass {
+  color: var(--pl-green);
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.paper-lab-gate-pill--fail {
+  color: var(--pl-red);
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.3);
+}
+
+/* Market overview 2x2 */
+.paper-lab-market-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.paper-lab-market-grid__cell {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  min-width: 0;
+}
+
+.paper-lab-market-grid__cell--hero {
+  grid-column: 1 / -1;
+  padding: 10px 12px;
+}
+
+.paper-lab-market-grid__value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.paper-lab-market-grid__delta {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  margin-left: 6px;
+}
+
+.paper-lab-market-grid__delta--up {
+  color: var(--pl-green);
+}
+
+.paper-lab-market-grid__delta--down {
+  color: var(--pl-red);
 }
 
 .paper-lab-market-stat {
@@ -444,7 +603,32 @@
   margin: 6px 0;
 }
 
-/* Recent battles */
+/* Recent battles / vote segment */
+.paper-lab-vote-segment {
+  margin: 8px 0;
+}
+
+.paper-lab-vote-segment__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.paper-lab-vote-segment__label--buy {
+  color: var(--pl-green);
+}
+
+.paper-lab-vote-segment__label--hold {
+  color: var(--pl-muted);
+}
+
+.paper-lab-vote-segment__label--sell {
+  color: var(--pl-red);
+}
+
 .paper-lab-vote-bar {
   display: flex;
   height: 6px;
@@ -472,7 +656,141 @@
 
 /* Portfolio rail in command center */
 .paper-lab-portfolio-section {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+/* Typography */
+.paper-lab-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pl-muted);
+}
+
+.paper-lab-metric {
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--pl-text);
+}
+
+.paper-lab-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sidebar guide & legend */
+.paper-lab-sidebar__guide-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: auto;
+  border: none;
+  border-top: 1px solid var(--pl-border);
+  background: transparent;
+  color: var(--pl-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.paper-lab-sidebar__guide-toggle:hover {
+  color: var(--pl-text);
+}
+
+.paper-lab-sidebar__guide-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 12px;
+}
+
+.paper-lab-sidebar__guide-item {
+  font-size: 0.7rem;
+  color: var(--pl-faint);
+  padding: 4px 10px;
+  line-height: 1.35;
+}
+
+.paper-lab-sidebar__guide-item strong {
+  display: block;
+  color: var(--pl-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-bottom: 1px;
+}
+
+.paper-lab-sidebar__legend {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  background: var(--pl-panel-soft);
+}
+
+.paper-lab-sidebar__legend-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pl-faint);
+  margin-bottom: 8px;
+}
+
+.paper-lab-sidebar__legend-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* R:R badge */
+.paper-lab-rr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.paper-lab-rr-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.paper-lab-rr-badge__dot--strong {
+  background: var(--pl-green);
+  box-shadow: var(--pl-glow-green);
+}
+
+.paper-lab-rr-badge__dot--mid {
+  background: var(--pl-amber);
+}
+
+.paper-lab-rr-badge__dot--weak {
+  background: var(--pl-red);
+}
+
+/* Positions footer */
+.paper-lab-table-glossary--subtle {
+  font-size: 0.65rem;
+  color: var(--pl-faint);
+  opacity: 0.85;
+}
+
+/* Qty cell */
+.paper-lab-qty-cell__primary {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.paper-lab-qty-cell__sub {
+  font-size: 0.65rem;
+  color: var(--pl-faint);
+  font-variant-numeric: tabular-nums;
 }
 
 .paper-lab-portfolio-section__head {
@@ -521,13 +839,7 @@
   }
 }
 
-/* Battle replay table only at very wide viewports */
+/* Arena battle table hidden — cards only on arena page */
 .paper-lab-battle-table--wide {
-  display: none;
-}
-
-@media (min-width: 1920px) {
-  .paper-lab-battle-table--wide {
-    display: block;
-  }
+  display: none !important;
 }

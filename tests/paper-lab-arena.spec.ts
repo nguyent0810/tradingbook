@@ -7,7 +7,7 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByTestId("paper-lab-sidebar")).toBeVisible();
     await expect(page.getByTestId("paper-lab-top-nav")).toBeVisible();
     await expect(page.getByTestId("paper-lab-disclaimer")).toBeVisible();
-    await expect(page.getByText("Paper only")).toBeVisible();
+    await expect(page.getByText("Paper Only")).toBeVisible();
   });
 
   test("command center panels visible without tabs", async ({ page }) => {
@@ -42,6 +42,13 @@ test.describe("/paper-lab arena", () => {
 
   test("battle replay uses cards at 1280px viewport", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/paper-lab");
+    await expect(page.getByTestId("paper-lab-battle-cards")).toBeVisible();
+    await expect(page.locator(".paper-lab-battle-table-wrap")).toBeHidden();
+  });
+
+  test("battle replay uses cards at 1920px viewport", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto("/paper-lab");
     await expect(page.getByTestId("paper-lab-battle-cards")).toBeVisible();
     await expect(page.locator(".paper-lab-battle-table-wrap")).toBeHidden();
