@@ -13,7 +13,7 @@ export function MarketRegimeExplanationCard({
   const dimensions = regime.dimensions ?? {};
 
   return (
-    <PaperLabPanel title="Market Regime Explanation" testId="paper-lab-regime-explanation">
+    <PaperLabPanel title="Market Regime Explanation" testId="paper-lab-regime-explanation" tone="soft">
       <p className="text-sm font-medium text-[var(--pl-text)] mb-2">{regime.label}</p>
       <p className="text-xs text-[var(--pl-muted)] line-clamp-3 mb-3">{explanation}</p>
       <PaperLabDetailsDialog title="Regime dimensions" triggerLabel="View Regime Details">

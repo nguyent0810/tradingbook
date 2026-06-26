@@ -5,12 +5,15 @@ import { Sparkline } from "@/components/command-deck/ui/sparkline";
 import type { PortfolioCardDto } from "@/lib/paper-lab/types/arena-dto";
 import { formatArenaVndCompact, formatPctSigned } from "@/lib/paper-lab/ui/arena-format";
 import { AgentDetailDrawer } from "./AgentDetailDrawer";
-import { PaperLabPanel } from "./ui/PaperLabPanel";
 import "./paper-lab-workstation.css";
 import "./paper-lab-command-center.css";
 
 function styleInitial(style: string): string {
   return style.slice(0, 2).toUpperCase();
+}
+
+function styleSlug(style: string): string {
+  return style.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 export function AgentPortfolioRail({
@@ -45,6 +48,7 @@ export function AgentPortfolioRail({
               key={p.agentId}
               className={`paper-lab-agent-tile ${isActive ? "paper-lab-agent-tile--active" : ""}`}
               data-agent-id={p.agentId}
+              data-style={styleSlug(p.style)}
               onClick={() => onSelectAgent?.(p.agentId)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {

@@ -1,9 +1,10 @@
 import type { BattleReplayRowDto } from "@/lib/paper-lab/types/arena-dto";
-import { formatConfidencePct, confidenceBand } from "@/lib/paper-lab/ui/arena-format";
+import { formatConfidencePct } from "@/lib/paper-lab/ui/arena-format";
 import { ActionBadge } from "./ui/ActionBadge";
 import { PaperLabDetailsDialog } from "./ui/PaperLabDetailsDialog";
 import { StatusPill } from "./ui/StatusPill";
 import "./paper-lab-workstation.css";
+import "./paper-lab-command-center.css";
 
 function OutcomeBadge({ outcome }: { outcome: string }) {
   if (outcome === "WIN") return <StatusPill status="CLOSED_TP" />;
@@ -15,17 +16,15 @@ function OutcomeBadge({ outcome }: { outcome: string }) {
 function BulletList({
   items,
   className,
-  max = 3,
 }: {
   items: string[];
   className: string;
-  max?: number;
 }) {
   if (items.length === 0) return <span className="text-xs text-slate-500">—</span>;
   return (
     <ul className={`text-xs list-disc list-inside space-y-0.5 ${className}`}>
-      {items.slice(0, max).map((s) => (
-        <li key={s} className="paper-lab-line-clamp-2">
+      {items.slice(0, 2).map((s) => (
+        <li key={s} className="line-clamp-2">
           {s}
         </li>
       ))}
@@ -40,46 +39,43 @@ export function BattleReplayCardList({ rows }: { rows: BattleReplayRowDto[] }) {
         <li key={row.agentId} className="paper-lab-battle-card">
           <div className="paper-lab-battle-card__header">
             <div className="min-w-0 flex-1">
-              <div className="paper-lab-cell-strong paper-lab-truncate">{row.agentName}</div>
+              <div className="paper-lab-cell-strong truncate">{row.agentName}</div>
               <span className="paper-lab-agent-tile__style">{row.style}</span>
             </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <ActionBadge action={row.action} />
-              <span className="text-xs tabular-nums text-slate-300">
+              <span className="text-xs paper-lab-tabular text-slate-300">
                 {formatConfidencePct(row.confidence)}
-                <span className="block text-[0.65rem] text-slate-500">{confidenceBand(row.confidence)}</span>
               </span>
               <OutcomeBadge outcome={row.outcome} />
             </div>
           </div>
 
-          <p className="paper-lab-line-clamp-2 text-sm text-slate-200 mt-2 mb-2">
+          <p className="line-clamp-2 text-xs text-slate-300 mt-2 mb-2">
+            <span className="text-slate-500">Summary: </span>
             {row.explanation.summary}
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
-              <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-emerald-300/90 mb-1">
-                Supports
-              </div>
+              <div className="paper-lab-label mb-1">Supports</div>
               <BulletList items={row.explanation.supporting} className="text-emerald-300/85" />
             </div>
             <div>
-              <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-amber-200/90 mb-1">
-                Concerns
-              </div>
+              <div className="paper-lab-label mb-1">Concerns</div>
               <BulletList items={row.explanation.opposing} className="text-amber-200/85" />
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/40">
-            <p className="text-xs text-slate-400 paper-lab-line-clamp-2 flex-1 min-w-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/30">
+            <p className="text-xs text-slate-400 line-clamp-1 flex-1 min-w-0">
               <span className="text-slate-500">Style lens: </span>
               {row.explanation.styleLens}
             </p>
             <PaperLabDetailsDialog
               title={`${row.agentName} — battle details`}
               testId={`battle-details-${row.agentId}`}
+              triggerLabel="View details"
             >
               <p className="text-sm text-slate-200 mb-3">{row.explanation.summary}</p>
               <div className="mb-3">
