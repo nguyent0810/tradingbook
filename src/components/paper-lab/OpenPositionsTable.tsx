@@ -44,8 +44,8 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
 
   return (
     <div data-testid="paper-lab-positions">
-      <div className="paper-lab-table-wrap">
-        <table className="paper-lab-table paper-lab-table--positions">
+      <div className="positions-table-wrapper">
+        <table className="paper-lab-table paper-lab-table--positions positions-table">
           <thead>
             <tr>
               <th>Agent</th>
@@ -69,7 +69,9 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
               const pnlClass = p.unrealizedPnlVnd >= 0 ? "paper-lab-positive" : "paper-lab-negative";
               return (
                 <tr key={p.id}>
-                  <td className="whitespace-nowrap">{p.agentName}</td>
+                  <td className="paper-lab-agent-col">
+                    <span className="paper-lab-truncate block">{p.agentName}</span>
+                  </td>
                   <td className="font-mono">{p.symbol}</td>
                   <td className="tabular-nums">{formatEquityThousandVndPerShare(p.entryPriceKVnd)}</td>
                   <td><PriceWithPct entry={p.entryPriceKVnd} value={p.stopLossKVnd} /></td>
@@ -86,7 +88,7 @@ export function OpenPositionsTable({ positions }: { positions: OpenPositionRowDt
                     {formatPctSigned(p.unrealizedPnlPct)}
                   </td>
                   <td className={`tabular-nums ${p.rMultiple >= 0 ? "paper-lab-positive" : "paper-lab-negative"}`}>
-                    {p.rMultiple.toFixed(2)}R
+                    {p.rMultiple.toFixed(1)}R
                   </td>
                   <td className="tabular-nums">{p.holdingDays}</td>
                   <td><StatusPill status={p.status} /></td>

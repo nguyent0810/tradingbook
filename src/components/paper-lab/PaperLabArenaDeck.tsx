@@ -69,7 +69,9 @@ export function PaperLabArenaDeck({ data }: { data: PaperLabPageDto }) {
         <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
           Agent Portfolios
         </h2>
-        <span className="text-xs text-slate-500">Hover for details · click to filter positions</span>
+        <span className="text-xs text-slate-500">
+          Click card to filter · Details icon for portfolio breakdown
+        </span>
       </div>
       <AgentPortfolioRail
         portfolios={data.portfolios}
@@ -109,7 +111,7 @@ export function PaperLabArenaDeck({ data }: { data: PaperLabPageDto }) {
       </div>
 
       {tab === "workspace" && (
-        <div className="paper-lab-workspace-grid">
+        <div className="arena-bottom-grid">
           <div>
             <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
               Open Positions

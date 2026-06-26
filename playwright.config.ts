@@ -58,6 +58,16 @@ export default defineConfig({
         storageState: authState,
       },
     },
+    {
+      name: "chromium-paper-lab-arena",
+      testMatch: /paper-lab-arena\.spec\.ts$/,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 900 },
+        storageState: authState,
+      },
+    },
   ],
   webServer: {
     command: "npm run dev",

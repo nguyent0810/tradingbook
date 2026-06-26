@@ -1,5 +1,6 @@
 import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
 import { formatConfidencePct, confidenceBand } from "@/lib/paper-lab/ui/arena-format";
+import { BattleReplayCardList } from "./BattleReplayCardList";
 import { ActionBadge } from "./ui/ActionBadge";
 import { StatusPill } from "./ui/StatusPill";
 import "./paper-lab-workstation.css";
@@ -48,10 +49,15 @@ export function BattleReplayPanel({
         <p className="text-sm text-slate-300 font-medium">
           {sessionDate} — <span className="font-mono">{symbol}</span>
         </p>
-        <p className="text-xs text-slate-400 mt-1">{insight}</p>
+        <p className="text-xs text-slate-400 mt-1 paper-lab-line-clamp-3">{insight}</p>
       </div>
       <BattleVoteSummary rows={rows} />
-      <div className="paper-lab-table-wrap">
+
+      <div className="paper-lab-battle-cards-wrap">
+        <BattleReplayCardList rows={rows} />
+      </div>
+
+      <div className="paper-lab-battle-table-wrap paper-lab-table-wrap">
         <table className="paper-lab-table paper-lab-table--battle">
           <thead>
             <tr>
@@ -68,7 +74,7 @@ export function BattleReplayPanel({
             {rows.map((row) => (
               <tr key={row.agentId}>
                 <td>
-                  <div className="whitespace-nowrap">{row.agentName}</div>
+                  <div className="paper-lab-truncate max-w-[120px]">{row.agentName}</div>
                   <span className="paper-lab-agent-tile__style">{row.style}</span>
                 </td>
                 <td><ActionBadge action={row.action} /></td>
@@ -79,8 +85,8 @@ export function BattleReplayPanel({
                 <td className="paper-lab-reasoning-cell">
                   {row.explanation.supporting.length > 0 ? (
                     <ul className="text-xs text-emerald-300/85 list-disc list-inside">
-                      {row.explanation.supporting.map((s) => (
-                        <li key={s}>{s}</li>
+                      {row.explanation.supporting.slice(0, 3).map((s) => (
+                        <li key={s} className="paper-lab-line-clamp-2">{s}</li>
                       ))}
                     </ul>
                   ) : (
@@ -90,15 +96,17 @@ export function BattleReplayPanel({
                 <td className="paper-lab-reasoning-cell">
                   {row.explanation.opposing.length > 0 ? (
                     <ul className="text-xs text-amber-200/85 list-disc list-inside">
-                      {row.explanation.opposing.map((s) => (
-                        <li key={s}>{s}</li>
+                      {row.explanation.opposing.slice(0, 3).map((s) => (
+                        <li key={s} className="paper-lab-line-clamp-2">{s}</li>
                       ))}
                     </ul>
                   ) : (
                     <span className="text-xs text-slate-500">—</span>
                   )}
                 </td>
-                <td className="text-xs text-slate-400 max-w-[160px]">{row.explanation.styleLens}</td>
+                <td className="text-xs text-slate-400 paper-lab-line-clamp-2 max-w-[180px]">
+                  {row.explanation.styleLens}
+                </td>
                 <td><OutcomeBadge outcome={row.outcome} /></td>
               </tr>
             ))}
