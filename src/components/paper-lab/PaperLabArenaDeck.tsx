@@ -1,22 +1,34 @@
 "use client";
 
 import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PaperOnlyDisclaimerBanner } from "./PaperOnlyDisclaimerBanner";
 import { AgentExecutionModeBanner } from "./AgentExecutionModeBanner";
 import { RegimeBanner } from "./RegimeBanner";
 import { ArenaOverviewStrip } from "./ArenaOverviewStrip";
 import { AgentLeaderboardTable } from "./AgentLeaderboardTable";
-import { AgentPortfolioCards } from "./AgentPortfolioCards";
+import { AgentPortfolioRail } from "./AgentPortfolioRail";
 import { OpenPositionsTable } from "./OpenPositionsTable";
 import { DecisionsLogTable } from "./DecisionsLogTable";
 import { CioRecommendationPanel } from "./CioRecommendationPanel";
+import { BattleReplayPanel } from "./BattleReplayPanel";
 import "./paper-lab-workstation.css";
 
-type TabId = "positions" | "decisions" | "replay";
+type TabId = "workspace" | "decisions";
 
 export function PaperLabArenaDeck({ data }: { data: PaperLabPageDto }) {
-  const [tab, setTab] = useState<TabId>("positions");
+  const [tab, setTab] = useState<TabId>("workspace");
+  const [leaderboardExpanded, setLeaderboardExpanded] = useState(false);
+  const [agentFilter, setAgentFilter] = useState<string | null>(null);
+
+  const filteredPositions = useMemo(() => {
+    if (!agentFilter) return data.positions;
+    return data.positions.filter((p) => p.agentId === agentFilter);
+  }, [data.positions, agentFilter]);
+
+  const leaderboardRows = leaderboardExpanded
+    ? data.leaderboard
+    : data.leaderboard.slice(0, 5);
 
   return (
     <div data-testid="paper-lab-arena">
@@ -24,30 +36,65 @@ export function PaperLabArenaDeck({ data }: { data: PaperLabPageDto }) {
       {data.overview.executionMode && (
         <AgentExecutionModeBanner mode={data.overview.executionMode} />
       )}
+      {data.overview.stale && (
+        <p className="paper-lab-stale-banner text-xs text-amber-200 mb-3 px-3 py-2 rounded border border-amber-500/30 bg-amber-950/20">
+          Market data may be stale — review regime and bar freshness before interpreting agent decisions.
+        </p>
+      )}
       <RegimeBanner regime={data.overview.marketRegime} />
       <ArenaOverviewStrip overview={data.overview} />
 
-      <div className="paper-lab-grid-2 mb-5">
+      <div className="paper-lab-grid-2 mb-4">
         <div>
-          <h2 className="text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wide">
-            Agent Leaderboard
-          </h2>
-          <AgentLeaderboardTable rows={data.leaderboard} />
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+              Agent Leaderboard
+            </h2>
+            {data.leaderboard.length > 5 && (
+              <button
+                type="button"
+                className="paper-lab-link-btn text-xs"
+                onClick={() => setLeaderboardExpanded((v) => !v)}
+              >
+                {leaderboardExpanded ? "Show top 5" : `View all ${data.leaderboard.length}`}
+              </button>
+            )}
+          </div>
+          <AgentLeaderboardTable rows={leaderboardRows} />
         </div>
         <CioRecommendationPanel cio={data.cio} />
       </div>
 
-      <h2 className="text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wide">
-        Agent Portfolios
-      </h2>
-      <AgentPortfolioCards portfolios={data.portfolios} />
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wide">
+          Agent Portfolios
+        </h2>
+        <span className="text-xs text-slate-500">Hover for details · click to filter positions</span>
+      </div>
+      <AgentPortfolioRail
+        portfolios={data.portfolios}
+        activeAgentId={agentFilter}
+        onSelectAgent={(id) => {
+          setAgentFilter((prev) => (prev === id ? null : id));
+          setTab("workspace");
+        }}
+      />
+      {agentFilter && (
+        <button
+          type="button"
+          className="paper-lab-link-btn text-xs mt-2 mb-4"
+          onClick={() => setAgentFilter(null)}
+        >
+          Clear filter: {data.portfolios.find((p) => p.agentId === agentFilter)?.agentName}
+        </button>
+      )}
+      {!agentFilter && <div className="mb-4" />}
 
       <div className="paper-lab-tabs">
         {(
           [
-            ["positions", "Open Positions"],
+            ["workspace", "Positions & Battle"],
             ["decisions", "Decisions Log"],
-            ["replay", "Battle Replay"],
           ] as const
         ).map(([id, label]) => (
           <button
@@ -61,39 +108,23 @@ export function PaperLabArenaDeck({ data }: { data: PaperLabPageDto }) {
         ))}
       </div>
 
-      {tab === "positions" && <OpenPositionsTable positions={data.positions} />}
-      {tab === "decisions" && <DecisionsLogTable decisions={data.decisions} />}
-      {tab === "replay" && (
-        <div data-testid="paper-lab-battle-replay">
-          <p className="text-sm text-slate-400 mb-2">
-            {data.battleReplay.sessionDate} — {data.battleReplay.symbol}
-          </p>
-          <div className="paper-lab-table-wrap">
-            <table className="paper-lab-table">
-              <thead>
-                <tr>
-                  <th>Agent</th>
-                  <th>Action</th>
-                  <th>Conf</th>
-                  <th>Reasoning</th>
-                  <th>Outcome</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.battleReplay.rows.map((row) => (
-                  <tr key={row.agentId}>
-                    <td>{row.agentName}</td>
-                    <td>{row.action}</td>
-                    <td className="tabular-nums">{(row.confidence * 100).toFixed(0)}%</td>
-                    <td style={{ whiteSpace: "normal", maxWidth: 320 }}>{row.reasoning}</td>
-                    <td>{row.outcome}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {tab === "workspace" && (
+        <div className="paper-lab-workspace-grid">
+          <div>
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              Open Positions
+            </h3>
+            <OpenPositionsTable positions={filteredPositions} />
+          </div>
+          <div>
+            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">
+              Battle Replay
+            </h3>
+            <BattleReplayPanel battleReplay={data.battleReplay} />
           </div>
         </div>
       )}
+      {tab === "decisions" && <DecisionsLogTable decisions={data.decisions} />}
     </div>
   );
 }

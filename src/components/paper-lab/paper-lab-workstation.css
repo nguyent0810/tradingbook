@@ -274,3 +274,373 @@
   border-radius: 0.25rem;
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* ── Compact agent portfolio rail ── */
+.paper-lab-agent-rail {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+  scroll-snap-type: x proximity;
+}
+
+.paper-lab-agent-tile {
+  flex: 0 0 168px;
+  scroll-snap-align: start;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: rgba(15, 23, 42, 0.65);
+  cursor: default;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.paper-lab-agent-tile[role="button"] {
+  cursor: pointer;
+}
+
+.paper-lab-agent-tile:hover,
+.paper-lab-agent-tile:focus-within {
+  border-color: rgba(34, 211, 238, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.paper-lab-agent-tile--active {
+  border-color: rgba(34, 211, 238, 0.55);
+  background: rgba(8, 47, 73, 0.45);
+}
+
+.paper-lab-agent-tile__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.paper-lab-agent-tile__avatar {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  background: rgba(34, 211, 238, 0.15);
+  color: rgb(165, 243, 252);
+}
+
+.paper-lab-agent-tile__name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(248, 250, 252);
+  line-height: 1.2;
+}
+
+.paper-lab-agent-tile__style {
+  font-size: 0.6rem;
+  color: rgb(148, 163, 184);
+}
+
+.paper-lab-agent-tile__metrics {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.paper-lab-agent-tile__label {
+  display: block;
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(100, 116, 139);
+}
+
+.paper-lab-agent-tile__value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(226, 232, 240);
+}
+
+.paper-lab-agent-popover {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: calc(100% + 4px);
+  z-index: 30;
+  width: 240px;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgb(15, 23, 42);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.paper-lab-agent-tile:hover .paper-lab-agent-popover,
+.paper-lab-agent-tile:focus-within .paper-lab-agent-popover {
+  display: block;
+}
+
+.paper-lab-agent-popover__title {
+  font-weight: 600;
+  color: rgb(248, 250, 252);
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.paper-lab-agent-popover__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.75rem;
+  font-size: 0.7rem;
+}
+
+.paper-lab-agent-popover__grid dt {
+  color: rgb(100, 116, 139);
+}
+
+.paper-lab-agent-popover__grid dd {
+  color: rgb(226, 232, 240);
+  text-align: right;
+  margin: 0;
+}
+
+.paper-lab-agent-popover__link {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  color: rgb(34, 211, 238);
+  text-decoration: none;
+}
+
+.paper-lab-agent-popover__link:hover {
+  text-decoration: underline;
+}
+
+/* ── Action & status badges ── */
+.paper-lab-action-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+}
+
+.paper-lab-action--buy {
+  background: rgba(20, 83, 45, 0.5);
+  color: rgb(134, 239, 172);
+  border: 1px solid rgba(74, 222, 128, 0.35);
+}
+
+.paper-lab-action--hold {
+  background: rgba(51, 65, 85, 0.5);
+  color: rgb(203, 213, 225);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.paper-lab-action--reduce {
+  background: rgba(120, 53, 15, 0.45);
+  color: rgb(253, 230, 138);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.paper-lab-action--sell {
+  background: rgba(127, 29, 29, 0.45);
+  color: rgb(252, 165, 165);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+}
+
+.paper-lab-status-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+}
+
+.paper-lab-status--open {
+  background: rgba(20, 83, 45, 0.45);
+  color: rgb(134, 239, 172);
+}
+
+.paper-lab-status--partial {
+  background: rgba(30, 58, 138, 0.45);
+  color: rgb(147, 197, 253);
+}
+
+.paper-lab-status--tp {
+  background: rgba(21, 128, 61, 0.55);
+  color: rgb(187, 247, 208);
+}
+
+.paper-lab-status--sl {
+  background: rgba(127, 29, 29, 0.5);
+  color: rgb(252, 165, 165);
+}
+
+.paper-lab-status--expired {
+  background: rgba(51, 65, 85, 0.55);
+  color: rgb(148, 163, 184);
+}
+
+.paper-lab-status--invalid {
+  background: rgba(154, 52, 18, 0.45);
+  color: rgb(254, 215, 170);
+}
+
+.paper-lab-validation-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+.paper-lab-validation-skipped {
+  color: rgb(148, 163, 184);
+}
+
+/* ── CIO card ── */
+.paper-lab-cio-card {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  padding-bottom: 0.75rem;
+}
+
+.paper-lab-cio-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* ── JSON audit dialog ── */
+.paper-lab-json-btn {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(30, 41, 59, 0.6);
+  color: rgb(203, 213, 225);
+  cursor: pointer;
+}
+
+.paper-lab-json-btn:hover {
+  border-color: rgba(34, 211, 238, 0.35);
+  color: rgb(165, 243, 252);
+}
+
+.paper-lab-json-dialog {
+  max-width: min(640px, 92vw);
+  width: 100%;
+  padding: 0;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.5rem;
+  background: rgb(15, 23, 42);
+  color: rgb(226, 232, 240);
+}
+
+.paper-lab-json-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.paper-lab-json-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.paper-lab-json-dialog__body {
+  margin: 0;
+  padding: 1rem;
+  max-height: 60vh;
+  overflow: auto;
+  font-size: 0.75rem;
+  font-family: var(--font-geist-mono, monospace);
+}
+
+.paper-lab-order-ref {
+  background: none;
+  border: none;
+  color: rgb(148, 163, 184);
+  cursor: pointer;
+  padding: 0;
+}
+
+.paper-lab-order-ref:hover {
+  color: rgb(34, 211, 238);
+}
+
+.paper-lab-reasoning-cell {
+  max-width: 280px;
+  white-space: normal;
+  vertical-align: top;
+}
+
+.paper-lab-help-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-left: 0.2rem;
+  border-radius: 999px;
+  font-size: 0.55rem;
+  font-weight: 700;
+  background: rgba(148, 163, 184, 0.2);
+  color: rgb(148, 163, 184);
+  cursor: help;
+}
+
+.paper-lab-link-btn {
+  background: none;
+  border: none;
+  color: rgb(34, 211, 238);
+  cursor: pointer;
+  padding: 0;
+}
+
+.paper-lab-link-btn:hover {
+  text-decoration: underline;
+}
+
+.paper-lab-battle-vote {
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 600;
+}
+
+.paper-lab-battle-vote--buy {
+  background: rgba(20, 83, 45, 0.35);
+  color: rgb(134, 239, 172);
+}
+
+.paper-lab-battle-vote--hold {
+  background: rgba(51, 65, 85, 0.45);
+  color: rgb(203, 213, 225);
+}
+
+.paper-lab-battle-vote--sell {
+  background: rgba(127, 29, 29, 0.35);
+  color: rgb(252, 165, 165);
+}
+
+.paper-lab-table-glossary {
+  line-height: 1.5;
+}
+
+.paper-lab-table--battle td,
+.paper-lab-table--positions td {
+  vertical-align: top;
+}
+
+.paper-lab-workspace-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 1280px) {
+  .paper-lab-workspace-grid {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+  }
+}

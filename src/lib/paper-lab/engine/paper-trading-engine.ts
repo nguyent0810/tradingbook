@@ -14,6 +14,11 @@ import {
   validateAgentDecisionForExecution,
   type OrderValidationContext,
 } from "@/lib/paper-lab/engine/order-validator";
+import {
+  applyBoardLotToBuyDecision,
+  formatBoardLotRejectionReason,
+  roundDownSellQuantity,
+} from "@/lib/paper-lab/engine/board-lot";
 
 export type ExecuteDecisionParams = {
   portfolioId: string;
@@ -48,7 +53,25 @@ export async function executeValidatedDecision(
     };
   }
 
-  const validation = validateAgentDecisionForExecution(params.decision, params.validationCtx);
+  const action = params.decision.action;
+  let decisionForExecution = params.decision;
+
+  if (action === "BUY" || action === "ADD") {
+    const { decision: rounded, lot } = applyBoardLotToBuyDecision(params.decision);
+    if (!lot.ok) {
+      return rejectOrder(
+        prisma,
+        params,
+        formatBoardLotRejectionReason(lot)
+      );
+    }
+    decisionForExecution = rounded;
+  }
+
+  const validation = validateAgentDecisionForExecution(
+    decisionForExecution,
+    params.validationCtx
+  );
   if (!validation.ok) {
     await prisma.agentDecision.update({
       where: { id: params.decisionDbId },
@@ -63,8 +86,8 @@ export async function executeValidatedDecision(
         decisionId: params.decisionDbId,
         symbol: params.decision.symbol,
         side: "BUY",
-        quantity: params.decision.quantity ?? 0,
-        priceKvnd: params.decision.entry_price ?? 0,
+        quantity: decisionForExecution.quantity ?? 0,
+        priceKvnd: decisionForExecution.entry_price ?? 0,
         status: "REJECTED",
         rejectionReason: validation.reasons.join("; "),
         sessionDate: params.sessionDate,
@@ -73,14 +96,12 @@ export async function executeValidatedDecision(
     return { orderId: order.id, positionId: null, rejected: true, reason: validation.reasons.join("; ") };
   }
 
-  const action = params.decision.action;
-
   if (action === "BUY" || action === "ADD") {
-    return openOrAddPosition(prisma, params);
+    return openOrAddPosition(prisma, { ...params, decision: decisionForExecution });
   }
 
   if (action === "EXIT" || action === "REDUCE" || action === "SELL") {
-    return closeOrReducePosition(prisma, params);
+    return closeOrReducePosition(prisma, { ...params, decision: decisionForExecution });
   }
 
   return { orderId: null, positionId: null, rejected: true, reason: "Unsupported action" };
@@ -200,10 +221,16 @@ async function closeOrReducePosition(
     return rejectOrder(prisma, params, "No open position");
   }
 
-  const reduceQty =
+  const reduceQtyRaw =
     decision.action === "REDUCE"
       ? Math.max(1, Math.floor(position.quantity / 2))
       : position.quantity;
+
+  const sellLot = roundDownSellQuantity(reduceQtyRaw);
+  if (!sellLot.ok) {
+    return rejectOrder(prisma, params, formatBoardLotRejectionReason(sellLot));
+  }
+  const reduceQty = sellLot.quantity;
 
   const { fillKVnd } = resolveFillPriceKVnd({
     orderPriceKVnd: bar.close,

@@ -4,6 +4,9 @@ import { PaperLabPageShell } from "@/components/paper-lab/PaperLabPageShell";
 import { PaperOnlyDisclaimerBanner } from "@/components/paper-lab/PaperOnlyDisclaimerBanner";
 import { prisma } from "@/lib/prisma";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
+import { buildDecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
+import type { AgentDecisionOutput } from "@/lib/paper-lab/types/agent-decision.schema";
+import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
@@ -22,7 +25,7 @@ export default async function BattleDetailPage({
     where: { id },
     include: {
       battleDecisions: {
-        include: { outcome: true, agent: true, decision: true },
+        include: { outcome: true, agent: true, decision: { include: { output: true } } },
       },
     },
   });
@@ -57,6 +60,14 @@ export default async function BattleDetailPage({
                   : display === "LOSS"
                     ? "paper-lab-outcome-loss"
                     : "";
+              const payload = d.decision.output?.payload as Partial<AgentDecisionOutput> | undefined;
+              const explanation = buildDecisionExplanation({
+                agentId: d.agent.slug,
+                action: d.action as AgentAction,
+                symbol: battle.symbol,
+                reasoningSummary: d.reasoning ?? d.decision.reasoningSummary,
+                payload: payload ?? null,
+              });
               return (
                 <tr key={d.id}>
                   <td>{d.agent.displayName}</td>
@@ -64,7 +75,7 @@ export default async function BattleDetailPage({
                   <td className="tabular-nums">{(d.confidence * 100).toFixed(0)}%</td>
                   <td className={cls}>{display}</td>
                   <td style={{ whiteSpace: "normal", maxWidth: 360 }}>
-                    {d.outcome?.explanation ?? d.reasoning ?? "—"}
+                    {d.outcome?.explanation ?? explanation.summary}
                   </td>
                 </tr>
               );

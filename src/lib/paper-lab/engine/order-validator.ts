@@ -11,6 +11,7 @@ import {
   isWithinLimitBand,
   kvndToVnd,
 } from "@/lib/paper-lab/engine/units";
+import { VN_BOARD_LOT_SHARES } from "@/lib/paper-lab/engine/board-lot";
 
 export type OrderValidationContext = {
   navVnd: number;
@@ -61,6 +62,13 @@ export function validateAgentDecisionForExecution(
     } else {
       if (!(entry > stop)) reasons.push("Stop must be below entry for LONG");
       if (!(tp > entry)) reasons.push("Take profit must be above entry for LONG");
+
+      if (qty % VN_BOARD_LOT_SHARES !== 0) {
+        reasons.push("Quantity must be a multiple of 100 shares (board lot)");
+      }
+      if (qty < VN_BOARD_LOT_SHARES) {
+        reasons.push(`Quantity below minimum board lot (${VN_BOARD_LOT_SHARES} shares)`);
+      }
 
       const notional = computeNotionalVnd(entry, qty);
       const maxTrade = ctx.navVnd * PAPER_MAX_PER_TRADE_EXPOSURE_PCT;

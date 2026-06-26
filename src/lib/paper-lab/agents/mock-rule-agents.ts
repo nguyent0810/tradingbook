@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import type { AgentDecisionOutput } from "@/lib/paper-lab/types/agent-decision.schema";
 import type { MarketContextBundle } from "@/lib/paper-lab/types/market-context-bundle";
 import type { PaperAgentSlug } from "@/lib/paper-lab/constants";
+import { roundDownToBoardLotShares } from "@/lib/paper-lab/engine/board-lot";
+import { buildAgentReasoningSummary } from "@/lib/paper-lab/ui/arena-copy";
 
 export interface PaperAgentRunner {
   id: PaperAgentSlug;
@@ -23,7 +25,25 @@ function baseDecision(
   const entry = setup?.close ?? bundle.price.closeKVnd;
   const stop = setup?.stopLevel ?? entry * 0.94;
   const tp = setup?.breakoutLevel ? setup.breakoutLevel * 1.08 : entry * 1.12;
-  const qty = action === "BUY" || action === "ADD" ? Math.max(100, Math.floor(50_000_000 / (entry * 1000))) : null;
+  const rawQty =
+    action === "BUY" || action === "ADD"
+      ? Math.floor(50_000_000 / (entry * 1000))
+      : null;
+  const lot = rawQty != null ? roundDownToBoardLotShares(rawQty) : null;
+  const qty = lot?.ok ? lot.quantity : null;
+
+  const signals = {
+    supporting_signals: setup?.quality === "A" ? ["gate2_quality_A"] : setup?.quality === "B" ? ["gate2_quality_B"] : [],
+    opposing_signals: bundle.marketRegime.gate1Level === "WARNING" ? ["weak_regime"] : [],
+    market_regime_assumption: bundle.marketRegime.gate1Level,
+  };
+
+  const reasoning = buildAgentReasoningSummary({
+    agentId,
+    action,
+    symbol: bundle.symbol,
+    payload: signals,
+  });
 
   return {
     agent_id: agentId,
@@ -42,14 +62,14 @@ function baseDecision(
     risk_reward_ratio: entry > stop ? (tp - entry) / (entry - stop) : null,
     confidence: 0.65,
     time_horizon: "SWING_20D",
-    reasoning: `${agentId} rule evaluation on ${bundle.symbol}: regime ${bundle.marketRegime.gate1Level}, gate2 ${setup?.quality ?? "none"}.`,
+    reasoning,
     invalidation_conditions:
       action === "BUY" || action === "ADD"
         ? [`Daily close below ${stop.toFixed(1)} k VND`, "Gate1 FAIL"]
         : null,
-    supporting_signals: setup?.quality === "A" ? ["gate2_quality_A"] : [],
-    opposing_signals: bundle.marketRegime.gate1Level === "WARNING" ? ["weak_regime"] : [],
-    market_regime_assumption: bundle.marketRegime.gate1Level,
+    supporting_signals: signals.supporting_signals,
+    opposing_signals: signals.opposing_signals,
+    market_regime_assumption: signals.market_regime_assumption,
     metadata: { prompt_version: `${agentId}_v1`, model: "mock-rule-agent" },
     ...overrides,
   };
