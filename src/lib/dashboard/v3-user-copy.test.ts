@@ -49,7 +49,9 @@ function expectNoForbidden(text: string) {
 describe("mapRsWatchlistEntryToV3Card", () => {
   it("builds compact card without raw diagnostic strings in default fields", () => {
     const card = mapRsWatchlistEntryToV3Card(RAW_ROW);
-    const serialized = JSON.stringify(card);
+    // terminalCode is an internal data field (consumed by scoring + the workbench
+    // mapper), never rendered. Assert the user-facing COPY carries readable labels.
+    const serialized = JSON.stringify({ ...card, terminalCode: undefined });
 
     expect(card.symbol).toBe("CDC");
     expect(card.stateBadge).toBe("Watch: breakout");
@@ -88,7 +90,8 @@ describe("mapRsWatchlistToV3Panel", () => {
 
     expect(panel.title).toBe("Relative Strength Radar");
     expect(panel.cards).toHaveLength(1);
-    expectNoForbidden(JSON.stringify(panel));
+    const copyOnly = { ...panel, cards: panel.cards.map((c) => ({ ...c, terminalCode: undefined })) };
+    expectNoForbidden(JSON.stringify(copyOnly));
   });
 });
 

@@ -1,71 +1,74 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { StatusPill } from "./ui/StatusPill";
+import { useEffect, useState } from "react";
 import "./paper-lab-command-center.css";
 
-const NAV = [
-  { href: "/paper-lab", label: "Arena", icon: "AR" },
-  { href: "/paper-lab/battles", label: "Battles", icon: "BT" },
-  { href: "/paper-lab/timeline", label: "Timeline", icon: "TL" },
-  { href: "/paper-lab/hof", label: "Hall of Fame", icon: "HF" },
-  { href: "/paper-lab/experiments", label: "Experiments", icon: "EX" },
-  { href: "/paper-lab/human", label: "Human PM", icon: "PM" },
-  { href: "/paper-lab/ops", label: "Ops", icon: "OP" },
+/**
+ * Arena section index — a light in-page outline (not an app sidebar). Renders as
+ * a slim sticky pill row inside the Arena page. Jumps to a zone (smooth scroll)
+ * and scroll-spies the active zone; from a deep link it carries ?focus=.
+ */
+const SECTIONS = [
+  { id: "arena-now", focus: "now", label: "Now" },
+  { id: "arena-consensus", focus: "consensus", label: "Consensus" },
+  { id: "arena-conflict", focus: "conflict", label: "Conflict" },
+  { id: "arena-decision", focus: "decision", label: "Decision" },
+  { id: "arena-learning", focus: "learning", label: "Learning" },
 ] as const;
 
 export function PaperLabSidebar() {
-  const pathname = usePathname();
-  const [legendOpen, setLegendOpen] = useState(false);
+  const [active, setActive] = useState<string>(SECTIONS[0].id);
+
+  useEffect(() => {
+    const els = SECTIONS.map((s) => document.getElementById(s.id)).filter(Boolean) as HTMLElement[];
+    if (els.length === 0) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visible[0]) setActive(visible[0].target.id);
+      },
+      { rootMargin: "-18% 0px -70% 0px", threshold: 0 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+
+  const handleClick = (e: React.MouseEvent, id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActive(id);
+    }
+  };
 
   return (
-    <aside className="paper-lab-sidebar" data-testid="paper-lab-sidebar">
-      <Link href="/paper-lab" className="paper-lab-sidebar__brand">
-        <span className="paper-lab-sidebar__logo">TradeLog</span>
-        <span className="paper-lab-sidebar__kicker">AI Investment Lab</span>
-      </Link>
-
-      <nav className="paper-lab-sidebar__nav" aria-label="Paper Lab">
-        {NAV.map(({ href, label, icon }) => {
-          const active =
-            pathname === href || (href !== "/paper-lab" && pathname.startsWith(href));
+    <nav className="arena-index" data-testid="paper-lab-sidebar" aria-label="Arena sections">
+      <span className="arena-index__eyebrow">Report</span>
+      <ol className="arena-index__list">
+        {SECTIONS.map((s, i) => {
+          const isActive = s.id === active;
           return (
-            <Link
-              key={href}
-              href={href}
-              className={`paper-lab-sidebar__link ${active ? "paper-lab-sidebar__link--active" : ""}`}
-              title={label}
-            >
-              <span className="paper-lab-sidebar__icon">{icon}</span>
-              <span className="paper-lab-sidebar__label">{label}</span>
-            </Link>
+            <li key={s.id}>
+              <Link
+                href={`/paper-lab?focus=${s.focus}`}
+                scroll={false}
+                onClick={(e) => handleClick(e, s.id)}
+                className={`arena-index__link${isActive ? " arena-index__link--active" : ""}`}
+                aria-current={isActive ? "true" : undefined}
+              >
+                <span className="arena-index__num" aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                {s.label}
+              </Link>
+            </li>
           );
         })}
-      </nav>
-
-      <button
-        type="button"
-        className="paper-lab-sidebar__guide-toggle"
-        onClick={() => setLegendOpen((v) => !v)}
-        aria-expanded={legendOpen}
-      >
-        <span>Status Legend</span>
-        <span aria-hidden>{legendOpen ? "−" : "+"}</span>
-      </button>
-
-      {legendOpen && (
-        <div className="paper-lab-sidebar__legend paper-lab-panel--muted">
-          <div className="paper-lab-sidebar__legend-pills">
-            <StatusPill status="OPEN" />
-            <StatusPill status="PARTIAL" />
-            <StatusPill status="CLOSED_TP" />
-            <StatusPill status="CLOSED_SL" />
-            <StatusPill status="EXPIRED" />
-          </div>
-        </div>
-      )}
-    </aside>
+      </ol>
+    </nav>
   );
 }

@@ -35,8 +35,11 @@
     "audit:early-entry:paper-summary": "npx tsx scripts/audit/early-entry-paper-summary.ts",
     "ops:vercel:enable-early-entry": "bash scripts/ops/enable-early-entry-vercel.sh",
     "seed:paper-agents": "npx tsx scripts/seed-paper-agents.ts",
+    "seed:arena:dev": "npx tsx scripts/dev/seed-arena-dev.ts",
+    "seed:arena:dev:clean": "npx tsx scripts/dev/seed-arena-dev.ts --clean",
     "paper-lab:daily": "npx tsx scripts/run-paper-lab-daily.ts",
     "lab-analytics:daily": "npx tsx scripts/run-lab-analytics-daily.ts",
+    "alloc:review": "npx tsx scripts/run-shadow-allocation-review.ts",
     "paper-lab:validate": "npx tsx scripts/validate-paper-lab-data.ts"
   },
   "dependencies": {
@@ -46,9 +49,11 @@
     "@types/pg": "^8.20.0",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^12.40.0",
+    "gsap": "^3.15.0",
     "jose": "^6.2.2",
     "lucide-react": "^1.16.0",
     "next": "16.2.1",
+    "ogl": "^1.0.11",
     "pg": "^8.20.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",

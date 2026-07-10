@@ -36,26 +36,7 @@ export function DashboardPageHeader({ cta, slim = false }: Props) {
           className="btn btn-primary btn-sm dash-v2-btn-primary"
           data-testid="dashboard-header-primary-cta"
         >
-          {cta.primaryLabel === "Log trade" ? (
-            <>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-              {cta.primaryLabel}
-            </>
-          ) : (
-            cta.primaryLabel
-          )}
+          {cta.primaryLabel}
         </Link>
         {showSecondary && cta.secondaryHref && cta.secondaryLabel ? (
           <Link

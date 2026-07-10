@@ -32,12 +32,12 @@ export function LedgerPulseBar({ data }: Props) {
             ))}
           </div>
         ) : (
-          <strong className="block mt-2 text-sm">No closed trades yet</strong>
+          <strong className="block mt-2 text-sm">No closed positions yet</strong>
         )}
       </div>
 
       <div>
-        <span className="cd-kicker">Open trades</span>
+        <span className="cd-kicker">Open positions</span>
         <strong className="cd-mono cd-ledger-value block mt-2">{data.openTrades}</strong>
       </div>
 
@@ -47,7 +47,7 @@ export function LedgerPulseBar({ data }: Props) {
       </div>
 
       <div>
-        <span className="cd-kicker">Trade review</span>
+        <span className="cd-kicker">Session review</span>
         <Link
           href={data.reviewHref}
           className="block mt-2 text-sm underline"

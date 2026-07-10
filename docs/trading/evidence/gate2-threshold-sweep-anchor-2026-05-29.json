@@ -1,0 +1,361 @@
+﻿{
+  "disclaimer": "Diagnostic threshold sweep only ΓÇö production Gate 2 constants and scanner job unchanged.",
+  "asOfSession": "2026-05-28",
+  "symbolCount": 54,
+  "lookbackSessions": 1,
+  "baseline": {
+    "counts": {
+      "A": 1,
+      "B": 0,
+      "INVALID": 53
+    },
+    "terminalCodeCounts": {
+      "trend_ma20_below_ma50": 4,
+      "trend_below_ma50": 31,
+      "breakout_not_holding": 5,
+      "breakout_recency": 11,
+      "pullback_zone_interaction": 2,
+      "VALID": 1
+    }
+  },
+  "arms": [
+    {
+      "dimensionKey": "breakoutRecencyBars",
+      "dimensionLabel": "GATE2_BREAKOUT_RECENCY_BARS",
+      "multiplier": 0.8,
+      "paramValue": 8,
+      "productionValue": 10,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 4,
+        "breakout_recency": 12,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "breakoutRecencyBars",
+      "dimensionLabel": "GATE2_BREAKOUT_RECENCY_BARS",
+      "multiplier": 1.2,
+      "paramValue": 12,
+      "productionValue": 10,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 6,
+        "swept_breakout_weak_close": 1,
+        "breakout_recency": 8,
+        "pullback_zone_interaction": 2,
+        "volume_ratio": 1,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "deltaPullback",
+      "dimensionLabel": "GATE2_DELTA_PULLBACK",
+      "multiplier": 0.8,
+      "paramValue": 0.016,
+      "productionValue": 0.02,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "deltaPullback",
+      "dimensionLabel": "GATE2_DELTA_PULLBACK",
+      "multiplier": 1.2,
+      "paramValue": 0.024,
+      "productionValue": 0.02,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "maxBreakoutExtensionFrac",
+      "dimensionLabel": "GATE2_MAX_BREAKOUT_EXTENSION_FRAC",
+      "multiplier": 0.8,
+      "paramValue": 0.04000000000000001,
+      "productionValue": 0.05,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "maxBreakoutExtensionFrac",
+      "dimensionLabel": "GATE2_MAX_BREAKOUT_EXTENSION_FRAC",
+      "multiplier": 1.2,
+      "paramValue": 0.06,
+      "productionValue": 0.05,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "maxPullbackDepthFrac",
+      "dimensionLabel": "GATE2_MAX_PULLBACK_DEPTH_FRAC",
+      "multiplier": 0.8,
+      "paramValue": 0.032,
+      "productionValue": 0.04,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "maxPullbackDepthFrac",
+      "dimensionLabel": "GATE2_MAX_PULLBACK_DEPTH_FRAC",
+      "multiplier": 1.2,
+      "paramValue": 0.048,
+      "productionValue": 0.04,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "minVolumeRatioB",
+      "dimensionLabel": "GATE2_VOL_RATIO_B (min volume)",
+      "multiplier": 0.8,
+      "paramValue": 0.96,
+      "productionValue": 1.2,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "minVolumeRatioB",
+      "dimensionLabel": "GATE2_VOL_RATIO_B (min volume)",
+      "multiplier": 1.2,
+      "paramValue": 1.44,
+      "productionValue": 1.2,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "minRiskToStopFrac",
+      "dimensionLabel": "GATE2_MIN_RISK_TO_STOP_FRAC",
+      "multiplier": 0.8,
+      "paramValue": 0.0024000000000000002,
+      "productionValue": 0.003,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    },
+    {
+      "dimensionKey": "minRiskToStopFrac",
+      "dimensionLabel": "GATE2_MIN_RISK_TO_STOP_FRAC",
+      "multiplier": 1.2,
+      "paramValue": 0.0036,
+      "productionValue": 0.003,
+      "counts": {
+        "A": 1,
+        "B": 0,
+        "INVALID": 53
+      },
+      "terminalCodeCounts": {
+        "trend_ma20_below_ma50": 4,
+        "trend_below_ma50": 31,
+        "breakout_not_holding": 5,
+        "breakout_recency": 11,
+        "pullback_zone_interaction": 2,
+        "VALID": 1
+      },
+      "deltaVsBaseline": {
+        "A": 0,
+        "B": 0,
+        "INVALID": 0
+      },
+      "newlyPassingSymbols": [],
+      "newlyRejectedSymbols": [],
+      "changedSymbolsRs": []
+    }
+  ]
+}

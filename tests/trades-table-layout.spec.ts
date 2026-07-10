@@ -18,7 +18,7 @@ const COL = {
 
 test.describe("/trades table layout", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/trades");
+    await page.goto("/trades/journal");
     await expect(page.getByTestId("trades-table")).toBeVisible({
       timeout: 30_000,
     });

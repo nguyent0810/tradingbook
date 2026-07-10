@@ -29,7 +29,7 @@ export function WorkbenchRowQuickActions({ symbol }: Props) {
         Create alert
       </button>
       <button type="button" className="cd-workbench-quick-actions__btn" data-testid="rs-quick-paper-log">
-        Paper log
+        Log signal
       </button>
     </div>
   );

@@ -1,0 +1,324 @@
+﻿{
+  "generatedAt": "2026-05-29T02:52:49.137Z",
+  "tradableCount": 54,
+  "evaluationRowCount": 3240,
+  "reportSchemaVersion": "d2.1-rs-rank-evidence",
+  "anchorSession": "2026-05-28",
+  "lookbackSessions": 60,
+  "mode": "walkforward_ab",
+  "formula": "rsTerm = clamp(RS20_pp ├ù 25, -250, +250)",
+  "productionRsRankEnabled": false,
+  "abCandidateCount": 7,
+  "tierCounts": {
+    "A": 7,
+    "B": 0
+  },
+  "ordering": {
+    "entries": [
+      {
+        "symbol": "BMS@2026-03-06",
+        "rankScoreBase": 1978.831659686932,
+        "rsTerm": 198.15425636875244,
+        "rankScoreWithRs": 2176.9859160556844,
+        "rs20SpreadPct": 7.926170254750097,
+        "baseRank": 7,
+        "rsAdjustedRank": 6
+      },
+      {
+        "symbol": "CSV@2026-03-04",
+        "rankScoreBase": 3699.4655206735383,
+        "rsTerm": 250,
+        "rankScoreWithRs": 3949.4655206735383,
+        "rs20SpreadPct": 11.821655106651674,
+        "baseRank": 2,
+        "rsAdjustedRank": 2
+      },
+      {
+        "symbol": "CTR@2026-05-28",
+        "rankScoreBase": 2004.18382769962,
+        "rsTerm": 93.53898800416455,
+        "rankScoreWithRs": 2097.7228157037844,
+        "rs20SpreadPct": 3.741559520166582,
+        "baseRank": 6,
+        "rsAdjustedRank": 7
+      },
+      {
+        "symbol": "DDV@2026-03-04",
+        "rankScoreBase": 3475.9550964254586,
+        "rsTerm": 250,
+        "rankScoreWithRs": 3725.9550964254586,
+        "rs20SpreadPct": 18.705239567496257,
+        "baseRank": 3,
+        "rsAdjustedRank": 3
+      },
+      {
+        "symbol": "DGC@2026-03-12",
+        "rankScoreBase": 3722.82620925131,
+        "rsTerm": 250,
+        "rankScoreWithRs": 3972.82620925131,
+        "rs20SpreadPct": 23.59021320903786,
+        "baseRank": 1,
+        "rsAdjustedRank": 1
+      },
+      {
+        "symbol": "DGC@2026-03-13",
+        "rankScoreBase": 2592.435154012252,
+        "rsTerm": 250,
+        "rankScoreWithRs": 2842.435154012252,
+        "rs20SpreadPct": 21.904988207766195,
+        "baseRank": 5,
+        "rsAdjustedRank": 5
+      },
+      {
+        "symbol": "VCB@2026-05-20",
+        "rankScoreBase": 2787.6309720110235,
+        "rsTerm": 82.12966944676101,
+        "rankScoreWithRs": 2869.7606414577845,
+        "rs20SpreadPct": 3.2851867778704404,
+        "baseRank": 4,
+        "rsAdjustedRank": 4
+      }
+    ],
+    "promoted": [
+      {
+        "symbol": "BMS@2026-03-06",
+        "baseRank": 7,
+        "rsAdjustedRank": 6,
+        "delta": 1
+      }
+    ],
+    "demoted": [
+      {
+        "symbol": "CTR@2026-05-28",
+        "baseRank": 6,
+        "rsAdjustedRank": 7,
+        "delta": -1
+      }
+    ]
+  },
+  "entriesDetailed": [
+    {
+      "symbol": "BMS@2026-03-06",
+      "rankScoreBase": 1978.831659686932,
+      "rsTerm": 198.15425636875244,
+      "rankScoreWithRs": 2176.9859160556844,
+      "rs20SpreadPct": 7.926170254750097,
+      "baseRank": 7,
+      "rsAdjustedRank": 6,
+      "underlying": "BMS",
+      "sessionDate": "2026-03-06",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 1.4040616821815455,
+      "rankDelta": 1,
+      "forward20Pct": 5.109489051094895
+    },
+    {
+      "symbol": "CSV@2026-03-04",
+      "rankScoreBase": 3699.4655206735383,
+      "rsTerm": 250,
+      "rankScoreWithRs": 3949.4655206735383,
+      "rs20SpreadPct": 11.821655106651674,
+      "baseRank": 2,
+      "rsAdjustedRank": 2,
+      "underlying": "CSV",
+      "sessionDate": "2026-03-04",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 3.194938168742212,
+      "rankDelta": 0,
+      "forward20Pct": -16.486902927580893
+    },
+    {
+      "symbol": "CTR@2026-05-28",
+      "rankScoreBase": 2004.18382769962,
+      "rsTerm": 93.53898800416455,
+      "rankScoreWithRs": 2097.7228157037844,
+      "rs20SpreadPct": 3.741559520166582,
+      "baseRank": 6,
+      "rsAdjustedRank": 7,
+      "underlying": "CTR",
+      "sessionDate": "2026-05-28",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 0.2268489680408603,
+      "rankDelta": -1,
+      "forward20Pct": null
+    },
+    {
+      "symbol": "DDV@2026-03-04",
+      "rankScoreBase": 3475.9550964254586,
+      "rsTerm": 250,
+      "rankScoreWithRs": 3725.9550964254586,
+      "rs20SpreadPct": 18.705239567496257,
+      "baseRank": 3,
+      "rsAdjustedRank": 3,
+      "underlying": "DDV",
+      "sessionDate": "2026-03-04",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 20.179854275176858,
+      "rankDelta": 0,
+      "forward20Pct": -15.123456790123457
+    },
+    {
+      "symbol": "DGC@2026-03-12",
+      "rankScoreBase": 3722.82620925131,
+      "rsTerm": 250,
+      "rankScoreWithRs": 3972.82620925131,
+      "rs20SpreadPct": 23.59021320903786,
+      "baseRank": 1,
+      "rsAdjustedRank": 1,
+      "underlying": "DGC",
+      "sessionDate": "2026-03-12",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 21.459075792783242,
+      "rankDelta": 0,
+      "forward20Pct": -34.36341161928307
+    },
+    {
+      "symbol": "DGC@2026-03-13",
+      "rankScoreBase": 2592.435154012252,
+      "rsTerm": 250,
+      "rankScoreWithRs": 2842.435154012252,
+      "rs20SpreadPct": 21.904988207766195,
+      "baseRank": 5,
+      "rsAdjustedRank": 5,
+      "underlying": "DGC",
+      "sessionDate": "2026-03-13",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": 23.933274250905868,
+      "rankDelta": 0,
+      "forward20Pct": -30.232558139534895
+    },
+    {
+      "symbol": "VCB@2026-05-20",
+      "rankScoreBase": 2787.6309720110235,
+      "rsTerm": 82.12966944676101,
+      "rankScoreWithRs": 2869.7606414577845,
+      "rs20SpreadPct": 3.2851867778704404,
+      "baseRank": 4,
+      "rsAdjustedRank": 4,
+      "underlying": "VCB",
+      "sessionDate": "2026-05-20",
+      "quality": "A",
+      "terminalCode": "VALID",
+      "rs50SpreadPct": -3.3540306873866435,
+      "rankDelta": 0,
+      "forward20Pct": null
+    }
+  ],
+  "forwardOutcomes": [
+    {
+      "group": "promoted",
+      "sampleSize": 1,
+      "missingFuture20": 0,
+      "missingFuture20Pct": 0,
+      "highMissingFuture20Warning": null,
+      "horizons": [
+        {
+          "horizon": 5,
+          "n": 1,
+          "avgPct": -2.9197080291970656,
+          "medianPct": -2.9197080291970656,
+          "winRate": 0
+        },
+        {
+          "horizon": 10,
+          "n": 1,
+          "avgPct": 0,
+          "medianPct": 0,
+          "winRate": 0
+        },
+        {
+          "horizon": 20,
+          "n": 1,
+          "avgPct": 5.109489051094895,
+          "medianPct": 5.109489051094895,
+          "winRate": 1
+        }
+      ],
+      "avgMfe20Pct": 10.21897810218979,
+      "avgMae20Pct": -12.408759124087588,
+      "hitPlus5BeforeMinus3Rate": 0,
+      "hitPlus10Within20Rate": 1,
+      "drawdownWorseThanMinus5Rate": 1
+    },
+    {
+      "group": "demoted",
+      "sampleSize": 1,
+      "missingFuture20": 1,
+      "missingFuture20Pct": 1,
+      "highMissingFuture20Warning": ">30% missing 20-session forward labels (1/1).",
+      "horizons": [
+        {
+          "horizon": 5,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 10,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        },
+        {
+          "horizon": 20,
+          "n": 0,
+          "avgPct": null,
+          "medianPct": null,
+          "winRate": null
+        }
+      ],
+      "avgMfe20Pct": null,
+      "avgMae20Pct": null,
+      "hitPlus5BeforeMinus3Rate": null,
+      "hitPlus10Within20Rate": null,
+      "drawdownWorseThanMinus5Rate": null
+    },
+    {
+      "group": "unchanged",
+      "sampleSize": 5,
+      "missingFuture20": 1,
+      "missingFuture20Pct": 0.2,
+      "highMissingFuture20Warning": null,
+      "horizons": [
+        {
+          "horizon": 5,
+          "n": 5,
+          "avgPct": -15.273437369708109,
+          "medianPct": -11.248073959938376,
+          "winRate": 0
+        },
+        {
+          "horizon": 10,
+          "n": 4,
+          "avgPct": -22.117957553317485,
+          "medianPct": -22.084463077762255,
+          "winRate": 0
+        },
+        {
+          "horizon": 20,
+          "n": 4,
+          "avgPct": -24.05158236913058,
+          "medianPct": -23.359730533557894,
+          "winRate": 0
+        }
+      ],
+      "avgMfe20Pct": 1.6172067159013648,
+      "avgMae20Pct": -29.720850644417336,
+      "hitPlus5BeforeMinus3Rate": 0,
+      "hitPlus10Within20Rate": 0,
+      "drawdownWorseThanMinus5Rate": 1
+    }
+  ],
+  "smallSampleWarning": "Very small A/B sample (n=7) ΓÇö hypothesis only.",
+  "enablementReadiness": "insufficient_ab_sample",
+  "enablementRecommendation": "Collect more walk-forward A/B samples (ΓëÑ30) before staging enablement.",
+  "rsAtAnchorLimitation": "RS20/RS50 computed at each replay session date."
+}

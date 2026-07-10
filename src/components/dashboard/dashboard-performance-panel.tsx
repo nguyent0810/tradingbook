@@ -29,7 +29,7 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
 
       {metrics.totalTrades === 0 ? (
         <p className="dash-performance__empty" data-testid="dashboard-performance-empty">
-          No closed trades yet — equity curve appears after first exit.
+          No closed positions yet — equity curve appears after first exit.
         </p>
       ) : (
         <>
@@ -60,7 +60,7 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
               testId="dashboard-equity-sparkline"
               height="sparkline"
               state="ready"
-              description="Recent cumulative P&amp;L (closed trades)"
+              description="Recent cumulative P&amp;L (closed positions)"
               className="dash-performance__sparkline chart-frame--inline"
             >
               <ChartPlot height={56}>

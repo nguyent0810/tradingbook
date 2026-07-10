@@ -9,6 +9,12 @@ import type { MarketContextBundle } from "@/lib/paper-lab/types/market-context-b
 import { evaluateBreakoutPullbackCandidate } from "@/lib/scanner/gate2/breakout-pullback";
 import { computeRelativeStrengthDiagnostic } from "@/lib/scanner/gate2/relative-strength";
 import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
+import {
+  computeAtr14,
+  computeMaAtIndex,
+  volumeMa20AtIndex,
+} from "@/lib/scanner/early-entry/bar-metrics";
+import { evaluateEarlyEntrySession } from "@/lib/scanner/early-entry/evaluate-early-entry";
 import { evaluateTradabilityForSymbolId } from "@/lib/scanner/tradability";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
 import { computePortfolioState } from "@/lib/paper-lab/portfolio/portfolio-service";
@@ -27,6 +33,32 @@ function toGate2Bars(
     close: r.close,
     volume: r.volume,
   }));
+}
+
+/** Whole-calendar-day difference (UTC), floored at 0. */
+export function utcDayDiff(later: Date, earlier: Date): number {
+  const a = Date.UTC(later.getUTCFullYear(), later.getUTCMonth(), later.getUTCDate());
+  const b = Date.UTC(earlier.getUTCFullYear(), earlier.getUTCMonth(), earlier.getUTCDate());
+  return Math.max(0, Math.round((a - b) / 86_400_000));
+}
+
+/** Raw N-session high/low over the trailing window ending at `idx` (inclusive). */
+export function rawRangeHighLow(
+  bars: readonly Gate2BarInput[],
+  idx: number,
+  window: number
+): { high: number | null; low: number | null } {
+  if (idx < 0 || bars.length === 0) return { high: null, low: null };
+  const from = Math.max(0, idx - (window - 1));
+  const slice = bars.slice(from, idx + 1);
+  if (slice.length === 0) return { high: null, low: null };
+  let hi = slice[0]!.high;
+  let lo = slice[0]!.low;
+  for (const b of slice) {
+    if (b.high > hi) hi = b.high;
+    if (b.low < lo) lo = b.low;
+  }
+  return { high: hi, low: lo };
 }
 
 export async function buildMarketContextBundle(
@@ -69,9 +101,23 @@ export async function buildMarketContextBundle(
   const stockBars = toGate2Bars(stock.bars);
   const evalBar = stock.bars[stock.bars.length - 1]!;
   const prevBar = stock.bars.length > 1 ? stock.bars[stock.bars.length - 2]! : null;
+  const evalIdx = stockBars.length - 1;
+
+  // Phase 0 technical enrichment (deterministic; reuses scanner indicator helpers).
+  // `stockBars` are already ascending and filtered to <= sessionDate, so the last
+  // index is the evaluation bar.
+  const { ma20, ma50 } = computeMaAtIndex(stockBars, evalIdx);
+  const atr14KVnd = computeAtr14(stockBars, evalIdx);
+  const { high: range20dHigh, low: range20dLow } = rawRangeHighLow(stockBars, evalIdx, 20);
+  const volMa20Fallback = volumeMa20AtIndex(stockBars, evalIdx);
 
   const gate2 = evaluateBreakoutPullbackCandidate(stockBars, params.sessionDate);
   const rs = computeRelativeStrengthDiagnostic(stockBars, indexGate2, params.sessionDate);
+  const earlyEntry = evaluateEarlyEntrySession({
+    stockBars,
+    indexBars: indexGate2,
+    sessionDate: params.sessionDate,
+  });
   const tradability = await evaluateTradabilityForSymbolId(prisma, stock.id, params.sessionDate);
 
   const ctxDaily = await prisma.marketContextDaily.findUnique({
@@ -188,19 +234,25 @@ export async function buildMarketContextBundle(
     },
     volume: {
       volume: evalBar.volume,
-      volMa20: symCtx?.volMa20 ?? null,
-      volRatioMa20: symCtx?.volRatioMa20 ?? null,
-      avgValueVnd20: symCtx?.close && symCtx?.volMa20 ? symCtx.close * 1000 * symCtx.volMa20 : null,
+      volMa20: symCtx?.volMa20 ?? volMa20Fallback,
+      volRatioMa20:
+        symCtx?.volRatioMa20 ??
+        (volMa20Fallback && volMa20Fallback > 0 ? evalBar.volume / volMa20Fallback : null),
+      avgValueVnd20: symCtx?.close && symCtx?.volMa20
+        ? symCtx.close * 1000 * symCtx.volMa20
+        : volMa20Fallback
+          ? evalBar.close * 1000 * volMa20Fallback
+          : null,
     },
     technicals: {
-      ma20: null,
-      ma50: null,
-      atr14KVnd: null,
-      range20dHigh: gate2?.breakoutLevel ?? null,
-      range20dLow: gate2?.pullbackZoneLow ?? null,
+      ma20,
+      ma50,
+      atr14KVnd,
+      range20dHigh,
+      range20dLow,
     },
     relativeStrength: rs,
-    earlyEntry: null,
+    earlyEntry,
     gate2Setup: gate2,
     marketRegime: {
       gate1Level: gate1,
@@ -234,8 +286,15 @@ export async function buildMarketContextBundle(
           stopLossKVnd: openPos.stopLossKvnd,
           takeProfitKVnd: openPos.takeProfitKvnd,
           unrealizedPnlVnd: Math.round((evalBar.close - openPos.avgEntryKvnd) * 1000 * openPos.quantity),
-          holdingDays: 0,
+          holdingDays: utcDayDiff(params.sessionDate, openPos.openedAt),
           status: openPos.status === "PARTIAL" ? "PARTIAL" : "OPEN",
+          initialRiskPerShareKvnd: openPos.initialRiskPerShareKvnd ?? null,
+          highWaterMarkKvnd: openPos.highWaterMarkKvnd ?? null,
+          trailingStopKvnd: openPos.trailingStopKvnd ?? null,
+          addsCount: openPos.addsCount ?? 0,
+          partialsCount: openPos.partialsCount ?? 0,
+          maxFavorableExcursionKvnd: openPos.maxFavorableExcursionKvnd ?? 0,
+          maxAdverseExcursionKvnd: openPos.maxAdverseExcursionKvnd ?? 0,
         }
       : null,
     portfolioState: {

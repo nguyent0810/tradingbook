@@ -76,6 +76,10 @@ export async function runPaperLabDailyJob(
     const decisions = await prisma.agentDecision.findMany({
       where: { agentId: agent.id, sessionDate },
       include: { output: true, order: true },
+      // Deterministic insertion order so rotation's laggard REDUCE/EXIT executes
+      // before its funding BUY. Insertion order is what the legacy path already
+      // relied on implicitly, so this does not change legacy behavior.
+      orderBy: { createdAt: "asc" },
     });
 
     for (const dec of decisions) {

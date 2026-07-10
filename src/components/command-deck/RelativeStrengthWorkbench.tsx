@@ -113,7 +113,7 @@ export function RelativeStrengthWorkbench({
       {showEarlyEntry ? (
         <div className="cd-rs-early-compact mb-2" data-testid="command-deck-rs-early-research-section">
           <p className="m-0 text-xs cd-rs-early-compact__line">
-            Early Entry Research · research-only · not a buy signal · paper validation enabled
+            Early Entry Research · research-only · not a buy signal · validation enabled
           </p>
           <EarlyEntryHelpPanel />
         </div>
@@ -365,7 +365,7 @@ export function RelativeStrengthWorkbench({
                             </p>
                           ) : null}
                           <p className="m-0 mt-1 text-[10px]" style={{ color: "var(--cd-text-dim)" }}>
-                            Paper validation: log daily, validate weekly — see safety details above.
+                            Validation: log daily, validate weekly — see safety details above.
                           </p>
                         </div>
                       </td>

@@ -22,7 +22,7 @@ export function TradeGateCard({ risk }: Props) {
   return (
     <Card className="p-4" data-testid="dashboard-cyber-trade-gate">
       <CardHeader
-        title="Trade Gate"
+        title="Entry Gate"
         subtitle={risk.tradeGate.subtitle}
         action={
           <div className="text-right text-xs">

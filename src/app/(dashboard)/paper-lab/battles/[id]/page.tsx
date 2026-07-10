@@ -9,7 +9,7 @@ import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
-  title: "Battle Replay | AI Lab",
+  title: "Battle Replay | Arena",
 };
 
 export const dynamic = "force-dynamic";

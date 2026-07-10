@@ -12,10 +12,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tradelog.app";
+
 export const metadata: Metadata = {
-  title: "TradeLog — Stock Trading Journal",
+  metadataBase: new URL(SITE_URL),
+  title: "TradeLog — Setup Intelligence Platform",
   description:
-    "A minimal, frictionless trading journal to log, track and analyze your trades.",
+    "TradeLog is a setup intelligence platform: scan the market, surface high-quality setups with the evidence behind each one, and pressure-test every decision before you commit capital.",
+  applicationName: "TradeLog",
+  openGraph: {
+    type: "website",
+    siteName: "TradeLog",
+    title: "TradeLog — Setup Intelligence Platform",
+    description:
+      "Know which opportunities deserve your capital. Evidence-driven decision support for traders.",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export default function RootLayout({

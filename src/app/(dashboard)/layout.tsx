@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { AppShellNavDesktop, AppShellNavMobile } from "@/components/app-shell-nav";
+import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { LogoutButton } from "@/components/logout-button";
 
 export default async function DashboardLayout({
@@ -18,18 +19,19 @@ export default async function DashboardLayout({
     <div className="app-shell command-deck-shell">
       <header className="app-shell-header">
         <div className="app-shell-header-inner">
-          <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="app-shell-brand">
+          <div className="app-shell-header__lead">
+            <Link href="/dashboard" className="app-shell-brand" aria-label="TradeLog — Dashboard">
               <svg
+                className="app-shell-brand__mark"
                 width="18"
                 height="18"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="var(--accent)"
+                stroke="currentColor"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                aria-hidden
+                aria-hidden="true"
               >
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 <polyline points="16 7 22 7 22 13" />
@@ -40,11 +42,13 @@ export default async function DashboardLayout({
             <AppShellNavDesktop />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="app-shell-header__actions">
             <span className="app-shell-user hidden sm:block">{session.email}</span>
             <LogoutButton />
           </div>
         </div>
+
+        <AppBreadcrumbs />
       </header>
 
       <AppShellNavMobile />

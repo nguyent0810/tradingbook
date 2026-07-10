@@ -10,24 +10,32 @@ export function RegisterForm() {
   );
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="cd-auth-form" data-testid="register-form" noValidate>
       {state?.message && (
-        <div
-          className="rounded-lg px-4 py-3 text-sm"
-          style={{
-            background: "var(--danger-muted)",
-            color: "var(--danger)",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
-          }}
-        >
-          {state.message}
+        <div className="cd-auth-alert" role="alert" data-testid="register-error">
+          <svg
+            className="cd-auth-alert__icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          <span>{state.message}</span>
         </div>
       )}
 
-      <div>
-        <label htmlFor="name" className="label">
-          Name{" "}
-          <span style={{ color: "var(--text-muted)" }}>(optional)</span>
+      <div className="cd-auth-field">
+        <label htmlFor="name" className="cd-auth-label">
+          Name <span className="cd-auth-label__hint">(optional)</span>
         </label>
         <input
           id="name"
@@ -35,12 +43,12 @@ export function RegisterForm() {
           type="text"
           autoComplete="name"
           placeholder="Your name"
-          className="input"
+          className="cd-auth-input"
         />
       </div>
 
-      <div>
-        <label htmlFor="email" className="label">
+      <div className="cd-auth-field">
+        <label htmlFor="email" className="cd-auth-label">
           Email
         </label>
         <input
@@ -50,17 +58,19 @@ export function RegisterForm() {
           autoComplete="email"
           required
           placeholder="you@example.com"
-          className="input"
+          className="cd-auth-input"
+          aria-invalid={state?.errors?.email ? "true" : undefined}
+          aria-describedby={state?.errors?.email ? "email-error" : undefined}
         />
         {state?.errors?.email && (
-          <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
+          <p id="email-error" className="cd-auth-error" aria-live="polite">
             {state.errors.email[0]}
           </p>
         )}
       </div>
 
-      <div>
-        <label htmlFor="password" className="label">
+      <div className="cd-auth-field">
+        <label htmlFor="password" className="cd-auth-label">
           Password
         </label>
         <input
@@ -70,11 +80,19 @@ export function RegisterForm() {
           autoComplete="new-password"
           required
           placeholder="Min. 6 characters"
-          className="input"
+          className="cd-auth-input"
+          aria-invalid={state?.errors?.password ? "true" : undefined}
+          aria-describedby={
+            state?.errors?.password ? "password-error" : "password-hint"
+          }
         />
-        {state?.errors?.password && (
-          <p className="mt-1 text-xs" style={{ color: "var(--danger)" }}>
+        {state?.errors?.password ? (
+          <p id="password-error" className="cd-auth-error" aria-live="polite">
             {state.errors.password[0]}
+          </p>
+        ) : (
+          <p id="password-hint" className="cd-auth-error" style={{ color: "var(--cd-text-dim)" }}>
+            At least 6 characters.
           </p>
         )}
       </div>
@@ -82,25 +100,27 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={pending}
-        className="btn btn-primary w-full"
-        style={{ marginTop: "8px" }}
+        aria-busy={pending}
+        className="cd-auth-btn"
+        data-testid="register-submit"
       >
         {pending ? (
-          <span className="flex items-center gap-2">
+          <>
             <svg
-              className="h-4 w-4 animate-spin"
+              className="cd-auth-btn__spinner"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
+              aria-hidden="true"
             >
               <circle cx="12" cy="12" r="10" opacity="0.25" />
               <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75" />
             </svg>
             Creating account…
-          </span>
+          </>
         ) : (
-          "Create Account"
+          "Create account"
         )}
       </button>
     </form>

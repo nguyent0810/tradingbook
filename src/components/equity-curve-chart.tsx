@@ -12,7 +12,7 @@ export function EquityCurveChart({ data }: { data: EquityDataPoint[] }) {
         testId="equity-curve-chart"
         height="default"
         state="empty"
-        emptyMessage="Not enough closed trades to plot equity curve."
+        emptyMessage="Not enough closed positions to plot equity curve."
       />
     );
   }
@@ -25,7 +25,7 @@ export function EquityCurveChart({ data }: { data: EquityDataPoint[] }) {
     <ChartFrame
       testId="equity-curve-chart"
       title="Equity curve"
-      description="Cumulative realized P&amp;L from closed trades"
+      description="Cumulative realized P&amp;L from closed positions"
       height="default"
       state="ready"
       className="chart-frame--bordered"

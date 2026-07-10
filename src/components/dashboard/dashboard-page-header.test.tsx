@@ -8,12 +8,12 @@ describe("DashboardPageHeader CTA order", () => {
       <DashboardPageHeader
         cta={{
           lead: "No new swing entries today.",
-          primaryHref: "/trades",
-          primaryLabel: "Review open positions",
-          secondaryHref: "/setups",
-          secondaryLabel: "Open pipeline",
-          tertiaryHref: "/trades/new",
-          tertiaryLabel: "Log exit or adjustment",
+          primaryHref: "/setups",
+          primaryLabel: "Review setups",
+          secondaryHref: "/paper-lab",
+          secondaryLabel: "Open Arena",
+          tertiaryHref: null,
+          tertiaryLabel: null,
         }}
       />
     );
@@ -23,6 +23,6 @@ describe("DashboardPageHeader CTA order", () => {
     expect(primaryIdx).toBeGreaterThan(-1);
     expect(secondaryIdx).toBeGreaterThan(-1);
     expect(primaryIdx).toBeLessThan(secondaryIdx);
-    expect(html.indexOf("Review open positions")).toBeLessThan(html.indexOf("Open pipeline"));
+    expect(html.indexOf("Review setups")).toBeLessThan(html.indexOf("Open Arena"));
   });
 });

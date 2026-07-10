@@ -19,22 +19,22 @@ export function PaperLabHeaderGrid({
   return (
     <header className="paper-lab-header-grid" data-testid="paper-lab-header-grid">
       <PaperLabPanel className="paper-lab-title-block">
-        <h1>AI Trading Arena</h1>
+        <h1>Arena</h1>
         <div className="paper-lab-title-block__chips">
           <span className="paper-lab-title-chip paper-lab-title-chip--paper" data-testid="paper-lab-disclaimer">
-            Paper Only
+            Simulation only
           </span>
           <span className="paper-lab-title-chip">{overview.totalAgents} Agents</span>
           <span className="paper-lab-title-chip">
-            {formatArenaVndCompact(overview.totalVirtualCapitalVnd)} virtual capital
+            {formatArenaVndCompact(overview.totalVirtualCapitalVnd)} simulated capital
           </span>
           <span className="paper-lab-title-chip paper-lab-title-chip--mode">{modeLabel}</span>
         </div>
         <p className="paper-lab-title-block__status">
-          Virtual funds competing under identical market data.
+          Agents competing under identical market data.
         </p>
         <p className="paper-lab-title-block__lead">
-          Regime intelligence · agent battles · research only
+          Regime intelligence · agent battles · simulation only
         </p>
         {overview.stale && (
           <p className="text-xs text-[var(--pl-amber)] mt-2 line-clamp-2">

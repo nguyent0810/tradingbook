@@ -9,14 +9,19 @@ type Props = {
   risk: V3RiskConsole;
 };
 
-function actionTone(action: string): "danger" | "warning" | "success" | "neutral" {
-  if (action === "Go") return "success";
-  if (action === "No new entries" || action === "Hold") return "danger";
-  if (action === "Setup needed" || action === "Configure equity") return "warning";
-  return "neutral";
+type GateTone = "danger" | "warning" | "success" | "neutral";
+type GateRow = ReturnType<typeof mapTradeGateRows>[number];
+
+/** Per-row tone — same buckets as countByStatus so dots/badges/counts agree. */
+function rowTone(row: GateRow): GateTone {
+  const label = row.statusLabel.toLowerCase();
+  if (label.includes("block")) return "danger";
+  if (label.includes("ready") || row.action === "Go") return "success";
+  if (label.includes("wait") || label.includes("setup")) return "warning";
+  return "warning";
 }
 
-function countByStatus(rows: ReturnType<typeof mapTradeGateRows>) {
+function countByStatus(rows: GateRow[]) {
   let blocked = 0;
   let waiting = 0;
   let ready = 0;
@@ -30,59 +35,83 @@ function countByStatus(rows: ReturnType<typeof mapTradeGateRows>) {
   return { blocked, waiting, ready };
 }
 
+/** Overall gate verdict — answers "are we allowed to trade?" */
+function gateVerdict(counts: { blocked: number; waiting: number; ready: number }): {
+  label: string;
+  tone: GateTone;
+} {
+  if (counts.blocked > 0) return { label: "Entries blocked", tone: "danger" };
+  if (counts.ready > 0) return { label: "Entries allowed", tone: "success" };
+  return { label: "Awaiting setup", tone: "warning" };
+}
+
+const TONE_ORDER: Record<GateTone, number> = { danger: 0, warning: 1, success: 2, neutral: 3 };
+
+function Count({ label, value, tone }: { label: string; value: number; tone: GateTone }) {
+  return (
+    <div className={`cd-count cd-count--${tone}`}>
+      <span className="cd-mono cd-count__value">{value}</span>
+      <span className="cd-count__label">{label}</span>
+    </div>
+  );
+}
+
 export function TradeGateSummaryCard({ risk }: Props) {
   const rows = mapTradeGateRows(risk);
   const counts = countByStatus(rows);
+  const verdict = gateVerdict(counts);
+  const ordered = [...rows].sort((a, b) => TONE_ORDER[rowTone(a)] - TONE_ORDER[rowTone(b)]);
 
   return (
-    <Card className="p-3 cd-trade-gate-summary" data-testid="dashboard-cyber-trade-gate">
+    <Card className="p-3 cd-trade-gate" data-testid="dashboard-cyber-trade-gate">
       <CardHeader
-        title="Trade Gate"
+        title="Entry Gate"
         subtitle={risk.tradeGate.subtitle}
         action={
-          <span className="cd-mono text-xs" style={{ color: "var(--cd-text-muted)" }}>
-            Open {risk.openPositions}
+          <span className="cd-trade-gate__open">
+            <span className="cd-trade-gate__open-label">Open</span>
+            <span className="cd-mono cd-trade-gate__open-count">{risk.openPositions}</span>
           </span>
         }
       />
 
-      <p className="cd-trade-gate-summary__counts m-0 mb-2 text-xs">
-        Blocked: <strong>{counts.blocked}</strong> · Waiting: <strong>{counts.waiting}</strong> ·
-        Ready: <strong>{counts.ready}</strong>
-      </p>
+      {/* Verdict — allowed to trade? */}
+      <div className={`cd-trade-gate__verdict cd-trade-gate__verdict--${verdict.tone}`}>
+        <span className="cd-trade-gate__verdict-dot" aria-hidden />
+        {verdict.label}
+      </div>
 
-      <details className="cd-trade-gate-summary__details">
-        <summary className="cd-trade-gate-summary__trigger text-xs">View rules</summary>
-        <div className="cd-table-scroll cd-table-scroll--compact mt-2" role="region" aria-label="Trade Gate rules">
-          <table className="cd-rs-table">
-            <thead>
-              <tr>
-                <th>Rule</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.rule}</td>
-                  <td>
-                    <Badge tone={actionTone(row.action)} size="compact">
-                      {row.statusLabel}
-                    </Badge>
-                  </td>
-                  <td className="cd-mono text-xs">{row.action}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </details>
+      {/* Counts */}
+      <div className="cd-trade-gate__counts" role="group" aria-label="Gate status counts">
+        <Count label="Blocked" value={counts.blocked} tone="danger" />
+        <Count label="Waiting" value={counts.waiting} tone="warning" />
+        <Count label="Ready" value={counts.ready} tone="success" />
+      </div>
 
-      {rows.length === 0 ? (
-        <p className="text-xs m-0 mt-1" style={{ color: "var(--cd-text-dim)" }}>
-          {risk.capitalProtectionState}
-        </p>
+      {/* Compact checklist — blocked first */}
+      {rows.length > 0 ? (
+        <ul className="cd-trade-gate__list" aria-label="Trade gate rules">
+          {ordered.map((row) => {
+            const tone = rowTone(row);
+            return (
+              <li key={row.id} className="cd-trade-gate__item">
+                <span className={`cd-trade-gate__dot cd-trade-gate__dot--${tone}`} aria-hidden />
+                <span className="cd-trade-gate__rule" title={row.rule}>
+                  {row.rule}
+                </span>
+                <Badge tone={tone} size="compact">
+                  {row.statusLabel}
+                </Badge>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p className="cd-trade-gate__empty">{risk.capitalProtectionState}</p>
+      )}
+
+      {rows.length > 0 && risk.capitalProtectionState ? (
+        <p className="cd-trade-gate__footer">{risk.capitalProtectionState}</p>
       ) : null}
     </Card>
   );

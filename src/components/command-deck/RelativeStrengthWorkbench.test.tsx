@@ -49,7 +49,7 @@ describe("RelativeStrengthWorkbench", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY, ROW_WITHOUT_EARLY]} />
     );
-    expect(html).toContain("Early Entry Research · research-only · not a buy signal · paper validation enabled");
+    expect(html).toContain("Early Entry Research · research-only · not a buy signal · validation enabled");
     expect(html).toContain('data-testid="early-entry-help"');
     expect(html).toContain("Pilot Research");
     expect(html).toContain("Main Setup");
@@ -74,7 +74,7 @@ describe("RelativeStrengthWorkbench", () => {
     const html = renderToStaticMarkup(
       <RelativeStrengthWorkbench rows={[ROW_WITH_EARLY]} />
     );
-    expect(html).toContain("Paper watch only");
+    expect(html).toContain("Validation watch");
     expect(html).toContain("<th>Main Setup</th>");
     expect(html).toContain("Early Research");
     expect(html).not.toContain("RS Strength");
@@ -105,7 +105,7 @@ describe("WorkbenchRowQuickActions", () => {
     expect(html).toContain("View chart");
     expect(html).toContain("Add to watchlist");
     expect(html).toContain("Create alert");
-    expect(html).toContain("Paper log");
+    expect(html).toContain("Log signal");
     expect(html).not.toMatch(/>(Buy|Execute|Place order)</);
   });
 });
