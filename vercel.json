@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/lab-analytics-daily",
       "schedule": "45 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/shadow-allocation-review",
+      "schedule": "0 16 1 * *"
     }
   ]
 }

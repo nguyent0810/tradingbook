@@ -1,0 +1,95 @@
+﻿{
+  "tradableCount": 54,
+  "replayRowCount": 54,
+  "report": {
+    "disclaimer": "Forward-return validation is diagnostic only ΓÇö past outcomes do not guarantee future results. Do not change production thresholds from small samples.",
+    "anchorSession": "2026-05-28ΓÇª2026-05-28",
+    "evaluationRowCount": 54,
+    "lookbackSessions": 1,
+    "includeSweepArms": true,
+    "cohorts": [
+      {
+        "cohort": "baseline_tier_a",
+        "label": "Baseline Tier A",
+        "sampleSize": 1,
+        "smallSampleWarning": "Small sample (n=1) ΓÇö hypothesis generation only, not production proof.",
+        "missingFutureBars": 1,
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 10,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 20,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": null,
+        "avgMaxAdverseExcursion20Pct": null,
+        "hitPlus5BeforeMinus3Rate": null,
+        "hitPlus10Within20Rate": null,
+        "drawdownWorseThanMinus5Rate": null,
+        "rs20Split": null
+      },
+      {
+        "cohort": "invalid_rs20_positive",
+        "label": "INVALID + RS20>0",
+        "sampleSize": 27,
+        "smallSampleWarning": null,
+        "missingFutureBars": 27,
+        "horizons": [
+          {
+            "horizon": 5,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 10,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          },
+          {
+            "horizon": 20,
+            "n": 0,
+            "avgPct": null,
+            "medianPct": null,
+            "winRate": null
+          }
+        ],
+        "avgMaxFavorableExcursion20Pct": null,
+        "avgMaxAdverseExcursion20Pct": null,
+        "hitPlus5BeforeMinus3Rate": null,
+        "hitPlus10Within20Rate": null,
+        "drawdownWorseThanMinus5Rate": null,
+        "rs20Split": {
+          "positive": {
+            "n": 0,
+            "avgForward20Pct": null
+          },
+          "negative": {
+            "n": 0,
+            "avgForward20Pct": null
+          }
+        }
+      }
+    ],
+    "sweepArmCount": 0
+  }
+}

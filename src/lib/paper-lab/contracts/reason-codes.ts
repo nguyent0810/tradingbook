@@ -1,0 +1,137 @@
+/**
+ * Phase 0.5 contract — Reason code catalog.
+ *
+ * A canonical, stable set of deterministic rule-trace codes for future evaluator
+ * output. This does NOT change any evaluator and does NOT tighten the decision
+ * schema: `AgentDecisionOutput.reason_codes` stays `string[]` (optional) for
+ * backward compatibility, so legacy/free-form string arrays still validate.
+ * Future phases emit values from this catalog; `isKnownReasonCode` lets analytics
+ * distinguish canonical codes from legacy strings without rejecting the latter.
+ */
+
+export const REASON_CODES = {
+  // --- Breakout Hunter ---
+  BRK_A_VOL_CONFIRM: "BRK_A_VOL_CONFIRM",
+  BRK_RS_POS: "BRK_RS_POS",
+  BRK_ADD_1R: "BRK_ADD_1R",
+  BRK_PARTIAL_2R: "BRK_PARTIAL_2R",
+  BRK_STOP_STRUCT: "BRK_STOP_STRUCT",
+  BRK_TRAIL_BE: "BRK_TRAIL_BE",
+  BRK_EXIT_REGIME: "BRK_EXIT_REGIME",
+  BRK_BLOCK_FAIL: "BRK_BLOCK_FAIL",
+
+  // --- Pullback Operator ---
+  PB_ZONE_ENTRY: "PB_ZONE_ENTRY",
+  PB_DUAL_UPTREND: "PB_DUAL_UPTREND",
+  PB_PARTIAL_1_5R: "PB_PARTIAL_1_5R",
+  PB_STOP_ZONE: "PB_STOP_ZONE",
+  PB_EXIT_SUPPORT_BREAK: "PB_EXIT_SUPPORT_BREAK",
+  PB_BLOCK_NO_TREND: "PB_BLOCK_NO_TREND",
+
+  // --- RS Rotator ---
+  RS_LEADER_ENTRY: "RS_LEADER_ENTRY",
+  RS_ABOVE_MA50: "RS_ABOVE_MA50",
+  RS_ADD_MOMENTUM: "RS_ADD_MOMENTUM",
+  RS_REDUCE_FADE: "RS_REDUCE_FADE",
+  RS_EXIT_BELOW_MA50: "RS_EXIT_BELOW_MA50",
+  RS_TRAIL_CHANDELIER: "RS_TRAIL_CHANDELIER",
+
+  // --- Trend Rider ---
+  TR_BULL_ENTRY: "TR_BULL_ENTRY",
+  TR_DUAL_UPTREND: "TR_DUAL_UPTREND",
+  TR_PYRAMID_2R: "TR_PYRAMID_2R",
+  TR_TRAIL_MA20: "TR_TRAIL_MA20",
+  TR_EXIT_REGIME_DOWNGRADE: "TR_EXIT_REGIME_DOWNGRADE",
+  TR_BLOCK_NOT_BULL: "TR_BLOCK_NOT_BULL",
+
+  // --- Swing Tactician ---
+  SW_AB_ENTRY: "SW_AB_ENTRY",
+  SW_PARTIAL_1R: "SW_PARTIAL_1R",
+  SW_TIME_STOP_10D: "SW_TIME_STOP_10D",
+  SW_FLAT_STOP_5D: "SW_FLAT_STOP_5D",
+  SW_STOP_STRUCT: "SW_STOP_STRUCT",
+  SW_TP_2R: "SW_TP_2R",
+
+  // --- Mean-Reversion Dip ---
+  MR_OVERSOLD_MA20: "MR_OVERSOLD_MA20",
+  MR_NEAR_20D_LOW: "MR_NEAR_20D_LOW",
+  MR_TARGET_MA20: "MR_TARGET_MA20",
+  MR_STOP_LOW_BREAK: "MR_STOP_LOW_BREAK",
+  MR_TIME_STOP_8D: "MR_TIME_STOP_8D",
+  MR_BLOCK_BEAR: "MR_BLOCK_BEAR",
+
+  // --- Early Bird ---
+  EB_EARLY_READY: "EB_EARLY_READY",
+  EB_RS_POS: "EB_RS_POS",
+  EB_ADD_ON_CONFIRM: "EB_ADD_ON_CONFIRM",
+  EB_PARTIAL_1_5R: "EB_PARTIAL_1_5R",
+  EB_STOP_RR: "EB_STOP_RR",
+  EB_INVALIDATE: "EB_INVALIDATE",
+
+  // --- All-Weather Allocator ---
+  AW_A_RISKON: "AW_A_RISKON",
+  AW_REGIME_SCALE: "AW_REGIME_SCALE",
+  AW_REDUCE_DOWNGRADE: "AW_REDUCE_DOWNGRADE",
+  AW_STOP_STRUCT: "AW_STOP_STRUCT",
+  AW_CASH_UP_BEAR: "AW_CASH_UP_BEAR",
+  AW_BLOCK_HIGHVOL: "AW_BLOCK_HIGHVOL",
+
+  // --- Risk Warden ---
+  RW_SELECTIVE_ENTRY: "RW_SELECTIVE_ENTRY",
+  RW_TRIM_EXPOSURE: "RW_TRIM_EXPOSURE",
+  RW_CUT_LOSER_EARLY: "RW_CUT_LOSER_EARLY",
+  RW_DEADMONEY_TIMESTOP: "RW_DEADMONEY_TIMESTOP",
+  RW_DERISK_BEAR: "RW_DERISK_BEAR",
+  RW_HALT_NOT_PASS: "RW_HALT_NOT_PASS",
+
+  // --- Portfolio rotation (cross-cutting) ---
+  ROTATE_INTO_LEADER: "ROTATE_INTO_LEADER",
+  ROTATE_REDUCE_LAGGARD: "ROTATE_REDUCE_LAGGARD",
+  ROTATE_EXIT_LAGGARD: "ROTATE_EXIT_LAGGARD",
+  ROTATE_THRESHOLD_NOT_MET: "ROTATE_THRESHOLD_NOT_MET",
+  ROTATE_BLOCKED_REGIME: "ROTATE_BLOCKED_REGIME",
+  ROTATE_CAP_REACHED: "ROTATE_CAP_REACHED",
+
+  // --- Generic / portfolio gates ---
+  SKIP_REGIME_HALT: "SKIP_REGIME_HALT",
+  SKIP_DRAWDOWN_HALT: "SKIP_DRAWDOWN_HALT",
+  SKIP_NO_CAPACITY: "SKIP_NO_CAPACITY",
+  SKIP_UNCONFIRMED: "SKIP_UNCONFIRMED",
+
+  // --- Phase 4 position lifecycle (generic, cross-manager) ---
+  ADD_PYRAMID: "ADD_PYRAMID",
+  REDUCE_PARTIAL_PROFIT: "REDUCE_PARTIAL_PROFIT",
+  EXIT_SETUP_INVALIDATION: "EXIT_SETUP_INVALIDATION",
+  EXIT_REGIME: "EXIT_REGIME",
+  EXIT_TIME_STOP: "EXIT_TIME_STOP",
+  EXIT_DEAD_MONEY: "EXIT_DEAD_MONEY",
+  HOLD_MANAGED: "HOLD_MANAGED",
+  TRAIL_BREAKEVEN: "TRAIL_BREAKEVEN",
+  TRAIL_RAISED: "TRAIL_RAISED",
+  TRAIL_STOP_HIT: "TRAIL_STOP_HIT",
+
+  // --- Shadow Capital Allocation (read-only scorecard) ---
+  ALLOC_STRONG_TWR: "ALLOC_STRONG_TWR",
+  ALLOC_STRONG_CALMAR: "ALLOC_STRONG_CALMAR",
+  ALLOC_CONSISTENT: "ALLOC_CONSISTENT",
+  ALLOC_RISK_DISCIPLINED: "ALLOC_RISK_DISCIPLINED",
+  ALLOC_ATTRIBUTION_STRONG: "ALLOC_ATTRIBUTION_STRONG",
+  ALLOC_DRAWDOWN_PENALTY: "ALLOC_DRAWDOWN_PENALTY",
+  ALLOC_CASH_DRAG_PENALTY: "ALLOC_CASH_DRAG_PENALTY",
+  ALLOC_INSUFFICIENT_TRACK_RECORD: "ALLOC_INSUFFICIENT_TRACK_RECORD",
+  ALLOC_FLOOR_APPLIED: "ALLOC_FLOOR_APPLIED",
+  ALLOC_CAP_APPLIED: "ALLOC_CAP_APPLIED",
+  ALLOC_NO_CHANGE: "ALLOC_NO_CHANGE",
+} as const;
+
+export type ReasonCodeKey = keyof typeof REASON_CODES;
+export type CanonicalReasonCode = (typeof REASON_CODES)[ReasonCodeKey];
+
+/** Backward-compatible: reason codes remain plain strings on the wire. */
+export type ReasonCode = string;
+
+export const KNOWN_REASON_CODES: readonly string[] = Object.values(REASON_CODES);
+
+export function isKnownReasonCode(code: string): code is CanonicalReasonCode {
+  return (KNOWN_REASON_CODES as readonly string[]).includes(code);
+}

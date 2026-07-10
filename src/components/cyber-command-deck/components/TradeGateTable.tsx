@@ -54,7 +54,7 @@ export function TradeGateTable({ data, flashMap }: Props) {
 
   return (
     <TechTable
-      title="Trade Gate"
+      title="Entry Gate"
       subtitle={data.tradeGate.subtitle}
       testId="dashboard-cyber-trade-gate"
       rows={rows}

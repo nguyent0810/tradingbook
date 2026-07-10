@@ -16,7 +16,7 @@ export function PaperValidationSummaryCard({ summary, showEarlyEntry }: Props) {
     <Card className="p-3 cd-paper-summary" data-testid="paper-validation-summary">
       <div className="cd-paper-summary__grid">
         <div>
-          <span className="cd-kicker">Paper open</span>
+          <span className="cd-kicker">Open signals</span>
           <strong className="cd-mono block text-sm">{summary.openLiveSignals}</strong>
         </div>
         <div>

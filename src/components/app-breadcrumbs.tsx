@@ -1,0 +1,67 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+/**
+ * Global wayfinding for the authenticated shell.
+ *
+ * Renders a breadcrumb trail only for NESTED routes (depth ≥ 2) — top-level
+ * sections (Dashboard, Setups, Arena) already read their location from the
+ * active primary-nav item, so a single-crumb trail there would be redundant
+ * noise. Driven entirely by the pathname; no route data is duplicated.
+ */
+const SEGMENT_LABELS: Record<string, string> = {
+  "paper-lab": "Arena",
+  agents: "Agents",
+  battles: "Battles",
+  experiments: "Experiments",
+  hof: "Hall of Fame",
+  human: "Human",
+  ops: "Ops",
+  timeline: "Timeline",
+};
+
+function labelFor(segment: string): string {
+  const known = SEGMENT_LABELS[segment];
+  if (known) return known;
+  // Dynamic segment (slug / id / date): keep it readable, don't mangle dates.
+  return decodeURIComponent(segment);
+}
+
+export function AppBreadcrumbs() {
+  const pathname = usePathname() ?? "";
+  const segments = pathname.split("/").filter(Boolean);
+
+  // Flat top-level route → the active nav item is enough. No breadcrumb.
+  if (segments.length < 2) return null;
+
+  const crumbs = segments.map((segment, i) => ({
+    label: labelFor(segment),
+    href: "/" + segments.slice(0, i + 1).join("/"),
+    isLast: i === segments.length - 1,
+  }));
+
+  return (
+    <nav className="cd-breadcrumbs" aria-label="Breadcrumb">
+      {crumbs.map((crumb, i) => (
+        <span key={crumb.href} style={{ display: "contents" }}>
+          {i > 0 && (
+            <span className="cd-breadcrumbs__sep" aria-hidden="true">
+              /
+            </span>
+          )}
+          {crumb.isLast ? (
+            <span className="cd-breadcrumbs__item" aria-current="page">
+              {crumb.label}
+            </span>
+          ) : (
+            <Link href={crumb.href} className="cd-breadcrumbs__item">
+              {crumb.label}
+            </Link>
+          )}
+        </span>
+      ))}
+    </nav>
+  );
+}

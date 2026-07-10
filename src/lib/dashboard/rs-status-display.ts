@@ -37,7 +37,7 @@ export const WORKBENCH_ACTION_TOOLTIPS: Record<string, string> = {
   "Wait better zone": "Price is outside a valid entry zone.",
   "Watch trigger": "Wait for breakout confirmation.",
   "Too early": "Trend filter has not confirmed.",
-  "Paper watch only": "Research signal only, not a buy recommendation.",
+  "Validation watch": "Research signal only, not a buy recommendation.",
   "Wait confirmation": "Add only after confirmation.",
   Observe: "Monitor only.",
 };
@@ -91,7 +91,7 @@ export function workbenchActionLabel(row: RelativeStrengthRow): string {
   if (setup === "Wait Breakout") return "Watch trigger";
   if (setup === "Below MA50") return "Too early";
 
-  if (early === "Pilot Research") return "Paper watch only";
+  if (early === "Pilot Research") return "Validation watch";
   if (early === "Add Watch") return "Wait confirmation";
 
   return "Observe";

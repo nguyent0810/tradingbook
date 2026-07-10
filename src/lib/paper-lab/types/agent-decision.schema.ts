@@ -39,6 +39,12 @@ export const AgentDecisionOutputSchema = z
     supporting_signals: z.array(z.string()),
     opposing_signals: z.array(z.string()),
 
+    // Phase 0: deterministic rule-trace codes. Optional so historical payloads
+    // stored before this field existed still parse as VALID (the field is simply
+    // absent); consumers coalesce to [] when reading. The DNA engine will
+    // populate it in a later phase.
+    reason_codes: z.array(z.string()).optional(),
+
     market_regime_assumption: z.enum(["PASS", "WARNING", "FAIL", "UNKNOWN"]),
 
     metadata: z.object({

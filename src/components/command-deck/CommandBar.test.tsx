@@ -20,7 +20,7 @@ const DATA: CommandBarData = {
 
 const CTA = {
   lead: "Protect capital",
-  primaryHref: "/trades",
+  primaryHref: "/setups",
   primaryLabel: "Review positions",
   secondaryHref: "/setups",
   secondaryLabel: "Open pipeline",

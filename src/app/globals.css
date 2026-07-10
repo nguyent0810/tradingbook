@@ -9837,3 +9837,1424 @@ body {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   COMMAND DECK — design tokens (single source of truth)
+   Defined here in the always-global stylesheet so the Dashboard (.cd-root) and
+   Setups (.tosv3-setups-page) read the SAME spacing, type, color, glass, focus
+   and motion tokens. command-deck.css (dashboard-only import) no longer
+   redeclares these — it keeps only its surface + layout-specific vars.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cd-root,
+.tosv3-setups-page,
+.cd-auth,
+.command-deck-shell,
+.cd-landing {
+  /* Surfaces */
+  --cd-bg: #060a14;
+  --cd-bg-accent: #0c1428;
+  --cd-surface: #12141c;
+  --cd-surface-raised: #181b26;
+  --cd-border: rgba(255, 255, 255, 0.07);
+
+  /* Text — hierarchy lifted to meet WCAG AA on dark glass surfaces */
+  --cd-text: #e8eaef;
+  --cd-text-muted: #b4bccd;
+  --cd-text-dim: #8c94a8;
+
+  /* Semantic — status + market direction */
+  --cd-danger: #f43f5e;
+  --cd-danger-muted: rgba(244, 63, 94, 0.14);
+  --cd-danger-border: rgba(244, 63, 94, 0.28);
+  --cd-warning: #ffb800;
+  --cd-success: #00e676;
+  --cd-cyan: #00e5ff;
+  --cd-long: #22c55e;
+  --cd-short: #f97316;
+  --cd-pnl-pos: #4ade80;
+  --cd-pnl-neg: #f87171;
+  --cd-neutral: #8c94a8;
+
+  /* Glass + elevation tiers */
+  --cd-glass-bg: rgba(14, 20, 36, 0.62);
+  --cd-glass-border: rgba(120, 160, 220, 0.14);
+  --cd-glass-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --cd-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.04);
+  --cd-elev-1: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --cd-elev-2: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --cd-elev-3: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+  /* Glow accents */
+  --cd-glow-cyan: 0 0 24px rgba(0, 229, 255, 0.12);
+  --cd-glow-gold: 0 0 20px rgba(255, 184, 0, 0.1);
+  --cd-glow-danger: 0 0 36px rgba(244, 63, 94, 0.18);
+
+  /* Typography scale */
+  --cd-fs-2xs: 0.625rem;
+  --cd-fs-xs: 0.6875rem;
+  --cd-fs-sm: 0.8125rem;
+  --cd-fs-base: 0.875rem;
+  --cd-fs-md: 1rem;
+  --cd-fs-lg: 1.125rem;
+  --cd-fs-xl: 1.5rem;
+  --cd-fs-2xl: 1.875rem;
+  --cd-lh-tight: 1.2;
+  --cd-lh-snug: 1.375;
+  --cd-lh-normal: 1.5;
+  --cd-ls-caps: 0.08em;
+  --cd-fw-medium: 500;
+  --cd-fw-semibold: 600;
+  --cd-fw-bold: 700;
+
+  /* Spacing rhythm (4px base) */
+  --cd-space-1: 0.25rem;
+  --cd-space-2: 0.5rem;
+  --cd-space-3: 0.75rem;
+  --cd-space-4: 1rem;
+  --cd-space-5: 1.25rem;
+  --cd-space-6: 1.5rem;
+  --cd-space-8: 2rem;
+
+  /* Radius tiers */
+  --cd-radius-sm: 8px;
+  --cd-radius-md: 10px;
+  --cd-radius: 14px;
+  --cd-radius-lg: 18px;
+
+  /* Focus + motion */
+  --cd-focus: #00e5ff;
+  --cd-focus-ring: 0 0 0 2px rgba(0, 229, 255, 0.55);
+  --cd-motion-fast: 150ms;
+  --cd-motion-base: 200ms;
+  --cd-motion-slow: 250ms;
+  --cd-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Setups ↔ Command Deck cohesion ───
+   Aligns the Setups page with the Dashboard "terminal" language:
+   tabular numerics for fast column scanning + the same cyan keyboard-focus ring
+   (matched to the dashboard: token colour + rounded corners). */
+.tosv3-setups-page {
+  font-variant-numeric: tabular-nums;
+}
+.tosv3-setups-page
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline-offset: 2px;
+  border-radius: var(--cd-radius-sm, 8px);
+}
+.tosv3-setups-page
+  :where(a, button, [role="button"], input, select, textarea, summary):focus:not(:focus-visible) {
+  outline: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tosv3-setups-page *,
+  .tosv3-setups-page *::before,
+  .tosv3-setups-page *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SETUPS — Command Deck cohesive redesign (visual override layer)
+   Scoped to .tosv3-setups-page. Overrides VISUAL properties only (surface,
+   glass, color, type, radius, tone, focus) to the Command Deck design system;
+   layout/structure/testids/logic are untouched (responsive preserved).
+   ═══════════════════════════════════════════════════════════════════════ */
+.tosv3-setups-page {
+  /* Design tokens come from the shared `.cd-root, .tosv3-setups-page` block above
+     (single source of truth). Only the page surface is set here. */
+  color: var(--cd-text);
+  background:
+    radial-gradient(ellipse 100% 60% at 50% -10%, rgba(30, 58, 120, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 40% at 0% 80%, rgba(0, 229, 255, 0.05) 0%, transparent 45%),
+    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, #04060c 100%);
+}
+
+/* Panels → glass cards (highlight + shadow match the dashboard .cd-card--glass) */
+.tosv3-setups-page .sw-glass-panel,
+.tosv3-setups-page .tosv3-panel,
+.tosv3-setups-page .tosv3-setups-workstation-panel,
+.tosv3-setups-page .tosv3-setups-momentum__panel,
+.tosv3-setups-page .tosv3-setups-sizing-panel,
+.tosv3-setups-page .tosv3-rs-detail,
+.tosv3-setups-page .tosv3-collapsible {
+  background: var(--cd-glass-bg);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius);
+  box-shadow: var(--cd-glass-highlight), var(--cd-glass-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* Headers / kickers / titles */
+.tosv3-setups-page .tosv3-workstation-header__title {
+  color: var(--cd-text);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.tosv3-setups-page .tosv3-workstation-header__lead,
+.tosv3-setups-page .tosv3-type-muted {
+  color: var(--cd-text-muted);
+}
+.tosv3-setups-page .tosv3-kicker,
+.tosv3-setups-page .tosv3-setups-workstation-panel__section-title,
+.tosv3-setups-page .tosv3-section-head {
+  color: var(--cd-text-dim);
+  font-size: var(--cd-fs-2xs);
+  text-transform: uppercase;
+  /* 0.14em matches the dashboard .cd-kicker eyebrow tracking */
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+/* Tables — sticky header, tabular, row separation, hover, ready-selected */
+.tosv3-setups-page .tosv3-rs-table,
+.tosv3-setups-page .tosv3-setups-selector-table {
+  font-size: var(--cd-fs-sm);
+  font-variant-numeric: tabular-nums;
+}
+.tosv3-setups-page .tosv3-rs-table th,
+.tosv3-setups-page .tosv3-setups-selector-table th {
+  background: rgba(10, 14, 24, 0.94);
+  color: var(--cd-text-dim);
+  font-size: var(--cd-fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  border-bottom: 1px solid var(--cd-border);
+}
+.tosv3-setups-page .tosv3-rs-table__row,
+.tosv3-setups-page .tosv3-setups-selector-table__row {
+  transition: background var(--cd-motion-fast) var(--cd-ease);
+}
+.tosv3-setups-page .tosv3-rs-table__row:hover,
+.tosv3-setups-page .tosv3-setups-selector-table__row:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+.tosv3-setups-page .tosv3-setups-selector-table__row--ready {
+  box-shadow: inset 2px 0 0 var(--cd-cyan);
+  background: rgba(0, 229, 255, 0.06);
+}
+.tosv3-setups-page .tosv3-rs-table__symbol,
+.tosv3-setups-page .tosv3-setups-selector-table__symbol,
+.tosv3-setups-page .tosv3-rs-card__symbol,
+.tosv3-setups-page .tosv3-setups-workstation-panel__symbol {
+  color: var(--cd-text);
+  font-weight: 700;
+}
+.tosv3-setups-page .tosv3-rs-table__metric,
+.tosv3-setups-page .tosv3-setups-workstation-panel__score,
+.tosv3-setups-page .tosv3-setups-metric-strip,
+.tosv3-setups-page .tosv3-rs-card__metrics {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Buttons */
+.tosv3-setups-page .tosv3-btn {
+  border-radius: var(--cd-radius-sm);
+  font-weight: 600;
+  transition:
+    color var(--cd-motion-fast) var(--cd-ease),
+    background var(--cd-motion-fast) var(--cd-ease),
+    border-color var(--cd-motion-fast) var(--cd-ease);
+}
+.tosv3-setups-page .tosv3-btn--primary {
+  background: var(--cd-cyan);
+  color: #04121a;
+  border: 1px solid transparent;
+}
+.tosv3-setups-page .tosv3-btn--primary:hover {
+  background: #5cf0ff;
+}
+.tosv3-setups-page .tosv3-btn--secondary {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--cd-text-muted);
+  border: 1px solid var(--cd-glass-border);
+}
+.tosv3-setups-page .tosv3-btn--secondary:hover {
+  color: var(--cd-text);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* Badges / chips + semantic tones */
+.tosv3-setups-page .tosv3-rs-chip,
+.tosv3-setups-page .tosv3-rs-card__badge,
+.tosv3-setups-page .tosv3-rs-row__badge,
+.tosv3-setups-page .dash-chip {
+  border-radius: 999px;
+  font-size: var(--cd-fs-2xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--cd-glass-border);
+}
+.tosv3-setups-page .tosv3-rs-chip--strong,
+.tosv3-setups-page .sw-pipeline-stage__value--success,
+.tosv3-setups-page .tosv3-setups-evidence-item--ok,
+.tosv3-setups-page .dash-market-status__value--muted {
+  color: var(--cd-success);
+}
+.tosv3-setups-page .tosv3-rs-chip--watch,
+.tosv3-setups-page .tosv3-rs-card__badge--awaiting,
+.tosv3-setups-page .sw-pipeline-stage__value--warning {
+  color: var(--cd-warning);
+}
+.tosv3-setups-page .tosv3-rs-card__badge--blocked {
+  color: var(--cd-danger);
+}
+.tosv3-setups-page .tosv3-rs-chip--context {
+  color: var(--cd-cyan);
+}
+
+/* RS cards / insight / blocker copy */
+.tosv3-setups-page .tosv3-rs-card__insight,
+.tosv3-setups-page .tosv3-rs-card__blocker,
+.tosv3-setups-page .tosv3-setups-workstation-panel__summary,
+.tosv3-setups-page .tosv3-setups-workstation-panel__hint {
+  color: var(--cd-text-muted);
+  font-size: var(--cd-fs-xs);
+}
+.tosv3-setups-page .tosv3-rs-card__next-label,
+.tosv3-setups-page .tosv3-setups-workstation-panel__meta {
+  color: var(--cd-text-dim);
+}
+
+/* Metric cards */
+.tosv3-setups-page .tosv3-setups-metric-card {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--cd-border);
+  border-radius: var(--cd-radius-md);
+}
+
+/* Stance */
+.tosv3-setups-page .tosv3-setups-stance__mode {
+  color: var(--cd-text);
+  font-weight: 700;
+}
+.tosv3-setups-page .tosv3-setups-stance__reason,
+.tosv3-setups-page .tosv3-setups-stance__note,
+.tosv3-setups-page .tosv3-setups-stance__allocation {
+  color: var(--cd-text-muted);
+}
+
+/* Sizing inputs */
+.tosv3-setups-page .tosv3-setups-sizing-field__input {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--cd-border);
+  border-radius: var(--cd-radius-sm);
+  color: var(--cd-text);
+}
+.tosv3-setups-page .tosv3-setups-sizing-field__label,
+.tosv3-setups-page .tosv3-setups-sizing-panel__group-title,
+.tosv3-setups-page .tosv3-setups-sizing-panel__hint {
+  color: var(--cd-text-dim);
+}
+
+/* Evidence + market status */
+.tosv3-setups-page .tosv3-setups-evidence-item {
+  color: var(--cd-text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.tosv3-setups-page .dash-market-status__value {
+  color: var(--cd-text);
+}
+.tosv3-setups-page .dash-market-status__label,
+.tosv3-setups-page .dash-market-status__lead {
+  color: var(--cd-text-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTHENTICATION — Command Deck experience
+   Same visual language as Dashboard + Setups: shared --cd-* tokens, glass
+   surfaces, cyan accent, focus rings, calm (non-looping) motion. Scoped to
+   .cd-auth so global .btn/.input/.card elsewhere are untouched.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cd-auth {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--cd-space-6) var(--cd-space-4);
+  color: var(--cd-text);
+  font-variant-numeric: tabular-nums;
+  background:
+    radial-gradient(ellipse 100% 60% at 50% -10%, rgba(30, 58, 120, 0.35) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, rgba(20, 40, 90, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 40% at 0% 90%, rgba(0, 229, 255, 0.05) 0%, transparent 45%),
+    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 42%, #04060c 100%);
+}
+
+.cd-auth__layout {
+  width: 100%;
+  max-width: 25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-5);
+}
+
+/* Glass card — identical elevation to dashboard .cd-card--glass */
+.cd-auth__card {
+  background: var(--cd-glass-bg);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius-lg);
+  box-shadow: var(--cd-glass-highlight), var(--cd-glass-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: var(--cd-space-8) var(--cd-space-6) var(--cd-space-6);
+}
+
+/* Brand */
+.cd-auth__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--cd-space-3);
+  margin-bottom: var(--cd-space-6);
+}
+.cd-auth__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--cd-radius-md);
+  color: var(--cd-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  box-shadow: var(--cd-glow-cyan);
+}
+.cd-auth__eyebrow {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+}
+.cd-auth__title {
+  margin: 0;
+  font-size: var(--cd-fs-xl);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.01em;
+  line-height: var(--cd-lh-tight);
+  color: var(--cd-text);
+}
+.cd-auth__lead {
+  margin: 0;
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-snug);
+  color: var(--cd-text-muted);
+  max-width: 22rem;
+}
+
+/* Fields */
+.cd-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-4);
+}
+.cd-auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-2);
+}
+.cd-auth-label {
+  font-size: var(--cd-fs-sm);
+  font-weight: var(--cd-fw-medium);
+  color: var(--cd-text-muted);
+}
+.cd-auth-label__hint {
+  color: var(--cd-text-dim);
+  font-weight: var(--cd-fw-medium);
+}
+.cd-auth-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  font-size: var(--cd-fs-base);
+  color: var(--cd-text);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--cd-border);
+  border-radius: var(--cd-radius-sm);
+  transition:
+    border-color var(--cd-motion-fast) var(--cd-ease),
+    box-shadow var(--cd-motion-fast) var(--cd-ease),
+    background var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-auth-input::placeholder {
+  color: var(--cd-text-dim);
+}
+.cd-auth-input:hover {
+  border-color: var(--cd-glass-border);
+}
+.cd-auth-input:focus {
+  outline: none;
+  border-color: rgba(0, 229, 255, 0.55);
+  box-shadow: var(--cd-focus-ring);
+  background: rgba(0, 0, 0, 0.35);
+}
+.cd-auth-input[aria-invalid="true"] {
+  border-color: var(--cd-danger-border);
+}
+.cd-auth-input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.45);
+}
+
+/* Field-level error */
+.cd-auth-error {
+  font-size: var(--cd-fs-xs);
+  color: var(--cd-pnl-neg);
+}
+
+/* Form-level alert */
+.cd-auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--cd-space-2);
+  padding: 0.625rem 0.75rem;
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-snug);
+  color: #fecdd3;
+  background: var(--cd-danger-muted);
+  border: 1px solid var(--cd-danger-border);
+  border-radius: var(--cd-radius-sm);
+}
+.cd-auth-alert__icon {
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+  color: var(--cd-danger);
+}
+
+/* Primary submit — matches dashboard cyan button hierarchy */
+.cd-auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cd-space-2);
+  width: 100%;
+  margin-top: var(--cd-space-1);
+  padding: 0.625rem 1rem;
+  font-size: var(--cd-fs-base);
+  font-weight: var(--cd-fw-semibold);
+  line-height: 1;
+  color: #04121a;
+  background: var(--cd-cyan);
+  border: 1px solid transparent;
+  border-radius: var(--cd-radius-sm);
+  cursor: pointer;
+  transition:
+    background var(--cd-motion-fast) var(--cd-ease),
+    box-shadow var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-auth-btn:hover:not(:disabled) {
+  background: #5cf0ff;
+  box-shadow: var(--cd-glow-cyan);
+}
+.cd-auth-btn:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+.cd-auth-btn__spinner {
+  width: 1rem;
+  height: 1rem;
+  animation: cd-auth-spin 0.7s linear infinite;
+}
+
+/* Journey — reinforces Dashboard → Setups → Arena. Static, no looping. */
+.cd-auth__journey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--cd-space-2);
+  margin-top: var(--cd-space-6);
+  padding-top: var(--cd-space-5);
+  border-top: 1px solid var(--cd-border);
+}
+.cd-auth__step {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cd-text-muted);
+}
+.cd-auth__step-sep {
+  color: var(--cd-text-dim);
+  opacity: 0.7;
+}
+
+/* Footer switch link */
+.cd-auth__footer {
+  margin: 0;
+  text-align: center;
+  font-size: var(--cd-fs-sm);
+  color: var(--cd-text-muted);
+}
+.cd-auth__link {
+  color: var(--cd-cyan);
+  font-weight: var(--cd-fw-semibold);
+  text-decoration: none;
+  border-radius: 2px;
+}
+.cd-auth__link:hover {
+  text-decoration: underline;
+}
+
+/* Keyboard focus ring — mirrors the dashboard foundation */
+.cd-auth
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline-offset: 2px;
+  border-radius: var(--cd-radius-sm, 8px);
+}
+.cd-auth :where(a, button, input):focus:not(:focus-visible) {
+  outline: none;
+}
+
+.cd-auth__enter {
+  animation: fade-in 0.3s var(--cd-ease);
+}
+
+@keyframes cd-auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-auth *,
+  .cd-auth *::before,
+  .cd-auth *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   NAVIGATION — Command Deck authenticated shell
+   Unifies the primary nav (header, brand, nav links, mobile nav, breadcrumbs,
+   user, sign-out) with Dashboard/Setups/Auth: shared --cd-* tokens, cyan
+   active state, glass header, consistent hover + keyboard focus rings.
+   Scoped to .command-deck-shell so it wins over the legacy .app-shell-* rules.
+   ═══════════════════════════════════════════════════════════════════════ */
+.command-deck-shell .app-shell-header {
+  border-bottom: 1px solid var(--cd-border);
+  background: rgba(6, 10, 20, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.command-deck-shell .app-shell-header-inner {
+  gap: var(--cd-space-4);
+}
+
+.app-shell-header__lead {
+  display: flex;
+  align-items: center;
+  gap: var(--cd-space-6);
+  min-width: 0;
+}
+.app-shell-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--cd-space-3);
+  flex-shrink: 0;
+}
+
+/* Brand */
+.command-deck-shell .app-shell-brand {
+  gap: var(--cd-space-2);
+  font-size: var(--cd-fs-base);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--cd-text);
+}
+.command-deck-shell .app-shell-brand:hover {
+  color: var(--cd-cyan);
+}
+.app-shell-brand__mark {
+  color: var(--cd-cyan);
+  flex-shrink: 0;
+}
+
+/* Desktop primary nav */
+.command-deck-shell .app-shell-nav {
+  display: none;
+  align-items: center;
+  gap: var(--cd-space-1);
+}
+@media (min-width: 768px) {
+  .command-deck-shell .app-shell-nav {
+    display: flex;
+  }
+}
+
+.command-deck-shell .app-shell-nav-link {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--cd-radius-sm);
+  color: var(--cd-text-muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    color var(--cd-motion-fast) var(--cd-ease),
+    background var(--cd-motion-fast) var(--cd-ease),
+    border-color var(--cd-motion-fast) var(--cd-ease);
+}
+.command-deck-shell .app-shell-nav-link:hover {
+  color: var(--cd-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+.command-deck-shell .app-shell-nav-link--active {
+  color: var(--cd-text);
+  background: rgba(0, 229, 255, 0.08);
+  border-color: rgba(0, 229, 255, 0.28);
+  box-shadow: none;
+}
+.command-deck-shell .app-shell-nav-link--active:hover {
+  background: rgba(0, 229, 255, 0.12);
+}
+.command-deck-shell .app-shell-nav-link__label {
+  font-size: var(--cd-fs-sm);
+  font-weight: var(--cd-fw-semibold);
+  line-height: 1.2;
+}
+.command-deck-shell .app-shell-nav-link__deck {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+  line-height: 1;
+}
+.command-deck-shell .app-shell-nav-link--active .app-shell-nav-link__deck {
+  color: var(--cd-cyan);
+}
+
+/* User + sign out */
+.command-deck-shell .app-shell-user {
+  font-size: var(--cd-fs-sm);
+  color: var(--cd-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.cd-nav-signout {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+  padding: 0.375rem 0.75rem;
+  font-size: var(--cd-fs-sm);
+  font-weight: var(--cd-fw-medium);
+  color: var(--cd-text-muted);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius-sm);
+  cursor: pointer;
+  transition:
+    color var(--cd-motion-fast) var(--cd-ease),
+    background var(--cd-motion-fast) var(--cd-ease),
+    border-color var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-nav-signout:hover {
+  color: var(--cd-text);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Breadcrumbs — slim wayfinding row for nested routes */
+.cd-breadcrumbs {
+  max-width: var(--app-shell-max-width);
+  margin: 0 auto;
+  padding: 0.5rem var(--space-6);
+  display: flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+  font-size: var(--cd-fs-xs);
+  border-top: 1px solid var(--cd-border);
+}
+.cd-breadcrumbs__item {
+  color: var(--cd-text-dim);
+  text-decoration: none;
+  border-radius: 3px;
+  transition: color var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-breadcrumbs__item[href]:hover {
+  color: var(--cd-text-muted);
+}
+.cd-breadcrumbs__item[aria-current="page"] {
+  color: var(--cd-text);
+  font-weight: var(--cd-fw-semibold);
+}
+.cd-breadcrumbs__sep {
+  color: var(--cd-text-dim);
+  opacity: 0.55;
+}
+
+/* Mobile primary nav — visible below 768, hidden at/above (matches desktop nav) */
+.command-deck-shell .app-shell-mobile-nav {
+  display: flex;
+  border-bottom: 1px solid var(--cd-border);
+  background: rgba(8, 12, 22, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+@media (min-width: 768px) {
+  .command-deck-shell .app-shell-mobile-nav {
+    display: none;
+  }
+}
+.command-deck-shell .app-shell-mobile-nav-link {
+  flex: 1;
+  padding: var(--cd-space-3) var(--cd-space-2);
+  gap: 2px;
+  color: var(--cd-text-muted);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--cd-motion-fast) var(--cd-ease),
+    background var(--cd-motion-fast) var(--cd-ease),
+    border-color var(--cd-motion-fast) var(--cd-ease);
+}
+.command-deck-shell .app-shell-mobile-nav-link:hover {
+  color: var(--cd-text);
+  background: rgba(255, 255, 255, 0.03);
+}
+.command-deck-shell .app-shell-mobile-nav-link--active {
+  color: var(--cd-text);
+  background: rgba(0, 229, 255, 0.07);
+  border-bottom-color: var(--cd-cyan);
+}
+.command-deck-shell .app-shell-mobile-nav-link--active .app-shell-nav-link__deck {
+  color: var(--cd-cyan);
+}
+
+/* Keyboard focus ring — mirrors dashboard/setups/auth foundation */
+.command-deck-shell .app-shell-header
+  :where(a, button, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible,
+.command-deck-shell .app-shell-mobile-nav
+  :where(a, button, [role="button"]):focus-visible,
+.command-deck-shell .cd-breadcrumbs :where(a):focus-visible {
+  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline-offset: 2px;
+  border-radius: var(--cd-radius-sm, 8px);
+}
+.command-deck-shell .app-shell-header :where(a, button):focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .command-deck-shell .app-shell-header *,
+  .command-deck-shell .app-shell-mobile-nav * {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LANDING — Setup Intelligence Platform (Command Deck marketing surface)
+   Product-story layout in the same language as Dashboard/Setups/Arena/Auth:
+   shared --cd-* tokens, glass, cyan accent, calm (non-looping) motion.
+   Server-rendered, no client JS. Scoped to .cd-landing.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cd-landing {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--cd-text);
+  font-variant-numeric: tabular-nums;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -8%, rgba(30, 58, 120, 0.38) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 45% at 92% 12%, rgba(0, 229, 255, 0.06) 0%, transparent 46%),
+    radial-gradient(ellipse 60% 40% at 0% 92%, rgba(15, 35, 80, 0.14) 0%, transparent 45%),
+    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 44%, #04060c 100%);
+}
+.cd-landing__container {
+  width: 100%;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-left: var(--cd-space-6);
+  padding-right: var(--cd-space-6);
+}
+
+/* Header */
+.cd-landing__header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid var(--cd-border);
+  background: rgba(6, 10, 20, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.cd-landing__header-inner {
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cd-space-4);
+}
+.cd-landing__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+  font-size: var(--cd-fs-base);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--cd-text);
+  text-decoration: none;
+}
+.cd-landing__brand-mark {
+  color: var(--cd-cyan);
+}
+.cd-landing__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+}
+
+/* Buttons */
+.cd-landing-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cd-space-2);
+  padding: 0.5rem 1rem;
+  font-size: var(--cd-fs-sm);
+  font-weight: var(--cd-fw-semibold);
+  border-radius: var(--cd-radius-sm);
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--cd-motion-fast) var(--cd-ease),
+    color var(--cd-motion-fast) var(--cd-ease),
+    border-color var(--cd-motion-fast) var(--cd-ease),
+    box-shadow var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-landing-btn--primary {
+  background: var(--cd-cyan);
+  color: #04121a;
+}
+.cd-landing-btn--primary:hover {
+  background: #5cf0ff;
+  box-shadow: var(--cd-glow-cyan);
+}
+.cd-landing-btn--ghost {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--cd-text-muted);
+  border-color: var(--cd-glass-border);
+}
+.cd-landing-btn--ghost:hover {
+  color: var(--cd-text);
+  background: rgba(255, 255, 255, 0.07);
+}
+.cd-landing-btn--lg {
+  padding: 0.6875rem 1.375rem;
+  font-size: var(--cd-fs-base);
+}
+
+/* Sections */
+.cd-landing__main {
+  flex: 1;
+}
+.cd-landing-section {
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+.cd-landing-section__eyebrow {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cd-cyan);
+  margin: 0 0 var(--cd-space-3);
+}
+.cd-landing-section__title {
+  margin: 0;
+  font-size: clamp(1.375rem, 3.5vw, 1.875rem);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--cd-lh-tight);
+  color: var(--cd-text);
+  max-width: 34rem;
+}
+.cd-landing-section__lead {
+  margin: var(--cd-space-4) 0 0;
+  font-size: var(--cd-fs-lg);
+  line-height: var(--cd-lh-snug);
+  color: var(--cd-text-muted);
+  max-width: 42rem;
+}
+
+/* Hero */
+.cd-landing-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--cd-space-8);
+  align-items: center;
+  padding-top: 4rem;
+  padding-bottom: 4.5rem;
+}
+@media (min-width: 960px) {
+  .cd-landing-hero {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 3.5rem;
+    padding-top: 5.5rem;
+    padding-bottom: 6rem;
+  }
+}
+.cd-landing-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cd-space-2);
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+  padding: 0.3125rem 0.625rem;
+  border: 1px solid var(--cd-glass-border);
+  border-radius: 999px;
+  background: rgba(0, 229, 255, 0.05);
+}
+.cd-landing-hero__eyebrow::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cd-cyan);
+  box-shadow: 0 0 8px var(--cd-cyan);
+}
+.cd-landing-hero__title {
+  margin: var(--cd-space-5) 0 0;
+  font-size: clamp(2.25rem, 6vw, 3.5rem);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--cd-text);
+}
+.cd-landing-hero__title-accent {
+  color: var(--cd-cyan);
+}
+.cd-landing-hero__lead {
+  margin: var(--cd-space-5) 0 0;
+  font-size: var(--cd-fs-lg);
+  line-height: var(--cd-lh-normal);
+  color: var(--cd-text-muted);
+  max-width: 34rem;
+}
+.cd-landing-hero__cta {
+  margin-top: var(--cd-space-8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-3);
+}
+.cd-landing-hero__note {
+  margin-top: var(--cd-space-4);
+  font-size: var(--cd-fs-xs);
+  color: var(--cd-text-dim);
+}
+
+/* Steps — how it works */
+.cd-landing-steps {
+  margin-top: var(--cd-space-8);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--cd-space-4);
+}
+@media (min-width: 860px) {
+  .cd-landing-steps {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--cd-space-5);
+  }
+}
+.cd-landing-step {
+  position: relative;
+  padding: var(--cd-space-5);
+  background: var(--cd-glass-bg);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius);
+  box-shadow: var(--cd-glass-highlight), var(--cd-elev-1);
+}
+.cd-landing-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--cd-radius-sm);
+  font-size: var(--cd-fs-sm);
+  font-weight: var(--cd-fw-bold);
+  color: var(--cd-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+}
+.cd-landing-step__stage {
+  margin: var(--cd-space-3) 0 0;
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+}
+.cd-landing-step__title {
+  margin: var(--cd-space-1) 0 0;
+  font-size: var(--cd-fs-lg);
+  font-weight: var(--cd-fw-semibold);
+  color: var(--cd-text);
+}
+.cd-landing-step__copy {
+  margin: var(--cd-space-2) 0 0;
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-snug);
+  color: var(--cd-text-muted);
+}
+
+/* Pillars */
+.cd-landing-pillars {
+  margin-top: var(--cd-space-8);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--cd-space-5);
+}
+@media (min-width: 860px) {
+  .cd-landing-pillars {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+.cd-landing-pillar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-4);
+  padding: var(--cd-space-6);
+  background: var(--cd-glass-bg);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius-lg);
+  box-shadow: var(--cd-glass-highlight), var(--cd-glass-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.cd-landing-pillar__name {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--cd-cyan);
+}
+.cd-landing-pillar__title {
+  margin: 0;
+  font-size: var(--cd-fs-lg);
+  font-weight: var(--cd-fw-semibold);
+  color: var(--cd-text);
+}
+.cd-landing-pillar__copy {
+  margin: 0;
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-snug);
+  color: var(--cd-text-muted);
+}
+
+/* Evidence — trust section */
+.cd-landing-evidence {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--cd-space-8);
+  align-items: center;
+}
+@media (min-width: 960px) {
+  .cd-landing-evidence {
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+  }
+}
+.cd-landing-evidence__list {
+  margin: var(--cd-space-6) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-4);
+}
+.cd-landing-evidence__item {
+  display: flex;
+  gap: var(--cd-space-3);
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-snug);
+  color: var(--cd-text-muted);
+}
+.cd-landing-evidence__check {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  color: var(--cd-success);
+}
+.cd-landing-evidence__item strong {
+  color: var(--cd-text);
+  font-weight: var(--cd-fw-semibold);
+}
+
+/* Final CTA band */
+.cd-landing-cta {
+  text-align: center;
+  padding: 4rem var(--cd-space-6);
+  background: var(--cd-glass-bg);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius-lg);
+  box-shadow: var(--cd-glass-highlight), var(--cd-glass-shadow);
+}
+.cd-landing-cta__title {
+  margin: 0 auto;
+  max-width: 30rem;
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--cd-lh-tight);
+  color: var(--cd-text);
+}
+.cd-landing-cta__lead {
+  margin: var(--cd-space-4) auto 0;
+  max-width: 34rem;
+  font-size: var(--cd-fs-base);
+  color: var(--cd-text-muted);
+}
+.cd-landing-cta__actions {
+  margin-top: var(--cd-space-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-3);
+  justify-content: center;
+}
+
+/* Footer */
+.cd-landing-footer {
+  border-top: 1px solid var(--cd-border);
+  background: rgba(4, 6, 12, 0.6);
+}
+.cd-landing-footer__inner {
+  padding-top: var(--cd-space-8);
+  padding-bottom: var(--cd-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-6);
+}
+@media (min-width: 720px) {
+  .cd-landing-footer__inner {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+}
+.cd-landing-footer__brand {
+  max-width: 22rem;
+}
+.cd-landing-footer__tagline {
+  margin: var(--cd-space-3) 0 0;
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-snug);
+  color: var(--cd-text-dim);
+}
+.cd-landing-footer__links {
+  display: flex;
+  gap: 3rem;
+}
+.cd-landing-footer__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-2);
+}
+.cd-landing-footer__col-title {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+  margin-bottom: var(--cd-space-1);
+}
+.cd-landing-footer__link {
+  font-size: var(--cd-fs-sm);
+  color: var(--cd-text-muted);
+  text-decoration: none;
+  transition: color var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-landing-footer__link:hover {
+  color: var(--cd-cyan);
+}
+.cd-landing-footer__legal {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding: var(--cd-space-5) 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cd-space-3);
+  justify-content: space-between;
+  font-size: var(--cd-fs-xs);
+  color: var(--cd-text-dim);
+}
+.cd-landing-footer__disclaimer {
+  max-width: 46rem;
+}
+
+/* Product mock panels — faithful, static previews in the app's own language */
+.cd-mock {
+  background: var(--cd-glass-bg);
+  border: 1px solid var(--cd-glass-border);
+  border-radius: var(--cd-radius-lg);
+  box-shadow: var(--cd-glass-highlight), var(--cd-glass-shadow);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: var(--cd-space-5);
+  font-size: var(--cd-fs-sm);
+}
+.cd-mock__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cd-space-3);
+  margin-bottom: var(--cd-space-4);
+}
+.cd-mock__eyebrow {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+}
+.cd-mock__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+}
+.cd-mock__chip--go {
+  color: var(--cd-success);
+  background: rgba(0, 230, 118, 0.12);
+  border-color: rgba(0, 230, 118, 0.26);
+}
+.cd-mock__chip--watch {
+  color: var(--cd-warning);
+  background: rgba(255, 184, 0, 0.12);
+  border-color: rgba(255, 184, 0, 0.26);
+}
+.cd-mock__chip--cyan {
+  color: var(--cd-cyan);
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.24);
+}
+.cd-mock__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.cd-mock__verdict {
+  font-size: 1.5rem;
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--cd-text);
+}
+.cd-mock__sub {
+  margin-top: 0.15rem;
+  font-size: var(--cd-fs-xs);
+  color: var(--cd-text-dim);
+}
+.cd-mock__meter {
+  margin-top: var(--cd-space-4);
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.cd-mock__meter-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #00b8d4, #22d3ee);
+}
+.cd-mock__rows {
+  margin-top: var(--cd-space-4);
+  display: flex;
+  flex-direction: column;
+}
+.cd-mock__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cd-space-3);
+  padding: 0.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+.cd-mock__row:first-child {
+  border-top: none;
+}
+.cd-mock__row-label {
+  color: var(--cd-text-muted);
+}
+.cd-mock__row-sym {
+  font-weight: var(--cd-fw-bold);
+  color: var(--cd-text);
+}
+.cd-mock__row-val {
+  font-variant-numeric: tabular-nums;
+  color: var(--cd-text);
+  font-weight: var(--cd-fw-semibold);
+}
+.cd-mock__row-val--pos {
+  color: var(--cd-pnl-pos);
+}
+.cd-mock__evidence {
+  margin-top: var(--cd-space-4);
+  padding-top: var(--cd-space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: var(--cd-fs-xs);
+  color: var(--cd-text-dim);
+  line-height: var(--cd-lh-snug);
+}
+
+/* Keyboard focus ring — same as the rest of the app */
+.cd-landing :where(a, button, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline-offset: 2px;
+  border-radius: var(--cd-radius-sm, 8px);
+}
+.cd-landing :where(a, button):focus:not(:focus-visible) {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cd-landing *,
+  .cd-landing *::before,
+  .cd-landing *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}
+
+/* Skip to content — WCAG 2.4.1 bypass-blocks; hidden until keyboard focus */
+.cd-landing__skip {
+  position: absolute;
+  left: var(--cd-space-4);
+  top: -3.5rem;
+  z-index: 60;
+  padding: 0.5rem 0.875rem;
+  font-size: var(--cd-fs-sm);
+  font-weight: var(--cd-fw-semibold);
+  color: #04121a;
+  background: var(--cd-cyan);
+  border-radius: var(--cd-radius-sm);
+  text-decoration: none;
+  transition: top var(--cd-motion-fast) var(--cd-ease);
+}
+.cd-landing__skip:focus {
+  top: var(--cd-space-3);
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}

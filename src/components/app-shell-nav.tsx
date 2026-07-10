@@ -6,37 +6,23 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", deck: "Command" },
   { href: "/setups", label: "Setups", deck: "Pipeline" },
-  { href: "/paper-lab", label: "Arena", deck: "Paper Lab" },
-  { href: "/trades/journal", label: "Journal", deck: "Ledger" },
+  { href: "/paper-lab", label: "Arena", deck: "Simulation" },
 ] as const;
 
 function isNavActive(pathname: string, href: string): boolean {
   if (href === "/dashboard") return pathname === "/dashboard";
-  if (href === "/trades/journal") {
-    return pathname === "/trades/journal" || pathname.startsWith("/trades/");
-  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function desktopLinkClass(active: boolean): string {
-  return active
-    ? "app-shell-nav-link app-shell-nav-link--active"
-    : "app-shell-nav-link";
-}
-
-function mobileLinkClass(active: boolean): string {
-  return active
-    ? "app-shell-mobile-nav-link app-shell-mobile-nav-link--active"
-    : "app-shell-mobile-nav-link";
-}
-
 function NavLinks({
-  mobile,
+  variant,
   pathname,
 }: {
-  mobile: boolean;
+  variant: "desktop" | "mobile";
   pathname: string;
 }) {
+  const base =
+    variant === "mobile" ? "app-shell-mobile-nav-link" : "app-shell-nav-link";
   return (
     <>
       {NAV_ITEMS.map(({ href, label, deck }) => {
@@ -45,7 +31,7 @@ function NavLinks({
           <Link
             key={href}
             href={href}
-            className={mobile ? mobileLinkClass(active) : desktopLinkClass(active)}
+            className={active ? `${base} ${base}--active` : base}
             aria-current={active ? "page" : undefined}
           >
             <span className="app-shell-nav-link__label">{label}</span>
@@ -57,22 +43,22 @@ function NavLinks({
   );
 }
 
-/** Desktop nav — render inside `app-shell-header-inner`. */
+/** Desktop primary nav — semantic Command Deck link row. */
 export function AppShellNavDesktop() {
   const pathname = usePathname() ?? "";
   return (
-    <nav className="app-shell-nav" aria-label="Main">
-      <NavLinks mobile={false} pathname={pathname} />
+    <nav className="app-shell-nav" aria-label="Primary">
+      <NavLinks variant="desktop" pathname={pathname} />
     </nav>
   );
 }
 
-/** Mobile nav — render between header and main. */
+/** Mobile primary nav — rendered between the header and main content. */
 export function AppShellNavMobile() {
   const pathname = usePathname() ?? "";
   return (
-    <nav className="app-shell-mobile-nav" aria-label="Main mobile">
-      <NavLinks mobile pathname={pathname} />
+    <nav className="app-shell-mobile-nav" aria-label="Primary mobile">
+      <NavLinks variant="mobile" pathname={pathname} />
     </nav>
   );
 }

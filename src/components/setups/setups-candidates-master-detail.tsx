@@ -216,10 +216,10 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
           </div>
         </div>
         <Link
-          href={`/trades/new?setupCandidateId=${candidate.id}`}
+          href={`/paper-lab?setupCandidateId=${candidate.id}`}
           className="tosv3-btn tosv3-btn--primary tosv3-btn--sm"
         >
-          Log trade
+          Validate setup
         </Link>
       </header>
 

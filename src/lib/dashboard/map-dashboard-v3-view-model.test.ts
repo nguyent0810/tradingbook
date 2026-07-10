@@ -237,7 +237,7 @@ describe("mapDashboardV3ViewModel — ledger", () => {
     const vm = mapFromInput(baseInput());
     const serialized = JSON.stringify(vm.ledger);
     expect(serialized).not.toMatch(/disciplineScore|reviewQueue/);
-    expect(vm.ledger.reviewHref).toBe("/trades");
+    expect(vm.ledger.reviewHref).toBe("/setups");
     expect(vm.ledger.reviewLabel).toContain("Review");
   });
 });
@@ -325,7 +325,12 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
       })
     );
     const card = vm.rsWatchlist.cards[0]!;
-    const serialized = JSON.stringify(vm.rsWatchlist);
+    // Exclude the internal terminalCode data field (never rendered) — assert the
+    // user-facing copy fields carry no raw diagnostic codes.
+    const serialized = JSON.stringify({
+      ...vm.rsWatchlist,
+      cards: vm.rsWatchlist.cards.map((c) => ({ ...c, terminalCode: undefined })),
+    });
     expect(vm.rsWatchlist.title).toBe("Relative Strength Radar");
     expect(card.primaryInsight).toMatch(/breakout/i);
     expect(card.stateBadge).toBe("Watch: breakout");
@@ -357,12 +362,12 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
 
   it("prioritizes review CTA when NO_TRADE and open positions exist", () => {
     const vm = mapFromInput(baseInput(), { openPositionCount: 2 });
-    expect(vm.headerCta.primaryHref).toBe("/trades");
-    expect(vm.headerCta.primaryLabel).toBe("Review open positions");
-    expect(vm.headerCta.secondaryHref).toBe("/setups");
-    expect(vm.headerCta.secondaryLabel).toBe("Open pipeline");
-    expect(vm.headerCta.tertiaryHref).toBe("/trades/new");
-    expect(vm.headerCta.tertiaryLabel).toBe("Log exit or adjustment");
+    expect(vm.headerCta.primaryHref).toBe("/setups");
+    expect(vm.headerCta.primaryLabel).toBe("Review setups");
+    expect(vm.headerCta.secondaryHref).toBe("/paper-lab");
+    expect(vm.headerCta.secondaryLabel).toBe("Open Arena");
+    expect(vm.headerCta.tertiaryHref).toBeNull();
+    expect(vm.headerCta.tertiaryLabel).toBeNull();
   });
 
   it("pluralizes watch state copy", () => {

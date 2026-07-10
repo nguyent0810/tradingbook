@@ -156,7 +156,7 @@ describe("rs-status-display", () => {
         distFromMa20Pct: 2.1,
       },
     });
-    expect(workbenchActionLabel(row)).toBe("Paper watch only");
+    expect(workbenchActionLabel(row)).toBe("Validation watch");
   });
 
   it("provides concise action tooltips", () => {

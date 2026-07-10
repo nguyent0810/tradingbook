@@ -43,7 +43,7 @@ const NODE_COLORS: Record<RadarNodeClassification, { fill: string; glow: string 
   avoid: { fill: "#f43f5e", glow: "rgba(244, 63, 94, 0.32)" },
 };
 
-const AXIS_TICK = { fill: "#9ca3af", fontSize: 10 };
+const AXIS_TICK = { fill: "#8c94a8", fontSize: 10 };
 const CHART_MARGIN = RADAR_CHART_MARGIN;
 
 function WorkbenchTooltip({
@@ -158,6 +158,9 @@ export function OpportunityRadar({
   );
 
   useEffect(() => {
+    // Client-mount gate to avoid SSR/hydration mismatch for the layout-measured
+    // radar; setting state once on mount is the intended, one-shot behavior.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -245,6 +248,8 @@ export function OpportunityRadar({
         <div
           className={`cd-radar-plot aspect-square ${mini ? "cd-radar-plot--mini" : ""}`}
           data-testid="command-deck-radar-plot"
+          role="img"
+          aria-label="Opportunity map — readiness (horizontal) versus risk (vertical); bubble color shows classification"
         >
           <PolarBackdrop mini={mini} />
           {mounted ? (
@@ -336,8 +341,8 @@ export function OpportunityRadar({
                               cy={y}
                               r={r}
                               fill={colors.fill}
-                              stroke={active ? "rgba(255,255,255,0.45)" : "transparent"}
-                              strokeWidth={active ? 1.5 : 0}
+                              stroke={active ? "rgba(0, 229, 255, 0.85)" : "transparent"}
+                              strokeWidth={active ? 1.75 : 0}
                             />
                             {showLabel ? (
                               <text
@@ -374,11 +379,25 @@ export function OpportunityRadar({
       </div>
 
       {mini ? (
-        <div className="cd-radar-mini-summary" data-testid="radar-mini-summary">
-          <span>Pilot Research: {summary.pilotResearch}</span>
-          <span>Watch: {summary.watch}</span>
-          <span>Too Extended: {summary.tooExtended}</span>
-          <span>Best RS: {summary.bestRs.join(", ") || "—"}</span>
+        <div
+          className="cd-radar-mini-summary"
+          data-testid="radar-mini-summary"
+          role="group"
+          aria-label="Radar classification counts"
+        >
+          <span className="cd-radar-stat">
+            <i className="cd-radar-stat__dot cd-radar-stat__dot--actionable" aria-hidden />
+            Pilot Research: {summary.pilotResearch}
+          </span>
+          <span className="cd-radar-stat">
+            <i className="cd-radar-stat__dot cd-radar-stat__dot--watch" aria-hidden />
+            Watch: {summary.watch}
+          </span>
+          <span className="cd-radar-stat">
+            <i className="cd-radar-stat__dot cd-radar-stat__dot--avoid" aria-hidden />
+            Too Extended: {summary.tooExtended}
+          </span>
+          <span className="cd-radar-stat cd-radar-stat--wide">Best RS: {summary.bestRs.join(", ") || "—"}</span>
           {selectedSymbol ? (
             <span className="cd-radar-mini-summary__focus" data-testid="radar-selected-summary">
               Focus: {selectedSymbol}
@@ -388,8 +407,8 @@ export function OpportunityRadar({
       ) : null}
 
       {nodes.length === 0 ? (
-        <p className="text-xs m-0 mt-2" style={{ color: "var(--cd-text-dim)" }}>
-          No candidates plotted on the readiness/risk map.
+        <p className="cd-radar-empty" role="status">
+          No candidates on the readiness × risk map yet — clears as the workbench surfaces setups.
         </p>
       ) : null}
     </Card>

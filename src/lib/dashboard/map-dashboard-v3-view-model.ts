@@ -244,12 +244,12 @@ function buildHeaderCta(
     if (openPositionCount > 0) {
       return {
         lead: "No new swing entries today. Review risk, watch the pipeline, and wait for the next scan.",
-        primaryHref: "/trades",
-        primaryLabel: "Review open positions",
-        secondaryHref: "/setups",
-        secondaryLabel: "Open pipeline",
-        tertiaryHref: "/trades/new",
-        tertiaryLabel: "Log exit or adjustment",
+        primaryHref: "/setups",
+        primaryLabel: "Review setups",
+        secondaryHref: "/paper-lab",
+        secondaryLabel: "Open Arena",
+        tertiaryHref: null,
+        tertiaryLabel: null,
       };
     }
     return {
@@ -268,8 +268,8 @@ function buildHeaderCta(
       lead: "Reduced-risk day. Watch developing setups — nothing is confirmed for full-size entry yet.",
       primaryHref: "/setups",
       primaryLabel: "Open pipeline",
-      secondaryHref: "/trades/new",
-      secondaryLabel: "Log trade",
+      secondaryHref: "/paper-lab",
+      secondaryLabel: "Open Arena",
       tertiaryHref: null,
       tertiaryLabel: null,
     };
@@ -278,10 +278,10 @@ function buildHeaderCta(
   if (mode === "TRADE") {
     return {
       lead: "Normal risk mode. Qualified setups passed filters — enter only when your playbook confirms.",
-      primaryHref: "/trades/new",
-      primaryLabel: "Log trade",
-      secondaryHref: "/setups",
-      secondaryLabel: "Open pipeline",
+      primaryHref: "/setups",
+      primaryLabel: "Review setups",
+      secondaryHref: "/paper-lab",
+      secondaryLabel: "Open Arena",
       tertiaryHref: null,
       tertiaryLabel: null,
     };
@@ -291,8 +291,8 @@ function buildHeaderCta(
     lead: "Watchlist-only day. Monitor names on your list — no new swing entries from the latest scan.",
     primaryHref: "/setups",
     primaryLabel: "Open pipeline",
-    secondaryHref: "/trades",
-    secondaryLabel: "Review trades",
+    secondaryHref: "/paper-lab",
+    secondaryLabel: "Open Arena",
     tertiaryHref: null,
     tertiaryLabel: null,
   };
@@ -739,7 +739,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
     signalTrajectory: {
       points: signalPoints,
       emptyMessage:
-        signalPoints.length < 2 ? "No closed trades yet — equity trajectory unavailable." : null,
+        signalPoints.length < 2 ? "No closed positions yet — equity trajectory unavailable." : null,
     },
     radar: {
       mapDots,
@@ -774,8 +774,8 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
           ? `${curve[curve.length - 1]!.cumulativePnl >= 0 ? "+" : ""}${(curve[curve.length - 1]!.cumulativePnl / 1_000_000).toFixed(2)}M closed book`
           : null,
       pulseBarHeights: buildPulseBarHeights(trades),
-      reviewHref: "/trades",
-      reviewLabel: "Review on Trades",
+      reviewHref: "/setups",
+      reviewLabel: "Review setups",
     },
     evidence,
     evidenceDefaultOpen: buildEvidenceDefaultOpen(cockpitDto, freshness, evidence),

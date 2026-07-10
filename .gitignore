@@ -64,3 +64,31 @@ next-env.d.ts
 /data/vn-symbols.json
 
 local.env
+
+.vercel
+
+# React Bits — local read-only reference clone (inspiration only, never shipped)
+/react-bits
+
+# --- Machine-local npm cache (never commit) ---
+/.npm-cache/
+
+# --- Local preview/tooling config (machine-specific) ---
+/.claude/launch.json
+
+# --- Temporary run & debug artifacts (recoverable via backup branch; not product) ---
+/.tmp-cohort-polish/
+/.tmp-cohort-test/
+/.tmp-run-*/
+/.superpowers/
+/docs/temp/
+/_anchor-fwd.err
+/_anchor-sweep.err
+/docs/trading/evidence/_*.log
+/docs/trading/evidence/_*.err
+
+# --- Dev-only debug scripts (not product) ---
+/scripts/debug-cyber-layout.mjs
+/scripts/debug-cyber-opacity.mjs
+/scripts/debug-motion.mjs
+/scripts/capture-tall.mjs

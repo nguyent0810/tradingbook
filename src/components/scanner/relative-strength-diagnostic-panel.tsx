@@ -49,7 +49,7 @@ export function RelativeStrengthDiagnosticPanel({
         style={{ color: "var(--text-tertiary)" }}
         data-testid="rs-diagnostic-disclaimer"
       >
-        {diagnostic?.disclaimer ?? "Relative strength diagnostic only — not used in Gate 2 pass/fail or rankScore."}
+        {diagnostic?.disclaimer ?? "Relative strength is a context signal — it helps prioritize, but doesn't approve or rank a setup on its own."}
       </p>
     </div>
   );

@@ -98,6 +98,14 @@ export type MarketContextBundle = {
     unrealizedPnlVnd: number;
     holdingDays: number;
     status: "OPEN" | "PARTIAL";
+    // Phase 4 position-management state (from Phase 0 columns; nullable fallbacks).
+    initialRiskPerShareKvnd: number | null;
+    highWaterMarkKvnd: number | null;
+    trailingStopKvnd: number | null;
+    addsCount: number;
+    partialsCount: number;
+    maxFavorableExcursionKvnd: number;
+    maxAdverseExcursionKvnd: number;
   };
 
   portfolioState: {

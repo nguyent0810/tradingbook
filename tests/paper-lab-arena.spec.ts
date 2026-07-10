@@ -1,27 +1,24 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("/paper-lab arena", () => {
-  test("shows command shell and paper-only badge", async ({ page }) => {
+  test("shows arena page shell, section index and simulation badge", async ({ page }) => {
     await page.goto("/paper-lab");
+    // Arena is a first-class page inside the global shell (no app sidebar / utility bar).
     await expect(page.getByTestId("paper-lab-command-shell")).toBeVisible();
     await expect(page.getByTestId("paper-lab-sidebar")).toBeVisible();
-    await expect(page.getByTestId("paper-lab-top-nav")).toBeVisible();
     await expect(page.getByTestId("paper-lab-disclaimer")).toBeVisible();
-    await expect(page.getByText("Paper Only")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-disclaimer")).toContainText("Simulation only");
   });
 
-  test("utility bar has compact back to dashboard control", async ({ page }) => {
+  test("section index navigates the on-page zones (not a route sidebar)", async ({ page }) => {
     await page.goto("/paper-lab");
-    const utilityBar = page.getByTestId("paper-lab-top-nav");
-    await expect(utilityBar.getByRole("link", { name: "Arena" })).toHaveCount(0);
-    await expect(utilityBar.getByRole("link", { name: "Battles" })).toHaveCount(0);
-    await expect(utilityBar.getByRole("link", { name: "Hall of Fame" })).toHaveCount(0);
-    await expect(utilityBar.getByText("← Dashboard")).toHaveCount(0);
-    const back = page.getByTestId("paper-lab-back-dashboard");
-    await expect(back).toBeVisible();
-    await expect(back).toHaveAttribute("href", "/dashboard");
-    await expect(back).toHaveAttribute("title", "Back to Dashboard");
-    await expect(page.getByTestId("paper-lab-sidebar").locator('a[href="/paper-lab"]')).toBeVisible();
+    const index = page.getByTestId("paper-lab-sidebar");
+    // The former app sidebar is now a light section index of the 5 narrative zones.
+    for (const label of ["Now", "Consensus", "Conflict", "Decision", "Learning"]) {
+      await expect(index.getByRole("link", { name: label })).toBeVisible();
+    }
+    // No standalone utility bar / route menu inside the page.
+    await expect(page.getByTestId("paper-lab-top-nav")).toHaveCount(0);
   });
 
   test("workspace defaults to open positions tab", async ({ page }) => {
@@ -44,11 +41,12 @@ test.describe("/paper-lab arena", () => {
 
   test("agent league strip sits below header cards", async ({ page }) => {
     await page.goto("/paper-lab");
-    const hero = page.getByTestId("paper-lab-arena-hero");
-    await expect(hero).toBeVisible();
-    await expect(hero.getByTestId("paper-lab-header-grid")).toBeVisible();
-    await expect(hero.getByTestId("paper-lab-portfolios")).toBeVisible();
-    await expect(hero.getByText("Agent League")).toBeVisible();
+    // Workspace re-architecture: the header grid lives in the NOW zone and the
+    // agent league in the CONSENSUS zone (both on the one Arena workspace).
+    await expect(page.getByTestId("paper-lab-arena-hero")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-header-grid")).toBeVisible();
+    await expect(page.getByTestId("paper-lab-portfolios")).toBeVisible();
+    await expect(page.getByText("Agent League")).toBeVisible();
   });
 
   test("agent portfolio cards show full names", async ({ page }) => {

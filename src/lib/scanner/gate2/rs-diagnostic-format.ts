@@ -5,9 +5,13 @@ import {
   RS_LOOKBACK_50,
 } from "./relative-strength";
 
-/** Shown on every RS panel — not used in Gate 2 pass/fail or rankScore (Batch D1). */
+/**
+ * Shown on every RS panel. RS is a context signal for prioritization — it does not
+ * drive setup approval or ranking on its own (Batch D1). User-facing copy is kept
+ * free of internal scoring jargon.
+ */
 export const RS_DIAGNOSTIC_DISCLAIMER =
-  "Relative strength diagnostic only — not used in current Gate 2 pass/fail and not part of rankScore yet.";
+  "Relative strength is a context signal — it helps prioritize, but doesn't approve or rank a setup on its own.";
 
 export type RsDiagnosticUi = {
   summary: string;

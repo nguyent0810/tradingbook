@@ -533,6 +533,22 @@ enum PaperPositionStatus {
   CLOSED
 }
 
+// Phase 0.5 contract: fine-grained position lifecycle. Frozen vocabulary for
+// future position management. The engine initializes OPEN and never transitions
+// yet; `PaperPositionStatus` remains the field the current engine reads/writes.
+enum PositionLifecycle {
+  OPEN
+  ADDING
+  PARTIAL_EXIT
+  RUNNING
+  TRAILING
+  STOPPED
+  TARGET_HIT
+  TIME_EXIT
+  ROTATED
+  CLOSED
+}
+
 enum PaperExitReason {
   STOP_LOSS_HIT
   TAKE_PROFIT_HIT
@@ -732,6 +748,23 @@ model PaperPosition {
   takeProfitKvnd  Float               @map("take_profit_kvnd")
   riskAmountVnd   BigInt              @map("risk_amount_vnd")
   status          PaperPositionStatus @default(OPEN)
+
+  // Phase 0.5 contract: fine-grained lifecycle. Initialized to OPEN on open and
+  // never transitioned yet (no reader/transition logic). `status` is unchanged.
+  lifecycle       PositionLifecycle   @default(OPEN)
+
+  // Phase 0 (Fund Manager Engine): additive position-management state.
+  // Nullable / defaulted so historical rows and legacy execution keep working.
+  // Trailing/add/partial EXECUTION is deferred to later phases; these are
+  // initialized on open only.
+  highWaterMarkKvnd         Float? @map("high_water_mark_kvnd")
+  trailingStopKvnd          Float? @map("trailing_stop_kvnd")
+  initialRiskPerShareKvnd   Float? @map("initial_risk_per_share_kvnd")
+  addsCount                 Int    @default(0) @map("adds_count")
+  partialsCount             Int    @default(0) @map("partials_count")
+  maxFavorableExcursionKvnd Float  @default(0) @map("max_favorable_excursion_kvnd")
+  maxAdverseExcursionKvnd   Float  @default(0) @map("max_adverse_excursion_kvnd")
+
   openedAt        DateTime            @map("opened_at") @db.Date
   closedAt        DateTime?           @map("closed_at") @db.Date
   entryDecisionId String?             @map("entry_decision_id")
@@ -759,9 +792,106 @@ model PaperTrade {
   closedSessionDate DateTime        @map("closed_session_date") @db.Date
   createdAt         DateTime        @default(now()) @map("created_at")
 
+  attribution TradeAttribution?
+
   @@index([positionId])
   @@index([closedSessionDate])
   @@map("paper_trades")
+}
+
+// Performance Attribution (v1): deterministic per-trade explanation. Heuristic
+// scores are in [0,1]; monetary fields reconcile to realized P&L (gross - fees).
+model TradeAttribution {
+  id           String     @id @default(uuid()) @db.Uuid
+  paperTradeId String     @unique @map("paper_trade_id") @db.Uuid
+  paperTrade   PaperTrade @relation(fields: [paperTradeId], references: [id], onDelete: Cascade)
+  positionId   String     @map("position_id")
+  agentId      String     @map("agent_id")
+  entryDecisionId String? @map("entry_decision_id")
+  exitDecisionId  String? @map("exit_decision_id")
+
+  attributionSchemaVersion String  @default("1.0.0") @map("attribution_schema_version")
+  engineVersion            String  @map("engine_version")
+  dnaVersion               String? @map("dna_version")
+
+  setupType     String  @map("setup_type")
+  exitReason    String  @map("exit_reason")
+  regimeAtEntry String? @map("regime_at_entry")
+  regimeAtExit  String? @map("regime_at_exit")
+
+  mfeR Float? @map("mfe_r")
+  maeR Float? @map("mae_r")
+
+  entryQualityScore   Float @map("entry_quality_score")
+  holdingQualityScore Float @map("holding_quality_score")
+  exitQualityScore    Float @map("exit_quality_score")
+  sizingQualityScore  Float @map("sizing_quality_score")
+  regimeFitScore      Float @map("regime_fit_score")
+  riskControlScore    Float @map("risk_control_score")
+
+  grossPriceMoveVnd BigInt  @map("gross_price_move_vnd")
+  feesVnd           BigInt  @map("fees_vnd")
+  realizedPnlVnd    BigInt  @map("realized_pnl_vnd")
+  cashDragVnd       BigInt? @map("cash_drag_vnd")
+  leftOnTablePct    Float?  @map("left_on_table_pct")
+
+  reasonCodesJson   Json     @map("reason_codes_json")
+  contributionsJson Json     @map("contributions_json")
+  inputHash         String   @map("input_hash")
+  computedAt        DateTime @default(now()) @map("computed_at")
+
+  @@index([agentId])
+  @@map("trade_attributions")
+}
+
+// Shadow Capital Allocation review (read-only scorecard + proposal). MOVES NO
+// capital: `applied` is always false in this phase; no CapitalFlow is written.
+model AllocationReview {
+  id                     String   @id @default(uuid()) @db.Uuid
+  reviewDate             DateTime @map("review_date") @db.Date
+  cadence                String
+  trailingWindowSessions Int      @map("trailing_window_sessions")
+  schemaVersion          String   @default("1.0.0") @map("schema_version")
+  scoringVersion         String   @map("scoring_version")
+  totalPoolVnd           BigInt   @map("total_pool_vnd")
+  scorecardsJson         Json     @map("scorecards_json")
+  currentAllocationJson  Json     @map("current_allocation_json")
+  proposedAllocationJson Json     @map("proposed_allocation_json")
+  reasonCodesJson        Json     @map("reason_codes_json")
+  inputHash              String   @map("input_hash")
+  applied                Boolean  @default(false)
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  @@unique([reviewDate, cadence, scoringVersion])
+  @@map("allocation_reviews")
+}
+
+// Monthly aggregate of trade attribution per manager (upsert on agent+month).
+model ManagerAttributionMonthly {
+  id      String @id @default(uuid()) @db.Uuid
+  agentId String @map("agent_id")
+  month   String // "YYYY-MM"
+
+  attributionSchemaVersion String @default("1.0.0") @map("attribution_schema_version")
+  tradeCount               Int    @map("trade_count")
+  realizedPnlVnd           BigInt @map("realized_pnl_vnd")
+  reconciledPnlVnd         BigInt @map("reconciled_pnl_vnd")
+
+  avgEntryQuality   Float @map("avg_entry_quality")
+  avgHoldingQuality Float @map("avg_holding_quality")
+  avgExitQuality    Float @map("avg_exit_quality")
+  avgSizingQuality  Float @map("avg_sizing_quality")
+  avgRegimeFit      Float @map("avg_regime_fit")
+  avgRiskControl    Float @map("avg_risk_control")
+  cashDragVnd       BigInt @map("cash_drag_vnd")
+
+  bySetupJson  Json     @map("by_setup_json")
+  byRegimeJson Json     @map("by_regime_json")
+  computedAt   DateTime @default(now()) @map("computed_at")
+
+  @@unique([agentId, month])
+  @@map("manager_attribution_monthly")
 }
 
 model AgentDecision {
@@ -943,6 +1073,18 @@ model AgentError {
 }
 
 // ─── Phase 2: AI Investment Laboratory ───
+
+// Market Memory: market-level, per-style setup base rates as of a session.
+// One row per session; computed post-session (analytics), read by the DNA
+// evaluator for a date <= S-1 (no lookahead). `memory_json` holds a MarketMemory.
+model MarketMemoryDaily {
+  sessionDate   DateTime @id @db.Date @map("session_date")
+  memoryJson    Json     @map("memory_json")
+  schemaVersion String   @default("1.0.0") @map("schema_version")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("market_memory_daily")
+}
 
 model MarketRegimeSnapshot {
   sessionDate    DateTime        @id @db.Date @map("session_date")

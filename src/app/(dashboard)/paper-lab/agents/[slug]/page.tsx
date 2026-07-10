@@ -6,7 +6,7 @@ import type { AgentDnaProfile } from "@/lib/lab/types/regime";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
-  title: "Agent Profile | AI Lab",
+  title: "Agent Profile | Arena",
 };
 
 export const dynamic = "force-dynamic";

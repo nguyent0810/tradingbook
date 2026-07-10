@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "playwright-report/**",
     "test-results/**",
+    // React Bits is a read-only reference clone (never shipped, also excluded
+    // from tsconfig) — not our code, so keep it out of lint.
+    "react-bits/**",
   ]),
 ]);
 

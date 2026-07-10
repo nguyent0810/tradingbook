@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
-  title: "Lab Ops | AI Lab",
+  title: "Ops | Arena",
 };
 
 export const dynamic = "force-dynamic";

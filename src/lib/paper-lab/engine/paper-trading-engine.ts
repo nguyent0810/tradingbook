@@ -19,6 +19,9 @@ import {
   formatBoardLotRejectionReason,
   roundDownSellQuantity,
 } from "@/lib/paper-lab/engine/board-lot";
+import { isDnaEngineEnabled } from "@/lib/paper-lab/dna/dna-engine-flag";
+import { getManagerDna } from "@/lib/paper-lab/dna/manager-configs";
+import { computeTrailingUpdate } from "@/lib/paper-lab/engine/trailing";
 
 export type ExecuteDecisionParams = {
   portfolioId: string;
@@ -175,6 +178,9 @@ async function openOrAddPosition(
         takeProfitKvnd: tp,
         riskAmountVnd: BigInt(computeRiskAtStopVnd(avgEntry, stop, newQty)),
         status: "OPEN",
+        // Phase 4: pyramiding bookkeeping (only ever reached via an ADD decision).
+        addsCount: { increment: 1 },
+        initialRiskPerShareKvnd: Math.max(avgEntry - stop, 0),
       },
     });
     positionId = updated.id;
@@ -189,6 +195,17 @@ async function openOrAddPosition(
         takeProfitKvnd: tp,
         riskAmountVnd: BigInt(computeRiskAtStopVnd(fillKVnd, stop, qty)),
         status: "OPEN",
+        // Phase 0.5 contract: initialize lifecycle. Never transitioned yet.
+        lifecycle: "OPEN",
+        // Phase 0: initialize position-management state on open. Trailing/add/
+        // partial EXECUTION is deferred; these are seed values only.
+        highWaterMarkKvnd: fillKVnd,
+        trailingStopKvnd: stop,
+        initialRiskPerShareKvnd: Math.max(fillKVnd - stop, 0),
+        addsCount: 0,
+        partialsCount: 0,
+        maxFavorableExcursionKvnd: 0,
+        maxAdverseExcursionKvnd: 0,
         openedAt: sessionDate,
         entryDecisionId: decisionDbId,
       },
@@ -221,9 +238,12 @@ async function closeOrReducePosition(
     return rejectOrder(prisma, params, "No open position");
   }
 
+  // Phase 4: REDUCE honors the decision's requested sell quantity (from the
+  // manager's reduceFraction) when provided; legacy REDUCE (quantity null) keeps
+  // the historical half-sell behavior.
   const reduceQtyRaw =
     decision.action === "REDUCE"
-      ? Math.max(1, Math.floor(position.quantity / 2))
+      ? Math.max(1, Math.min(position.quantity, decision.quantity ?? Math.floor(position.quantity / 2)))
       : position.quantity;
 
   const sellLot = roundDownSellQuantity(reduceQtyRaw);
@@ -295,7 +315,12 @@ async function closeOrReducePosition(
   } else {
     await prisma.paperPosition.update({
       where: { id: position.id },
-      data: { quantity: remaining, status: "PARTIAL" },
+      data: {
+        quantity: remaining,
+        status: "PARTIAL",
+        // Phase 4: count partial-profit reductions (inert for legacy positions).
+        ...(decision.action === "REDUCE" ? { partialsCount: { increment: 1 } } : {}),
+      },
     });
   }
 
@@ -337,9 +362,10 @@ export async function markPositionsAndDetectExits(
   sessionDate: Date,
   marks: Map<string, { low: number; high: number; close: number }>
 ): Promise<number> {
+  const dnaEnabled = isDnaEngineEnabled();
   const open = await prisma.paperPosition.findMany({
     where: { status: { in: ["OPEN", "PARTIAL"] } },
-    include: { portfolio: true },
+    include: { portfolio: { include: { agent: true } } },
   });
 
   let closedCount = 0;
@@ -348,12 +374,46 @@ export async function markPositionsAndDetectExits(
     const bar = marks.get(pos.symbol);
     if (!bar) continue;
 
+    // Phase 4 (flag-gated): trailing-stop maintenance + MFE/MAE/high-water update.
+    // Uses only the current session bar (no lookahead). Legacy path (flag off)
+    // keeps the original static stop/target behavior untouched.
+    let effectiveStop = pos.stopLossKvnd;
+    if (dnaEnabled) {
+      const dna = getManagerDna(pos.portfolio.agent.slug);
+      // Exit detection uses the PRIOR trailing stop, so a trail raised from this
+      // bar's high can never stop the position out on the same bar's low.
+      effectiveStop = Math.max(pos.stopLossKvnd, pos.trailingStopKvnd ?? pos.stopLossKvnd);
+
+      const t = computeTrailingUpdate({
+        avgEntryKvnd: pos.avgEntryKvnd,
+        stopLossKvnd: pos.stopLossKvnd,
+        initialRiskPerShareKvnd: pos.initialRiskPerShareKvnd,
+        highWaterMarkKvnd: pos.highWaterMarkKvnd,
+        trailingStopKvnd: pos.trailingStopKvnd,
+        maxFavorableExcursionKvnd: pos.maxFavorableExcursionKvnd,
+        maxAdverseExcursionKvnd: pos.maxAdverseExcursionKvnd,
+        bar,
+        trailingEnabled: dna?.position.trailing.enabled ?? false,
+        breakevenAtR: dna?.position.trailing.breakevenAtR ?? null,
+      });
+      // Persist the raised trail + excursions for the NEXT session.
+      await prisma.paperPosition.update({
+        where: { id: pos.id },
+        data: {
+          highWaterMarkKvnd: t.highWaterMarkKvnd,
+          maxFavorableExcursionKvnd: t.maxFavorableExcursionKvnd,
+          maxAdverseExcursionKvnd: t.maxAdverseExcursionKvnd,
+          trailingStopKvnd: t.trailingStopKvnd,
+        },
+      });
+    }
+
     let exitReason: PaperExitReason | null = null;
     let exitKVnd = bar.close;
 
-    if (bar.low <= pos.stopLossKvnd) {
+    if (bar.low <= effectiveStop) {
       exitReason = "STOP_LOSS_HIT";
-      exitKVnd = pos.stopLossKvnd;
+      exitKVnd = effectiveStop;
     } else if (bar.high >= pos.takeProfitKvnd) {
       exitReason = "TAKE_PROFIT_HIT";
       exitKVnd = pos.takeProfitKvnd;

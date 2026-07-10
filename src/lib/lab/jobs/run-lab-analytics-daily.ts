@@ -10,6 +10,9 @@ import { persistAllEvolutionScores } from "@/lib/lab/evolution/compute-evolution
 import { detectHallOfFameAchievements } from "@/lib/lab/hall-of-fame/detect-achievements";
 import { persistSessionReplayBundle } from "@/lib/lab/timeline/build-replay-bundle";
 import { recordLabTelemetry } from "@/lib/lab/observability/telemetry";
+import { resolvePaperLabSymbolUniverse } from "@/lib/paper-lab/context/build-market-context-bundle";
+import { computeAndPersistMarketMemory } from "@/lib/paper-lab/dna/market-memory-store";
+import { aggregateMonthlyAttribution, finalizeTradeAttributions } from "@/lib/paper-lab/dna/attribution-store";
 import {
   assertSessionReady,
   wasJobCompletedForSession,
@@ -52,6 +55,13 @@ export async function runLabAnalyticsDailyJob(
   const regimeSnapshot = await classifyRegimeForSession(prisma, sessionDate);
   await persistRegimeSnapshot(prisma, regimeSnapshot);
 
+  // Market Memory: compute market-level style base rates FOR session S (upsert,
+  // idempotent). This is post-session, so the S row is only read by decisions on
+  // S+1 or later (the runner loads memory with sessionDate < S). No lookahead.
+  const marketMemoryUniverse = await resolvePaperLabSymbolUniverse(prisma, sessionDate);
+  const marketMemory = await computeAndPersistMarketMemory(prisma, sessionDate, marketMemoryUniverse);
+  const marketMemoryStyles = Object.keys(marketMemory.byStyle).length;
+
   const memoryUpdated = await materializeAgentMemory(prisma, sessionDate);
   const battlesRegistered = await registerBattlesForSession(prisma, sessionDate);
   const outcomesResolved = await resolveBattleOutcomes(prisma, sessionDate);
@@ -63,6 +73,11 @@ export async function runLabAnalyticsDailyJob(
   const hofCount = await detectHallOfFameAchievements(prisma, sessionDate);
   await persistSessionReplayBundle(prisma, sessionDate);
 
+  // Performance Attribution: finalize per-trade rows (idempotent; back-fills
+  // post-exit metrics as their forward window completes) then roll up monthly.
+  const attributionsFinalized = await finalizeTradeAttributions(prisma, sessionDate);
+  const monthlyAttributions = await aggregateMonthlyAttribution(prisma, sessionDate);
+
   const durationMs = Date.now() - started;
   await recordLabTelemetry(prisma, {
     jobName: "lab-analytics-daily",
@@ -71,6 +86,7 @@ export async function runLabAnalyticsDailyJob(
     success: true,
     context: {
       sessionDate: sessionDate.toISOString().slice(0, 10),
+      marketMemoryStyles,
       memoryUpdated,
       battlesRegistered,
       outcomesResolved,
@@ -104,6 +120,7 @@ export async function runLabAnalyticsDailyJob(
     summary: {
       sessionDate: sessionDate.toISOString().slice(0, 10),
       durationMs,
+      marketMemoryStyles,
       memoryUpdated,
       battlesRegistered,
       outcomesResolved,
@@ -113,6 +130,8 @@ export async function runLabAnalyticsDailyJob(
       cioCount,
       tracesCount,
       hofCount,
+      attributionsFinalized,
+      monthlyAttributions,
       staleWarning: readiness.staleWarning,
     },
   };

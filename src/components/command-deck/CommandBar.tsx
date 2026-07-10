@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { Activity, ChevronDown, Shield, TrendingUp } from "lucide-react";
+import { Activity, ChevronDown, Gauge, Shield, TrendingUp } from "lucide-react";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import type { V3HeaderCta } from "@/lib/dashboard/dashboard-v3-view-model";
 import type { CommandBarData, CommandBarStat, StatusTone } from "./types";
@@ -15,17 +15,20 @@ type Props = {
   loading?: boolean;
 };
 
+type Tone = "danger" | "warning" | "success" | "neutral";
+
 const NUMERIC_SPLIT = /([+\-−]?\d[\d.,%/]*)/g;
 
 function isNumericChunk(part: string): boolean {
   return /^[+\-−]?\d[\d.,%/]*$/.test(part);
 }
 
-function toneTextClass(tone?: StatusTone): string {
-  if (tone === "danger") return "text-rose-500";
-  if (tone === "warning") return "text-amber-400";
-  if (tone === "success") return "text-emerald-400";
-  return "text-gray-100";
+/** Semantic tone class backed by foundation tokens (not raw colors). */
+function toneClass(tone?: StatusTone | Tone): string {
+  if (tone === "danger") return "cd-tone-danger";
+  if (tone === "warning") return "cd-tone-warning";
+  if (tone === "success") return "cd-tone-success";
+  return "";
 }
 
 function inferMomentumTrend(value: string, tone?: StatusTone): "up" | "down" | "flat" {
@@ -36,13 +39,30 @@ function inferMomentumTrend(value: string, tone?: StatusTone): "up" | "down" | "
   return "flat";
 }
 
+/** Verdict tone derived from the decision lead + regime text (text still conveys meaning). */
+function verdictTone(lead: string, regime: string): Tone {
+  const t = `${lead} ${regime}`.toLowerCase();
+  if (t.includes("protect") || t.includes("no trade") || t.includes("avoid") || t.includes("danger")) return "danger";
+  if (t.includes("caution") || t.includes("warning") || t.includes("probe") || t.includes("wait")) return "warning";
+  if (t.includes("trade") || t.includes("favorable") || t.includes("pass") || t.includes("execute") || t.includes("normal"))
+    return "success";
+  return "neutral";
+}
+
+function regimeTone(regime: string): Tone {
+  const l = regime.toLowerCase();
+  if (l.includes("caution") || l.includes("warning") || l.includes("no trade")) return "warning";
+  if (l.includes("favorable") || l.includes("pass") || l.includes("trade mode")) return "success";
+  return "neutral";
+}
+
 function TabularText({ children, className = "" }: { children: string; className?: string }) {
   const parts = children.split(NUMERIC_SPLIT);
   return (
     <span className={`whitespace-nowrap ${className}`.trim()}>
       {parts.map((part, index) =>
         isNumericChunk(part) ? (
-          <span key={`${part}-${index}`} className="font-mono tabular-nums">
+          <span key={`${part}-${index}`} className="cd-mono">
             {part}
           </span>
         ) : (
@@ -55,7 +75,11 @@ function TabularText({ children, className = "" }: { children: string; className
 
 function MiniMomentumSparkline({ trend }: { trend: "up" | "down" | "flat" }) {
   const stroke =
-    trend === "up" ? "#34d399" : trend === "down" ? "#f87171" : "#94a3b8";
+    trend === "up"
+      ? "var(--cd-pnl-pos, #34d399)"
+      : trend === "down"
+        ? "var(--cd-pnl-neg, #f87171)"
+        : "var(--cd-neutral, #94a3b8)";
   const points =
     trend === "up"
       ? "2,12 9,10 16,9 24,7 32,5 38,3"
@@ -64,7 +88,7 @@ function MiniMomentumSparkline({ trend }: { trend: "up" | "down" | "flat" }) {
         : "2,8 10,7 18,9 26,8 34,9 38,8";
 
   return (
-    <svg width={32} height={14} viewBox="0 0 40 16" className="shrink-0 opacity-80" aria-hidden>
+    <svg width={32} height={14} viewBox="0 0 40 16" className="cd-spark" aria-hidden>
       <polyline
         points={points}
         fill="none"
@@ -77,35 +101,35 @@ function MiniMomentumSparkline({ trend }: { trend: "up" | "down" | "flat" }) {
   );
 }
 
-function StatLabel({ children, icon }: { children: ReactNode; icon?: ReactNode }) {
+/** Compact label/value stat used across the status cluster. */
+function StatItem({
+  label,
+  icon,
+  children,
+  valueClass = "",
+  title,
+}: {
+  label: string;
+  icon?: ReactNode;
+  children: ReactNode;
+  valueClass?: string;
+  title?: string;
+}) {
   return (
-    <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-gray-400/70">
-      {icon}
-      {children}
-    </span>
+    <div className="cd-stat">
+      <span className="cd-stat__label">
+        {icon}
+        {label}
+      </span>
+      <span className={`cd-stat__value ${valueClass}`.trim()} title={title}>
+        {children}
+      </span>
+    </div>
   );
 }
 
-function regimePresentation(regime: string): string {
-  const lower = regime.toLowerCase();
-  if (lower.includes("caution") || lower.includes("warning") || lower.includes("no trade")) {
-    return "text-amber-300";
-  }
-  if (lower.includes("favorable") || lower.includes("pass") || lower.includes("trade mode")) {
-    return "text-emerald-300";
-  }
-  return "text-gray-100";
-}
-
-function ForeignFlowChip({
-  stats,
-  loading,
-}: {
-  stats: CommandBarStat[];
-  loading: boolean;
-}) {
-  const primary =
-    stats.find((s) => s.label.toLowerCase().includes("foreign 1d")) ?? stats[0];
+function ForeignFlowChip({ stats, loading }: { stats: CommandBarStat[]; loading: boolean }) {
+  const primary = stats.find((s) => s.label.toLowerCase().includes("foreign 1d")) ?? stats[0];
   if (!primary) return null;
 
   const trend = inferMomentumTrend(primary.value, primary.tone);
@@ -117,18 +141,18 @@ function ForeignFlowChip({
         {loading ? (
           <LoadingSkeleton height="1rem" width="4rem" />
         ) : (
-          <span className={`cd-foreign-flow__value ${toneTextClass(primary.tone)}`}>
+          <span className={`cd-foreign-flow__value ${toneClass(primary.tone)}`.trim()}>
             <MiniMomentumSparkline trend={trend} />
             <TabularText>{primary.value}</TabularText>
           </span>
         )}
-        <ChevronDown className="cd-foreign-flow__chevron h-3 w-3 opacity-60" aria-hidden />
+        <ChevronDown className="cd-foreign-flow__chevron h-3 w-3" aria-hidden />
       </summary>
       <div className="cd-foreign-flow__detail" data-testid="foreign-flow-detail">
         {stats.map((stat) => (
           <div key={stat.label} className="cd-foreign-flow__detail-row">
-            <span className="text-[10px] uppercase text-gray-400">{stat.label}</span>
-            <span className={`text-xs font-mono tabular-nums ${toneTextClass(stat.tone)}`}>
+            <span className="cd-foreign-flow__detail-label">{stat.label}</span>
+            <span className={`cd-mono cd-foreign-flow__detail-value ${toneClass(stat.tone)}`.trim()}>
               {loading ? "—" : stat.value}
             </span>
           </div>
@@ -141,7 +165,7 @@ function ForeignFlowChip({
 function SessionActions({ cta }: { cta: V3HeaderCta }) {
   return (
     <div className="cd-session-actions">
-      <Link href={cta.primaryHref} className="cd-session-actions__link">
+      <Link href={cta.primaryHref} className="cd-session-actions__link cd-session-actions__link--primary">
         {cta.primaryLabel}
       </Link>
       {cta.secondaryHref && cta.secondaryLabel ? (
@@ -158,74 +182,64 @@ function SessionActions({ cta }: { cta: V3HeaderCta }) {
 
 export function CommandBar({ data, headerCta, loading = false }: Props) {
   const foreignStats = data.stats.filter((s) => s.label.toLowerCase().startsWith("foreign"));
-  const regimeClassName = regimePresentation(data.regime);
+  const vTone = verdictTone(headerCta.lead, data.regime);
+  const rTone = regimeTone(data.regime);
   const vnindexTrend: "up" | "down" | "flat" =
-    data.volatility.toLowerCase().includes("down") ||
-    data.regime.toLowerCase().includes("caution")
-      ? "down"
-      : "up";
+    data.volatility.toLowerCase().includes("down") || data.regime.toLowerCase().includes("caution") ? "down" : "up";
   const hasActiveWatch = !data.watchState.toLowerCase().includes("no active");
 
   return (
     <Card className="cd-session-bar overflow-hidden" data-testid="command-deck-bar">
-      <div className="cd-session-bar__inner">
-        <div className="cd-session-bar__core">
-          <div className="cd-session-bar__metric">
-            <StatLabel icon={<Activity className="h-3 w-3 opacity-60" aria-hidden />}>
-              Session
-            </StatLabel>
-            {loading ? (
-              <LoadingSkeleton height="1rem" width="8rem" />
-            ) : (
-              <span className="cd-session-bar__value">
-                <TabularText>{data.session}</TabularText>
-              </span>
-            )}
-          </div>
+      <div className="cd-session-bar__inner" aria-label="Session command bar">
+        {/* Decision verdict — primary, scanned first */}
+        <div className={`cd-verdict cd-verdict--${vTone}`}>
+          <span className="cd-verdict__kicker">Decision</span>
+          {loading ? (
+            <LoadingSkeleton height="1.25rem" width="9rem" />
+          ) : (
+            <span className="cd-verdict__lead">
+              <span className="cd-verdict__dot" aria-hidden />
+              {headerCta.lead}
+            </span>
+          )}
+        </div>
 
-          <div className="cd-session-bar__metric">
-            <StatLabel icon={<TrendingUp className="h-3 w-3 opacity-60" aria-hidden />}>
-              VNINDEX
-            </StatLabel>
+        <div className="cd-session-bar__divider" aria-hidden />
+
+        {/* Status cluster — regime, freshness, watch, then market context */}
+        <div className="cd-session-bar__status" role="group" aria-label="Market status">
+          <StatItem label="Regime" title={data.regimeNote ?? undefined} valueClass={`cd-truncate ${toneClass(rTone)}`}>
+            <TabularText>{loading ? "—" : data.regime}</TabularText>
+          </StatItem>
+
+          <StatItem label="Freshness">
+            <TabularText>{loading ? "—" : data.freshness}</TabularText>
+          </StatItem>
+
+          <StatItem label="Watch" icon={<Shield className="cd-stat__icon" aria-hidden />}>
+            <Badge tone={hasActiveWatch ? "warning" : "neutral"} size="compact">
+              <TabularText>{loading ? "—" : data.watchState}</TabularText>
+            </Badge>
+          </StatItem>
+
+          <StatItem label="VNINDEX" icon={<TrendingUp className="cd-stat__icon" aria-hidden />} valueClass="cd-stat__value--strong">
             {loading ? (
               <LoadingSkeleton height="1rem" width="4rem" />
             ) : (
-              <span className="cd-session-bar__value cd-session-bar__value--strong">
+              <>
                 <MiniMomentumSparkline trend={vnindexTrend} />
                 <TabularText>{data.vnindex}</TabularText>
-              </span>
+              </>
             )}
-          </div>
+          </StatItem>
 
-          <div className="cd-session-bar__metric">
-            <StatLabel>Freshness</StatLabel>
-            <span className="cd-session-bar__value">
-              <TabularText>{loading ? "—" : data.freshness}</TabularText>
-            </span>
-          </div>
+          <StatItem label="Volatility" icon={<Gauge className="cd-stat__icon" aria-hidden />}>
+            <TabularText>{loading ? "—" : data.volatility}</TabularText>
+          </StatItem>
 
-          <div className="cd-session-bar__metric cd-session-bar__metric--regime">
-            <StatLabel>Regime</StatLabel>
-            <span className={`cd-session-bar__value truncate ${regimeClassName}`} title={data.regimeNote ?? undefined}>
-              <TabularText>{loading ? "—" : data.regime}</TabularText>
-            </span>
-          </div>
-
-          <div className="cd-session-bar__metric">
-            <StatLabel>Volatility</StatLabel>
-            <span className="cd-session-bar__value">
-              <TabularText>{loading ? "—" : data.volatility}</TabularText>
-            </span>
-          </div>
-
-          <div className="cd-session-bar__metric">
-            <StatLabel icon={<Shield className="h-3 w-3 opacity-60" aria-hidden />}>
-              Watch
-            </StatLabel>
-            <Badge tone={hasActiveWatch ? "warning" : "neutral"} pulse={hasActiveWatch} size="compact">
-              <TabularText>{loading ? "—" : data.watchState}</TabularText>
-            </Badge>
-          </div>
+          <StatItem label="Session" icon={<Activity className="cd-stat__icon" aria-hidden />}>
+            <TabularText>{loading ? "—" : data.session}</TabularText>
+          </StatItem>
         </div>
 
         {foreignStats.length > 0 ? (

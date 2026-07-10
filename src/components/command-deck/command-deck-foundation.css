@@ -1,0 +1,67 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Command Deck — Design-System Foundation (Step 1)
+
+   Cross-cutting primitives only: keyboard focus, reduced-motion, numeric
+   alignment, and opt-in type utilities. Design TOKENS live in the `.cd-root`
+   block of command-deck.css. This layer changes NO component structure,
+   testids, logic, or data — presentation foundation only.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Accessible keyboard focus (WCAG 2.4.7) ──
+   A single, high-contrast focus ring for every interactive element inside the
+   deck. Shown only for keyboard users (:focus-visible); pointer focus stays clean. */
+.cd-root
+  :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline-offset: 2px;
+  border-radius: var(--cd-radius-sm, 8px);
+}
+.cd-root
+  :where(a, button, [role="button"], input, select, textarea, summary):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Tabular numerics ──
+   Figures inherit tabular-nums from `.cd-root`; these selectors guarantee it for
+   dense numeric cells so columns of prices/percentages align on the decimal. */
+.cd-root .cd-mono,
+.cd-root [data-numeric],
+.cd-root th[data-numeric],
+.cd-root td[data-numeric] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── Opt-in typography utilities (do not restyle existing components) ── */
+.cd-fs-2xs {
+  font-size: var(--cd-fs-2xs);
+}
+.cd-fs-xs {
+  font-size: var(--cd-fs-xs);
+}
+.cd-fs-sm {
+  font-size: var(--cd-fs-sm);
+}
+.cd-fs-base {
+  font-size: var(--cd-fs-base);
+}
+.cd-label {
+  font-size: var(--cd-fs-2xs);
+  font-weight: var(--cd-fw-semibold, 600);
+  letter-spacing: var(--cd-ls-caps, 0.08em);
+  text-transform: uppercase;
+  color: var(--cd-text-dim);
+}
+
+/* ── Reduced motion ──
+   Neutralise non-essential animation/transition for users who request it. */
+@media (prefers-reduced-motion: reduce) {
+  .cd-root *,
+  .cd-root *::before,
+  .cd-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
