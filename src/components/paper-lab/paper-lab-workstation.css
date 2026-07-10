@@ -250,14 +250,14 @@
 
 .paper-lab-nav-link--active {
   color: rgb(34, 211, 238);
-  border-color: rgba(34, 211, 238, 0.35);
+  border-color: rgba(99, 102, 241, 0.35);
   background: rgba(8, 47, 73, 0.45);
 }
 
 .paper-lab-regime-banner {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(34, 211, 238, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.2);
   background: rgba(8, 47, 73, 0.25);
 }
 
@@ -265,9 +265,9 @@
   font-size: 0.75rem;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  background: rgba(34, 211, 238, 0.15);
+  background: rgba(99, 102, 241, 0.15);
   color: rgb(165, 243, 252);
-  border: 1px solid rgba(34, 211, 238, 0.25);
+  border: 1px solid rgba(99, 102, 241, 0.25);
 }
 
 .paper-lab-outcome-win {
@@ -406,8 +406,8 @@
 }
 
 .paper-lab-agent-tile--active {
-  border-color: rgba(34, 211, 238, 0.55);
-  box-shadow: 0 0 22px rgba(34, 211, 238, 0.2), 0 8px 28px rgba(0, 0, 0, 0.35);
+  border-color: rgba(99, 102, 241, 0.55);
+  box-shadow: 0 0 22px rgba(99, 102, 241, 0.2), 0 8px 28px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 
@@ -454,10 +454,10 @@
   justify-content: center;
   font-size: 0.6rem;
   font-weight: 700;
-  background: rgba(34, 211, 238, 0.12);
+  background: rgba(99, 102, 241, 0.12);
   color: rgb(165, 243, 252);
-  border: 2px solid rgba(34, 211, 238, 0.35);
-  box-shadow: 0 0 10px rgba(34, 211, 238, 0.15);
+  border: 2px solid rgba(99, 102, 241, 0.35);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
 }
 
 .paper-lab-agent-tile__name {
@@ -708,7 +708,7 @@
 }
 
 .paper-lab-json-btn:hover {
-  border-color: rgba(34, 211, 238, 0.35);
+  border-color: rgba(99, 102, 241, 0.35);
   color: rgb(165, 243, 252);
 }
 
@@ -807,8 +807,8 @@
 
 /* ── Decisions log row emphasis ── */
 .paper-lab-decision-row--active {
-  background: rgba(34, 211, 238, 0.04);
-  border-left: 3px solid rgba(34, 211, 238, 0.45);
+  background: rgba(99, 102, 241, 0.04);
+  border-left: 3px solid rgba(99, 102, 241, 0.45);
 }
 
 .paper-lab-decision-row--active td:first-child {

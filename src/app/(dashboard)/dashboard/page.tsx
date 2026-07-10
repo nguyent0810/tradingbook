@@ -35,9 +35,10 @@ import {
   persistRsWatchlistSnapshot,
 } from "@/lib/scanner/gate2/rs-watchlist-snapshot";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
-import { loadPaperValidationSummary } from "@/lib/dashboard/load-paper-validation-summary";
-import { CommandDeckDashboard } from "@/components/command-deck";
+import { buildLatestCloseBySymbol } from "@/lib/dashboard/latest-close-by-symbol";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
+import { DashboardDecisionCockpit } from "@/components/dashboard/dashboard-decision-cockpit";
+import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -163,6 +164,19 @@ export default async function DashboardPage() {
     activeWatchItems = [];
   }
 
+  let latestCloseBySymbol = new Map<string, number>();
+  if (activeWatchItems.length > 0) {
+    try {
+      latestCloseBySymbol = await buildLatestCloseBySymbol(
+        prisma,
+        activeWatchItems.map((item) => item.symbolId),
+        new Date()
+      );
+    } catch (e) {
+      console.error("[dashboard] latest close lookup failed:", e);
+    }
+  }
+
   const accountEquityVnd = parseTradingAccountEquityVnd();
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
 
@@ -275,17 +289,31 @@ export default async function DashboardPage() {
     dbLoadError,
   });
 
-  const paperValidation = await loadPaperValidationSummary();
-
   return (
-    <CommandDeckDashboard
-      viewModel={viewModel}
-      paperValidation={paperValidation}
-      header={
-        <div className="mb-4">
-          <DashboardPageHeader cta={viewModel.headerCta} slim />
-        </div>
-      }
-    />
+    <div className="page-container command-deck dash-cockpit dash-cockpit--v2 pb-10">
+      <DashboardPageHeader cta={viewModel.headerCta} />
+
+      {dbLoadError ? (
+        <ErrorStateWithEvidence
+          className="dash-v2-alert"
+          title="Partial dashboard data unavailable"
+          message={dbLoadError}
+          evidence="src/app/(dashboard)/dashboard/page.tsx · one or more Prisma reads failed; sections below may be empty."
+          data-testid="dashboard-db-load-error"
+        />
+      ) : null}
+
+      <DashboardDecisionCockpit
+        freshness={freshness}
+        latestScan={latestScan}
+        scanDelayedBackdrop={scanNotes?.benchmarkBackdrop?.delayedBackdrop ?? null}
+        cockpitDto={cockpitDto}
+        surfacedCount={latestScan?.candidateCountSurfaced ?? 0}
+        portfolioRiskConfigured={portfolioRiskConfigured}
+        trades={trades}
+        activeWatchItems={activeWatchItems}
+        latestCloseBySymbol={latestCloseBySymbol}
+      />
+    </div>
   );
 }

@@ -143,7 +143,7 @@ export function CioRecommendationPanel({
     }
     return (
       <section className="paper-lab-cio-panel" data-testid="paper-lab-cio">
-        <h3 className="text-sm font-semibold text-cyan-300 mb-2">CIO Final Recommendation</h3>
+        <h3 className="text-sm font-semibold text-indigo-300 mb-2">CIO Final Recommendation</h3>
         <p className="text-sm text-slate-400">No CIO recommendation for this session yet.</p>
       </section>
     );
@@ -155,7 +155,7 @@ export function CioRecommendationPanel({
 
   return (
     <section className="paper-lab-cio-panel" data-testid="paper-lab-cio">
-      <h3 className="text-sm font-semibold text-cyan-300 mb-3">
+      <h3 className="text-sm font-semibold text-indigo-300 mb-3">
         CIO Final Recommendation — {cio.sessionDate}
       </h3>
       <ul className="space-y-4">

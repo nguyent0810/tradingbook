@@ -206,7 +206,7 @@ describe("buildDecisionCockpitDto — TRADE day", () => {
     expect(dto.verdict.subtitle.value).toMatch(/not an automatic instruction/i);
     expect(dto.opportunity.mode).toBe("candidates");
     expect(dto.opportunity.candidates[0]?.ladderStage).toBe("tier_a");
-    expect(dto.opportunity.candidates[0]?.actionHint).toContain("setupCandidateId=cand-hpg");
+    expect(dto.opportunity.candidates[0]?.actionHint).toBe("Log trade — entry confirmed");
   });
 });
 

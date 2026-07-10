@@ -19,28 +19,16 @@ export default defineConfig({
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/ },
     {
-      name: "chromium-trades-layout-wide",
-      testMatch: /trades-table-layout\.spec\.ts$/,
-      dependencies: ["setup"],
+      name: "chromium-landing-auth",
+      testMatch: /landing-auth\.spec\.ts$/,
       use: {
         ...devices["Desktop Chrome"],
-        viewport: { width: 1365, height: 900 },
-        storageState: authState,
+        viewport: { width: 1280, height: 900 },
       },
     },
     {
-      name: "chromium-trades-layout-narrow",
-      testMatch: /trades-table-layout\.spec\.ts$/,
-      dependencies: ["setup"],
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 900, height: 800 },
-        storageState: authState,
-      },
-    },
-    {
-      name: "chromium-trades-workstation",
-      testMatch: /trades-workstation\.spec\.ts$/,
+      name: "chromium-dashboard-smoke",
+      testMatch: /dashboard-command-deck\.spec\.ts$/,
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
@@ -49,8 +37,8 @@ export default defineConfig({
       },
     },
     {
-      name: "chromium-dashboard-smoke",
-      testMatch: /dashboard-command-deck\.spec\.ts$/,
+      name: "chromium-setups-smoke",
+      testMatch: /setups-workstation\.spec\.ts$/,
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],
@@ -66,6 +54,40 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
         viewport: { width: 1280, height: 900 },
         storageState: authState,
+      },
+    },
+    {
+      name: "chromium-responsive-authenticated",
+      testMatch: /responsive-authenticated\.spec\.ts$/,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: authState,
+      },
+    },
+    {
+      name: "chromium-responsive-public",
+      testMatch: /responsive-public\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
+    {
+      name: "chromium-a11y-authenticated",
+      testMatch: /accessibility-authenticated\.spec\.ts$/,
+      dependencies: ["setup"],
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 900 },
+        storageState: authState,
+      },
+    },
+    {
+      name: "chromium-a11y-public",
+      testMatch: /accessibility-public\.spec\.ts$/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1280, height: 900 },
       },
     },
   ],
