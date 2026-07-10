@@ -1,10 +1,22 @@
-# Dashboard Decision Cockpit — UX Spec (Proposed)
+# Dashboard Decision Cockpit — UX Spec
 
-**Status:** PROPOSED — **do not implement on `/dashboard` until reviewed**  
-**Date:** 2026-05-25  
-**Audience:** Product + FE rebuild  
-**Related:** [TRADING_OS_V2_VISUAL_SPEC.md](./TRADING_OS_V2_VISUAL_SPEC.md), [DASHBOARD_FE_REBUILD_PLAN.md](../integration/DASHBOARD_FE_REBUILD_PLAN.md), [06-backend-gaps.md](../integration/06-backend-gaps.md)  
-**Mockup (non-production):** `/design-preview/decision-cockpit`
+**Status:** IMPLEMENTED on `/dashboard` (UI overhaul engagement, reviewed and approved for implementation).
+**Date:** 2026-05-25 (proposed) · sign-off below dated at implementation.
+**Audience:** Product + FE rebuild
+**Related:** [TRADING_OS_V2_VISUAL_SPEC.md](./TRADING_OS_V2_VISUAL_SPEC.md), [DASHBOARD_FE_REBUILD_PLAN.md](../integration/DASHBOARD_FE_REBUILD_PLAN.md), [06-backend-gaps.md](../integration/06-backend-gaps.md)
+
+## Implementation sign-off
+
+Reviewed against the shipped codebase before implementation. Findings that justified proceeding:
+
+- **Data dependencies were already real.** `buildDecisionCockpitDto()` (`src/lib/dashboard/decision-cockpit-dto.ts`) already computed every field this spec's blocks need — verdict, evidence, opportunity board, setup quality ladder, risk guardrail + budget headroom, tomorrow's plan, actionable diagnostics — but nothing on the live route assembled or rendered them. The component family that reads this DTO (`src/components/dashboard/dashboard-*.tsx`) already existed too, fully built, just never wired into a route.
+- **The fields this spec itself flagged as "mock/gap" (§10) are correctly absent from the shipped DTO**: no breadth %, no numeric confidence % (only a `high`/`medium`/`low` band, via `computeConfidenceBand`), no fabricated "NEUTRAL" badge.
+- **DC-1 (canonical Gate 1 source)** is resolved: `resolveCanonicalGate1()` picks the scan run's `gate1Level` when a scan exists, else the live regime — a single source for both verdict and evidence, as this spec required.
+- **NORMAL → TRADE** vocabulary mapping is implemented via `mapDecisionLevelToUxVerdict()`.
+
+Implementation promoted the existing `dashboard-*` panel family into a single assembler, `src/components/dashboard/dashboard-decision-cockpit.tsx`, wired from `src/app/(dashboard)/dashboard/page.tsx`, replacing the previously-live `command-deck` "cyber" dashboard (now retired). One net-new component was added to close a real gap: `dashboard-opportunity-candidates.tsx`, which renders `opportunity.mode === "candidates"` (Tier A/B surfaced setups) — no existing component covered that case, only the near-miss path.
+
+Verified via `npm run lint`, `npx tsc --noEmit`, `npm test` (789/789 passing), `npx next build`, and live browser verification of a real authenticated session (verdict, evidence, opportunity board, risk rail, setup quality ladder, tomorrow's plan, and both collapsed secondary sections all render with real data, zero console errors).
 
 ---
 

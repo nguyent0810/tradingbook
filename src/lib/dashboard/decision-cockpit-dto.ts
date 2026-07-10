@@ -710,7 +710,7 @@ function buildOpportunityBoard(
         if (ladder === "tier_a" || ladder === "tier_b") {
           actionHint =
             c.lifecycleSortLabel === "READY"
-              ? `Log trade → /trades/new?setupCandidateId=${c.id}`
+              ? "Log trade — entry confirmed"
               : "Wait for entry zone";
         }
         return {

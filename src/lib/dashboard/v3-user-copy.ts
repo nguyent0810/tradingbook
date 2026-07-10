@@ -181,7 +181,7 @@ export function formatActionHintForUser(raw: string | null | undefined): string 
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  if (/Log trade → \/trades\/new/i.test(trimmed)) return "Log trade when entry confirms.";
+  if (/Log trade — entry confirmed/i.test(trimmed)) return "Log trade when entry confirms.";
   if (/Wait for entry zone/i.test(trimmed)) return "Wait for pullback entry zone.";
   if (/Review on Setups/i.test(trimmed)) return "Review full setup on Setups.";
   return formatScannerReasonForUser(trimmed) || null;
