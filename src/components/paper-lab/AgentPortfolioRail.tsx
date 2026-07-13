@@ -54,15 +54,6 @@ export function AgentPortfolioRail({
                 className={`paper-lab-agent-tile paper-lab-agent-tile--wide ${isActive ? "paper-lab-agent-tile--active" : ""}`}
                 data-agent-id={p.agentId}
                 data-style={styleSlug(p.style)}
-                onClick={() => onSelectAgent?.(p.agentId)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    onSelectAgent?.(p.agentId);
-                  }
-                }}
-                role={onSelectAgent ? "button" : undefined}
-                tabIndex={onSelectAgent ? 0 : undefined}
               >
                 <button
                   type="button"
@@ -77,30 +68,47 @@ export function AgentPortfolioRail({
                   i
                 </button>
 
-                <div className="paper-lab-agent-tile__head paper-lab-agent-tile__head--wide">
-                  <span className="paper-lab-agent-tile__avatar" aria-hidden title={p.style}>
-                    {styleInitial(p.style)}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <div className="paper-lab-agent-tile__name paper-lab-agent-tile__name--full">
-                      {p.agentName}
+                {/* Select/filter affordance — a sibling of the details button (not an
+                    ancestor) so no control contains another focusable control. */}
+                <div
+                  className="paper-lab-agent-tile__select"
+                  style={{ display: "contents" }}
+                  onClick={() => onSelectAgent?.(p.agentId)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onSelectAgent?.(p.agentId);
+                    }
+                  }}
+                  role={onSelectAgent ? "button" : undefined}
+                  tabIndex={onSelectAgent ? 0 : undefined}
+                  aria-label={onSelectAgent ? `Select ${p.agentName} to filter` : undefined}
+                >
+                  <div className="paper-lab-agent-tile__head paper-lab-agent-tile__head--wide">
+                    <span className="paper-lab-agent-tile__avatar" aria-hidden title={p.style}>
+                      {styleInitial(p.style)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="paper-lab-agent-tile__name paper-lab-agent-tile__name--full">
+                        {p.agentName}
+                      </div>
+                      <span className="paper-lab-agent-tile__style">{p.style}</span>
                     </div>
-                    <span className="paper-lab-agent-tile__style">{p.style}</span>
+                    <Sparkline values={p.navSparkline} color={sparkColor} width={52} height={18} />
                   </div>
-                  <Sparkline values={p.navSparkline} color={sparkColor} width={52} height={18} />
-                </div>
-                <div className="paper-lab-agent-tile__metrics">
-                  <div className="min-w-0">
-                    <span className="paper-lab-agent-tile__label">NAV</span>
-                    <span className="paper-lab-agent-tile__value paper-lab-truncate">
-                      {formatArenaVndCompact(p.navVnd)}
-                    </span>
-                  </div>
-                  <div className="text-right min-w-0">
-                    <span className="paper-lab-agent-tile__label">PnL</span>
-                    <span className={`paper-lab-agent-tile__value tabular-nums ${pnlClass}`}>
-                      {formatPctSigned(p.pnlPct)}
-                    </span>
+                  <div className="paper-lab-agent-tile__metrics">
+                    <div className="min-w-0">
+                      <span className="paper-lab-agent-tile__label">NAV</span>
+                      <span className="paper-lab-agent-tile__value paper-lab-truncate">
+                        {formatArenaVndCompact(p.navVnd)}
+                      </span>
+                    </div>
+                    <div className="text-right min-w-0">
+                      <span className="paper-lab-agent-tile__label">PnL</span>
+                      <span className={`paper-lab-agent-tile__value tabular-nums ${pnlClass}`}>
+                        {formatPctSigned(p.pnlPct)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </article>

@@ -96,9 +96,9 @@ describe("mapRsWatchlistToV3Panel", () => {
 });
 
 describe("formatActionHintForUser", () => {
-  it("strips internal trade URLs from action hints", () => {
+  it("formats the confirmed-entry action hint sentinel", () => {
     expect(
-      formatActionHintForUser("Log trade → /trades/new?setupCandidateId=abc-123")
+      formatActionHintForUser("Log trade — entry confirmed")
     ).toBe("Log trade when entry confirms.");
   });
 });

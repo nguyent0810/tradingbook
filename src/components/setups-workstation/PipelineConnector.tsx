@@ -15,7 +15,7 @@ export function PipelineConnector({ active }: Props) {
         <defs>
           <linearGradient id="sw-pipe-grad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="rgba(100,116,139,0.2)" />
-            <stop offset="50%" stopColor="rgba(34,211,238,0.45)" />
+            <stop offset="50%" stopColor="rgba(99,102,241,0.45)" />
             <stop offset="100%" stopColor="rgba(100,116,139,0.2)" />
           </linearGradient>
         </defs>
@@ -30,13 +30,13 @@ export function PipelineConnector({ active }: Props) {
         {active && !reducedMotion ? (
           <motion.circle
             r="2.5"
-            fill="#22d3ee"
+            fill="#6366f1"
             initial={{ offsetDistance: "0%" }}
             animate={{ offsetDistance: "100%" }}
             transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
             style={{
               offsetPath: 'path("M2 8 L28 8")',
-              filter: "drop-shadow(0 0 4px rgba(34,211,238,0.8))",
+              filter: "drop-shadow(0 0 4px rgba(99,102,241,0.8))",
             }}
           />
         ) : null}

@@ -1,8 +1,21 @@
 # Trading OS Visual Spec v2
 
-**Status**: APPROVED  
+**Status**: APPROVED — implementation audited and re-aligned to this spec (UI overhaul engagement).
 **Target Viewport**: Desktop $\ge$ 1280px (Responsive stack on mobile)  
 **Metaphor**: Bloomberg (data-density & numeric honesty) + Linear/Vercel (visual hierarchy & clean typography)
+
+## Implementation audit note
+
+An audit found the live app had drifted from this spec's approved indigo accent (`#6366f1`/`#818cf8`,
+§2.1) onto an undocumented neon-cyan palette (`#00e5ff`/`#22d3ee`) across three separate token
+systems that had each locally hardcoded the old color instead of referencing the shared accent:
+`--cd-*` (Dashboard/Setups/Auth/Landing/shell, `src/app/globals.css`), `--pl-*` (Arena,
+`src/components/paper-lab/paper-lab-command-center.css`), and `--sw-cyan` (Setups,
+`src/components/setups-workstation/setups-workstation.css`) — plus scattered raw
+Tailwind `cyan-*` utility classes and inline SVG colors in several component files. All have been
+corrected to resolve to the approved indigo accent, restoring one consistent brand color across the
+entire app as this spec originally specified. See the UI overhaul final report
+(`docs/design/UI_OVERHAUL_FINAL_REPORT.md`) for the full file list and validation evidence.
 
 ---
 
