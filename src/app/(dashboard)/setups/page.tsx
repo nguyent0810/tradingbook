@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic";
 
 export default async function SetupsPage() {
   return (
-    <V3PageShell testId="setups-workstation" pageClassName="tosv3-setups-page bg-[#07090E]">
+    <V3PageShell testId="setups-workstation" pageClassName="tosv3-setups-page bg-[var(--bg-primary)]">
       <WorkstationShell
         header={<SetupsPageHeader />}
         pipeline={

@@ -1,121 +1,6 @@
 @import "tailwindcss";
+@import "./tokens.css";
 @import "./v3-layout-foundation.css";
-
-/* ─── Design Tokens ─── */
-:root {
-  /* Base palette - dark mode first */
-  --bg-primary: #09090b;
-  --bg-secondary: #121215;
-  --bg-tertiary: #1c1c20;
-  --bg-elevated: #18181c;
-  --bg-hover: #202026;
-
-  --text-primary: #fafafa;
-  --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
-  --text-muted: #52525b;
-
-  --border-primary: #1f1f23;
-  --border-secondary: #2d2d34;
-  --border-focus: #6366f1;
-
-  /* Accent – Indigo-violet gradient spectrum */
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --accent-muted: rgba(99, 102, 241, 0.15);
-  --accent-text: #a5b4fc;
-
-  /* Semantic */
-  --success: #22c55e;
-  --success-muted: rgba(34, 197, 94, 0.15);
-  --danger: #ef4444;
-  --danger-muted: rgba(239, 68, 68, 0.15);
-  --warning: #f59e0b;
-  --warning-muted: rgba(245, 158, 11, 0.15);
-
-  /* Trade-specific */
-  --long: #22c55e;
-  --long-muted: rgba(34, 197, 94, 0.12);
-  --short: #f97316;
-  --short-muted: rgba(249, 115, 22, 0.12);
-  --pnl-positive: #4ade80;
-  --pnl-negative: #f87171;
-
-  /* Spacing & Radius */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Layout — sticky tables stay below dashboard layout header (h-14) */
-  --app-header-height: 3.5rem;
-  --command-deck-max-width: 90rem;
-  --command-deck-gap: var(--space-5);
-  --command-deck-gap-tight: var(--space-4);
-  --app-shell-max-width: var(--command-deck-max-width);
-  --app-shell-header-bg: rgba(9, 9, 11, 0.82);
-  --app-shell-header-blur: 12px;
-
-  /* Typography scale */
-  --font-size-xs: 0.6875rem;
-  --font-size-sm: 0.8125rem;
-  --font-size-base: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.5rem;
-  --font-size-2xl: 1.875rem;
-  --line-height-tight: 1.25;
-  --line-height-snug: 1.375;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.625;
-  --letter-spacing-tight: -0.02em;
-  --letter-spacing-wide: 0.05em;
-
-  /* Spacing scale */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-
-  /* Elevation */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.38);
-  --shadow-glow-accent: 0 0 24px var(--accent-muted);
-
-  /* Semantic status — trading OS (health, data, integration) */
-  --status-healthy: #22c55e;
-  --status-healthy-muted: rgba(34, 197, 94, 0.14);
-  --status-healthy-border: rgba(34, 197, 94, 0.35);
-
-  --status-warning: #eab308;
-  --status-warning-muted: rgba(234, 179, 8, 0.14);
-  --status-warning-border: rgba(234, 179, 8, 0.35);
-
-  --status-at-risk: #f97316;
-  --status-at-risk-muted: rgba(249, 115, 22, 0.14);
-  --status-at-risk-border: rgba(249, 115, 22, 0.38);
-
-  --status-failed: #ef4444;
-  --status-failed-muted: rgba(239, 68, 68, 0.14);
-  --status-failed-border: rgba(239, 68, 68, 0.38);
-
-  --status-stale: #a78bfa;
-  --status-stale-muted: rgba(167, 139, 250, 0.12);
-  --status-stale-border: rgba(167, 139, 250, 0.32);
-
-  --status-backend-blocked: #71717a;
-  --status-backend-blocked-muted: rgba(113, 113, 122, 0.18);
-  --status-backend-blocked-border: rgba(113, 113, 122, 0.4);
-}
 
 @theme inline {
   --color-background: var(--bg-primary);
@@ -301,6 +186,19 @@ body {
   margin-bottom: 6px;
 }
 
+/* Form field (label + control + helper/error) */
+.form-field__helper {
+  margin: 6px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+}
+
+.form-field__error {
+  margin: 6px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--danger);
+}
+
 /* Select */
 .select {
   appearance: none;
@@ -326,6 +224,83 @@ body {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 3px var(--accent-muted);
   outline: none;
+}
+
+/* Tabs */
+.tabs__list {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.tabs__tab {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.tabs__tab:hover {
+  color: var(--text-primary);
+}
+
+.tabs__tab--active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+
+.tabs__panel {
+  padding-top: var(--space-4);
+}
+
+/* Dialog */
+.dialog {
+  width: min(560px, calc(100vw - var(--space-8)));
+  padding: 0;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.dialog__title {
+  font-size: var(--font-size-md);
+}
+
+.dialog__close {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  cursor: pointer;
+  padding: var(--space-1);
+}
+
+.dialog__close:hover {
+  color: var(--text-primary);
+}
+
+.dialog__body {
+  padding: var(--space-4);
 }
 
 /* Badges */
@@ -9868,7 +9843,8 @@ body {
   --cd-danger-border: rgba(244, 63, 94, 0.28);
   --cd-warning: #ffb800;
   --cd-success: #00e676;
-  --cd-cyan: #00e5ff;
+  /* Brand accent — aligned to the approved indigo v2 spec (was neon cyan). */
+  --cd-cyan: var(--accent-hover);
   --cd-long: #22c55e;
   --cd-short: #f97316;
   --cd-pnl-pos: #4ade80;
@@ -9885,7 +9861,7 @@ body {
   --cd-elev-3: 0 8px 32px rgba(0, 0, 0, 0.45);
 
   /* Glow accents */
-  --cd-glow-cyan: 0 0 24px rgba(0, 229, 255, 0.12);
+  --cd-glow-cyan: var(--shadow-glow-accent);
   --cd-glow-gold: 0 0 20px rgba(255, 184, 0, 0.1);
   --cd-glow-danger: 0 0 36px rgba(244, 63, 94, 0.18);
 
@@ -9922,8 +9898,8 @@ body {
   --cd-radius-lg: 18px;
 
   /* Focus + motion */
-  --cd-focus: #00e5ff;
-  --cd-focus-ring: 0 0 0 2px rgba(0, 229, 255, 0.55);
+  --cd-focus: var(--accent-hover);
+  --cd-focus-ring: 0 0 0 2px var(--accent-muted);
   --cd-motion-fast: 150ms;
   --cd-motion-base: 200ms;
   --cd-motion-slow: 250ms;
@@ -9939,7 +9915,7 @@ body {
 }
 .tosv3-setups-page
   :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline: 2px solid var(--cd-focus, #818cf8);
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }
@@ -9969,7 +9945,7 @@ body {
   color: var(--cd-text);
   background:
     radial-gradient(ellipse 100% 60% at 50% -10%, rgba(30, 58, 120, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 40% at 0% 80%, rgba(0, 229, 255, 0.05) 0%, transparent 45%),
+    radial-gradient(ellipse 70% 40% at 0% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
     linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, #04060c 100%);
 }
 
@@ -10036,7 +10012,7 @@ body {
 }
 .tosv3-setups-page .tosv3-setups-selector-table__row--ready {
   box-shadow: inset 2px 0 0 var(--cd-cyan);
-  background: rgba(0, 229, 255, 0.06);
+  background: rgba(99, 102, 241, 0.06);
 }
 .tosv3-setups-page .tosv3-rs-table__symbol,
 .tosv3-setups-page .tosv3-setups-selector-table__symbol,
@@ -10183,7 +10159,7 @@ body {
   background:
     radial-gradient(ellipse 100% 60% at 50% -10%, rgba(30, 58, 120, 0.35) 0%, transparent 55%),
     radial-gradient(ellipse 80% 50% at 100% 50%, rgba(20, 40, 90, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 40% at 0% 90%, rgba(0, 229, 255, 0.05) 0%, transparent 45%),
+    radial-gradient(ellipse 70% 40% at 0% 90%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
     linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 42%, #04060c 100%);
 }
 
@@ -10223,8 +10199,8 @@ body {
   height: 2.75rem;
   border-radius: var(--cd-radius-md);
   color: var(--cd-cyan);
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.22);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.22);
   box-shadow: var(--cd-glow-cyan);
 }
 .cd-auth__eyebrow {
@@ -10291,7 +10267,7 @@ body {
 }
 .cd-auth-input:focus {
   outline: none;
-  border-color: rgba(0, 229, 255, 0.55);
+  border-color: rgba(99, 102, 241, 0.55);
   box-shadow: var(--cd-focus-ring);
   background: rgba(0, 0, 0, 0.35);
 }
@@ -10405,7 +10381,7 @@ body {
 /* Keyboard focus ring — mirrors the dashboard foundation */
 .cd-auth
   :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline: 2px solid var(--cd-focus, #818cf8);
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }
@@ -10513,12 +10489,12 @@ body {
 }
 .command-deck-shell .app-shell-nav-link--active {
   color: var(--cd-text);
-  background: rgba(0, 229, 255, 0.08);
-  border-color: rgba(0, 229, 255, 0.28);
+  background: rgba(99, 102, 241, 0.08);
+  border-color: rgba(99, 102, 241, 0.28);
   box-shadow: none;
 }
 .command-deck-shell .app-shell-nav-link--active:hover {
-  background: rgba(0, 229, 255, 0.12);
+  background: rgba(99, 102, 241, 0.12);
 }
 .command-deck-shell .app-shell-nav-link__label {
   font-size: var(--cd-fs-sm);
@@ -10626,7 +10602,7 @@ body {
 }
 .command-deck-shell .app-shell-mobile-nav-link--active {
   color: var(--cd-text);
-  background: rgba(0, 229, 255, 0.07);
+  background: rgba(99, 102, 241, 0.07);
   border-bottom-color: var(--cd-cyan);
 }
 .command-deck-shell .app-shell-mobile-nav-link--active .app-shell-nav-link__deck {
@@ -10639,7 +10615,7 @@ body {
 .command-deck-shell .app-shell-mobile-nav
   :where(a, button, [role="button"]):focus-visible,
 .command-deck-shell .cd-breadcrumbs :where(a):focus-visible {
-  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline: 2px solid var(--cd-focus, #818cf8);
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }
@@ -10669,7 +10645,7 @@ body {
   font-variant-numeric: tabular-nums;
   background:
     radial-gradient(ellipse 90% 55% at 50% -8%, rgba(30, 58, 120, 0.38) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 45% at 92% 12%, rgba(0, 229, 255, 0.06) 0%, transparent 46%),
+    radial-gradient(ellipse 70% 45% at 92% 12%, rgba(99, 102, 241, 0.06) 0%, transparent 46%),
     radial-gradient(ellipse 60% 40% at 0% 92%, rgba(15, 35, 80, 0.14) 0%, transparent 45%),
     linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 44%, #04060c 100%);
 }
@@ -10821,7 +10797,7 @@ body {
   padding: 0.3125rem 0.625rem;
   border: 1px solid var(--cd-glass-border);
   border-radius: 999px;
-  background: rgba(0, 229, 255, 0.05);
+  background: rgba(99, 102, 241, 0.05);
 }
 .cd-landing-hero__eyebrow::before {
   content: "";
@@ -10892,8 +10868,8 @@ body {
   font-size: var(--cd-fs-sm);
   font-weight: var(--cd-fw-bold);
   color: var(--cd-cyan);
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.22);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.22);
 }
 .cd-landing-step__stage {
   margin: var(--cd-space-3) 0 0;
@@ -11147,8 +11123,8 @@ body {
 }
 .cd-mock__chip--cyan {
   color: var(--cd-cyan);
-  background: rgba(0, 229, 255, 0.1);
-  border-color: rgba(0, 229, 255, 0.24);
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.24);
 }
 .cd-mock__dot {
   width: 6px;
@@ -11177,7 +11153,7 @@ body {
 .cd-mock__meter-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #00b8d4, #22d3ee);
+  background: linear-gradient(90deg, #6366f1, #818cf8);
 }
 .cd-mock__rows {
   margin-top: var(--cd-space-4);
@@ -11221,7 +11197,7 @@ body {
 
 /* Keyboard focus ring — same as the rest of the app */
 .cd-landing :where(a, button, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--cd-focus, #00e5ff);
+  outline: 2px solid var(--cd-focus, #818cf8);
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }

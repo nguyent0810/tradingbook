@@ -148,11 +148,11 @@ const SidebarTabButton = memo(function SidebarTabButton({
       {active ? (
         <motion.span
           layoutId="setups-tab-pill"
-          className="absolute inset-x-1 inset-y-1 rounded-md bg-cyan-500/10 ring-1 ring-cyan-500/30"
+          className="absolute inset-x-1 inset-y-1 rounded-md bg-indigo-500/10 ring-1 ring-indigo-500/30"
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         />
       ) : null}
-      <span className={`relative z-10 ${active ? "text-cyan-300" : ""}`}>{tab.label}</span>
+      <span className={`relative z-10 ${active ? "text-indigo-300" : ""}`}>{tab.label}</span>
     </button>
   );
 });

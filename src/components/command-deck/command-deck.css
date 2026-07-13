@@ -278,8 +278,8 @@
 }
 
 .cd-progress__fill--info {
-  background: linear-gradient(90deg, #00b8d4, #22d3ee);
-  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+  background: linear-gradient(90deg, #6366f1, #818cf8);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
 }
 
 /* ─── Grid & zones ─── */
@@ -1133,7 +1133,7 @@
 }
 
 .cd-workbench-table__row--selected {
-  background: rgba(0, 229, 255, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   box-shadow: inset 2px 0 0 var(--cd-cyan);
 }
 
@@ -1170,7 +1170,7 @@
 
 .cd-workbench-quick-actions__btn:hover {
   color: var(--cd-text);
-  border-color: rgba(0, 229, 255, 0.25);
+  border-color: rgba(99, 102, 241, 0.25);
 }
 
 .cd-workbench-action {
@@ -1336,8 +1336,8 @@
   width: fit-content;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
-  border: 1px solid rgba(0, 229, 255, 0.35);
-  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.08);
   color: var(--cd-cyan);
   font-weight: var(--cd-fw-semibold);
 }
