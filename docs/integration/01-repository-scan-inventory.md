@@ -189,4 +189,4 @@ Integration patterns:
 | `src/components/equity-panel.tsx`, `equity-curve-chart.tsx` | **Not imported** by any page (grep) |
 | `src/lib/analytics.ts` | **Not imported** by pages — metrics helpers only |
 
-Referenced in `UI_BLUEPRINT.md` / `REFACTOR_PLAN.md` as planned, not integrated.
+Referenced in `UI_BLUEPRINT.md` / `REFACTOR_PLAN.md` (both archived under `docs/archive/`, superseded by `docs/design/PLAYBOOK.md`) as planned, not integrated.

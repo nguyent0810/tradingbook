@@ -239,7 +239,7 @@ flowchart TD
 
 ### Page: Dashboard
 * **Visual Intent:** Command cockpit look. Dark slate background, crisp neon border accents, typography emphasizing numbers. Avoids visual decorations; uses high-contrast labels for critical warning conditions.
-* **Layout:** Grid structure matching [UI_BLUEPRINT.md](file:///d:/Tools/Trading/UI_BLUEPRINT.md). Row A: Regime banner. Row B (Split): Left Metrics, Right Watchlist. Row C: Top Setups.
+* **Layout:** Grid structure matching [UI_BLUEPRINT.md](../archive/UI_BLUEPRINT.md) (archived — superseded by `docs/design/PLAYBOOK.md` and `DASHBOARD_DECISION_COCKPIT_UX_SPEC.md`). Row A: Regime banner. Row B (Split): Left Metrics, Right Watchlist. Row C: Top Setups.
 * **Components:** `PageHeader`, `MarketDataAlignmentBanner`, `RegimePanel`, `MetricsCluster`, `SetupsPipelineTable`, `MomentumWatchSection`.
 * **Data Contract:**
   | UI Block | Required Field | Source | Available Now? | Backend Gap |
