@@ -4,7 +4,7 @@
   --sw-glass: rgba(2, 6, 23, 0.3);
   --sw-border: rgba(30, 41, 59, 0.6);
   --sw-inset: inset 0 1px 1px rgba(255, 255, 255, 0.05);
-  --sw-cyan: #818cf8;
+  --sw-cyan: var(--accent-hover);
   --sw-rose: #f43f5e;
   --sw-amber: #fbbf24;
   --sw-emerald: #34d399;
@@ -54,17 +54,17 @@
 }
 
 .sw-pipeline-stage__value--warning {
-  color: #fbbf24;
+  color: var(--sw-amber);
   text-shadow: 0 0 12px rgba(251, 191, 36, 0.45);
 }
 
 .sw-pipeline-stage__value--success {
-  color: #34d399;
+  color: var(--sw-emerald);
   text-shadow: 0 0 10px rgba(52, 211, 153, 0.35);
 }
 
 .sw-pipeline-stage__value--danger {
-  color: #f43f5e;
+  color: var(--sw-rose);
   text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
 }
 
