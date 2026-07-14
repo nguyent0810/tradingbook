@@ -154,7 +154,7 @@ export function applyCalibrationVariant(
   }
 
   if (variant === "combined_tight") {
-    let state = base;
+    const state = base;
     const checks: Array<() => CalibratedStateResult | null> = [
       () =>
         state === "PILOT_BUY" && (m.riskRewardRatio ?? 0) < 2.5
