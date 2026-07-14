@@ -3,6 +3,7 @@
 **Status:** ACTIVE — single source of truth for design-engineering practice across the app.
 **Supersedes:** `DESIGN.md`, `UI_BLUEPRINT.md`, `UI_DNA_DESIGN_SYSTEM.md`, `REFACTOR_PLAN.md`, `TRADING_DASHBOARD_PRD.md` (archived under `docs/archive/` — their concrete page inventories described a `/trades` ledger IA that no longer exists; their principle-level guidance is carried forward below, not discarded).
 **Does not replace:** [`TRADING_OS_V2_VISUAL_SPEC.md`](./TRADING_OS_V2_VISUAL_SPEC.md) (color/type/surface tokens — still canonical) or [`DASHBOARD_DECISION_COCKPIT_UX_SPEC.md`](./DASHBOARD_DECISION_COCKPIT_UX_SPEC.md) (Dashboard IA — still canonical). This document is the layer above both: the rules that apply everywhere, plus the state/motion/a11y/performance guidance neither of those specs formalizes.
+**Validation:** see [`CONSISTENCY_PASS_VALIDATION_LOG.md`](./CONSISTENCY_PASS_VALIDATION_LOG.md) for the batch-by-batch verification evidence behind this playbook and the fragmentation fixes it documents.
 
 ---
 
