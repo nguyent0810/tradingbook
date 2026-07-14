@@ -3,6 +3,7 @@ import {
   computeRsScoringV1,
   computeRsStrengthScoreV1,
   isRsScoringV1Enabled,
+  watchlistRsSpreadP90,
 } from "./rs-scoring-v1";
 import type { RsNearMissWatchlistRow } from "./rs-near-miss-watchlist";
 
@@ -71,5 +72,21 @@ describe("rs-scoring-v1", () => {
       rsDiagnostic: null,
     });
     expect(near.setupReadinessScore).toBeGreaterThan(trend.setupReadinessScore);
+  });
+
+  describe("watchlistRsSpreadP90", () => {
+    it("returns null below the minimum sample size, even with valid values", () => {
+      const rows = Array.from({ length: 7 }, (_, i) =>
+        stubRow({ rs20SpreadPct: 5 + i })
+      );
+      expect(watchlistRsSpreadP90(rows, "rs20SpreadPct")).toBeNull();
+    });
+
+    it("computes a p90 once the minimum sample size is met", () => {
+      const rows = Array.from({ length: 10 }, (_, i) =>
+        stubRow({ rs20SpreadPct: i + 1 })
+      );
+      expect(watchlistRsSpreadP90(rows, "rs20SpreadPct")).not.toBeNull();
+    });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterCandidatesByGate1Level } from "./collect-candidates";
+import { deriveGate1SurfacingRule, filterCandidatesByGate1Level } from "./collect-candidates";
 import type { SetupCandidate } from "./types";
 
 const sample = (q: "A" | "B"): SetupCandidate => ({
@@ -29,5 +29,13 @@ describe("filterCandidatesByGate1Level", () => {
   it("PASS keeps A and B", () => {
     const r = filterCandidatesByGate1Level("PASS", [sample("A"), sample("B")]);
     expect(r).toHaveLength(2);
+  });
+});
+
+describe("deriveGate1SurfacingRule", () => {
+  it("maps FAIL/WARNING/PASS to none/tier-a-only/all", () => {
+    expect(deriveGate1SurfacingRule("FAIL")).toBe("none");
+    expect(deriveGate1SurfacingRule("WARNING")).toBe("tier-a-only");
+    expect(deriveGate1SurfacingRule("PASS")).toBe("all");
   });
 });

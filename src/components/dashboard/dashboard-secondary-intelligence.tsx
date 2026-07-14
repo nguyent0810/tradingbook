@@ -10,6 +10,8 @@ import { RsNearMissWatchlistPanel } from "@/components/rs-near-miss-watchlist-pa
 export type DashboardSecondaryIntelligenceProps = {
   diagnostics: ActionableDiagnosticsDto;
   watchItems: DashboardWatchlistItem[];
+  /** True when the watchlist query hit its row cap and more items exist beyond what's shown. */
+  watchItemsTruncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
   rsNearMissWatchlist?: DecisionCockpitDto["rsNearMissWatchlist"];
   /** Inside command-deck collapsible — omit duplicate zone chrome. */
@@ -19,6 +21,7 @@ export type DashboardSecondaryIntelligenceProps = {
 export function DashboardSecondaryIntelligence({
   diagnostics,
   watchItems,
+  watchItemsTruncated = false,
   latestCloseBySymbol,
   rsNearMissWatchlist,
   embedded = false,
@@ -49,6 +52,7 @@ export function DashboardSecondaryIntelligence({
         <div className="dash-v2-card dash-v2-card--inset">
           <DashboardWatchlistPanel
             items={watchItems}
+            truncated={watchItemsTruncated}
             latestCloseBySymbol={latestCloseBySymbol}
           />
         </div>

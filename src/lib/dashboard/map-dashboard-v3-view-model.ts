@@ -671,11 +671,6 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
   const recentCurve = curve.slice(-18);
   const signalPoints = recentCurve.map((p) => p.cumulativePnl);
 
-  const blockers = [
-    ...cockpitDto.risk.rules.map((r) => formatScannerReasonForUser(r.text)),
-    ...cockpitDto.blockers.map((b) => formatScannerReasonForUser(b.waitFor)),
-  ].filter(Boolean);
-
   const decisionMode = mapUxVerdictToDecisionMode(cockpitDto.verdict.uxLevel.value);
   const nextActionResult = buildNextAction(cockpitDto, params.openPositionCount);
   const setupCards = buildSetupCards(topSetups);
@@ -760,7 +755,6 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       openPositions: params.openPositionCount,
       lossLimit: null,
       posture: tradeGate.subtitle,
-      blockers,
       capitalProtectionState: formatScannerReasonForUser(headroom.statusCopy) || headroom.statusCopy,
       utilizationPercent,
       utilizationTone,

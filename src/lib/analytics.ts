@@ -127,12 +127,9 @@ export function computeEquityCurve(trades: Trade[]): EquityDataPoint[] {
   let cumulativePnl = 0;
   return sortedChronological.map((t) => {
     cumulativePnl += t.realizedPnl!;
-    const displayDate = typeof window === 'undefined' ? 
-       (t.exitDate || t.entryDate).toISOString().split('T')[0] : 
-       (t.exitDate || t.entryDate).toLocaleDateString();
 
     return {
-      date: displayDate,
+      date: (t.exitDate || t.entryDate).toISOString().split("T")[0]!,
       pnl: t.realizedPnl!,
       cumulativePnl: parseFloat(cumulativePnl.toFixed(2)),
     };

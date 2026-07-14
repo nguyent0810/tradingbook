@@ -19,6 +19,8 @@ export type DashboardWatchlistItem = {
 
 export type DashboardWatchlistPanelProps = {
   items: DashboardWatchlistItem[];
+  /** True when more active watch items exist beyond the ones shown here. */
+  truncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
 };
 
@@ -44,6 +46,7 @@ function watchActionHint(
 
 export function DashboardWatchlistPanel({
   items,
+  truncated = false,
   latestCloseBySymbol,
 }: DashboardWatchlistPanelProps) {
   return (
@@ -100,6 +103,15 @@ export function DashboardWatchlistPanel({
               })}
             </tbody>
           </table>
+          {truncated ? (
+            <p
+              className="dash-panel__subtitle text-xs"
+              data-testid="dashboard-watchlist-truncated-note"
+            >
+              Showing the first {items.length} — more active watch items exist. Narrow via the{" "}
+              Setups pipeline to see the rest.
+            </p>
+          ) : null}
         </div>
       )}
     </section>

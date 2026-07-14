@@ -13,9 +13,13 @@ export function isRsScoringV1Enabled(): boolean {
 export type RsScoringV1Input = {
   row: RsNearMissWatchlistRow;
   rsDiagnostic: RelativeStrengthDiagnostic | null;
-  /** Optional universe p90 for RS20 — when missing, uses row value clamped. */
-  universeRs20P90?: number | null;
-  universeRs50P90?: number | null;
+  /**
+   * Optional p90 spread from the near-miss watchlist batch being scored (NOT the
+   * full scan universe — see `watchlistRsSpreadP90`). When missing, normalization
+   * falls back to a fixed denominator.
+   */
+  watchlistRs20P90?: number | null;
+  watchlistRs50P90?: number | null;
   /** Gate 1 level for readiness modifier */
   gate1Level?: "PASS" | "WARNING" | "FAIL" | null;
 };
@@ -87,14 +91,14 @@ function regimeModifier(gate1: RsScoringV1Input["gate1Level"]): number {
  * RS Strength Score (0–100) — relative leadership only; no setup terminal weighting.
  */
 export function computeRsStrengthScoreV1(input: RsScoringV1Input): number {
-  const { row, rsDiagnostic, universeRs20P90, universeRs50P90 } = input;
+  const { row, rsDiagnostic, watchlistRs20P90, watchlistRs50P90 } = input;
   const rs20 = row.rs20SpreadPct;
   const rs50 = row.rs50SpreadPct;
 
-  const rs20Norm = normalizeSpread(rs20, universeRs20P90);
+  const rs20Norm = normalizeSpread(rs20, watchlistRs20P90);
   const rs50Norm =
     rs50 != null && Number.isFinite(rs50)
-      ? normalizeSpread(rs50, universeRs50P90)
+      ? normalizeSpread(rs50, watchlistRs50P90)
       : rs20Norm * 0.5;
 
   const consistency = consistencyBonus(rs20, rs50);
@@ -182,8 +186,8 @@ export function buildRsScoringMapFromEntries(
     rsDiagnosticSummary: r.rsDiagnostic?.summary ?? "",
   }));
 
-  const rs20P90 = universeRsSpreadP90(stubRows, "rs20SpreadPct");
-  const rs50P90 = universeRsSpreadP90(stubRows, "rs50SpreadPct");
+  const rs20P90 = watchlistRsSpreadP90(stubRows, "rs20SpreadPct");
+  const rs50P90 = watchlistRsSpreadP90(stubRows, "rs50SpreadPct");
 
   const out = new Map<string, RsScoringV1Result>();
   for (let i = 0; i < rows.length; i++) {
@@ -194,8 +198,8 @@ export function buildRsScoringMapFromEntries(
       computeRsScoringV1({
         row: stub,
         rsDiagnostic: options?.diagnosticsBySymbol?.get(row.symbol) ?? null,
-        universeRs20P90: rs20P90,
-        universeRs50P90: rs50P90,
+        watchlistRs20P90: rs20P90,
+        watchlistRs50P90: rs50P90,
         gate1Level: options?.gate1Level ?? null,
       })
     );
@@ -203,15 +207,24 @@ export function buildRsScoringMapFromEntries(
   return out;
 }
 
-/** Universe p90 helper for batch scoring. */
-export function universeRsSpreadP90(
+/** Minimum sample size before a p90 over the watchlist batch is trusted. */
+const MIN_SAMPLE_SIZE_FOR_P90 = 8;
+
+/**
+ * P90 spread over the near-miss watchlist batch passed in (`rows`), which is
+ * capped at a small number of entries (see `computeRsNearMissWatchlistFromDb`'s
+ * `limit`) — NOT a percentile over the full scan universe. Returns `null` below
+ * `MIN_SAMPLE_SIZE_FOR_P90` so callers fall back to a fixed denominator instead
+ * of trusting a percentile computed from too few rows.
+ */
+export function watchlistRsSpreadP90(
   rows: readonly RsNearMissWatchlistRow[],
   field: "rs20SpreadPct" | "rs50SpreadPct"
 ): number | null {
   const vals = rows
     .map((r) => r[field])
     .filter((v): v is number => v != null && Number.isFinite(v) && v > 0);
-  if (vals.length === 0) return null;
+  if (vals.length < MIN_SAMPLE_SIZE_FOR_P90) return null;
   vals.sort((a, b) => a - b);
   const idx = Math.min(vals.length - 1, Math.floor(vals.length * 0.9));
   return vals[idx] ?? null;

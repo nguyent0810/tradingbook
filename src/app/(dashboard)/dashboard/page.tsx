@@ -89,7 +89,7 @@ async function loadActiveWatchItems(): Promise<Fallible<DashboardWatchlistItem[]
         },
       },
       orderBy: [{ lifecycleStatus: "asc" }, { updatedAt: "desc" }],
-      take: 20,
+      take: 21,
       include: {
         symbol: { select: { symbol: true } },
       },
@@ -225,7 +225,8 @@ export default async function DashboardPage() {
     ]);
   const trades = tradesResult.data;
   const latestScan = latestScanResult.data;
-  const activeWatchItems = activeWatchItemsResult.data;
+  const watchlistTruncated = activeWatchItemsResult.data.length > 20;
+  const activeWatchItems = activeWatchItemsResult.data.slice(0, 20);
 
   const alignmentAnalysis = analyzeMarketDataAlignment(marketSnapshot);
   const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
@@ -354,6 +355,7 @@ export default async function DashboardPage() {
         portfolioRiskConfigured={portfolioRiskConfigured}
         trades={trades}
         activeWatchItems={activeWatchItems}
+        watchlistTruncated={watchlistTruncated}
         latestCloseBySymbol={latestCloseBySymbol}
       />
     </div>

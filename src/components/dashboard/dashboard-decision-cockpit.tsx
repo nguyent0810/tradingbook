@@ -23,6 +23,7 @@ export type DashboardDecisionCockpitProps = {
   portfolioRiskConfigured: boolean;
   trades: Trade[];
   activeWatchItems: DashboardWatchlistItem[];
+  watchlistTruncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
 };
 
@@ -41,6 +42,7 @@ export function DashboardDecisionCockpit({
   portfolioRiskConfigured,
   trades,
   activeWatchItems,
+  watchlistTruncated = false,
   latestCloseBySymbol,
 }: DashboardDecisionCockpitProps) {
   return (
@@ -108,6 +110,7 @@ export function DashboardDecisionCockpit({
         <DashboardSecondaryIntelligence
           diagnostics={cockpitDto.actionableDiagnostics}
           watchItems={activeWatchItems}
+          watchItemsTruncated={watchlistTruncated}
           latestCloseBySymbol={latestCloseBySymbol}
           rsNearMissWatchlist={cockpitDto.rsNearMissWatchlist}
           embedded
