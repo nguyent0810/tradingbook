@@ -84,6 +84,8 @@ body {
   --cd-success: #00e676;
   /* Brand accent — aligned to the approved indigo v2 spec (was neon cyan). */
   --cd-cyan: var(--accent-hover);
+  /* Not yet reconciled to indigo -- see docs/design/PLAYBOOK.md known-debt list */
+  --cd-auth-btn-hover-legacy: #5cf0ff;
   --cd-long: #22c55e;
   --cd-short: #f97316;
   --cd-pnl-pos: #4ade80;
@@ -328,7 +330,7 @@ body {
     box-shadow var(--cd-motion-fast) var(--cd-ease);
 }
 .cd-auth-btn:hover:not(:disabled) {
-  background: #5cf0ff;
+  background: var(--cd-auth-btn-hover-legacy);
   box-shadow: var(--cd-glow-cyan);
 }
 .cd-auth-btn:disabled {
