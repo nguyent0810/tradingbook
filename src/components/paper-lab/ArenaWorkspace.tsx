@@ -10,6 +10,7 @@ import { PaperLabHeaderGrid } from "./PaperLabHeaderGrid";
 import { PaperLabWorkspaceTabs } from "./PaperLabWorkspaceTabs";
 import { HumanPmForm } from "./HumanPmForm";
 import { PaperLabSidebar } from "./PaperLabSidebar";
+import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import "./paper-lab-command-center.css";
 import "./paper-lab-workstation.css";
 
@@ -490,7 +491,11 @@ function DebateCamp({ camp, members }: { camp: Camp; members: { name: string; ph
         <span className="arena-camp__count">{members.length}</span>
       </div>
       {members.length === 0 ? (
-        <p className="arena-camp__empty">No takers</p>
+        <EmptyStateWithReason
+          compact
+          title="No takers"
+          reason="No agents are recommending this move right now."
+        />
       ) : (
         <ul className="arena-camp__list">
           {members.map((m, i) => (
