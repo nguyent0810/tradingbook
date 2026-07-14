@@ -96,8 +96,6 @@ export type V3RiskConsole = {
   openPositions: number;
   lossLimit: string | null;
   posture: string;
-  /** @deprecated Use tradeGate.rows — kept for transitional empty fallback. */
-  blockers: string[];
   capitalProtectionState: string;
   utilizationPercent: number | null;
   utilizationTone: "normal" | "elevated" | "critical";

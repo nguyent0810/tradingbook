@@ -2,21 +2,38 @@ import Link from "next/link";
 import type { OpportunityBoardDto, OpportunityCandidateDto } from "@/lib/dashboard/decision-cockpit-dto";
 import { formatSetupLadderStageLabel } from "@/lib/dashboard/decision-cockpit-dto";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
-import { SignalBadge, healthLevelToBadgeVariant, qualityToTierVariant } from "@/components/command-deck";
+import { Badge, type BadgeTone } from "@/components/ui/badge";
 
 export type DashboardOpportunityCandidatesProps = {
   opportunity: OpportunityBoardDto;
 };
+
+function healthLevelToBadgeTone(level: string): BadgeTone {
+  switch (level) {
+    case "HEALTHY":
+      return "success";
+    case "WARNING":
+      return "warning";
+    case "AT_RISK":
+      return "at-risk";
+    case "DEAD":
+      return "dead";
+    default:
+      return "neutral";
+  }
+}
 
 function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
   return (
     <li className="dash-near-miss__card" data-testid={`dashboard-opportunity-${row.symbol}`}>
       <div className="dash-near-miss__head">
         <span className="font-mono font-semibold">{row.symbol}</span>
-        <SignalBadge variant={qualityToTierVariant(row.quality)}>{row.quality}</SignalBadge>
-        <SignalBadge variant={healthLevelToBadgeVariant(row.healthLevel)}>
+        <Badge tone={row.quality === "A" ? "tier-a" : "tier-b"} size="compact">
+          {row.quality}
+        </Badge>
+        <Badge tone={healthLevelToBadgeTone(row.healthLevel)} size="compact">
           {row.healthLevel}
-        </SignalBadge>
+        </Badge>
         <span className="dash-chip dash-chip--muted text-xs">
           {formatSetupLadderStageLabel(row.ladderStage)}
         </span>

@@ -96,9 +96,12 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
                       };
                       if (point.cumulativePnl == null) return null;
                       const isPositive = point.cumulativePnl >= 0;
+                      const displayDate = point.date
+                        ? new Date(point.date).toLocaleDateString()
+                        : point.date;
                       return (
                         <div className="chart-frame__tooltip">
-                          <p className="chart-frame__tooltip-label">{point.date}</p>
+                          <p className="chart-frame__tooltip-label">{displayDate}</p>
                           <p
                             className="chart-frame__tooltip-value tabular-nums"
                             style={{

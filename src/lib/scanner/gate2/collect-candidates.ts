@@ -7,17 +7,27 @@ import {
 import { evaluateBreakoutPullbackCandidate } from "./breakout-pullback";
 import type { Gate1Level, Gate2BarInput, SetupCandidate } from "./types";
 
+export type Gate1SurfacingRule = "none" | "tier-a-only" | "all";
+
 /**
- * Gate 1 × Gate 2 — FAIL surfaces nothing; WARNING surfaces A only; PASS surfaces A and B.
+ * Gate 1 × Gate 2 surfacing rule — FAIL surfaces nothing; WARNING surfaces A only;
+ * PASS surfaces A and B. Single source of truth: the scan-time filter below and
+ * the dashboard's funnel reconstruction (`gate-funnel-copy.ts`) both call this so
+ * the two can't drift out of sync.
  */
+export function deriveGate1SurfacingRule(gate1Level: Gate1Level): Gate1SurfacingRule {
+  if (gate1Level === "FAIL") return "none";
+  if (gate1Level === "WARNING") return "tier-a-only";
+  return "all";
+}
+
 export function filterCandidatesByGate1Level(
   gate1Level: Gate1Level,
   candidates: SetupCandidate[]
 ): SetupCandidate[] {
-  if (gate1Level === "FAIL") return [];
-  if (gate1Level === "WARNING") {
-    return candidates.filter((c) => c.quality === "A");
-  }
+  const rule = deriveGate1SurfacingRule(gate1Level);
+  if (rule === "none") return [];
+  if (rule === "tier-a-only") return candidates.filter((c) => c.quality === "A");
   return candidates;
 }
 

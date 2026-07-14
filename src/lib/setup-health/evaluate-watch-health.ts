@@ -7,6 +7,37 @@ import type {
   WatchHealthResult,
 } from "./types";
 
+/** Extension tiers: close vs pullback-zone-high, mutually exclusive (highest wins). */
+const EXTENDED_PCT = 0.05;
+const TOO_EXTENDED_PCT = 0.08;
+const CHASE_PCT = 0.12;
+
+/** Distance-to-zone beyond which a setup is considered dead. */
+const DEAD_SETUP_DISTANCE_PCT = 0.1;
+
+/** Sessions since first seen before a setup is flagged as aging. */
+const AGING_SETUP_SESSIONS = 5;
+
+/** Sessions since breakout without a zone touch before flagging failed-to-pullback. */
+const FAILED_TO_PULLBACK_SESSIONS = 5;
+
+/** Volume vs 20-bar median below this ratio counts toward volume fade. */
+const VOLUME_FADE_RATIO = 0.7;
+
+/** Close position within the bar's range below this fraction, on above-median volume, flags reversal risk. */
+const REVERSAL_CLOSE_FRACTION = 0.3;
+
+const SCORE_PENALTY = {
+  CHASE: 55,
+  TOO_EXTENDED: 40,
+  EXTENDED: 25,
+  AGING_SETUP: 20,
+  VOLUME_FADE: 25,
+  FAILED_TO_PULLBACK: 30,
+  REVERSAL_RISK: 40,
+  DEAD_SETUP: 50,
+} as const;
+
 function dayKey(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
@@ -56,23 +87,23 @@ function extendedTierFlag(
 ): SetupHealthFlag | null {
   if (pullbackZoneHigh <= 0 || close <= pullbackZoneHigh) return null;
   const pct = (close - pullbackZoneHigh) / pullbackZoneHigh;
-  if (pct > 0.12) return "CHASE";
-  if (pct > 0.08) return "TOO_EXTENDED";
-  if (pct > 0.05) return "EXTENDED";
+  if (pct > CHASE_PCT) return "CHASE";
+  if (pct > TOO_EXTENDED_PCT) return "TOO_EXTENDED";
+  if (pct > EXTENDED_PCT) return "EXTENDED";
   return null;
 }
 
 function computeScore(flags: SetupHealthFlag[]): number {
   let score = 100;
-  if (flags.includes("CHASE")) score -= 55;
-  else if (flags.includes("TOO_EXTENDED")) score -= 40;
-  else if (flags.includes("EXTENDED")) score -= 25;
+  if (flags.includes("CHASE")) score -= SCORE_PENALTY.CHASE;
+  else if (flags.includes("TOO_EXTENDED")) score -= SCORE_PENALTY.TOO_EXTENDED;
+  else if (flags.includes("EXTENDED")) score -= SCORE_PENALTY.EXTENDED;
 
-  if (flags.includes("AGING_SETUP")) score -= 20;
-  if (flags.includes("VOLUME_FADE")) score -= 25;
-  if (flags.includes("FAILED_TO_PULLBACK")) score -= 30;
-  if (flags.includes("REVERSAL_RISK")) score -= 40;
-  if (flags.includes("DEAD_SETUP")) score -= 50;
+  if (flags.includes("AGING_SETUP")) score -= SCORE_PENALTY.AGING_SETUP;
+  if (flags.includes("VOLUME_FADE")) score -= SCORE_PENALTY.VOLUME_FADE;
+  if (flags.includes("FAILED_TO_PULLBACK")) score -= SCORE_PENALTY.FAILED_TO_PULLBACK;
+  if (flags.includes("REVERSAL_RISK")) score -= SCORE_PENALTY.REVERSAL_RISK;
+  if (flags.includes("DEAD_SETUP")) score -= SCORE_PENALTY.DEAD_SETUP;
 
   return Math.max(0, Math.min(100, score));
 }
@@ -137,7 +168,7 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
     (b) => compareDay(b.date, firstSeenBarDate) > 0 && compareDay(b.date, evalBarDate) <= 0
   ).length;
   meta.sessionsAfterFirstSeen = sessionsAfterFirstSeen;
-  if (sessionsAfterFirstSeen >= 5) flags.push("AGING_SETUP");
+  if (sessionsAfterFirstSeen >= AGING_SETUP_SESSIONS) flags.push("AGING_SETUP");
 
   const ext = extendedTierFlag(close, pullbackZoneHigh);
   if (ext) {
@@ -146,7 +177,7 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
       pullbackZoneHigh > 0 ? (close - pullbackZoneHigh) / pullbackZoneHigh : null;
   }
 
-  if (meta.distanceToZonePct > 0.1) flags.push("DEAD_SETUP");
+  if (meta.distanceToZonePct > DEAD_SETUP_DISTANCE_PCT) flags.push("DEAD_SETUP");
 
   /** First session where close clears breakout (full history through eval). */
   let breakoutIdx = -1;
@@ -172,7 +203,7 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
         break;
       }
     }
-    if (sessionsSinceBreakout >= 5 && !touchedZone) flags.push("FAILED_TO_PULLBACK");
+    if (sessionsSinceBreakout >= FAILED_TO_PULLBACK_SESSIONS && !touchedZone) flags.push("FAILED_TO_PULLBACK");
   }
 
   const last20 = [...bars].filter((b) => compareDay(b.date, evalBarDate) <= 0).slice(-20);
@@ -187,12 +218,12 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
 
   const m20 = meta.median20Volume;
   const volFadeRatio = m20 != null && m20 > 0 ? evalBar.volume / m20 : null;
-  const lowVsMedian = volFadeRatio != null && volFadeRatio < 0.7;
+  const lowVsMedian = volFadeRatio != null && volFadeRatio < VOLUME_FADE_RATIO;
   if (decreasing3 || lowVsMedian) flags.push("VOLUME_FADE");
 
   if (evalBar.high > evalBar.low) {
     const closeFrac = (evalBar.close - evalBar.low) / (evalBar.high - evalBar.low);
-    if (closeFrac < 0.3 && m20 != null && evalBar.volume > m20) {
+    if (closeFrac < REVERSAL_CLOSE_FRACTION && m20 != null && evalBar.volume > m20) {
       flags.push("REVERSAL_RISK");
     }
   }

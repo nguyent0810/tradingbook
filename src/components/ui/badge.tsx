@@ -1,4 +1,13 @@
-export type BadgeTone = "danger" | "warning" | "success" | "neutral" | "info";
+export type BadgeTone =
+  | "danger"
+  | "warning"
+  | "success"
+  | "neutral"
+  | "info"
+  | "tier-a"
+  | "tier-b"
+  | "at-risk"
+  | "dead";
 
 const toneClass: Record<BadgeTone, string> = {
   danger: "cd-badge--danger",
@@ -6,6 +15,10 @@ const toneClass: Record<BadgeTone, string> = {
   success: "cd-badge--success",
   neutral: "cd-badge--neutral",
   info: "cd-badge--info",
+  "tier-a": "cd-badge--tier-a",
+  "tier-b": "cd-badge--tier-b",
+  "at-risk": "cd-badge--at-risk",
+  dead: "cd-badge--dead",
 };
 
 export function Badge({

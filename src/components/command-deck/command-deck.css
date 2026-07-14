@@ -193,6 +193,47 @@
   box-shadow: 0 0 8px rgba(56, 189, 248, 0.55);
 }
 
+/* Setup-tier and setup-health severity tones (dashboard opportunity board) */
+.cd-badge--tier-a {
+  color: var(--pnl-positive);
+  background: linear-gradient(180deg, var(--status-healthy-muted) 0%, rgba(34, 197, 94, 0.08) 100%);
+  border-color: var(--status-healthy-border);
+}
+.cd-badge--tier-a .cd-badge__dot {
+  background: var(--status-healthy);
+  box-shadow: 0 0 8px var(--status-healthy);
+}
+
+.cd-badge--tier-b {
+  color: var(--accent-text);
+  background: linear-gradient(180deg, var(--accent-muted) 0%, rgba(99, 102, 241, 0.08) 100%);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.cd-badge--tier-b .cd-badge__dot {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.cd-badge--at-risk {
+  color: #ffd8b8;
+  background: linear-gradient(180deg, var(--status-at-risk-muted) 0%, rgba(249, 115, 22, 0.08) 100%);
+  border-color: var(--status-at-risk-border);
+}
+.cd-badge--at-risk .cd-badge__dot {
+  background: var(--status-at-risk);
+  box-shadow: 0 0 8px var(--status-at-risk);
+}
+
+.cd-badge--dead {
+  color: #fecaca;
+  background: linear-gradient(180deg, var(--status-failed-muted) 0%, rgba(239, 68, 68, 0.08) 100%);
+  border-color: var(--status-failed-border);
+}
+.cd-badge--dead .cd-badge__dot {
+  background: var(--status-failed);
+  box-shadow: 0 0 8px var(--status-failed);
+}
+
 .cd-badge--title {
   text-transform: none;
   letter-spacing: 0.02em;

@@ -1,4 +1,5 @@
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
+import { deriveGate1SurfacingRule } from "@/lib/scanner/gate2/collect-candidates";
 import type { DailyTradingDecisionLevel } from "@/lib/scanner/trading-decision";
 
 /** Scan row counts used for Gate 2 qualified vs Gate 1 surfaced breakdown. */
@@ -10,7 +11,9 @@ export type GateFunnelScanCounts = {
 
 /**
  * Gate 2 qualified (pre–Gate 1) vs surfaced (post–Gate 1) by tier.
- * Surfaced tier split follows surfacing rules in `filterCandidatesByGate1Level`.
+ * Surfaced tier split follows `deriveGate1SurfacingRule` (shared with the
+ * scan-time filter in `collect-candidates.ts`), reconstructed here from the
+ * persisted aggregate counts since per-tier surfaced counts aren't persisted.
  */
 export type GateFunnelSnapshot = {
   gate1Level: Gate1Level;
@@ -33,16 +36,14 @@ export function computeGateFunnelSnapshot(
   const qualifiedCountB = scan.candidateCountB;
   const qualifiedTotal = qualifiedCountA + qualifiedCountB;
 
+  const rule = deriveGate1SurfacingRule(gate1Level);
+
   let surfacedCountA = 0;
   let surfacedCountB = 0;
 
-  if (gate1Level === "FAIL") {
-    surfacedCountA = 0;
-    surfacedCountB = 0;
-  } else if (gate1Level === "WARNING") {
+  if (rule === "tier-a-only") {
     surfacedCountA = Math.min(qualifiedCountA, scan.candidateCountSurfaced);
-    surfacedCountB = 0;
-  } else {
+  } else if (rule === "all") {
     surfacedCountA = Math.min(qualifiedCountA, scan.candidateCountSurfaced);
     const remainder = Math.max(0, scan.candidateCountSurfaced - surfacedCountA);
     surfacedCountB = Math.min(qualifiedCountB, remainder);
