@@ -5,6 +5,7 @@ import {
   buildDecisionCockpitDto,
   type DecisionCockpitInput,
 } from "@/lib/dashboard/decision-cockpit-dto";
+import { buildTradeGate } from "@/lib/dashboard/build-trade-gate";
 import { DashboardDecisionCockpit } from "./dashboard-decision-cockpit";
 
 const freshness = buildMarketFreshnessDto({
@@ -45,6 +46,12 @@ describe("DashboardDecisionCockpit", () => {
         trades={[]}
         activeWatchItems={[]}
         latestCloseBySymbol={new Map()}
+        tradeGate={buildTradeGate({
+          cockpitDto,
+          freshness,
+          topSetups: [],
+          utilizationTone: "normal",
+        })}
       />
     );
 
@@ -80,6 +87,12 @@ describe("DashboardDecisionCockpit", () => {
         trades={[]}
         activeWatchItems={[]}
         latestCloseBySymbol={new Map()}
+        tradeGate={buildTradeGate({
+          cockpitDto,
+          freshness,
+          topSetups: [],
+          utilizationTone: "normal",
+        })}
       />
     );
 
@@ -133,6 +146,12 @@ describe("DashboardDecisionCockpit", () => {
         trades={[]}
         activeWatchItems={[]}
         latestCloseBySymbol={new Map()}
+        tradeGate={buildTradeGate({
+          cockpitDto,
+          freshness,
+          topSetups: [],
+          utilizationTone: "normal",
+        })}
       />
     );
 

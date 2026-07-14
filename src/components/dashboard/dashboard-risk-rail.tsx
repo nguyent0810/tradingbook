@@ -1,15 +1,24 @@
 import type {
+  ConfidenceBand,
+  MarkToMarketExposureDto,
+  PositionSizingPanelDto,
   RiskBudgetHeadroomDto,
   RiskGuardrailDto,
+  RiskToStopBreakdownDto,
   VerdictDto,
 } from "@/lib/dashboard/decision-cockpit-dto";
 import { DashboardExposurePanel } from "@/components/dashboard/dashboard-exposure-panel";
+import { DashboardPositionSizingPanel } from "@/components/dashboard/dashboard-position-sizing-panel";
 
 export type DashboardRiskRailProps = {
   risk: RiskGuardrailDto;
   verdict: VerdictDto;
   riskBudgetHeadroom: RiskBudgetHeadroomDto;
   portfolioRiskConfigured: boolean;
+  riskToStop: RiskToStopBreakdownDto;
+  markToMarketExposure: MarkToMarketExposureDto;
+  recommendedPositionSizing: PositionSizingPanelDto | null;
+  confidenceBand: ConfidenceBand;
 };
 
 export function DashboardRiskRail({
@@ -17,6 +26,10 @@ export function DashboardRiskRail({
   verdict,
   riskBudgetHeadroom,
   portfolioRiskConfigured,
+  riskToStop,
+  markToMarketExposure,
+  recommendedPositionSizing,
+  confidenceBand,
 }: DashboardRiskRailProps) {
   return (
     <aside
@@ -33,6 +46,15 @@ export function DashboardRiskRail({
           verdict={verdict}
           riskBudgetHeadroom={riskBudgetHeadroom}
           portfolioRiskConfigured={portfolioRiskConfigured}
+          riskToStop={riskToStop}
+          markToMarketExposure={markToMarketExposure}
+        />
+      </div>
+      <div className="dash-v2-card dash-v2-card--rail command-deck-risk-rail__card">
+        <DashboardPositionSizingPanel
+          recommendedPositionSizing={recommendedPositionSizing}
+          portfolioRiskConfigured={portfolioRiskConfigured}
+          confidenceBand={confidenceBand}
         />
       </div>
     </aside>

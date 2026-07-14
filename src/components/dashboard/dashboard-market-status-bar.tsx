@@ -40,6 +40,9 @@ export function DashboardMarketStatusBar({ freshness }: DashboardMarketStatusBar
           <span className="dash-chip">VNINDEX {freshness.benchmarkDate ?? "—"}</span>
           <span className="dash-chip">Equity {freshness.equityMaxDate ?? "—"}</span>
           <span className="dash-chip">Scan {formatScanRunLabel(freshness.scanRunAt)}</span>
+          <span className="dash-chip" data-testid="dashboard-data-timing-mode" title="All data below is end-of-day — no intraday/realtime feed exists in this app.">
+            Data: EOD
+          </span>
         </div>
         <Link href="/setups" className="dash-market-status__action text-xs font-medium">
           Setups →
@@ -65,6 +68,9 @@ export function DashboardMarketStatusBar({ freshness }: DashboardMarketStatusBar
         <span className="dash-chip">VNINDEX {freshness.benchmarkDate ?? "—"}</span>
         <span className="dash-chip">Equity {freshness.equityMaxDate ?? "—"}</span>
         <span className="dash-chip">Scan {formatScanRunLabel(freshness.scanRunAt)}</span>
+        <span className="dash-chip" data-testid="dashboard-data-timing-mode" title="All data below is end-of-day — no intraday/realtime feed exists in this app.">
+          Data: EOD
+        </span>
       </div>
     </div>
   );

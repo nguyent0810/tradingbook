@@ -19,6 +19,8 @@ export function healthLevelActionHint(level: SetupHealthLevelValue): string | nu
       return "Avoid chasing. Wait for reset.";
     case "DEAD":
       return "Setup no longer tradable.";
+    case "NO_DATA":
+      return "No recent bar data — cannot evaluate. Not eligible for entry.";
     default:
       return null;
   }

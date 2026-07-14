@@ -7,13 +7,85 @@ import type {
   WatchHealthResult,
 } from "./types";
 
-/** Extension tiers: close vs pullback-zone-high, mutually exclusive (highest wins). */
-const EXTENDED_PCT = 0.05;
-const TOO_EXTENDED_PCT = 0.08;
-const CHASE_PCT = 0.12;
+/**
+ * Extension tiers: close vs pullback-zone-high, mutually exclusive (highest wins).
+ * Exported so `rank-components.ts`'s extension reward curve uses the SAME
+ * distance definition as this health penalty — one normalized "how extended"
+ * scale shared by both, instead of two independently-tuned numbers.
+ */
+export const EXTENDED_PCT = 0.05;
+export const TOO_EXTENDED_PCT = 0.08;
+export const CHASE_PCT = 0.12;
 
 /** Distance-to-zone beyond which a setup is considered dead. */
 const DEAD_SETUP_DISTANCE_PCT = 0.1;
+
+/** Minimum bars for a stable 14-period ATR (14 true-range values, each needing a prior close). */
+const ATR_PERIOD = 14;
+const MIN_BARS_FOR_ATR = ATR_PERIOD + 1;
+
+/**
+ * ATR-multiple thresholds replacing the flat EXTENDED_PCT/TOO_EXTENDED_PCT/CHASE_PCT
+ * when enough bars exist, so the same rule doesn't misjudge a sleepy large-cap and a
+ * high-beta small-cap identically. Multiples are chosen so a ~2% "typical" daily
+ * ATR% reproduces roughly the old flat thresholds (5%/8%/12%) — an unvalidated
+ * calibration assumption (no backtest evidence either way — see final report),
+ * documented here for the next tuning pass rather than derived from data.
+ */
+const EXTENDED_ATR_MULT = 2;
+const TOO_EXTENDED_ATR_MULT = 3.5;
+const CHASE_ATR_MULT = 5;
+
+/** True Range for one bar given the previous bar's close. */
+function trueRange(bar: OhlcvBar, prevClose: number): number {
+  return Math.max(
+    bar.high - bar.low,
+    Math.abs(bar.high - prevClose),
+    Math.abs(bar.low - prevClose)
+  );
+}
+
+/**
+ * Simple (not Wilder-smoothed) 14-period ATR from the last 15 ascending bars.
+ * Returns null when there aren't enough bars for a stable read — callers must
+ * fall back to the flat-% thresholds, not silently treat null as zero volatility.
+ */
+export function computeAtr14(barsAsc: OhlcvBar[]): number | null {
+  if (barsAsc.length < MIN_BARS_FOR_ATR) return null;
+  const recent = barsAsc.slice(-MIN_BARS_FOR_ATR);
+  const trs: number[] = [];
+  for (let i = 1; i < recent.length; i++) {
+    trs.push(trueRange(recent[i]!, recent[i - 1]!.close));
+  }
+  if (trs.length === 0) return null;
+  return trs.reduce((sum, v) => sum + v, 0) / trs.length;
+}
+
+type ExtensionThresholds = {
+  extended: number;
+  tooExtended: number;
+  chase: number;
+  source: "atr" | "flat_pct_fallback";
+};
+
+function resolveExtensionThresholds(barsAsc: OhlcvBar[], close: number): ExtensionThresholds {
+  const atr = computeAtr14(barsAsc);
+  if (atr != null && close > 0) {
+    const atrPct = atr / close;
+    return {
+      extended: atrPct * EXTENDED_ATR_MULT,
+      tooExtended: atrPct * TOO_EXTENDED_ATR_MULT,
+      chase: atrPct * CHASE_ATR_MULT,
+      source: "atr",
+    };
+  }
+  return {
+    extended: EXTENDED_PCT,
+    tooExtended: TOO_EXTENDED_PCT,
+    chase: CHASE_PCT,
+    source: "flat_pct_fallback",
+  };
+}
 
 /** Sessions since first seen before a setup is flagged as aging. */
 const AGING_SETUP_SESSIONS = 5;
@@ -83,13 +155,14 @@ function barsInteractionZone(
  */
 function extendedTierFlag(
   close: number,
-  pullbackZoneHigh: number
+  pullbackZoneHigh: number,
+  thresholds: ExtensionThresholds
 ): SetupHealthFlag | null {
   if (pullbackZoneHigh <= 0 || close <= pullbackZoneHigh) return null;
   const pct = (close - pullbackZoneHigh) / pullbackZoneHigh;
-  if (pct > CHASE_PCT) return "CHASE";
-  if (pct > TOO_EXTENDED_PCT) return "TOO_EXTENDED";
-  if (pct > EXTENDED_PCT) return "EXTENDED";
+  if (pct > thresholds.chase) return "CHASE";
+  if (pct > thresholds.tooExtended) return "TOO_EXTENDED";
+  if (pct > thresholds.extended) return "EXTENDED";
   return null;
 }
 
@@ -149,18 +222,26 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
     extendedPct: null,
     distanceToZonePct: 0,
     median20Volume: null,
+    extensionThresholdSource: "flat_pct_fallback",
   };
 
   if (!evalBar) {
+    // Missing data must never read as a healthy 100 — that's indistinguishable
+    // from a genuinely strong setup. NO_DATA sorts/scores as the worst case so
+    // it can never surface as Tier A/B or enable Go (see resolveSetupLadderStage,
+    // canShowGo/blockedHealth in build-trade-gate.ts).
     return {
       flags: [],
-      score: 100,
-      level: "HEALTHY",
+      score: 0,
+      level: "NO_DATA",
       meta,
     };
   }
 
   const close = evalBar.close;
+
+  const extensionThresholds = resolveExtensionThresholds(bars, close);
+  meta.extensionThresholdSource = extensionThresholds.source;
 
   meta.distanceToZonePct = distanceToZonePct(close, pullbackZoneLow, pullbackZoneHigh);
 
@@ -170,7 +251,7 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
   meta.sessionsAfterFirstSeen = sessionsAfterFirstSeen;
   if (sessionsAfterFirstSeen >= AGING_SETUP_SESSIONS) flags.push("AGING_SETUP");
 
-  const ext = extendedTierFlag(close, pullbackZoneHigh);
+  const ext = extendedTierFlag(close, pullbackZoneHigh, extensionThresholds);
   if (ext) {
     flags.push(ext);
     meta.extendedPct =

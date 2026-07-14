@@ -195,6 +195,7 @@ const SETUP_HEALTH_LEVEL_LABELS: Record<string, string> = {
   WARNING: "Watch",
   AT_RISK: "At risk",
   DEAD: "Broken",
+  NO_DATA: "No data",
 };
 
 /** Setup watch health level (scanner watch items). */

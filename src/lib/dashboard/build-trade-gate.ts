@@ -53,10 +53,13 @@ function canShowGo(
   headroom: DecisionCockpitDto["riskBudgetHeadroom"],
   utilizationTone: "normal" | "elevated" | "critical",
   topSetups: SurfacedCandidateHealthView[],
-  gate1: DecisionCockpitDto["verdict"]["gate1Resolution"]["canonical"]
+  gate1: DecisionCockpitDto["verdict"]["gate1Resolution"]["canonical"],
+  confidenceBand: DecisionCockpitDto["verdict"]["confidenceBand"]["value"]
 ): boolean {
   if (ux !== "TRADE") return false;
   if (gate1 === "FAIL") return false;
+  /** Low-confidence data (stale/gapped/weak coverage) must read as watch-only, never Go. */
+  if (confidenceBand === "low") return false;
   if (headroom.status !== "configured") return false;
   if (headroom.isOverMaxBook) return false;
   if (utilizationTone === "critical") return false;
@@ -69,11 +72,12 @@ function isBudgetPolicyRule(text: string): boolean {
   return /risk budget headroom|book headroom compares open notional/i.test(text);
 }
 
-/** Enforce stance overrides — NO TRADE never shows Go; missing budget never shows Ready/Go. */
+/** Enforce stance overrides — NO TRADE never shows Go; missing budget never shows Ready/Go; low confidence never shows Go. */
 function applyStanceOverrides(
   rows: V3TradeGateRow[],
   ux: VerdictUxLevel,
-  budgetStatus: DecisionCockpitDto["riskBudgetHeadroom"]["status"]
+  budgetStatus: DecisionCockpitDto["riskBudgetHeadroom"]["status"],
+  confidenceBand: DecisionCockpitDto["verdict"]["confidenceBand"]["value"]
 ): V3TradeGateRow[] {
   return rows.map((r) => {
     let next = { ...r };
@@ -86,6 +90,18 @@ function applyStanceOverrides(
           statusLabel: "Setup needed",
           action: budgetStatus === "unavailable" ? "Configure equity" : "Setup needed",
           severity: "Med",
+        };
+      }
+    }
+
+    if (confidenceBand === "low") {
+      if (next.action === "Go" || next.status === "ready") {
+        next = {
+          ...next,
+          status: "blocked",
+          statusLabel: "Blocked",
+          action: "No new entries",
+          severity: "High",
         };
       }
     }
@@ -134,7 +150,8 @@ export function buildTradeGate(params: {
   const ux = cockpitDto.verdict.uxLevel.value;
   const gate1 = cockpitDto.verdict.gate1Resolution.canonical;
   const headroom = cockpitDto.riskBudgetHeadroom;
-  const showGo = canShowGo(ux, headroom, utilizationTone, topSetups, gate1);
+  const confidenceBand = cockpitDto.verdict.confidenceBand.value;
+  const showGo = canShowGo(ux, headroom, utilizationTone, topSetups, gate1, confidenceBand);
   const rows: V3TradeGateRow[] = [];
 
   rows.push(
@@ -251,6 +268,23 @@ export function buildTradeGate(params: {
     );
   }
 
+  if (confidenceBand === "low") {
+    rows.push(
+      tradeGateRow(
+        "confidence",
+        "Data confidence",
+        "blocked",
+        "High",
+        "No new entries",
+        "derived"
+      )
+    );
+  } else if (confidenceBand === "medium") {
+    rows.push(
+      tradeGateRow("confidence", "Data confidence", "waiting", "Med", "Watch", "derived")
+    );
+  }
+
   if (freshness.scanSessionCoverage?.weakCoverage) {
     rows.push(
       tradeGateRow(
@@ -265,7 +299,7 @@ export function buildTradeGate(params: {
   }
 
   const blockedHealth = topSetups.some(
-    (s) => s.healthLevel === "DEAD" || s.healthLevel === "AT_RISK"
+    (s) => s.healthLevel === "DEAD" || s.healthLevel === "AT_RISK" || s.healthLevel === "NO_DATA"
   );
   if (blockedHealth) {
     rows.push(
@@ -311,7 +345,7 @@ export function buildTradeGate(params: {
     );
   }
 
-  const normalizedRows = applyStanceOverrides(rows, ux, headroom.status);
+  const normalizedRows = applyStanceOverrides(rows, ux, headroom.status, confidenceBand);
 
   return {
     subtitle: buildTradeGateSubtitle(ux),

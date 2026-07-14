@@ -112,6 +112,8 @@ function healthLevelToRisk(healthLevel: string): number {
       return 72;
     case "DEAD":
       return 88;
+    case "NO_DATA":
+      return 95;
     default:
       return 50;
   }
@@ -119,7 +121,9 @@ function healthLevelToRisk(healthLevel: string): number {
 
 function healthLevelToUi(healthLevel: string): V3SetupCard["health"] {
   if (healthLevel === "HEALTHY") return "Healthy";
-  if (healthLevel === "DEAD" || healthLevel === "AT_RISK") return "Blocked";
+  if (healthLevel === "DEAD" || healthLevel === "AT_RISK" || healthLevel === "NO_DATA") {
+    return "Blocked";
+  }
   return "Warning";
 }
 
@@ -363,13 +367,13 @@ function buildHighestQualitySetup(
 
 function buildGate1MismatchNote(
   gate1: DecisionCockpitDto["verdict"]["gate1Resolution"],
-  ux: DecisionCockpitDto["verdict"]["uxLevel"]["value"]
+  _ux: DecisionCockpitDto["verdict"]["uxLevel"]["value"]
 ): string | null {
   if (!gate1.mismatch || gate1.scanGate1 == null) return null;
   const scan = displayGate1ScanLevel(gate1.scanGate1);
   const live = displayGate1ScanLevel(gate1.liveRegimeGate1);
-  if (ux === "NO_TRADE" && gate1.scanGate1 === "PASS" && gate1.liveRegimeGate1 === "WARNING") {
-    return `Scan tagged ${scan}, live ${live} — no new entries today; treat live conditions as the higher bar.`;
+  if (gate1.liveOverrideApplied) {
+    return `Scan tagged ${scan}, live ${live} — today's stance has been downgraded to the live reading.`;
   }
   return `Scan regime ${scan} · live ${live}`;
 }
@@ -378,6 +382,11 @@ function buildMarketPulseRegimeLabel(
   gate1: DecisionCockpitDto["verdict"]["gate1Resolution"]
 ): string {
   const label = displayGate1ScanLevel(gate1.canonical);
+  // liveOverrideApplied: canonical IS the live value now — label it as an override,
+  // not "(scan)", which would wrongly imply the stale scan-time reading is showing.
+  if (gate1.liveOverrideApplied) {
+    return `${label} (live override)`;
+  }
   if (gate1.mismatch && gate1.scanGate1 != null) {
     return `${label} (scan)`;
   }
@@ -389,25 +398,15 @@ function augmentPrimaryReasonForMismatch(
   dto: DecisionCockpitDto
 ): string {
   const gate1 = dto.verdict.gate1Resolution;
-  if (
-    dto.verdict.uxLevel.value === "NO_TRADE" &&
-    gate1.mismatch &&
-    gate1.scanGate1 === "PASS" &&
-    gate1.liveRegimeGate1 === "WARNING"
-  ) {
-    return `${primaryReason} Live VNINDEX has weakened to Caution since the scan — that mismatch supports staying out.`;
+  if (gate1.liveOverrideApplied) {
+    return `${primaryReason} Live VNINDEX has weakened to ${displayGate1ScanLevel(gate1.liveRegimeGate1)} since the scan (was ${displayGate1ScanLevel(gate1.scanGate1!)}) — that shift supports staying out.`;
   }
   return primaryReason;
 }
 
 function buildMainRisk(dto: DecisionCockpitDto): string | null {
   const gate1 = dto.verdict.gate1Resolution;
-  if (
-    dto.verdict.uxLevel.value === "NO_TRADE" &&
-    gate1.mismatch &&
-    gate1.scanGate1 === "PASS" &&
-    gate1.liveRegimeGate1 === "WARNING"
-  ) {
+  if (gate1.liveOverrideApplied) {
     return `Live regime is ${displayGate1ScanLevel(gate1.liveRegimeGate1)} while the scan was ${displayGate1ScanLevel(gate1.scanGate1!)} — prioritize capital preservation until conditions realign.`;
   }
   const blocker = dto.blockers[0];
@@ -424,7 +423,7 @@ function buildSetupCards(topSetups: SurfacedCandidateHealthView[]): V3SetupCard[
     const entryMid = (s.pullbackZoneLow + s.pullbackZoneHigh) / 2;
     const rr = formatRiskReward(s.pullbackZoneLow, s.pullbackZoneHigh, s.stopLevel);
     let actionState = s.lifecycleSortLabel === "READY" ? "ARMED" : "WATCH FOR CONFIRM";
-    if (s.healthLevel === "DEAD" || s.healthLevel === "AT_RISK") {
+    if (s.healthLevel === "DEAD" || s.healthLevel === "AT_RISK" || s.healthLevel === "NO_DATA") {
       actionState = "DO NOT TRADE";
     } else if (s.healthLevel === "HEALTHY" && s.lifecycleSortLabel === "READY") {
       actionState = "EXECUTE WINDOW OPEN";
@@ -528,11 +527,17 @@ export function mapMarketForeignEvidenceFromDto(
 
     let state: DashboardV3ViewModel["evidence"][number]["state"] = "ok";
     if (id === "market_foreign_1d") {
-      state = foreignFlowEvidenceState(market?.foreignNetValue1d);
+      state = foreignFlowEvidenceState(market?.foreignNetValue1d, market?.foreignFlowRollingDangerVnd);
     } else if (id === "market_foreign_5d") {
-      state = foreignFlowEvidenceState(market?.foreignNetValue5d);
+      state = foreignFlowEvidenceState(
+        market?.foreignNetValue5d,
+        market?.foreignFlowRolling5dDangerVnd
+      );
     } else if (id === "market_foreign_10d") {
-      state = foreignFlowEvidenceState(market?.foreignNetValue10d);
+      state = foreignFlowEvidenceState(
+        market?.foreignNetValue10d,
+        market?.foreignFlowRolling10dDangerVnd
+      );
     }
 
     items.push({

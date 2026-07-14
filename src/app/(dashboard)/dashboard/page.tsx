@@ -37,7 +37,10 @@ import {
   persistRsWatchlistSnapshot,
 } from "@/lib/scanner/gate2/rs-watchlist-snapshot";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
+import { computePortfolioGuardrails } from "@/lib/dashboard/portfolio-guardrails";
 import { buildLatestCloseBySymbol } from "@/lib/dashboard/latest-close-by-symbol";
+import { fetchLatestCloseByTradeSymbols } from "@/lib/trades/unrealized-from-close";
+import type { DecisionCockpitOpenTradeSnapshot } from "@/lib/dashboard/decision-cockpit-dto";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardDecisionCockpit } from "@/components/dashboard/dashboard-decision-cockpit";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
@@ -153,6 +156,33 @@ async function loadLatestCloseBySymbol(
   }
 }
 
+/**
+ * Workstream B — mark-to-market exposure for OPEN trades. Reuses the existing
+ * `fetchLatestCloseByTradeSymbols` helper (already used for unrealized P&L on
+ * the Trades ledger — see `src/lib/trades/unrealized-from-close.ts`), keyed
+ * directly by ticker (`Trade.symbol`). Deliberately NOT
+ * `src/lib/dashboard/latest-close-by-symbol.ts`: that helper is keyed by the
+ * internal `StockSymbol.id`, sourced from watchlist rows — a poor fit for
+ * open trades, which only carry the ticker string.
+ */
+async function loadLatestCloseByTradeSymbol(
+  openTrades: DecisionCockpitOpenTradeSnapshot[]
+): Promise<Map<string, number>> {
+  if (openTrades.length === 0) return new Map();
+  try {
+    const bars = await fetchLatestCloseByTradeSymbols(
+      prisma,
+      openTrades.map((t) => t.symbol)
+    );
+    const closeBySymbol = new Map<string, number>();
+    for (const [sym, bar] of bars) closeBySymbol.set(sym, bar.close);
+    return closeBySymbol;
+  } catch (e) {
+    console.error("[dashboard] latest close by trade symbol lookup failed:", e);
+    return new Map();
+  }
+}
+
 async function loadRsDiagnosticsBySymbol(
   candidatesWithHealth: SurfacedCandidateHealthView[],
   scanNotes: DailyScanGate2Notes | null,
@@ -248,13 +278,25 @@ export default async function DashboardPage() {
   const currentExposure = openTrades.reduce((sum, t) => sum + t.entryPrice * t.quantity, 0);
   const accountEquityVnd = parseTradingAccountEquityVnd();
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
+  // Workstream D — practical portfolio guardrails; reuses `trades` already loaded above
+  // (all statuses, not just OPEN) rather than issuing a new Prisma query.
+  const portfolioGuardrails = computePortfolioGuardrails({ trades, accountEquityVnd });
+  // Workstream B — risk-to-stop / mark-to-market inputs (distinct from cost-basis `currentExposure`).
+  const openTradesForRisk: DecisionCockpitOpenTradeSnapshot[] = openTrades.map((t) => ({
+    symbol: t.symbol,
+    entryPrice: t.entryPrice,
+    quantity: t.quantity,
+    stopLoss: t.stopLoss,
+  }));
 
   // Tier 2 — each depends only on Tier 1 results, independent of each other.
-  const [marketContext, candidatesHealthResult, latestCloseBySymbol] = await Promise.all([
-    loadMarketContext(freshness.benchmarkDate, rawCandidates, scanNotes),
-    loadCandidatesWithHealth(rawCandidates, evalDate),
-    loadLatestCloseBySymbol(activeWatchItems),
-  ]);
+  const [marketContext, candidatesHealthResult, latestCloseBySymbol, latestCloseByTradeSymbol] =
+    await Promise.all([
+      loadMarketContext(freshness.benchmarkDate, rawCandidates, scanNotes),
+      loadCandidatesWithHealth(rawCandidates, evalDate),
+      loadLatestCloseBySymbol(activeWatchItems),
+      loadLatestCloseByTradeSymbol(openTradesForRisk),
+    ]);
   const candidatesWithHealth = candidatesHealthResult.data;
   const topSetups = candidatesWithHealth.slice(0, 5);
 
@@ -289,6 +331,9 @@ export default async function DashboardPage() {
       rsDiagnosticsBySymbol,
       rsNearMissWatchlist,
       marketContext,
+      portfolioGuardrails,
+      openTrades: openTradesForRisk,
+      latestCloseByTradeSymbol,
     })
   );
 
@@ -357,6 +402,7 @@ export default async function DashboardPage() {
         activeWatchItems={activeWatchItems}
         watchlistTruncated={watchlistTruncated}
         latestCloseBySymbol={latestCloseBySymbol}
+        tradeGate={viewModel.risk.tradeGate}
       />
     </div>
   );
