@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import "../paper-lab-workstation.css";
 
 export function ValidationBadge({
@@ -11,5 +12,9 @@ export function ValidationBadge({
       : status === "INVALID"
         ? "paper-lab-validation-invalid"
         : "paper-lab-validation-skipped";
-  return <span className={`paper-lab-validation-badge ${cls}`}>{status}</span>;
+  return (
+    <Badge bare className={`paper-lab-validation-badge ${cls}`}>
+      {status}
+    </Badge>
+  );
 }
