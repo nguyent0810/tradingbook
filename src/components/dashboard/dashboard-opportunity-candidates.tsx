@@ -18,6 +18,8 @@ function healthLevelToBadgeTone(level: string): BadgeTone {
       return "at-risk";
     case "DEAD":
       return "dead";
+    case "NO_DATA":
+      return "dead";
     default:
       return "neutral";
   }

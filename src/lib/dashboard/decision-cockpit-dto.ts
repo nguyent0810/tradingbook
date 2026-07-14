@@ -27,12 +27,31 @@ import {
 } from "@/lib/dashboard/gate-funnel-copy";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
+import type { PortfolioGuardrailsDto } from "./portfolio-guardrails";
 import { buildRsNearMissWatchlistPanel } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import {
   displayGate1ScanLevel,
   displayNearMissDiagnosticStatus,
   nearMissDiagnosticActionHint,
 } from "@/lib/trading-display-labels";
+import {
+  buildRecommendedPositionSizing,
+  type PositionSizingPanelDto,
+} from "./position-sizing-panel";
+import {
+  buildMarkToMarketExposure,
+  buildRiskToStopBreakdown,
+  type DecisionCockpitOpenTradeSnapshot,
+  type MarkToMarketExposureDto,
+  type RiskToStopBreakdownDto,
+} from "./risk-exposure-breakdown";
+
+export type { PositionSizingPanelDto } from "./position-sizing-panel";
+export type {
+  DecisionCockpitOpenTradeSnapshot,
+  MarkToMarketExposureDto,
+  RiskToStopBreakdownDto,
+} from "./risk-exposure-breakdown";
 
 export type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 
@@ -65,6 +84,15 @@ export type Gate1Resolution = {
   scanGate1: Gate1Level | null;
   liveRegimeGate1: Gate1Level;
   mismatch: boolean;
+  /**
+   * True when the live regime is WORSE than the persisted scan-run Gate 1
+   * (e.g. scan said PASS, live has since dropped to WARNING/FAIL). When true,
+   * `canonical` is the live (worse) value and the verdict is recomputed from
+   * it rather than trusting the persisted decision — see `resolveDecision`.
+   * We never override toward a BETTER live reading; a stale NO_TRADE staying
+   * cautious is safe, a stale TRADE staying optimistic is not.
+   */
+  liveOverrideApplied: boolean;
   note: string;
 };
 
@@ -132,6 +160,12 @@ export type DecisionCockpitInput = {
   rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
   /** Phase 1B — read-only market context; does not affect verdict, risk, or opportunity. */
   marketContext?: MarketContextUiDto | null;
+  /** Workstream D — practical portfolio guardrails (max positions, heat, duplicate-symbol exposure). */
+  portfolioGuardrails?: PortfolioGuardrailsDto | null;
+  /** Workstream B — OPEN trade rows for risk-to-stop and mark-to-market breakdowns (distinct from cost-basis `openExposureVnd`). */
+  openTrades?: DecisionCockpitOpenTradeSnapshot[];
+  /** Workstream B — latest close per uppercase ticker for OPEN trade symbols (mark-to-market only; not the watchlist symbolId-keyed map). */
+  latestCloseByTradeSymbol?: ReadonlyMap<string, number>;
 };
 
 export type ProvenanceField<T> = {
@@ -310,6 +344,33 @@ export type DecisionCockpitDto = {
   scanRunId: string | null;
   /** Diagnostic RS leaders that failed Gate 2 — separate from Tier A/B opportunity board. */
   rsNearMissWatchlist: RsNearMissWatchlistPanelDto;
+  /**
+   * Workstream D — max concurrent positions, portfolio heat, duplicate-symbol exposure.
+   * Null when the caller didn't supply trade data (does not affect verdict or Gate 2).
+   * Sector concentration / correlation are deliberately NOT covered — see portfolio-guardrails.ts.
+   */
+  portfolioGuardrails: PortfolioGuardrailsDto | null;
+  /**
+   * Workstream B — position sizing for the single best actionable opportunity
+   * (`computePositionSizing`, wrapped with VN board-lot rounding, a liquidity
+   * cap, and a slippage/gap buffer). Null when equity is not configured, the
+   * book cap can't be resolved, confidence is "low", or no eligible Tier A/B
+   * candidate is surfaced — see `buildRecommendedPositionSizing`.
+   */
+  recommendedPositionSizing: PositionSizingPanelDto | null;
+  /**
+   * Workstream B — sum of (entryPrice − stopLoss) × quantity across OPEN
+   * trades with a known stop. Distinct from cost-basis `openExposureVnd`:
+   * trades with `stopLoss: null` are excluded from the sum and counted
+   * separately (`unknownStopCount`), never assumed to carry zero risk.
+   */
+  riskToStop: RiskToStopBreakdownDto;
+  /**
+   * Workstream B — mark-to-market exposure for OPEN trades using the latest
+   * close per ticker (when resolvable). Distinct from cost-basis
+   * `openExposureVnd`; `available: false` / partial counts are surfaced, not hidden.
+   */
+  markToMarketExposure: MarkToMarketExposureDto;
 };
 
 const LADDER_STAGE_UI: Record<SetupLadderStage, { label: string; subtitle: string }> = {
@@ -352,6 +413,13 @@ export function mapDecisionLevelToUxVerdict(
   return level;
 }
 
+const GATE1_SEVERITY: Record<Gate1Level, number> = { PASS: 0, WARNING: 1, FAIL: 2 };
+
+/** Higher-severity (more cautious) of two Gate 1 levels. */
+function worseGate1Level(a: Gate1Level, b: Gate1Level): Gate1Level {
+  return GATE1_SEVERITY[a] >= GATE1_SEVERITY[b] ? a : b;
+}
+
 export function resolveCanonicalGate1(input: {
   scanGate1: Gate1Level | null;
   liveRegimeGate1: Gate1Level;
@@ -359,15 +427,20 @@ export function resolveCanonicalGate1(input: {
   const { scanGate1, liveRegimeGate1 } = input;
   if (scanGate1 != null) {
     const mismatch = scanGate1 !== liveRegimeGate1;
+    const canonical = worseGate1Level(scanGate1, liveRegimeGate1);
+    const liveOverrideApplied = canonical !== scanGate1;
     return {
-      canonical: scanGate1,
+      canonical,
       source: "scan_run",
       scanGate1,
       liveRegimeGate1,
       mismatch,
-      note: mismatch
-        ? "Verdict uses scan-run Gate 1; live regime differs — see evidence chips."
-        : "Verdict uses scan-run Gate 1 (aligned with Setups page).",
+      liveOverrideApplied,
+      note: liveOverrideApplied
+        ? "Live regime is worse than the scan-run Gate 1 — verdict downgraded to the live reading; the persisted scan decision is shown for reference only."
+        : mismatch
+          ? "Verdict uses scan-run Gate 1; live regime differs but is not worse — see evidence chips."
+          : "Verdict uses scan-run Gate 1 (aligned with Setups page).",
     };
   }
   return {
@@ -376,6 +449,7 @@ export function resolveCanonicalGate1(input: {
     scanGate1: null,
     liveRegimeGate1,
     mismatch: false,
+    liveOverrideApplied: false,
     note: "No daily scan — verdict uses live VNINDEX regime only.",
   };
 }
@@ -383,6 +457,8 @@ export function resolveCanonicalGate1(input: {
 export function resolveSetupLadderStage(
   candidate: DecisionCockpitCandidateSnapshot
 ): SetupLadderStage {
+  /** No bar data to evaluate — never eligible for Tier A/B, treat like an invalid setup. */
+  if (candidate.healthLevel === "NO_DATA") return "invalid";
   if (candidate.healthLevel === "DEAD") return "invalid";
   if (candidate.healthLevel === "AT_RISK") return "avoid";
   if (candidate.healthFlags.some((f) => EXTENSION_FLAGS.includes(f))) return "extended";
@@ -424,6 +500,37 @@ function classifyBlockerSeverity(category: string, gate1: Gate1Level): BlockerSe
   return "timing";
 }
 
+/**
+ * True when a newer trading session's data has been imported since this scan
+ * ran — i.e. the scan itself is behind the latest available session. Session
+ * dates (`YYYY-MM-DD`) are compared, not wall-clock hours, so a Friday-evening
+ * scan viewed Monday morning is NOT stale by this measure (no newer session
+ * existed yet). A weekend/holiday gap alone never trips this.
+ */
+export function isNewSessionAvailableSinceScan(
+  scanRunAt: Date | null,
+  latestAvailableSessionDate: string | null
+): boolean {
+  if (scanRunAt == null || latestAvailableSessionDate == null) return false;
+  const scanDay = scanRunAt.toISOString().slice(0, 10);
+  return latestAvailableSessionDate > scanDay;
+}
+
+/**
+ * Absolute failsafe only — deliberately long enough to span the longest
+ * realistic VN market closure (Tet, ~9 calendar days) without false-flagging
+ * a legitimate holiday gap. `isNewSessionAvailableSinceScan` is the primary
+ * staleness signal; this only catches a pipeline that's been silently broken
+ * far longer than any holiday would explain.
+ */
+export const ABSOLUTE_STALE_FAILSAFE_DAYS = 10;
+
+function isScanOlderThanFailsafe(now: Date, scanRunAt: Date | null): boolean {
+  if (scanRunAt == null) return false;
+  const ageDays = (now.getTime() - scanRunAt.getTime()) / (1000 * 60 * 60 * 24);
+  return ageDays > ABSOLUTE_STALE_FAILSAFE_DAYS;
+}
+
 export function computeConfidenceBand(params: {
   hasScan: boolean;
   freshness: MarketFreshnessDto;
@@ -438,17 +545,29 @@ export function computeConfidenceBand(params: {
     return "low";
   }
 
-  const scanAgeHours =
-    scanRunAt != null ? (now.getTime() - scanRunAt.getTime()) / (1000 * 60 * 60) : null;
-  const scanStale = scanAgeHours != null && scanAgeHours > 36;
+  const latestAvailableSession = [freshness.benchmarkDate, freshness.equityMaxDate]
+    .filter((d): d is string => d != null)
+    .sort()
+    .pop() ?? null;
+  const scanStale =
+    isNewSessionAvailableSinceScan(scanRunAt, latestAvailableSession) ||
+    isScanOlderThanFailsafe(now, scanRunAt);
 
   const weakSessionCoverage =
     freshness.scanSessionCoverage?.weakCoverage === true ||
     freshness.staleFlags.some((f) => f.code === "scan_weak_session_coverage");
 
+  // "info"-severity stale flags are cosmetic/observational, not safety-critical —
+  // only "warning"/"error" flags should be able to force "low" (which gates
+  // trade recommendations via canShowGo / buildRecommendedPositionSizing).
+  // "error" flags already force "low" above; this also covers "warning".
+  const hasBlockingStaleFlag = freshness.staleFlags.some(
+    (f) => f.severity === "warning" || f.severity === "error"
+  );
+
   if (
     freshness.delayedBackdrop ||
-    freshness.staleFlags.length > 0 ||
+    hasBlockingStaleFlag ||
     scanStale ||
     gate1 === "FAIL" ||
     weakSessionCoverage
@@ -458,11 +577,9 @@ export function computeConfidenceBand(params: {
 
   if (
     !freshness.delayedBackdrop &&
-    freshness.staleFlags.length === 0 &&
+    !hasBlockingStaleFlag &&
     gate1 === "PASS" &&
-    surfacedCount > 0 &&
-    scanAgeHours != null &&
-    scanAgeHours <= 24
+    surfacedCount > 0
   ) {
     return "high";
   }
@@ -470,15 +587,68 @@ export function computeConfidenceBand(params: {
   return "medium";
 }
 
+/**
+ * Fail-closed: when the live regime is worse than what was persisted at scan
+ * time (`gate1.liveOverrideApplied`), recompute from the live-worsened Gate 1
+ * instead of trusting the persisted (now-stale-optimistic) decision. We only
+ * ever override toward a MORE conservative outcome — see `resolveCanonicalGate1`.
+ */
 function resolveDecision(
   scanNotes: DailyScanGate2Notes | null,
-  gate1: Gate1Level,
+  gate1: Gate1Resolution,
+  latestScan: DecisionCockpitScanSnapshot | null
+): DailyTradingDecision {
+  if (gate1.liveOverrideApplied) {
+    const recomputed = computeDailyTradingDecision({
+      gate1Level: gate1.canonical,
+      candidateCountA: latestScan?.candidateCountA ?? 0,
+      candidateCountB: latestScan?.candidateCountB ?? 0,
+    });
+    const persisted = scanNotes?.decision;
+    return {
+      ...recomputed,
+      explanation: persisted
+        ? `${recomputed.explanation} Live regime downgraded from the scan-time decision (was ${persisted.level} ${persisted.allocation}).`
+        : recomputed.explanation,
+    };
+  }
+  if (scanNotes?.decision) return scanNotes.decision;
+  if (latestScan) {
+    return computeDailyTradingDecision({
+      gate1Level: gate1.canonical,
+      candidateCountA: latestScan.candidateCountA,
+      candidateCountB: latestScan.candidateCountB,
+    });
+  }
+  return {
+    level: "NO_TRADE",
+    allocation: "0%",
+    explanation: "No scan run found yet.",
+  };
+}
+
+/**
+ * The decision as it was actually persisted at scan time (or would have been,
+ * from the scan-time Gate 1) — deliberately NEVER recomputed from the live
+ * override. `resolveDecision` above intentionally swaps in the live-worsened
+ * decision as the ACTIVE one (drives headline/uxLevel/allocation), which means
+ * it can no longer be used for the "Persisted stance: ..." reference copy —
+ * that copy exists specifically to let the trader compare "what the scan
+ * said" against "what's active now", so it must reflect the scan-time value
+ * even when a live override is in effect. Bug found in acceptance audit:
+ * before this function existed, `persistedLevel`/`persistedLevelNote` silently
+ * echoed the overridden value instead, making the "Persisted stance" line
+ * misreport NO_TRADE when the scan had actually persisted NORMAL/TRADE.
+ */
+function resolvePersistedDecision(
+  scanNotes: DailyScanGate2Notes | null,
+  gate1: Gate1Resolution,
   latestScan: DecisionCockpitScanSnapshot | null
 ): DailyTradingDecision {
   if (scanNotes?.decision) return scanNotes.decision;
   if (latestScan) {
     return computeDailyTradingDecision({
-      gate1Level: gate1,
+      gate1Level: gate1.scanGate1 ?? gate1.liveRegimeGate1,
       candidateCountA: latestScan.candidateCountA,
       candidateCountB: latestScan.candidateCountB,
     });
@@ -1025,14 +1195,15 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     liveRegimeGate1: input.liveRegime.level,
   });
 
-  const decision = resolveDecision(input.scanNotes, gate1.canonical, input.latestScan);
+  const decision = resolveDecision(input.scanNotes, gate1, input.latestScan);
+  const persistedDecision = resolvePersistedDecision(input.scanNotes, gate1, input.latestScan);
   const gateFunnel = input.latestScan
     ? computeGateFunnelSnapshot(input.latestScan, gate1.canonical)
     : null;
   const ux = mapDecisionLevelToUxVerdict(decision.level);
   const verdictCopy = buildVerdictUxCopy({
     uxLevel: ux,
-    persistedLevel: decision.level,
+    persistedLevel: persistedDecision.level,
     gate1: gate1.canonical,
     funnel: gateFunnel ?? {
       gate1Level: gate1.canonical,
@@ -1081,7 +1252,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
   const verdict: VerdictDto = {
     uxLevel: { value: ux, provenance: "derived" },
     persistedLevel: {
-      value: decision.level,
+      value: persistedDecision.level,
       provenance: input.scanNotes?.decision ? "real" : "derived",
     },
     headline: {
@@ -1143,6 +1314,27 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
 
   const tomorrow = buildTomorrowPlan(ux, decision, opportunity, input.watchlist, blockers);
 
+  const recommendedPositionSizing = buildRecommendedPositionSizing({
+    candidates: input.surfacedCandidates.map((c) => ({
+      symbolKey: c.symbolKey,
+      quality: c.quality,
+      ladderStage: resolveSetupLadderStage(c),
+      closeKVnd: c.close,
+      stopKVnd: c.stopLevel,
+    })),
+    confidenceBand: confidence,
+    accountEquityVnd: input.accountEquityVnd,
+    currentPortfolioExposureVnd: input.openExposureVnd,
+    maxPortfolioExposurePct: riskBudgetHeadroom.maxBookPercent.value,
+    marketContext: input.marketContext,
+  });
+
+  const riskToStop = buildRiskToStopBreakdown(input.openTrades ?? []);
+  const markToMarketExposure = buildMarkToMarketExposure(
+    input.openTrades ?? [],
+    input.latestCloseByTradeSymbol ?? new Map()
+  );
+
   return {
     verdict,
     gateFunnel,
@@ -1174,5 +1366,9 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     scanRunId: input.latestScan?.id ?? null,
     rsNearMissWatchlist:
       input.rsNearMissWatchlist ?? buildRsNearMissWatchlistPanel([]),
+    portfolioGuardrails: input.portfolioGuardrails ?? null,
+    recommendedPositionSizing,
+    riskToStop,
+    markToMarketExposure,
   };
 }

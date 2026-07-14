@@ -16,6 +16,16 @@ export type MarketFreshnessStaleFlag = {
   message: string;
 };
 
+/**
+ * Data timing mode — always "eod" today: the entire import → scan pipeline
+ * runs once daily, after VN cash-session close (production-bar-import.yml
+ * cron: Mon-Fri after ATC), from `StockDailyBar`/`IndexDailyBar` daily bars.
+ * There is no intraday/realtime feed anywhere in this app to be "delayed"
+ * relative to — "delayed"/"realtime" are placeholders for if one is ever
+ * added; do not infer either from the current data without a real source.
+ */
+export type MarketDataTimingMode = "eod" | "delayed" | "realtime";
+
 /** Normalized market freshness contract for Dashboard / Setups / Trades (P1 foundation). */
 export type MarketFreshnessDto = {
   /** VNINDEX latest EOD session (UTC calendar day `YYYY-MM-DD`). */
@@ -29,6 +39,8 @@ export type MarketFreshnessDto = {
   staleFlags: MarketFreshnessStaleFlag[];
   /** From latest scan `notes.sessionCoverage` when available. */
   scanSessionCoverage: ScanSessionCoverage | null;
+  /** See `MarketDataTimingMode` — always "eod" in this app today. */
+  dataTimingMode: MarketDataTimingMode;
 };
 
 function isoDayUtc(d: Date | null): string | null {
@@ -133,6 +145,7 @@ export function buildMarketFreshnessDto(params: {
     delayedBackdrop,
     staleFlags,
     scanSessionCoverage,
+    dataTimingMode: "eod",
   };
 }
 

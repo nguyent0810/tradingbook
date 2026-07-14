@@ -15,6 +15,9 @@ const prodLikeContext: MarketContextUiDto = {
     foreignSymbolsOk: 159,
     foreignSymbolsTotal: 206,
     foreignCoveragePct: 159 / 206,
+    foreignFlowRollingDangerVnd: null,
+    foreignFlowRolling5dDangerVnd: null,
+    foreignFlowRolling10dDangerVnd: null,
     gate1Level: "PASS",
     vnindexVolRatioMa20: 1.1,
   },
@@ -84,6 +87,7 @@ describe("buildSymbolContextEvidenceLines", () => {
       foreignNetValue10d: null,
       foreignDataQuality: "OK",
       volRatioMa20: 1.35,
+      volMa20: null,
     });
     expect(lines).toEqual(["Foreign 1D: −12.40B ₫ net", "Vol 1.4× MA20 (context)"]);
   });
@@ -96,6 +100,7 @@ describe("buildSymbolContextEvidenceLines", () => {
         foreignNetValue10d: null,
         foreignDataQuality: "ALL_ZERO",
         volRatioMa20: null,
+        volMa20: null,
       })
     ).toEqual(["Foreign: all zero"]);
   });
@@ -108,6 +113,7 @@ describe("buildSymbolContextEvidenceLines", () => {
         foreignNetValue10d: null,
         foreignDataQuality: "PARTIAL",
         volRatioMa20: 0.9,
+        volMa20: null,
       })
     ).toEqual(["Foreign: partial data", "Vol 0.9× MA20 (context)"]);
   });
@@ -121,6 +127,7 @@ describe("buildSymbolContextEvidenceLines", () => {
         foreignNetValue10d: null,
         foreignDataQuality: "OK",
         volRatioMa20: null,
+        volMa20: null,
       })
     ).toEqual([]);
   });

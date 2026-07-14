@@ -6,6 +6,8 @@ export type SymbolContextUiDto = {
   foreignNetValue10d: number | null;
   foreignDataQuality: ForeignDataQuality | null;
   volRatioMa20: number | null;
+  /** 20-day average volume (shares) — passthrough of `SymbolMarketContextDaily.volMa20`, used for the dashboard liquidity cap. */
+  volMa20: number | null;
 };
 
 export type MarketContextMarketUiDto = {
@@ -15,6 +17,10 @@ export type MarketContextMarketUiDto = {
   foreignSymbolsOk: number;
   foreignSymbolsTotal: number;
   foreignCoveragePct: number | null;
+  /** Rolling 10th-percentile danger thresholds from trailing history — see foreign-flow-evidence.ts. */
+  foreignFlowRollingDangerVnd: number | null;
+  foreignFlowRolling5dDangerVnd: number | null;
+  foreignFlowRolling10dDangerVnd: number | null;
   gate1Level: Gate1ScanLevel | null;
   vnindexVolRatioMa20: number | null;
 };

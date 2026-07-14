@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeAtr14,
   distanceToZonePct,
   evaluateWatchHealth,
   filterBarsThroughEval,
@@ -112,6 +113,103 @@ describe("extended tiers (mutually exclusive)", () => {
     });
     expect(r.flags).toContain("CHASE");
     expect(r.flags.filter((f) => ["EXTENDED", "TOO_EXTENDED", "CHASE"].includes(f))).toHaveLength(1);
+  });
+});
+
+describe("computeAtr14", () => {
+  it("returns null with fewer than 15 bars", () => {
+    const bars = Array.from({ length: 10 }, (_, i) =>
+      bar(`2026-02-${String(i + 1).padStart(2, "0")}`)
+    );
+    expect(computeAtr14(bars)).toBeNull();
+  });
+
+  it("computes a positive ATR with 15+ bars of real range", () => {
+    const bars = Array.from({ length: 15 }, (_, i) =>
+      bar(`2026-02-${String(i + 1).padStart(2, "0")}`, { high: 102, low: 98, close: 100 })
+    );
+    expect(computeAtr14(bars)).toBeCloseTo(4, 6); // flat high-low=4 range every bar
+  });
+});
+
+describe("volatility-normalized extension thresholds (ATR%)", () => {
+  function quietBars(count: number, close: number): OhlcvBar[] {
+    return Array.from({ length: count }, (_, i) =>
+      bar(`2026-03-${String(i + 1).padStart(2, "0")}`, {
+        high: close + 0.5,
+        low: close - 0.5,
+        close,
+      })
+    );
+  }
+
+  function volatileBars(count: number, close: number): OhlcvBar[] {
+    return Array.from({ length: count }, (_, i) =>
+      bar(`2026-03-${String(i + 1).padStart(2, "0")}`, {
+        high: close + 10,
+        low: close - 10,
+        close,
+      })
+    );
+  }
+
+  it("provenance: falls back to flat % with too few bars for ATR", () => {
+    const r = evaluateWatchHealth({
+      breakoutLevel: 90,
+      pullbackZoneLow: 94,
+      pullbackZoneHigh: 100,
+      firstSeenBarDate: new Date("2026-01-01T12:00:00.000Z"),
+      evalBarDate: new Date("2026-01-02T12:00:00.000Z"),
+      barsAscThroughEval: [bar("2026-01-01", { close: 104 }), bar("2026-01-02", { close: 105 })],
+    });
+    expect(r.meta.extensionThresholdSource).toBe("flat_pct_fallback");
+  });
+
+  it("provenance: uses ATR-based thresholds once 15+ bars are available", () => {
+    const bars = [...quietBars(14, 100), bar("2026-03-15", { close: 105, high: 105.5, low: 104.5 })];
+    const r = evaluateWatchHealth({
+      breakoutLevel: 90,
+      pullbackZoneLow: 94,
+      pullbackZoneHigh: 100,
+      firstSeenBarDate: new Date("2026-03-01T12:00:00.000Z"),
+      evalBarDate: bars[bars.length - 1]!.date,
+      barsAscThroughEval: bars,
+    });
+    expect(r.meta.extensionThresholdSource).toBe("atr");
+  });
+
+  it("a quiet (low-ATR%) stock is flagged more aggressively than the flat-% rule at the same raw extension", () => {
+    // 5% above zoneHigh would be exactly the flat-threshold boundary (no flag).
+    // For a stock whose normal daily range is ~1, 5% is a much bigger relative
+    // move — ATR-normalized thresholds must flag it, not wave it through.
+    const bars = [...quietBars(14, 100), bar("2026-03-15", { close: 105, high: 105.5, low: 104.5 })];
+    const r = evaluateWatchHealth({
+      breakoutLevel: 90,
+      pullbackZoneLow: 94,
+      pullbackZoneHigh: 100,
+      firstSeenBarDate: new Date("2026-03-01T12:00:00.000Z"),
+      evalBarDate: bars[bars.length - 1]!.date,
+      barsAscThroughEval: bars,
+    });
+    expect(r.meta.extensionThresholdSource).toBe("atr");
+    expect(r.flags.some((f) => f === "EXTENDED" || f === "TOO_EXTENDED" || f === "CHASE")).toBe(true);
+  });
+
+  it("a volatile (high-ATR%) stock is NOT flagged at a raw extension that would trip the flat-% rule", () => {
+    // 8% above zoneHigh would be TOO_EXTENDED under the flat rule. For a stock
+    // whose normal daily range is ±10, 8% is well within its ordinary noise —
+    // ATR-normalized thresholds must not chase-flag ordinary volatility.
+    const bars = [...volatileBars(14, 100), bar("2026-03-15", { close: 108, high: 118, low: 98 })];
+    const r = evaluateWatchHealth({
+      breakoutLevel: 90,
+      pullbackZoneLow: 94,
+      pullbackZoneHigh: 100,
+      firstSeenBarDate: new Date("2026-03-01T12:00:00.000Z"),
+      evalBarDate: bars[bars.length - 1]!.date,
+      barsAscThroughEval: bars,
+    });
+    expect(r.meta.extensionThresholdSource).toBe("atr");
+    expect(r.flags.some((f) => f === "EXTENDED" || f === "TOO_EXTENDED" || f === "CHASE")).toBe(false);
   });
 });
 
@@ -385,6 +483,34 @@ describe("combined flags and score / level", () => {
     });
     expect(r.flags).toContain("CHASE");
     expect(r.level).toBe("DEAD");
+  });
+
+  it("missing eval bar returns NO_DATA, never HEALTHY/100 (regression: previously defaulted to a fake-healthy 100)", () => {
+    const r = evaluateWatchHealth({
+      breakoutLevel: 99,
+      pullbackZoneLow: 96,
+      pullbackZoneHigh: 98,
+      firstSeenBarDate: new Date("2026-08-01T12:00:00.000Z"),
+      evalBarDate: new Date("2026-08-10T12:00:00.000Z"),
+      barsAscThroughEval: [], // no bars at all through the eval date
+    });
+    expect(r.level).toBe("NO_DATA");
+    expect(r.level).not.toBe("HEALTHY");
+    expect(r.score).toBe(0);
+    expect(r.flags).toEqual([]);
+  });
+
+  it("missing eval bar also returns NO_DATA when all bars are strictly after the eval date", () => {
+    const r = evaluateWatchHealth({
+      breakoutLevel: 99,
+      pullbackZoneLow: 96,
+      pullbackZoneHigh: 98,
+      firstSeenBarDate: new Date("2026-08-01T12:00:00.000Z"),
+      evalBarDate: new Date("2026-08-01T12:00:00.000Z"),
+      barsAscThroughEval: [bar("2026-08-05", { close: 100 })],
+    });
+    expect(r.level).toBe("NO_DATA");
+    expect(r.score).toBe(0);
   });
 });
 

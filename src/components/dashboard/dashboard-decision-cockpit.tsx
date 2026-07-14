@@ -2,6 +2,7 @@ import type { Trade } from "@/generated/prisma/client";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { DecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
+import type { V3TradeGate } from "@/lib/dashboard/dashboard-v3-view-model";
 import { CommandDeckCollapsible } from "@/components/command-deck";
 import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
 import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
@@ -9,6 +10,8 @@ import { DashboardOpportunityCandidates } from "@/components/dashboard/dashboard
 import { DashboardNearMissRejectionsPanel } from "@/components/dashboard/dashboard-near-miss-rejections-panel";
 import { DashboardSetupQualityLadder } from "@/components/dashboard/dashboard-setup-quality-ladder";
 import { DashboardRiskRail } from "@/components/dashboard/dashboard-risk-rail";
+import { DashboardTradeGatePanel } from "@/components/dashboard/dashboard-trade-gate-panel";
+import { DashboardPortfolioGuardrailsPanel } from "@/components/dashboard/dashboard-portfolio-guardrails-panel";
 import { DashboardTomorrowPlan } from "@/components/dashboard/dashboard-tomorrow-plan";
 import { DashboardSecondaryIntelligence } from "@/components/dashboard/dashboard-secondary-intelligence";
 import { DashboardBookSnapshot } from "@/components/dashboard/dashboard-book-snapshot";
@@ -25,6 +28,7 @@ export type DashboardDecisionCockpitProps = {
   activeWatchItems: DashboardWatchlistItem[];
   watchlistTruncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
+  tradeGate: V3TradeGate;
 };
 
 /**
@@ -44,6 +48,7 @@ export function DashboardDecisionCockpit({
   activeWatchItems,
   watchlistTruncated = false,
   latestCloseBySymbol,
+  tradeGate,
 }: DashboardDecisionCockpitProps) {
   return (
     <DashboardEntrance>
@@ -88,12 +93,22 @@ export function DashboardDecisionCockpit({
               verdict={cockpitDto.verdict}
               riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
               portfolioRiskConfigured={portfolioRiskConfigured}
+              riskToStop={cockpitDto.riskToStop}
+              markToMarketExposure={cockpitDto.markToMarketExposure}
+              recommendedPositionSizing={cockpitDto.recommendedPositionSizing}
+              confidenceBand={cockpitDto.verdict.confidenceBand.value}
             />
           </div>
 
           <div className="dash-v2-card dash-v2-card--inset dash-v2-card--muted">
             <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
           </div>
+
+          <DashboardTradeGatePanel tradeGate={tradeGate} />
+
+          {cockpitDto.portfolioGuardrails ? (
+            <DashboardPortfolioGuardrailsPanel guardrails={cockpitDto.portfolioGuardrails} />
+          ) : null}
         </div>
       </section>
 

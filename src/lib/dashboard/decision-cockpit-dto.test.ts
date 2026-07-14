@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
+import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { RS_DIAGNOSTIC_DISCLAIMER } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import {
@@ -84,18 +85,47 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
 }
 
 describe("resolveCanonicalGate1 (DC-1)", () => {
-  it("prefers scan-run Gate 1 when scan exists", () => {
-    const r = resolveCanonicalGate1({ scanGate1: "PASS", liveRegimeGate1: "WARNING" });
-    expect(r.canonical).toBe("PASS");
-    expect(r.source).toBe("scan_run");
-    expect(r.mismatch).toBe(true);
-  });
-
   it("falls back to live regime when no scan", () => {
     const r = resolveCanonicalGate1({ scanGate1: null, liveRegimeGate1: "WARNING" });
     expect(r.canonical).toBe("WARNING");
     expect(r.source).toBe("live_regime");
     expect(r.mismatch).toBe(false);
+    expect(r.liveOverrideApplied).toBe(false);
+  });
+
+  it("keeps scan-run Gate 1 when live regime is not worse (aligned)", () => {
+    const r = resolveCanonicalGate1({ scanGate1: "PASS", liveRegimeGate1: "PASS" });
+    expect(r.canonical).toBe("PASS");
+    expect(r.source).toBe("scan_run");
+    expect(r.mismatch).toBe(false);
+    expect(r.liveOverrideApplied).toBe(false);
+  });
+
+  it("fail-closed: overrides toward live WARNING when scan said PASS", () => {
+    const r = resolveCanonicalGate1({ scanGate1: "PASS", liveRegimeGate1: "WARNING" });
+    expect(r.canonical).toBe("WARNING");
+    expect(r.source).toBe("scan_run");
+    expect(r.mismatch).toBe(true);
+    expect(r.liveOverrideApplied).toBe(true);
+  });
+
+  it("fail-closed: overrides toward live FAIL when scan said PASS", () => {
+    const r = resolveCanonicalGate1({ scanGate1: "PASS", liveRegimeGate1: "FAIL" });
+    expect(r.canonical).toBe("FAIL");
+    expect(r.liveOverrideApplied).toBe(true);
+  });
+
+  it("fail-closed: overrides toward live FAIL when scan said WARNING", () => {
+    const r = resolveCanonicalGate1({ scanGate1: "WARNING", liveRegimeGate1: "FAIL" });
+    expect(r.canonical).toBe("FAIL");
+    expect(r.liveOverrideApplied).toBe(true);
+  });
+
+  it("never upgrades toward a BETTER live reading — stale caution stays cautious", () => {
+    const r = resolveCanonicalGate1({ scanGate1: "FAIL", liveRegimeGate1: "PASS" });
+    expect(r.canonical).toBe("FAIL");
+    expect(r.mismatch).toBe(true);
+    expect(r.liveOverrideApplied).toBe(false);
   });
 });
 
@@ -106,12 +136,41 @@ describe("mapDecisionLevelToUxVerdict", () => {
 });
 
 describe("buildDecisionCockpitDto — production-like zero surfaced", () => {
-  it("uses scan Gate 1 for verdict (not live WARNING)", () => {
+  it("fail-closed: live WARNING (worse than scan PASS) overrides the verdict", () => {
     const dto = buildDecisionCockpitDto(baseInput());
     expect(dto.verdict.persistedLevel.value).toBe("NO_TRADE");
     expect(dto.verdict.uxLevel.value).toBe("NO_TRADE");
-    expect(dto.verdict.gate1Resolution.canonical).toBe("PASS");
+    expect(dto.verdict.gate1Resolution.canonical).toBe("WARNING");
     expect(dto.verdict.gate1Resolution.mismatch).toBe(true);
+    expect(dto.verdict.gate1Resolution.liveOverrideApplied).toBe(true);
+  });
+
+  it("acceptance audit regression: persistedLevel/persistedLevelNote keep showing the TRUE scan-time decision under a live override, not the recomputed active one", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        latestScan: {
+          ...baseInput().latestScan!,
+          gate1Level: "PASS",
+          candidateCountA: 2,
+          candidateCountB: 0,
+          candidateCountSurfaced: 2,
+        },
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          decision: { level: "NORMAL", allocation: "50-70%", explanation: "Valid setups." },
+        },
+        // Scan persisted PASS/NORMAL; live regime has since turned FAIL.
+        liveRegime: { level: "FAIL", symbol: "VNINDEX", latestBar: null },
+      })
+    );
+
+    expect(dto.verdict.gate1Resolution.liveOverrideApplied).toBe(true);
+    // Active/headline-facing level correctly reflects the override.
+    expect(dto.verdict.uxLevel.value).toBe("NO_TRADE");
+    // But the "what the scan actually persisted" fields must NOT collapse to
+    // the override value — that would hide the fact that anything changed.
+    expect(dto.verdict.persistedLevel.value).toBe("NORMAL");
+    expect(dto.verdict.persistedLevelNote.value).toMatch(/Persisted stance: NORMAL/);
   });
 
   it("surfaces near-miss opportunity board when zero candidates", () => {
@@ -233,6 +292,29 @@ describe("resolveSetupLadderStage", () => {
       })
     ).toBe("extended");
   });
+
+  it("NO_DATA (missing eval bar) is never Tier A/B — classified invalid like DEAD", () => {
+    expect(
+      resolveSetupLadderStage({
+        id: "y",
+        symbolKey: "VNM",
+        quality: "A",
+        lifecycleSortLabel: "READY",
+        healthLevel: "NO_DATA",
+        healthScore: 0,
+        healthScoreLabel: "Risky",
+        healthFlags: [],
+        healthSummary: null,
+        reasons: [],
+        rankSummary: null,
+        close: 1,
+        pullbackZoneLow: 0.9,
+        pullbackZoneHigh: 1.1,
+        stopLevel: 0.8,
+        rankScore: 1,
+      })
+    ).toBe("invalid");
+  });
 });
 
 describe("buildDecisionCockpitDto — tomorrow plan", () => {
@@ -268,6 +350,8 @@ describe("buildDecisionCockpitDto — tomorrow plan", () => {
   it("candidate day: watch includes surfaced symbol", () => {
     const dto = buildDecisionCockpitDto(
       baseInput({
+        // Aligned live regime — this test is about tomorrow-plan copy, not Gate 1 override behavior.
+        liveRegime: { ...baseInput().liveRegime, level: "PASS" },
         latestScan: {
           ...baseInput().latestScan!,
           candidateCountA: 1,
@@ -683,6 +767,95 @@ describe("computeConfidenceBand", () => {
       })
     ).toBe("low");
   });
+
+  it("session-aware: Friday scan viewed Monday morning is NOT stale (weekend gap, no false low)", () => {
+    // Friday 2026-05-22 scan; freshness still anchored to that same Friday session
+    // (no newer session imported yet) — viewed Monday 2026-05-25 morning, ~63h later.
+    const fresh = buildMarketFreshnessDto({
+      snapshot: {
+        benchmarkSessionDate: new Date(Date.UTC(2026, 4, 22)),
+        latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 22)),
+        latestScanRunAt: new Date(Date.UTC(2026, 4, 22, 12, 30, 0)),
+      },
+    });
+    const band = computeConfidenceBand({
+      hasScan: true,
+      freshness: fresh,
+      gate1: "PASS",
+      surfacedCount: 3,
+      now: new Date(Date.UTC(2026, 4, 25, 9, 0, 0)),
+      scanRunAt: new Date(Date.UTC(2026, 4, 22, 12, 30, 0)),
+    });
+    expect(band).toBe("high");
+  });
+
+  it("session-aware: a newer session's data being available downgrades confidence even a few hours later", () => {
+    // Scan ran for Friday's session; by the time the dashboard loads, Monday's
+    // session has already been imported (benchmarkDate moved forward) but the
+    // scan hasn't re-run yet — this IS real staleness regardless of hours.
+    const fresh = buildMarketFreshnessDto({
+      snapshot: {
+        benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
+        latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
+        latestScanRunAt: new Date(Date.UTC(2026, 4, 22, 12, 30, 0)),
+      },
+    });
+    const band = computeConfidenceBand({
+      hasScan: true,
+      freshness: fresh,
+      gate1: "PASS",
+      surfacedCount: 3,
+      now: new Date(Date.UTC(2026, 4, 25, 20, 0, 0)),
+      scanRunAt: new Date(Date.UTC(2026, 4, 22, 12, 30, 0)),
+    });
+    expect(band).toBe("low");
+  });
+
+  it("absolute failsafe: catches a scan far older than any realistic holiday even with no newer session", () => {
+    const fresh = buildMarketFreshnessDto({
+      snapshot: {
+        benchmarkSessionDate: new Date(Date.UTC(2026, 4, 1)),
+        latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 1)),
+        latestScanRunAt: new Date(Date.UTC(2026, 4, 1, 12, 30, 0)),
+      },
+    });
+    const band = computeConfidenceBand({
+      hasScan: true,
+      freshness: fresh,
+      gate1: "PASS",
+      surfacedCount: 3,
+      now: new Date(Date.UTC(2026, 4, 20, 9, 0, 0)), // 19 days later
+      scanRunAt: new Date(Date.UTC(2026, 4, 1, 12, 30, 0)),
+    });
+    expect(band).toBe("low");
+  });
+
+  it("an info-severity-only stale flag does NOT force low (cosmetic noise must not block trade recommendations)", () => {
+    // Constructed literally (not via a real flag-producing function) because no
+    // current code path in market-freshness-dto.ts / market-data-alignment.ts
+    // actually emits an "info" flag today — this guards computeConfidenceBand
+    // itself against ever over-blocking on a future purely-informational flag.
+    const fresh: MarketFreshnessDto = {
+      benchmarkDate: "2026-05-25",
+      equityMaxDate: "2026-05-25",
+      scanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)).toISOString(),
+      delayedBackdrop: false,
+      staleFlags: [
+        { code: "cosmetic_info_flag", severity: "info", message: "Informational only." },
+      ],
+      scanSessionCoverage: null,
+      dataTimingMode: "eod",
+    };
+    const band = computeConfidenceBand({
+      hasScan: true,
+      freshness: fresh,
+      gate1: "PASS",
+      surfacedCount: 3,
+      now: new Date(Date.UTC(2026, 4, 25, 14, 0, 0)),
+      scanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+    });
+    expect(band).toBe("high");
+  });
 });
 
 const prodLikeMarketContext: MarketContextUiDto = {
@@ -695,6 +868,9 @@ const prodLikeMarketContext: MarketContextUiDto = {
     foreignSymbolsOk: 159,
     foreignSymbolsTotal: 206,
     foreignCoveragePct: 77.18,
+    foreignFlowRollingDangerVnd: null,
+    foreignFlowRolling5dDangerVnd: null,
+    foreignFlowRolling10dDangerVnd: null,
     gate1Level: "PASS",
     vnindexVolRatioMa20: 1.1,
   },
@@ -731,5 +907,102 @@ describe("buildDecisionCockpitDto — market context Phase 1B invariance", () =>
     expect(ids).toContain("market_foreign_coverage");
     expect(ids).not.toContain("market_foreign_5d");
     expect(ids).not.toContain("market_foreign_10d");
+  });
+});
+
+function tierACandidate(): DecisionCockpitInput["surfacedCandidates"][number] {
+  return {
+    id: "cand-1",
+    symbolKey: "HPG",
+    quality: "A",
+    lifecycleSortLabel: "READY",
+    healthLevel: "HEALTHY",
+    healthScore: 90,
+    healthScoreLabel: "Strong",
+    healthFlags: [],
+    healthSummary: null,
+    reasons: [],
+    rankSummary: null,
+    close: 100,
+    pullbackZoneLow: 97,
+    pullbackZoneHigh: 101,
+    stopLevel: 97,
+    rankScore: 80,
+  };
+}
+
+describe("buildDecisionCockpitDto — Workstream B position sizing + risk breakdown wiring", () => {
+  it("surfaces a recommendedPositionSizing when equity is configured, confidence is high, and a Tier A candidate is surfaced", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        surfacedCandidates: [tierACandidate()],
+        accountEquityVnd: 1_000_000_000,
+        portfolioRiskConfigured: true,
+        liveRegime: {
+          level: "PASS",
+          symbol: "VNINDEX",
+          latestBar: { date: new Date(Date.UTC(2026, 4, 25)), close: 1245.5 },
+        },
+        latestScan: {
+          id: "scan-1",
+          runAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+          gate1Level: "PASS",
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+          universeScannedCount: 400,
+        },
+      })
+    );
+
+    expect(dto.verdict.confidenceBand.value).toBe("high");
+    expect(dto.recommendedPositionSizing).not.toBeNull();
+    expect(dto.recommendedPositionSizing?.symbol).toBe("HPG");
+  });
+
+  it("gates: no recommendedPositionSizing when equity is not configured", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        surfacedCandidates: [tierACandidate()],
+        accountEquityVnd: null,
+        portfolioRiskConfigured: false,
+      })
+    );
+    expect(dto.recommendedPositionSizing).toBeNull();
+  });
+
+  it("riskToStop excludes trades with a null stop and counts them separately", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        openTrades: [
+          { symbol: "HPG", entryPrice: 100, quantity: 1000, stopLoss: 97 },
+          { symbol: "SSI", entryPrice: 50, quantity: 500, stopLoss: null },
+        ],
+      })
+    );
+    expect(dto.riskToStop.knownRiskVnd).toBe(3000);
+    expect(dto.riskToStop.knownStopCount).toBe(1);
+    expect(dto.riskToStop.unknownStopCount).toBe(1);
+  });
+
+  it("markToMarketExposure is unavailable (not zero) when no close map is supplied for open trades", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        openTrades: [{ symbol: "HPG", entryPrice: 100, quantity: 1000, stopLoss: 97 }],
+      })
+    );
+    expect(dto.markToMarketExposure.available).toBe(false);
+    expect(dto.markToMarketExposure.exposureVnd).toBeNull();
+  });
+
+  it("markToMarketExposure sums latestCloseByTradeSymbol × quantity when supplied", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        openTrades: [{ symbol: "HPG", entryPrice: 100, quantity: 1000, stopLoss: 97 }],
+        latestCloseByTradeSymbol: new Map([["HPG", 105]]),
+      })
+    );
+    expect(dto.markToMarketExposure.available).toBe(true);
+    expect(dto.markToMarketExposure.exposureVnd).toBe(105_000);
   });
 });

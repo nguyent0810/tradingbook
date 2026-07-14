@@ -17,6 +17,8 @@ const LEVEL_RANK: Record<SetupHealthLevelValue, number> = {
   WARNING: 1,
   AT_RISK: 2,
   DEAD: 3,
+  /** Worse than DEAD — an unevaluable setup must never sort above a known-bad one. */
+  NO_DATA: 4,
 };
 
 const LIFECYCLE_RANK = { READY: 0, WATCHING: 1, NEW: 2 } as const;

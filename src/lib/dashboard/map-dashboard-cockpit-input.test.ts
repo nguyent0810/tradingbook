@@ -51,8 +51,11 @@ describe("buildDashboardCockpitInput", () => {
     expect(input.liveRegime.level).toBe("WARNING");
 
     const dto = buildDecisionCockpitDto(input);
-    expect(dto.verdict.gate1Resolution.canonical).toBe("PASS");
+    // Fail-closed: live WARNING is worse than the persisted scan-run PASS, so
+    // canonical is overridden toward the live (worse) reading — see decision-cockpit-dto.ts:355.
+    expect(dto.verdict.gate1Resolution.canonical).toBe("WARNING");
     expect(dto.verdict.gate1Resolution.mismatch).toBe(true);
+    expect(dto.verdict.gate1Resolution.liveOverrideApplied).toBe(true);
     expect(dto.evidence.some((c) => c.id === "gate1_live")).toBe(true);
   });
 

@@ -17,6 +17,17 @@ describe("buildMarketFreshnessDto", () => {
     expect(dto.staleFlags).toHaveLength(0);
   });
 
+  it("always reports dataTimingMode as eod (no intraday/realtime feed exists)", () => {
+    const dto = buildMarketFreshnessDto({
+      snapshot: {
+        benchmarkSessionDate: new Date(Date.UTC(2026, 4, 10)),
+        latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
+        latestScanRunAt: new Date(Date.UTC(2026, 4, 10, 8, 0, 0)),
+      },
+    });
+    expect(dto.dataTimingMode).toBe("eod");
+  });
+
   it("flags missing benchmark and sets delayedBackdrop when equity exists", () => {
     const dto = buildMarketFreshnessDto({
       snapshot: {

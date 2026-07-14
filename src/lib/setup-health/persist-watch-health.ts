@@ -109,12 +109,19 @@ export async function evaluateAndPersistHealthForActiveWatchItems(
       barsAscThroughEval: barsAsc,
     });
 
+    // The Prisma `SetupHealthLevel` enum has no NO_DATA member (would need a
+    // migration). AT_RISK is the closest existing value that already means
+    // "don't trust this without a closer look" — a safe, lossy downgrade for
+    // the persisted column. The dashboard's own live computation (not this
+    // periodic job) uses the real NO_DATA level to fully exclude Tier A/B/Go.
+    const persistedLevel: SetupHealthLevel = level === "NO_DATA" ? "AT_RISK" : level;
+
     await prisma.setupWatchItem.update({
       where: { id: w.id },
       data: {
         healthFlags: flags,
         healthScore: score,
-        healthLevel: level as SetupHealthLevel,
+        healthLevel: persistedLevel,
         lastHealthEvaluatedAt: now,
       },
     });

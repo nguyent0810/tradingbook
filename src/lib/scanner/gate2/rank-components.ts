@@ -4,6 +4,46 @@ import {
   GATE2_RANK_MA_CAP,
   GATE2_RANK_VOL_CAP,
 } from "./constants";
+import { CHASE_PCT, EXTENDED_PCT } from "@/lib/setup-health/evaluate-watch-health";
+
+/**
+ * Extension reward curve — shares its distance definition with setup-health's
+ * own extension penalty (`EXTENDED_PCT`/`CHASE_PCT`, same % above breakout)
+ * instead of a second, independently-tuned number. Reward rises with a fresh
+ * breakout up to `EXTENDED_PCT` (still "healthy" by the same measure the
+ * health scorer uses), then decays linearly to 0 by `CHASE_PCT` — a name
+ * ranked higher for being MORE extended past the healthy point no longer
+ * happens; rank and health point the same direction on the same setup.
+ * (Reconciles docs/audits/trading-algorithm-audit.md finding F05.)
+ *
+ * PARTIAL reconciliation only, by design: this always uses the FLAT
+ * `EXTENDED_PCT`/`CHASE_PCT` constants, never the ATR-normalized, per-stock
+ * thresholds that `resolveExtensionThresholds` in evaluate-watch-health.ts
+ * computes from `EXTENDED_ATR_MULT`/`TOO_EXTENDED_ATR_MULT`/`CHASE_ATR_MULT`
+ * once 15+ bars are available. Concrete failure mode (see the "ATR vs flat
+ * threshold divergence" describe block in rank-components.test.ts for
+ * worked numbers): for a LOW-volatility stock, health's tighter ATR-based
+ * thresholds can flag CHASE/DEAD at a raw % move where this flat curve is
+ * still handing out ~86% of the max extension reward — rank under-penalizes
+ * what health considers dangerously extended. For a HIGH-volatility stock,
+ * health's wider ATR-based thresholds can call the same raw % move perfectly
+ * HEALTHY (no extension flag at all) while this flat curve has already
+ * decayed past its healthy ceiling to that same ~86% — rank over-penalizes
+ * what health considers still fine for that stock's normal volatility. This
+ * is a known, intentionally scoped gap, not a bug: closing it means
+ * threading bars/ATR data into `Gate2RankScoreParams` (and from there into
+ * `breakout-pullback.ts` / `run-daily-scan-job.ts`), a larger pipeline change
+ * deliberately left out of scope when this reward curve was reconciled.
+ */
+function extensionRewardPct(extRawPct: number): number {
+  const ext = Math.max(0, extRawPct);
+  const healthyCeilingPct = EXTENDED_PCT * 100;
+  const chaseFloorPct = CHASE_PCT * 100;
+  if (ext <= healthyCeilingPct) return ext;
+  if (ext >= chaseFloorPct) return 0;
+  const decayFrac = (ext - healthyCeilingPct) / (chaseFloorPct - healthyCeilingPct);
+  return healthyCeilingPct * (1 - decayFrac);
+}
 
 /** Decomposed Gate 2 rank score (explainability only — formula unchanged). */
 export type Gate2RankComponents = {
@@ -42,7 +82,7 @@ export function computeGate2RankBreakdown(params: Gate2RankScoreParams): Gate2Ra
       : 0;
 
   const volumeTerm = 1000 * Math.min(volRatio, GATE2_RANK_VOL_CAP);
-  const extensionTerm = 100 * Math.min(Math.max(0, extRaw), GATE2_RANK_EXT_CAP);
+  const extensionTerm = 100 * Math.min(extensionRewardPct(extRaw), GATE2_RANK_EXT_CAP);
   const maDistanceTerm = 50 * Math.min(Math.max(0, maRaw), GATE2_RANK_MA_CAP);
   const depthPenalty = 200 * Math.min(depthRaw, GATE2_RANK_DEPTH_CAP);
   const rankScore = volumeTerm + extensionTerm + maDistanceTerm - depthPenalty;

@@ -26,6 +26,9 @@ const prodLikeMarketContext: MarketContextUiDto = {
     foreignSymbolsOk: 159,
     foreignSymbolsTotal: 206,
     foreignCoveragePct: 159 / 206,
+    foreignFlowRollingDangerVnd: null,
+    foreignFlowRolling5dDangerVnd: null,
+    foreignFlowRolling10dDangerVnd: null,
     gate1Level: "PASS",
     vnindexVolRatioMa20: 1.1,
   },
@@ -394,7 +397,9 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
         },
       })
     );
-    expect(vm.marketPulse.regime).toBe("Favorable (scan)");
+    // Fail-closed: live WARNING (Caution) is worse than scan-run PASS (Favorable),
+    // so canonical is overridden to the live value — labeled "(live override)", not "(scan)".
+    expect(vm.marketPulse.regime).toBe("Caution (live override)");
     expect(vm.marketPulse.gate1MismatchNote).toMatch(/Scan tagged Favorable, live Caution/i);
     expect(vm.decision.primaryReason).toMatch(/Live VNINDEX has weakened to Caution/i);
     expect(vm.decision.mainRisk).toMatch(/Live regime is Caution while the scan was Favorable/i);
