@@ -13,7 +13,7 @@ import {
   type BarRow,
 } from "@/lib/scanner/near-miss-watchlist";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
-import { evaluateTradabilityForSymbolId } from "@/lib/scanner/tradability";
+import { evaluateTradabilityForSymbolIdsBatched } from "@/lib/scanner/tradability";
 import { rejectionBucketLabel } from "@/lib/scanner/setups-trader-copy";
 import { loadVnindexBarsForRs } from "./load-rs-diagnostics";
 import {
@@ -373,14 +373,18 @@ export async function computeRsNearMissWatchlistFromDb(
     orderBy: { symbol: "asc" },
   });
 
+  // One batched, bounded-lookback query for all active symbols' bars, evaluated
+  // in-memory — replaces what was previously up to 2 DB round trips per symbol
+  // (a tradability-only fetch, then a full-OHLCV fetch for eligible ones).
+  const evaluated = await evaluateTradabilityForSymbolIdsBatched(
+    prisma,
+    symbols,
+    expectedLatestSession
+  );
+
   const tradable: { id: string; symbol: string }[] = [];
   for (const s of symbols) {
-    const tr = await evaluateTradabilityForSymbolId(
-      prisma,
-      s.id,
-      expectedLatestSession
-    );
-    if (tr.passed) tradable.push({ id: s.id, symbol: s.symbol });
+    if (evaluated.get(s.id)?.result.passed) tradable.push({ id: s.id, symbol: s.symbol });
   }
 
   const eligible: RsNearMissWatchlistRow[] = [];
@@ -389,18 +393,7 @@ export async function computeRsNearMissWatchlistFromDb(
   for (const t of tradable) {
     if (excludeSet.has(t.symbol)) continue;
 
-    const rows = await prisma.stockDailyBar.findMany({
-      where: { symbolId: t.id },
-      orderBy: { date: "asc" },
-      select: {
-        date: true,
-        open: true,
-        high: true,
-        low: true,
-        close: true,
-        volume: true,
-      },
-    });
+    const rows = evaluated.get(t.id)?.bars ?? [];
 
     const ev = evaluateBreakoutPullbackCandidate(rows, expectedLatestSession);
     const rsDiagnostic = computeRelativeStrengthDiagnostic(

@@ -1,6 +1,9 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import { fetchStockBarsGroupedAscThroughDate } from "@/lib/setup-health/load-bars";
+import type { OhlcvBar } from "@/lib/setup-health/types";
 import { equityPriceToVnd, tradedValueVnd } from "./price-units";
 import {
+  TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS,
   TRADABILITY_MAX_CALENDAR_GAP_DAYS,
   TRADABILITY_MIN_AVG_VALUE_VND_20,
   TRADABILITY_MIN_AVG_VOLUME_20,
@@ -204,6 +207,36 @@ export async function evaluateTradabilityForSymbolId(
 }
 
 /**
+ * Batch-fetch bars (one query, bounded lookback) for the given symbols and evaluate
+ * tradability for each from the in-memory result — replaces an N-query-per-symbol loop
+ * with a single round trip. Returns a `symbolId -> { result, bars }` map so callers that
+ * also need the bars for downstream evaluation (breakout/pullback, RS diagnostic) can
+ * reuse them instead of re-querying.
+ */
+export async function evaluateTradabilityForSymbolIdsBatched(
+  prisma: PrismaClient,
+  symbols: ReadonlyArray<{ id: string; symbol: string }>,
+  expectedLatestSession: Date
+): Promise<Map<string, { result: TradabilityResult; bars: OhlcvBar[] }>> {
+  const fromDate = new Date(expectedLatestSession);
+  fromDate.setUTCDate(fromDate.getUTCDate() - TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS);
+
+  const barsBySymbolId = await fetchStockBarsGroupedAscThroughDate(
+    prisma,
+    symbols.map((s) => s.id),
+    expectedLatestSession,
+    fromDate
+  );
+
+  const out = new Map<string, { result: TradabilityResult; bars: OhlcvBar[] }>();
+  for (const s of symbols) {
+    const bars = barsBySymbolId.get(s.id) ?? [];
+    out.set(s.id, { result: evaluateTradability(bars, expectedLatestSession), bars });
+  }
+  return out;
+}
+
+/**
  * Evaluate all active `StockSymbol` rows and return per-symbol results + aggregate.
  * Intended to run **after** bars are loaded and **before** Gate 2.
  */
@@ -220,20 +253,17 @@ export async function evaluateTradabilityForAllActiveSymbols(
     select: { id: true, symbol: true },
   });
 
-  const items: TradabilityBatchItem[] = [];
+  const evaluated = await evaluateTradabilityForSymbolIdsBatched(
+    prisma,
+    symbols,
+    expectedLatestSession
+  );
 
-  for (const s of symbols) {
-    const result = await evaluateTradabilityForSymbolId(
-      prisma,
-      s.id,
-      expectedLatestSession
-    );
-    items.push({
-      symbolKey: s.symbol,
-      symbolId: s.id,
-      result,
-    });
-  }
+  const items: TradabilityBatchItem[] = symbols.map((s) => ({
+    symbolKey: s.symbol,
+    symbolId: s.id,
+    result: evaluated.get(s.id)!.result,
+  }));
 
   const aggregate = aggregateTradabilityResults(
     items.map((i) => ({ symbolKey: i.symbolKey, result: i.result }))

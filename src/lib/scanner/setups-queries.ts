@@ -19,12 +19,21 @@ export type LatestScanWithCandidates = Prisma.DailyScanRunGetPayload<{
 }>;
 
 async function fetchLatestDailyScanRun(): Promise<LatestScanWithCandidates | null> {
+  // Cheap metadata-only scan (no candidates join) to find the latest non-smoke run id,
+  // then one targeted fetch with the full candidates include for just that run —
+  // avoids joining candidates for up to LATEST_SCAN_LOOKBACK - 1 runs that get discarded.
   const recentRuns = await prisma.dailyScanRun.findMany({
     orderBy: { runAt: "desc" },
     take: LATEST_SCAN_LOOKBACK,
+    select: { id: true, notes: true },
+  });
+  const latest = recentRuns.find((r) => !isSmokeDailyScanRunNotes(r.notes));
+  if (!latest) return null;
+
+  return prisma.dailyScanRun.findUnique({
+    where: { id: latest.id },
     include: scanRunInclude,
   });
-  return recentRuns.find((r) => !isSmokeDailyScanRunNotes(r.notes)) ?? null;
 }
 
 export async function getLatestDailyScanRun(): Promise<LatestScanWithCandidates | null> {
