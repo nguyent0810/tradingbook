@@ -1,3 +1,5 @@
+> **ARCHIVED** — superseded by [`docs/design/PLAYBOOK.md`](../design/PLAYBOOK.md). Its hierarchy/density/component rules were ported forward; the Setups-specific implementation mapping below is still accurate as of the 2026-07 UI overhaul but should be cross-checked against `src/components/setups-candidate-health-strip.tsx` before relying on it. Kept for historical reference only.
+
 # UI DNA / Design System (Trading Dashboard)
 
 ## 1) Visual Hierarchy Rules

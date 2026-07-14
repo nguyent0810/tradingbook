@@ -1,3 +1,5 @@
+> **ARCHIVED** — superseded by [`docs/design/PLAYBOOK.md`](../design/PLAYBOOK.md) (principles) and [`docs/design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md`](../design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md) (current, implemented IA). This PRD's decision-hierarchy and anti-pattern guidance was ported forward; its concrete section inventory (Today's Action, Best Setups, Watchlist, Diagnostics) has been superseded by the Decision Cockpit's verdict/evidence/opportunity/guardrail/tomorrow's-plan structure. Kept for historical reference only.
+
 # Trading Dashboard PRD
 
 ## 1) Core Philosophy

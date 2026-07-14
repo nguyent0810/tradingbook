@@ -1,3 +1,5 @@
+> **ARCHIVED** — superseded by [`docs/design/PLAYBOOK.md`](../design/PLAYBOOK.md). Describes a `/trades` ledger IA that no longer exists as a route; concrete layouts here are stale. Kept for historical reference only.
+
 # UI Blueprint — Dashboard, Trades, Trade Detail
 
 Companion to **`DESIGN.md`**. Concrete layouts and component hierarchy only—**no implementation**.

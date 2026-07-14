@@ -173,6 +173,6 @@ flowchart TB
 |-------|--------|
 | `EquityPanel` / `EquityCurveChart` | Not mounted |
 | `analytics.ts` helpers | Not mounted |
-| `UI_BLUEPRINT.md` KPI band | Aspirational |
+| `UI_BLUEPRINT.md` KPI band (archived, see `docs/archive/UI_BLUEPRINT.md`) | Aspirational |
 
 Rebuild should not assume these exist in runtime without new wiring.

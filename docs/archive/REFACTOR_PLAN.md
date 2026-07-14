@@ -1,3 +1,5 @@
+> **ARCHIVED** — superseded by [`docs/design/PLAYBOOK.md`](../design/PLAYBOOK.md). This plan targeted the `/trades` ledger dashboard shape, which has since been replaced by the Decision Cockpit (see `docs/design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md`). Kept for historical reference only.
+
 # UI refactor plan — align with DESIGN.md & UI_BLUEPRINT.md
 
 **Scope:** Audit + controlled refactor proposal only. **No code changes** in this document. **Backend / Gate 1 data wiring out of scope** unless noted as future.

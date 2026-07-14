@@ -1,3 +1,5 @@
+> **ARCHIVED** — superseded by [`docs/design/PLAYBOOK.md`](../design/PLAYBOOK.md). Describes a `/trades` ledger IA that no longer exists as a route; principle-level guidance (density, color semantics, tone) has been ported forward. Kept for historical reference only.
+
 # Design System — TradeLog / Playbook
 
 **Audience:** Operators making end-of-day trading decisions and maintaining an audit-grade journal.  
