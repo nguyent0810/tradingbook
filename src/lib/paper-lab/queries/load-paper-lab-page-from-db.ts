@@ -9,12 +9,17 @@ import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
 import type { RegimeDimensions } from "@/lib/lab/types/regime";
 import { getPaperLabExecutionMode } from "@/lib/paper-lab/llm-config";
+import { buildLatestCloseBySymbol } from "@/lib/dashboard/latest-close-by-symbol";
+import type { PortfolioSnapshot } from "@/generated/prisma/client";
 import {
   buildBattleInsight,
   buildCioPresentation,
   buildDecisionExplanation,
   formatRegimeDimension,
 } from "@/lib/paper-lab/ui/arena-copy";
+
+/** Calendar-day lookback for the 14-point NAV sparkline (margin above 14 daily snapshots for weekend/holiday gaps). */
+const PORTFOLIO_SPARKLINE_LOOKBACK_CALENDAR_DAYS = 60;
 
 function tableExistsError(err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);
@@ -90,34 +95,77 @@ function countBattleVotes(decisions: Array<{ action: string }>) {
 
 export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> {
   try {
-    const agentCount = await prisma.paperAgent.count();
+    const [agentCount, latestPerf] = await Promise.all([
+      prisma.paperAgent.count(),
+      prisma.agentPerformanceDaily.findFirst({ orderBy: { sessionDate: "desc" } }),
+    ]);
     if (agentCount === 0) return null;
 
-    const latestPerf = await prisma.agentPerformanceDaily.findFirst({
-      orderBy: { sessionDate: "desc" },
-    });
     const sessionDate = latestPerf?.sessionDate ?? new Date();
 
-    const agents = await prisma.paperAgent.findMany({
-      where: { slug: { not: "cio" } },
-      include: {
-        portfolio: true,
-        performance: {
-          where: { sessionDate },
-          take: 1,
+    const [
+      agents,
+      rankings,
+      openPositions,
+      decisions,
+      cioRows,
+      regimeSnapshot,
+      regimeCtx,
+      battle,
+      recentBattleRows,
+    ] = await Promise.all([
+      prisma.paperAgent.findMany({
+        where: { slug: { not: "cio" } },
+        include: {
+          portfolio: true,
+          performance: {
+            where: { sessionDate },
+            take: 1,
+          },
+          rankings: {
+            where: { sessionDate },
+            take: 1,
+          },
         },
-        rankings: {
-          where: { sessionDate },
-          take: 1,
+      }),
+      prisma.agentRanking.findMany({
+        where: { sessionDate },
+        orderBy: { rank: "asc" },
+        include: { agent: true },
+      }),
+      prisma.paperPosition.findMany({
+        where: { status: { in: ["OPEN", "PARTIAL"] } },
+        include: { portfolio: { include: { agent: true } } },
+      }),
+      prisma.agentDecision.findMany({
+        where: { sessionDate },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        include: { agent: true, output: true, order: true },
+      }),
+      prisma.cioRecommendation.findMany({ where: { sessionDate }, take: 10 }),
+      prisma.marketRegimeSnapshot.findUnique({ where: { sessionDate } }),
+      prisma.marketContextDaily.findUnique({ where: { sessionDate } }),
+      prisma.arenaBattle.findFirst({
+        where: { sessionDate },
+        orderBy: { createdAt: "desc" },
+        include: {
+          battleDecisions: {
+            include: {
+              outcome: true,
+              decision: { include: { agent: true, output: true } },
+            },
+          },
         },
-      },
-    });
-
-    const rankings = await prisma.agentRanking.findMany({
-      where: { sessionDate },
-      orderBy: { rank: "asc" },
-      include: { agent: true },
-    });
+      }),
+      prisma.arenaBattle.findMany({
+        orderBy: { sessionDate: "desc" },
+        take: 3,
+        include: {
+          battleDecisions: { select: { action: true } },
+        },
+      }),
+    ]);
 
     const leaderboard = rankings.map((r) => {
       const perf = agents.find((a) => a.id === r.agentId)?.performance[0];
@@ -139,112 +187,127 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       };
     });
 
-    const portfolios = await Promise.all(
-      agents.map(async (a) => {
-        const snap = await prisma.portfolioSnapshot.findFirst({
-          where: { portfolioId: a.portfolio?.id },
-          orderBy: { sessionDate: "desc" },
-        });
-        const perf = a.performance[0];
-        const sparkSnaps = a.portfolio
-          ? await prisma.portfolioSnapshot.findMany({
-              where: { portfolioId: a.portfolio.id },
-              orderBy: { sessionDate: "desc" },
-              take: 14,
-              select: { navVnd: true },
-            })
-          : [];
-        const navSparkline = sparkSnaps.reverse().map((s) => Number(s.navVnd));
-        const lb = leaderboard.find((r) => r.agentId === a.slug);
-
-        let openRiskVnd = 0;
-        if (a.portfolio) {
-          const openPos = await prisma.paperPosition.findMany({
-            where: {
-              portfolioId: a.portfolio.id,
-              status: { in: ["OPEN", "PARTIAL"] },
-            },
-          });
-          openRiskVnd = openPos.reduce((sum, p) => sum + Number(p.riskAmountVnd), 0);
-        }
-
-        return {
-          agentId: a.slug,
-          agentName: a.displayName,
-          style: a.style,
-          startingCapitalVnd: a.portfolio
-            ? Number(a.portfolio.initialCapitalVnd)
-            : PAPER_INITIAL_CAPITAL_VND,
-          cashVnd: snap
-            ? Number(snap.cashVnd)
-            : Number(a.portfolio?.cashVnd ?? PAPER_INITIAL_CAPITAL_VND),
-          investedVnd: snap ? Number(snap.navVnd) - Number(snap.cashVnd) : 0,
-          navVnd: snap
-            ? Number(snap.navVnd)
-            : perf
-              ? Number(perf.navVnd)
-              : PAPER_INITIAL_CAPITAL_VND,
-          exposurePct: snap?.exposurePct ?? 0,
-          sectorExposure: (snap?.sectorExposureJson as Record<string, number>) ?? {},
-          openRiskVnd,
-          buyingPowerVnd: snap
-            ? Math.floor(Number(snap.cashVnd) * 0.99)
-            : PAPER_INITIAL_CAPITAL_VND,
-          pnlPct: lb?.pnlPct ?? perf?.totalReturnPct ?? 0,
-          winRate: lb?.winRate ?? perf?.winRate ?? 0,
-          maxDrawdownPct: lb?.maxDrawdownPct ?? perf?.maxDrawdownPct ?? 0,
-          navSparkline:
-            navSparkline.length >= 2
-              ? navSparkline
-              : [PAPER_INITIAL_CAPITAL_VND, snap ? Number(snap.navVnd) : PAPER_INITIAL_CAPITAL_VND],
-        };
-      })
+    // Batch portfolio snapshots for all agents in one query (replaces a 2-query-per-agent N+1):
+    // bounded lookback window covers both the latest snapshot and the 14-point sparkline.
+    const portfolioIds = agents
+      .map((a) => a.portfolio?.id)
+      .filter((id): id is string => Boolean(id));
+    const snapshotLookbackFrom = new Date(sessionDate);
+    snapshotLookbackFrom.setUTCDate(
+      snapshotLookbackFrom.getUTCDate() - PORTFOLIO_SPARKLINE_LOOKBACK_CALENDAR_DAYS
     );
+    const snapshotRows =
+      portfolioIds.length > 0
+        ? await prisma.portfolioSnapshot.findMany({
+            where: { portfolioId: { in: portfolioIds }, sessionDate: { gte: snapshotLookbackFrom } },
+            orderBy: [{ portfolioId: "asc" }, { sessionDate: "desc" }],
+          })
+        : [];
+    const snapshotsByPortfolioId = new Map<string, PortfolioSnapshot[]>();
+    for (const row of snapshotRows) {
+      const arr = snapshotsByPortfolioId.get(row.portfolioId);
+      if (arr) arr.push(row);
+      else snapshotsByPortfolioId.set(row.portfolioId, [row]);
+    }
 
-    const openPositions = await prisma.paperPosition.findMany({
-      where: { status: { in: ["OPEN", "PARTIAL"] } },
-      include: { portfolio: { include: { agent: true } } },
+    // openRiskVnd per portfolio derived from the already-fetched `openPositions` (same status filter)
+    // instead of a separate per-agent query.
+    const openRiskByPortfolioId = new Map<string, number>();
+    for (const p of openPositions) {
+      openRiskByPortfolioId.set(
+        p.portfolioId,
+        (openRiskByPortfolioId.get(p.portfolioId) ?? 0) + Number(p.riskAmountVnd)
+      );
+    }
+
+    const portfolios = agents.map((a) => {
+      const snaps = a.portfolio ? snapshotsByPortfolioId.get(a.portfolio.id) ?? [] : [];
+      const snap = snaps[0]; // snaps sorted desc by sessionDate — first is latest
+      const perf = a.performance[0];
+      const navSparkline = snaps
+        .slice(0, 14)
+        .map((s) => Number(s.navVnd))
+        .reverse();
+      const lb = leaderboard.find((r) => r.agentId === a.slug);
+      const openRiskVnd = a.portfolio ? openRiskByPortfolioId.get(a.portfolio.id) ?? 0 : 0;
+
+      return {
+        agentId: a.slug,
+        agentName: a.displayName,
+        style: a.style,
+        startingCapitalVnd: a.portfolio
+          ? Number(a.portfolio.initialCapitalVnd)
+          : PAPER_INITIAL_CAPITAL_VND,
+        cashVnd: snap
+          ? Number(snap.cashVnd)
+          : Number(a.portfolio?.cashVnd ?? PAPER_INITIAL_CAPITAL_VND),
+        investedVnd: snap ? Number(snap.navVnd) - Number(snap.cashVnd) : 0,
+        navVnd: snap
+          ? Number(snap.navVnd)
+          : perf
+            ? Number(perf.navVnd)
+            : PAPER_INITIAL_CAPITAL_VND,
+        exposurePct: snap?.exposurePct ?? 0,
+        sectorExposure: (snap?.sectorExposureJson as Record<string, number>) ?? {},
+        openRiskVnd,
+        buyingPowerVnd: snap
+          ? Math.floor(Number(snap.cashVnd) * 0.99)
+          : PAPER_INITIAL_CAPITAL_VND,
+        pnlPct: lb?.pnlPct ?? perf?.totalReturnPct ?? 0,
+        winRate: lb?.winRate ?? perf?.winRate ?? 0,
+        maxDrawdownPct: lb?.maxDrawdownPct ?? perf?.maxDrawdownPct ?? 0,
+        navSparkline:
+          navSparkline.length >= 2
+            ? navSparkline
+            : [PAPER_INITIAL_CAPITAL_VND, snap ? Number(snap.navVnd) : PAPER_INITIAL_CAPITAL_VND],
+      };
     });
 
-    const positions = await Promise.all(
-      openPositions.map(async (p) => {
-        const bar = await prisma.stockDailyBar.findFirst({
-          where: { symbol: { symbol: p.symbol } },
-          orderBy: { date: "desc" },
-        });
-        const mark = bar?.close ?? p.avgEntryKvnd;
-        const unrealized = Math.round((mark - p.avgEntryKvnd) * 1000 * p.quantity);
-        const cost = p.avgEntryKvnd * 1000 * p.quantity;
-        const nav = Number(p.portfolio.initialCapitalVnd);
-        return {
-          id: p.id,
-          agentId: p.portfolio.agent.slug,
-          agentName: p.portfolio.agent.displayName,
-          symbol: p.symbol,
-          entryPriceKVnd: p.avgEntryKvnd,
-          currentPriceKVnd: mark,
-          stopLossKVnd: p.stopLossKvnd,
-          takeProfitKVnd: p.takeProfitKvnd,
-          quantity: p.quantity,
-          allocationPct: nav > 0 ? (cost / nav) * 100 : 0,
-          riskAmountVnd: Number(p.riskAmountVnd),
-          unrealizedPnlVnd: unrealized,
-          unrealizedPnlPct: cost > 0 ? (unrealized / cost) * 100 : 0,
-          rMultiple:
-            p.avgEntryKvnd > p.stopLossKvnd
-              ? (mark - p.avgEntryKvnd) / (p.avgEntryKvnd - p.stopLossKvnd)
-              : 0,
-          holdingDays: utcDayDiff(sessionDate, p.openedAt),
-          status: p.status === "PARTIAL" ? ("PARTIAL" as const) : ("OPEN" as const),
-        };
-      })
-    );
+    // Batch latest close per symbol for all open positions in one round trip (replaces a per-position N+1).
+    const positionTickers = [...new Set(openPositions.map((p) => p.symbol))];
+    const latestCloseBySymbol = new Map<string, number>();
+    if (positionTickers.length > 0) {
+      const symbolRows = await prisma.stockSymbol.findMany({
+        where: { symbol: { in: positionTickers } },
+        select: { id: true, symbol: true },
+      });
+      const closeBySymbolId = await buildLatestCloseBySymbol(
+        prisma,
+        symbolRows.map((s) => s.id),
+        sessionDate
+      );
+      for (const s of symbolRows) {
+        const close = closeBySymbolId.get(s.id);
+        if (close != null) latestCloseBySymbol.set(s.symbol, close);
+      }
+    }
 
-    const decisions = await prisma.agentDecision.findMany({
-      where: { sessionDate },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-      include: { agent: true, output: true, order: true },
+    const positions = openPositions.map((p) => {
+      const mark = latestCloseBySymbol.get(p.symbol) ?? p.avgEntryKvnd;
+      const unrealized = Math.round((mark - p.avgEntryKvnd) * 1000 * p.quantity);
+      const cost = p.avgEntryKvnd * 1000 * p.quantity;
+      const nav = Number(p.portfolio.initialCapitalVnd);
+      return {
+        id: p.id,
+        agentId: p.portfolio.agent.slug,
+        agentName: p.portfolio.agent.displayName,
+        symbol: p.symbol,
+        entryPriceKVnd: p.avgEntryKvnd,
+        currentPriceKVnd: mark,
+        stopLossKVnd: p.stopLossKvnd,
+        takeProfitKVnd: p.takeProfitKvnd,
+        quantity: p.quantity,
+        allocationPct: nav > 0 ? (cost / nav) * 100 : 0,
+        riskAmountVnd: Number(p.riskAmountVnd),
+        unrealizedPnlVnd: unrealized,
+        unrealizedPnlPct: cost > 0 ? (unrealized / cost) * 100 : 0,
+        rMultiple:
+          p.avgEntryKvnd > p.stopLossKvnd
+            ? (mark - p.avgEntryKvnd) / (p.avgEntryKvnd - p.stopLossKvnd)
+            : 0,
+        holdingDays: utcDayDiff(sessionDate, p.openedAt),
+        status: p.status === "PARTIAL" ? ("PARTIAL" as const) : ("OPEN" as const),
+      };
     });
 
     const decisionRows = decisions.map((d) => {
@@ -273,18 +336,6 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       };
     });
 
-    const cioRows = await prisma.cioRecommendation.findMany({
-      where: { sessionDate },
-      take: 10,
-    });
-
-    const regimeSnapshot = await prisma.marketRegimeSnapshot.findUnique({
-      where: { sessionDate },
-    });
-    const regimeCtx = await prisma.marketContextDaily.findUnique({
-      where: { sessionDate },
-    });
-
     const dimensions = regimeSnapshot?.dimensionsJson as RegimeDimensions | undefined;
     const regimeLabels = dimensions
       ? [dimensions.trendRegime, dimensions.volatilityRegime, dimensions.breadthRegime]
@@ -293,27 +344,6 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
     const sorted = [...leaderboard].sort((a, b) => b.pnlPct - a.pnlPct);
     const best = sorted[0];
     const worst = sorted[sorted.length - 1];
-
-    const battle = await prisma.arenaBattle.findFirst({
-      where: { sessionDate },
-      orderBy: { createdAt: "desc" },
-      include: {
-        battleDecisions: {
-          include: {
-            outcome: true,
-            decision: { include: { agent: true, output: true } },
-          },
-        },
-      },
-    });
-
-    const recentBattleRows = await prisma.arenaBattle.findMany({
-      orderBy: { sessionDate: "desc" },
-      take: 3,
-      include: {
-        battleDecisions: { select: { action: true } },
-      },
-    });
 
     const battleSymbol = battle?.symbol ?? decisions[0]?.symbol ?? "FPT";
 

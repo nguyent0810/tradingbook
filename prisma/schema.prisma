@@ -234,6 +234,7 @@ model StockSymbol {
   foreignTradeDaily    ForeignTradeDaily[]
   symbolMarketContexts SymbolMarketContextDaily[]
 
+  @@index([active])
   @@map("stock_symbols")
 }
 
@@ -459,6 +460,7 @@ model SetupWatchItem {
   @@unique([symbolId, setupType])
   @@index([healthLevel])
   @@index([lifecycleStatus])
+  @@index([lifecycleStatus, updatedAt])
   @@map("setup_watch_items")
 }
 

@@ -1,9 +1,7 @@
 import "server-only";
 
-import {
-  NearMissWatchlistGrid,
-  TerminalFilterLog,
-} from "@/components/setups-workstation";
+import { NearMissWatchlistGrid } from "@/components/setups-workstation";
+import { TerminalFilterLogLazy as TerminalFilterLog } from "@/components/setups-workstation/TerminalFilterLog-lazy";
 import { compareClosestRowsExecutionOrder } from "@/lib/scanner/closest-execution-metrics";
 import {
   loadRsDiagnosticsForSetupsCached,

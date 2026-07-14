@@ -2,8 +2,8 @@ import "server-only";
 
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
-import { IntelligenceSidebar } from "@/components/setups-workstation";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { IntelligenceSidebarLazy as IntelligenceSidebar } from "@/components/setups-workstation/IntelligenceSidebar-lazy";
 import { loadGate2BreakdownCached, loadSetupsBaseData } from "./setups-cached-data";
 
 export async function SetupsSidebarAsync() {

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   computeClosestExecutionStatus,
 } from "@/lib/scanner/closest-execution-metrics";

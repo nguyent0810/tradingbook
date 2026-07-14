@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AppShellNavDesktop, AppShellNavMobile } from "@/components/app-shell-nav";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { LogoutButton } from "@/components/logout-button";
+import "./dashboard-shell.css";
 
 export default async function DashboardLayout({
   children,

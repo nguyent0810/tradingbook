@@ -1,14 +1,18 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import dynamic from "next/dynamic";
+
+const PipelineConnectorDot = dynamic(
+  () => import("./PipelineConnectorDot").then((m) => m.PipelineConnectorDot),
+  { ssr: false }
+);
 
 type Props = {
   active: boolean;
 };
 
+/** Static connector line renders immediately; the animated dot (framer-motion) loads lazily and only when active. */
 export function PipelineConnector({ active }: Props) {
-  const reducedMotion = useReducedMotion() ?? false;
-
   return (
     <div className="relative flex h-8 w-10 shrink-0 items-center justify-center" aria-hidden>
       <svg width="40" height="16" viewBox="0 0 40 16" className="overflow-visible">
@@ -27,19 +31,7 @@ export function PipelineConnector({ active }: Props) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        {active && !reducedMotion ? (
-          <motion.circle
-            r="2.5"
-            fill="#6366f1"
-            initial={{ offsetDistance: "0%" }}
-            animate={{ offsetDistance: "100%" }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
-            style={{
-              offsetPath: 'path("M2 8 L28 8")',
-              filter: "drop-shadow(0 0 4px rgba(99,102,241,0.8))",
-            }}
-          />
-        ) : null}
+        {active ? <PipelineConnectorDot /> : null}
       </svg>
     </div>
   );
