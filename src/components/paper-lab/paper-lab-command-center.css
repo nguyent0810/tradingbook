@@ -1213,7 +1213,6 @@
 .arena-camp__who { font-size: 0.72rem; color: var(--pl-muted); }
 .arena-camp__who b { color: var(--pl-text); }
 .arena-camp__reason { font-size: 0.72rem; line-height: 1.35; color: var(--pl-faint); }
-.arena-camp__empty { font-size: 0.72rem; color: var(--pl-faint); margin: 0; }
 .arena-debate__verdict {
   margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px;

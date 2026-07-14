@@ -1689,6 +1689,26 @@
   color: var(--text-secondary);
 }
 
+/* Compact variant: no bordered panel/padding -- for a small slot already
+   inside its own bordered container (e.g. one column of a debate strip). */
+.ui-state-panel--compact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.ui-state-panel--compact__title {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.ui-state-panel--compact__body {
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-snug);
+  color: var(--text-tertiary);
+}
+
 .ui-state-panel__evidence {
   margin-top: var(--space-3);
   padding: var(--space-3);
