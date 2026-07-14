@@ -140,10 +140,10 @@ export function SetupsClosestSymbolsSection({
 
   return (
     <section className="card p-6">
-      <h2 className="text-lg font-medium" style={{ color: "var(--text-primary)" }}>
+      <h2 className="text-lg font-medium !text-[var(--text-primary)]">
         Closest to qualifying
       </h2>
-      <p className="mt-1 text-sm leading-snug" style={{ color: "var(--text-tertiary)" }}>
+      <p className="mt-1 text-sm leading-snug !text-[var(--text-tertiary)]">
         Ranked by proximity to a valid entry zone, then scanner quality. Execution context from the
         same Gate 2 evaluation — not recommendations. Expand levels for prices (k ₫).
       </p>
@@ -162,11 +162,10 @@ export function SetupsClosestSymbolsSection({
           return (
             <li
               key={`${row.symbol}-${row.partialPipelineScore}-${row.stageRank}`}
-              className="rounded-lg border p-4"
-              style={{ borderColor: "var(--border-primary)", background: "var(--bg-primary)" }}
+              className="rounded-lg border p-4 !border-[var(--border-primary)] !bg-[var(--bg-primary)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <span className="mono text-xl font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>
+                <span className="mono text-xl font-bold tracking-tight !text-[var(--text-primary)]">
                   {row.symbol}
                 </span>
                 <span
@@ -181,29 +180,29 @@ export function SetupsClosestSymbolsSection({
                 </span>
               </div>
 
-              <div className="mt-3 space-y-1.5 text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              <div className="mt-3 space-y-1.5 text-sm leading-relaxed !text-[var(--text-secondary)]">
                 {row.terminalReasonPreview ? (
-                  <p className="text-xs leading-snug" style={{ color: "var(--text-tertiary)" }}>
+                  <p className="text-xs leading-snug !text-[var(--text-tertiary)]">
                     {formatScannerReasonForUser(row.terminalReasonPreview)}
                   </p>
                 ) : null}
                 <p>
-                  <span style={{ color: "var(--text-tertiary)" }}>→ </span>
+                  <span className="!text-[var(--text-tertiary)]">→ </span>
                   {executionHeadline(status)}
                 </p>
                 <p>
-                  <span style={{ color: "var(--text-tertiary)" }}>→ </span>
+                  <span className="!text-[var(--text-tertiary)]">→ </span>
                   {zoneDistanceLineWithProximity(row.close, row.pullbackZoneLow, row.pullbackZoneHigh)}
                 </p>
                 <p>
-                  <span style={{ color: "var(--text-tertiary)" }}>→ </span>
+                  <span className="!text-[var(--text-tertiary)]">→ </span>
                   Risk: {fmtPct1FromFrac(riskFrac)}
                 </p>
                 <p>
-                  <span style={{ color: "var(--text-tertiary)" }}>→ </span>
+                  <span className="!text-[var(--text-tertiary)]">→ </span>
                   {nearMissDiagnosticActionHint(status)}
                 </p>
-                <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="mt-3 border-t pt-3 !border-[var(--border-primary)]">
                   <RelativeStrengthDiagnosticPanel
                     diagnostic={rsBySymbol?.get(row.symbol) ?? null}
                     compact
@@ -212,56 +211,56 @@ export function SetupsClosestSymbolsSection({
                 </div>
               </div>
 
-              <details className="details-disclosure mt-3 border-t pt-3 text-xs" style={{ borderColor: "var(--border-primary)" }}>
-                <summary className="cursor-pointer font-medium outline-none" style={{ color: "var(--accent-text)" }}>
-                  <span className="details-marker-closed mr-1 inline text-[var(--text-tertiary)]" aria-hidden>
+              <details className="details-disclosure mt-3 border-t pt-3 text-xs !border-[var(--border-primary)]">
+                <summary className="cursor-pointer font-medium outline-none !text-[var(--accent-text)]">
+                  <span className="details-marker-closed mr-1 inline !text-[var(--text-tertiary)]" aria-hidden>
                     ▸
                   </span>
-                  <span className="details-marker-open mr-1 inline text-[var(--text-tertiary)]" aria-hidden>
+                  <span className="details-marker-open mr-1 inline !text-[var(--text-tertiary)]" aria-hidden>
                     ▾
                   </span>
                   Price levels (k ₫)
                 </summary>
-                <dl className="mt-2 grid gap-1 sm:grid-cols-2" style={{ color: "var(--text-tertiary)" }}>
+                <dl className="mt-2 grid gap-1 sm:grid-cols-2 !text-[var(--text-tertiary)]">
                   <div>
-                    <dt className="inline font-medium" style={{ color: "var(--text-secondary)" }}>
+                    <dt className="inline font-medium !text-[var(--text-secondary)]">
                       Close:{" "}
                     </dt>
-                    <dd className="inline mono font-semibold" style={{ color: "var(--text-primary)" }}>
+                    <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.close > 0 ? fmtThousands(row.close) : "—"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="inline font-medium" style={{ color: "var(--text-secondary)" }}>
+                    <dt className="inline font-medium !text-[var(--text-secondary)]">
                       Breakout:{" "}
                     </dt>
-                    <dd className="inline mono font-semibold" style={{ color: "var(--text-primary)" }}>
+                    <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.breakoutLevel > 0 ? fmtThousands(row.breakoutLevel) : "—"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="inline font-medium" style={{ color: "var(--text-secondary)" }}>
+                    <dt className="inline font-medium !text-[var(--text-secondary)]">
                       Zone low–high:{" "}
                     </dt>
-                    <dd className="inline mono font-semibold" style={{ color: "var(--text-primary)" }}>
+                    <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.pullbackZoneLow > 0 || row.pullbackZoneHigh > 0
                         ? `${fmtThousands(row.pullbackZoneLow)} – ${fmtThousands(row.pullbackZoneHigh)}`
                         : "—"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="inline font-medium" style={{ color: "var(--text-secondary)" }}>
+                    <dt className="inline font-medium !text-[var(--text-secondary)]">
                       Stop:{" "}
                     </dt>
-                    <dd className="inline mono font-semibold" style={{ color: "var(--text-primary)" }}>
+                    <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.stopLevel > 0 ? fmtThousands(row.stopLevel) : "—"}
                     </dd>
                   </div>
                   <div className="sm:col-span-2">
-                    <dt className="inline font-medium" style={{ color: "var(--text-secondary)" }}>
+                    <dt className="inline font-medium !text-[var(--text-secondary)]">
                       Above breakout (vs level):{" "}
                     </dt>
-                    <dd className="inline mono font-semibold" style={{ color: "var(--text-primary)" }}>
+                    <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {hasExecutableBreakout(row.breakoutLevel)
                         ? fmtPct1FromFrac(
                             computeDistanceAboveBreakoutFrac(row.close, row.breakoutLevel)

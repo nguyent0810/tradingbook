@@ -91,7 +91,7 @@ export function RegisterForm() {
             {state.errors.password[0]}
           </p>
         ) : (
-          <p id="password-hint" className="cd-auth-error" style={{ color: "var(--cd-text-dim)" }}>
+          <p id="password-hint" className="cd-auth-error !text-[var(--cd-text-dim)]">
             At least 6 characters.
           </p>
         )}

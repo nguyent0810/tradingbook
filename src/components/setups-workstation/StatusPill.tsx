@@ -6,11 +6,11 @@ type Props = {
 export function StatusPill({ active, label }: Props) {
   return (
     <span
-      className="inline-flex h-2 w-2 shrink-0 rounded-full"
-      style={{
-        backgroundColor: active ? "var(--status-healthy)" : "var(--text-muted)",
-        boxShadow: active ? "0 0 8px var(--status-healthy-border)" : "none",
-      }}
+      className={`inline-flex h-2 w-2 shrink-0 rounded-full ${
+        active
+          ? "!bg-[var(--status-healthy)] !shadow-[0_0_8px_var(--status-healthy-border)]"
+          : "!bg-[var(--text-muted)]"
+      }`}
       aria-hidden={!label}
       title={label}
     />

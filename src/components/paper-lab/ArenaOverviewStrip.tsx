@@ -53,7 +53,7 @@ export function ArenaOverviewStrip({ overview }: { overview: ArenaOverviewDto })
       </div>
       <div className="paper-lab-kpi">
         <div className="paper-lab-kpi__label">Last evaluation</div>
-        <div className="paper-lab-kpi__value" style={{ fontSize: "0.85rem" }}>
+        <div className="paper-lab-kpi__value !text-[0.85rem]">
           {overview.latestEvaluationAt
             ? new Date(overview.latestEvaluationAt).toLocaleString("vi-VN")
             : "—"}
