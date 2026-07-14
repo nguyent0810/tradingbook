@@ -1,6 +1,6 @@
 import type { Trade } from "@/generated/prisma/client";
 import { CommandDeckCollapsible } from "@/components/command-deck";
-import { DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel";
+import { DashboardPerformancePanelLazy as DashboardPerformancePanel } from "@/components/dashboard/dashboard-performance-panel-lazy";
 
 export type DashboardBookSnapshotProps = {
   trades: Trade[];

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
 import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
 import {
@@ -22,6 +23,7 @@ import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { fetchMarketContextUi } from "@/lib/market/fetch-market-context-ui";
 import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
+import type { DailyScanGate2Notes } from "@/lib/scanner/gate2-scan-diagnostics";
 import { buildDecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
 import { buildDashboardCockpitInput } from "@/lib/dashboard/map-dashboard-cockpit-input";
 import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagnostics";
@@ -47,102 +49,36 @@ export const metadata: Metadata = {
   description: "Trading OS decision cockpit.",
 };
 
-export default async function DashboardPage() {
-  const session = await getSession();
-  if (!session) redirect("/login");
+type Fallible<T> = { data: T; error: string | null };
 
-  let dbLoadError: string | null = null;
-
-  let trades: Trade[] = [];
+async function loadTrades(userId: string): Promise<Fallible<Trade[]>> {
   try {
-    trades = await prisma.trade.findMany({
-      where: { userId: session.userId },
+    const data = await prisma.trade.findMany({
+      where: { userId },
       orderBy: { entryDate: "asc" },
     });
+    return { data, error: null };
   } catch (e) {
-    dbLoadError = "Database temporarily unavailable (trade history).";
     console.error("[dashboard] trades query failed:", e);
-    trades = [];
+    return { data: [], error: "Database temporarily unavailable (trade history)." };
   }
+}
 
-  const [regime, marketSnapshot] = await Promise.all([
-    getMarketRegimeFromDb("VNINDEX"),
-    fetchMarketSessionSnapshot(prisma),
-  ]);
-  const alignmentAnalysis = analyzeMarketDataAlignment(marketSnapshot);
-
-  let latestScan = null as Awaited<ReturnType<typeof getLatestDailyScanRun>>;
+async function loadLatestScan(): Promise<
+  Fallible<Awaited<ReturnType<typeof getLatestDailyScanRun>>>
+> {
   try {
-    latestScan = await getLatestDailyScanRun();
+    const data = await getLatestDailyScanRun();
+    return { data, error: null };
   } catch (e) {
-    dbLoadError ??= "Database temporarily unavailable (latest scan).";
     console.error("[dashboard] latest scan query failed:", e);
-    latestScan = null;
+    return { data: null, error: "Database temporarily unavailable (latest scan)." };
   }
+}
 
-  const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
-  const freshness = buildMarketFreshnessDto({
-    snapshot: marketSnapshot,
-    alignment: alignmentAnalysis,
-    delayedBackdropFromScanNotes:
-      scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
-    scanSessionCoverage: scanNotes?.sessionCoverage ?? null,
-  });
-
-  let marketContext: MarketContextUiDto | null = null;
-  if (freshness.benchmarkDate) {
-    try {
-      const rsSymbolsForContext = [
-        ...new Set([
-          ...toCandidateRows(latestScan).map((c) => c.symbolKey),
-          ...(scanNotes?.closestToValidSymbols ?? [])
-            .slice(0, 12)
-            .map((r) => r.symbol),
-        ]),
-      ];
-      marketContext = await fetchMarketContextUi(
-        prisma,
-        freshness.benchmarkDate,
-        { symbols: rsSymbolsForContext }
-      );
-    } catch (e) {
-      console.error("[dashboard] market context load failed:", e);
-    }
-  }
-
-  const rawCandidates = toCandidateRows(latestScan);
-  const evalDate =
-    rawCandidates.length > 0
-      ? rawCandidates.reduce(
-          (latestDate, c) => (c.barDate > latestDate ? c.barDate : latestDate),
-          rawCandidates[0]!.barDate
-        )
-      : latestScan?.runAt ?? new Date();
-  let candidatesWithHealth: SurfacedCandidateHealthView[] = [];
+async function loadActiveWatchItems(): Promise<Fallible<DashboardWatchlistItem[]>> {
   try {
-    candidatesWithHealth =
-      rawCandidates.length > 0
-        ? await prepareSurfacedCandidatesHealthView(
-            prisma,
-            rawCandidates,
-            evalDate
-          )
-        : [];
-  } catch (e) {
-    dbLoadError ??= "Database temporarily unavailable (candidate health).";
-    console.error("[dashboard] candidate health query failed:", e);
-    candidatesWithHealth = [];
-  }
-  const topSetups = candidatesWithHealth.slice(0, 5);
-
-  const openTrades = trades.filter((t) => t.status === "OPEN");
-  const currentExposure = openTrades.reduce(
-    (sum, t) => sum + t.entryPrice * t.quantity,
-    0
-  );
-  let activeWatchItems: DashboardWatchlistItem[] = [];
-  try {
-    activeWatchItems = await prisma.setupWatchItem.findMany({
+    const data = await prisma.setupWatchItem.findMany({
       where: {
         lifecycleStatus: {
           in: [
@@ -158,88 +94,185 @@ export default async function DashboardPage() {
         symbol: { select: { symbol: true } },
       },
     });
+    return { data, error: null };
   } catch (e) {
-    dbLoadError ??= "Database temporarily unavailable (watchlist).";
     console.error("[dashboard] watch items query failed:", e);
-    activeWatchItems = [];
+    return { data: [], error: "Database temporarily unavailable (watchlist)." };
   }
+}
 
-  let latestCloseBySymbol = new Map<string, number>();
-  if (activeWatchItems.length > 0) {
-    try {
-      latestCloseBySymbol = await buildLatestCloseBySymbol(
-        prisma,
-        activeWatchItems.map((item) => item.symbolId),
-        new Date()
-      );
-    } catch (e) {
-      console.error("[dashboard] latest close lookup failed:", e);
+async function loadMarketContext(
+  benchmarkDate: string | null,
+  rawCandidates: ReturnType<typeof toCandidateRows>,
+  scanNotes: DailyScanGate2Notes | null
+): Promise<MarketContextUiDto | null> {
+  if (!benchmarkDate) return null;
+  try {
+    const rsSymbolsForContext = [
+      ...new Set([
+        ...rawCandidates.map((c) => c.symbolKey),
+        ...(scanNotes?.closestToValidSymbols ?? []).slice(0, 12).map((r) => r.symbol),
+      ]),
+    ];
+    return await fetchMarketContextUi(prisma, benchmarkDate, {
+      symbols: rsSymbolsForContext,
+    });
+  } catch (e) {
+    console.error("[dashboard] market context load failed:", e);
+    return null;
+  }
+}
+
+async function loadCandidatesWithHealth(
+  rawCandidates: ReturnType<typeof toCandidateRows>,
+  evalDate: Date
+): Promise<Fallible<SurfacedCandidateHealthView[]>> {
+  if (rawCandidates.length === 0) return { data: [], error: null };
+  try {
+    const data = await prepareSurfacedCandidatesHealthView(prisma, rawCandidates, evalDate);
+    return { data, error: null };
+  } catch (e) {
+    console.error("[dashboard] candidate health query failed:", e);
+    return { data: [], error: "Database temporarily unavailable (candidate health)." };
+  }
+}
+
+async function loadLatestCloseBySymbol(
+  activeWatchItems: DashboardWatchlistItem[]
+): Promise<Map<string, number>> {
+  if (activeWatchItems.length === 0) return new Map();
+  try {
+    return await buildLatestCloseBySymbol(
+      prisma,
+      activeWatchItems.map((item) => item.symbolId),
+      new Date()
+    );
+  } catch (e) {
+    console.error("[dashboard] latest close lookup failed:", e);
+    return new Map();
+  }
+}
+
+async function loadRsDiagnosticsBySymbol(
+  candidatesWithHealth: SurfacedCandidateHealthView[],
+  scanNotes: DailyScanGate2Notes | null,
+  rsSession: Date | null
+): Promise<Record<string, RsDiagnosticUi> | undefined> {
+  if (!rsSession) return undefined;
+  const rsSymbols = [
+    ...new Set([
+      ...candidatesWithHealth.map((c) => c.symbolKey),
+      ...(scanNotes?.closestToValidSymbols ?? []).slice(0, 12).map((r) => r.symbol),
+    ]),
+  ];
+  if (rsSymbols.length === 0) return undefined;
+  try {
+    const rsMap = await loadRsDiagnosticUiForSymbols(prisma, rsSymbols, rsSession);
+    const rsDiagnosticsBySymbol: Record<string, RsDiagnosticUi> = {};
+    for (const [sym, ui] of rsMap) {
+      if (ui) rsDiagnosticsBySymbol[sym] = ui;
     }
+    return rsDiagnosticsBySymbol;
+  } catch (e) {
+    console.error("[dashboard] RS diagnostic load failed:", e);
+    return undefined;
   }
+}
 
+async function loadRsNearMiss(
+  candidatesWithHealth: SurfacedCandidateHealthView[],
+  rsSession: Date | null
+) {
+  const empty = {
+    panel: buildRsNearMissWatchlistPanel([]),
+    rowsForSnapshot: [] as Awaited<ReturnType<typeof computeRsNearMissWatchlistFromDb>>["rows"],
+    tradabilityCount: 0,
+    uiMap: undefined as Map<string, RsDiagnosticUi | null> | undefined,
+  };
+  if (!rsSession) return empty;
+  try {
+    const excludeSymbols = candidatesWithHealth.map((c) => c.symbolKey);
+    const { rows, tradabilityPassedCount, earlyEntryBySymbol } =
+      await computeRsNearMissWatchlistFromDb(prisma, { limit: 12, excludeSymbols });
+    const rsMap = await loadRsDiagnosticUiForSymbols(
+      prisma,
+      rows.map((r) => r.symbol),
+      rsSession
+    );
+    return {
+      panel: buildRsNearMissWatchlistPanel(rows, rsMap, earlyEntryBySymbol),
+      rowsForSnapshot: rows,
+      tradabilityCount: tradabilityPassedCount,
+      uiMap: rsMap,
+    };
+  } catch (e) {
+    console.error("[dashboard] RS near-miss watchlist failed:", e);
+    return empty;
+  }
+}
+
+export default async function DashboardPage() {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
+  // Tier 1 — independent of everything except the session; run together.
+  const [tradesResult, [regime, marketSnapshot], latestScanResult, activeWatchItemsResult] =
+    await Promise.all([
+      loadTrades(session.userId),
+      Promise.all([getMarketRegimeFromDb("VNINDEX"), fetchMarketSessionSnapshot(prisma)]),
+      loadLatestScan(),
+      loadActiveWatchItems(),
+    ]);
+  const trades = tradesResult.data;
+  const latestScan = latestScanResult.data;
+  const activeWatchItems = activeWatchItemsResult.data;
+
+  const alignmentAnalysis = analyzeMarketDataAlignment(marketSnapshot);
+  const scanNotes = parseDailyScanGate2Notes(latestScan?.notes ?? null);
+  const freshness = buildMarketFreshnessDto({
+    snapshot: marketSnapshot,
+    alignment: alignmentAnalysis,
+    delayedBackdropFromScanNotes: scanNotes?.benchmarkBackdrop?.delayedBackdrop === true,
+    scanSessionCoverage: scanNotes?.sessionCoverage ?? null,
+  });
+  const rawCandidates = toCandidateRows(latestScan);
+  const evalDate =
+    rawCandidates.length > 0
+      ? rawCandidates.reduce(
+          (latestDate, c) => (c.barDate > latestDate ? c.barDate : latestDate),
+          rawCandidates[0]!.barDate
+        )
+      : latestScan?.runAt ?? new Date();
+  const openTrades = trades.filter((t) => t.status === "OPEN");
+  const currentExposure = openTrades.reduce((sum, t) => sum + t.entryPrice * t.quantity, 0);
   const accountEquityVnd = parseTradingAccountEquityVnd();
   const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
 
-  const rsSession =
-    marketSnapshot.benchmarkSessionDate ??
-    (rawCandidates.length > 0 ? evalDate : null);
-  let rsDiagnosticsBySymbol: Record<string, RsDiagnosticUi> | undefined;
-  if (rsSession) {
-    const rsSymbols = [
-      ...new Set([
-        ...candidatesWithHealth.map((c) => c.symbolKey),
-        ...(scanNotes?.closestToValidSymbols ?? [])
-          .slice(0, 12)
-          .map((r) => r.symbol),
-      ]),
-    ];
-    if (rsSymbols.length > 0) {
-      try {
-        const rsMap = await loadRsDiagnosticUiForSymbols(
-          prisma,
-          rsSymbols,
-          rsSession
-        );
-        rsDiagnosticsBySymbol = {};
-        for (const [sym, ui] of rsMap) {
-          if (ui) rsDiagnosticsBySymbol[sym] = ui;
-        }
-      } catch (e) {
-        console.error("[dashboard] RS diagnostic load failed:", e);
-      }
-    }
-  }
+  // Tier 2 — each depends only on Tier 1 results, independent of each other.
+  const [marketContext, candidatesHealthResult, latestCloseBySymbol] = await Promise.all([
+    loadMarketContext(freshness.benchmarkDate, rawCandidates, scanNotes),
+    loadCandidatesWithHealth(rawCandidates, evalDate),
+    loadLatestCloseBySymbol(activeWatchItems),
+  ]);
+  const candidatesWithHealth = candidatesHealthResult.data;
+  const topSetups = candidatesWithHealth.slice(0, 5);
 
-  let rsNearMissWatchlist = buildRsNearMissWatchlistPanel([]);
-  let rsWatchlistRowsForSnapshot: Awaited<
-    ReturnType<typeof computeRsNearMissWatchlistFromDb>
-  >["rows"] = [];
-  let rsWatchlistTradabilityCount = 0;
-  let rsWatchlistUiMap: Map<string, RsDiagnosticUi | null> | undefined;
-  if (rsSession) {
-    try {
-      const excludeSymbols = candidatesWithHealth.map((c) => c.symbolKey);
-      const { rows, tradabilityPassedCount, earlyEntryBySymbol } =
-        await computeRsNearMissWatchlistFromDb(
-        prisma,
-        {
-          limit: 12,
-          excludeSymbols,
-        }
-      );
-      rsWatchlistRowsForSnapshot = rows;
-      rsWatchlistTradabilityCount = tradabilityPassedCount;
-      const rsMap = await loadRsDiagnosticUiForSymbols(
-        prisma,
-        rows.map((r) => r.symbol),
-        rsSession
-      );
-      rsWatchlistUiMap = rsMap;
-      rsNearMissWatchlist = buildRsNearMissWatchlistPanel(rows, rsMap, earlyEntryBySymbol);
-    } catch (e) {
-      console.error("[dashboard] RS near-miss watchlist failed:", e);
-    }
-  }
+  const rsSession =
+    marketSnapshot.benchmarkSessionDate ?? (rawCandidates.length > 0 ? evalDate : null);
+
+  // Tier 3 — both depend on candidatesWithHealth/rsSession, independent of each other.
+  const [rsDiagnosticsBySymbol, rsNearMiss] = await Promise.all([
+    loadRsDiagnosticsBySymbol(candidatesWithHealth, scanNotes, rsSession),
+    loadRsNearMiss(candidatesWithHealth, rsSession),
+  ]);
+  const rsNearMissWatchlist = rsNearMiss.panel;
+
+  const dbLoadError =
+    tradesResult.error ??
+    latestScanResult.error ??
+    candidatesHealthResult.error ??
+    activeWatchItemsResult.error ??
+    null;
 
   const cockpitDto = buildDecisionCockpitDto(
     buildDashboardCockpitInput({
@@ -258,22 +291,31 @@ export default async function DashboardPage() {
     })
   );
 
+  // Snapshot persistence is a write with no effect on the rendered response —
+  // schedule it after the response is sent instead of blocking on it.
   if (
     isRsWatchlistSnapshotEnabled() &&
     rsSession &&
-    rsWatchlistRowsForSnapshot.length > 0
+    rsNearMiss.rowsForSnapshot.length > 0
   ) {
-    try {
-      await persistRsWatchlistSnapshot(prisma, {
-        sessionDate: rsSession,
-        rows: rsWatchlistRowsForSnapshot,
-        verdictUxLevel: cockpitDto.verdict.uxLevel.value,
-        tradabilityPassedCount: rsWatchlistTradabilityCount,
-        rsUiBySymbol: rsWatchlistUiMap,
-      });
-    } catch (e) {
-      console.error("[dashboard] RS watchlist snapshot failed:", e);
-    }
+    const sessionDate = rsSession;
+    const rowsForSnapshot = rsNearMiss.rowsForSnapshot;
+    const tradabilityCount = rsNearMiss.tradabilityCount;
+    const uiMap = rsNearMiss.uiMap;
+    const verdictUxLevel = cockpitDto.verdict.uxLevel.value;
+    after(async () => {
+      try {
+        await persistRsWatchlistSnapshot(prisma, {
+          sessionDate,
+          rows: rowsForSnapshot,
+          verdictUxLevel,
+          tradabilityPassedCount: tradabilityCount,
+          rsUiBySymbol: uiMap,
+        });
+      } catch (e) {
+        console.error("[dashboard] RS watchlist snapshot failed:", e);
+      }
+    });
   }
 
   const viewModel = mapDashboardV3ViewModel({

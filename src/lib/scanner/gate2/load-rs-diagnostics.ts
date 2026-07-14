@@ -1,4 +1,6 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import { fetchStockBarsGroupedAscThroughDate } from "@/lib/setup-health/load-bars";
+import { TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS } from "@/lib/scanner/tradability-constants";
 import type { Gate2BarInput } from "./types";
 import {
   computeRelativeStrengthDiagnostic,
@@ -73,20 +75,17 @@ export async function loadRsDiagnosticsForSymbols(
     select: { id: true, symbol: true },
   });
 
+  const fromDate = new Date(sessionDate);
+  fromDate.setUTCDate(fromDate.getUTCDate() - TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS);
+  const barsBySymbolId = await fetchStockBarsGroupedAscThroughDate(
+    prisma,
+    symbolRows.map((r) => r.id),
+    sessionDate,
+    fromDate
+  );
+
   for (const { id, symbol } of symbolRows) {
-    const stockRows = await prisma.stockDailyBar.findMany({
-      where: { symbolId: id },
-      orderBy: { date: "asc" },
-      select: {
-        date: true,
-        open: true,
-        high: true,
-        low: true,
-        close: true,
-        volume: true,
-      },
-    });
-    const stockBars = toGate2Bars(stockRows);
+    const stockBars = toGate2Bars(barsBySymbolId.get(id) ?? []);
     out.set(
       symbol,
       computeRelativeStrengthDiagnostic(stockBars, index, sessionDate)

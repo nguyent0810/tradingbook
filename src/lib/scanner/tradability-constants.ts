@@ -17,6 +17,13 @@ export const TRADABILITY_MIN_CLOSE_VND = 10_000;
 export const TRADABILITY_ROLLING_DAYS = 20;
 
 /**
+ * Calendar-day lookback used when batch-fetching bars for tradability/RS evaluation
+ * (comfortable margin above `TRADABILITY_MIN_BARS` trading days, accounting for
+ * weekends, VN holidays, and the max allowed suspension gap).
+ */
+export const TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS = 300;
+
+/**
  * Fail if any consecutive pair of bar dates (after sort/dedupe) is separated by more
  * than this many **calendar** days — long suspension / bad series. No weekday-aggregate rule.
  */

@@ -1,18 +1,23 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { OhlcvBar } from "./types";
 
-/** Daily bars per symbol, ascending date, through `throughDate` inclusive. */
+/**
+ * Daily bars per symbol, ascending date, through `throughDate` inclusive.
+ * Pass `fromDate` to bound the lower end (e.g. a rolling-window evaluation
+ * that only needs the last N trading days) — omit for full history.
+ */
 export async function fetchStockBarsGroupedAscThroughDate(
   prisma: PrismaClient,
   symbolIds: readonly string[],
-  throughDate: Date
+  throughDate: Date,
+  fromDate?: Date
 ): Promise<Map<string, OhlcvBar[]>> {
   if (symbolIds.length === 0) return new Map();
 
   const rows = await prisma.stockDailyBar.findMany({
     where: {
       symbolId: { in: [...symbolIds] },
-      date: { lte: throughDate },
+      date: fromDate ? { gte: fromDate, lte: throughDate } : { lte: throughDate },
     },
     orderBy: [{ symbolId: "asc" }, { date: "asc" }],
     select: {
