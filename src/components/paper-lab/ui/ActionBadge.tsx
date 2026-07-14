@@ -1,4 +1,5 @@
 import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
+import { Badge } from "@/components/ui/badge";
 import "../paper-lab-workstation.css";
 
 const ACTION_CLASS: Record<string, string> = {
@@ -12,8 +13,8 @@ const ACTION_CLASS: Record<string, string> = {
 
 export function ActionBadge({ action }: { action: AgentAction | string }) {
   return (
-    <span className={`paper-lab-action-badge ${ACTION_CLASS[action] ?? "paper-lab-action--hold"}`}>
+    <Badge bare className={`paper-lab-action-badge ${ACTION_CLASS[action] ?? "paper-lab-action--hold"}`}>
       {action}
-    </span>
+    </Badge>
   );
 }
