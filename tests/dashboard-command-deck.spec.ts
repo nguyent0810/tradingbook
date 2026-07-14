@@ -38,4 +38,27 @@ test.describe("Dashboard Decision Cockpit — production route smoke", () => {
     // Guard against the retired cyber dashboard ever reappearing.
     await expect(page.getByTestId("dashboard-cyber")).toHaveCount(0);
   });
+
+  test("Book snapshot performance panel loads after expanding (regression: previously stuck on loading skeleton in dev)", async ({
+    page,
+  }) => {
+    await page.goto("/dashboard");
+    await page.waitForURL("**/dashboard");
+
+    const bookSnapshot = page.getByTestId("dashboard-book-snapshot");
+    await expect(bookSnapshot).toBeVisible();
+
+    // Native <details> starts collapsed — expand it to mount the lazy performance panel.
+    await bookSnapshot.locator("summary").click();
+
+    const panel = page.getByTestId("dashboard-performance-panel");
+    const empty = page.getByTestId("dashboard-performance-empty");
+
+    // Success or empty state must resolve — the panel must not remain frozen
+    // on its loading skeleton. Root cause: `next dev`'s HMR websocket was
+    // blocked by Next 16's allowedDevOrigins default, which silently broke
+    // client-side effect scheduling app-wide (see next.config.ts).
+    await expect(panel.or(empty)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByLabel("Loading performance panel")).toHaveCount(0);
+  });
 });
