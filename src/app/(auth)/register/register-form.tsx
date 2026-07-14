@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { register, type AuthState } from "@/app/actions/auth";
+import { Button } from "@/components/ui/button";
 
 export function RegisterForm() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
@@ -97,11 +98,11 @@ export function RegisterForm() {
         )}
       </div>
 
-      <button
+      <Button
         type="submit"
+        variant="auth"
         disabled={pending}
         aria-busy={pending}
-        className="cd-auth-btn"
         data-testid="register-submit"
       >
         {pending ? (
@@ -122,7 +123,7 @@ export function RegisterForm() {
         ) : (
           "Create account"
         )}
-      </button>
+      </Button>
     </form>
   );
 }
