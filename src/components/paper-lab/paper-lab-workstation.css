@@ -91,6 +91,10 @@
   overflow-x: auto;
   border-radius: 0.5rem;
   border: 1px solid rgba(148, 163, 184, 0.12);
+  /* Without this, a flex/grid ancestor sizes this wrapper to fit the table's
+     min-width instead of clamping it to available space, so overflow-x never
+     actually engages here and bleeds out to the page instead. */
+  min-width: 0;
 }
 
 .paper-lab-table {

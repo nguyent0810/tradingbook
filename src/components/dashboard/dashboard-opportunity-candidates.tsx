@@ -25,9 +25,18 @@ function healthLevelToBadgeTone(level: string): BadgeTone {
   }
 }
 
+const TIER_ACCENT: Record<OpportunityCandidateDto["quality"], string> = {
+  A: "var(--cd-success, var(--success))",
+  B: "var(--cd-warning, var(--warning))",
+};
+
 function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
   return (
-    <li className="dash-near-miss__card" data-testid={`dashboard-opportunity-${row.symbol}`}>
+    <li
+      className="dash-near-miss__card"
+      data-testid={`dashboard-opportunity-${row.symbol}`}
+      style={{ ["--dash-card-accent" as string]: TIER_ACCENT[row.quality] }}
+    >
       <div className="dash-near-miss__head">
         <span className="font-mono font-semibold">{row.symbol}</span>
         <Badge tone={row.quality === "A" ? "tier-a" : "tier-b"} size="compact">

@@ -3,6 +3,7 @@ import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { DecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
 import type { V3TradeGate } from "@/lib/dashboard/dashboard-v3-view-model";
+import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import { CommandDeckCollapsible } from "@/components/command-deck";
 import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
 import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
@@ -29,6 +30,7 @@ export type DashboardDecisionCockpitProps = {
   watchlistTruncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
   tradeGate: V3TradeGate;
+  vnindexHistory: VnindexHistoryPoint[];
 };
 
 /**
@@ -49,6 +51,7 @@ export function DashboardDecisionCockpit({
   watchlistTruncated = false,
   latestCloseBySymbol,
   tradeGate,
+  vnindexHistory,
 }: DashboardDecisionCockpitProps) {
   return (
     <DashboardEntrance>
@@ -61,6 +64,7 @@ export function DashboardDecisionCockpit({
           surfacedCount={surfacedCount}
           evidence={cockpitDto.evidence}
           blockers={cockpitDto.blockers}
+          vnindexHistory={vnindexHistory}
         />
       </div>
 

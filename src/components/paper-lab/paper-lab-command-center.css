@@ -111,13 +111,16 @@
   margin-bottom: 20px;
 }
 
-@media (min-width: 1280px) {
+/* Breakpoints offset by the app shell's left sidebar (~240px, see
+   .app-shell-sidebar in dashboard-shell.css) — these fixed-column layouts
+   need that much *content* width, not viewport width, to actually fit. */
+@media (min-width: 1520px) {
   .paper-lab-header-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 1440px) {
+@media (min-width: 1680px) {
   .paper-lab-header-grid {
     grid-template-columns: minmax(280px, 1fr) 300px 320px 340px;
   }
@@ -620,6 +623,10 @@
 
 .safe-table-wrap {
   overflow-x: auto;
+  /* Without this, a flex/grid ancestor sizes this wrapper to fit .safe-table's
+     920px min-width instead of clamping it to available space, so overflow-x
+     never actually engages here and bleeds out to the page instead. */
+  min-width: 0;
 }
 
 .safe-table {

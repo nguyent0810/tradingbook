@@ -14,24 +14,18 @@ function isNavActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavLinks({
-  variant,
-  pathname,
-}: {
-  variant: "desktop" | "mobile";
-  pathname: string;
-}) {
-  const base =
-    variant === "mobile" ? "app-shell-mobile-nav-link" : "app-shell-nav-link";
+/** Mobile primary nav — rendered between the header and main content (<768px). Desktop primary nav lives in `AppShellSidebar`. */
+export function AppShellNavMobile() {
+  const pathname = usePathname() ?? "";
   return (
-    <>
+    <nav className="app-shell-mobile-nav" aria-label="Primary mobile">
       {NAV_ITEMS.map(({ href, label, deck }) => {
         const active = isNavActive(pathname, href);
         return (
           <Link
             key={href}
             href={href}
-            className={active ? `${base} ${base}--active` : base}
+            className={active ? "app-shell-mobile-nav-link app-shell-mobile-nav-link--active" : "app-shell-mobile-nav-link"}
             aria-current={active ? "page" : undefined}
           >
             <span className="app-shell-nav-link__label">{label}</span>
@@ -39,26 +33,6 @@ function NavLinks({
           </Link>
         );
       })}
-    </>
-  );
-}
-
-/** Desktop primary nav — semantic Command Deck link row. */
-export function AppShellNavDesktop() {
-  const pathname = usePathname() ?? "";
-  return (
-    <nav className="app-shell-nav" aria-label="Primary">
-      <NavLinks variant="desktop" pathname={pathname} />
-    </nav>
-  );
-}
-
-/** Mobile primary nav — rendered between the header and main content. */
-export function AppShellNavMobile() {
-  const pathname = usePathname() ?? "";
-  return (
-    <nav className="app-shell-mobile-nav" aria-label="Primary mobile">
-      <NavLinks variant="mobile" pathname={pathname} />
     </nav>
   );
 }

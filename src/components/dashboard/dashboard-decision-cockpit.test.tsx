@@ -52,6 +52,7 @@ describe("DashboardDecisionCockpit", () => {
           topSetups: [],
           utilizationTone: "normal",
         })}
+        vnindexHistory={[]}
       />
     );
 
@@ -93,6 +94,7 @@ describe("DashboardDecisionCockpit", () => {
           topSetups: [],
           utilizationTone: "normal",
         })}
+        vnindexHistory={[]}
       />
     );
 
@@ -152,6 +154,7 @@ describe("DashboardDecisionCockpit", () => {
           topSetups: [],
           utilizationTone: "normal",
         })}
+        vnindexHistory={[]}
       />
     );
 

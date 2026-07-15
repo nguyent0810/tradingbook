@@ -28,6 +28,17 @@ export type PlaybookPerformance = {
   totalPnl: number;
 };
 
+export type TradeOutcomeCategory = "WIN" | "LOSS" | "BREAKEVEN";
+
+export type OutcomeBreakdownSlice = {
+  outcome: TradeOutcomeCategory;
+  label: string;
+  count: number;
+  totalPnl: number;
+  /** Share of closed trades, 0-100. */
+  pct: number;
+};
+
 export function computeAdvancedMetrics(trades: Trade[]): AdvancedMetrics {
   const closedTrades = trades.filter((t) => t.status === "CLOSED" && t.realizedPnl !== null);
   const totalTrades = closedTrades.length;
@@ -165,4 +176,47 @@ export function computePlaybookPerformance(trades: Trade[]): PlaybookPerformance
       };
     })
     .sort((a, b) => b.totalPnl - a.totalPnl);
+}
+
+const OUTCOME_LABELS: Record<TradeOutcomeCategory, string> = {
+  WIN: "Win",
+  LOSS: "Loss",
+  BREAKEVEN: "Breakeven",
+};
+
+/**
+ * Win/Loss/Breakeven split derived from `realizedPnl` sign — NOT the `Trade.outcome`
+ * enum field, which is never populated anywhere in this app today (no `prisma.trade.create/
+ * update` call exists in app code). Same derivation `computeAdvancedMetrics`/`computeEquityCurve`
+ * already use for win rate, so this stays consistent with those existing figures.
+ */
+export function computeOutcomeBreakdown(trades: Trade[]): OutcomeBreakdownSlice[] {
+  const closedTrades = trades.filter((t) => t.status === "CLOSED" && t.realizedPnl !== null);
+
+  const groups: Record<TradeOutcomeCategory, { count: number; pnl: number }> = {
+    WIN: { count: 0, pnl: 0 },
+    LOSS: { count: 0, pnl: 0 },
+    BREAKEVEN: { count: 0, pnl: 0 },
+  };
+
+  for (const t of closedTrades) {
+    const pnl = t.realizedPnl!;
+    const outcome: TradeOutcomeCategory = pnl > 0 ? "WIN" : pnl < 0 ? "LOSS" : "BREAKEVEN";
+    groups[outcome].count++;
+    groups[outcome].pnl += pnl;
+  }
+
+  const total = closedTrades.length;
+  return (Object.keys(groups) as TradeOutcomeCategory[])
+    .map((outcome) => {
+      const g = groups[outcome];
+      return {
+        outcome,
+        label: OUTCOME_LABELS[outcome],
+        count: g.count,
+        totalPnl: parseFloat(g.pnl.toFixed(2)),
+        pct: total > 0 ? parseFloat(((g.count / total) * 100).toFixed(2)) : 0,
+      };
+    })
+    .filter((slice) => slice.count > 0);
 }

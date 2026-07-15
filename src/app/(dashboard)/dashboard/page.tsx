@@ -19,6 +19,7 @@ import {
   parseTradingAccountEquityVnd,
 } from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
+import { fetchVnindexHistory } from "@/lib/market/fetch-vnindex-history";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { fetchMarketContextUi } from "@/lib/market/fetch-market-context-ui";
@@ -246,13 +247,19 @@ export default async function DashboardPage() {
   if (!session) redirect("/login");
 
   // Tier 1 — independent of everything except the session; run together.
-  const [tradesResult, [regime, marketSnapshot], latestScanResult, activeWatchItemsResult] =
-    await Promise.all([
-      loadTrades(session.userId),
-      Promise.all([getMarketRegimeFromDb("VNINDEX"), fetchMarketSessionSnapshot(prisma)]),
-      loadLatestScan(),
-      loadActiveWatchItems(),
-    ]);
+  const [
+    tradesResult,
+    [regime, marketSnapshot],
+    latestScanResult,
+    activeWatchItemsResult,
+    vnindexHistory,
+  ] = await Promise.all([
+    loadTrades(session.userId),
+    Promise.all([getMarketRegimeFromDb("VNINDEX"), fetchMarketSessionSnapshot(prisma)]),
+    loadLatestScan(),
+    loadActiveWatchItems(),
+    fetchVnindexHistory(prisma, 30),
+  ]);
   const trades = tradesResult.data;
   const latestScan = latestScanResult.data;
   const watchlistTruncated = activeWatchItemsResult.data.length > 20;
@@ -403,6 +410,7 @@ export default async function DashboardPage() {
         watchlistTruncated={watchlistTruncated}
         latestCloseBySymbol={latestCloseBySymbol}
         tradeGate={viewModel.risk.tradeGate}
+        vnindexHistory={vnindexHistory}
       />
     </div>
   );
