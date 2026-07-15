@@ -113,7 +113,7 @@ export function DashboardNearMissRejectionsPanel({
               <NearMissCard key={row.symbol} row={row} />
             ))}
           </ul>
-          <p className="dash-near-miss__footer text-xs" style={{ color: "var(--text-tertiary)" }}>
+          <p className="dash-near-miss__footer text-xs">
             Full rejection buckets and symbol lists are on{" "}
             <Link href="/setups" className="dash-v2-link">
               Setups pipeline

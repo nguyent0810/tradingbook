@@ -669,6 +669,16 @@
   line-height: var(--line-height-tight);
 }
 
+.dash-decision-hero__subtitle {
+  margin-top: var(--space-1);
+  color: var(--text-secondary);
+}
+
+.dash-decision-hero__persisted-note {
+  margin-top: var(--space-1);
+  color: var(--text-tertiary);
+}
+
 .dash-decision-hero__allocation {
   margin-top: var(--space-2);
   font-size: var(--font-size-sm);
@@ -1908,6 +1918,59 @@
   color: var(--text-secondary);
 }
 
+.dash-near-miss__rs {
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-primary);
+}
+
+.dash-near-miss__footer {
+  margin-top: var(--space-3);
+  color: var(--text-tertiary);
+}
+
+/*
+ * RS diagnostic (Relative strength vs VNINDEX) — shared component
+ * (src/components/scanner/relative-strength-diagnostic-panel.tsx) used inside
+ * near-miss cards, opportunity candidate cards, and the /setups RS panels.
+ * Had ZERO styling anywhere in the repo before this pass — rendered as a bare
+ * text blob regardless of which "restyled" card contained it.
+ */
+.rs-diagnostic {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
+}
+
+.rs-diagnostic--compact {
+  padding: var(--space-2);
+}
+
+.rs-diagnostic__title {
+  margin-bottom: var(--space-1);
+  color: var(--text-tertiary);
+}
+
+.rs-diagnostic__summary {
+  color: var(--text-primary);
+}
+
+.rs-diagnostic__lines {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  color: var(--text-secondary);
+}
+
+.rs-diagnostic__unavailable {
+  color: var(--text-tertiary);
+}
+
+.rs-diagnostic__disclaimer {
+  padding-top: var(--space-1);
+  border-top: 1px solid var(--border-primary);
+}
+
 /* Trade gate ("Why not Go?") — had NO styling at all before this pass;
    rendered as an unstyled <ul> despite the outer card looking finished. */
 .dash-trade-gate__subtitle {
@@ -2128,6 +2191,11 @@
   justify-content: space-between;
   gap: var(--space-6);
   padding-bottom: var(--space-2);
+}
+
+.dash-cockpit--v2 .dash-v2-page-header__copy {
+  min-width: 0;
+  flex: 1 1 320px;
 }
 
 .dash-cockpit--v2 .dash-v2-page-header__title {
