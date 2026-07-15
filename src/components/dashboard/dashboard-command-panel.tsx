@@ -5,10 +5,14 @@ import type {
   EvidenceChipDto,
   VerdictDto,
 } from "@/lib/dashboard/decision-cockpit-dto";
+import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
+import { resolveHostilityGauge } from "@/lib/dashboard/hostility-gauge";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
 import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
+import { DashboardVnindexTrendChart } from "@/components/dashboard/dashboard-vnindex-trend-chart";
+import { DashboardHostilityGauge } from "@/components/dashboard/dashboard-hostility-gauge";
 
 export type DashboardCommandPanelProps = {
   freshness: MarketFreshnessDto;
@@ -18,6 +22,7 @@ export type DashboardCommandPanelProps = {
   surfacedCount: number;
   evidence: EvidenceChipDto[];
   blockers: ActionableBlockerDto[];
+  vnindexHistory: VnindexHistoryPoint[];
 };
 
 export function DashboardCommandPanel({
@@ -28,7 +33,10 @@ export function DashboardCommandPanel({
   surfacedCount,
   evidence,
   blockers,
+  vnindexHistory,
 }: DashboardCommandPanelProps) {
+  const gauge = resolveHostilityGauge(verdict.gate1Resolution.canonical);
+
   return (
     <section
       className="dash-v2-command command-deck-panel"
@@ -50,8 +58,14 @@ export function DashboardCommandPanel({
         />
       </div>
 
-      <div className="command-deck-panel__verdict">
-        <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} />
+      <div className="command-deck-panel__hero-row">
+        <div className="command-deck-panel__verdict">
+          <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} />
+        </div>
+        <div className="command-deck-panel__hero-charts">
+          <DashboardVnindexTrendChart history={vnindexHistory} />
+          <DashboardHostilityGauge gauge={gauge} />
+        </div>
       </div>
 
       <div className="dash-v2-proof-foot">

@@ -2,9 +2,20 @@
 
 import type { Trade } from "@/generated/prisma/client";
 import { formatVND } from "@/lib/formatters";
-import { computeAdvancedMetrics, computeEquityCurve } from "@/lib/analytics";
-import { Area, AreaChart, Tooltip } from "recharts";
+import {
+  computeAdvancedMetrics,
+  computeEquityCurve,
+  computeOutcomeBreakdown,
+  type TradeOutcomeCategory,
+} from "@/lib/analytics";
+import { Area, AreaChart, Cell, Pie, PieChart, Tooltip } from "recharts";
 import { ChartFrame, ChartPlot } from "@/components/command-deck";
+
+const OUTCOME_COLOR: Record<TradeOutcomeCategory, string> = {
+  WIN: "var(--cd-pnl-pos)",
+  LOSS: "var(--cd-pnl-neg)",
+  BREAKEVEN: "var(--cd-neutral)",
+};
 
 export type DashboardPerformancePanelProps = {
   trades: Trade[];
@@ -14,6 +25,7 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
   const metrics = computeAdvancedMetrics(trades);
   const curve = computeEquityCurve(trades);
   const recent = curve.slice(-24);
+  const outcomeBreakdown = computeOutcomeBreakdown(trades);
   const gradientId = "dashboardPerfPnlGrad";
 
   return (
@@ -130,6 +142,62 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
                   />
                 </AreaChart>
               </ChartPlot>
+            </ChartFrame>
+          ) : null}
+          {outcomeBreakdown.length > 0 ? (
+            <ChartFrame
+              testId="dashboard-outcome-donut"
+              title="Win / Loss / Breakeven"
+              description="Closed trades, by outcome"
+              height="compact"
+              className="dash-performance__donut"
+            >
+              <ChartPlot height={140}>
+                <PieChart>
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const slice = payload[0]?.payload as
+                        | (typeof outcomeBreakdown)[number]
+                        | undefined;
+                      if (!slice) return null;
+                      return (
+                        <div className="chart-frame__tooltip">
+                          <p className="chart-frame__tooltip-label">{slice.label}</p>
+                          <p className="chart-frame__tooltip-value tabular-nums">
+                            {slice.count} trade{slice.count === 1 ? "" : "s"} ({slice.pct}%)
+                          </p>
+                        </div>
+                      );
+                    }}
+                  />
+                  <Pie
+                    data={outcomeBreakdown}
+                    dataKey="count"
+                    nameKey="label"
+                    innerRadius={40}
+                    outerRadius={60}
+                    paddingAngle={2}
+                    isAnimationActive={false}
+                  >
+                    {outcomeBreakdown.map((slice) => (
+                      <Cell key={slice.outcome} fill={OUTCOME_COLOR[slice.outcome]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ChartPlot>
+              <ul className="dash-performance__donut-legend">
+                {outcomeBreakdown.map((slice) => (
+                  <li key={slice.outcome}>
+                    <span
+                      className="dash-performance__donut-dot"
+                      style={{ background: OUTCOME_COLOR[slice.outcome] }}
+                      aria-hidden="true"
+                    />
+                    {slice.label} {slice.pct}%
+                  </li>
+                ))}
+              </ul>
             </ChartFrame>
           ) : null}
         </>

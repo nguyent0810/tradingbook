@@ -78,4 +78,26 @@ describe("DashboardPerformancePanel", () => {
     );
     expect(multiple).toContain('data-testid="dashboard-equity-sparkline"');
   });
+
+  it("renders the win/loss/breakeven donut with closed trades", () => {
+    const html = renderToStaticMarkup(
+      <DashboardPerformancePanel
+        trades={[
+          trade({ id: "t1", realizedPnl: 2000 }),
+          trade({ id: "t2", realizedPnl: -500 }),
+        ]}
+      />
+    );
+    expect(html).toContain('data-testid="dashboard-outcome-donut"');
+    expect(html).toContain("Win / Loss / Breakeven");
+    expect(html).toContain("Win 50%");
+    expect(html).toContain("Loss 50%");
+  });
+
+  it("omits the donut when there are no closed trades", () => {
+    const html = renderToStaticMarkup(
+      <DashboardPerformancePanel trades={[trade({ status: "OPEN", exitDate: null, realizedPnl: null })]} />
+    );
+    expect(html).not.toContain('data-testid="dashboard-outcome-donut"');
+  });
 });

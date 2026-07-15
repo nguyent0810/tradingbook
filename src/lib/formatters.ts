@@ -10,6 +10,12 @@ export function formatEquityThousandVndPerShare(
   return `${s}k ₫`;
 }
 
+/** Whole-number percent, e.g. `formatPercent(42.3)` → "42%". */
+export function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value) + "%";
+}
+
 /** Session / bar calendar date in UTC (long form). */
 export function formatBarDataDateUtcLong(date: Date): string {
   return new Intl.DateTimeFormat("en-US", {
