@@ -226,8 +226,13 @@ export type OpportunityNearMissDto = {
   rsDiagnostic: RsDiagnosticUi | null;
   actionHint: string;
   provenance: DataProvenance;
-  /** Gate 2 rank score at time of scan — real, already-computed value (not a new metric). */
-  rankScore: number;
+  /**
+   * Gate 2 "how close to valid" pipeline-depth score (stageRank*100 + reasonLineCount).
+   * NOT the same field as `OpportunityCandidateDto.rankScore` — INVALID-quality
+   * evaluations always have `rankScore` hardcoded to 0 (see gate2/breakout-pullback.ts
+   * `invalidBase()`), so near-miss rows must rank on `partialPipelineScore` instead.
+   */
+  partialPipelineScore: number;
 };
 
 export type OpportunityBoardDto = {
@@ -937,7 +942,7 @@ function buildOpportunityBoard(
           rsDiagnostic: rsFor(row.symbol),
           actionHint: nearMissDiagnosticActionHint(status),
           provenance: "real",
-          rankScore: row.rankScore,
+          partialPipelineScore: row.partialPipelineScore,
         };
       }),
       emptyReason: null,

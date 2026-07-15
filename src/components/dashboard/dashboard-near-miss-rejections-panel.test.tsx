@@ -16,17 +16,17 @@ function nearMissRow(overrides: Partial<OpportunityNearMissDto> = {}): Opportuni
     rsDiagnostic: null,
     actionHint: "Not a trade signal — watch only",
     provenance: "real",
-    rankScore: 64,
+    partialPipelineScore: 64,
     ...overrides,
   };
 }
 
 describe("DashboardNearMissRejectionsPanel", () => {
-  it("renders the rank score badge for each near-miss card", () => {
+  it("renders the pipeline-depth score badge for each near-miss card", () => {
     const opportunity: OpportunityBoardDto = {
       mode: "near_miss",
       candidates: [],
-      nearMiss: [nearMissRow({ symbol: "ABB", rankScore: 64.4 })],
+      nearMiss: [nearMissRow({ symbol: "ABB", partialPipelineScore: 64.4 })],
       emptyReason: null,
     };
 
