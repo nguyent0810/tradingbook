@@ -1937,9 +1937,9 @@
  */
 .rs-diagnostic {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-primary);
+  border: 1px solid var(--border-secondary);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
+  background: var(--bg-hover);
 }
 
 .rs-diagnostic--compact {
