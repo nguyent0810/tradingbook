@@ -48,6 +48,13 @@ function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
         <span className="dash-chip dash-chip--muted text-xs">
           {formatSetupLadderStageLabel(row.ladderStage)}
         </span>
+        <span
+          className="dash-near-miss__score tabular-nums"
+          data-testid={`dashboard-opportunity-score-${row.symbol}`}
+          title="Gate 2 rank score at time of scan"
+        >
+          {Math.round(row.rankScore)}
+        </span>
       </div>
       {row.rankSummary ? <p className="dash-near-miss__note text-sm font-medium">{row.rankSummary}</p> : null}
       {row.primaryReasons.length > 0 ? (

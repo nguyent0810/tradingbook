@@ -1,11 +1,23 @@
 import Link from "next/link";
-import type { OpportunityBoardDto, OpportunityNearMissDto } from "@/lib/dashboard/decision-cockpit-dto";
+import type {
+  OpportunityBoardDto,
+  OpportunityNearMissDto,
+  SetupLadderStage,
+} from "@/lib/dashboard/decision-cockpit-dto";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import { rejectionBucketLabel } from "@/lib/scanner/setups-trader-copy";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 
 export type DashboardNearMissRejectionsPanelProps = {
   opportunity: OpportunityBoardDto;
+};
+
+/** Near-miss cards have no quality tier — accent by ladder stage instead. */
+const LADDER_ACCENT: Partial<Record<SetupLadderStage, string>> = {
+  watch: "var(--cd-warning, var(--warning))",
+  extended: "var(--cd-warning, var(--warning))",
+  invalid: "var(--cd-text-dim, var(--text-tertiary))",
+  avoid: "var(--cd-danger, var(--danger))",
 };
 
 function nearMissTraderNote(row: OpportunityNearMissDto): string | null {
@@ -26,7 +38,11 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
       : null;
 
   return (
-    <li className="dash-near-miss__card" data-testid={`dashboard-near-miss-${row.symbol}`}>
+    <li
+      className="dash-near-miss__card"
+      data-testid={`dashboard-near-miss-${row.symbol}`}
+      style={{ ["--dash-card-accent" as string]: LADDER_ACCENT[row.ladderStage] ?? "var(--border-primary)" }}
+    >
       <div className="dash-near-miss__head">
         <span className="font-mono font-semibold">{row.symbol}</span>
         <span
@@ -37,6 +53,13 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
         </span>
         <span className="dash-chip dash-chip--muted text-xs">
           {rejectionBucketLabel(row.terminalCategory)}
+        </span>
+        <span
+          className="dash-near-miss__score tabular-nums"
+          data-testid={`dashboard-near-miss-score-${row.symbol}`}
+          title="Gate 2 rank score at time of scan"
+        >
+          {Math.round(row.rankScore)}
         </span>
       </div>
       {note ? <p className="dash-near-miss__note text-sm font-medium">{note}</p> : null}

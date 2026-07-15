@@ -17,6 +17,12 @@ export type DashboardExposurePanelProps = {
   markToMarketExposure: MarkToMarketExposureDto;
 };
 
+const STANCE_TONE: Record<VerdictDto["uxLevel"]["value"], string> = {
+  NO_TRADE: "dash-exposure__stance-box--danger",
+  PROBE: "dash-exposure__stance-box--warning",
+  TRADE: "dash-exposure__stance-box--success",
+};
+
 export function DashboardExposurePanel({
   risk,
   verdict,
@@ -52,7 +58,10 @@ export function DashboardExposurePanel({
         </p>
       ) : null}
 
-      <p className="dash-exposure__stance" data-testid="dashboard-exposure-stance">
+      <p
+        className={`dash-exposure__stance-box ${STANCE_TONE[verdict.uxLevel.value]}`}
+        data-testid="dashboard-exposure-stance"
+      >
         {risk.stanceCopy.value}
       </p>
 
