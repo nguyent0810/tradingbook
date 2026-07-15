@@ -886,6 +886,26 @@
   color: var(--text-secondary);
 }
 
+.dash-exposure__stance-box {
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-left: 3px solid var(--dash-stance-color, var(--border-primary));
+  background: color-mix(in srgb, var(--dash-stance-color, var(--border-primary)) 12%, transparent);
+  color: var(--text-primary);
+}
+.dash-exposure__stance-box--danger {
+  --dash-stance-color: var(--cd-danger, var(--danger));
+}
+.dash-exposure__stance-box--warning {
+  --dash-stance-color: var(--cd-warning, var(--warning));
+}
+.dash-exposure__stance-box--success {
+  --dash-stance-color: var(--cd-success, var(--success));
+}
+
 .dash-exposure__gate1-live {
   font-weight: 500;
   color: var(--text-tertiary);
@@ -1866,6 +1886,18 @@
   margin-bottom: var(--space-2);
 }
 
+.dash-near-miss__score {
+  margin-left: auto;
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--dash-card-accent, var(--border-primary)) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--dash-card-accent, var(--border-primary)) 45%, transparent);
+}
+
 .dash-near-miss__note {
   color: var(--accent-text);
   margin-bottom: var(--space-1);
@@ -1874,6 +1906,72 @@
 .dash-near-miss__wait,
 .dash-near-miss__meta {
   color: var(--text-secondary);
+}
+
+/* Trade gate ("Why not Go?") — had NO styling at all before this pass;
+   rendered as an unstyled <ul> despite the outer card looking finished. */
+.dash-trade-gate__subtitle {
+  margin-bottom: var(--space-2);
+}
+.dash-trade-gate__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.dash-trade-gate__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  border-left: 3px solid var(--dash-gate-color, var(--border-primary));
+  background: var(--bg-elevated);
+}
+.dash-trade-gate__row--blocked {
+  --dash-gate-color: var(--cd-danger, var(--danger));
+}
+.dash-trade-gate__row--waiting {
+  --dash-gate-color: var(--cd-warning, var(--warning));
+}
+.dash-trade-gate__row--setup_needed {
+  --dash-gate-color: var(--cd-text-dim, var(--text-tertiary));
+}
+.dash-trade-gate__row--ready {
+  --dash-gate-color: var(--cd-success, var(--success));
+}
+.dash-trade-gate__rule {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+.dash-trade-gate__action {
+  margin-left: auto;
+  color: var(--text-tertiary);
+}
+
+.dash-portfolio-guardrails__hint {
+  margin-top: var(--space-2);
+}
+.dash-portfolio-guardrails__duplicates {
+  list-style: none;
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+.dash-portfolio-guardrails__duplicates li {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border-left: 2px solid var(--cd-warning, var(--warning));
 }
 
 .dash-integrity-notes {

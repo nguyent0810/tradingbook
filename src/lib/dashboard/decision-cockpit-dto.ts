@@ -209,6 +209,8 @@ export type OpportunityCandidateDto = {
   rsDiagnostic: RsDiagnosticUi | null;
   actionHint: string;
   provenance: DataProvenance;
+  /** Gate 2 rank score at time of scan — same value backing rankSummary's text. */
+  rankScore: number;
 };
 
 export type OpportunityNearMissDto = {
@@ -224,6 +226,8 @@ export type OpportunityNearMissDto = {
   rsDiagnostic: RsDiagnosticUi | null;
   actionHint: string;
   provenance: DataProvenance;
+  /** Gate 2 rank score at time of scan — real, already-computed value (not a new metric). */
+  rankScore: number;
 };
 
 export type OpportunityBoardDto = {
@@ -892,6 +896,7 @@ function buildOpportunityBoard(
           healthSummary: summary,
           primaryReasons: reasons,
           rankSummary: c.rankSummary,
+          rankScore: c.rankScore,
           rsDiagnostic: rsFor(c.symbolKey),
           actionHint,
           provenance: "derived",
@@ -932,6 +937,7 @@ function buildOpportunityBoard(
           rsDiagnostic: rsFor(row.symbol),
           actionHint: nearMissDiagnosticActionHint(status),
           provenance: "real",
+          rankScore: row.rankScore,
         };
       }),
       emptyReason: null,

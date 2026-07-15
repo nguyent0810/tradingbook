@@ -13,6 +13,7 @@ function candidate(overrides: Partial<OpportunityCandidateDto> = {}): Opportunit
     healthSummary: "Setup is healthy and holding the breakout level.",
     primaryReasons: ["Breakout confirmed", "Volume expansion"],
     rankSummary: "Strong (88)",
+    rankScore: 88,
     rsDiagnostic: null,
     actionHint: "Log trade — entry confirmed",
     provenance: "real",

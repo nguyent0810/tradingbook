@@ -33,14 +33,16 @@ export function DashboardTradeGatePanel({ tradeGate }: DashboardTradeGatePanelPr
       </p>
       <ul className="dash-trade-gate__rows" data-testid="dashboard-trade-gate-rows">
         {tradeGate.rows.map((row) => (
-          <li key={row.id} className="dash-trade-gate__row" data-testid={`dashboard-trade-gate-row-${row.id}`}>
+          <li
+            key={row.id}
+            className={`dash-trade-gate__row dash-trade-gate__row--${row.status}`}
+            data-testid={`dashboard-trade-gate-row-${row.id}`}
+          >
             <Badge tone={STATUS_TONE[row.status]} size="compact">
               {row.statusLabel}
             </Badge>
             <span className="dash-trade-gate__rule">{row.rule}</span>
-            <span className="dash-trade-gate__action text-xs" style={{ color: "var(--text-tertiary)" }}>
-              {row.action}
-            </span>
+            <span className="dash-trade-gate__action text-xs">{row.action}</span>
           </li>
         ))}
       </ul>
