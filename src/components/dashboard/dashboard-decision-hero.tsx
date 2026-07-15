@@ -58,7 +58,6 @@ export function DashboardDecisionHero({
         <p
           className="dash-decision-hero__persisted-note text-xs"
           data-testid="dashboard-verdict-persisted-note"
-          style={{ color: "var(--text-tertiary)" }}
         >
           {verdict.persistedLevelNote.value}
         </p>
