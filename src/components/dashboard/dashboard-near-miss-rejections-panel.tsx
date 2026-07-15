@@ -69,6 +69,7 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
         <RelativeStrengthDiagnosticPanel
           diagnostic={row.rsDiagnostic}
           compact
+          detail="summary"
           testId={`dashboard-near-miss-rs-${row.symbol}`}
         />
       </div>

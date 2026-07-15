@@ -86,31 +86,33 @@ describe("closestExecutionActionHint", () => {
 });
 
 describe("compareClosestRowsExecutionOrder", () => {
-  it("sorts by distance to zone then rankScore", () => {
+  it("sorts by distance to zone first", () => {
+    // rankScore is intentionally identical (0) on every row — these are all
+    // INVALID-quality rows in production, where rankScore is always 0 (see
+    // gate2/breakout-pullback.ts invalidBase()), so it can never differentiate them.
     const rows = [
-      {
-        rankScore: 50,
-        close: 120,
-        pullbackZoneLow: 110,
-        pullbackZoneHigh: 115,
-      },
-      {
-        rankScore: 90,
-        close: 112,
-        pullbackZoneLow: 110,
-        pullbackZoneHigh: 115,
-      },
-      {
-        rankScore: 10,
-        close: 113,
-        pullbackZoneLow: 110,
-        pullbackZoneHigh: 115,
-      },
+      { rankScore: 0, close: 120, pullbackZoneLow: 110, pullbackZoneHigh: 115 },
+      { rankScore: 0, close: 108, pullbackZoneLow: 110, pullbackZoneHigh: 115 },
+      { rankScore: 0, close: 113, pullbackZoneLow: 110, pullbackZoneHigh: 115 },
     ];
     const sorted = [...rows].sort(compareClosestRowsExecutionOrder);
-    expect(sorted[0]!.close).toBe(112);
-    expect(sorted[1]!.close).toBe(113);
+    expect(sorted[0]!.close).toBe(113);
+    expect(sorted[1]!.close).toBe(108);
     expect(sorted[2]!.close).toBe(120);
+  });
+
+  it("does not use rankScore as a tie-breaker even when it varies (unrealistic input, but must not silently reorder on it)", () => {
+    const rows = [
+      { rankScore: 90, close: 112, pullbackZoneLow: 110, pullbackZoneHigh: 115, symbol: "BBB" },
+      { rankScore: 10, close: 112, pullbackZoneLow: 110, pullbackZoneHigh: 115, symbol: "AAA" },
+    ];
+    // Both rows tie on distance (0, both inside the zone) and have no
+    // partialPipelineScore/stageRank/reasonLineCount — falls all the way through
+    // to the final alphabetical-by-symbol tie-break, never to the (unused)
+    // differing rankScore. "AAA" (rankScore 10) sorts first despite the lower
+    // score, proving rankScore plays no part in the ordering.
+    const sorted = [...rows].sort(compareClosestRowsExecutionOrder);
+    expect(sorted.map((r) => r.symbol)).toEqual(["AAA", "BBB"]);
   });
 
   it("tie-breaks distance+rankScore with partialPipelineScore then symbol", () => {

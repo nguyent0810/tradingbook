@@ -215,7 +215,7 @@ export function DashboardExposurePanel({
           ))}
         </ul>
         <ul className="dash-exposure__caveats">
-          {headroom.caveats.map((line) => (
+          {headroom.caveats.slice(0, 3).map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
