@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildRsScoringMapFromEntries,
   computeRsScoringV1,
   computeRsStrengthScoreV1,
   isRsScoringV1Enabled,
   watchlistRsSpreadP90,
 } from "./rs-scoring-v1";
-import type { RsNearMissWatchlistRow } from "./rs-near-miss-watchlist";
+import type {
+  RsNearMissWatchlistEntryDto,
+  RsNearMissWatchlistRow,
+} from "./rs-near-miss-watchlist";
 
 function stubRow(overrides: Partial<RsNearMissWatchlistRow> = {}): RsNearMissWatchlistRow {
   return {
@@ -72,6 +76,48 @@ describe("rs-scoring-v1", () => {
       rsDiagnostic: null,
     });
     expect(near.setupReadinessScore).toBeGreaterThan(trend.setupReadinessScore);
+  });
+
+  describe("buildRsScoringMapFromEntries", () => {
+    function stubEntryDto(overrides: Partial<RsNearMissWatchlistEntryDto> = {}): RsNearMissWatchlistEntryDto {
+      return {
+        symbol: "VND",
+        sessionDate: "2026-05-28",
+        rs20SpreadPct: 11.6,
+        rs50SpreadPct: -0.2,
+        terminalCode: "pullback_zone_interaction",
+        failedGate2Because: "x",
+        topRejectionReason: "x",
+        stageRank: 58,
+        distanceToPullbackZoneFrac: 0.02,
+        lastVolume: null,
+        rsDiagnostic: null,
+        disclaimerLines: [],
+        actionHint: "Watch only",
+        ...overrides,
+      };
+    }
+
+    it("threads the DTO's real lastVolume through instead of pinning liquidity to a constant", () => {
+      const highVolume = buildRsScoringMapFromEntries([
+        stubEntryDto({ symbol: "HIGHVOL", lastVolume: 5_000_000 }),
+      ]).get("HIGHVOL")!;
+      const lowVolume = buildRsScoringMapFromEntries([
+        stubEntryDto({ symbol: "LOWVOL", lastVolume: 50_000 }),
+      ]).get("LOWVOL")!;
+
+      // Before the fix, every entry's liquidity component was pinned to the
+      // "unknown volume" constant (40) regardless of the DTO's real lastVolume,
+      // so this would have failed (both scores identical).
+      expect(highVolume.rsStrengthScore).toBeGreaterThan(lowVolume.rsStrengthScore);
+    });
+
+    it("falls back safely (no crash) when a DTO omits lastVolume entirely", () => {
+      const result = buildRsScoringMapFromEntries([
+        stubEntryDto({ symbol: "NOVOL", lastVolume: undefined }),
+      ]).get("NOVOL")!;
+      expect(Number.isFinite(result.rsStrengthScore)).toBe(true);
+    });
   });
 
   describe("watchlistRsSpreadP90", () => {

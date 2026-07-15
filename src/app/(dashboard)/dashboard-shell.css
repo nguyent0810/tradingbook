@@ -637,7 +637,7 @@
 }
 
 .dash-decision-hero--no-trade .dash-decision-hero__title {
-  color: #fbbf24;
+  color: var(--warning);
 }
 
 .dash-decision-hero--probe {
@@ -738,7 +738,7 @@
   margin-top: var(--space-2);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  color: #fbbf24;
+  color: var(--warning);
   line-height: var(--line-height-snug);
 }
 
@@ -1993,7 +1993,7 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border-primary);
   border-left: 3px solid var(--dash-gate-color, var(--border-primary));
-  background: var(--bg-elevated);
+  background: color-mix(in srgb, var(--bg-primary) 60%, transparent);
 }
 .dash-trade-gate__row--blocked {
   --dash-gate-color: var(--cd-danger, var(--danger));

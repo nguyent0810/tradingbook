@@ -58,7 +58,7 @@ function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
       </div>
       {row.rankSummary ? <p className="dash-near-miss__note text-sm font-medium">{row.rankSummary}</p> : null}
       {row.primaryReasons.length > 0 ? (
-        <p className="dash-near-miss__wait text-sm">{row.primaryReasons.join(" · ")}</p>
+        <p className="dash-near-miss__wait text-sm">{row.primaryReasons.slice(0, 2).join(" · ")}</p>
       ) : null}
       {row.healthSummary ? (
         <p className="dash-near-miss__meta text-xs">{row.healthSummary}</p>
@@ -70,6 +70,7 @@ function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
         <RelativeStrengthDiagnosticPanel
           diagnostic={row.rsDiagnostic}
           compact
+          detail="summary"
           testId={`dashboard-opportunity-rs-${row.symbol}`}
         />
       </div>

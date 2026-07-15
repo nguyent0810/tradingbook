@@ -100,11 +100,12 @@ export function hasExecutableBreakout(breakoutLevel: number): boolean {
 }
 
 export type ClosestRowSortInput = {
+  /** Kept for reference only — always 0 for INVALID rows, not used for sort order. */
   rankScore: number;
   close: number;
   pullbackZoneLow: number;
   pullbackZoneHigh: number;
-  /** Deterministic tie-breakers when distance + rankScore tie (avoids stable-sort artifact looking alphabetical). */
+  /** Deterministic tie-breakers when distance ties (avoids stable-sort artifact looking alphabetical). */
   symbol?: string;
   partialPipelineScore?: number;
   stageRank?: number;
@@ -116,14 +117,19 @@ function tieBreakerNum(v: number | undefined, fallback: number): number {
   return v !== undefined && Number.isFinite(v) ? v : fallback;
 }
 
-/** Sort: nearest to pullback zone first (lower distance fraction), then higher Gate 2 rankScore. */
+/**
+ * Sort: nearest to pullback zone first (lower distance fraction), then higher
+ * Gate 2 partialPipelineScore. `rankScore` is intentionally NOT a tie-breaker
+ * here — these are all INVALID-quality evaluations, and `rankScore` is
+ * hardcoded to 0 for every INVALID row (see `invalidBase()` in
+ * gate2/breakout-pullback.ts), so comparing it would always be a no-op.
+ */
 export function compareClosestRowsExecutionOrder(a: ClosestRowSortInput, b: ClosestRowSortInput): number {
   const da = computeDistanceToPullbackZoneFrac(a.close, a.pullbackZoneLow, a.pullbackZoneHigh);
   const db = computeDistanceToPullbackZoneFrac(b.close, b.pullbackZoneLow, b.pullbackZoneHigh);
   const na = Number.isNaN(da) ? Number.POSITIVE_INFINITY : da;
   const nb = Number.isNaN(db) ? Number.POSITIVE_INFINITY : db;
   if (na !== nb) return na - nb;
-  if (a.rankScore !== b.rankScore) return b.rankScore - a.rankScore;
 
   const pa = tieBreakerNum(a.partialPipelineScore, Number.NEGATIVE_INFINITY);
   const pb = tieBreakerNum(b.partialPipelineScore, Number.NEGATIVE_INFINITY);

@@ -98,6 +98,8 @@ export type RsNearMissWatchlistEntryDto = {
   topRejectionReason: string;
   stageRank: number;
   distanceToPullbackZoneFrac: number | null;
+  /** Feeds the RS-scoring-v1 liquidity component (feature-flagged, display-only). */
+  lastVolume?: number | null;
   rsDiagnostic: RsDiagnosticUi | null;
   disclaimerLines: readonly string[];
   actionHint: string;
@@ -265,6 +267,7 @@ export function toRsNearMissWatchlistEntryDto(
     topRejectionReason: row.topRejectionReason,
     stageRank: row.stageRank,
     distanceToPullbackZoneFrac: row.distanceToPullbackZoneFrac,
+    lastVolume: row.lastVolume,
     rsDiagnostic,
     disclaimerLines: [
       RS_NEAR_MISS_WATCHLIST_COPY.diagnosticOnly,

@@ -182,7 +182,7 @@ export function buildRsScoringMapFromEntries(
     stageRank: r.stageRank,
     distanceToPullbackZoneFrac: r.distanceToPullbackZoneFrac,
     rankScore: 0,
-    lastVolume: null,
+    lastVolume: r.lastVolume ?? null,
     rsDiagnosticSummary: r.rsDiagnostic?.summary ?? "",
   }));
 

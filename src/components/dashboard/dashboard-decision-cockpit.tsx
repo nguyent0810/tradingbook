@@ -85,13 +85,11 @@ export function DashboardDecisionCockpit({
 
         <div className="command-deck-opportunity__body dash-v2-zone__body">
           <div className="command-deck__opportunity-row">
-            <div className="dash-v2-card dash-v2-card--inset">
-              {cockpitDto.opportunity.mode === "candidates" ? (
-                <DashboardOpportunityCandidates opportunity={cockpitDto.opportunity} />
-              ) : (
-                <DashboardNearMissRejectionsPanel opportunity={cockpitDto.opportunity} />
-              )}
-            </div>
+            {cockpitDto.opportunity.mode === "candidates" ? (
+              <DashboardOpportunityCandidates opportunity={cockpitDto.opportunity} />
+            ) : (
+              <DashboardNearMissRejectionsPanel opportunity={cockpitDto.opportunity} />
+            )}
             <DashboardRiskRail
               risk={cockpitDto.risk}
               verdict={cockpitDto.verdict}
