@@ -3,8 +3,6 @@ import { labError, labJson } from "@/lib/lab/api-response";
 import { queryHallOfFame } from "@/lib/lab/hall-of-fame/detect-achievements";
 import type { HallOfFameAchievementType } from "@/generated/prisma/client";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);

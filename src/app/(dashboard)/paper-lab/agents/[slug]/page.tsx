@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import type { AgentDnaProfile } from "@/lib/lab/types/regime";
@@ -9,13 +10,12 @@ export const metadata: Metadata = {
   title: "Agent Profile | Arena",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function AgentProfilePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  await connection();
   const { slug } = await params;
   const agent = await prisma.paperAgent.findUnique({
     where: { slug },

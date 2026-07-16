@@ -19,7 +19,7 @@ import {
   parseTradingAccountEquityVnd,
 } from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
-import { fetchVnindexHistory } from "@/lib/market/fetch-vnindex-history";
+import { fetchVnindexHistoryCached } from "@/lib/market/fetch-vnindex-history";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import { fetchMarketContextUi } from "@/lib/market/fetch-market-context-ui";
@@ -31,7 +31,7 @@ import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagno
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import {
   buildRsNearMissWatchlistPanel,
-  computeRsNearMissWatchlistFromDb,
+  getCachedRsNearMissWatchlist,
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import {
   isRsWatchlistSnapshotEnabled,
@@ -216,7 +216,7 @@ async function loadRsNearMiss(
 ) {
   const empty = {
     panel: buildRsNearMissWatchlistPanel([]),
-    rowsForSnapshot: [] as Awaited<ReturnType<typeof computeRsNearMissWatchlistFromDb>>["rows"],
+    rowsForSnapshot: [] as Awaited<ReturnType<typeof getCachedRsNearMissWatchlist>>["rows"],
     tradabilityCount: 0,
     uiMap: undefined as Map<string, RsDiagnosticUi | null> | undefined,
   };
@@ -224,7 +224,7 @@ async function loadRsNearMiss(
   try {
     const excludeSymbols = candidatesWithHealth.map((c) => c.symbolKey);
     const { rows, tradabilityPassedCount, earlyEntryBySymbol } =
-      await computeRsNearMissWatchlistFromDb(prisma, { limit: 12, excludeSymbols });
+      await getCachedRsNearMissWatchlist({ limit: 12, excludeSymbols });
     const rsMap = await loadRsDiagnosticUiForSymbols(
       prisma,
       rows.map((r) => r.symbol),
@@ -258,7 +258,7 @@ export default async function DashboardPage() {
     Promise.all([getMarketRegimeFromDb("VNINDEX"), fetchMarketSessionSnapshot(prisma)]),
     loadLatestScan(),
     loadActiveWatchItems(),
-    fetchVnindexHistory(prisma, 30),
+    fetchVnindexHistoryCached(30),
   ]);
   const trades = tradesResult.data;
   const latestScan = latestScanResult.data;

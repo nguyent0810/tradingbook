@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { labError, labJson } from "@/lib/lab/api-response";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
 
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const sessionDate = await getExpectedLatestSessionFromIndexBars(prisma);

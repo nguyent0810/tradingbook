@@ -23,4 +23,3 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ runId, status: "COMPLETED" });
 }
 
-export const dynamic = "force-dynamic";

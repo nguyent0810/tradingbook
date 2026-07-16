@@ -35,4 +35,3 @@ export async function POST() {
   return NextResponse.json({ sessionDate: sessionDate.toISOString().slice(0, 10), closed });
 }
 
-export const dynamic = "force-dynamic";

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { authorizeCronRequest } from "@/lib/cron/authorize-cron-request";
 import { describeDatabaseUrl } from "@/lib/database-url-fingerprint";
 import { prisma } from "@/lib/prisma";
@@ -58,6 +59,10 @@ export async function GET(request: Request): Promise<NextResponse> {
     });
     return NextResponse.json({ ok: false, error: result.error }, { status: 500 });
   }
+
+  // Cron-triggered, not a user-facing Server Action — expire immediately rather than
+  // stale-while-revalidate so the next dashboard/setups visit gets fresh scan data.
+  revalidateTag("daily-scan", { expire: 0 });
 
   const summary =
     typeof result.summaryJson === "object" && result.summaryJson !== null

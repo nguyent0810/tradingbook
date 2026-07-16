@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { loadArenaBattles } from "@/lib/paper-lab/queries/load-arena-battles";
 import { PAPER_AGENT_SEEDS, PAPER_INITIAL_CAPITAL_VND } from "@/lib/paper-lab/constants";
 import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
 import type {
@@ -112,7 +113,7 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       regimeSnapshot,
       regimeCtx,
       battle,
-      recentBattleRows,
+      allBattles,
     ] = await Promise.all([
       prisma.paperAgent.findMany({
         where: { slug: { not: "cio" } },
@@ -158,14 +159,9 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
           },
         },
       }),
-      prisma.arenaBattle.findMany({
-        orderBy: { sessionDate: "desc" },
-        take: 3,
-        include: {
-          battleDecisions: { select: { action: true } },
-        },
-      }),
+      loadArenaBattles(),
     ]);
+    const recentBattleRows = allBattles.slice(0, 3);
 
     const leaderboard = rankings.map((r) => {
       const perf = agents.find((a) => a.id === r.agentId)?.performance[0];

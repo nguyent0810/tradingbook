@@ -35,4 +35,3 @@ export async function POST() {
   return NextResponse.json({ updated: metricsList.length });
 }
 
-export const dynamic = "force-dynamic";

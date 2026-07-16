@@ -4,8 +4,6 @@ import { submitHumanPmDecision, compareHumanVsAi, ensureHumanPmAgent } from "@/l
 import { buildMarketContextBundle } from "@/lib/paper-lab/context/build-market-context-bundle";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
 
-export const dynamic = "force-dynamic";
-
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {

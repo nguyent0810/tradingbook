@@ -1,8 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { labError, labJson } from "@/lib/lab/api-response";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(
   _request: Request,
   context: { params: Promise<{ sessionDate: string }> }

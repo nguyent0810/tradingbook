@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { labError, labJson } from "@/lib/lab/api-response";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string }> }
