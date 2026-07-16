@@ -4,16 +4,17 @@ import { DashboardPerformancePanelLazy as DashboardPerformancePanel } from "@/co
 
 export type DashboardBookSnapshotProps = {
   trades: Trade[];
+  tradesError?: boolean;
 };
 
-export function DashboardBookSnapshot({ trades }: DashboardBookSnapshotProps) {
+export function DashboardBookSnapshot({ trades, tradesError = false }: DashboardBookSnapshotProps) {
   return (
     <CommandDeckCollapsible
       summary="Book snapshot — closed-trade performance"
       testId="dashboard-book-snapshot"
     >
       <div className="dash-v2-card dash-v2-card--inset dash-v2-card--muted">
-        <DashboardPerformancePanel trades={trades} />
+        <DashboardPerformancePanel trades={trades} error={tradesError} />
       </div>
     </CommandDeckCollapsible>
   );

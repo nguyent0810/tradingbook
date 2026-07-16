@@ -66,7 +66,7 @@ function RMultipleCell({ position }: { position: OpenPositionRowDto }) {
 
 function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
   if (positions.length === 0) {
-    return <p className="text-sm text-slate-400">No open positions.</p>;
+    return <p className="text-sm text-[var(--text-tertiary)]">No open positions.</p>;
   }
 
   return (
@@ -143,7 +143,7 @@ export function OpenPositionsTable({
   if (positions.length === 0) {
     return (
       <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
-        <p className="text-sm text-slate-400">No open positions.</p>
+        <p className="text-sm text-[var(--text-tertiary)]">No open positions.</p>
       </PaperLabPanel>
     );
   }

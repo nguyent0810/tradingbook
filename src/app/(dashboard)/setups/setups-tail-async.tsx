@@ -64,7 +64,7 @@ export async function SetupsTailAsync() {
       />
 
       {rsWatchlistRes.error ? (
-        <p className="text-sm text-rose-400" role="status">
+        <p className="text-sm text-[var(--danger)]" role="status">
           {rsWatchlistRes.error}
         </p>
       ) : null}

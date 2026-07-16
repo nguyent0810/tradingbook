@@ -26,11 +26,13 @@ export type DashboardDecisionCockpitProps = {
   surfacedCount: number;
   portfolioRiskConfigured: boolean;
   trades: Trade[];
+  tradesError?: boolean;
   activeWatchItems: DashboardWatchlistItem[];
   watchlistTruncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
   tradeGate: V3TradeGate;
   vnindexHistory: VnindexHistoryPoint[];
+  vnindexHistoryError?: boolean;
 };
 
 /**
@@ -47,11 +49,13 @@ export function DashboardDecisionCockpit({
   surfacedCount,
   portfolioRiskConfigured,
   trades,
+  tradesError = false,
   activeWatchItems,
   watchlistTruncated = false,
   latestCloseBySymbol,
   tradeGate,
   vnindexHistory,
+  vnindexHistoryError = false,
 }: DashboardDecisionCockpitProps) {
   return (
     <DashboardEntrance>
@@ -65,6 +69,7 @@ export function DashboardDecisionCockpit({
           evidence={cockpitDto.evidence}
           blockers={cockpitDto.blockers}
           vnindexHistory={vnindexHistory}
+          vnindexHistoryError={vnindexHistoryError}
         />
       </div>
 
@@ -134,7 +139,7 @@ export function DashboardDecisionCockpit({
         />
       </CommandDeckCollapsible>
 
-      <DashboardBookSnapshot trades={trades} />
+      <DashboardBookSnapshot trades={trades} tradesError={tradesError} />
     </DashboardEntrance>
   );
 }

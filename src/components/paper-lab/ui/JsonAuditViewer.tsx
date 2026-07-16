@@ -22,7 +22,7 @@ export function JsonAuditViewer({
   }, [payload]);
 
   if (!payload || Object.keys(payload).length === 0) {
-    return <span className="text-slate-500">—</span>;
+    return <span className="text-[var(--text-tertiary)]">—</span>;
   }
 
   return (

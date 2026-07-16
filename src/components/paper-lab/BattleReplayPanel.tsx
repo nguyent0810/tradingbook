@@ -25,7 +25,7 @@ function BattleReplayContent({
   const { sessionDate, symbol, insight, rows } = battleReplay;
 
   if (rows.length === 0) {
-    return <p className="text-sm text-slate-400">No battle replay data for this session.</p>;
+    return <p className="text-sm text-[var(--text-tertiary)]">No battle replay data for this session.</p>;
   }
 
   const votes = countVotes(rows);
@@ -37,10 +37,10 @@ function BattleReplayContent({
       )}
 
       <div className="paper-lab-battle-replay__session">
-        <p className="text-sm text-slate-300 font-medium">
+        <p className="text-sm text-[var(--text-secondary)] font-medium">
           Session replay — {sessionDate} · <span className="font-mono">{symbol}</span>
         </p>
-        <p className="text-xs text-slate-400 mt-1 line-clamp-2">{insight}</p>
+        <p className="text-xs text-[var(--text-tertiary)] mt-1 line-clamp-2">{insight}</p>
       </div>
       <VoteSegmentBar votes={votes} />
       <div className="paper-lab-battle-cards-wrap paper-lab-battle-cards-wrap--tab">
@@ -66,7 +66,7 @@ export function BattleReplayPanel({
   if (battleReplay.rows.length === 0) {
     return (
       <PaperLabPanel title="Battle Replay" testId="paper-lab-battle-replay">
-        <p className="text-sm text-slate-400">No battle replay data for this session.</p>
+        <p className="text-sm text-[var(--text-tertiary)]">No battle replay data for this session.</p>
       </PaperLabPanel>
     );
   }

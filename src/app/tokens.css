@@ -14,7 +14,14 @@
 
   --text-primary: #fafafa;
   --text-secondary: #a1a1aa;
-  --text-tertiary: #71717a;
+  /* Lightened from #71717a — the old value failed WCAG AA (4.12:1 on --bg-primary,
+     used as real secondary-text content in ~50 places, not decoration). #8b8b94
+     measures ~5.9:1 on --bg-primary / ~5.0:1 on --bg-tertiary, the lightest surface
+     it's used on. */
+  --text-tertiary: #8b8b94;
+  /* Decorative-only (placeholders, disabled glyphs) — fails AA, do not use for
+     readable text. See ChartFrame's caption/state-message rules for the fix that
+     moved real text off this token onto --text-tertiary instead. */
   --text-muted: #52525b;
 
   --border-primary: #1f1f23;
@@ -94,6 +101,16 @@
   --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.28);
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.38);
   --shadow-glow-accent: 0 0 24px var(--accent-muted);
+  --shadow-glow-success: 0 0 24px var(--success-muted);
+  --shadow-glow-warning: 0 0 24px var(--warning-muted);
+  --shadow-glow-danger: 0 0 24px var(--danger-muted);
+  --shadow-inset-sm: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+
+  /* Z-index scale — named layers so new overlays don't have to guess a magic number */
+  --z-sticky: 20;
+  --z-dropdown: 40;
+  --z-overlay: 60;
+  --z-modal: 100;
 
   /* Semantic status — trading OS (health, data, integration) */
   --status-healthy: #22c55e;

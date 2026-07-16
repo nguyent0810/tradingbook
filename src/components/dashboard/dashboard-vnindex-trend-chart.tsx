@@ -2,16 +2,35 @@
 
 import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import { Area, AreaChart, Tooltip, XAxis, YAxis } from "recharts";
+import { useReducedMotion } from "framer-motion";
 import { ChartFrame, ChartPlot } from "@/components/command-deck";
 
 export type DashboardVnindexTrendChartProps = {
   history: VnindexHistoryPoint[];
+  error?: boolean;
 };
 
 const CHART_HEIGHT = 140;
 const GRADIENT_ID = "dashboardVnindexTrendGrad";
 
-export function DashboardVnindexTrendChart({ history }: DashboardVnindexTrendChartProps) {
+export function DashboardVnindexTrendChart({
+  history,
+  error = false,
+}: DashboardVnindexTrendChartProps) {
+  const reducedMotion = useReducedMotion() ?? false;
+
+  if (error) {
+    return (
+      <ChartFrame
+        testId="dashboard-vnindex-trend-chart"
+        title="VNINDEX — 30D"
+        height={CHART_HEIGHT}
+        state="error"
+        errorMessage="VNINDEX history could not be loaded."
+      />
+    );
+  }
+
   if (history.length < 2) {
     return (
       <ChartFrame
@@ -27,7 +46,7 @@ export function DashboardVnindexTrendChart({ history }: DashboardVnindexTrendCha
   const first = history[0]!.close;
   const last = history[history.length - 1]!.close;
   const isUp = last >= first;
-  const color = isUp ? "var(--cd-pnl-pos)" : "var(--cd-pnl-neg)";
+  const color = isUp ? "var(--pnl-positive)" : "var(--pnl-negative)";
 
   return (
     <ChartFrame
@@ -67,6 +86,7 @@ export function DashboardVnindexTrendChart({ history }: DashboardVnindexTrendCha
             strokeWidth={1.5}
             fillOpacity={1}
             fill={`url(#${GRADIENT_ID})`}
+            isAnimationActive={!reducedMotion}
           />
         </AreaChart>
       </ChartPlot>

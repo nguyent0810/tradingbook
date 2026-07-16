@@ -35,6 +35,7 @@ import { buildSymbolContextEvidenceLines } from "@/lib/market/build-market-conte
 import { prisma } from "@/lib/prisma";
 
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { CandidateScanner } from "@/components/setups-workstation";
 
 import {
@@ -240,7 +241,9 @@ export async function SetupsCandidatesAsync() {
             message={perfBanner}
             evidence="src/app/(dashboard)/setups/setups-candidates-async.tsx · loadSurfacedCandidatesHealthCached / loadSetupPerfRowsCached"
             data-testid="setups-candidates-partial-data"
-          />
+          >
+            <RefreshButton />
+          </ErrorStateWithEvidence>
         ) : null
       }
     />

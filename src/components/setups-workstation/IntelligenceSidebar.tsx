@@ -1,7 +1,8 @@
 "use client";
 
-import { memo, useCallback, useId, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { memo, useCallback, useId, useMemo } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { SetupsStanceCompact } from "@/components/setups/setups-stance-compact";
 import { SetupsFunnelCompact } from "@/components/setups/setups-funnel-compact";
 import { SetupsDiagnosticsStack } from "@/components/setups/setups-diagnostics-stack";
@@ -9,6 +10,8 @@ import type { IntelligenceSidebarProps } from "./types";
 import "./setups-workstation.css";
 
 type TabId = "stance" | "funnel" | "diagnostics";
+
+const VALID_TABS: readonly TabId[] = ["stance", "funnel", "diagnostics"];
 
 export function IntelligenceSidebar({
   tradingDecision,
@@ -18,8 +21,20 @@ export function IntelligenceSidebar({
   scanNotes,
 }: IntelligenceSidebarProps) {
   const defaultTab: TabId = tradingDecision ? "stance" : "funnel";
-  const [tab, setTab] = useState<TabId>(defaultTab);
   const panelId = useId();
+  const reducedMotion = useReducedMotion() ?? false;
+
+  // Tab lives in the URL (?sidebarTab=) instead of local state — so navigating
+  // away (e.g. to a setup detail) and back via browser history restores it,
+  // instead of silently resetting to the default tab.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("sidebarTab");
+  const tab: TabId =
+    requestedTab && (VALID_TABS as string[]).includes(requestedTab)
+      ? (requestedTab as TabId)
+      : defaultTab;
 
   const tabs: { id: TabId; label: string }[] = useMemo(
     () => [
@@ -30,7 +45,19 @@ export function IntelligenceSidebar({
     []
   );
 
-  const handleTabChange = useCallback((nextTab: TabId) => setTab(nextTab), []);
+  const handleTabChange = useCallback(
+    (nextTab: TabId) => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (nextTab === defaultTab) {
+        params.delete("sidebarTab");
+      } else {
+        params.set("sidebarTab", nextTab);
+      }
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [defaultTab, pathname, router, searchParams]
+  );
 
   const isNoTrade = tradingDecision?.level === "NO_TRADE";
 
@@ -41,7 +68,7 @@ export function IntelligenceSidebar({
       aria-label="Pipeline intelligence dock"
     >
       <div
-        className="relative flex border-b border-slate-800/60"
+        className="relative flex border-b border-[var(--border-primary)]/60"
         role="tablist"
         aria-label="Pipeline intelligence"
       >
@@ -52,6 +79,7 @@ export function IntelligenceSidebar({
             tab={t}
             active={tab === t.id}
             onSelect={handleTabChange}
+            reducedMotion={reducedMotion}
           />
         ))}
       </div>
@@ -64,17 +92,21 @@ export function IntelligenceSidebar({
               role="tabpanel"
               id={`${panelId}-panel-stance`}
               aria-labelledby={`${panelId}-tab-stance`}
-              initial={{ opacity: 0, y: 4 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
+              exit={
+                reducedMotion
+                  ? undefined
+                  : { opacity: 0, y: -4, transition: { duration: 0.1 } }
+              }
+              transition={{ duration: reducedMotion ? 0 : 0.15 }}
             >
               {tradingDecision ? (
                 <div className={isNoTrade ? "sw-stance-pulse rounded-lg" : undefined}>
                   <SetupsStanceCompact decision={tradingDecision} />
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">No trading stance for this scan.</p>
+                <p className="text-sm text-[var(--text-tertiary)]">No trading stance for this scan.</p>
               )}
             </motion.div>
           ) : null}
@@ -85,10 +117,14 @@ export function IntelligenceSidebar({
               role="tabpanel"
               id={`${panelId}-panel-funnel`}
               aria-labelledby={`${panelId}-tab-funnel`}
-              initial={{ opacity: 0, y: 4 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
+              exit={
+                reducedMotion
+                  ? undefined
+                  : { opacity: 0, y: -4, transition: { duration: 0.1 } }
+              }
+              transition={{ duration: reducedMotion ? 0 : 0.15 }}
             >
               <SetupsFunnelCompact latestScan={latestScan} nearMissCount={nearMissCount} />
             </motion.div>
@@ -101,10 +137,14 @@ export function IntelligenceSidebar({
               id={`${panelId}-panel-diagnostics`}
               aria-labelledby={`${panelId}-tab-diagnostics`}
               className="max-h-[min(60vh,480px)] overflow-y-auto"
-              initial={{ opacity: 0, y: 4 }}
+              initial={reducedMotion ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
+              exit={
+                reducedMotion
+                  ? undefined
+                  : { opacity: 0, y: -4, transition: { duration: 0.1 } }
+              }
+              transition={{ duration: reducedMotion ? 0 : 0.15 }}
             >
               <SetupsDiagnosticsStack
                 rejectionBuckets={rejectionBuckets}
@@ -127,11 +167,13 @@ const SidebarTabButton = memo(function SidebarTabButton({
   tab,
   active,
   onSelect,
+  reducedMotion,
 }: {
   panelId: string;
   tab: { id: TabId; label: string };
   active: boolean;
   onSelect: (tab: TabId) => void;
+  reducedMotion: boolean;
 }) {
   const handleClick = useCallback(() => onSelect(tab.id), [onSelect, tab.id]);
 
@@ -142,17 +184,17 @@ const SidebarTabButton = memo(function SidebarTabButton({
       id={`${panelId}-tab-${tab.id}`}
       aria-selected={active}
       aria-controls={`${panelId}-panel-${tab.id}`}
-      className="relative flex-1 px-3 py-2.5 font-mono text-[10px] uppercase tracking-wide text-slate-500 transition hover:text-slate-300"
+      className="relative flex-1 px-3 py-2.5 font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)] transition hover:text-[var(--text-secondary)]"
       onClick={handleClick}
     >
       {active ? (
         <motion.span
-          layoutId="setups-tab-pill"
-          className="absolute inset-x-1 inset-y-1 rounded-md bg-indigo-500/10 ring-1 ring-indigo-500/30"
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          layoutId={reducedMotion ? undefined : "setups-tab-pill"}
+          className="absolute inset-x-1 inset-y-1 rounded-md bg-[var(--accent)]/10 ring-1 ring-[var(--accent)]/30"
+          transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 400, damping: 30 }}
         />
       ) : null}
-      <span className={`relative z-10 ${active ? "text-indigo-300" : ""}`}>{tab.label}</span>
+      <span className={`relative z-10 ${active ? "text-[var(--accent-text)]" : ""}`}>{tab.label}</span>
     </button>
   );
 });

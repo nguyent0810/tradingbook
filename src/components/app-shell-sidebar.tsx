@@ -131,7 +131,7 @@ export function AppShellSidebar() {
             key={label}
             className="app-shell-sidebar-link app-shell-sidebar-link--disabled"
             aria-disabled="true"
-            title={collapsed ? `${label} — coming soon` : undefined}
+            title={`${label} — coming soon`}
           >
             <Icon className="app-shell-sidebar-link__icon" />
             <span className="app-shell-sidebar-link__text">
@@ -148,6 +148,7 @@ export function AppShellSidebar() {
         className="app-shell-sidebar__collapse"
         onClick={() => setCollapsed((c) => !c)}
         aria-expanded={!collapsed}
+        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <IconChevron
           className={
@@ -156,7 +157,9 @@ export function AppShellSidebar() {
               : "app-shell-sidebar__collapse-icon"
           }
         />
-        <span className="app-shell-sidebar__collapse-label">Collapse</span>
+        <span className="app-shell-sidebar__collapse-label" aria-hidden="true">
+          {collapsed ? "Expand" : "Collapse"}
+        </span>
       </button>
     </aside>
   );

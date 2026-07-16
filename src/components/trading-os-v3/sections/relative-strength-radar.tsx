@@ -477,7 +477,10 @@ export function RelativeStrengthRadar({ panel }: Props) {
                           <td className="table-num tosv3-rs-table__metric">
                             {formatRr(card.earlyEntry?.estimatedRiskReward)}
                           </td>
-                          <td className="tosv3-rs-table__entry-type">
+                          <td
+                            className="tosv3-rs-table__entry-type"
+                            title={card.earlyEntry?.entryType ?? undefined}
+                          >
                             {card.earlyEntry?.entryType ?? "—"}
                           </td>
                         </>

@@ -15,10 +15,10 @@
   min-height: 100%;
   color: var(--cd-text);
   background:
-    radial-gradient(ellipse 100% 60% at 50% -10%, rgba(30, 58, 120, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 50% at 100% 50%, rgba(20, 40, 90, 0.15) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 40% at 0% 80%, rgba(15, 35, 80, 0.12) 0%, transparent 45%),
-    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, #04060c 100%);
+    radial-gradient(ellipse 100% 60% at 50% -10%, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, color-mix(in srgb, var(--accent) 15%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 40% at 0% 80%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, var(--bg-primary) 100%);
   font-family: var(--font-geist-sans, system-ui, sans-serif);
   /* Aligned figures across the terminal (dense numeric columns) */
   font-variant-numeric: tabular-nums;
@@ -44,7 +44,7 @@
   border-radius: var(--cd-radius);
   background: var(--cd-surface);
   border: 1px solid var(--cd-border);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-md);
 }
 
 .cd-card--glass {
@@ -65,25 +65,25 @@
 }
 
 .cd-card--glow-danger {
-  border-color: rgba(244, 63, 94, 0.4);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
   box-shadow:
     var(--cd-glass-highlight),
-    0 0 0 1px rgba(244, 63, 94, 0.12),
+    0 0 0 1px color-mix(in srgb, var(--danger) 12%, transparent),
     var(--cd-glow-danger);
 }
 
 .cd-card--glow-warning {
-  border-color: rgba(255, 184, 0, 0.3);
+  border-color: color-mix(in srgb, var(--warning) 30%, transparent);
   box-shadow:
     var(--cd-glass-highlight),
     var(--cd-glow-gold);
 }
 
 .cd-card--glow-success {
-  border-color: rgba(0, 230, 118, 0.25);
+  border-color: color-mix(in srgb, var(--success) 25%, transparent);
   box-shadow:
     var(--cd-glass-highlight),
-    0 0 24px rgba(0, 230, 118, 0.08);
+    0 0 24px color-mix(in srgb, var(--success) 8%, transparent);
 }
 
 .cd-card__header {
@@ -113,7 +113,7 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
   border: 1px solid transparent;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 10%, transparent);
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -129,16 +129,16 @@
   height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--bg-primary) 25%, transparent);
 }
 
 .cd-badge--danger {
-  color: #fecdd3;
-  background: linear-gradient(180deg, rgba(244, 63, 94, 0.22) 0%, rgba(190, 24, 60, 0.14) 100%);
+  color: var(--pnl-negative);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--danger) 22%, transparent) 0%, color-mix(in srgb, var(--danger) 14%, transparent) 100%);
   border-color: var(--cd-danger-border);
   box-shadow:
-    inset 0 1px 0 rgba(255, 200, 210, 0.12),
-    0 2px 8px rgba(244, 63, 94, 0.15);
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 12%, transparent),
+    0 2px 8px color-mix(in srgb, var(--danger) 15%, transparent);
 }
 .cd-badge--danger .cd-badge__dot {
   background: var(--cd-danger);
@@ -146,12 +146,12 @@
 }
 
 .cd-badge--warning {
-  color: #ffe9a8;
-  background: linear-gradient(180deg, rgba(255, 184, 0, 0.18) 0%, rgba(200, 140, 0, 0.1) 100%);
-  border-color: rgba(255, 184, 0, 0.28);
+  color: var(--warning);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--warning) 18%, transparent) 0%, color-mix(in srgb, var(--warning) 10%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--warning) 28%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 230, 150, 0.12),
-    0 2px 8px rgba(255, 184, 0, 0.12);
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 12%, transparent),
+    0 2px 8px color-mix(in srgb, var(--warning) 12%, transparent);
 }
 .cd-badge--warning .cd-badge__dot {
   background: var(--cd-warning);
@@ -159,12 +159,12 @@
 }
 
 .cd-badge--success {
-  color: #b8f5d0;
-  background: linear-gradient(180deg, rgba(0, 230, 118, 0.16) 0%, rgba(0, 160, 80, 0.1) 100%);
-  border-color: rgba(0, 230, 118, 0.26);
+  color: var(--pnl-positive);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--success) 16%, transparent) 0%, color-mix(in srgb, var(--success) 10%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--success) 26%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(200, 255, 220, 0.1),
-    0 2px 8px rgba(0, 230, 118, 0.1);
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 10%, transparent),
+    0 2px 8px color-mix(in srgb, var(--success) 10%, transparent);
 }
 .cd-badge--success .cd-badge__dot {
   background: var(--cd-success);
@@ -173,7 +173,7 @@
 
 .cd-badge--neutral {
   color: var(--cd-text-muted);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.03) 100%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--text-primary) 7%, transparent) 0%, color-mix(in srgb, var(--text-primary) 3%, transparent) 100%);
   border-color: var(--cd-border);
 }
 .cd-badge--neutral .cd-badge__dot {
@@ -181,22 +181,22 @@
 }
 
 .cd-badge--info {
-  color: #b8ecff;
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.16) 0%, rgba(14, 116, 144, 0.1) 100%);
-  border-color: rgba(56, 189, 248, 0.28);
+  color: var(--accent-text);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, transparent) 0%, color-mix(in srgb, var(--accent) 10%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(200, 240, 255, 0.1),
-    0 2px 8px rgba(56, 189, 248, 0.1);
+    inset 0 1px 0 color-mix(in srgb, var(--text-primary) 10%, transparent),
+    0 2px 8px color-mix(in srgb, var(--accent) 10%, transparent);
 }
 .cd-badge--info .cd-badge__dot {
-  background: #38bdf8;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.55);
+  background: var(--accent);
+  box-shadow: var(--shadow-glow-accent);
 }
 
 /* Setup-tier and setup-health severity tones (dashboard opportunity board) */
 .cd-badge--tier-a {
   color: var(--pnl-positive);
-  background: linear-gradient(180deg, var(--status-healthy-muted) 0%, rgba(34, 197, 94, 0.08) 100%);
+  background: linear-gradient(180deg, var(--status-healthy-muted) 0%, color-mix(in srgb, var(--status-healthy) 8%, transparent) 100%);
   border-color: var(--status-healthy-border);
 }
 .cd-badge--tier-a .cd-badge__dot {
@@ -206,7 +206,7 @@
 
 .cd-badge--tier-b {
   color: var(--accent-text);
-  background: linear-gradient(180deg, var(--accent-muted) 0%, rgba(99, 102, 241, 0.08) 100%);
+  background: linear-gradient(180deg, var(--accent-muted) 0%, color-mix(in srgb, var(--accent) 8%, transparent) 100%);
   border-color: color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .cd-badge--tier-b .cd-badge__dot {
@@ -215,8 +215,8 @@
 }
 
 .cd-badge--at-risk {
-  color: #ffd8b8;
-  background: linear-gradient(180deg, var(--status-at-risk-muted) 0%, rgba(249, 115, 22, 0.08) 100%);
+  color: var(--status-at-risk);
+  background: linear-gradient(180deg, var(--status-at-risk-muted) 0%, color-mix(in srgb, var(--status-at-risk) 8%, transparent) 100%);
   border-color: var(--status-at-risk-border);
 }
 .cd-badge--at-risk .cd-badge__dot {
@@ -225,8 +225,8 @@
 }
 
 .cd-badge--dead {
-  color: #fecaca;
-  background: linear-gradient(180deg, var(--status-failed-muted) 0%, rgba(239, 68, 68, 0.08) 100%);
+  color: var(--pnl-negative);
+  background: linear-gradient(180deg, var(--status-failed-muted) 0%, color-mix(in srgb, var(--status-failed) 8%, transparent) 100%);
   border-color: var(--status-failed-border);
 }
 .cd-badge--dead .cd-badge__dot {
@@ -259,15 +259,15 @@
   0%,
   100% {
     box-shadow:
-      inset 0 1px 0 rgba(255, 200, 210, 0.08),
-      0 0 0 1px rgba(244, 63, 94, 0.22),
-      0 0 28px rgba(244, 63, 94, 0.16);
+      inset 0 1px 0 color-mix(in srgb, var(--text-primary) 8%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--danger) 22%, transparent),
+      0 0 28px color-mix(in srgb, var(--danger) 16%, transparent);
   }
   50% {
     box-shadow:
-      inset 0 1px 0 rgba(255, 200, 210, 0.12),
-      0 0 0 1px rgba(244, 63, 94, 0.45),
-      0 0 44px rgba(244, 63, 94, 0.28);
+      inset 0 1px 0 color-mix(in srgb, var(--text-primary) 12%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--danger) 45%, transparent),
+      0 0 44px color-mix(in srgb, var(--danger) 28%, transparent);
   }
 }
 

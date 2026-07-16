@@ -28,7 +28,7 @@ function CioRecBody({ rec }: { rec: Rec }) {
       <div className="paper-lab-cio-meta">
         <span>
           Consensus:{" "}
-          <strong className="text-slate-200">{rec.consensusLabel}</strong>{" "}
+          <strong className="text-[var(--text-primary)]">{rec.consensusLabel}</strong>{" "}
           ({rec.consensusScoreDisplay})
           <PaperLabHelpIcon text={CONSENSUS_TOOLTIP} />
         </span>
@@ -41,14 +41,14 @@ function CioRecBody({ rec }: { rec: Rec }) {
         <span>Regime: {rec.regimeContext}</span>
       </div>
 
-      <p className="text-sm text-slate-200 mb-2 paper-lab-line-clamp-3">{rec.decisionSummary}</p>
+      <p className="text-sm text-[var(--text-primary)] mb-2 paper-lab-line-clamp-3">{rec.decisionSummary}</p>
 
       {rec.supportingReasons.length > 0 && (
         <div className="paper-lab-cio-section">
-          <div className="text-xs font-semibold text-emerald-300/90 mb-1">
+          <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">
             Why CIO chose {rec.finalAction}
           </div>
-          <ul className="text-xs text-slate-300 space-y-0.5 list-disc list-inside">
+          <ul className="text-xs text-[var(--text-secondary)] space-y-0.5 list-disc list-inside">
             {rec.supportingReasons.map((r) => (
               <li key={r} className="paper-lab-line-clamp-2">{r}</li>
             ))}
@@ -58,8 +58,8 @@ function CioRecBody({ rec }: { rec: Rec }) {
 
       {rec.risks.length > 0 && (
         <div className="paper-lab-cio-section">
-          <div className="text-xs font-semibold text-amber-200/90 mb-1">Main risks</div>
-          <ul className="text-xs text-amber-100/80 space-y-0.5 list-disc list-inside">
+          <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Main risks</div>
+          <ul className="text-xs text-[var(--warning)]/80 space-y-0.5 list-disc list-inside">
             {rec.risks.map((r) => (
               <li key={r} className="paper-lab-line-clamp-2">{r}</li>
             ))}
@@ -69,11 +69,11 @@ function CioRecBody({ rec }: { rec: Rec }) {
 
       {rec.dissentingAgents.length > 0 && (
         <div className="paper-lab-cio-section">
-          <div className="text-xs font-semibold text-slate-400 mb-1">Dissent</div>
-          <ul className="text-xs text-slate-400 space-y-2">
+          <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Dissent</div>
+          <ul className="text-xs text-[var(--text-tertiary)] space-y-2">
             {rec.dissentingAgents.map((d) => (
               <li key={d.agentId}>
-                <span className="text-slate-300">{d.agentName}</span>{" "}
+                <span className="text-[var(--text-secondary)]">{d.agentName}</span>{" "}
                 <ActionBadge action={d.action} /> —{" "}
                 <span className="paper-lab-line-clamp-2 block">{d.humanReason}</span>
               </li>
@@ -143,8 +143,8 @@ export function CioRecommendationPanel({
     }
     return (
       <section className="paper-lab-cio-panel" data-testid="paper-lab-cio">
-        <h3 className="text-sm font-semibold text-indigo-300 mb-2">CIO Final Recommendation</h3>
-        <p className="text-sm text-slate-400">No CIO recommendation for this session yet.</p>
+        <h3 className="text-sm font-semibold text-[var(--accent-text)] mb-2">CIO Final Recommendation</h3>
+        <p className="text-sm text-[var(--text-tertiary)]">No CIO recommendation for this session yet.</p>
       </section>
     );
   }
@@ -155,16 +155,16 @@ export function CioRecommendationPanel({
 
   return (
     <section className="paper-lab-cio-panel" data-testid="paper-lab-cio">
-      <h3 className="text-sm font-semibold text-indigo-300 mb-3">
+      <h3 className="text-sm font-semibold text-[var(--accent-text)] mb-3">
         CIO Final Recommendation — {cio.sessionDate}
       </h3>
       <ul className="space-y-4">
         {cio.recommendations.map((rec) => (
           <li key={rec.symbol} className="paper-lab-cio-card">
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="font-mono font-semibold text-slate-100 text-base">{rec.symbol}</span>
+              <span className="font-mono font-semibold text-[var(--text-primary)] text-base">{rec.symbol}</span>
               <ActionBadge action={rec.finalAction} />
-              <span className="text-xs text-slate-300 tabular-nums">
+              <span className="text-xs text-[var(--text-secondary)] tabular-nums">
                 {formatConfidencePct(rec.confidence)} confidence
               </span>
             </div>
@@ -172,12 +172,12 @@ export function CioRecommendationPanel({
             {rec.dissentingAgents.some((d) => d.humanReason.length > 80) && (
               <div className="mt-2">
                 <PaperLabDetailsDialog title={`${rec.symbol} — dissenting agents`}>
-                  <ul className="text-sm text-slate-300 space-y-3">
+                  <ul className="text-sm text-[var(--text-secondary)] space-y-3">
                     {rec.dissentingAgents.map((d) => (
                       <li key={d.agentId}>
-                        <span className="font-semibold text-slate-100">{d.agentName}</span>{" "}
+                        <span className="font-semibold text-[var(--text-primary)]">{d.agentName}</span>{" "}
                         <ActionBadge action={d.action} />
-                        <p className="mt-1 text-slate-400">{d.humanReason}</p>
+                        <p className="mt-1 text-[var(--text-tertiary)]">{d.humanReason}</p>
                       </li>
                     ))}
                   </ul>

@@ -2,6 +2,7 @@ import "server-only";
 
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { V3Panel } from "@/components/trading-os-v3/layout";
 import { loadSetupsBaseData } from "./setups-cached-data";
 
@@ -24,7 +25,9 @@ export async function SetupsOverviewAsync() {
           message={dbBanner}
           evidence="src/app/(dashboard)/setups/setups-overview-async.tsx · loadSetupsBaseData"
           data-testid="setups-overview-db-banner-no-run"
-        />
+        >
+          <RefreshButton />
+        </ErrorStateWithEvidence>
       ) : null}
       <V3Panel className="tosv3-empty-state-wrap">
         <EmptyStateWithReason

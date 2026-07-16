@@ -20,7 +20,7 @@ function decisionRowClass(action: string): string {
 }
 
 function OrderRef({ orderId }: { orderId: string | null }) {
-  if (!orderId) return <span className="text-slate-500">—</span>;
+  if (!orderId) return <span className="text-[var(--text-tertiary)]">—</span>;
 
   const copy = async () => {
     await navigator.clipboard.writeText(orderId);
@@ -46,15 +46,15 @@ function ReasoningCell({ decision }: { decision: DecisionLogRowDto }) {
 
   return (
     <td className="paper-lab-reasoning-cell">
-      <p className="text-slate-200 paper-lab-line-clamp-2 text-xs">{decision.explanation.summary}</p>
+      <p className="text-[var(--text-primary)] paper-lab-line-clamp-2 text-xs">{decision.explanation.summary}</p>
       {hasMore && (
         <div className="mt-1">
           <PaperLabDetailsDialog title={`${decision.agentName} — reasoning`} triggerLabel="View reasoning">
-            <p className="text-sm text-slate-200 mb-3">{decision.explanation.summary}</p>
+            <p className="text-sm text-[var(--text-primary)] mb-3">{decision.explanation.summary}</p>
             {decision.explanation.supporting.length > 0 && (
               <div className="mb-3">
-                <div className="text-xs font-semibold text-emerald-300/90 mb-1">Supporting</div>
-                <ul className="text-xs text-emerald-300/85 list-disc list-inside space-y-1">
+                <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">Supporting</div>
+                <ul className="text-xs text-[var(--success)]/85 list-disc list-inside space-y-1">
                   {decision.explanation.supporting.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
@@ -63,8 +63,8 @@ function ReasoningCell({ decision }: { decision: DecisionLogRowDto }) {
             )}
             {decision.explanation.opposing.length > 0 && (
               <div>
-                <div className="text-xs font-semibold text-amber-200/90 mb-1">Opposing</div>
-                <ul className="text-xs text-amber-200/85 list-disc list-inside space-y-1">
+                <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Opposing</div>
+                <ul className="text-xs text-[var(--warning)]/85 list-disc list-inside space-y-1">
                   {decision.explanation.opposing.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
@@ -82,7 +82,7 @@ export function DecisionsLogTable({ decisions }: { decisions: DecisionLogRowDto[
   if (decisions.length === 0) {
     return (
       <PaperLabPanel title="Decisions Log" testId="paper-lab-decisions" tone="soft">
-        <p className="text-sm text-slate-400">No agent decisions logged yet.</p>
+        <p className="text-sm text-[var(--text-tertiary)]">No agent decisions logged yet.</p>
       </PaperLabPanel>
     );
   }

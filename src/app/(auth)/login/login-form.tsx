@@ -1,14 +1,25 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { login, type AuthState } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function LoginForm() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(
     login,
     undefined
   );
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (state?.errors?.email) {
+      emailRef.current?.focus();
+    } else if (state?.errors?.password) {
+      passwordRef.current?.focus();
+    }
+  }, [state?.errors]);
 
   return (
     <form action={formAction} className="cd-auth-form" data-testid="login-form" noValidate>
@@ -36,9 +47,10 @@ export function LoginForm() {
 
       <div className="cd-auth-field">
         <label htmlFor="email" className="cd-auth-label">
-          Email
+          Email <span className="cd-auth-label__required" aria-hidden="true">*</span>
         </label>
         <input
+          ref={emailRef}
           id="email"
           name="email"
           type="email"
@@ -58,12 +70,12 @@ export function LoginForm() {
 
       <div className="cd-auth-field">
         <label htmlFor="password" className="cd-auth-label">
-          Password
+          Password <span className="cd-auth-label__required" aria-hidden="true">*</span>
         </label>
-        <input
+        <PasswordInput
+          ref={passwordRef}
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           required
           placeholder="••••••••"

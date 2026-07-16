@@ -34,7 +34,7 @@ export default async function TimelineSessionPage({
     <>
       <PaperLabPanel title={`Session ${raw}`} className="mb-4">
         {data.regime && (
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-[var(--text-tertiary)]">
             Regime: {data.regime.gate1Level} —{" "}
             {Object.values(data.regime.dimensions ?? {}).join(" · ")}
           </p>

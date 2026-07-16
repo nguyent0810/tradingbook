@@ -9,19 +9,25 @@ import {
   type TradeOutcomeCategory,
 } from "@/lib/analytics";
 import { Area, AreaChart, Cell, Pie, PieChart, Tooltip } from "recharts";
+import { useReducedMotion } from "framer-motion";
 import { ChartFrame, ChartPlot } from "@/components/command-deck";
 
 const OUTCOME_COLOR: Record<TradeOutcomeCategory, string> = {
-  WIN: "var(--cd-pnl-pos)",
-  LOSS: "var(--cd-pnl-neg)",
-  BREAKEVEN: "var(--cd-neutral)",
+  WIN: "var(--pnl-positive)",
+  LOSS: "var(--pnl-negative)",
+  BREAKEVEN: "var(--text-tertiary)",
 };
 
 export type DashboardPerformancePanelProps = {
   trades: Trade[];
+  error?: boolean;
 };
 
-export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelProps) {
+export function DashboardPerformancePanel({
+  trades,
+  error = false,
+}: DashboardPerformancePanelProps) {
+  const reducedMotion = useReducedMotion() ?? false;
   const metrics = computeAdvancedMetrics(trades);
   const curve = computeEquityCurve(trades);
   const recent = curve.slice(-24);
@@ -39,7 +45,15 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
       </h2>
       <p className="dash-performance__subtitle">Closed trades only — secondary to today&apos;s stance</p>
 
-      {metrics.totalTrades === 0 ? (
+      {error ? (
+        <p
+          className="dash-performance__empty dash-performance__empty--error"
+          data-testid="dashboard-performance-error"
+          role="alert"
+        >
+          Trade history could not be loaded.
+        </p>
+      ) : metrics.totalTrades === 0 ? (
         <p className="dash-performance__empty" data-testid="dashboard-performance-empty">
           No closed positions yet — equity curve appears after first exit.
         </p>
@@ -139,6 +153,7 @@ export function DashboardPerformancePanel({ trades }: DashboardPerformancePanelP
                     strokeWidth={1.5}
                     fillOpacity={1}
                     fill={`url(#${gradientId})`}
+                    isAnimationActive={!reducedMotion}
                   />
                 </AreaChart>
               </ChartPlot>

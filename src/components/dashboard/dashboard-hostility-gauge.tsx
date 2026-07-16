@@ -9,9 +9,9 @@ export type DashboardHostilityGaugeProps = {
 };
 
 const TONE_COLOR: Record<HostilityGaugeTone, string> = {
-  calm: "var(--cd-success)",
-  caution: "var(--cd-warning)",
-  hostile: "var(--cd-danger)",
+  calm: "var(--success)",
+  caution: "var(--warning)",
+  hostile: "var(--danger)",
 };
 
 const GAUGE_HEIGHT = 140;
@@ -49,7 +49,7 @@ export function DashboardHostilityGauge({ gauge }: DashboardHostilityGaugeProps)
           >
             <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
             <RadialBar
-              background={{ fill: "var(--cd-glass-bg, rgba(255,255,255,0.06))" }}
+              background={{ fill: "var(--cd-glass-bg)" }}
               dataKey="value"
               cornerRadius={8}
               isAnimationActive={false}
