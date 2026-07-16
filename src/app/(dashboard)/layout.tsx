@@ -7,6 +7,7 @@ import { AppShellSidebar } from "@/components/app-shell-sidebar";
 import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { LogoutButton } from "@/components/logout-button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { FocusMainOnRouteChange } from "@/components/focus-main-on-route-change";
 import "./dashboard-shell.css";
 
 /** Session check is a Request-time API (cookies()) — isolated in its own component (and
@@ -53,7 +54,10 @@ async function DashboardShellBody({ children }: { children: React.ReactNode }) {
 
       <AppShellNavMobile />
 
-      <main className="app-shell-main command-deck-shell__main">{children}</main>
+      <FocusMainOnRouteChange targetId="main-content" />
+      <main id="main-content" tabIndex={-1} className="app-shell-main command-deck-shell__main">
+        {children}
+      </main>
     </div>
   );
 }
@@ -65,6 +69,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="app-shell command-deck-shell">
+      <a href="#main-content" className="app-shell-skip">
+        Skip to content
+      </a>
       <Suspense fallback={<LoadingSkeleton height="100vh" aria-label="Loading" />}>
         <AppShellSidebar />
         <DashboardShellBody>{children}</DashboardShellBody>

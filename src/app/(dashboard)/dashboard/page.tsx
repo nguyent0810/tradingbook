@@ -45,6 +45,7 @@ import type { DecisionCockpitOpenTradeSnapshot } from "@/lib/dashboard/decision-
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardDecisionCockpit } from "@/components/dashboard/dashboard-decision-cockpit";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import type { Trade } from "@/generated/prisma/client";
 
@@ -252,7 +253,7 @@ export default async function DashboardPage() {
     [regime, marketSnapshot],
     latestScanResult,
     activeWatchItemsResult,
-    vnindexHistory,
+    vnindexHistoryResult,
   ] = await Promise.all([
     loadTrades(session.userId),
     Promise.all([getMarketRegimeFromDb("VNINDEX"), fetchMarketSessionSnapshot(prisma)]),
@@ -261,6 +262,7 @@ export default async function DashboardPage() {
     fetchVnindexHistoryCached(30),
   ]);
   const trades = tradesResult.data;
+  const vnindexHistory = vnindexHistoryResult.points;
   const latestScan = latestScanResult.data;
   const watchlistTruncated = activeWatchItemsResult.data.length > 20;
   const activeWatchItems = activeWatchItemsResult.data.slice(0, 20);
@@ -395,7 +397,9 @@ export default async function DashboardPage() {
           message={dbLoadError}
           evidence="src/app/(dashboard)/dashboard/page.tsx · one or more Prisma reads failed; sections below may be empty."
           data-testid="dashboard-db-load-error"
-        />
+        >
+          <RefreshButton />
+        </ErrorStateWithEvidence>
       ) : null}
 
       <DashboardDecisionCockpit
@@ -406,11 +410,13 @@ export default async function DashboardPage() {
         surfacedCount={latestScan?.candidateCountSurfaced ?? 0}
         portfolioRiskConfigured={portfolioRiskConfigured}
         trades={trades}
+        tradesError={tradesResult.error != null}
         activeWatchItems={activeWatchItems}
         watchlistTruncated={watchlistTruncated}
         latestCloseBySymbol={latestCloseBySymbol}
         tradeGate={viewModel.risk.tradeGate}
         vnindexHistory={vnindexHistory}
+        vnindexHistoryError={vnindexHistoryResult.error}
       />
     </div>
   );

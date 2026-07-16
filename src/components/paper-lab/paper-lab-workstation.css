@@ -5,8 +5,8 @@
   padding: 0.75rem 1rem;
   margin-bottom: 1.25rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
   color: rgb(253, 230, 138);
   font-size: 0.875rem;
   line-height: 1.45;
@@ -20,7 +20,7 @@
   text-transform: uppercase;
   padding: 0.2rem 0.45rem;
   border-radius: 0.25rem;
-  background: rgba(245, 158, 11, 0.25);
+  background: color-mix(in srgb, var(--warning) 25%, transparent);
   color: rgb(254, 243, 199);
 }
 
@@ -34,8 +34,8 @@
 .paper-lab-kpi {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(11, 17, 33, 0.85);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 18%, transparent);
+  background: color-mix(in srgb, var(--pl-bg-soft) 85%, transparent);
 }
 
 /* ── Text overflow utilities ── */
@@ -65,11 +65,11 @@
 }
 
 .paper-lab-cell-muted {
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
 }
 
 .paper-lab-cell-strong {
-  color: rgb(248, 250, 252);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -77,20 +77,20 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   margin-bottom: 0.25rem;
 }
 
 .paper-lab-kpi__value {
   font-size: 1.1rem;
   font-weight: 600;
-  color: rgb(248, 250, 252);
+  color: var(--text-primary);
 }
 
 .paper-lab-table-wrap {
   overflow-x: auto;
   border-radius: 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 12%, transparent);
   /* Without this, a flex/grid ancestor sizes this wrapper to fit the table's
      min-width instead of clamping it to available space, so overflow-x never
      actually engages here and bleeds out to the page instead. */
@@ -109,15 +109,15 @@
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgb(148, 163, 184);
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  color: var(--pl-muted);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 15%, transparent);
   white-space: nowrap;
 }
 
 .paper-lab-table td {
   padding: 0.55rem 0.75rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-  color: rgb(226, 232, 240);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 8%, transparent);
+  color: var(--pl-text);
   white-space: nowrap;
 }
 
@@ -126,15 +126,15 @@
 }
 
 .paper-lab-rank-up {
-  color: rgb(74, 222, 128);
+  color: var(--pnl-positive);
 }
 
 .paper-lab-rank-down {
-  color: rgb(248, 113, 113);
+  color: var(--pl-red);
 }
 
 .paper-lab-rank-flat {
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
 }
 
 .paper-lab-portfolio-scroll {
@@ -149,19 +149,19 @@
   flex: 0 0 240px;
   padding: 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.15);
-  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 15%, transparent);
+  background: color-mix(in srgb, var(--pl-bg-soft) 60%, transparent);
 }
 
 .paper-lab-portfolio-card__name {
   font-weight: 600;
-  color: rgb(248, 250, 252);
+  color: var(--text-primary);
   margin-bottom: 0.15rem;
 }
 
 .paper-lab-portfolio-card__style {
   font-size: 0.7rem;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   margin-bottom: 0.75rem;
 }
 
@@ -169,13 +169,13 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 15%, transparent);
 }
 
 .paper-lab-tab {
   padding: 0.5rem 0.75rem;
   font-size: 0.8125rem;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -184,23 +184,23 @@
 }
 
 .paper-lab-tab--active {
-  color: rgb(34, 211, 238);
-  border-bottom-color: rgb(34, 211, 238);
+  color: var(--pl-cyan);
+  border-bottom-color: var(--pl-cyan);
 }
 
 .paper-lab-cio-panel {
   padding: 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  background: rgba(11, 17, 33, 0.9);
+  border: 1px solid color-mix(in srgb, var(--pl-blue) 20%, transparent);
+  background: color-mix(in srgb, var(--pl-bg-soft) 90%, transparent);
 }
 
 .paper-lab-positive {
-  color: rgb(74, 222, 128);
+  color: var(--pnl-positive);
 }
 
 .paper-lab-negative {
-  color: rgb(248, 113, 113);
+  color: var(--pl-red);
 }
 
 .paper-lab-grid-2 {
@@ -218,18 +218,18 @@
 .paper-lab-json-preview {
   font-family: var(--font-geist-mono, monospace);
   font-size: 0.7rem;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .paper-lab-validation-valid {
-  color: rgb(74, 222, 128);
+  color: var(--pnl-positive);
 }
 
 .paper-lab-validation-invalid {
-  color: rgb(248, 113, 113);
+  color: var(--pl-red);
 }
 
 .paper-lab-nav {
@@ -242,26 +242,26 @@
   padding: 0.35rem 0.65rem;
   font-size: 0.8125rem;
   border-radius: 0.35rem;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   text-decoration: none;
   border: 1px solid transparent;
 }
 
 .paper-lab-nav-link:hover {
-  color: rgb(226, 232, 240);
+  color: var(--pl-text);
   background: rgba(51, 65, 85, 0.35);
 }
 
 .paper-lab-nav-link--active {
-  color: rgb(34, 211, 238);
-  border-color: rgba(99, 102, 241, 0.35);
+  color: var(--pl-cyan);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
   background: rgba(8, 47, 73, 0.45);
 }
 
 .paper-lab-regime-banner {
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
   background: rgba(8, 47, 73, 0.25);
 }
 
@@ -269,17 +269,17 @@
   font-size: 0.75rem;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  background: rgba(99, 102, 241, 0.15);
-  color: rgb(165, 243, 252);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: var(--accent-muted);
+  color: var(--accent-text);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
 .paper-lab-outcome-win {
-  color: rgb(74, 222, 128);
+  color: var(--pnl-positive);
 }
 
 .paper-lab-outcome-loss {
-  color: rgb(248, 113, 113);
+  color: var(--pl-red);
 }
 
 .paper-lab-mode-banner {
@@ -293,13 +293,13 @@
 }
 
 .paper-lab-mode-banner--rule {
-  border: 1px solid rgba(74, 222, 128, 0.25);
+  border: 1px solid color-mix(in srgb, var(--pnl-positive) 25%, transparent);
   background: rgba(20, 83, 45, 0.2);
   color: rgb(187, 247, 208);
 }
 
 .paper-lab-mode-banner--llm {
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  border: 1px solid color-mix(in srgb, var(--pl-purple) 30%, transparent);
   background: rgba(76, 29, 149, 0.2);
   color: rgb(221, 214, 254);
 }
@@ -372,8 +372,8 @@
   scroll-snap-align: start;
   padding: 0.5rem 0.55rem;
   border-radius: 10px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: linear-gradient(145deg, rgba(20, 28, 48, 0.9), rgba(11, 17, 33, 0.92));
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 18%, transparent);
+  background: linear-gradient(145deg, rgba(20, 28, 48, 0.9), color-mix(in srgb, var(--pl-bg-soft) 92%, transparent));
   cursor: default;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
   position: relative;
@@ -383,20 +383,20 @@
 }
 
 .paper-lab-agent-tile[data-style*="swing"] {
-  background: linear-gradient(145deg, rgba(14, 116, 144, 0.22), rgba(11, 17, 33, 0.92));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pl-blue) 22%, transparent), color-mix(in srgb, var(--pl-bg-soft) 92%, transparent));
 }
 
 .paper-lab-agent-tile[data-style*="momentum"] {
-  background: linear-gradient(145deg, rgba(52, 211, 153, 0.14), rgba(11, 17, 33, 0.92));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pnl-positive) 14%, transparent), color-mix(in srgb, var(--pl-bg-soft) 92%, transparent));
 }
 
 .paper-lab-agent-tile[data-style*="contrarian"],
 .paper-lab-agent-tile[data-style*="devil"] {
-  background: linear-gradient(145deg, rgba(167, 139, 250, 0.14), rgba(11, 17, 33, 0.92));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pl-purple) 14%, transparent), color-mix(in srgb, var(--pl-bg-soft) 92%, transparent));
 }
 
 .paper-lab-agent-tile[data-style*="trend"] {
-  background: linear-gradient(145deg, rgba(96, 165, 250, 0.14), rgba(11, 17, 33, 0.92));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--pl-blue) 14%, transparent), color-mix(in srgb, var(--pl-bg-soft) 92%, transparent));
 }
 
 .paper-lab-agent-tile[role="button"] {
@@ -404,14 +404,14 @@
 }
 
 .paper-lab-agent-tile:hover {
-  border-color: rgba(56, 189, 248, 0.35);
+  border-color: color-mix(in srgb, var(--pl-blue) 35%, transparent);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
 }
 
 .paper-lab-agent-tile--active {
-  border-color: rgba(99, 102, 241, 0.55);
-  box-shadow: 0 0 22px rgba(99, 102, 241, 0.2), 0 8px 28px rgba(0, 0, 0, 0.35);
+  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--accent) 20%, transparent), var(--shadow-lg);
   transform: translateY(-1px);
 }
 
@@ -433,9 +433,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 0.25rem;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 25%, transparent);
   background: rgba(17, 24, 39, 0.8);
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   font-size: 0.65rem;
   font-weight: 700;
   cursor: pointer;
@@ -443,9 +443,17 @@
   line-height: 1;
 }
 
+/* Invisible 44x44px hit-area overlay — keeps the visible glyph small (20x20px,
+   the card has no room to spare) while meeting the touch-target minimum. */
+.paper-lab-agent-tile__details-btn::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+}
+
 .paper-lab-agent-tile__details-btn:hover {
-  border-color: rgba(56, 189, 248, 0.45);
-  color: rgb(165, 243, 252);
+  border-color: color-mix(in srgb, var(--pl-blue) 45%, transparent);
+  color: var(--accent-text);
 }
 
 .paper-lab-agent-tile__avatar {
@@ -458,23 +466,23 @@
   justify-content: center;
   font-size: 0.6rem;
   font-weight: 700;
-  background: rgba(99, 102, 241, 0.12);
-  color: rgb(165, 243, 252);
-  border: 2px solid rgba(99, 102, 241, 0.35);
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent-text);
+  border: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 0 10px var(--accent-muted);
 }
 
 .paper-lab-agent-tile__name {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgb(248, 250, 252);
+  color: var(--text-primary);
   line-height: 1.2;
   max-width: 72px;
 }
 
 .paper-lab-agent-tile__style {
   font-size: 0.55rem;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   display: block;
   max-width: 72px;
   overflow: hidden;
@@ -499,7 +507,7 @@
 .paper-lab-agent-tile__value {
   font-size: 0.7rem;
   font-weight: 600;
-  color: rgb(226, 232, 240);
+  color: var(--pl-text);
 }
 
 .paper-lab-drawer-grid {
@@ -515,7 +523,7 @@
 }
 
 .paper-lab-drawer-grid dd {
-  color: rgb(226, 232, 240);
+  color: var(--pl-text);
   margin: 0;
   text-align: right;
 }
@@ -545,10 +553,10 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid rgba(148, 163, 184, 0.2);
-  background: rgb(11, 17, 33);
+  border-left: 1px solid color-mix(in srgb, var(--pl-muted) 20%, transparent);
+  background: var(--pl-bg-soft);
   box-shadow: -8px 0 40px rgba(0, 0, 0, 0.45);
-  z-index: 60;
+  z-index: var(--z-overlay);
 }
 
 .paper-lab-side-drawer__header {
@@ -556,8 +564,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
-  color: rgb(248, 250, 252);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 15%, transparent);
+  color: var(--text-primary);
 }
 
 .paper-lab-side-drawer__body {
@@ -571,10 +579,10 @@
   max-width: min(560px, 92vw);
   width: 100%;
   padding: 0;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 20%, transparent);
   border-radius: 0.5rem;
-  background: rgb(11, 17, 33);
-  color: rgb(226, 232, 240);
+  background: var(--pl-bg-soft);
+  color: var(--pl-text);
 }
 
 .paper-lab-details-dialog::backdrop {
@@ -586,7 +594,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 15%, transparent);
 }
 
 .paper-lab-details-dialog__body {
@@ -608,25 +616,25 @@
 .paper-lab-action--buy {
   background: rgba(20, 83, 45, 0.5);
   color: rgb(134, 239, 172);
-  border: 1px solid rgba(74, 222, 128, 0.35);
+  border: 1px solid color-mix(in srgb, var(--pnl-positive) 35%, transparent);
 }
 
 .paper-lab-action--hold {
   background: rgba(51, 65, 85, 0.5);
-  color: rgb(203, 213, 225);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: var(--pl-muted);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 25%, transparent);
 }
 
 .paper-lab-action--reduce {
   background: rgba(120, 53, 15, 0.45);
   color: rgb(253, 230, 138);
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  border: 1px solid color-mix(in srgb, var(--warning) 35%, transparent);
 }
 
 .paper-lab-action--sell {
   background: rgba(127, 29, 29, 0.45);
   color: rgb(252, 165, 165);
-  border: 1px solid rgba(248, 113, 113, 0.35);
+  border: 1px solid color-mix(in srgb, var(--pl-red) 35%, transparent);
 }
 
 .paper-lab-status-pill {
@@ -659,7 +667,7 @@
 
 .paper-lab-status--expired {
   background: rgba(51, 65, 85, 0.55);
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
 }
 
 .paper-lab-status--invalid {
@@ -673,12 +681,12 @@
 }
 
 .paper-lab-validation-skipped {
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
 }
 
 /* ── CIO card ── */
 .paper-lab-cio-card {
-  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 12%, transparent);
   padding-bottom: 0.75rem;
 }
 
@@ -691,7 +699,7 @@
   flex-wrap: wrap;
   gap: 0.5rem 1rem;
   font-size: 0.75rem;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -703,27 +711,31 @@
 /* ── JSON audit dialog ── */
 .paper-lab-json-btn {
   font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
+  min-height: 44px;
+  padding: 0.2rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 0.25rem;
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 25%, transparent);
   background: rgba(30, 41, 59, 0.6);
-  color: rgb(203, 213, 225);
+  color: var(--pl-muted);
   cursor: pointer;
 }
 
 .paper-lab-json-btn:hover {
-  border-color: rgba(99, 102, 241, 0.35);
-  color: rgb(165, 243, 252);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent-text);
 }
 
 .paper-lab-json-dialog {
   max-width: min(640px, 92vw);
   width: 100%;
   padding: 0;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 20%, transparent);
   border-radius: 0.5rem;
-  background: rgb(15, 23, 42);
-  color: rgb(226, 232, 240);
+  background: var(--pl-bg-soft);
+  color: var(--pl-text);
 }
 
 .paper-lab-json-dialog::backdrop {
@@ -735,7 +747,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  border-bottom: 1px solid color-mix(in srgb, var(--pl-muted) 15%, transparent);
 }
 
 .paper-lab-json-dialog__body {
@@ -750,13 +762,13 @@
 .paper-lab-order-ref {
   background: none;
   border: none;
-  color: rgb(148, 163, 184);
+  color: var(--pl-muted);
   cursor: pointer;
   padding: 0;
 }
 
 .paper-lab-order-ref:hover {
-  color: rgb(34, 211, 238);
+  color: var(--pl-cyan);
 }
 
 .paper-lab-reasoning-cell {
@@ -773,7 +785,7 @@
 .positions-table-wrapper {
   overflow-x: auto;
   border-radius: 0.5rem;
-  border: 1px solid rgba(148, 163, 184, 0.12);
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 12%, transparent);
 }
 
 .positions-table {
@@ -788,8 +800,8 @@
 .paper-lab-battle-card {
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  background: linear-gradient(180deg, rgba(22, 30, 48, 0.75), rgba(11, 17, 33, 0.88));
+  border: 1px solid color-mix(in srgb, var(--pl-muted) 14%, transparent);
+  background: linear-gradient(180deg, rgba(22, 30, 48, 0.75), color-mix(in srgb, var(--pl-bg-soft) 88%, transparent));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
@@ -811,8 +823,8 @@
 
 /* ── Decisions log row emphasis ── */
 .paper-lab-decision-row--active {
-  background: rgba(99, 102, 241, 0.04);
-  border-left: 3px solid rgba(99, 102, 241, 0.45);
+  background: color-mix(in srgb, var(--accent) 4%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .paper-lab-decision-row--active td:first-child {
@@ -837,15 +849,15 @@
   border-radius: 999px;
   font-size: 0.55rem;
   font-weight: 700;
-  background: rgba(148, 163, 184, 0.2);
-  color: rgb(148, 163, 184);
+  background: color-mix(in srgb, var(--pl-muted) 20%, transparent);
+  color: var(--pl-muted);
   cursor: help;
 }
 
 .paper-lab-link-btn {
   background: none;
   border: none;
-  color: rgb(34, 211, 238);
+  color: var(--pl-cyan);
   cursor: pointer;
   padding: 0;
 }
@@ -867,7 +879,7 @@
 
 .paper-lab-battle-vote--hold {
   background: rgba(51, 65, 85, 0.45);
-  color: rgb(203, 213, 225);
+  color: var(--pl-muted);
 }
 
 .paper-lab-battle-vote--sell {

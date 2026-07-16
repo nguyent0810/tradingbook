@@ -2,7 +2,7 @@
 
 import type { PaperLabPageDto, RecentBattleSummaryDto } from "@/lib/paper-lab/types/arena-dto";
 import type { OpenPositionRowDto } from "@/lib/paper-lab/types/arena-dto";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BattleReplayPanel } from "./BattleReplayPanel";
 import { OpenPositionsTable } from "./OpenPositionsTable";
 import "./paper-lab-command-center.css";
@@ -19,7 +19,24 @@ export function PaperLabWorkspaceTabs({
   battleReplay: PaperLabPageDto["battleReplay"];
   recentBattles: RecentBattleSummaryDto[];
 }) {
-  const [tab, setTab] = useState<WorkspaceTab>("positions");
+  // Tab lives in the URL (?tab=battle) — consistent with the sibling section
+  // index's ?focus= deep-linking, and survives browser back/forward instead of
+  // silently resetting to "positions".
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tab: WorkspaceTab = searchParams.get("tab") === "battle" ? "battle" : "positions";
+
+  const setTab = (next: WorkspaceTab) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === "positions") {
+      params.delete("tab");
+    } else {
+      params.set("tab", next);
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
 
   return (
     <section className="paper-lab-workspace" data-testid="paper-lab-workspace">

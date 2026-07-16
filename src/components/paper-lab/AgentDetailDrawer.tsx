@@ -28,7 +28,7 @@ export function AgentDetailDrawer({
       onClose={onClose}
       testId="paper-lab-agent-drawer"
     >
-      <p className="text-xs text-slate-400 mb-3">{portfolio.style}</p>
+      <p className="text-xs text-[var(--text-tertiary)] mb-3">{portfolio.style}</p>
 
       <dl className="paper-lab-drawer-grid">
         <div>
@@ -73,8 +73,8 @@ export function AgentDetailDrawer({
 
       {Object.keys(portfolio.sectorExposure).length > 0 && (
         <div className="mt-3">
-          <div className="text-xs font-semibold text-slate-400 mb-1">Sector exposure</div>
-          <ul className="text-xs text-slate-300 space-y-0.5">
+          <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Sector exposure</div>
+          <ul className="text-xs text-[var(--text-secondary)] space-y-0.5">
             {Object.entries(portfolio.sectorExposure).map(([k, v]) => (
               <li key={k}>
                 {k}: {v.toFixed(0)}%

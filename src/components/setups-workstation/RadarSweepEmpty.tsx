@@ -11,9 +11,9 @@ export function RadarSweepEmpty({ "data-testid": testId = "setups-radar-sweep" }
       data-testid={testId}
       aria-hidden
     >
-      <div className="absolute inset-0 rounded-full border border-indigo-500/20" />
-      <div className="absolute inset-3 rounded-full border border-indigo-500/10" />
-      <div className="absolute inset-6 rounded-full border border-indigo-500/5" />
+      <div className="absolute inset-0 rounded-full border border-[var(--accent)]/20" />
+      <div className="absolute inset-3 rounded-full border border-[var(--accent)]/10" />
+      <div className="absolute inset-6 rounded-full border border-[var(--accent)]/5" />
       <div
         className="sw-radar-sweep__ring absolute inset-0 rounded-full"
         style={{
@@ -21,7 +21,7 @@ export function RadarSweepEmpty({ "data-testid": testId = "setups-radar-sweep" }
             "conic-gradient(from 0deg, transparent 0deg, rgba(99,102,241,0.35) 40deg, transparent 80deg)",
         }}
       />
-      <div className="h-2 w-2 rounded-full bg-indigo-400/80 shadow-[0_0_12px_rgba(99,102,241,0.6)]" />
+      <div className="h-2 w-2 rounded-full bg-[var(--accent-hover)]/80 shadow-[0_0_12px_rgba(99,102,241,0.6)]" />
     </div>
   );
 }

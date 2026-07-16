@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useBreadcrumbLabel } from "@/components/breadcrumb-label-store";
 
 /**
  * Global wayfinding for the authenticated shell.
@@ -32,15 +33,21 @@ function labelFor(segment: string): string {
 export function AppBreadcrumbs() {
   const pathname = usePathname() ?? "";
   const segments = pathname.split("/").filter(Boolean);
+  // Only the last crumb can ever be a dynamic segment a leaf page overrides
+  // (agents/[slug], battles/[id]) — intermediate segments are always static.
+  const overrideLabel = useBreadcrumbLabel(pathname);
 
   // Flat top-level route → the active nav item is enough. No breadcrumb.
   if (segments.length < 2) return null;
 
-  const crumbs = segments.map((segment, i) => ({
-    label: labelFor(segment),
-    href: "/" + segments.slice(0, i + 1).join("/"),
-    isLast: i === segments.length - 1,
-  }));
+  const crumbs = segments.map((segment, i) => {
+    const isLast = i === segments.length - 1;
+    return {
+      label: isLast && overrideLabel ? overrideLabel : labelFor(segment),
+      href: "/" + segments.slice(0, i + 1).join("/"),
+      isLast,
+    };
+  });
 
   return (
     <nav className="cd-breadcrumbs" aria-label="Breadcrumb">

@@ -23,6 +23,7 @@ export type DashboardCommandPanelProps = {
   evidence: EvidenceChipDto[];
   blockers: ActionableBlockerDto[];
   vnindexHistory: VnindexHistoryPoint[];
+  vnindexHistoryError?: boolean;
 };
 
 export function DashboardCommandPanel({
@@ -34,6 +35,7 @@ export function DashboardCommandPanel({
   evidence,
   blockers,
   vnindexHistory,
+  vnindexHistoryError = false,
 }: DashboardCommandPanelProps) {
   const gauge = resolveHostilityGauge(verdict.gate1Resolution.canonical);
 
@@ -63,7 +65,7 @@ export function DashboardCommandPanel({
           <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} />
         </div>
         <div className="command-deck-panel__hero-charts">
-          <DashboardVnindexTrendChartLazy history={vnindexHistory} />
+          <DashboardVnindexTrendChartLazy history={vnindexHistory} error={vnindexHistoryError} />
           <DashboardHostilityGaugeLazy gauge={gauge} />
         </div>
       </div>

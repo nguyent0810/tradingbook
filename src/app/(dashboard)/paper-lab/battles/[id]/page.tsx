@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
+import { BreadcrumbLabelSetter } from "@/components/breadcrumb-label-setter";
 import { prisma } from "@/lib/prisma";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
 import { buildDecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
@@ -31,11 +32,12 @@ export default async function BattleDetailPage({
 
   if (!battle) notFound();
 
+  const battleLabel = `${battle.sessionDate.toISOString().slice(0, 10)} — ${battle.symbol}`;
+
   return (
-    <PaperLabPanel
-      title={`${battle.sessionDate.toISOString().slice(0, 10)} — ${battle.symbol}`}
-      testId="battle-replay-detail"
-    >
+    <>
+      <BreadcrumbLabelSetter label={battleLabel} />
+      <PaperLabPanel title={battleLabel} testId="battle-replay-detail">
       <div className="safe-table-wrap paper-lab-table-wrap">
         <table className="paper-lab-table safe-table">
           <thead>
@@ -81,6 +83,7 @@ export default async function BattleDetailPage({
           </tbody>
         </table>
       </div>
-    </PaperLabPanel>
+      </PaperLabPanel>
+    </>
   );
 }

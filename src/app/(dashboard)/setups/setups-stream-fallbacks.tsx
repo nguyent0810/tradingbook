@@ -55,7 +55,7 @@ export function SetupsCandidatesFallback() {
         <LoadingSkeleton className="mt-2 h-5 w-56 rounded-md" />
       </header>
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,280px)_1fr]">
-        <LoadingSkeletonGroup rows={4} className="rounded-lg border border-slate-800/40 p-3" />
+        <LoadingSkeletonGroup rows={4} className="rounded-lg border border-[var(--border-primary)]/40 p-3" />
         <LoadingSkeleton className="min-h-[200px] w-full rounded-xl" />
       </div>
     </section>

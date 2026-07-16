@@ -14,7 +14,7 @@
   isolation: isolate;
   min-height: 100vh;
   overflow: hidden;
-  color: #e9edf6;
+  color: var(--cd-text);
   background:
     radial-gradient(circle at 15% -10%, rgba(79, 70, 229, 0.22), transparent 38%),
     radial-gradient(circle at 85% -20%, rgba(16, 185, 129, 0.18), transparent 44%),
@@ -58,7 +58,7 @@
 }
 
 .tosv3-page-shell.tosv3-workstation {
-  color: #dbe7f8;
+  color: var(--cd-text);
 }
 
 .tosv3-page-shell__flow {
@@ -203,7 +203,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #9eb0c9;
+  color: var(--cd-text-muted);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -212,13 +212,13 @@
 
 .tosv3-layout-dock__tab:hover,
 .tosv3-setups-dock__tab:hover {
-  color: #dbe7f8;
+  color: var(--cd-text);
 }
 
 .tosv3-layout-dock__tab.is-active,
 .tosv3-setups-dock__tab.is-active {
-  color: #eef6ff;
-  border-bottom-color: #2dd4bf;
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-hover);
 }
 
 .tosv3-layout-dock__tab:focus-visible,
@@ -297,12 +297,12 @@
   border: 1px solid rgba(102, 128, 159, 0.32);
   background: rgba(15, 23, 42, 0.6);
   font-size: 0.62rem;
-  color: #b6c8e2;
+  color: var(--cd-text-muted);
   line-height: 1.35;
 }
 
 .tosv3-meta-chip--muted {
-  color: #8fa0bc;
+  color: var(--cd-text-dim);
   border-color: rgba(102, 128, 159, 0.22);
 }
 
@@ -353,13 +353,13 @@
   margin: 0.15rem 0 0;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #eef6ff;
+  color: var(--text-primary);
 }
 
 .tosv3-section__lead {
   margin: 0.2rem 0 0;
   font-size: 0.68rem;
-  color: #9eb0c9;
+  color: var(--cd-text-muted);
   line-height: 1.35;
 }
 
@@ -394,7 +394,7 @@
 }
 
 .tosv3-ledger-summary__lines--muted {
-  color: #9eb0c9;
+  color: var(--cd-text-muted);
   font-size: 0.64rem;
 }
 
@@ -402,7 +402,7 @@
 .tosv3-ledger-summary__subsection-title {
   margin: 0.35rem 0 0;
   font-size: 0.6rem;
-  color: #8fa0bc;
+  color: var(--cd-text-dim);
 }
 
 .tosv3-ledger-summary__subsection-title {
@@ -428,14 +428,14 @@
   margin: 0;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #eef6ff;
+  color: var(--text-primary);
 }
 
 .tosv3-ledger-table-section__hint,
 .tosv3-ledger-table-section__units {
   margin: 0.2rem 0 0;
   font-size: 0.62rem;
-  color: #9eb0c9;
+  color: var(--cd-text-muted);
   line-height: 1.35;
 }
 

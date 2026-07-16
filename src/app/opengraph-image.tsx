@@ -32,7 +32,9 @@ export default function OpengraphImage() {
               borderRadius: "10px",
               background: "rgba(0, 229, 255, 0.12)",
               border: "1px solid rgba(0, 229, 255, 0.3)",
-              color: "#00e5ff",
+              // Must stay in sync with tokens.css's --accent (#6366f1) — this file
+              // runs outside the CSS cascade and can't reference var(--token).
+              color: "#6366f1",
               fontSize: "26px",
               fontWeight: 700,
             }}
@@ -68,7 +70,9 @@ export default function OpengraphImage() {
             }}
           >
             Know which opportunities&nbsp;
-            <span style={{ color: "#00e5ff" }}>deserve your capital.</span>
+            {/* Must stay in sync with tokens.css's --accent (#6366f1) — this file
+                runs outside the CSS cascade and can't reference var(--token). */}
+            <span style={{ color: "#6366f1" }}>deserve your capital.</span>
           </div>
         </div>
 

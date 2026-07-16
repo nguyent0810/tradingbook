@@ -11,6 +11,7 @@ import {
 } from "@/lib/trading-display-labels";
 import { EmptyStateWithReason } from "@/components/ui/empty-state-with-reason";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { PriceWithUnit } from "@/components/ui/price-with-unit";
 
 function fmtRatio(n: number | null): string {
@@ -72,7 +73,9 @@ export async function MomentumWatchSection({ embedded = false }: { embedded?: bo
               : "src/components/momentum-watch-section.tsx · getMomentumWatchRowsForPhase1"
           }
           data-testid="momentum-watch-db-error"
-        />
+        >
+          <RefreshButton />
+        </ErrorStateWithEvidence>
       ) : rows.length === 0 ? (
         <EmptyStateWithReason
           title="No momentum watch names"

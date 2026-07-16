@@ -14,7 +14,7 @@ function toneClass(tone: PipelineStageTone): string {
     case "danger":
       return "sw-pipeline-stage__value--danger";
     default:
-      return "text-slate-200";
+      return "text-[var(--text-primary)]";
   }
 }
 
@@ -25,7 +25,7 @@ export function PipelineMetrics({ latestScan, nearMissCount, gate1Label }: Pipel
         className="sw-glass-panel px-4 py-3"
         data-testid="setups-pipeline-summary-empty"
       >
-        <span className="font-mono text-[10px] uppercase tracking-wide text-slate-500">
+        <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
           No scan run — pipeline counts unavailable
         </span>
       </div>
@@ -43,8 +43,8 @@ export function PipelineMetrics({ latestScan, nearMissCount, gate1Label }: Pipel
       <div className="flex flex-wrap items-stretch gap-1">
         {stages.map((stage, index) => (
           <div key={stage.id} className="flex items-center">
-            <div className="flex min-w-[7.5rem] flex-col gap-0.5 rounded-lg border border-slate-800/40 bg-slate-950/20 px-3 py-2">
-              <span className="font-mono text-[10px] uppercase tracking-wide text-slate-500">
+            <div className="flex min-w-[7.5rem] flex-col gap-0.5 rounded-lg border border-[var(--border-primary)]/40 bg-[var(--bg-primary)]/20 px-3 py-2">
+              <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
                 {stage.label}
               </span>
               <span
@@ -52,7 +52,7 @@ export function PipelineMetrics({ latestScan, nearMissCount, gate1Label }: Pipel
               >
                 {stage.value}
               </span>
-              <span className="font-mono text-[10px] text-slate-500">{stage.hint}</span>
+              <span className="font-mono text-[10px] text-[var(--text-tertiary)]">{stage.hint}</span>
             </div>
             {index < stages.length - 1 ? (
               <PipelineConnector active={stage.active && stages[index + 1]!.active} />
@@ -61,7 +61,7 @@ export function PipelineMetrics({ latestScan, nearMissCount, gate1Label }: Pipel
         ))}
       </div>
       <span
-        className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wide text-slate-500"
+        className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]"
         title={latestScan.id}
       >
         Run {fmtRunDate(latestScan.runAt)}

@@ -212,7 +212,7 @@ export function SetupsClosestSymbolsSection({
               </div>
 
               <details className="details-disclosure mt-3 border-t pt-3 text-xs !border-[var(--border-primary)]">
-                <summary className="cursor-pointer font-medium outline-none !text-[var(--accent-text)]">
+                <summary className="cursor-pointer font-medium outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-primary)] !text-[var(--accent-text)]">
                   <span className="details-marker-closed mr-1 inline !text-[var(--text-tertiary)]" aria-hidden>
                     ▸
                   </span>

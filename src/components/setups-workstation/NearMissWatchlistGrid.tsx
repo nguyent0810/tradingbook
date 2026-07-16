@@ -29,12 +29,12 @@ export function NearMissWatchlistGrid({
         className="sw-glass-panel grid grid-cols-1 gap-0 lg:grid-cols-[1fr_320px]"
         data-testid="setups-near-miss-panel"
       >
-        <div className="min-w-0 border-slate-800/40 lg:border-r">
-          <header className="flex items-center justify-between border-b border-slate-800/40 px-4 py-3">
-            <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">
+        <div className="min-w-0 border-[var(--border-primary)]/40 lg:border-r">
+          <header className="flex items-center justify-between border-b border-[var(--border-primary)]/40 px-4 py-3">
+            <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
               Near-miss pipeline
             </span>
-            <span className="font-mono text-xs tabular-nums text-amber-400/90">
+            <span className="font-mono text-xs tabular-nums text-[var(--warning)]/90">
               {closestRows.length}
             </span>
           </header>
@@ -51,10 +51,10 @@ export function NearMissWatchlistGrid({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800/40 font-mono text-[10px] uppercase tracking-wide text-slate-500">
-                    <th className="border-r border-slate-800/40 px-3 py-2">Symbol</th>
-                    <th className="border-r border-slate-800/40 px-3 py-2">Status</th>
-                    <th className="border-r border-slate-800/40 px-3 py-2 text-right">Close</th>
+                  <tr className="border-b border-[var(--border-primary)]/40 font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
+                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2">Symbol</th>
+                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2">Status</th>
+                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2 text-right">Close</th>
                     <th className="px-3 py-2">Blocker</th>
                   </tr>
                 </thead>
@@ -74,22 +74,22 @@ export function NearMissWatchlistGrid({
                     return (
                       <tr
                         key={`${row.symbol}-${row.stageRank}`}
-                        className={`sw-near-miss-row border-b border-slate-800/30 ${
+                        className={`sw-near-miss-row border-b border-[var(--border-primary)]/30 ${
                           isAwaiting ? "hover:bg-white/5" : ""
                         }`}
                       >
-                        <td className="border-r border-slate-800/40 px-3 py-2 font-mono font-semibold text-slate-200">
+                        <td className="border-r border-[var(--border-primary)]/40 px-3 py-2 font-mono font-semibold text-[var(--text-primary)]">
                           {row.symbol}
                         </td>
-                        <td className="border-r border-slate-800/40 px-3 py-2">
-                          <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 font-mono text-[10px] text-amber-300">
+                        <td className="border-r border-[var(--border-primary)]/40 px-3 py-2">
+                          <span className="rounded border border-[var(--warning)]/30 bg-[var(--warning)]/10 px-1.5 py-0.5 font-mono text-[10px] text-[var(--warning)]">
                             {displayNearMissDiagnosticStatus(status)}
                           </span>
                         </td>
-                        <td className="border-r border-slate-800/40 px-3 py-2 text-right font-mono tabular-nums text-slate-300">
+                        <td className="border-r border-[var(--border-primary)]/40 px-3 py-2 text-right font-mono tabular-nums text-[var(--text-secondary)]">
                           {row.close > 0 ? fmtThousands(row.close) : "—"}
                         </td>
-                        <td className="px-3 py-2 text-slate-400" title={blocker}>
+                        <td className="px-3 py-2 text-[var(--text-tertiary)]" title={blocker}>
                           {blocker.length > 48 ? `${blocker.slice(0, 47)}…` : blocker}
                         </td>
                       </tr>
@@ -102,7 +102,7 @@ export function NearMissWatchlistGrid({
         </div>
 
         <aside className="min-w-0 p-4">
-          <p className="mb-3 font-mono text-[10px] uppercase tracking-wide text-slate-500">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
             RS checklist
           </p>
           {closestRows.length > 0 ? (
@@ -119,7 +119,7 @@ export function NearMissWatchlistGrid({
           ) : rsPanel && rsPanel.rows.length > 0 ? (
             <SetupsRsWatchlistV3 panel={rsPanel} />
           ) : (
-            <p className="text-xs text-slate-500">No RS diagnostics available.</p>
+            <p className="text-xs text-[var(--text-tertiary)]">No RS diagnostics available.</p>
           )}
         </aside>
       </div>
@@ -127,10 +127,10 @@ export function NearMissWatchlistGrid({
       {rsPanel && rsPanel.rows.length > 0 && closestRows.length > 0 ? (
         <div className="sw-glass-panel p-4">
           <header className="mb-3 flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wide text-slate-400">
+            <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
               Relative strength watchlist
             </span>
-            <span className="font-mono text-xs tabular-nums text-slate-400">
+            <span className="font-mono text-xs tabular-nums text-[var(--text-tertiary)]">
               {rsPanel.rows.length}
             </span>
           </header>

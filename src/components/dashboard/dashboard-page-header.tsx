@@ -50,7 +50,7 @@ export function DashboardPageHeader({ cta, slim = false }: Props) {
         {cta.tertiaryHref && cta.tertiaryLabel ? (
           <Link
             href={cta.tertiaryHref}
-            className="text-xs text-slate-500 hover:text-slate-300 self-center ml-1"
+            className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] self-center ml-1"
             data-testid="dashboard-header-tertiary-cta"
           >
             {cta.tertiaryLabel}

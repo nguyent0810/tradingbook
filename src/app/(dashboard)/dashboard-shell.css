@@ -294,7 +294,7 @@
 /* Entire row must elevate above later <li> blocks; inner z-index alone cannot beat sibling list items. */
 .setups-diagnostics-buckets > li.diagnostics-bucket-open {
   position: relative;
-  z-index: 100;
+  z-index: var(--z-modal);
   isolation: isolate;
 }
 
@@ -1019,6 +1019,12 @@
 
 .dash-ladder__bar-seg {
   min-width: 2px;
+  /* Animates on data change (once per scan run), not per-frame/on scroll or
+     hover, so the reflow cost here is low-frequency. A `transform: scaleX()`
+     rewrite would need every segment absolutely positioned with a computed
+     left offset (flex-grow's proportional redistribution can't be replicated
+     by scaling one segment in isolation) — deferred as disproportionate
+     effort for a rarely-triggered transition. */
   transition: flex-grow 0.15s ease;
 }
 
@@ -1043,7 +1049,7 @@
 }
 
 .dash-ladder__bar-seg--avoid {
-  background: color-mix(in srgb, var(--danger, #ef4444) 80%, var(--text-tertiary));
+  background: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary));
 }
 
 .dash-ladder__bar-seg--empty {
@@ -1094,7 +1100,7 @@
 }
 
 .dash-ladder__stage-dot--avoid {
-  background: color-mix(in srgb, var(--danger, #ef4444) 80%, var(--text-tertiary));
+  background: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary));
 }
 
 .dash-ladder__micro-bar {
@@ -1149,7 +1155,7 @@
 }
 
 .dash-blocker-details__strip--structure_broken {
-  background: var(--danger, #ef4444);
+  background: var(--danger);
 }
 
 .dash-blocker-details__strip--extension {
@@ -1433,6 +1439,10 @@
   color: var(--text-tertiary);
 }
 
+.dash-performance__empty--error {
+  color: var(--danger);
+}
+
 .dash-performance__stats {
   display: flex;
   flex-wrap: wrap;
@@ -1609,6 +1619,26 @@
   padding: 0 var(--space-6);
 }
 
+.app-shell-skip {
+  position: absolute;
+  left: var(--space-4);
+  top: -3.5rem;
+  z-index: var(--z-overlay);
+  padding: 0.5rem 0.875rem;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--bg-primary);
+  background: var(--accent-hover);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: top var(--transition-fast);
+}
+.app-shell-skip:focus {
+  top: var(--space-3);
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
 .app-shell-brand {
   display: flex;
   align-items: center;
@@ -1635,12 +1665,8 @@
   border-bottom: 1px solid var(--border-primary);
   background: var(--bg-secondary);
 }
-
-@media (min-width: 640px) {
-  .app-shell-mobile-nav {
-    display: none;
-  }
-}
+/* Hidden at >=768px by the more specific .command-deck-shell rule below —
+   this selector is always inside .command-deck-shell (see (dashboard)/layout.tsx). */
 
 .app-shell-mobile-nav-link {
   flex: 1;
@@ -2211,7 +2237,7 @@
   gap: var(--space-3);
   position: sticky;
   top: var(--app-header-height);
-  z-index: 20;
+  z-index: var(--z-sticky);
   padding: var(--space-3);
   margin: calc(-1 * var(--space-3));
   margin-bottom: 0;
@@ -2858,11 +2884,19 @@
 
 /* ===== Command Deck — Motion, A11y, Charts, Forms (Big Batch 4) ===== */
 
-/* --- Motion tokens --- */
+/* --- Motion tokens ---
+   Intentionally a separate scale from tokens.css's --transition-fast/base and
+   globals.css's --cd-motion-*: those are for micro-interactions (hover, focus,
+   toggle), this is for larger entrance/reveal choreography (zone stagger on
+   dashboard load) and uses a spring-like ease instead of the interaction curve. */
 .command-deck {
   --deck-motion-duration: 380ms;
   --deck-motion-duration-fast: 180ms;
   --deck-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* 72ms, above the ~30-50ms guideline for list/grid *item* stagger — but this
+     staggers ~5-6 large page-level zones (command band, opportunity section,
+     tomorrow's plan, ...), not list rows. A tight 40ms reads as rushed at
+     that scale; kept intentionally slower. */
   --deck-motion-stagger: 72ms;
 }
 
@@ -3028,7 +3062,7 @@
 .chart-frame__description {
   margin: var(--space-1) 0 0;
   font-size: var(--font-size-xs);
-  color: var(--text-muted);
+  color: var(--text-tertiary);
   line-height: var(--line-height-relaxed);
 }
 
@@ -3058,7 +3092,7 @@
   padding: var(--space-4);
   text-align: center;
   font-size: var(--font-size-sm);
-  color: var(--text-muted);
+  color: var(--text-tertiary);
 }
 
 .chart-frame__state-message--error {
@@ -3087,7 +3121,7 @@
   margin: 0;
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.625rem;
-  color: var(--text-muted);
+  color: var(--text-tertiary);
 }
 
 .chart-frame__tooltip-value {
@@ -3430,7 +3464,7 @@
   font-size: 0.52rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #5eead4;
+  color: var(--accent-hover);
   white-space: nowrap;
 }
 
@@ -3565,7 +3599,8 @@
 .tosv3-rs-card__evidence-toggle {
   border: 0;
   background: transparent;
-  padding: 0;
+  padding: 0.4rem;
+  margin: -0.4rem;
   font-size: 0.56rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3643,14 +3678,14 @@
 
 .tosv3-rs-row:hover,
 .tosv3-rs-row:focus-visible {
-  border-color: rgba(94, 234, 212, 0.42);
+  border-color: color-mix(in srgb, var(--accent-hover) 42%, transparent);
   outline: none;
 }
 
 .tosv3-rs-row.is-selected {
-  border-color: rgba(94, 234, 212, 0.55);
+  border-color: color-mix(in srgb, var(--accent-hover) 55%, transparent);
   background: rgba(16, 28, 42, 0.88);
-  box-shadow: inset 0 0 0 1px rgba(94, 234, 212, 0.15);
+  box-shadow: inset 0 0 0 1px var(--accent-muted);
 }
 
 .tosv3-rs-row__badge {
@@ -3796,8 +3831,8 @@
 
 .tosv3-btn--primary {
   color: #041018;
-  background: linear-gradient(180deg, #5eead4 0%, #2dd4bf 48%, #14b8a6 100%);
-  border-color: rgba(45, 212, 191, 0.45);
+  background: linear-gradient(180deg, var(--accent-hover) 0%, var(--accent) 100%);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 .tosv3-btn--primary:hover {
@@ -3933,8 +3968,8 @@
 }
 
 .tosv3-rs-table__row.is-selected td {
-  background: rgba(45, 212, 191, 0.1);
-  box-shadow: inset 2px 0 0 #2dd4bf;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .tosv3-rs-table__symbol {
@@ -4234,7 +4269,7 @@
 .tosv3-setups-stance__mode {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #5eead4;
+  color: var(--accent-hover);
   letter-spacing: 0.03em;
 }
 
@@ -4365,8 +4400,8 @@
 }
 
 .tosv3-setups-selector-table__row.is-selected td {
-  background: rgba(45, 212, 191, 0.12);
-  box-shadow: inset 2px 0 0 #2dd4bf;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: inset 2px 0 0 var(--accent);
 }
 
 .tosv3-setups-selector-table__symbol {
@@ -4795,7 +4830,7 @@
 }
 .tosv3-setups-page
   :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--cd-focus, #818cf8);
+  outline: 2px solid var(--cd-focus, var(--accent-hover));
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }
@@ -4825,7 +4860,7 @@
   color: var(--cd-text);
   background:
     radial-gradient(ellipse 100% 60% at 50% -10%, rgba(30, 58, 120, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 70% 40% at 0% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
+    radial-gradient(ellipse 70% 40% at 0% 80%, color-mix(in srgb, var(--accent) 5%, transparent) 0%, transparent 45%),
     linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, #04060c 100%);
 }
 
@@ -4892,7 +4927,7 @@
 }
 .tosv3-setups-page .tosv3-setups-selector-table__row--ready {
   box-shadow: inset 2px 0 0 var(--cd-cyan);
-  background: rgba(99, 102, 241, 0.06);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 .tosv3-setups-page .tosv3-rs-table__symbol,
 .tosv3-setups-page .tosv3-setups-selector-table__symbol,
@@ -4923,7 +4958,7 @@
   border: 1px solid transparent;
 }
 .tosv3-setups-page .tosv3-btn--primary:hover {
-  background: #5cf0ff;
+  background: var(--accent-hover);
 }
 .tosv3-setups-page .tosv3-btn--secondary {
   background: rgba(255, 255, 255, 0.04);
@@ -5041,7 +5076,7 @@
      the collapsed variant would be clamped back to ~240px without this. */
   min-width: 0;
   overflow: hidden;
-  height: 100vh;
+  height: 100dvh;
   position: sticky;
   top: 0;
   padding: var(--cd-space-4) var(--cd-space-3);
@@ -5050,6 +5085,13 @@
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   transition: width var(--cd-motion-fast, 0.15s) var(--cd-ease, ease);
+  /* Animating `width` on a flex item necessarily reflows its siblings each
+     frame — that's inherent to an in-place-shrinking sidebar, not something
+     `contain` can fully avoid without switching to an off-canvas/transform
+     pattern (a larger change deferred for now). `contain: layout` at least
+     stops this element's OWN internal content from adding extra reflow work
+     on top of that during the transition. */
+  contain: layout;
 }
 .app-shell-sidebar--collapsed {
   width: var(--app-shell-sidebar-collapsed-width, 4.5rem);
@@ -5353,7 +5395,7 @@
 .command-deck-shell .app-shell-mobile-nav
   :where(a, button, [role="button"]):focus-visible,
 .command-deck-shell .cd-breadcrumbs :where(a):focus-visible {
-  outline: 2px solid var(--cd-focus, #818cf8);
+  outline: 2px solid var(--cd-focus, var(--accent-hover));
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }

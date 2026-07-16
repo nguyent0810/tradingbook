@@ -84,8 +84,6 @@ body {
   --cd-success: #00e676;
   /* Brand accent — aligned to the approved indigo v2 spec (was neon cyan). */
   --cd-cyan: var(--accent-hover);
-  /* Not yet reconciled to indigo -- see docs/design/PLAYBOOK.md known-debt list */
-  --cd-auth-btn-hover-legacy: #5cf0ff;
   --cd-long: var(--long);
   --cd-short: var(--short);
   --cd-pnl-pos: var(--pnl-positive);
@@ -138,7 +136,16 @@ body {
   --cd-radius: 14px;
   --cd-radius-lg: 18px;
 
-  /* Focus + motion */
+  /* Focus + motion — --cd-motion-fast/--cd-ease intentionally carry the same
+     literal values as tokens.css's --transition-fast (150ms / same cubic-bezier),
+     just under the legacy --cd-* naming still referenced across command-deck/
+     paper-lab CSS as separate duration+easing parts (`transition: prop
+     var(--cd-motion-fast) var(--cd-ease)`), so they can't be aliased via var()
+     without changing that composition. --cd-motion-base (200ms) and
+     --cd-motion-slow (250ms) are a genuinely separate, slightly slower step
+     than --transition-base (250ms) — kept as-is, not collapsed into one value,
+     since changing an established transition duration risks a visible timing
+     regression without a dedicated motion QA pass. */
   --cd-focus: var(--accent-hover);
   --cd-focus-ring: 0 0 0 2px var(--accent-muted);
   --cd-motion-fast: 150ms;
@@ -251,10 +258,16 @@ body {
   color: var(--cd-text-dim);
   font-weight: var(--cd-fw-medium);
 }
+.cd-auth-label__required {
+  color: var(--danger);
+}
 .cd-auth-input {
   width: 100%;
+  min-height: 44px;
   padding: 0.625rem 0.75rem;
-  font-size: var(--cd-fs-base);
+  /* 16px, not --cd-fs-base (14px) — anything smaller triggers iOS Safari's
+     auto-zoom on focus, which is jarring on the first form most users hit. */
+  font-size: 1rem;
   color: var(--cd-text);
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--cd-border);
@@ -281,6 +294,36 @@ body {
 }
 .cd-auth-input[aria-invalid="true"]:focus {
   box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.45);
+}
+
+.cd-auth-password-wrap {
+  position: relative;
+}
+.cd-auth-password-wrap .cd-auth-input {
+  padding-right: 2.75rem;
+}
+.cd-auth-password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 2.75rem;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--cd-text-dim);
+  cursor: pointer;
+}
+.cd-auth-password-toggle:hover {
+  color: var(--cd-text);
+}
+.cd-auth-password-toggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+  border-radius: var(--cd-radius-sm);
 }
 
 /* Field-level error */
@@ -315,6 +358,7 @@ body {
   justify-content: center;
   gap: var(--cd-space-2);
   width: 100%;
+  min-height: 44px;
   margin-top: var(--cd-space-1);
   padding: 0.625rem 1rem;
   font-size: var(--cd-fs-base);
@@ -330,7 +374,7 @@ body {
     box-shadow var(--cd-motion-fast) var(--cd-ease);
 }
 .cd-auth-btn:hover:not(:disabled) {
-  background: var(--cd-auth-btn-hover-legacy);
+  background: var(--accent-text);
   box-shadow: var(--cd-glow-cyan);
 }
 .cd-auth-btn:disabled {
@@ -386,7 +430,7 @@ body {
 /* Keyboard focus ring — mirrors the dashboard foundation */
 .cd-auth
   :where(a, button, [role="button"], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--cd-focus, #818cf8);
+  outline: 2px solid var(--cd-focus, var(--accent-hover));
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }
@@ -444,7 +488,7 @@ body {
 .cd-landing__header {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: var(--z-dropdown);
   border-bottom: 1px solid var(--cd-border);
   background: rgba(6, 10, 20, 0.72);
   backdrop-filter: blur(14px);
@@ -500,7 +544,7 @@ body {
   color: #04121a;
 }
 .cd-landing-btn--primary:hover {
-  background: #5cf0ff;
+  background: var(--accent-hover);
   box-shadow: var(--cd-glow-cyan);
 }
 .cd-landing-btn--ghost {
@@ -510,7 +554,7 @@ body {
 }
 .cd-landing-btn--ghost:hover {
   color: var(--cd-text);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--cd-border);
 }
 .cd-landing-btn--lg {
   padding: 0.6875rem 1.375rem;
@@ -930,13 +974,13 @@ body {
   margin-top: var(--cd-space-4);
   height: 5px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--cd-border);
   overflow: hidden;
 }
 .cd-mock__meter-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #6366f1, #818cf8);
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
 }
 .cd-mock__rows {
   margin-top: var(--cd-space-4);
@@ -980,7 +1024,7 @@ body {
 
 /* Keyboard focus ring — same as the rest of the app */
 .cd-landing :where(a, button, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
-  outline: 2px solid var(--cd-focus, #818cf8);
+  outline: 2px solid var(--cd-focus, var(--accent-hover));
   outline-offset: 2px;
   border-radius: var(--cd-radius-sm, 8px);
 }
@@ -1002,7 +1046,7 @@ body {
   position: absolute;
   left: var(--cd-space-4);
   top: -3.5rem;
-  z-index: 60;
+  z-index: var(--z-overlay);
   padding: 0.5rem 0.875rem;
   font-size: var(--cd-fs-sm);
   font-weight: var(--cd-fw-semibold);
