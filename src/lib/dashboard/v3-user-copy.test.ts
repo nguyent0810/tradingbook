@@ -28,6 +28,10 @@ const RAW_ROW = {
       "VNINDEX above MA50: yes",
     ],
     rs20SpreadPct: 18.16,
+    rs50SpreadPct: 24.91,
+    stockAboveMa50: true,
+    indexAboveMa50: true,
+    trendLabel: "dual-uptrend" as const,
   },
 };
 

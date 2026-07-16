@@ -491,6 +491,11 @@ describe("buildDecisionCockpitDto — RS diagnostic (Batch D1)", () => {
       summary: "RS20 +6.00pp",
       lines: ["RS20: +6.00 pp vs VNINDEX — Outperforming VNINDEX over 20 sessions."],
       disclaimer: RS_DIAGNOSTIC_DISCLAIMER,
+      rs20SpreadPct: 6.0,
+      rs50SpreadPct: null,
+      stockAboveMa50: true,
+      indexAboveMa50: false,
+      trendLabel: "leading" as const,
     };
     const dto = buildDecisionCockpitDto(
       baseInput({
@@ -547,6 +552,11 @@ describe("buildDecisionCockpitDto — RS diagnostic (Batch D1)", () => {
       summary: "RS20 -2.00pp",
       lines: ["RS20: -2.00 pp vs VNINDEX — Underperforming VNINDEX over 20 sessions."],
       disclaimer: RS_DIAGNOSTIC_DISCLAIMER,
+      rs20SpreadPct: -2.0,
+      rs50SpreadPct: null,
+      stockAboveMa50: false,
+      indexAboveMa50: true,
+      trendLabel: "lagging" as const,
     };
     const dto = buildDecisionCockpitDto(
       baseInput({

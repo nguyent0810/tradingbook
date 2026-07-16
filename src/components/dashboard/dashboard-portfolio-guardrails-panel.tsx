@@ -19,7 +19,7 @@ export function DashboardPortfolioGuardrailsPanel({
 
   return (
     <section
-      className="dash-v2-card dash-v2-card--inset dash-portfolio-guardrails"
+      className="dash-card dash-portfolio-guardrails"
       data-testid="dashboard-portfolio-guardrails-panel"
       aria-labelledby="dashboard-portfolio-guardrails-heading"
     >

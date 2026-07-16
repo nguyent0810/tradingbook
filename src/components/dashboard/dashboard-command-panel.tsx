@@ -13,6 +13,7 @@ import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision
 import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
 import { DashboardVnindexTrendChartLazy } from "@/components/dashboard/dashboard-vnindex-trend-chart-lazy";
 import { DashboardHostilityGaugeLazy } from "@/components/dashboard/dashboard-hostility-gauge-lazy";
+import { DashboardConvictionRing } from "@/components/dashboard/dashboard-conviction-ring";
 
 export type DashboardCommandPanelProps = {
   freshness: MarketFreshnessDto;
@@ -41,7 +42,7 @@ export function DashboardCommandPanel({
 
   return (
     <section
-      className="dash-v2-command command-deck-panel"
+      className="dash-card dash-card--command"
       data-testid="dashboard-cockpit-zone-decision"
       aria-labelledby="dash-v2-command-heading"
     >
@@ -65,6 +66,7 @@ export function DashboardCommandPanel({
           <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} />
         </div>
         <div className="command-deck-panel__hero-charts">
+          <DashboardConvictionRing band={verdict.confidenceBand.value} />
           <DashboardVnindexTrendChartLazy history={vnindexHistory} error={vnindexHistoryError} />
           <DashboardHostilityGaugeLazy gauge={gauge} />
         </div>

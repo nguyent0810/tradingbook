@@ -13,12 +13,24 @@ import {
 export const RS_DIAGNOSTIC_DISCLAIMER =
   "Relative strength is a context signal — it helps prioritize, but doesn't approve or rank a setup on its own.";
 
+export type RsTrendLabel = "leading" | "dual-uptrend" | "lagging" | "neutral";
+
 export type RsDiagnosticUi = {
   summary: string;
   lines: string[];
   disclaimer: string;
   /** RS20 spread (pp) for rank-term preview — diagnostic only. */
   rs20SpreadPct: number | null;
+  /** RS50 spread (pp) — diagnostic only. */
+  rs50SpreadPct: number | null;
+  stockAboveMa50: boolean | null;
+  indexAboveMa50: boolean | null;
+  /**
+   * Single-word trend read for a status chip: "leading" (stock > MA50, index
+   * isn't), "dual-uptrend" (both above MA50), "lagging" (stock below MA50
+   * while index isn't), "neutral" (anything else / insufficient data).
+   */
+  trendLabel: RsTrendLabel;
 };
 
 export function interpretRs20Spread(rsSpreadPct: number): string {
@@ -77,10 +89,15 @@ export function formatRelativeStrengthDiagnosticForUi(
   if (stockMa) lines.push(stockMa);
   if (indexMa) lines.push(indexMa);
 
+  let trendLabel: RsTrendLabel = "neutral";
   if (d.stockLeadingMa50 === true) {
     lines.push("Stock above MA50 while VNINDEX is not — relative leadership vs benchmark.");
+    trendLabel = "leading";
   } else if (d.dualUptrendMa50 === true) {
     lines.push("Both stock and VNINDEX above MA50 — broad risk-on backdrop.");
+    trendLabel = "dual-uptrend";
+  } else if (d.stockAboveMa50 === false && d.indexAboveMa50 !== false) {
+    trendLabel = "lagging";
   }
 
   return {
@@ -88,5 +105,9 @@ export function formatRelativeStrengthDiagnosticForUi(
     lines,
     disclaimer: RS_DIAGNOSTIC_DISCLAIMER,
     rs20SpreadPct: r20?.rsSpreadPct ?? null,
+    rs50SpreadPct: r50?.rsSpreadPct ?? null,
+    stockAboveMa50: d.stockAboveMa50,
+    indexAboveMa50: d.indexAboveMa50,
+    trendLabel,
   };
 }

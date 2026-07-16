@@ -31,42 +31,40 @@ const TIER_ACCENT: Record<OpportunityCandidateDto["quality"], string> = {
 };
 
 function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
+  const hasWhy = row.primaryReasons.length > 0 || Boolean(row.healthSummary);
+
   return (
     <li
-      className="dash-near-miss__card"
+      className="dash-card dash-card--interactive dash-tile"
       data-testid={`dashboard-opportunity-${row.symbol}`}
       style={{ ["--dash-card-accent" as string]: TIER_ACCENT[row.quality] }}
     >
-      <div className="dash-near-miss__head">
-        <span className="font-mono font-semibold">{row.symbol}</span>
+      <div className="dash-tile__head">
+        <span className="dash-tile__symbol font-mono">{row.symbol}</span>
         <Badge tone={row.quality === "A" ? "tier-a" : "tier-b"} size="compact">
           {row.quality}
         </Badge>
         <Badge tone={healthLevelToBadgeTone(row.healthLevel)} size="compact">
           {row.healthLevel}
         </Badge>
-        <span className="dash-chip dash-chip--muted text-xs">
-          {formatSetupLadderStageLabel(row.ladderStage)}
-        </span>
         <span
-          className="dash-near-miss__score tabular-nums"
+          className="dash-tile__score tabular-nums"
           data-testid={`dashboard-opportunity-score-${row.symbol}`}
           title="Gate 2 rank score at time of scan"
         >
           {Math.round(row.rankScore)}
         </span>
       </div>
-      {row.rankSummary ? <p className="dash-near-miss__note text-sm font-medium">{row.rankSummary}</p> : null}
-      {row.primaryReasons.length > 0 ? (
-        <p className="dash-near-miss__wait text-sm">{row.primaryReasons.slice(0, 2).join(" · ")}</p>
-      ) : null}
-      {row.healthSummary ? (
-        <p className="dash-near-miss__meta text-xs">{row.healthSummary}</p>
-      ) : null}
-      <p className="dash-near-miss__meta text-xs" data-testid={`dashboard-opportunity-action-${row.symbol}`}>
+      <div className="dash-tile__meta-row">
+        <span className="dash-chip dash-chip--muted text-xs">
+          {formatSetupLadderStageLabel(row.ladderStage)}
+        </span>
+      </div>
+      {row.rankSummary ? <p className="dash-tile__insight text-sm font-medium">{row.rankSummary}</p> : null}
+      <p className="dash-tile__action text-xs" data-testid={`dashboard-opportunity-action-${row.symbol}`}>
         {row.actionHint}
       </p>
-      <div className="dash-near-miss__rs mt-2">
+      <div className="dash-tile__rs">
         <RelativeStrengthDiagnosticPanel
           diagnostic={row.rsDiagnostic}
           compact
@@ -74,6 +72,15 @@ function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
           testId={`dashboard-opportunity-rs-${row.symbol}`}
         />
       </div>
+      {hasWhy ? (
+        <details className="dash-tile__why">
+          <summary className="dash-tile__why-toggle">Why {row.quality}</summary>
+          {row.primaryReasons.length > 0 ? (
+            <p className="dash-tile__why-line text-xs">{row.primaryReasons.slice(0, 2).join(" · ")}</p>
+          ) : null}
+          {row.healthSummary ? <p className="dash-tile__why-line text-xs">{row.healthSummary}</p> : null}
+        </details>
+      ) : null}
     </li>
   );
 }
@@ -85,18 +92,15 @@ export function DashboardOpportunityCandidates({
   const rows = opportunity.candidates.slice(0, 5);
 
   return (
-    <div
-      className="dash-v2-card dash-v2-card--inset dash-v2-near-miss"
-      data-testid="dashboard-opportunity-candidates-panel"
-    >
-      <header className="dash-v2-card__header">
-        <h3 className="dash-v2-card__title">Best setups</h3>
-        <p className="dash-v2-card__lead">
+    <div className="dash-card dash-card--muted" data-testid="dashboard-opportunity-candidates-panel">
+      <header className="dash-card__header">
+        <h3 className="dash-card__title">Best setups</h3>
+        <p className="dash-card__lead">
           Surfaced Tier A/B candidates — validated, ready to review.
         </p>
       </header>
 
-      <ul className="dash-near-miss__list">
+      <ul className="dash-tile-grid">
         {rows.map((row) => (
           <CandidateCard key={row.candidateId} row={row} />
         ))}
