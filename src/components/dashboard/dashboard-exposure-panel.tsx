@@ -23,6 +23,34 @@ const STANCE_TONE: Record<VerdictDto["uxLevel"]["value"], string> = {
   TRADE: "dash-exposure__stance-box--success",
 };
 
+/**
+ * Prominent explanation + CTA for why book-risk caps are qualitative-only —
+ * mirrors DashboardPositionSizingPanel's EquityNotConfiguredBanner so the
+ * same underlying gap (no TRADING_ACCOUNT_EQUITY_VND) reads the same way in
+ * both places instead of a quiet, easy-to-miss hint line.
+ */
+function EquityNotConfiguredBanner() {
+  return (
+    <div
+      className="ui-state-panel status-surface--warning"
+      data-testid="dashboard-risk-guardrail-equity-not-configured-banner"
+      role="status"
+    >
+      <p className="ui-state-panel__eyebrow">Risk guardrail</p>
+      <p className="ui-state-panel__title">Unavailable — equity not configured</p>
+      <p className="ui-state-panel__body">
+        Book-risk caps below are qualitative only because no account equity is configured.
+        Without it there is nothing to compare open notional against, so caps stay
+        guidance-only instead of computed.
+      </p>
+      <p className="ui-state-panel__body">
+        Set <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code> in your environment and
+        restart the app to enable position sizing and book-risk caps.
+      </p>
+    </div>
+  );
+}
+
 export function DashboardExposurePanel({
   risk,
   verdict,
@@ -46,11 +74,7 @@ export function DashboardExposurePanel({
         {headroom.status === "configured" ? "Risk guardrail" : "Risk guardrail (qualitative)"}
       </h2>
 
-      {headroom.status === "unavailable" ? (
-        <p className="dash-exposure__hint" data-testid="dashboard-exposure-headroom-unavailable">
-          {headroom.statusCopy}
-        </p>
-      ) : null}
+      {headroom.status === "unavailable" ? <EquityNotConfiguredBanner /> : null}
 
       {headroom.status === "partial" ? (
         <p className="dash-exposure__hint" data-testid="dashboard-exposure-headroom-partial">
@@ -138,7 +162,7 @@ export function DashboardExposurePanel({
         <p className="dash-exposure__caption text-xs" style={{ color: "var(--text-tertiary)" }}>
           {headroom.statusCopy}
         </p>
-      ) : !portfolioRiskConfigured ? (
+      ) : headroom.status === "partial" && !portfolioRiskConfigured ? (
         <p className="dash-exposure__hint" data-testid="dashboard-exposure-qualitative-hint">
           Book caps are guidance only until{" "}
           <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code> is set — not compared to

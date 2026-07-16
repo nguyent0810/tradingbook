@@ -22,7 +22,7 @@ function nearMissRow(overrides: Partial<OpportunityNearMissDto> = {}): Opportuni
 }
 
 describe("DashboardNearMissRejectionsPanel", () => {
-  it("renders the pipeline-depth score badge for each near-miss card", () => {
+  it("renders the execution status chip but not the raw internal pipeline score", () => {
     const opportunity: OpportunityBoardDto = {
       mode: "near_miss",
       candidates: [],
@@ -34,8 +34,8 @@ describe("DashboardNearMissRejectionsPanel", () => {
       <DashboardNearMissRejectionsPanel opportunity={opportunity} />
     );
 
-    expect(html).toContain('data-testid="dashboard-near-miss-score-ABB"');
-    expect(html).toContain(">64<");
+    expect(html).toContain('data-testid="dashboard-near-miss-diagnostic-status"');
+    expect(html).not.toContain('data-testid="dashboard-near-miss-score-ABB"');
   });
 
   it("renders the empty state when there is no near-miss data", () => {
