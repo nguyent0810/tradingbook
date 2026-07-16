@@ -39,33 +39,34 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
 
   return (
     <li
-      className="dash-near-miss__card"
+      className="dash-card dash-card--interactive dash-tile"
       data-testid={`dashboard-near-miss-${row.symbol}`}
       style={{ ["--dash-card-accent" as string]: LADDER_ACCENT[row.ladderStage] ?? "var(--border-primary)" }}
     >
-      <div className="dash-near-miss__head">
-        <span className="font-mono font-semibold">{row.symbol}</span>
+      <div className="dash-tile__head">
+        <span className="dash-tile__symbol font-mono">{row.symbol}</span>
         <span
           className="dash-chip dash-chip--muted text-xs"
           data-testid="dashboard-near-miss-diagnostic-status"
         >
           {row.executionStatusLabel}
         </span>
-        <span className="dash-chip dash-chip--muted text-xs">
-          {rejectionBucketLabel(row.terminalCategory)}
-        </span>
         <span
-          className="dash-near-miss__score tabular-nums"
+          className="dash-tile__score tabular-nums"
           data-testid={`dashboard-near-miss-score-${row.symbol}`}
           title="Gate 2 pipeline-depth score — how far this symbol got before failing (not a rank score)"
         >
           {Math.round(row.partialPipelineScore)}
         </span>
       </div>
-      {note ? <p className="dash-near-miss__note text-sm font-medium">{note}</p> : null}
-      <p className="dash-near-miss__wait text-sm">{row.waitFor}</p>
-      {dist ? <p className="dash-near-miss__meta text-xs tabular-nums">{dist}</p> : null}
-      <div className="dash-near-miss__rs mt-2">
+      <div className="dash-tile__meta-row">
+        <span className="dash-chip dash-chip--muted text-xs">
+          {rejectionBucketLabel(row.terminalCategory)}
+        </span>
+        {dist ? <span className="dash-chip dash-chip--muted text-xs tabular-nums">{dist}</span> : null}
+      </div>
+      <p className="dash-tile__insight text-sm">{row.waitFor}</p>
+      <div className="dash-tile__rs">
         <RelativeStrengthDiagnosticPanel
           diagnostic={row.rsDiagnostic}
           compact
@@ -73,6 +74,12 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
           testId={`dashboard-near-miss-rs-${row.symbol}`}
         />
       </div>
+      {note ? (
+        <details className="dash-tile__why">
+          <summary className="dash-tile__why-toggle">Note</summary>
+          <p className="dash-tile__why-line text-xs">{note}</p>
+        </details>
+      ) : null}
     </li>
   );
 }
@@ -84,10 +91,10 @@ export function DashboardNearMissRejectionsPanel({
   const rows = opportunity.nearMiss;
 
   return (
-    <div className="dash-v2-card dash-v2-card--inset dash-v2-near-miss" data-testid="dashboard-near-miss-panel">
-      <header className="dash-v2-card__header">
-        <h3 className="dash-v2-card__title">Near miss / rejection</h3>
-        <p className="dash-v2-card__lead">
+    <div className="dash-card dash-card--muted" data-testid="dashboard-near-miss-panel">
+      <header className="dash-card__header">
+        <h3 className="dash-card__title">Near miss / rejection</h3>
+        <p className="dash-card__lead">
           Gate 2 diagnostics only — closest INVALID names, not SetupCandidate trade signals.
         </p>
       </header>
@@ -109,7 +116,7 @@ export function DashboardNearMissRejectionsPanel({
         </div>
       ) : (
         <>
-          <ul className="dash-near-miss__list">
+          <ul className="dash-tile-grid">
             {rows.map((row) => (
               <NearMissCard key={row.symbol} row={row} />
             ))}

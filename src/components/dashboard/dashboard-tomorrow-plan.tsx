@@ -16,15 +16,15 @@ export function DashboardTomorrowPlan({
 
   return (
     <section
-      className={`dash-tomorrow dash-panel dash-surface-1${promoted ? " dash-tomorrow--promoted" : ""}`}
+      className={`dash-tomorrow dash-card${promoted ? " dash-tomorrow--promoted" : ""}`}
       data-testid="dashboard-tomorrow-plan"
       aria-labelledby="dashboard-tomorrow-heading"
     >
-      <header className="dash-panel__header">
+      <header className="dash-card__header">
         <h2 id="dashboard-tomorrow-heading" className="dash-section-title">
           {promoted ? "What next" : "Tomorrow's plan"}
         </h2>
-        <p className="dash-panel__subtitle">
+        <p className="dash-card__lead">
           {promoted
             ? "Watch · trigger · avoid · posture for the next session"
             : "Watch, triggers, and avoid rules for the next session"}

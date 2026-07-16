@@ -52,10 +52,6 @@ function metricClass(tone: V3RsWatchlistCard["metrics"][number]["tone"]): string
   }
 }
 
-function metricValue(card: V3RsWatchlistCard, label: string): string {
-  return card.metrics.find((m) => m.label === label)?.value ?? "—";
-}
-
 function formatPrice(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "—";
   return value.toFixed(2);
@@ -69,6 +65,37 @@ function formatPct(value: number | null | undefined, digits = 1): string {
 function formatRr(value: number | null | undefined): string {
   if (value == null || !Number.isFinite(value)) return "—";
   return `${value.toFixed(2)}:1`;
+}
+
+function formatSpread(pct: number | null | undefined): string {
+  if (pct == null || !Number.isFinite(pct)) return "—";
+  const sign = pct >= 0 ? "+" : "";
+  return `${sign}${pct.toFixed(1)}pp`;
+}
+
+/** Small diverging bar for a table cell — same read as the dashboard RS bar, narrower. */
+const RS_MINI_BAR_SCALE_PP = 8;
+function RsMiniBar({ pct }: { pct: number | null | undefined }) {
+  if (pct == null || !Number.isFinite(pct)) {
+    return <span className="tosv3-rs-mini-cell tabular-nums">—</span>;
+  }
+  const clamped = Math.max(-RS_MINI_BAR_SCALE_PP, Math.min(RS_MINI_BAR_SCALE_PP, pct));
+  const width = (Math.abs(clamped) / RS_MINI_BAR_SCALE_PP) * 50;
+  const positive = pct >= 0;
+  return (
+    <span className="tosv3-rs-mini-cell">
+      <span className="tosv3-rs-mini-bar" aria-hidden="true">
+        <span className="tosv3-rs-mini-bar__mid" />
+        <span
+          className={`tosv3-rs-mini-bar__fill ${positive ? "tosv3-rs-mini-bar__fill--pos" : "tosv3-rs-mini-bar__fill--neg"}`}
+          style={{ ["--w" as string]: `${width}%` }}
+        />
+      </span>
+      <span className={`tabular-nums ${positive ? "tosv3-rs-mini-cell__num--pos" : "tosv3-rs-mini-cell__num--neg"}`}>
+        {formatSpread(pct)}
+      </span>
+    </span>
+  );
 }
 
 function earlyStateClass(state: string): string {
@@ -134,14 +161,14 @@ function EarlyEntryResearchHeader({
           </select>
         </label>
       </div>
-      <div className="tosv3-rs-early-research__checklist" data-testid="dashboard-v3-rs-daily-checklist">
-        <p className="tosv3-rs-early-research__checklist-title">Daily research checklist</p>
+      <details className="tosv3-rs-early-research__checklist" data-testid="dashboard-v3-rs-daily-checklist">
+        <summary className="tosv3-rs-early-research__checklist-title">Daily research checklist</summary>
         <ul>
           {EARLY_ENTRY_DAILY_CHECKLIST.map((line) => (
             <li key={line}>{line}</li>
           ))}
         </ul>
-      </div>
+      </details>
       <p className="tosv3-rs-early-research__paper" data-testid="dashboard-v3-rs-paper-commands">
         <span>Daily:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.daily}</code>
         <span className="tosv3-rs-early-research__paper-sep">·</span>
@@ -153,7 +180,11 @@ function EarlyEntryResearchHeader({
   );
 }
 
-function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlistCard["earlyEntry"]> }) {
+function EarlyEntryPanel({
+  earlyEntry,
+}: {
+  earlyEntry: NonNullable<V3RsWatchlistCard["earlyEntry"]>;
+}) {
   const chips = [
     ...earlyEntry.reasonCodes.slice(0, 8),
     ...earlyEntry.transitionReasonCodes.slice(0, 4),
@@ -211,20 +242,6 @@ function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlist
           <span className="tosv3-rs-chip__value tabular-nums">{formatPrice(earlyEntry.invalidLevel)}</span>
         </li>
       </ul>
-      {earlyEntry.targetReason || earlyEntry.invalidLevelReason ? (
-        <p className="tosv3-rs-early-entry__explain">
-          {earlyEntry.targetReason ? (
-            <span>
-              <strong>Target reason:</strong> {earlyEntry.targetReason}.
-            </span>
-          ) : null}{" "}
-          {earlyEntry.invalidLevelReason ? (
-            <span>
-              <strong>Invalid reason:</strong> {earlyEntry.invalidLevelReason}.
-            </span>
-          ) : null}
-        </p>
-      ) : null}
       {chips.length > 0 ? (
         <ul className="tosv3-rs-early-entry__chips" aria-label="Early entry reason chips">
           {chips.map((code) => (
@@ -234,15 +251,37 @@ function EarlyEntryPanel({ earlyEntry }: { earlyEntry: NonNullable<V3RsWatchlist
           ))}
         </ul>
       ) : null}
-      {earlyEntry.whyNotPilotYet ? (
-        <p className="tosv3-rs-early-entry__why-not" data-testid="dashboard-v3-rs-why-not-pilot">
-          <strong>Why not pilot yet:</strong> {earlyEntry.whyNotPilotYet}
-        </p>
-      ) : null}
-      {earlyEntry.rrRejectionReason ? (
-        <p className="tosv3-rs-early-entry__why-not">
-          <strong>R:R rejection:</strong> {earlyEntry.rrRejectionReason}
-        </p>
+      {earlyEntry.targetReason ||
+      earlyEntry.invalidLevelReason ||
+      earlyEntry.whyNotPilotYet ||
+      earlyEntry.rrRejectionReason ? (
+        <details className="tosv3-rs-card__why">
+          <summary className="tosv3-rs-card__why-toggle">Why</summary>
+          {earlyEntry.targetReason || earlyEntry.invalidLevelReason ? (
+            <p className="tosv3-rs-early-entry__explain">
+              {earlyEntry.targetReason ? (
+                <span>
+                  <strong>Target reason:</strong> {earlyEntry.targetReason}.
+                </span>
+              ) : null}{" "}
+              {earlyEntry.invalidLevelReason ? (
+                <span>
+                  <strong>Invalid reason:</strong> {earlyEntry.invalidLevelReason}.
+                </span>
+              ) : null}
+            </p>
+          ) : null}
+          {earlyEntry.whyNotPilotYet ? (
+            <p className="tosv3-rs-early-entry__why-not" data-testid="dashboard-v3-rs-why-not-pilot">
+              <strong>Why not pilot yet:</strong> {earlyEntry.whyNotPilotYet}
+            </p>
+          ) : null}
+          {earlyEntry.rrRejectionReason ? (
+            <p className="tosv3-rs-early-entry__why-not">
+              <strong>R:R rejection:</strong> {earlyEntry.rrRejectionReason}
+            </p>
+          ) : null}
+        </details>
       ) : null}
     </div>
   );
@@ -285,12 +324,17 @@ function RsDetailPanel({
           </li>
         ))}
       </ul>
-      <p className="tosv3-rs-card__next">
-        <span className="tosv3-rs-card__next-label">Next</span>
-        {card.nextCondition}
-      </p>
-      {card.blockerLabel ? (
-        <p className="tosv3-rs-card__blocker">{card.blockerLabel}</p>
+      {card.nextCondition || card.blockerLabel ? (
+        <details className="tosv3-rs-card__why">
+          <summary className="tosv3-rs-card__why-toggle">Why</summary>
+          <p className="tosv3-rs-card__next">
+            <span className="tosv3-rs-card__next-label">Next</span>
+            {card.nextCondition}
+          </p>
+          {card.blockerLabel ? (
+            <p className="tosv3-rs-card__blocker">{card.blockerLabel}</p>
+          ) : null}
+        </details>
       ) : null}
       {card.earlyEntry ? <EarlyEntryPanel earlyEntry={card.earlyEntry} /> : null}
       {card.technicalEvidence.length > 0 ? (
@@ -447,8 +491,12 @@ export function RelativeStrengthRadar({ panel }: Props) {
                           {friendlySetupStateLabel(card.setupState)}
                         </span>
                       </td>
-                      <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS20")}</td>
-                      <td className="table-num tosv3-rs-table__metric">{metricValue(card, "RS50")}</td>
+                      <td className="table-num tosv3-rs-table__metric">
+                        <RsMiniBar pct={card.rs20SpreadPct} />
+                      </td>
+                      <td className="table-num tosv3-rs-table__metric">
+                        <RsMiniBar pct={card.rs50SpreadPct} />
+                      </td>
                       <td className="tosv3-rs-table__blocker" title={card.setupReason}>
                         {truncateForChip(card.setupReason, 32)}
                       </td>

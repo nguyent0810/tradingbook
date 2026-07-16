@@ -12,6 +12,10 @@ function diagnostic(overrides: Partial<RsDiagnosticUi> = {}): RsDiagnosticUi {
     ],
     disclaimer: "Relative strength is a context signal — it helps prioritize, but doesn't approve or rank a setup on its own.",
     rs20SpreadPct: 15.09,
+    rs50SpreadPct: 34.81,
+    stockAboveMa50: true,
+    indexAboveMa50: false,
+    trendLabel: "leading",
     ...overrides,
   };
 }

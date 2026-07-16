@@ -107,9 +107,7 @@ export function DashboardDecisionCockpit({
             />
           </div>
 
-          <div className="dash-v2-card dash-v2-card--inset dash-v2-card--muted">
-            <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
-          </div>
+          <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
 
           <DashboardTradeGatePanel tradeGate={tradeGate} />
 
@@ -120,9 +118,7 @@ export function DashboardDecisionCockpit({
       </section>
 
       <div className="command-deck__tomorrow">
-        <div className="dash-v2-card dash-v2-card--inset">
-          <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} />
-        </div>
+        <DashboardTomorrowPlan tomorrow={cockpitDto.tomorrow} />
       </div>
 
       <CommandDeckCollapsible

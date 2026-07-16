@@ -21,14 +21,14 @@ const STATUS_TONE: Record<V3TradeGateRow["status"], BadgeTone> = {
 export function DashboardTradeGatePanel({ tradeGate }: DashboardTradeGatePanelProps) {
   return (
     <section
-      className="dash-v2-card dash-v2-card--inset dash-trade-gate"
+      className="dash-card dash-trade-gate"
       data-testid="dashboard-trade-gate-panel"
       aria-labelledby="dashboard-trade-gate-heading"
     >
       <h2 id="dashboard-trade-gate-heading" className="dash-section-title">
         Why not Go?
       </h2>
-      <p className="dash-trade-gate__subtitle text-xs" style={{ color: "var(--text-tertiary)" }}>
+      <p className="dash-card__lead">
         {tradeGate.subtitle}
       </p>
       <ul className="dash-trade-gate__rows" data-testid="dashboard-trade-gate-rows">

@@ -11,16 +11,16 @@ export function DashboardSetupQualityLadder({ ladder }: DashboardSetupQualityLad
 
   return (
     <section
-      className="dash-ladder dash-panel dash-surface-1"
+      className="dash-ladder dash-card"
       data-testid="dashboard-setup-quality-ladder"
       aria-labelledby="dashboard-ladder-heading"
     >
-      <header className="dash-panel__header dash-ladder__header">
+      <header className="dash-card__header dash-ladder__header">
         <div>
           <h2 id="dashboard-ladder-heading" className="dash-section-title">
             Setup quality ladder
           </h2>
-          <p className="dash-panel__subtitle">Pipeline distribution from latest scan</p>
+          <p className="dash-card__lead">Pipeline distribution from latest scan</p>
         </div>
         <span className="dash-ladder__total tabular-nums">
           {ladder.totalClassified} classified
