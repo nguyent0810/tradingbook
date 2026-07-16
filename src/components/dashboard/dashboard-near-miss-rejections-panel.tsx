@@ -51,13 +51,6 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
         >
           {row.executionStatusLabel}
         </span>
-        <span
-          className="dash-tile__score tabular-nums"
-          data-testid={`dashboard-near-miss-score-${row.symbol}`}
-          title="Gate 2 pipeline-depth score — how far this symbol got before failing (not a rank score)"
-        >
-          {Math.round(row.partialPipelineScore)}
-        </span>
       </div>
       <div className="dash-tile__meta-row">
         <span className="dash-chip dash-chip--muted text-xs">
