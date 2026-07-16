@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { queryHallOfFame } from "@/lib/lab/hall-of-fame/detect-achievements";
 import { loadPaperLabPageDto } from "@/lib/paper-lab/load-paper-lab-page";
+import { loadArenaBattles } from "@/lib/paper-lab/queries/load-arena-battles";
 import { ArenaWorkspace, type ArenaLearning } from "@/components/paper-lab/ArenaWorkspace";
 
 export const metadata: Metadata = {
@@ -9,8 +11,6 @@ export const metadata: Metadata = {
   description:
     "Arena — pressure-test strategies in simulation. Agents compete on the same market data; every portfolio, order and result is simulated. No real capital.",
 };
-
-export const dynamic = "force-dynamic";
 
 /** Learning-zone summaries — the same queries the deep-link routes use, guarded
  *  so the workspace still renders when those tables are empty or absent. */
@@ -23,9 +23,7 @@ async function loadLearning(): Promise<ArenaLearning> {
         take: 6,
       })
       .catch(() => [] as { id: string; symbol: string; action: string; reasoningSummary: string | null }[]),
-    prisma.arenaBattle
-      .findMany({ orderBy: { sessionDate: "desc" }, take: 20, include: { battleDecisions: true } })
-      .catch(() => [] as { id: string; sessionDate: Date; symbol: string; status: string; battleDecisions: unknown[]; benchmarkReturn5dPct: number | null }[]),
+    loadArenaBattles(),
     queryHallOfFame(prisma, { limit: 15 }).catch(() => []),
     prisma.promptExperiment
       .findMany({ orderBy: { startedAt: "desc" }, take: 12, include: { arms: true } })
@@ -87,6 +85,7 @@ export default async function PaperLabPage({
 }: {
   searchParams: Promise<{ focus?: string }>;
 }) {
+  await connection();
   const [data, learning, sp] = await Promise.all([
     loadPaperLabPageDto(),
     loadLearning(),

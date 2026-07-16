@@ -3,7 +3,6 @@ import { authorizeCronRequest } from "@/lib/cron/authorize-cron-request";
 import { prisma } from "@/lib/prisma";
 import { runLabAnalyticsDailyJob } from "@/lib/lab/jobs/run-lab-analytics-daily";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 export async function GET(request: Request) {

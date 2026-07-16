@@ -20,4 +20,3 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ decisions });
 }
 
-export const dynamic = "force-dynamic";

@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { encrypt, decrypt, type SessionPayload } from "./session-crypto";
 
@@ -21,11 +22,11 @@ export async function createSession(userId: string, email: string) {
   });
 }
 
-export async function getSession(): Promise<SessionPayload | null> {
+export const getSession = cache(async (): Promise<SessionPayload | null> => {
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE)?.value;
   return decrypt(session);
-}
+});
 
 export async function deleteSession() {
   const cookieStore = await cookies();

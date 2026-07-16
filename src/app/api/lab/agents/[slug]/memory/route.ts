@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { labError, labJson } from "@/lib/lab/api-response";
 import { loadAgentMemoryRecall } from "@/lib/lab/memory/build-memory";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(
   request: Request,
   context: { params: Promise<{ slug: string }> }

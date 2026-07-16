@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
@@ -8,13 +9,12 @@ export const metadata: Metadata = {
   title: "Session Theatre | Arena",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function TimelineSessionPage({
   params,
 }: {
   params: Promise<{ sessionDate: string }>;
 }) {
+  await connection();
   const { sessionDate: raw } = await params;
   const sessionDate = new Date(raw);
   const bundle = await prisma.sessionReplayBundle.findUnique({

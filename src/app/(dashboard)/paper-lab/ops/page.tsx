@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { getTelemetrySummary } from "@/lib/lab/observability/telemetry";
 import { prisma } from "@/lib/prisma";
@@ -8,9 +9,8 @@ export const metadata: Metadata = {
   title: "Ops | Arena",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function LabOpsPage() {
+  await connection();
   const summary = await getTelemetrySummary(prisma);
 
   return (

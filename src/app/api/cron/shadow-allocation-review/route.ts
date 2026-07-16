@@ -3,7 +3,6 @@ import { authorizeCronRequest } from "@/lib/cron/authorize-cron-request";
 import { prisma } from "@/lib/prisma";
 import { runShadowAllocationReviewJob } from "@/lib/paper-lab/dna/allocation-review-job";
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 /**

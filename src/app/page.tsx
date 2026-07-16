@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
@@ -153,14 +154,22 @@ function ArenaMock() {
   );
 }
 
-export default async function Home() {
+/** Session check is a Request-time API (cookies()) — isolated in its own component so
+ *  the rest of this marketing page can still be part of the static prerendered shell. */
+async function HomeAuthGate() {
   const session = await getSession();
   if (session) {
     redirect("/dashboard");
   }
+  return null;
+}
 
+export default function Home() {
   return (
     <div className="cd-landing">
+      <Suspense fallback={null}>
+        <HomeAuthGate />
+      </Suspense>
       {/* Static JSON-LD (no user input) — safe use of dangerouslySetInnerHTML */}
       <script
         type="application/ld+json"

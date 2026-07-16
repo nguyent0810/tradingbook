@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import { cacheLife, cacheTag } from "next/cache";
 
 export type VnindexHistoryPoint = {
   /** UTC calendar day, YYYY-MM-DD. */
@@ -26,4 +27,15 @@ export async function fetchVnindexHistory(
     console.error("[fetch-vnindex-history] failed:", e);
     return [];
   }
+}
+
+/** Cached wrapper around {@link fetchVnindexHistory} using the shared prisma singleton. */
+export async function fetchVnindexHistoryCached(
+  sessions: number = 30
+): Promise<VnindexHistoryPoint[]> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600, expire: 86400 });
+  cacheTag("daily-scan");
+  const { prisma } = await import("@/lib/prisma");
+  return fetchVnindexHistory(prisma, sessions);
 }

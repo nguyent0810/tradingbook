@@ -11,4 +11,3 @@ export async function GET() {
   return NextResponse.json({ rows: dto.leaderboard, sessionDate: dto.overview.latestEvaluationAt });
 }
 
-export const dynamic = "force-dynamic";

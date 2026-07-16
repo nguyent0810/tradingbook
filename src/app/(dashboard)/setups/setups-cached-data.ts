@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { cacheLife, cacheTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { parseDailyScanGate2Notes } from "@/lib/scanner/parse-daily-scan-notes";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
@@ -17,7 +18,7 @@ import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagno
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import {
   buildRsNearMissWatchlistPanel,
-  computeRsNearMissWatchlistFromDb,
+  getCachedRsNearMissWatchlist,
   type RsNearMissWatchlistPanelDto,
 } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 
@@ -33,8 +34,11 @@ export type SetupsBaseData = {
   equityMaxLoadError: string | null;
 };
 
-/** Latest scan + index session in parallel (single flight per request via React cache). */
-export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
+/** Latest scan + index session in parallel, cached across requests until the next daily scan. */
+export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600, expire: 86400 });
+  cacheTag("daily-scan");
   const [scanRes, sessionRes, equityRes] = await Promise.all([
     getLatestDailyScanRun()
       .then((latest) => ({ latest, error: null as string | null }))
@@ -79,7 +83,7 @@ export const loadSetupsBaseData = cache(async (): Promise<SetupsBaseData> => {
     sessionLoadError: sessionRes.error,
     equityMaxLoadError: equityRes.error,
   };
-});
+}
 
 export const loadGate2BreakdownCached = cache(
   async (): Promise<{ breakdown: Gate2CategoryBreakdownRow[]; error: string | null }> => {
@@ -162,7 +166,7 @@ export const loadRsNearMissWatchlistForSetupsCached = cache(
     }
     const excludeSymbols = base.candidateRows.map((c) => c.symbolKey);
     try {
-      const { rows } = await computeRsNearMissWatchlistFromDb(prisma, {
+      const { rows } = await getCachedRsNearMissWatchlist({
         limit: 15,
         excludeSymbols,
       });

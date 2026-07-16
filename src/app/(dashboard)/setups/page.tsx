@@ -23,9 +23,6 @@ export const metadata: Metadata = {
   description: "Latest daily scanner run and breakout/pullback candidates.",
 };
 
-/** Skip SSG — page runs heavy read-only DB diagnostics (e.g. Gate 2 breakdown) at request time. */
-export const dynamic = "force-dynamic";
-
 export default async function SetupsPage() {
   return (
     <V3PageShell testId="setups-workstation" pageClassName="tosv3-setups-page bg-[var(--bg-primary)]">

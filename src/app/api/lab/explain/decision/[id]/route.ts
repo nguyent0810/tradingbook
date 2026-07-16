@@ -2,8 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { labError, labJson } from "@/lib/lab/api-response";
 import { buildExplanationTrace } from "@/lib/lab/explain/build-trace";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(
   _request: Request,
   context: { params: Promise<{ id: string }> }

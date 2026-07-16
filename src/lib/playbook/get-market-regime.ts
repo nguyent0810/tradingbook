@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cacheLife, cacheTag } from "next/cache";
 import type { Bar } from "@/lib/market/types";
 import {
   evaluateMarketRegime,
@@ -59,6 +60,9 @@ export async function getMarketRegimeFromDb(
   symbol: string = DEFAULT_INDEX_SYMBOL,
   barLimit: number = DEFAULT_BAR_LIMIT
 ): Promise<MarketRegimeFromDbResult> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600, expire: 86400 });
+  cacheTag("daily-scan");
   try {
     const totalStored = await prisma.indexDailyBar.count({ where: { symbol } });
 

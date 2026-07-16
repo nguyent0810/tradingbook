@@ -30,5 +30,4 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ runId: "paper-lab-daily", ...result.summary });
 }
 
-export const dynamic = "force-dynamic";
 export const maxDuration = 300;

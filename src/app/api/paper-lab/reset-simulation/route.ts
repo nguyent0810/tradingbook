@@ -37,4 +37,3 @@ export async function POST(request: Request) {
   return NextResponse.json({ reset: portfolios.length });
 }
 
-export const dynamic = "force-dynamic";

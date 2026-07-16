@@ -11,8 +11,8 @@ import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-marke
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
 import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
-import { DashboardVnindexTrendChart } from "@/components/dashboard/dashboard-vnindex-trend-chart";
-import { DashboardHostilityGauge } from "@/components/dashboard/dashboard-hostility-gauge";
+import { DashboardVnindexTrendChartLazy } from "@/components/dashboard/dashboard-vnindex-trend-chart-lazy";
+import { DashboardHostilityGaugeLazy } from "@/components/dashboard/dashboard-hostility-gauge-lazy";
 
 export type DashboardCommandPanelProps = {
   freshness: MarketFreshnessDto;
@@ -63,8 +63,8 @@ export function DashboardCommandPanel({
           <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} />
         </div>
         <div className="command-deck-panel__hero-charts">
-          <DashboardVnindexTrendChart history={vnindexHistory} />
-          <DashboardHostilityGauge gauge={gauge} />
+          <DashboardVnindexTrendChartLazy history={vnindexHistory} />
+          <DashboardHostilityGaugeLazy gauge={gauge} />
         </div>
       </div>
 

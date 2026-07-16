@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
@@ -12,13 +13,12 @@ export const metadata: Metadata = {
   title: "Battle Replay | Arena",
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function BattleDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await connection();
   const { id } = await params;
   const battle = await prisma.arenaBattle.findUnique({
     where: { id },

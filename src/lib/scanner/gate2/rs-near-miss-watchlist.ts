@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@/generated/prisma/client";
+import { cacheLife, cacheTag } from "next/cache";
 import {
   terminalGate2Reason,
   type Gate2DiagnosticEvaluationRow,
@@ -444,6 +445,25 @@ export async function computeRsNearMissWatchlistFromDb(
         })
       : undefined,
   };
+}
+
+/**
+ * Cached wrapper around {@link computeRsNearMissWatchlistFromDb} using the shared prisma
+ * singleton — shared by dashboard and setups so the full-market scan runs once, not twice.
+ */
+export async function getCachedRsNearMissWatchlist(
+  options: ComputeRsNearMissWatchlistOptions = {}
+): Promise<{
+  expectedLatestSession: Date;
+  tradabilityPassedCount: number;
+  rows: RsNearMissWatchlistRow[];
+  earlyEntryBySymbol?: Map<string, EarlyEntryDisplayMetadata | null>;
+}> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600, expire: 86400 });
+  cacheTag("daily-scan");
+  const { prisma } = await import("@/lib/prisma");
+  return computeRsNearMissWatchlistFromDb(prisma, options);
 }
 
 /** Build watchlist rows from in-memory Gate 2 diagnostic rows (tests / replay). */
