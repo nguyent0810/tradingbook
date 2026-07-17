@@ -377,7 +377,14 @@ describe("buildDecisionCockpitDto — tomorrow plan", () => {
     );
     expect(dto.tomorrow.watchSymbols.value).toContain("MWG");
     expect(dto.tomorrow.triggerLine.value).toContain("MWG");
-    expect(dto.tomorrow.postureLine.value).toContain("TRADE");
+    expect(dto.tomorrow.watchReasons.MWG).toBeTruthy();
+  });
+
+  it("watchReasons carries the near-miss waitFor text per symbol (not a shared line)", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    const [firstSymbol] = dto.tomorrow.watchSymbols.value;
+    expect(firstSymbol).toBeTruthy();
+    expect(dto.tomorrow.watchReasons[firstSymbol!]).toBeTruthy();
   });
 });
 
@@ -470,6 +477,67 @@ describe("buildDecisionCockpitDto — setup quality ladder (S5)", () => {
     expect(dto.setupQualityLadder.totalClassified).toBe(0);
     expect(dto.setupQualityLadder.stages.every((s) => s.count === 0)).toBe(true);
     expect(dto.setupQualityLadder.stages.every((s) => s.sampleSymbols.length === 0)).toBe(true);
+  });
+});
+
+describe("buildDecisionCockpitDto — scan pulse summary (S5 reframe)", () => {
+  it("active day: tier A/B clears produce an 'Active day' summary with the cleared count", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          closestToValidSymbols: [],
+        },
+        latestScan: {
+          ...baseInput().latestScan!,
+          candidateCountA: 1,
+          candidateCountB: 0,
+          candidateCountSurfaced: 1,
+        },
+        surfacedCandidates: [
+          {
+            id: "c1",
+            symbolKey: "MWG",
+            quality: "A",
+            lifecycleSortLabel: "READY",
+            healthLevel: "HEALTHY",
+            healthScore: 80,
+            healthScoreLabel: "Strong",
+            healthFlags: [],
+            healthSummary: null,
+            reasons: [],
+            rankSummary: null,
+            close: 10,
+            pullbackZoneLow: 9.5,
+            pullbackZoneHigh: 10.2,
+            stopLevel: 9,
+            rankScore: 1,
+          },
+        ],
+      })
+    );
+    expect(dto.setupQualityLadder.summary).toContain("Active day");
+    expect(dto.setupQualityLadder.summary).toContain("1 name");
+  });
+
+  it("quiet day: only watch-stage matches produce a 'Quiet day' summary", () => {
+    const dto = buildDecisionCockpitDto(baseInput());
+    expect(dto.setupQualityLadder.stages.find((s) => s.stage === "tier_a")?.count).toBe(0);
+    expect(dto.setupQualityLadder.stages.find((s) => s.stage === "watch")?.count).toBeGreaterThan(0);
+    expect(dto.setupQualityLadder.summary).toContain("Quiet day");
+  });
+
+  it("no candidates at all: falls back to a neutral no-classification summary", () => {
+    const dto = buildDecisionCockpitDto(
+      baseInput({
+        scanNotes: {
+          ...baseInput().scanNotes!,
+          closestToValidSymbols: [],
+        },
+      })
+    );
+    expect(dto.setupQualityLadder.totalClassified).toBe(0);
+    expect(dto.setupQualityLadder.summary).toBe("No candidates classified in the latest scan.");
   });
 });
 

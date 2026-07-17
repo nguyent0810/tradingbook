@@ -712,9 +712,10 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       mainRisk: buildMainRisk(cockpitDto),
       nextAction: nextActionResult.text,
       nextActionProvenance: nextActionResult.provenance,
-      // Risk guardrail's stance copy was Trade-table-derived and removed —
-      // tomorrow's posture line is the closest still-real substitute.
-      riskPosture: cockpitDto.tomorrow.postureLine.value,
+      // Risk guardrail's stance copy was Trade-table-derived and removed;
+      // tomorrow's own postureLine field was also removed as redundant with
+      // the hero verdict headline (same info, shown at the top of the page).
+      riskPosture: cockpitDto.verdict.headline.value,
       capitalProtection:
         formatScannerReasonForUser(cockpitDto.tomorrow.avoidLine.value || null) || null,
     },
@@ -741,7 +742,7 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       maxRiskPercent,
       openPositions: params.openPositionCount,
       lossLimit: null,
-      posture: cockpitDto.tomorrow.postureLine.value,
+      posture: cockpitDto.verdict.headline.value,
       capitalProtectionState:
         formatScannerReasonForUser(cockpitDto.tomorrow.avoidLine.value) || "",
       utilizationPercent,

@@ -29,6 +29,29 @@ function sortChipsForInline(chips: EvidenceChipDto[]): EvidenceChipDto[] {
   });
 }
 
+/**
+ * Safe/caution/danger coloring so the chip row reads at a glance, not just
+ * on hover-title. Presentation-only — inspects the same `id`/`display`
+ * strings already produced by buildEvidenceStack, no DTO changes.
+ */
+function chipTone(chip: EvidenceChipDto): "safe" | "warn" | "danger" | null {
+  if (chip.id === "gate1" || chip.id === "gate1_live") {
+    if (chip.display === "Favorable") return "safe";
+    if (chip.display === "Caution") return "warn";
+    if (chip.display === "Hostile") return "danger";
+    return null;
+  }
+  if (chip.id === "aligned") {
+    return chip.display === "Yes" ? "safe" : "warn";
+  }
+  if (chip.id.startsWith("market_foreign_") && chip.id !== "market_foreign_coverage") {
+    if (chip.display.startsWith("+")) return "safe";
+    if (chip.display.startsWith("−") || chip.display.startsWith("-")) return "danger";
+    return null;
+  }
+  return null;
+}
+
 export function DashboardEvidenceCompact({
   chips,
   blockers = [],
@@ -45,7 +68,7 @@ export function DashboardEvidenceCompact({
         {inline.map((chip) => (
           <span
             key={chip.id}
-            className="dash-hint-chip"
+            className={`dash-hint-chip${chipTone(chip) ? ` dash-hint-chip--${chipTone(chip)}` : ""}`}
             data-testid={`dashboard-evidence-chip-${chip.id}`}
             title={
               chip.hint

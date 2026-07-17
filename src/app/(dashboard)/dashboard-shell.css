@@ -621,9 +621,15 @@
   color: var(--text-tertiary);
 }
 
-/* Decision hero */
+/* Decision hero — flex column, height fills the grid cell (hero-row's
+   align-items: start no longer leaves it short) so the evidence strip can
+   pin to the bottom via margin-top: auto instead of the card ending with
+   dead space below its own content. */
 .dash-decision-hero {
   border: 1px solid var(--border-primary);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .dash-decision-hero--no-trade {
@@ -780,6 +786,25 @@
   border-color: color-mix(in srgb, var(--warning) 40%, var(--border-primary));
   background: color-mix(in srgb, var(--warning-muted) 50%, var(--bg-tertiary));
 }
+.dash-hint-chip--warn .dash-hint-chip__value {
+  color: var(--warning);
+}
+
+.dash-hint-chip--safe {
+  border-color: color-mix(in srgb, var(--success) 40%, var(--border-primary));
+  background: color-mix(in srgb, var(--success-muted) 50%, var(--bg-tertiary));
+}
+.dash-hint-chip--safe .dash-hint-chip__value {
+  color: var(--success);
+}
+
+.dash-hint-chip--danger {
+  border-color: color-mix(in srgb, var(--danger) 40%, var(--border-primary));
+  background: color-mix(in srgb, var(--danger-muted) 50%, var(--bg-tertiary));
+}
+.dash-hint-chip--danger .dash-hint-chip__value {
+  color: var(--danger);
+}
 
 .dash-hint-chip__label {
   color: var(--text-tertiary);
@@ -795,6 +820,13 @@
 
 .dash-evidence-compact__details {
   margin-top: var(--space-2);
+}
+
+/* Pins the evidence strip to the bottom of the (now flex-column) hero card —
+   fills the height the card stretches to instead of leaving it blank. */
+.dash-decision-hero__evidence {
+  margin-top: auto;
+  padding-top: var(--space-4);
 }
 
 .dash-evidence-compact__summary {
@@ -921,124 +953,160 @@
   overflow: hidden;
 }
 
-/* Setup quality ladder (S5 / S8 visual) */
-.dash-ladder__header {
+/* Today's scan pulse (was "Setup quality ladder") — demoted, compact card;
+   plain-language summary is the payoff, funnel + breakdown are supporting
+   detail. Stage color mapping (tier_a/b, watch, extended, invalid, avoid)
+   shared by the funnel segments, legend dots, and actionable-row accents. */
+.dash-ladder--pulse {
+  padding: var(--space-4) var(--space-5);
+}
+
+.dash-pulse-header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
 
-.dash-ladder__total {
+.dash-pulse-title {
+  margin: 0;
   font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-secondary);
+}
+
+.dash-ladder__total {
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--text-tertiary);
 }
 
-.dash-ladder__distribution {
+.dash-pulse-summary {
+  margin: 0 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: var(--line-height-snug);
+}
+
+.dash-pulse-funnel {
   display: flex;
-  height: 0.5rem;
+  align-items: stretch;
+  height: 26px;
   border-radius: var(--radius-sm);
   overflow: hidden;
+  border: 1px solid var(--border-secondary);
   gap: 1px;
-  margin-bottom: var(--space-3);
   background: var(--bg-tertiary);
 }
 
-.dash-ladder__bar-seg {
+.dash-pulse-funnel__seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   min-width: 2px;
-  /* Animates on data change (once per scan run), not per-frame/on scroll or
-     hover, so the reflow cost here is low-frequency. A `transform: scaleX()`
-     rewrite would need every segment absolutely positioned with a computed
-     left offset (flex-grow's proportional redistribution can't be replicated
-     by scaling one segment in isolation) — deferred as disproportionate
-     effort for a rarely-triggered transition. */
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--bg-primary);
   transition: flex-grow 0.15s ease;
 }
 
-.dash-ladder__bar-seg--tier_a {
-  background: var(--status-healthy);
-}
-
-.dash-ladder__bar-seg--tier_b {
-  background: color-mix(in srgb, var(--status-healthy) 65%, var(--accent));
-}
-
-.dash-ladder__bar-seg--watch {
-  background: var(--accent);
-}
-
-.dash-ladder__bar-seg--extended {
-  background: var(--warning);
-}
-
-.dash-ladder__bar-seg--invalid {
-  background: var(--text-tertiary);
-}
-
-.dash-ladder__bar-seg--avoid {
-  background: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary));
-}
-
-.dash-ladder__bar-seg--empty {
+.dash-pulse-funnel__seg--empty {
   opacity: 0.35;
 }
 
-.dash-ladder__stages--compact {
-  gap: var(--space-1);
+.dash-pulse-funnel__seg--tier_a { background: var(--status-healthy); }
+.dash-pulse-funnel__seg--tier_b { background: color-mix(in srgb, var(--status-healthy) 65%, var(--accent)); }
+.dash-pulse-funnel__seg--watch { background: var(--accent); }
+.dash-pulse-funnel__seg--extended { background: var(--warning); }
+.dash-pulse-funnel__seg--invalid { background: var(--text-tertiary); }
+.dash-pulse-funnel__seg--avoid { background: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary)); }
+
+.dash-pulse-legend {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-1) var(--space-2);
 }
 
-@media (min-width: 768px) {
-  .dash-ladder__stages--compact {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.dash-pulse-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.62rem;
+  color: var(--text-tertiary);
 }
 
-@media (min-width: 1280px) {
-  .dash-ladder__stages--compact {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.dash-ladder__stage-dot {
+.dash-pulse-legend__dot {
   width: 6px;
   height: 6px;
   border-radius: 999px;
   flex-shrink: 0;
 }
 
-.dash-ladder__stage-dot--tier_a {
-  background: var(--status-healthy);
+.dash-pulse-legend__dot--tier_a { background: var(--status-healthy); }
+.dash-pulse-legend__dot--tier_b { background: color-mix(in srgb, var(--status-healthy) 65%, var(--accent)); }
+.dash-pulse-legend__dot--watch { background: var(--accent); }
+.dash-pulse-legend__dot--extended { background: var(--warning); }
+.dash-pulse-legend__dot--invalid { background: var(--text-tertiary); }
+.dash-pulse-legend__dot--avoid { background: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary)); }
+
+.dash-pulse-legend__count {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--text-secondary);
 }
 
-.dash-ladder__stage-dot--tier_b {
-  background: color-mix(in srgb, var(--status-healthy) 65%, var(--accent));
+.dash-pulse-actionable {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.dash-ladder__stage-dot--watch {
-  background: var(--accent);
+.dash-pulse-actionable__item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 6px var(--space-2);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-primary) 55%, transparent);
+  border-left: 3px solid var(--dot-color, var(--accent));
 }
 
-.dash-ladder__stage-dot--extended {
-  background: var(--warning);
+.dash-pulse-actionable__item--tier_a { --dot-color: var(--status-healthy); }
+.dash-pulse-actionable__item--tier_b { --dot-color: color-mix(in srgb, var(--status-healthy) 65%, var(--accent)); }
+.dash-pulse-actionable__item--watch { --dot-color: var(--accent); }
+.dash-pulse-actionable__item--extended { --dot-color: var(--warning); }
+.dash-pulse-actionable__item--invalid { --dot-color: var(--text-tertiary); }
+.dash-pulse-actionable__item--avoid { --dot-color: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary)); }
+
+.dash-pulse-actionable__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 4rem;
+  color: var(--dot-color, var(--text-primary));
 }
 
-.dash-ladder__stage-dot--invalid {
-  background: var(--text-tertiary);
+.dash-pulse-actionable__syms {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
 }
 
-.dash-ladder__stage-dot--avoid {
-  background: color-mix(in srgb, var(--danger) 80%, var(--text-tertiary));
-}
-
-.dash-ladder__micro-bar {
-  height: 3px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
-  margin: var(--space-1) 0;
-  min-width: 0;
+.dash-pulse-actionable__count {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  font-weight: 600;
 }
 
 /* Compact blockers (S8) */
@@ -1133,67 +1201,7 @@
   margin-top: var(--space-1);
 }
 
-/* Setup quality ladder (S5) */
-.dash-ladder__stages {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-2);
-}
-
-@media (min-width: 768px) {
-  .dash-ladder__stages {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1280px) {
-  .dash-ladder__stages {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.dash-ladder__stage {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-primary);
-}
-
-.dash-ladder__stage-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2);
-}
-
-.dash-ladder__stage-label {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.dash-ladder__count {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-left: auto;
-}
-
-.dash-ladder__symbols {
-  margin: var(--space-2) 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-}
-
-.dash-ladder__empty-stage {
-  margin: var(--space-2) 0 0;
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-  font-style: italic;
-}
-
+/* Today's scan pulse footer link */
 .dash-ladder__link {
   color: var(--accent-primary);
   font-weight: 500;
@@ -1238,6 +1246,143 @@
 
 .dash-tomorrow__link {
   margin-top: var(--space-3);
+}
+
+/* Tomorrow's plan — non-promoted card redesign: watch symbols as individual
+   hoverable amber cards (per-symbol reason on hover/focus), trigger green,
+   avoid red. */
+.dash-tomorrow-blocks {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .dash-tomorrow-blocks {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-tomorrow-block {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
+  padding: var(--space-3) var(--space-4);
+}
+
+.dash-tomorrow-block--wide {
+  grid-column: 1 / -1;
+}
+
+.dash-tomorrow-block__label {
+  margin: 0 0 var(--space-2);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.dash-tomorrow-block__body {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.dash-tomorrow-block--watch {
+  border-color: color-mix(in srgb, var(--warning) 30%, var(--border-primary));
+}
+.dash-tomorrow-block--watch .dash-tomorrow-block__label {
+  color: var(--warning);
+}
+
+.dash-tomorrow-block--trigger {
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border-primary));
+  background: color-mix(in srgb, var(--success-muted) 35%, var(--bg-elevated));
+}
+.dash-tomorrow-block--trigger .dash-tomorrow-block__label {
+  color: var(--success);
+}
+
+.dash-tomorrow-block--avoid {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border-primary));
+  background: color-mix(in srgb, var(--danger-muted) 35%, var(--bg-elevated));
+}
+.dash-tomorrow-block--avoid .dash-tomorrow-block__label {
+  color: var(--danger);
+}
+
+.dash-tomorrow-watch-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dash-sym-card {
+  position: relative;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--warning-muted);
+  border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
+  color: var(--warning);
+  cursor: default;
+}
+.dash-sym-card:hover,
+.dash-sym-card:focus-visible {
+  background: color-mix(in srgb, var(--warning) 22%, var(--warning-muted));
+  outline: none;
+}
+
+.dash-sym-card__tip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 7px);
+  transform: translateX(-50%) translateY(4px);
+  width: max-content;
+  max-width: 15rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 120ms ease, transform 120ms ease;
+  pointer-events: none;
+  z-index: 5;
+}
+.dash-sym-card__tip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--bg-primary);
+}
+.dash-sym-card:hover .dash-sym-card__tip,
+.dash-sym-card:focus-visible .dash-sym-card__tip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-sym-card__tip {
+    transition: none;
+  }
 }
 
 .dash-actionable-blockers {
@@ -1649,20 +1794,6 @@
 
 /* ===== Decision Cockpit S8.1 strict bento overrides ===== */
 
-.dash-ladder__stage {
-  padding: var(--space-2) var(--space-3);
-}
-
-.dash-ladder__micro-bar {
-  height: 2px;
-  margin: 0.2rem 0;
-}
-
-.dash-ladder__symbols,
-.dash-ladder__empty-stage {
-  margin-top: var(--space-1);
-}
-
 .dash-momentum {
   min-height: 17rem;
 }
@@ -1983,15 +2114,6 @@
 
 /* Flatten nested standalone cards into unified command/opportunity/secondary shells */
 
-.dash-ladder__stage {
-  padding: var(--space-2) var(--space-3);
-}
-
-.dash-ladder__symbols,
-.dash-ladder__empty-stage {
-  margin-top: var(--space-1);
-}
-
 .dash-momentum .table-container {
   max-height: none;
   overflow: visible;
@@ -2186,11 +2308,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-}
-
-.dash-cockpit--v2 .dash-v2-proof-foot {
-  padding-top: var(--space-4);
-  border-top: 1px solid color-mix(in srgb, var(--border-primary) 70%, transparent);
 }
 
 /* Card families */
@@ -2590,7 +2707,11 @@
 .command-deck-panel__hero-row {
   display: grid;
   gap: var(--command-deck-gap, var(--space-4));
-  align-items: start;
+  /* stretch (not start): the verdict card is a flex column and pins its
+     evidence strip to the bottom via margin-top: auto, so the extra height
+     from the taller charts column gets filled with real content instead of
+     leaving dead space below a shorter, top-aligned card. */
+  align-items: stretch;
   min-width: 0;
 }
 
@@ -2603,14 +2724,14 @@
 .command-deck-panel__hero-charts {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
   min-width: 0;
 }
 .command-deck-panel__hero-charts .chart-frame {
   border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--border-primary) 85%, transparent);
   background: color-mix(in srgb, var(--bg-elevated) 92%, var(--bg-secondary));
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
 }
 
 .dash-conviction-ring {

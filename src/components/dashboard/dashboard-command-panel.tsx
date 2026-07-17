@@ -10,7 +10,6 @@ import { resolveHostilityGauge } from "@/lib/dashboard/hostility-gauge";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
-import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
 import { DashboardVnindexTrendChartLazy } from "@/components/dashboard/dashboard-vnindex-trend-chart-lazy";
 import { DashboardHostilityGaugeLazy } from "@/components/dashboard/dashboard-hostility-gauge-lazy";
 import { DashboardConvictionRing } from "@/components/dashboard/dashboard-conviction-ring";
@@ -63,17 +62,18 @@ export function DashboardCommandPanel({
 
       <div className="command-deck-panel__hero-row">
         <div className="command-deck-panel__verdict">
-          <DashboardDecisionHero verdict={verdict} surfacedCount={surfacedCount} />
+          <DashboardDecisionHero
+            verdict={verdict}
+            surfacedCount={surfacedCount}
+            evidence={evidence}
+            blockers={blockers}
+          />
         </div>
         <div className="command-deck-panel__hero-charts">
           <DashboardConvictionRing band={verdict.confidenceBand.value} />
           <DashboardVnindexTrendChartLazy history={vnindexHistory} error={vnindexHistoryError} />
           <DashboardHostilityGaugeLazy gauge={gauge} />
         </div>
-      </div>
-
-      <div className="dash-v2-proof-foot">
-        <DashboardEvidenceCompact chips={evidence} blockers={blockers} />
       </div>
     </section>
   );
