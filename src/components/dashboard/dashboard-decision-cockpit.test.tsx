@@ -5,7 +5,6 @@ import {
   buildDecisionCockpitDto,
   type DecisionCockpitInput,
 } from "@/lib/dashboard/decision-cockpit-dto";
-import { buildTradeGate } from "@/lib/dashboard/build-trade-gate";
 import { DashboardDecisionCockpit } from "./dashboard-decision-cockpit";
 
 const freshness = buildMarketFreshnessDto({
@@ -24,15 +23,12 @@ function minimalInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCo
     freshness,
     surfacedCandidates: [],
     watchlist: [],
-    openExposureVnd: 0,
-    accountEquityVnd: null,
-    portfolioRiskConfigured: false,
     ...overrides,
   };
 }
 
 describe("DashboardDecisionCockpit", () => {
-  it("renders every zone of the Decision Cockpit IA in order: trust/verdict, opportunity, tomorrow, secondary, book", () => {
+  it("renders every zone of the Decision Cockpit IA in order: trust/verdict, opportunity, tomorrow, secondary", () => {
     const cockpitDto = buildDecisionCockpitDto(minimalInput());
 
     const html = renderToStaticMarkup(
@@ -42,16 +38,8 @@ describe("DashboardDecisionCockpit", () => {
         scanDelayedBackdrop={null}
         cockpitDto={cockpitDto}
         surfacedCount={0}
-        portfolioRiskConfigured={false}
-        trades={[]}
         activeWatchItems={[]}
         latestCloseBySymbol={new Map()}
-        tradeGate={buildTradeGate({
-          cockpitDto,
-          freshness,
-          topSetups: [],
-          utilizationTone: "normal",
-        })}
         vnindexHistory={[]}
       />
     );
@@ -61,7 +49,6 @@ describe("DashboardDecisionCockpit", () => {
       'data-testid="dashboard-cockpit-zone-opportunity"',
       'data-testid="dashboard-tomorrow-plan"',
       'data-testid="dashboard-secondary-collapsible"',
-      "Book snapshot",
     ];
 
     let cursor = -1;
@@ -84,16 +71,8 @@ describe("DashboardDecisionCockpit", () => {
         scanDelayedBackdrop={null}
         cockpitDto={cockpitDto}
         surfacedCount={0}
-        portfolioRiskConfigured={false}
-        trades={[]}
         activeWatchItems={[]}
         latestCloseBySymbol={new Map()}
-        tradeGate={buildTradeGate({
-          cockpitDto,
-          freshness,
-          topSetups: [],
-          utilizationTone: "normal",
-        })}
         vnindexHistory={[]}
       />
     );
@@ -144,16 +123,8 @@ describe("DashboardDecisionCockpit", () => {
         scanDelayedBackdrop={null}
         cockpitDto={cockpitDto}
         surfacedCount={1}
-        portfolioRiskConfigured={false}
-        trades={[]}
         activeWatchItems={[]}
         latestCloseBySymbol={new Map()}
-        tradeGate={buildTradeGate({
-          cockpitDto,
-          freshness,
-          topSetups: [],
-          utilizationTone: "normal",
-        })}
         vnindexHistory={[]}
       />
     );

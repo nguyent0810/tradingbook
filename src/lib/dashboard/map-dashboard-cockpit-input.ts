@@ -11,12 +11,9 @@ import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reason
 import { formatGate2RankSummary } from "@/lib/scanner/gate2/rank-components";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
-import type { PortfolioGuardrailsDto } from "./portfolio-guardrails";
-import type { PositionSizingConfigOverrides } from "@/lib/trading-account-risk-config";
 import {
   type DecisionCockpitInput,
   type DecisionCockpitCandidateSnapshot,
-  type DecisionCockpitOpenTradeSnapshot,
   type DecisionCockpitWatchSnapshot,
   type DecisionCockpitScanSnapshot,
 } from "./decision-cockpit-dto";
@@ -36,19 +33,10 @@ export type BuildDashboardCockpitInputParams = {
   freshness: MarketFreshnessDto;
   candidatesWithHealth: SurfacedCandidateHealthView[];
   activeWatchItems: DashboardWatchItemForCockpit[];
-  openExposureVnd: number;
-  accountEquityVnd: number | null;
-  portfolioRiskConfigured: boolean;
-  positionSizingConfig?: PositionSizingConfigOverrides | null;
   now?: Date;
   rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>;
   rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
   marketContext?: MarketContextUiDto | null;
-  portfolioGuardrails?: PortfolioGuardrailsDto | null;
-  /** Workstream B — OPEN trade rows for risk-to-stop / mark-to-market breakdowns. */
-  openTrades?: DecisionCockpitOpenTradeSnapshot[];
-  /** Workstream B — latest close per uppercase ticker for OPEN trade symbols. */
-  latestCloseByTradeSymbol?: ReadonlyMap<string, number>;
 };
 
 function toScanSnapshot(
@@ -127,16 +115,9 @@ export function buildDashboardCockpitInput(
     freshness: params.freshness,
     surfacedCandidates: toCandidateSnapshots(params.candidatesWithHealth),
     watchlist: toWatchSnapshots(params.activeWatchItems),
-    openExposureVnd: params.openExposureVnd,
-    accountEquityVnd: params.accountEquityVnd,
-    portfolioRiskConfigured: params.portfolioRiskConfigured,
-    positionSizingConfig: params.positionSizingConfig,
     now: params.now,
     rsDiagnosticsBySymbol: params.rsDiagnosticsBySymbol,
     rsNearMissWatchlist: params.rsNearMissWatchlist,
     marketContext: params.marketContext,
-    portfolioGuardrails: params.portfolioGuardrails,
-    openTrades: params.openTrades,
-    latestCloseByTradeSymbol: params.latestCloseByTradeSymbol,
   };
 }

@@ -90,9 +90,6 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
     freshness: alignedFreshness,
     surfacedCandidates: [],
     watchlist: [],
-    openExposureVnd: 0,
-    accountEquityVnd: null,
-    portfolioRiskConfigured: false,
     now: new Date(Date.UTC(2026, 4, 25, 14, 0, 0)),
     ...overrides,
   };
@@ -212,8 +209,8 @@ describe("mapDashboardV3ViewModel — TRADE + candidates", () => {
 });
 
 describe("mapDashboardV3ViewModel — risk headroom gaps", () => {
-  it("leaves exposure percent null when equity not configured", () => {
-    const vm = mapFromInput(baseInput({ accountEquityVnd: null }));
+  it("exposure/max-risk percent are inert (null) — Trade-table-derived risk headroom was removed", () => {
+    const vm = mapFromInput(baseInput());
     expect(vm.risk.exposurePercent).toBeNull();
     expect(vm.risk.maxRiskPercent).toBeNull();
     expect(vm.risk.lossLimit).toBeNull();
@@ -350,13 +347,11 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
 });
 
 describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
-  it("NO_TRADE never shows Go in trade gate and safe nextAction", () => {
+  it("NO_TRADE shows safe nextAction and no setup cards", () => {
     const vm = mapFromInput(baseInput());
     expect(vm.decision.mode).toBe("PROTECT CAPITAL");
     expect(vm.decision.nextAction).not.toMatch(/HPG/);
-    expect(vm.risk.tradeGate.rows.every((r) => r.action !== "Go")).toBe(true);
     expect(vm.setupCards).toHaveLength(0);
-    expect(JSON.stringify(vm.risk.tradeGate.rows)).not.toMatch(/extension_cap/);
   });
 
   it("hides duplicate Open pipeline CTA when NO_TRADE and no open positions", () => {
@@ -383,12 +378,6 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
     expect(mapFromInput(baseInput(), { watchItemCount: 3 }).marketPulse.watchState).toBe(
       "3 symbols on watch"
     );
-  });
-
-  it("humanizes trade gate stop-level copy", () => {
-    const dto = buildDecisionCockpitDto(baseInput());
-    const stopRule = dto.risk.rules.find((r) => r.text.toLowerCase().includes("stop"));
-    expect(stopRule?.text).toBe("Stop levels are reference only; size risk separately.");
   });
 
   it("clarifies scan vs live regime mismatch on NO_TRADE", () => {

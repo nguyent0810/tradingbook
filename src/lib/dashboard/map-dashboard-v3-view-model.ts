@@ -38,7 +38,6 @@ import {
   isRsScoringV1Enabled,
 } from "@/lib/scanner/gate2/rs-scoring-v1";
 import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
-import { buildTradeGate } from "./build-trade-gate";
 import { foreignFlowEvidenceState } from "./foreign-flow-evidence";
 
 export type MapDashboardV3Params = {
@@ -651,26 +650,15 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
 
   const rejected = collectRejectedBandEntries(cockpitDto);
 
-  const headroom = cockpitDto.riskBudgetHeadroom;
-  let exposurePercent: number | null = null;
-  let maxRiskPercent: number | null = null;
-  let utilizationPercent: number | null = null;
-  let utilizationTone: V3RiskConsole["utilizationTone"] = "normal";
-
-  if (
-    headroom.status === "configured" &&
-    headroom.equityVnd.value != null &&
-    headroom.equityVnd.value > 0 &&
-    headroom.maxBookPercent.value != null
-  ) {
-    maxRiskPercent = Math.round(headroom.maxBookPercent.value * 100);
-    exposurePercent = Math.round(
-      (headroom.openExposureVnd.value / headroom.equityVnd.value) * 100
-    );
-    utilizationPercent = Math.round((exposurePercent / maxRiskPercent) * 100);
-    if (utilizationPercent >= 85) utilizationTone = "critical";
-    else if (utilizationPercent >= 65) utilizationTone = "elevated";
-  }
+  // Book-level risk headroom (equity vs. max-book cap) was Trade-table-derived
+  // and removed alongside the Risk guardrail / Trade gate Dashboard panels —
+  // see decision-cockpit-dto.ts. These fields stay in V3RiskConsole's shape
+  // (currently unread by any Dashboard consumer) as inert defaults rather than
+  // reworking the type now.
+  const exposurePercent: number | null = null;
+  const maxRiskPercent: number | null = null;
+  const utilizationPercent: number | null = null;
+  const utilizationTone: V3RiskConsole["utilizationTone"] = "normal";
 
   const curve = computeEquityCurve(trades);
   const recentCurve = curve.slice(-18);
@@ -679,12 +667,6 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
   const decisionMode = mapUxVerdictToDecisionMode(cockpitDto.verdict.uxLevel.value);
   const nextActionResult = buildNextAction(cockpitDto, params.openPositionCount);
   const setupCards = buildSetupCards(topSetups);
-  const tradeGate = buildTradeGate({
-    cockpitDto,
-    freshness,
-    topSetups,
-    utilizationTone,
-  });
   const evidence = buildEvidence(cockpitDto, freshness, marketContext);
 
   const gate1Mismatch = cockpitDto.verdict.gate1Resolution.mismatch;
@@ -730,11 +712,11 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       mainRisk: buildMainRisk(cockpitDto),
       nextAction: nextActionResult.text,
       nextActionProvenance: nextActionResult.provenance,
-      riskPosture: cockpitDto.risk.stanceCopy.value,
+      // Risk guardrail's stance copy was Trade-table-derived and removed —
+      // tomorrow's posture line is the closest still-real substitute.
+      riskPosture: cockpitDto.tomorrow.postureLine.value,
       capitalProtection:
-        formatScannerReasonForUser(
-          cockpitDto.tomorrow.avoidLine.value || headroom.statusCopy || null
-        ) || null,
+        formatScannerReasonForUser(cockpitDto.tomorrow.avoidLine.value || null) || null,
     },
     signalTrajectory: {
       points: signalPoints,
@@ -759,11 +741,11 @@ export function mapDashboardV3ViewModel(params: MapDashboardV3Params): Dashboard
       maxRiskPercent,
       openPositions: params.openPositionCount,
       lossLimit: null,
-      posture: tradeGate.subtitle,
-      capitalProtectionState: formatScannerReasonForUser(headroom.statusCopy) || headroom.statusCopy,
+      posture: cockpitDto.tomorrow.postureLine.value,
+      capitalProtectionState:
+        formatScannerReasonForUser(cockpitDto.tomorrow.avoidLine.value) || "",
       utilizationPercent,
       utilizationTone,
-      tradeGate,
     },
     ledger: {
       outcomeChips: buildRecentOutcomeChips(trades),
