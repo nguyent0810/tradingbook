@@ -1,11 +1,22 @@
-import type { VerdictDto, VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
+import type {
+  ActionableBlockerDto,
+  EvidenceChipDto,
+  VerdictDto,
+  VerdictUxLevel,
+} from "@/lib/dashboard/decision-cockpit-dto";
 import { displayGate1ScanLevel } from "@/lib/trading-display-labels";
+import { DashboardEvidenceCompact } from "@/components/dashboard/dashboard-evidence-compact";
 
 export type DashboardDecisionHeroProps = {
   verdict: VerdictDto;
   surfacedCount: number;
   /** Shorter card with detail in progressive disclosure (S8). */
   compact?: boolean;
+  /** Evidence chips + "Why this verdict?" — rendered inside the hero, pinned
+   *  to the bottom, so the card fills its natural height instead of leaving
+   *  the evidence strip as a separate, dead-space-prone element below. */
+  evidence?: EvidenceChipDto[];
+  blockers?: ActionableBlockerDto[];
 };
 
 function decisionModifier(uxLevel: VerdictUxLevel): string {
@@ -30,6 +41,8 @@ export function DashboardDecisionHero({
   verdict,
   surfacedCount,
   compact = false,
+  evidence,
+  blockers,
 }: DashboardDecisionHeroProps) {
   const ux = verdict.uxLevel.value;
   const { gate1Resolution } = verdict;
@@ -152,6 +165,12 @@ export function DashboardDecisionHero({
           </dl>
         </>
       )}
+
+      {evidence ? (
+        <div className="dash-decision-hero__evidence">
+          <DashboardEvidenceCompact chips={evidence} blockers={blockers} />
+        </div>
+      ) : null}
     </section>
   );
 }

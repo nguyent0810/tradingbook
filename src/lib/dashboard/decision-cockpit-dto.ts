@@ -243,6 +243,8 @@ export type SetupQualityLadderDto = {
   stages: LadderStageGroupDto[];
   /** Sum of per-stage counts (each symbol counted once in one stage). */
   totalClassified: number;
+  /** Plain-language "what happened today" lead line — see buildScanPulseSummary. */
+  summary: string;
 };
 
 export type BestSetupsPanelMode = "full_table" | "compact_empty";
@@ -257,9 +259,12 @@ export type TomorrowPlanDto = {
   watchSymbols: ProvenanceField<string[]>;
   /** Set when watch list is empty — honest fallback copy (derived/static). */
   watchNote: ProvenanceField<string | null>;
+  /** Per-symbol reason, keyed by symbol — same reason text already shown on
+   *  the Opportunity board / near-miss cards above, reused here instead of
+   *  discarded when the symbol gets flattened into watchSymbols. */
+  watchReasons: Record<string, string>;
   triggerLine: ProvenanceField<string>;
   avoidLine: ProvenanceField<string>;
-  postureLine: ProvenanceField<string>;
 };
 
 export type ActionableBlockerDto = {
@@ -837,7 +842,31 @@ function buildSetupQualityLadder(
   return {
     stages,
     totalClassified: stages.reduce((sum, s) => sum + s.count, 0),
+    summary: buildScanPulseSummary(stages),
   };
+}
+
+/**
+ * Plain-language "what happened today" lead line for the scan-pulse widget —
+ * this is the actual payoff of the widget (a market-temperature read), with
+ * the funnel/breakdown underneath as supporting detail, not the headline.
+ */
+function buildScanPulseSummary(stages: LadderStageGroupDto[]): string {
+  const byStage = new Map(stages.map((s) => [s.stage, s.count]));
+  const tierAB = (byStage.get("tier_a") ?? 0) + (byStage.get("tier_b") ?? 0);
+  const watch = byStage.get("watch") ?? 0;
+  const total = stages.reduce((sum, s) => sum + s.count, 0);
+
+  if (tierAB > 0) {
+    return `Active day — ${tierAB} name${tierAB === 1 ? "" : "s"} cleared Tier A/B today.`;
+  }
+  if (watch > 0) {
+    return `Quiet day — ${watch} name${watch === 1 ? "" : "s"} on watch, nothing cleared Tier A/B yet.`;
+  }
+  if (total === 0) {
+    return "No candidates classified in the latest scan.";
+  }
+  return "No names cleared Tier A/B or watch today — check Setups for the full breakdown.";
 }
 
 /**
@@ -958,12 +987,20 @@ function buildTomorrowPlan(
   blockers: ActionableBlockerDto[]
 ): TomorrowPlanDto {
   const watchSymbols: string[] = [];
-  for (const c of opportunity.candidates) watchSymbols.push(c.symbol);
+  const watchReasons: Record<string, string> = {};
+  for (const c of opportunity.candidates) {
+    watchSymbols.push(c.symbol);
+    watchReasons[c.symbol] = c.primaryReasons[0] ?? c.healthSummary ?? c.actionHint;
+  }
   for (const n of opportunity.nearMiss) {
     if (!watchSymbols.includes(n.symbol)) watchSymbols.push(n.symbol);
+    watchReasons[n.symbol] = n.waitFor;
   }
   for (const w of watchlist.slice(0, 5)) {
     if (!watchSymbols.includes(w.symbol)) watchSymbols.push(w.symbol);
+    if (!watchReasons[w.symbol]) {
+      watchReasons[w.symbol] = "On active watchlist — no fresh Gate 2 diagnostic yet this session.";
+    }
   }
 
   const triggerParts: string[] = [];
@@ -986,8 +1023,6 @@ function buildTomorrowPlan(
     avoidParts.push(`Avoid chase: ${topExtension.title} (${topExtension.count} names).`);
   }
 
-  const posture = `${ux.replace("_", " ")} · ${decision.allocation} max book`;
-
   let watchNote: string | null = null;
   if (watchSymbols.length === 0) {
     if (opportunity.mode === "near_miss") {
@@ -1003,9 +1038,9 @@ function buildTomorrowPlan(
   return {
     watchSymbols: { value: watchSymbols.slice(0, 8), provenance: "derived" },
     watchNote: { value: watchNote, provenance: watchNote ? "static_copy" : "derived" },
+    watchReasons,
     triggerLine: { value: triggerParts.join(" "), provenance: "derived" },
     avoidLine: { value: avoidParts.join(" ") || "Follow verdict caps.", provenance: "derived" },
-    postureLine: { value: posture, provenance: "derived" },
   };
 }
 

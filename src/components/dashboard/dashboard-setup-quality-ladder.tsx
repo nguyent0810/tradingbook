@@ -6,86 +6,93 @@ export type DashboardSetupQualityLadderProps = {
   ladder: SetupQualityLadderDto;
 };
 
+/**
+ * "Today's scan pulse" — a market-temperature read, distinct from the
+ * Opportunity board above it (which already shows the actual actionable
+ * symbols with reasons). The plain-language summary line is the payoff;
+ * the funnel + breakdown below are supporting detail, demoted in size vs
+ * Tomorrow's plan since this widget answers "how active was the scan?",
+ * not "what should I do?".
+ */
 export function DashboardSetupQualityLadder({ ladder }: DashboardSetupQualityLadderProps) {
-  const maxCount = Math.max(...ladder.stages.map((s) => s.count), 1);
+  const actionableStages = ladder.stages.filter((s) => s.count > 0);
 
   return (
     <section
-      className="dash-ladder dash-card"
+      className="dash-ladder dash-card dash-ladder--pulse"
       data-testid="dashboard-setup-quality-ladder"
       aria-labelledby="dashboard-ladder-heading"
     >
-      <header className="dash-card__header dash-ladder__header">
-        <div>
-          <h2 id="dashboard-ladder-heading" className="dash-section-title">
-            Setup quality ladder
-          </h2>
-          <p className="dash-card__lead">Pipeline distribution from latest scan</p>
-        </div>
+      <header className="dash-pulse-header">
+        <h2 id="dashboard-ladder-heading" className="dash-pulse-title">
+          Today&rsquo;s scan pulse
+        </h2>
         <span className="dash-ladder__total tabular-nums">
           {ladder.totalClassified} classified
         </span>
       </header>
 
+      <p className="dash-pulse-summary" data-testid="dashboard-ladder-summary">
+        {ladder.summary}
+      </p>
+
       <div
-        className="dash-ladder__distribution"
+        className="dash-pulse-funnel"
         data-testid="dashboard-ladder-distribution"
         role="img"
         aria-label={`Pipeline distribution: ${ladder.stages.map((s) => `${s.label} ${s.count}`).join(", ")}`}
       >
         {SETUP_LADDER_STAGE_ORDER.map((stageId) => {
           const group = ladder.stages.find((s) => s.stage === stageId)!;
+          const isEmpty = group.count === 0;
           return (
             <div
               key={stageId}
-              className={`dash-ladder__bar-seg dash-ladder__bar-seg--${stageId}${group.count === 0 ? " dash-ladder__bar-seg--empty" : ""}`}
-              style={{ flexGrow: group.count > 0 ? group.count : 0.15 }}
+              className={`dash-pulse-funnel__seg dash-pulse-funnel__seg--${stageId}${isEmpty ? " dash-pulse-funnel__seg--empty" : ""}`}
+              style={{ flexGrow: group.count > 0 ? group.count : 0.3 }}
               title={`${group.label}: ${group.count}`}
               data-testid={`dashboard-ladder-bar-${stageId}`}
-            />
+            >
+              {isEmpty ? null : group.count}
+            </div>
           );
         })}
       </div>
 
-      <ol className="dash-ladder__stages dash-ladder__stages--compact" data-testid="dashboard-ladder-stages">
+      <ul className="dash-pulse-legend" data-testid="dashboard-ladder-stages">
         {ladder.stages.map((group) => (
-          <li
-            key={group.stage}
-            className="dash-ladder__stage"
-            data-testid={`dashboard-ladder-stage-${group.stage}`}
-          >
-            <div className="dash-ladder__stage-head">
-              <span className={`dash-ladder__stage-dot dash-ladder__stage-dot--${group.stage}`} />
-              <span className="dash-ladder__stage-label">{group.label}</span>
-              <span
-                className="dash-ladder__count tabular-nums"
-                data-testid={`dashboard-ladder-count-${group.stage}`}
-              >
-                {group.count}
-              </span>
-            </div>
-            <div
-              className="dash-ladder__micro-bar"
-              aria-hidden
-              style={{
-                width: `${Math.max((group.count / maxCount) * 100, group.count > 0 ? 8 : 0)}%`,
-              }}
-            />
-            {group.sampleSymbols.length > 0 ? (
-              <p
-                className="dash-ladder__symbols font-mono"
-                data-testid={`dashboard-ladder-symbols-${group.stage}`}
-              >
-                {group.sampleSymbols.slice(0, 2).join(", ")}
-              </p>
-            ) : (
-              <p className="dash-ladder__empty-stage" data-testid={`dashboard-ladder-empty-${group.stage}`}>
-                —
-              </p>
-            )}
+          <li key={group.stage} className="dash-pulse-legend__item" data-testid={`dashboard-ladder-stage-${group.stage}`}>
+            <span className={`dash-pulse-legend__dot dash-pulse-legend__dot--${group.stage}`} />
+            {group.label}
+            <span className="dash-pulse-legend__count tabular-nums" data-testid={`dashboard-ladder-count-${group.stage}`}>
+              {group.count}
+            </span>
           </li>
         ))}
-      </ol>
+      </ul>
+
+      {actionableStages.length > 0 ? (
+        <ul className="dash-pulse-actionable">
+          {actionableStages.map((group) => (
+            <li
+              key={group.stage}
+              className={`dash-pulse-actionable__item dash-pulse-actionable__item--${group.stage}`}
+              data-testid={`dashboard-ladder-symbols-${group.stage}`}
+            >
+              <span className="dash-pulse-actionable__label">{group.label}</span>
+              <span className="dash-pulse-actionable__syms font-mono">
+                {group.sampleSymbols.join(", ")}
+                {group.count > group.sampleSymbols.length
+                  ? ` +${group.count - group.sampleSymbols.length} more`
+                  : ""}
+              </span>
+              <span className="dash-pulse-actionable__count tabular-nums">
+                {group.count} symbol{group.count === 1 ? "" : "s"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
 
       <p className="dash-ladder__footer text-xs" style={{ color: "var(--text-tertiary)" }}>
         <Link href="/setups" className="dash-ladder__link">
