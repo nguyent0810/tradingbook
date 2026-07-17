@@ -38,6 +38,7 @@ import {
   buildRecommendedPositionSizing,
   type PositionSizingPanelDto,
 } from "./position-sizing-panel";
+import type { PositionSizingConfigOverrides } from "@/lib/trading-account-risk-config";
 import {
   buildMarkToMarketExposure,
   buildRiskToStopBreakdown,
@@ -152,6 +153,8 @@ export type DecisionCockpitInput = {
   /** From `TRADING_ACCOUNT_EQUITY_VND` when set — not live broker balance. */
   accountEquityVnd: number | null;
   portfolioRiskConfigured: boolean;
+  /** User-configurable position-sizing overrides — null fields use position-sizing-panel.ts defaults. */
+  positionSizingConfig?: PositionSizingConfigOverrides | null;
   /** When set, used for scan-age confidence (tests). */
   now?: Date;
   /** Batch D1 — computed on demand; does not affect verdict or Gate 2. */
@@ -1338,6 +1341,9 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     currentPortfolioExposureVnd: input.openExposureVnd,
     maxPortfolioExposurePct: riskBudgetHeadroom.maxBookPercent.value,
     marketContext: input.marketContext,
+    baseRiskPerTradePct: input.positionSizingConfig?.riskPerTradePct ?? undefined,
+    maxPerTradeExposurePct: input.positionSizingConfig?.maxPositionPct ?? undefined,
+    liquidityCapPctOfAdv: input.positionSizingConfig?.liquidityCapPct ?? undefined,
   });
 
   const riskToStop = buildRiskToStopBreakdown(input.openTrades ?? []);

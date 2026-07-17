@@ -14,7 +14,10 @@ import {
   type SurfacedCandidateHealthView,
 } from "@/lib/setup-health";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
-import { getTradingAccountEquityVnd } from "@/lib/trading-account-risk-config";
+import {
+  getPositionSizingConfig,
+  getTradingAccountEquityVnd,
+} from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { fetchVnindexHistoryCached } from "@/lib/market/fetch-vnindex-history";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
@@ -284,6 +287,7 @@ export default async function DashboardPage() {
   const currentExposure = openTrades.reduce((sum, t) => sum + t.entryPrice * t.quantity, 0);
   const accountEquityVnd = await getTradingAccountEquityVnd(session.userId);
   const portfolioRiskConfigured = accountEquityVnd !== null;
+  const positionSizingConfig = await getPositionSizingConfig(session.userId);
   // Workstream D — practical portfolio guardrails; reuses `trades` already loaded above
   // (all statuses, not just OPEN) rather than issuing a new Prisma query.
   const portfolioGuardrails = computePortfolioGuardrails({ trades, accountEquityVnd });
@@ -334,6 +338,7 @@ export default async function DashboardPage() {
       openExposureVnd: currentExposure,
       accountEquityVnd,
       portfolioRiskConfigured,
+      positionSizingConfig,
       rsDiagnosticsBySymbol,
       rsNearMissWatchlist,
       marketContext,
