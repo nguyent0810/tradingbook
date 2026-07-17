@@ -50,3 +50,24 @@ describe("DashboardExposurePanel — stance box tone", () => {
     expect(html).toContain("dash-exposure__stance-box--danger");
   });
 });
+
+describe("DashboardExposurePanel — equity not configured", () => {
+  it("shows a prominent banner linking to /settings instead of a quiet env-var hint", () => {
+    const dto = buildDecisionCockpitDto(minimalInput());
+    expect(dto.riskBudgetHeadroom.status).toBe("unavailable");
+
+    const html = renderToStaticMarkup(
+      <DashboardExposurePanel
+        risk={dto.risk}
+        verdict={dto.verdict}
+        riskBudgetHeadroom={dto.riskBudgetHeadroom}
+        portfolioRiskConfigured={false}
+        riskToStop={{ knownRiskVnd: 0, knownStopCount: 0, unknownStopCount: 0 }}
+        markToMarketExposure={{ available: true, exposureVnd: 0, missingCloseCount: 0, unavailableReason: null }}
+      />
+    );
+
+    expect(html).toContain('data-testid="dashboard-risk-guardrail-equity-not-configured-banner"');
+    expect(html).toContain('href="/settings"');
+  });
+});

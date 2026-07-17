@@ -6,22 +6,14 @@
    and Setups share one source of truth. This rule keeps only the Command Deck's
    own surface + layout vars. */
 .cd-root {
-  /* Dashboard-specific layout vars (not shared design tokens) */
+  /* Dashboard-specific layout vars (not shared design tokens). The shared
+     background/color/font declarations live on `.cd-root` in globals.css
+     (always-global) so every route that applies this class gets them
+     without needing to import this Arena-only stylesheet. */
   --cd-gap: 1.25rem;
   --cd-panel-max-height-table: min(28rem, 55vh);
   --cd-radar-size: min(100%, 22rem);
   --cd-radar-size-mini: min(100%, 18rem);
-
-  min-height: 100%;
-  color: var(--cd-text);
-  background:
-    radial-gradient(ellipse 100% 60% at 50% -10%, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 50% at 100% 50%, color-mix(in srgb, var(--accent) 15%, transparent) 0%, transparent 50%),
-    radial-gradient(ellipse 70% 40% at 0% 80%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 45%),
-    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, var(--bg-primary) 100%);
-  font-family: var(--font-geist-sans, system-ui, sans-serif);
-  /* Aligned figures across the terminal (dense numeric columns) */
-  font-variant-numeric: tabular-nums;
 }
 
 .cd-shell {

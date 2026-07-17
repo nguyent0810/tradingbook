@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default async function SetupsPage() {
   return (
-    <V3PageShell testId="setups-workstation" pageClassName="tosv3-setups-page bg-[var(--bg-primary)]">
+    <V3PageShell testId="setups-workstation" pageClassName="tosv3-setups-page">
       <WorkstationShell
         header={<SetupsPageHeader />}
         pipeline={

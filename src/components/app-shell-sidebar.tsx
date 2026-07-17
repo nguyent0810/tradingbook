@@ -74,6 +74,7 @@ const ACTIVE_ITEMS: SidebarItem[] = [
   { href: "/dashboard", label: "Dashboard", deck: "Command Deck", Icon: IconGrid },
   { href: "/setups", label: "Setups", deck: "Pipeline", Icon: IconFunnel },
   { href: "/paper-lab", label: "Arena", deck: "Simulation", Icon: IconTarget },
+  { href: "/settings", label: "Settings", deck: "Account", Icon: IconSettings },
 ];
 
 /**
@@ -86,7 +87,6 @@ const COMING_SOON_ITEMS: Array<{ label: string; deck: string; Icon: SidebarIcon 
   { label: "Book", deck: "Ledger", Icon: IconBook },
   { label: "Analytics", deck: "Insights", Icon: IconBarChart },
   { label: "Watchlist", deck: "Tracking", Icon: IconEye },
-  { label: "Settings", deck: "Account", Icon: IconSettings },
 ];
 
 function isNavActive(pathname: string, href: string): boolean {

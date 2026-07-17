@@ -155,6 +155,25 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+   COMMAND DECK — shared page background
+   `.cd-root` is applied by Dashboard, Setups, and Arena alike so all three
+   render the same layered background instead of three separate systems.
+   Lives here (always-global) rather than in command-deck.css (Arena-only
+   import) so every route gets it without an extra per-page CSS import.
+   ═══════════════════════════════════════════════════════════════════════ */
+.cd-root {
+  min-height: 100%;
+  color: var(--cd-text);
+  background:
+    radial-gradient(ellipse 100% 60% at 50% -10%, color-mix(in srgb, var(--accent) 35%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 50% at 100% 50%, color-mix(in srgb, var(--accent) 15%, transparent) 0%, transparent 50%),
+    radial-gradient(ellipse 70% 40% at 0% 80%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 45%),
+    linear-gradient(180deg, var(--cd-bg-accent) 0%, var(--cd-bg) 40%, var(--bg-primary) 100%);
+  font-family: var(--font-geist-sans, system-ui, sans-serif);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
    AUTHENTICATION — Command Deck experience
    Same visual language as Dashboard + Setups: shared --cd-* tokens, glass
    surfaces, cyan accent, focus rings, calm (non-looping) motion. Scoped to

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatVND } from "@/lib/formatters";
 import type {
   MarkToMarketExposureDto,
@@ -44,8 +45,11 @@ function EquityNotConfiguredBanner() {
         guidance-only instead of computed.
       </p>
       <p className="ui-state-panel__body">
-        Set <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code> in your environment and
-        restart the app to enable position sizing and book-risk caps.
+        <Link href="/settings" className="dash-v2-link">
+          Set account equity →
+        </Link>{" "}
+        (or set <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code> in your
+        environment as a fallback default).
       </p>
     </div>
   );

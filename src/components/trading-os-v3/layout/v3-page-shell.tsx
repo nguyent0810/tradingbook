@@ -20,6 +20,7 @@ export function V3PageShell({
 }: V3PageShellProps) {
   const workstation = !pageClassName.includes("tosv3-dashboard");
   const rootClass = [
+    "cd-root",
     "tosv3-page-shell",
     "pb-10",
     workstation ? "tosv3-workstation" : "",
@@ -31,14 +32,6 @@ export function V3PageShell({
 
   return (
     <div className={rootClass} data-testid={testId}>
-      <div
-        className={`tosv3-page-shell__bg-grid${workstation ? " tosv3-workstation__bg-grid" : ""}`}
-        aria-hidden
-      />
-      <div
-        className={`tosv3-page-shell__bg-noise${workstation ? " tosv3-workstation__bg-noise" : ""}`}
-        aria-hidden
-      />
       <div className="tosv3-page-shell__inner tosv3-workstation__inner">{children}</div>
     </div>
   );

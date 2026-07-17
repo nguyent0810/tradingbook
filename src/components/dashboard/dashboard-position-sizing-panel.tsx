@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatVND } from "@/lib/formatters";
 import type { ConfidenceBand, PositionSizingPanelDto } from "@/lib/dashboard/decision-cockpit-dto";
 
@@ -12,8 +13,6 @@ export type DashboardPositionSizingPanelProps = {
  * position-sizing recommendation is muted/unavailable when account equity
  * isn't configured. Reuses the existing `ui-state-panel status-surface--warning`
  * pattern (see `StaleDataWarning`) — a bordered, padded panel, not a hint line.
- * This is a self-hosted, single-user app with no in-app settings UI, so the
- * CTA is a copy-paste environment-variable instruction, not a button to nowhere.
  */
 function EquityNotConfiguredBanner() {
   return (
@@ -30,8 +29,11 @@ function EquityNotConfiguredBanner() {
         recommendation is shown (fail-closed) instead of a guessed one.
       </p>
       <p className="ui-state-panel__body">
-        Set <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code> in your environment and
-        restart the app to enable position sizing and book-risk caps.
+        <Link href="/settings" className="dash-v2-link">
+          Set account equity →
+        </Link>{" "}
+        (or set <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code> in your
+        environment as a fallback default).
       </p>
     </div>
   );

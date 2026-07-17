@@ -38,6 +38,7 @@ describe("DashboardPositionSizingPanel", () => {
       />
     );
     expect(html).toContain('data-testid="dashboard-equity-not-configured-banner"');
+    expect(html).toContain('href="/settings"');
     expect(html).toContain("TRADING_ACCOUNT_EQUITY_VND");
     expect(html).not.toContain('data-testid="dashboard-position-sizing-recommendation"');
   });
