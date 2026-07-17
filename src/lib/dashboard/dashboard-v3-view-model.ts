@@ -71,25 +71,6 @@ export type V3SetupCard = {
   actionState: string;
 };
 
-export type V3TradeGateStatus = "blocked" | "waiting" | "setup_needed" | "ready";
-
-export type V3TradeGateRow = {
-  id: string;
-  rule: string;
-  status: V3TradeGateStatus;
-  statusLabel: string;
-  severity: "High" | "Med" | "Low";
-  action: string;
-  provenance: DataProvenance;
-};
-
-export type V3TradeGate = {
-  subtitle: string;
-  rows: V3TradeGateRow[];
-  budgetStatus: "configured" | "unavailable" | "partial";
-  budgetProvenance: DataProvenance;
-};
-
 export type V3RiskConsole = {
   exposurePercent: number | null;
   maxRiskPercent: number | null;
@@ -99,7 +80,6 @@ export type V3RiskConsole = {
   capitalProtectionState: string;
   utilizationPercent: number | null;
   utilizationTone: "normal" | "elevated" | "critical";
-  tradeGate: V3TradeGate;
 };
 
 export type V3SetupIntelligence = {

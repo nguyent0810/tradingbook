@@ -27,32 +27,12 @@ import {
 } from "@/lib/dashboard/gate-funnel-copy";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
-import type { PortfolioGuardrailsDto } from "./portfolio-guardrails";
 import { buildRsNearMissWatchlistPanel } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import {
   displayGate1ScanLevel,
   displayNearMissDiagnosticStatus,
   nearMissDiagnosticActionHint,
 } from "@/lib/trading-display-labels";
-import {
-  buildRecommendedPositionSizing,
-  type PositionSizingPanelDto,
-} from "./position-sizing-panel";
-import type { PositionSizingConfigOverrides } from "@/lib/trading-account-risk-config";
-import {
-  buildMarkToMarketExposure,
-  buildRiskToStopBreakdown,
-  type DecisionCockpitOpenTradeSnapshot,
-  type MarkToMarketExposureDto,
-  type RiskToStopBreakdownDto,
-} from "./risk-exposure-breakdown";
-
-export type { PositionSizingPanelDto } from "./position-sizing-panel";
-export type {
-  DecisionCockpitOpenTradeSnapshot,
-  MarkToMarketExposureDto,
-  RiskToStopBreakdownDto,
-} from "./risk-exposure-breakdown";
 
 export type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 
@@ -148,13 +128,6 @@ export type DecisionCockpitInput = {
   freshness: MarketFreshnessDto;
   surfacedCandidates: DecisionCockpitCandidateSnapshot[];
   watchlist: DecisionCockpitWatchSnapshot[];
-  /** Sum of entryPrice × quantity for OPEN trades (VND). */
-  openExposureVnd: number;
-  /** From `TRADING_ACCOUNT_EQUITY_VND` when set — not live broker balance. */
-  accountEquityVnd: number | null;
-  portfolioRiskConfigured: boolean;
-  /** User-configurable position-sizing overrides — null fields use position-sizing-panel.ts defaults. */
-  positionSizingConfig?: PositionSizingConfigOverrides | null;
   /** When set, used for scan-age confidence (tests). */
   now?: Date;
   /** Batch D1 — computed on demand; does not affect verdict or Gate 2. */
@@ -163,12 +136,6 @@ export type DecisionCockpitInput = {
   rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
   /** Phase 1B — read-only market context; does not affect verdict, risk, or opportunity. */
   marketContext?: MarketContextUiDto | null;
-  /** Workstream D — practical portfolio guardrails (max positions, heat, duplicate-symbol exposure). */
-  portfolioGuardrails?: PortfolioGuardrailsDto | null;
-  /** Workstream B — OPEN trade rows for risk-to-stop and mark-to-market breakdowns (distinct from cost-basis `openExposureVnd`). */
-  openTrades?: DecisionCockpitOpenTradeSnapshot[];
-  /** Workstream B — latest close per uppercase ticker for OPEN trade symbols (mark-to-market only; not the watchlist symbolId-keyed map). */
-  latestCloseByTradeSymbol?: ReadonlyMap<string, number>;
 };
 
 export type ProvenanceField<T> = {
@@ -286,31 +253,6 @@ export type BestSetupsPanelPresentation = {
   emptyReason: string;
 };
 
-export type RiskGuardrailDto = {
-  maxBookAllocation: ProvenanceField<string>;
-  perTradeGuidance: ProvenanceField<string>;
-  openExposureVnd: ProvenanceField<number>;
-  stanceCopy: ProvenanceField<string>;
-  rules: Array<{ text: string; provenance: DataProvenance }>;
-};
-
-/** DC-5 book-level headroom — not stop/R-multiple risk. */
-export type RiskBudgetHeadroomStatus = "configured" | "partial" | "unavailable";
-
-export type RiskBudgetHeadroomDto = {
-  status: RiskBudgetHeadroomStatus;
-  statusCopy: string;
-  equityVnd: ProvenanceField<number | null>;
-  openExposureVnd: ProvenanceField<number>;
-  maxBookVnd: ProvenanceField<number | null>;
-  remainingBookVnd: ProvenanceField<number | null>;
-  /** Upper bound of verdict allocation range as decimal (e.g. 0.7 for 70%). */
-  maxBookPercent: ProvenanceField<number | null>;
-  perTradeRiskGuidance: ProvenanceField<string>;
-  isOverMaxBook: boolean;
-  caveats: string[];
-};
-
 export type TomorrowPlanDto = {
   watchSymbols: ProvenanceField<string[]>;
   /** Set when watch list is empty — honest fallback copy (derived/static). */
@@ -346,9 +288,6 @@ export type DecisionCockpitDto = {
   ladder: LadderRowDto[];
   /** Grouped pipeline counts + sample symbols (S5). */
   setupQualityLadder: SetupQualityLadderDto;
-  risk: RiskGuardrailDto;
-  /** DC-5 book cap vs configured equity — no fabricated R/stop risk. */
-  riskBudgetHeadroom: RiskBudgetHeadroomDto;
   tomorrow: TomorrowPlanDto;
   /** Dashboard compact blockers (max 3); same source as `blockers`. */
   actionableDiagnostics: ActionableDiagnosticsDto;
@@ -356,33 +295,6 @@ export type DecisionCockpitDto = {
   scanRunId: string | null;
   /** Diagnostic RS leaders that failed Gate 2 — separate from Tier A/B opportunity board. */
   rsNearMissWatchlist: RsNearMissWatchlistPanelDto;
-  /**
-   * Workstream D — max concurrent positions, portfolio heat, duplicate-symbol exposure.
-   * Null when the caller didn't supply trade data (does not affect verdict or Gate 2).
-   * Sector concentration / correlation are deliberately NOT covered — see portfolio-guardrails.ts.
-   */
-  portfolioGuardrails: PortfolioGuardrailsDto | null;
-  /**
-   * Workstream B — position sizing for the single best actionable opportunity
-   * (`computePositionSizing`, wrapped with VN board-lot rounding, a liquidity
-   * cap, and a slippage/gap buffer). Null when equity is not configured, the
-   * book cap can't be resolved, confidence is "low", or no eligible Tier A/B
-   * candidate is surfaced — see `buildRecommendedPositionSizing`.
-   */
-  recommendedPositionSizing: PositionSizingPanelDto | null;
-  /**
-   * Workstream B — sum of (entryPrice − stopLoss) × quantity across OPEN
-   * trades with a known stop. Distinct from cost-basis `openExposureVnd`:
-   * trades with `stopLoss: null` are excluded from the sum and counted
-   * separately (`unknownStopCount`), never assumed to carry zero risk.
-   */
-  riskToStop: RiskToStopBreakdownDto;
-  /**
-   * Workstream B — mark-to-market exposure for OPEN trades using the latest
-   * close per ticker (when resolvable). Distinct from cost-basis
-   * `openExposureVnd`; `available: false` / partial counts are surfaced, not hidden.
-   */
-  markToMarketExposure: MarkToMarketExposureDto;
 };
 
 const LADDER_STAGE_UI: Record<SetupLadderStage, { label: string; subtitle: string }> = {
@@ -674,107 +586,6 @@ function resolvePersistedDecision(
 
 function perTradeGuidanceForLevel(level: DailyTradingDecisionLevel): string {
   return level === "PROBE" ? "10–15% of equity" : level === "NORMAL" ? "10–20% of equity" : "None";
-}
-
-const RISK_BUDGET_CAVEATS = [
-  "Equity from TRADING_ACCOUNT_EQUITY_VND — not a live broker balance.",
-  "Open exposure is sum of entry × quantity on OPEN trades — not mark-to-market or stop-based risk.",
-  "Per-trade guidance is static copy — not R-multiple sizing from stops.",
-] as const;
-
-/**
- * Parse upper bound of verdict max-book allocation string (e.g. "50-70%" → 0.7).
- * Returns null when the string cannot be parsed.
- */
-export function parseMaxBookFractionFromAllocation(allocation: string): number | null {
-  const range = allocation.match(/(\d+)\s*-\s*(\d+)%/);
-  if (range) return Number(range[2]) / 100;
-  const single = allocation.match(/(\d+)%/);
-  if (single) return Number(single[1]) / 100;
-  return null;
-}
-
-/**
- * DC-5: book-level headroom from env equity + verdict cap + open notional only.
- */
-export function buildRiskBudgetHeadroom(params: {
-  accountEquityVnd: number | null;
-  openExposureVnd: number;
-  maxBookAllocation: string;
-  perTradeGuidance: string;
-}): RiskBudgetHeadroomDto {
-  const { accountEquityVnd, openExposureVnd, maxBookAllocation, perTradeGuidance } = params;
-  const openField: ProvenanceField<number> = {
-    value: openExposureVnd,
-    provenance: "derived",
-  };
-  const perTradeField: ProvenanceField<string> = {
-    value: perTradeGuidance,
-    provenance: "static_copy",
-  };
-
-  if (accountEquityVnd == null || accountEquityVnd <= 0) {
-    return {
-      status: "unavailable",
-      statusCopy:
-        "Risk budget headroom not configured — set TRADING_ACCOUNT_EQUITY_VND to compare open notional to a book cap.",
-      equityVnd: { value: null, provenance: "gap" },
-      openExposureVnd: openField,
-      maxBookVnd: { value: null, provenance: "gap" },
-      remainingBookVnd: { value: null, provenance: "gap" },
-      maxBookPercent: { value: null, provenance: "gap" },
-      perTradeRiskGuidance: perTradeField,
-      isOverMaxBook: false,
-      caveats: [...RISK_BUDGET_CAVEATS],
-    };
-  }
-
-  const maxBookPercent = parseMaxBookFractionFromAllocation(maxBookAllocation);
-  if (maxBookPercent == null) {
-    return {
-      status: "partial",
-      statusCopy:
-        "Account equity is configured but verdict max-book allocation could not be parsed — caps stay qualitative.",
-      equityVnd: { value: accountEquityVnd, provenance: "config" },
-      openExposureVnd: openField,
-      maxBookVnd: { value: null, provenance: "gap" },
-      remainingBookVnd: { value: null, provenance: "gap" },
-      maxBookPercent: { value: null, provenance: "gap" },
-      perTradeRiskGuidance: perTradeField,
-      isOverMaxBook: false,
-      caveats: [...RISK_BUDGET_CAVEATS],
-    };
-  }
-
-  const maxBookVnd = Math.round(accountEquityVnd * maxBookPercent);
-  const remainingBookVnd = maxBookVnd - openExposureVnd;
-
-  return {
-    status: "configured",
-    statusCopy:
-      remainingBookVnd < 0
-        ? "Open notional exceeds parsed max-book cap — reduce exposure or raise cap only after review."
-        : "Book headroom uses configured equity and verdict max-book upper bound.",
-    equityVnd: { value: accountEquityVnd, provenance: "config" },
-    openExposureVnd: openField,
-    maxBookVnd: { value: maxBookVnd, provenance: "derived" },
-    remainingBookVnd: { value: remainingBookVnd, provenance: "derived" },
-    maxBookPercent: { value: maxBookPercent, provenance: "derived" },
-    perTradeRiskGuidance: perTradeField,
-    isOverMaxBook: remainingBookVnd < 0,
-    caveats: [...RISK_BUDGET_CAVEATS],
-  };
-}
-
-function stanceCopyForLevel(ux: VerdictUxLevel): string {
-  switch (ux) {
-    case "NO_TRADE":
-      return "Preserve capital — no new swing entries under current stance.";
-    case "PROBE":
-      return "Reduced book-risk — Tier A only when Gate 1 is cautious; not full-risk sizing.";
-    default:
-      return "Normal book-risk mode when setups surface — follow per-trade caps; not an order to trade every name.";
-  }
 }
 
 function buildEvidenceStack(
@@ -1294,63 +1105,7 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     gate1Resolution: gate1,
   };
 
-  const perTradeGuidance = perTradeGuidanceForLevel(decision.level);
-  const riskBudgetHeadroom = buildRiskBudgetHeadroom({
-    accountEquityVnd: input.accountEquityVnd,
-    openExposureVnd: input.openExposureVnd,
-    maxBookAllocation: decision.allocation,
-    perTradeGuidance,
-  });
-
-  const risk: RiskGuardrailDto = {
-    maxBookAllocation: { value: decision.allocation, provenance: "real" },
-    perTradeGuidance: {
-      value: perTradeGuidance,
-      provenance: "static_copy",
-    },
-    openExposureVnd: { value: input.openExposureVnd, provenance: "derived" },
-    stanceCopy: { value: stanceCopyForLevel(ux), provenance: "static_copy" },
-    rules: [
-      { text: "No chasing when price is extended above breakout.", provenance: "static_copy" },
-      {
-        text: "Stop levels are reference only; size risk separately.",
-        provenance: "gap",
-      },
-      {
-        text:
-          riskBudgetHeadroom.status === "configured"
-            ? "Book headroom compares open notional to parsed max-book cap (DC-5)."
-            : "Risk budget headroom unavailable until equity env and parseable cap.",
-        provenance: riskBudgetHeadroom.status === "configured" ? "derived" : "gap",
-      },
-    ],
-  };
-
   const tomorrow = buildTomorrowPlan(ux, decision, opportunity, input.watchlist, blockers);
-
-  const recommendedPositionSizing = buildRecommendedPositionSizing({
-    candidates: input.surfacedCandidates.map((c) => ({
-      symbolKey: c.symbolKey,
-      quality: c.quality,
-      ladderStage: resolveSetupLadderStage(c),
-      closeKVnd: c.close,
-      stopKVnd: c.stopLevel,
-    })),
-    confidenceBand: confidence,
-    accountEquityVnd: input.accountEquityVnd,
-    currentPortfolioExposureVnd: input.openExposureVnd,
-    maxPortfolioExposurePct: riskBudgetHeadroom.maxBookPercent.value,
-    marketContext: input.marketContext,
-    baseRiskPerTradePct: input.positionSizingConfig?.riskPerTradePct ?? undefined,
-    maxPerTradeExposurePct: input.positionSizingConfig?.maxPositionPct ?? undefined,
-    liquidityCapPctOfAdv: input.positionSizingConfig?.liquidityCapPct ?? undefined,
-  });
-
-  const riskToStop = buildRiskToStopBreakdown(input.openTrades ?? []);
-  const markToMarketExposure = buildMarkToMarketExposure(
-    input.openTrades ?? [],
-    input.latestCloseByTradeSymbol ?? new Map()
-  );
 
   return {
     verdict,
@@ -1366,8 +1121,6 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     opportunity,
     ladder: buildLadderRows(opportunity, input.surfacedCandidates),
     setupQualityLadder,
-    risk,
-    riskBudgetHeadroom,
     tomorrow,
     actionableDiagnostics: {
       blockers,
@@ -1383,9 +1136,5 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
     scanRunId: input.latestScan?.id ?? null,
     rsNearMissWatchlist:
       input.rsNearMissWatchlist ?? buildRsNearMissWatchlistPanel([]),
-    portfolioGuardrails: input.portfolioGuardrails ?? null,
-    recommendedPositionSizing,
-    riskToStop,
-    markToMarketExposure,
   };
 }

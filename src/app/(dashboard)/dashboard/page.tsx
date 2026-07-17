@@ -14,10 +14,6 @@ import {
   type SurfacedCandidateHealthView,
 } from "@/lib/setup-health";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
-import {
-  getPositionSizingConfig,
-  getTradingAccountEquityVnd,
-} from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { fetchVnindexHistoryCached } from "@/lib/market/fetch-vnindex-history";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
@@ -38,16 +34,12 @@ import {
   persistRsWatchlistSnapshot,
 } from "@/lib/scanner/gate2/rs-watchlist-snapshot";
 import { mapDashboardV3ViewModel } from "@/lib/dashboard/map-dashboard-v3-view-model";
-import { computePortfolioGuardrails } from "@/lib/dashboard/portfolio-guardrails";
 import { buildLatestCloseBySymbol } from "@/lib/dashboard/latest-close-by-symbol";
-import { fetchLatestCloseByTradeSymbols } from "@/lib/trades/unrealized-from-close";
-import type { DecisionCockpitOpenTradeSnapshot } from "@/lib/dashboard/decision-cockpit-dto";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-page-header";
 import { DashboardDecisionCockpit } from "@/components/dashboard/dashboard-decision-cockpit";
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
-import type { Trade } from "@/generated/prisma/client";
 
 export const metadata: Metadata = {
   title: "Dashboard — TradeLog",
@@ -55,19 +47,6 @@ export const metadata: Metadata = {
 };
 
 type Fallible<T> = { data: T; error: string | null };
-
-async function loadTrades(userId: string): Promise<Fallible<Trade[]>> {
-  try {
-    const data = await prisma.trade.findMany({
-      where: { userId },
-      orderBy: { entryDate: "asc" },
-    });
-    return { data, error: null };
-  } catch (e) {
-    console.error("[dashboard] trades query failed:", e);
-    return { data: [], error: "Database temporarily unavailable (trade history)." };
-  }
-}
 
 async function loadLatestScan(): Promise<
   Fallible<Awaited<ReturnType<typeof getLatestDailyScanRun>>>
@@ -158,33 +137,6 @@ async function loadLatestCloseBySymbol(
   }
 }
 
-/**
- * Workstream B — mark-to-market exposure for OPEN trades. Reuses the existing
- * `fetchLatestCloseByTradeSymbols` helper (already used for unrealized P&L on
- * the Trades ledger — see `src/lib/trades/unrealized-from-close.ts`), keyed
- * directly by ticker (`Trade.symbol`). Deliberately NOT
- * `src/lib/dashboard/latest-close-by-symbol.ts`: that helper is keyed by the
- * internal `StockSymbol.id`, sourced from watchlist rows — a poor fit for
- * open trades, which only carry the ticker string.
- */
-async function loadLatestCloseByTradeSymbol(
-  openTrades: DecisionCockpitOpenTradeSnapshot[]
-): Promise<Map<string, number>> {
-  if (openTrades.length === 0) return new Map();
-  try {
-    const bars = await fetchLatestCloseByTradeSymbols(
-      prisma,
-      openTrades.map((t) => t.symbol)
-    );
-    const closeBySymbol = new Map<string, number>();
-    for (const [sym, bar] of bars) closeBySymbol.set(sym, bar.close);
-    return closeBySymbol;
-  } catch (e) {
-    console.error("[dashboard] latest close by trade symbol lookup failed:", e);
-    return new Map();
-  }
-}
-
 async function loadRsDiagnosticsBySymbol(
   candidatesWithHealth: SurfacedCandidateHealthView[],
   scanNotes: DailyScanGate2Notes | null,
@@ -249,19 +201,16 @@ export default async function DashboardPage() {
 
   // Tier 1 — independent of everything except the session; run together.
   const [
-    tradesResult,
     [regime, marketSnapshot],
     latestScanResult,
     activeWatchItemsResult,
     vnindexHistoryResult,
   ] = await Promise.all([
-    loadTrades(session.userId),
     Promise.all([getMarketRegimeFromDb("VNINDEX"), fetchMarketSessionSnapshot(prisma)]),
     loadLatestScan(),
     loadActiveWatchItems(),
     fetchVnindexHistoryCached(30),
   ]);
-  const trades = tradesResult.data;
   const vnindexHistory = vnindexHistoryResult.points;
   const latestScan = latestScanResult.data;
   const watchlistTruncated = activeWatchItemsResult.data.length > 20;
@@ -283,29 +232,12 @@ export default async function DashboardPage() {
           rawCandidates[0]!.barDate
         )
       : latestScan?.runAt ?? new Date();
-  const openTrades = trades.filter((t) => t.status === "OPEN");
-  const currentExposure = openTrades.reduce((sum, t) => sum + t.entryPrice * t.quantity, 0);
-  const accountEquityVnd = await getTradingAccountEquityVnd(session.userId);
-  const portfolioRiskConfigured = accountEquityVnd !== null;
-  const positionSizingConfig = await getPositionSizingConfig(session.userId);
-  // Workstream D — practical portfolio guardrails; reuses `trades` already loaded above
-  // (all statuses, not just OPEN) rather than issuing a new Prisma query.
-  const portfolioGuardrails = computePortfolioGuardrails({ trades, accountEquityVnd });
-  // Workstream B — risk-to-stop / mark-to-market inputs (distinct from cost-basis `currentExposure`).
-  const openTradesForRisk: DecisionCockpitOpenTradeSnapshot[] = openTrades.map((t) => ({
-    symbol: t.symbol,
-    entryPrice: t.entryPrice,
-    quantity: t.quantity,
-    stopLoss: t.stopLoss,
-  }));
-
   // Tier 2 — each depends only on Tier 1 results, independent of each other.
-  const [marketContext, candidatesHealthResult, latestCloseBySymbol, latestCloseByTradeSymbol] =
+  const [marketContext, candidatesHealthResult, latestCloseBySymbol] =
     await Promise.all([
       loadMarketContext(freshness.benchmarkDate, rawCandidates, scanNotes),
       loadCandidatesWithHealth(rawCandidates, evalDate),
       loadLatestCloseBySymbol(activeWatchItems),
-      loadLatestCloseByTradeSymbol(openTradesForRisk),
     ]);
   const candidatesWithHealth = candidatesHealthResult.data;
   const topSetups = candidatesWithHealth.slice(0, 5);
@@ -321,7 +253,6 @@ export default async function DashboardPage() {
   const rsNearMissWatchlist = rsNearMiss.panel;
 
   const dbLoadError =
-    tradesResult.error ??
     latestScanResult.error ??
     candidatesHealthResult.error ??
     activeWatchItemsResult.error ??
@@ -335,16 +266,9 @@ export default async function DashboardPage() {
       freshness,
       candidatesWithHealth,
       activeWatchItems,
-      openExposureVnd: currentExposure,
-      accountEquityVnd,
-      portfolioRiskConfigured,
-      positionSizingConfig,
       rsDiagnosticsBySymbol,
       rsNearMissWatchlist,
       marketContext,
-      portfolioGuardrails,
-      openTrades: openTradesForRisk,
-      latestCloseByTradeSymbol,
     })
   );
 
@@ -381,9 +305,9 @@ export default async function DashboardPage() {
     regime,
     latestScan,
     topSetups,
-    trades,
+    trades: [],
     watchItemCount: activeWatchItems.length,
-    openPositionCount: openTrades.length,
+    openPositionCount: 0,
     marketContext,
     dbLoadError,
   });
@@ -410,13 +334,9 @@ export default async function DashboardPage() {
         scanDelayedBackdrop={scanNotes?.benchmarkBackdrop?.delayedBackdrop ?? null}
         cockpitDto={cockpitDto}
         surfacedCount={latestScan?.candidateCountSurfaced ?? 0}
-        portfolioRiskConfigured={portfolioRiskConfigured}
-        trades={trades}
-        tradesError={tradesResult.error != null}
         activeWatchItems={activeWatchItems}
         watchlistTruncated={watchlistTruncated}
         latestCloseBySymbol={latestCloseBySymbol}
-        tradeGate={viewModel.risk.tradeGate}
         vnindexHistory={vnindexHistory}
         vnindexHistoryError={vnindexHistoryResult.error}
       />

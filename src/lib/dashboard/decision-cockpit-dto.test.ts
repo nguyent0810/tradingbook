@@ -5,10 +5,8 @@ import { RS_DIAGNOSTIC_DISCLAIMER } from "@/lib/scanner/gate2/rs-diagnostic-form
 import type { MarketContextUiDto } from "@/lib/market/market-context-ui-dto";
 import {
   buildDecisionCockpitDto,
-  buildRiskBudgetHeadroom,
   computeConfidenceBand,
   mapDecisionLevelToUxVerdict,
-  parseMaxBookFractionFromAllocation,
   resolveBestSetupsPanelPresentation,
   resolveCanonicalGate1,
   resolveSetupLadderStage,
@@ -76,9 +74,6 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
     freshness: alignedFreshness,
     surfacedCandidates: [],
     watchlist: [],
-    openExposureVnd: 0,
-    accountEquityVnd: null,
-    portfolioRiskConfigured: false,
     now: new Date(Date.UTC(2026, 4, 25, 14, 0, 0)),
     ...overrides,
   };
@@ -634,96 +629,6 @@ describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
   });
 });
 
-describe("buildRiskBudgetHeadroom (DC-5)", () => {
-  it("configured path: equity from config, derived max book and remaining headroom", () => {
-    const h = buildRiskBudgetHeadroom({
-      accountEquityVnd: 100_000_000,
-      openExposureVnd: 30_000_000,
-      maxBookAllocation: "50-70%",
-      perTradeGuidance: "10–20% of equity",
-    });
-    expect(h.status).toBe("configured");
-    expect(h.equityVnd.provenance).toBe("config");
-    expect(h.equityVnd.value).toBe(100_000_000);
-    expect(h.maxBookPercent.value).toBe(0.7);
-    expect(h.maxBookVnd.value).toBe(70_000_000);
-    expect(h.remainingBookVnd.value).toBe(40_000_000);
-    expect(h.isOverMaxBook).toBe(false);
-    expect(h.openExposureVnd.provenance).toBe("derived");
-  });
-
-  it("unavailable when equity missing", () => {
-    const h = buildRiskBudgetHeadroom({
-      accountEquityVnd: null,
-      openExposureVnd: 5_000_000,
-      maxBookAllocation: "50%",
-      perTradeGuidance: "None",
-    });
-    expect(h.status).toBe("unavailable");
-    expect(h.equityVnd.provenance).toBe("gap");
-    expect(h.maxBookVnd.value).toBeNull();
-    expect(h.statusCopy).toMatch(/not configured/i);
-  });
-
-  it("flags over max book when open exposure exceeds parsed cap", () => {
-    const h = buildRiskBudgetHeadroom({
-      accountEquityVnd: 100_000_000,
-      openExposureVnd: 60_000_000,
-      maxBookAllocation: "50%",
-      perTradeGuidance: "10–20% of equity",
-    });
-    expect(h.status).toBe("configured");
-    expect(h.maxBookVnd.value).toBe(50_000_000);
-    expect(h.remainingBookVnd.value).toBe(-10_000_000);
-    expect(h.isOverMaxBook).toBe(true);
-  });
-
-  it("partial when allocation cannot be parsed", () => {
-    const h = buildRiskBudgetHeadroom({
-      accountEquityVnd: 50_000_000,
-      openExposureVnd: 0,
-      maxBookAllocation: "TBD",
-      perTradeGuidance: "None",
-    });
-    expect(h.status).toBe("partial");
-    expect(h.equityVnd.provenance).toBe("config");
-    expect(h.maxBookVnd.value).toBeNull();
-  });
-
-  it("does not expose R-multiple or stop-based risk fields", () => {
-    const dto = buildDecisionCockpitDto(
-      baseInput({
-        accountEquityVnd: 100_000_000,
-        openExposureVnd: 10_000_000,
-        portfolioRiskConfigured: true,
-        scanNotes: {
-          ...baseInput().scanNotes!,
-          decision: {
-            level: "NORMAL",
-            allocation: "50%",
-            explanation: "Test day.",
-          },
-        },
-        latestScan: {
-          ...baseInput().latestScan!,
-          candidateCountA: 1,
-          candidateCountB: 0,
-          candidateCountSurfaced: 1,
-        },
-      })
-    );
-    const serialized = JSON.stringify(dto.riskBudgetHeadroom);
-    expect(serialized).not.toMatch(/riskAtStop|rMultiple|riskBudgetVnd|perShareRisk/i);
-    expect(dto.riskBudgetHeadroom.status).toBe("configured");
-  });
-});
-
-describe("parseMaxBookFractionFromAllocation", () => {
-  it("parses range upper bound", () => {
-    expect(parseMaxBookFractionFromAllocation("20-40%")).toBe(0.4);
-  });
-});
-
 describe("computeConfidenceBand", () => {
   it("returns low when scan session coverage is weak", () => {
     const fresh = buildMarketFreshnessDto({
@@ -888,7 +793,7 @@ const prodLikeMarketContext: MarketContextUiDto = {
 };
 
 describe("buildDecisionCockpitDto — market context Phase 1B invariance", () => {
-  it("leaves verdict, risk, and opportunity unchanged when market context is present", () => {
+  it("leaves verdict and opportunity unchanged when market context is present", () => {
     const input = baseInput();
     const without = buildDecisionCockpitDto(input);
     const withContext = buildDecisionCockpitDto({
@@ -897,13 +802,11 @@ describe("buildDecisionCockpitDto — market context Phase 1B invariance", () =>
     });
 
     expect(withContext.verdict).toEqual(without.verdict);
-    expect(withContext.risk).toEqual(without.risk);
     expect(withContext.opportunity).toEqual(without.opportunity);
     expect(withContext.gateFunnel).toEqual(without.gateFunnel);
     expect(withContext.ladder).toEqual(without.ladder);
     expect(withContext.setupQualityLadder).toEqual(without.setupQualityLadder);
     expect(withContext.tomorrow).toEqual(without.tomorrow);
-    expect(withContext.riskBudgetHeadroom).toEqual(without.riskBudgetHeadroom);
   });
 
   it("appends market foreign evidence chips without removing existing chips", () => {
@@ -920,99 +823,3 @@ describe("buildDecisionCockpitDto — market context Phase 1B invariance", () =>
   });
 });
 
-function tierACandidate(): DecisionCockpitInput["surfacedCandidates"][number] {
-  return {
-    id: "cand-1",
-    symbolKey: "HPG",
-    quality: "A",
-    lifecycleSortLabel: "READY",
-    healthLevel: "HEALTHY",
-    healthScore: 90,
-    healthScoreLabel: "Strong",
-    healthFlags: [],
-    healthSummary: null,
-    reasons: [],
-    rankSummary: null,
-    close: 100,
-    pullbackZoneLow: 97,
-    pullbackZoneHigh: 101,
-    stopLevel: 97,
-    rankScore: 80,
-  };
-}
-
-describe("buildDecisionCockpitDto — Workstream B position sizing + risk breakdown wiring", () => {
-  it("surfaces a recommendedPositionSizing when equity is configured, confidence is high, and a Tier A candidate is surfaced", () => {
-    const dto = buildDecisionCockpitDto(
-      baseInput({
-        surfacedCandidates: [tierACandidate()],
-        accountEquityVnd: 1_000_000_000,
-        portfolioRiskConfigured: true,
-        liveRegime: {
-          level: "PASS",
-          symbol: "VNINDEX",
-          latestBar: { date: new Date(Date.UTC(2026, 4, 25)), close: 1245.5 },
-        },
-        latestScan: {
-          id: "scan-1",
-          runAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
-          gate1Level: "PASS",
-          candidateCountA: 1,
-          candidateCountB: 0,
-          candidateCountSurfaced: 1,
-          universeScannedCount: 400,
-        },
-      })
-    );
-
-    expect(dto.verdict.confidenceBand.value).toBe("high");
-    expect(dto.recommendedPositionSizing).not.toBeNull();
-    expect(dto.recommendedPositionSizing?.symbol).toBe("HPG");
-  });
-
-  it("gates: no recommendedPositionSizing when equity is not configured", () => {
-    const dto = buildDecisionCockpitDto(
-      baseInput({
-        surfacedCandidates: [tierACandidate()],
-        accountEquityVnd: null,
-        portfolioRiskConfigured: false,
-      })
-    );
-    expect(dto.recommendedPositionSizing).toBeNull();
-  });
-
-  it("riskToStop excludes trades with a null stop and counts them separately", () => {
-    const dto = buildDecisionCockpitDto(
-      baseInput({
-        openTrades: [
-          { symbol: "HPG", entryPrice: 100, quantity: 1000, stopLoss: 97 },
-          { symbol: "SSI", entryPrice: 50, quantity: 500, stopLoss: null },
-        ],
-      })
-    );
-    expect(dto.riskToStop.knownRiskVnd).toBe(3000);
-    expect(dto.riskToStop.knownStopCount).toBe(1);
-    expect(dto.riskToStop.unknownStopCount).toBe(1);
-  });
-
-  it("markToMarketExposure is unavailable (not zero) when no close map is supplied for open trades", () => {
-    const dto = buildDecisionCockpitDto(
-      baseInput({
-        openTrades: [{ symbol: "HPG", entryPrice: 100, quantity: 1000, stopLoss: 97 }],
-      })
-    );
-    expect(dto.markToMarketExposure.available).toBe(false);
-    expect(dto.markToMarketExposure.exposureVnd).toBeNull();
-  });
-
-  it("markToMarketExposure sums latestCloseByTradeSymbol × quantity when supplied", () => {
-    const dto = buildDecisionCockpitDto(
-      baseInput({
-        openTrades: [{ symbol: "HPG", entryPrice: 100, quantity: 1000, stopLoss: 97 }],
-        latestCloseByTradeSymbol: new Map([["HPG", 105]]),
-      })
-    );
-    expect(dto.markToMarketExposure.available).toBe(true);
-    expect(dto.markToMarketExposure.exposureVnd).toBe(105_000);
-  });
-});

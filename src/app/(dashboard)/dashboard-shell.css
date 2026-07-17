@@ -887,78 +887,8 @@
   color: var(--text-tertiary);
 }
 
-/* Opportunity preview (Decision Cockpit S3) */
-
-.dash-exposure__stance {
-  margin-top: var(--space-2);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.dash-exposure__stance-box {
-  margin-top: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  border-left: 3px solid var(--dash-stance-color, var(--border-primary));
-  background: color-mix(in srgb, var(--dash-stance-color, var(--border-primary)) 12%, transparent);
-  color: var(--text-primary);
-}
-.dash-exposure__stance-box--danger {
-  --dash-stance-color: var(--cd-danger, var(--danger));
-}
-.dash-exposure__stance-box--warning {
-  --dash-stance-color: var(--cd-warning, var(--warning));
-}
-.dash-exposure__stance-box--success {
-  --dash-stance-color: var(--cd-success, var(--success));
-}
-
-.dash-exposure__gate1-live {
-  font-weight: 500;
-  color: var(--text-tertiary);
-}
-
-.dash-exposure__rules {
-  margin: var(--space-3) 0 0;
-  padding-left: var(--space-4);
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-  list-style: disc;
-}
-
 .dash-exposure__caption {
   margin-top: var(--space-2);
-}
-
-.dash-exposure__headroom {
-  margin-top: var(--space-2);
-}
-
-.dash-exposure__pct {
-  font-size: var(--font-size-xs);
-  font-weight: 500;
-  color: var(--text-tertiary);
-}
-
-.dash-exposure__value--over {
-  color: var(--warning);
-}
-
-.dash-metric-grid--compact {
-  margin-top: var(--space-2);
-  gap: var(--space-2);
-}
-
-.dash-exposure__caveats {
-  margin: var(--space-2) 0 0;
-  padding-left: var(--space-4);
-  font-size: 0.625rem;
-  color: var(--text-tertiary);
-  list-style: disc;
-  line-height: var(--line-height-relaxed);
 }
 
 /* Tomorrow promoted (S8) */
@@ -1387,108 +1317,11 @@
   font-size: var(--font-size-xs);
 }
 
-/* Exposure metrics */
-.dash-metric-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-  margin-top: var(--space-3);
-}
-
-.dash-metric dt {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-wide);
-  color: var(--text-tertiary);
-}
-
-.dash-metric__value {
-  margin-top: var(--space-1);
-  font-size: var(--font-size-md);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.dash-exposure__hint,
-.dash-exposure__footnote {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-  line-height: var(--line-height-relaxed);
-}
-
-.dash-exposure__hint {
-  margin-bottom: var(--space-3);
-}
-
-.dash-exposure__footnote {
-  margin-top: var(--space-3);
-}
-
 .dash-code {
   border-radius: var(--radius-sm);
   background: var(--bg-tertiary);
   padding: 0.1rem 0.35rem;
   font-size: 0.7rem;
-}
-
-/* Performance (secondary) */
-.dash-performance__subtitle,
-.dash-performance__empty {
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-}
-
-.dash-performance__empty--error {
-  color: var(--danger);
-}
-
-.dash-performance__stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin-top: var(--space-2);
-  font-size: var(--font-size-xs);
-}
-
-.dash-performance__stats dt {
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 600;
-}
-
-.dash-performance__stats dd {
-  margin-top: 2px;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.dash-performance__donut {
-  margin-top: var(--space-3);
-}
-.dash-performance__donut-legend {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-3);
-  margin-top: var(--space-1);
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-  list-style: none;
-  padding: 0;
-}
-.dash-performance__donut-legend li {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.dash-performance__donut-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
 }
 
 .dash-scan-strip {
@@ -1830,26 +1663,6 @@
   margin-top: var(--space-1);
 }
 
-.dash-exposure__details {
-  margin-top: var(--space-2);
-}
-
-.dash-exposure__details summary {
-  cursor: pointer;
-  color: var(--accent-text);
-  font-weight: 600;
-  list-style: none;
-}
-
-.dash-exposure__details summary::-webkit-details-marker {
-  display: none;
-}
-
-.dash-exposure__rules,
-.dash-exposure__caveats {
-  margin-top: var(--space-2);
-}
-
 .dash-momentum {
   min-height: 17rem;
 }
@@ -2149,72 +1962,6 @@
   color: var(--text-tertiary);
 }
 
-/* Trade gate ("Why not Go?") — had NO styling at all before this pass;
-   rendered as an unstyled <ul> despite the outer card looking finished. */
-.dash-trade-gate__subtitle {
-  margin-bottom: var(--space-2);
-}
-.dash-trade-gate__rows {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-.dash-trade-gate__row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-primary);
-  border-left: 3px solid var(--dash-gate-color, var(--border-primary));
-  background: color-mix(in srgb, var(--bg-primary) 60%, transparent);
-}
-.dash-trade-gate__row--blocked {
-  --dash-gate-color: var(--cd-danger, var(--danger));
-}
-.dash-trade-gate__row--waiting {
-  --dash-gate-color: var(--cd-warning, var(--warning));
-}
-.dash-trade-gate__row--setup_needed {
-  --dash-gate-color: var(--cd-text-dim, var(--text-tertiary));
-}
-.dash-trade-gate__row--ready {
-  --dash-gate-color: var(--cd-success, var(--success));
-}
-.dash-trade-gate__rule {
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  color: var(--text-primary);
-}
-.dash-trade-gate__action {
-  margin-left: auto;
-  color: var(--text-tertiary);
-}
-
-.dash-portfolio-guardrails__hint {
-  margin-top: var(--space-2);
-}
-.dash-portfolio-guardrails__duplicates {
-  list-style: none;
-  margin: var(--space-1) 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-}
-.dash-portfolio-guardrails__duplicates li {
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  border-left: 2px solid var(--cd-warning, var(--warning));
-}
-
 .dash-integrity-notes {
   padding: var(--space-3);
   border: 1px solid var(--border-primary);
@@ -2243,16 +1990,6 @@
 .dash-ladder__symbols,
 .dash-ladder__empty-stage {
   margin-top: var(--space-1);
-}
-
-.dash-exposure__details {
-  margin-top: var(--space-2);
-}
-
-.dash-exposure__details summary {
-  cursor: pointer;
-  color: var(--accent-text);
-  font-weight: 600;
 }
 
 .dash-momentum .table-container {
@@ -2797,12 +2534,6 @@
   margin-top: var(--space-2);
 }
 
-.dash-cockpit--v2 .dash-performance__subtitle,
-.dash-cockpit--v2 .dash-exposure__details summary {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-}
-
 .dash-cockpit--v2 .dash-v2-alert {
   margin-bottom: var(--space-2);
 }
@@ -2995,17 +2726,6 @@
   flex-direction: column;
   gap: var(--command-deck-gap-tight);
   min-width: 0;
-}
-
-.command-deck-risk-rail {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  min-width: 0;
-}
-
-.command-deck-risk-rail__card {
-  flex: 1;
 }
 
 .command-deck__tomorrow {
@@ -3493,10 +3213,6 @@
 .chart-frame__tooltip-value {
   margin: var(--space-1) 0 0;
   font-weight: 600;
-}
-
-.dash-performance__sparkline.chart-frame--inline .chart-frame__description {
-  margin-bottom: var(--space-2);
 }
 
 /* Recharts axis — tabular, muted */

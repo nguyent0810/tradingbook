@@ -1,8 +1,6 @@
-import type { Trade } from "@/generated/prisma/client";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { DecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
-import type { V3TradeGate } from "@/lib/dashboard/dashboard-v3-view-model";
 import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import { CommandDeckCollapsible } from "@/components/command-deck";
 import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
@@ -10,12 +8,8 @@ import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-
 import { DashboardOpportunityCandidates } from "@/components/dashboard/dashboard-opportunity-candidates";
 import { DashboardNearMissRejectionsPanel } from "@/components/dashboard/dashboard-near-miss-rejections-panel";
 import { DashboardSetupQualityLadder } from "@/components/dashboard/dashboard-setup-quality-ladder";
-import { DashboardRiskRail } from "@/components/dashboard/dashboard-risk-rail";
-import { DashboardTradeGatePanel } from "@/components/dashboard/dashboard-trade-gate-panel";
-import { DashboardPortfolioGuardrailsPanel } from "@/components/dashboard/dashboard-portfolio-guardrails-panel";
 import { DashboardTomorrowPlan } from "@/components/dashboard/dashboard-tomorrow-plan";
 import { DashboardSecondaryIntelligence } from "@/components/dashboard/dashboard-secondary-intelligence";
-import { DashboardBookSnapshot } from "@/components/dashboard/dashboard-book-snapshot";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 
 export type DashboardDecisionCockpitProps = {
@@ -24,21 +18,17 @@ export type DashboardDecisionCockpitProps = {
   scanDelayedBackdrop: boolean | null;
   cockpitDto: DecisionCockpitDto;
   surfacedCount: number;
-  portfolioRiskConfigured: boolean;
-  trades: Trade[];
-  tradesError?: boolean;
   activeWatchItems: DashboardWatchlistItem[];
   watchlistTruncated?: boolean;
   latestCloseBySymbol: Map<string, number>;
-  tradeGate: V3TradeGate;
   vnindexHistory: VnindexHistoryPoint[];
   vnindexHistoryError?: boolean;
 };
 
 /**
- * Decision Cockpit — verdict -> evidence -> opportunities -> guardrails ->
- * tomorrow's plan -> book snapshot (docs/design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md).
- * Composes the dashboard-* panel family; the panels themselves already read
+ * Decision Cockpit — verdict -> evidence -> opportunities -> tomorrow's plan
+ * (docs/design/DASHBOARD_DECISION_COCKPIT_UX_SPEC.md). Composes the
+ * dashboard-* panel family; the panels themselves already read
  * DecisionCockpitDto fields directly, so this assembler only sequences them.
  */
 export function DashboardDecisionCockpit({
@@ -47,13 +37,9 @@ export function DashboardDecisionCockpit({
   scanDelayedBackdrop,
   cockpitDto,
   surfacedCount,
-  portfolioRiskConfigured,
-  trades,
-  tradesError = false,
   activeWatchItems,
   watchlistTruncated = false,
   latestCloseBySymbol,
-  tradeGate,
   vnindexHistory,
   vnindexHistoryError = false,
 }: DashboardDecisionCockpitProps) {
@@ -94,31 +80,13 @@ export function DashboardDecisionCockpit({
         </header>
 
         <div className="command-deck-opportunity__body dash-v2-zone__body">
-          <div className="command-deck__opportunity-row">
-            {cockpitDto.opportunity.mode === "candidates" ? (
-              <DashboardOpportunityCandidates opportunity={cockpitDto.opportunity} />
-            ) : (
-              <DashboardNearMissRejectionsPanel opportunity={cockpitDto.opportunity} />
-            )}
-            <DashboardRiskRail
-              risk={cockpitDto.risk}
-              verdict={cockpitDto.verdict}
-              riskBudgetHeadroom={cockpitDto.riskBudgetHeadroom}
-              portfolioRiskConfigured={portfolioRiskConfigured}
-              riskToStop={cockpitDto.riskToStop}
-              markToMarketExposure={cockpitDto.markToMarketExposure}
-              recommendedPositionSizing={cockpitDto.recommendedPositionSizing}
-              confidenceBand={cockpitDto.verdict.confidenceBand.value}
-            />
-          </div>
+          {cockpitDto.opportunity.mode === "candidates" ? (
+            <DashboardOpportunityCandidates opportunity={cockpitDto.opportunity} />
+          ) : (
+            <DashboardNearMissRejectionsPanel opportunity={cockpitDto.opportunity} />
+          )}
 
           <DashboardSetupQualityLadder ladder={cockpitDto.setupQualityLadder} />
-
-          <DashboardTradeGatePanel tradeGate={tradeGate} />
-
-          {cockpitDto.portfolioGuardrails ? (
-            <DashboardPortfolioGuardrailsPanel guardrails={cockpitDto.portfolioGuardrails} />
-          ) : null}
         </div>
       </section>
 
@@ -139,8 +107,6 @@ export function DashboardDecisionCockpit({
           embedded
         />
       </CommandDeckCollapsible>
-
-      <DashboardBookSnapshot trades={trades} tradesError={tradesError} />
     </DashboardEntrance>
   );
 }
