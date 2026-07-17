@@ -48,7 +48,7 @@ describe("DashboardDecisionCockpit", () => {
       'data-testid="dashboard-v2-hero-band"',
       'data-testid="dashboard-cockpit-zone-opportunity"',
       'data-testid="dashboard-tomorrow-plan"',
-      'data-testid="dashboard-secondary-collapsible"',
+      'data-testid="dashboard-cockpit-zone-next-session"',
     ];
 
     let cursor = -1;
