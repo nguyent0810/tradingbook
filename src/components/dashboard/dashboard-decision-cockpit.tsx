@@ -78,14 +78,19 @@ export function DashboardDecisionCockpit({
         data-testid="dashboard-cockpit-zone-opportunity"
         aria-labelledby="dashboard-opportunity-heading"
       >
-        <header className="dash-v2-zone-header">
-          <p className="dash-v2-eyebrow">Opportunities</p>
-          <h2 id="dashboard-opportunity-heading" className="dash-v2-zone-title">
-            Opportunity board
-          </h2>
-          <p className="dash-v2-zone-lead">
-            Tier actions, near-miss path, and setup quality — compare before you log risk.
-          </p>
+        <header className="dash-v2-zone-header dash-header--numbered">
+          <span className="dash-header-num" aria-hidden="true">
+            01
+          </span>
+          <div>
+            <p className="dash-v2-eyebrow">Opportunities</p>
+            <h2 id="dashboard-opportunity-heading" className="dash-v2-zone-title">
+              Opportunity board
+            </h2>
+            <p className="dash-v2-zone-lead">
+              Tier actions, near-miss path, and setup quality — compare before you log risk.
+            </p>
+          </div>
         </header>
 
         <div className="command-deck-opportunity__body dash-v2-zone__body">

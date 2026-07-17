@@ -65,6 +65,10 @@
   --command-deck-max-width: 90rem;
   --command-deck-gap: var(--space-5);
   --command-deck-gap-tight: var(--space-4);
+  /* Top-level zone-to-zone gap, closer to Arena's 2.25rem zone spacing —
+     kept separate from --command-deck-gap so tighter internal card-row
+     gaps (e.g. .command-deck-opportunity__body) don't also grow. */
+  --command-deck-zone-gap: 2rem;
   --app-shell-max-width: var(--command-deck-max-width);
   --app-shell-header-bg: rgba(9, 9, 11, 0.82);
   --app-shell-header-blur: 12px;

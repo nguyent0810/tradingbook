@@ -14,10 +14,7 @@ import {
   type SurfacedCandidateHealthView,
 } from "@/lib/setup-health";
 import { SetupLifecycleStatus } from "@/generated/prisma/client";
-import {
-  isTradingRiskBudgetConfigured,
-  parseTradingAccountEquityVnd,
-} from "@/lib/trading-account-risk-config";
+import { getTradingAccountEquityVnd } from "@/lib/trading-account-risk-config";
 import { fetchMarketSessionSnapshot } from "@/lib/market/market-session-snapshot";
 import { fetchVnindexHistoryCached } from "@/lib/market/fetch-vnindex-history";
 import { analyzeMarketDataAlignment } from "@/lib/market/market-data-alignment";
@@ -285,8 +282,8 @@ export default async function DashboardPage() {
       : latestScan?.runAt ?? new Date();
   const openTrades = trades.filter((t) => t.status === "OPEN");
   const currentExposure = openTrades.reduce((sum, t) => sum + t.entryPrice * t.quantity, 0);
-  const accountEquityVnd = parseTradingAccountEquityVnd();
-  const portfolioRiskConfigured = isTradingRiskBudgetConfigured();
+  const accountEquityVnd = await getTradingAccountEquityVnd(session.userId);
+  const portfolioRiskConfigured = accountEquityVnd !== null;
   // Workstream D — practical portfolio guardrails; reuses `trades` already loaded above
   // (all statuses, not just OPEN) rather than issuing a new Prisma query.
   const portfolioGuardrails = computePortfolioGuardrails({ trades, accountEquityVnd });
@@ -387,7 +384,7 @@ export default async function DashboardPage() {
   });
 
   return (
-    <div className="page-container command-deck dash-cockpit dash-cockpit--v2 pb-10">
+    <div className="cd-root page-container command-deck dash-cockpit dash-cockpit--v2 pb-10">
       <DashboardPageHeader cta={viewModel.headerCta} />
 
       {dbLoadError ? (

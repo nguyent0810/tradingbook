@@ -3,7 +3,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 export default function DashboardLoading() {
   return (
     <div
-      className="page-container command-deck dash-cockpit dash-cockpit--v2 pb-10"
+      className="cd-root page-container command-deck dash-cockpit dash-cockpit--v2 pb-10"
       aria-busy="true"
       data-testid="dashboard-cockpit-loading"
     >

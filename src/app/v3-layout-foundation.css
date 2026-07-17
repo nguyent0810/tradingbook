@@ -8,40 +8,16 @@
   --v3-gap-section: 0.85rem;
 }
 
-/* ── Page shell (all V3 routes) ── */
+/* ── Page shell (all V3 routes) ──
+   Background/color/type tokens come from the shared `.cd-root` rule
+   (command-deck.css) applied alongside `.tosv3-page-shell` in
+   `V3PageShell` — kept in sync with Dashboard/Arena's background instead
+   of a one-off gradient+grid+noise texture. Only layout properties live
+   here. */
 .tosv3-page-shell {
   position: relative;
   isolation: isolate;
-  min-height: 100vh;
   overflow: hidden;
-  color: var(--cd-text);
-  background:
-    radial-gradient(circle at 15% -10%, rgba(79, 70, 229, 0.22), transparent 38%),
-    radial-gradient(circle at 85% -20%, rgba(16, 185, 129, 0.18), transparent 44%),
-    linear-gradient(145deg, #040507 0%, #080a0d 40%, #0a0b10 100%);
-}
-
-.tosv3-page-shell__bg-grid,
-.tosv3-page-shell__bg-noise {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.tosv3-page-shell__bg-grid {
-  opacity: 0.36;
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(circle at center, black 35%, transparent 100%);
-}
-
-.tosv3-page-shell__bg-noise {
-  opacity: 0.12;
-  background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.5) 1px, transparent 0);
-  background-size: 4px 4px;
 }
 
 .tosv3-page-shell__inner,

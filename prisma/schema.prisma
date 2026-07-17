@@ -15,9 +15,25 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  trades Trade[]
+  trades          Trade[]
+  tradingSettings UserTradingSettings?
 
   @@map("users")
+}
+
+/// Per-user trading account config (currently just equity), settable/updatable
+/// from the app's Settings page instead of only the TRADING_ACCOUNT_EQUITY_VND
+/// env var — see src/lib/trading-account-risk-config.ts.
+model UserTradingSettings {
+  id               String   @id @default(cuid())
+  userId           String   @unique @map("user_id")
+  accountEquityVnd Float?   @map("account_equity_vnd")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_trading_settings")
 }
 
 model Trade {

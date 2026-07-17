@@ -20,15 +20,22 @@ export function DashboardTomorrowPlan({
       data-testid="dashboard-tomorrow-plan"
       aria-labelledby="dashboard-tomorrow-heading"
     >
-      <header className="dash-card__header">
-        <h2 id="dashboard-tomorrow-heading" className="dash-section-title">
-          {promoted ? "What next" : "Tomorrow's plan"}
-        </h2>
-        <p className="dash-card__lead">
-          {promoted
-            ? "Watch · trigger · avoid · posture for the next session"
-            : "Watch, triggers, and avoid rules for the next session"}
-        </p>
+      <header className={`dash-card__header${promoted ? "" : " dash-header--numbered"}`}>
+        {promoted ? null : (
+          <span className="dash-header-num" aria-hidden="true">
+            02
+          </span>
+        )}
+        <div>
+          <h2 id="dashboard-tomorrow-heading" className="dash-section-title">
+            {promoted ? "What next" : "Tomorrow's plan"}
+          </h2>
+          <p className="dash-card__lead">
+            {promoted
+              ? "Watch · trigger · avoid · posture for the next session"
+              : "Watch, triggers, and avoid rules for the next session"}
+          </p>
+        </div>
       </header>
 
       <dl className={`dash-tomorrow__grid${promoted ? " dash-tomorrow__grid--promoted" : ""}`}>
