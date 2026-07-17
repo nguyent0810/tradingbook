@@ -102,6 +102,7 @@ export type BuildRecommendedPositionSizingParams = {
   marketContext?: MarketContextUiDto | null;
   baseRiskPerTradePct?: number;
   maxPerTradeExposurePct?: number;
+  liquidityCapPctOfAdv?: number;
 };
 
 /** Scanner/stored `volMa20` (shares) × entry close → ADV in VND, or null when volume data is unavailable. */
@@ -140,12 +141,19 @@ export function applyLiquidityCap(params: {
   qtyShares: number;
   entryVndPerShare: number;
   advVnd: number | null;
+  /** Fraction of one day's ADV — defaults to `LIQUIDITY_CAP_PCT_OF_ADV`. */
+  liquidityCapPctOfAdv?: number;
 }): { qtyShares: number; capApplied: boolean } {
-  const { qtyShares, entryVndPerShare, advVnd } = params;
+  const {
+    qtyShares,
+    entryVndPerShare,
+    advVnd,
+    liquidityCapPctOfAdv = LIQUIDITY_CAP_PCT_OF_ADV,
+  } = params;
   if (advVnd == null || !(entryVndPerShare > 0)) {
     return { qtyShares, capApplied: false };
   }
-  const capNotionalVnd = advVnd * LIQUIDITY_CAP_PCT_OF_ADV;
+  const capNotionalVnd = advVnd * liquidityCapPctOfAdv;
   const capQtyShares = Math.floor(capNotionalVnd / entryVndPerShare);
   if (capQtyShares < qtyShares) {
     return { qtyShares: Math.max(0, capQtyShares), capApplied: true };
@@ -175,6 +183,7 @@ export function buildRecommendedPositionSizing(
     marketContext,
     baseRiskPerTradePct = DEFAULT_BASE_RISK_PER_TRADE_PCT,
     maxPerTradeExposurePct = DEFAULT_MAX_PER_TRADE_EXPOSURE_PCT,
+    liquidityCapPctOfAdv = LIQUIDITY_CAP_PCT_OF_ADV,
   } = params;
 
   if (confidenceBand === "low") return null;
@@ -209,6 +218,7 @@ export function buildRecommendedPositionSizing(
     qtyShares: sizing.value.qFinalShares,
     entryVndPerShare: sizing.value.entryVndPerShare,
     advVnd,
+    liquidityCapPctOfAdv,
   });
 
   const finalQtyShares = floorToBoardLot(qtyAfterLiquidity);

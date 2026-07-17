@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getTradingAccountEquityVnd, parsePositiveMoney } from "./trading-account-risk-config";
+import {
+  getPositionSizingConfig,
+  getTradingAccountEquityVnd,
+  parsePositiveMoney,
+} from "./trading-account-risk-config";
 
 const findUniqueMock = vi.hoisted(() => vi.fn());
 
@@ -42,7 +46,12 @@ describe("getTradingAccountEquityVnd", () => {
     expect(result).toBe(750_000_000);
     expect(findUniqueMock).toHaveBeenCalledWith({
       where: { userId: "user-db-value" },
-      select: { accountEquityVnd: true },
+      select: {
+        accountEquityVnd: true,
+        riskPerTradePct: true,
+        maxPositionPct: true,
+        liquidityCapPct: true,
+      },
     });
   });
 
@@ -71,5 +80,51 @@ describe("getTradingAccountEquityVnd", () => {
     const result = await getTradingAccountEquityVnd("user-unconfigured");
 
     expect(result).toBeNull();
+  });
+});
+
+describe("getPositionSizingConfig", () => {
+  it("returns the DB overrides when positive values are set", async () => {
+    findUniqueMock.mockResolvedValueOnce({
+      riskPerTradePct: 0.0075,
+      maxPositionPct: 0.15,
+      liquidityCapPct: 0.05,
+    });
+
+    const result = await getPositionSizingConfig("user-sizing-configured");
+
+    expect(result).toEqual({
+      riskPerTradePct: 0.0075,
+      maxPositionPct: 0.15,
+      liquidityCapPct: 0.05,
+    });
+  });
+
+  it("returns null fields (system defaults apply) when no row exists", async () => {
+    findUniqueMock.mockResolvedValueOnce(null);
+
+    const result = await getPositionSizingConfig("user-sizing-unconfigured");
+
+    expect(result).toEqual({
+      riskPerTradePct: null,
+      maxPositionPct: null,
+      liquidityCapPct: null,
+    });
+  });
+
+  it("treats zero/negative overrides as unset (falls back to system default)", async () => {
+    findUniqueMock.mockResolvedValueOnce({
+      riskPerTradePct: 0,
+      maxPositionPct: -0.1,
+      liquidityCapPct: 0.05,
+    });
+
+    const result = await getPositionSizingConfig("user-sizing-invalid");
+
+    expect(result).toEqual({
+      riskPerTradePct: null,
+      maxPositionPct: null,
+      liquidityCapPct: 0.05,
+    });
   });
 });

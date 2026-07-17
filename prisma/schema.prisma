@@ -21,13 +21,21 @@ model User {
   @@map("users")
 }
 
-/// Per-user trading account config (currently just equity), settable/updatable
-/// from the app's Settings page instead of only the TRADING_ACCOUNT_EQUITY_VND
-/// env var — see src/lib/trading-account-risk-config.ts.
+/// Per-user trading account config, settable/updatable from the app's Settings
+/// page instead of only the TRADING_ACCOUNT_EQUITY_VND env var / hardcoded
+/// position-sizing constants — see src/lib/trading-account-risk-config.ts and
+/// src/lib/dashboard/position-sizing-panel.ts (DEFAULT_* constants there are
+/// the fallback whenever a field here is null).
 model UserTradingSettings {
   id               String   @id @default(cuid())
   userId           String   @unique @map("user_id")
   accountEquityVnd Float?   @map("account_equity_vnd")
+  /// Decimal fraction (0.0075 = 0.75%), not a whole percent.
+  riskPerTradePct  Float?   @map("risk_per_trade_pct")
+  /// Decimal fraction (0.15 = 15%), not a whole percent.
+  maxPositionPct   Float?   @map("max_position_pct")
+  /// Decimal fraction (0.05 = 5%), not a whole percent.
+  liquidityCapPct  Float?   @map("liquidity_cap_pct")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 

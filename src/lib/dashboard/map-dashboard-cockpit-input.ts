@@ -12,6 +12,7 @@ import { formatGate2RankSummary } from "@/lib/scanner/gate2/rank-components";
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import type { PortfolioGuardrailsDto } from "./portfolio-guardrails";
+import type { PositionSizingConfigOverrides } from "@/lib/trading-account-risk-config";
 import {
   type DecisionCockpitInput,
   type DecisionCockpitCandidateSnapshot,
@@ -38,6 +39,7 @@ export type BuildDashboardCockpitInputParams = {
   openExposureVnd: number;
   accountEquityVnd: number | null;
   portfolioRiskConfigured: boolean;
+  positionSizingConfig?: PositionSizingConfigOverrides | null;
   now?: Date;
   rsDiagnosticsBySymbol?: Record<string, RsDiagnosticUi>;
   rsNearMissWatchlist?: RsNearMissWatchlistPanelDto;
@@ -128,6 +130,7 @@ export function buildDashboardCockpitInput(
     openExposureVnd: params.openExposureVnd,
     accountEquityVnd: params.accountEquityVnd,
     portfolioRiskConfigured: params.portfolioRiskConfigured,
+    positionSizingConfig: params.positionSizingConfig,
     now: params.now,
     rsDiagnosticsBySymbol: params.rsDiagnosticsBySymbol,
     rsNearMissWatchlist: params.rsNearMissWatchlist,

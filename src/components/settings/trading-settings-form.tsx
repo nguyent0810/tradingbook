@@ -6,9 +6,60 @@ import { Button } from "@/components/ui/button";
 
 export type TradingSettingsFormProps = {
   currentAccountEquityVnd: number | null;
+  /** Decimal fraction (0.0075 = 0.75%) or null — converted to a whole-percent display value. */
+  currentRiskPerTradePct: number | null;
+  currentMaxPositionPct: number | null;
+  currentLiquidityCapPct: number | null;
 };
 
-export function TradingSettingsForm({ currentAccountEquityVnd }: TradingSettingsFormProps) {
+function toPercentDisplay(fraction: number | null): string {
+  return fraction == null ? "" : String(fraction * 100);
+}
+
+type PercentFieldProps = {
+  name: string;
+  label: string;
+  defaultValue: string;
+  /** System default shown in the placeholder — matches position-sizing-panel.ts DEFAULT_*. */
+  systemDefaultPct: string;
+  errors: string[] | undefined;
+};
+
+function PercentField({ name, label, defaultValue, systemDefaultPct, errors }: PercentFieldProps) {
+  const errorId = `${name}-error`;
+  return (
+    <div className="cd-auth-field">
+      <label htmlFor={name} className="cd-auth-label">
+        {label} (%){" "}
+        <span className="cd-auth-label__hint">— blank uses the default, {systemDefaultPct}%</span>
+      </label>
+      <input
+        id={name}
+        name={name}
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        placeholder={systemDefaultPct}
+        defaultValue={defaultValue}
+        className="cd-auth-input"
+        aria-invalid={errors ? "true" : undefined}
+        aria-describedby={errors ? errorId : undefined}
+      />
+      {errors && (
+        <p id={errorId} className="cd-auth-error" aria-live="polite">
+          {errors[0]}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function TradingSettingsForm({
+  currentAccountEquityVnd,
+  currentRiskPerTradePct,
+  currentMaxPositionPct,
+  currentLiquidityCapPct,
+}: TradingSettingsFormProps) {
   const [state, formAction, pending] = useActionState<TradingSettingsState, FormData>(
     updateTradingSettings,
     undefined
@@ -54,6 +105,28 @@ export function TradingSettingsForm({ currentAccountEquityVnd }: TradingSettings
           </p>
         )}
       </div>
+
+      <PercentField
+        name="riskPerTradePct"
+        label="Risk per trade"
+        defaultValue={toPercentDisplay(currentRiskPerTradePct)}
+        systemDefaultPct="1"
+        errors={state?.errors?.riskPerTradePct}
+      />
+      <PercentField
+        name="maxPositionPct"
+        label="Max position size"
+        defaultValue={toPercentDisplay(currentMaxPositionPct)}
+        systemDefaultPct="20"
+        errors={state?.errors?.maxPositionPct}
+      />
+      <PercentField
+        name="liquidityCapPct"
+        label="Liquidity cap (% of ADV)"
+        defaultValue={toPercentDisplay(currentLiquidityCapPct)}
+        systemDefaultPct="10"
+        errors={state?.errors?.liquidityCapPct}
+      />
 
       <Button type="submit" variant="primary" disabled={pending} aria-busy={pending}>
         {pending ? "Saving…" : "Save"}

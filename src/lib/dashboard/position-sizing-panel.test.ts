@@ -84,6 +84,18 @@ describe("liquidity cap", () => {
   it("LIQUIDITY_CAP_PCT_OF_ADV documents 10% of one day's ADV", () => {
     expect(LIQUIDITY_CAP_PCT_OF_ADV).toBe(0.1);
   });
+
+  it("respects a custom liquidityCapPctOfAdv override instead of the 10% default", () => {
+    // 5% of 1B ADV = 50M VND cap -> 500 shares at 100k/share (tighter than the 10% default's 1,000).
+    const custom = applyLiquidityCap({
+      qtyShares: 10_000,
+      entryVndPerShare: 100_000,
+      advVnd: 1_000_000_000,
+      liquidityCapPctOfAdv: 0.05,
+    });
+    expect(custom.capApplied).toBe(true);
+    expect(custom.qtyShares).toBe(500);
+  });
 });
 
 describe("slippage / gap buffer", () => {
@@ -131,6 +143,23 @@ describe("buildRecommendedPositionSizing", () => {
     if (!dto) return;
     expect(dto.symbol).toBe("HPG");
     expect(dto.qtyShares % VN_BOARD_LOT_SHARES).toBe(0);
+  });
+
+  it("honors a user-configured baseRiskPerTradePct override (smaller risk budget -> smaller or equal qty)", () => {
+    const withDefault = buildRecommendedPositionSizing({
+      ...baseParams,
+      candidates: [candidate()],
+    });
+    const withOverride = buildRecommendedPositionSizing({
+      ...baseParams,
+      candidates: [candidate()],
+      baseRiskPerTradePct: 0.0075, // 0.75% vs the 1% default
+    });
+    expect(withDefault).not.toBeNull();
+    expect(withOverride).not.toBeNull();
+    if (!withDefault || !withOverride) return;
+    expect(withOverride.baseRiskPerTradePct).toBe(0.0075);
+    expect(withOverride.qtyShares).toBeLessThanOrEqual(withDefault.qtyShares);
   });
 
   it("prefers tier_a over tier_b when both are present", () => {

@@ -15,7 +15,12 @@ export default async function SettingsPage() {
 
   const settings = await prisma.userTradingSettings.findUnique({
     where: { userId: session.userId },
-    select: { accountEquityVnd: true },
+    select: {
+      accountEquityVnd: true,
+      riskPerTradePct: true,
+      maxPositionPct: true,
+      liquidityCapPct: true,
+    },
   });
 
   return (
@@ -38,13 +43,21 @@ export default async function SettingsPage() {
         <div className="dash-card__header">
           <h2 className="dash-card__title">Trading account</h2>
           <p className="dash-card__lead">
-            Used to compute book-risk caps and recommended position sizing on the Dashboard.
+            Used to compute book-risk caps and recommended position sizing on the Dashboard. Risk
+            per trade, max position size, and liquidity cap are optional — leave blank to use the
+            system default for each.
           </p>
         </div>
-        <TradingSettingsForm currentAccountEquityVnd={settings?.accountEquityVnd ?? null} />
+        <TradingSettingsForm
+          currentAccountEquityVnd={settings?.accountEquityVnd ?? null}
+          currentRiskPerTradePct={settings?.riskPerTradePct ?? null}
+          currentMaxPositionPct={settings?.maxPositionPct ?? null}
+          currentLiquidityCapPct={settings?.liquidityCapPct ?? null}
+        />
         <p className="dash-exposure__caption text-xs" style={{ color: "var(--text-tertiary)", marginTop: "var(--space-4)" }}>
-          Falls back to the <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code>{" "}
-          environment variable if unset here.
+          Equity falls back to the <code className="dash-code">TRADING_ACCOUNT_EQUITY_VND</code>{" "}
+          environment variable if unset here. Max book (%) is not user-configurable — it&rsquo;s
+          driven by today&rsquo;s verdict, on the Dashboard.
         </p>
       </div>
     </div>

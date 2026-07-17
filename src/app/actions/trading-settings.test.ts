@@ -21,9 +21,15 @@ vi.mock("next/cache", () => ({
   revalidatePath: revalidatePathMock,
 }));
 
-function formData(accountEquityVnd: string): FormData {
+function formData(
+  accountEquityVnd: string,
+  percentFields: { riskPerTradePct?: string; maxPositionPct?: string; liquidityCapPct?: string } = {}
+): FormData {
   const fd = new FormData();
   fd.set("accountEquityVnd", accountEquityVnd);
+  if (percentFields.riskPerTradePct != null) fd.set("riskPerTradePct", percentFields.riskPerTradePct);
+  if (percentFields.maxPositionPct != null) fd.set("maxPositionPct", percentFields.maxPositionPct);
+  if (percentFields.liquidityCapPct != null) fd.set("liquidityCapPct", percentFields.liquidityCapPct);
   return fd;
 }
 
@@ -55,18 +61,61 @@ describe("updateTradingSettings", () => {
     expect(upsertMock).not.toHaveBeenCalled();
   });
 
-  it("upserts the validated equity for the current user and revalidates the dashboard", async () => {
+  it("upserts equity with the percent fields left blank (null — system defaults apply)", async () => {
     getSessionMock.mockResolvedValue({ userId: "u1", email: "a@b.com" });
     upsertMock.mockResolvedValueOnce({});
 
     const result = await updateTradingSettings(undefined, formData("500,000,000"));
 
+    const values = {
+      accountEquityVnd: 500_000_000,
+      riskPerTradePct: null,
+      maxPositionPct: null,
+      liquidityCapPct: null,
+    };
     expect(upsertMock).toHaveBeenCalledWith({
       where: { userId: "u1" },
-      update: { accountEquityVnd: 500_000_000 },
-      create: { userId: "u1", accountEquityVnd: 500_000_000 },
+      update: values,
+      create: { userId: "u1", ...values },
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
     expect(result?.success).toBe(true);
+  });
+
+  it("converts whole-percent inputs to decimal fractions before storing", async () => {
+    getSessionMock.mockResolvedValue({ userId: "u1", email: "a@b.com" });
+    upsertMock.mockResolvedValueOnce({});
+
+    await updateTradingSettings(
+      undefined,
+      formData("500000000", {
+        riskPerTradePct: "0.75",
+        maxPositionPct: "15",
+        liquidityCapPct: "5",
+      })
+    );
+
+    expect(upsertMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        update: {
+          accountEquityVnd: 500_000_000,
+          riskPerTradePct: 0.0075,
+          maxPositionPct: 0.15,
+          liquidityCapPct: 0.05,
+        },
+      })
+    );
+  });
+
+  it("rejects a percent field out of the 0-100 range", async () => {
+    getSessionMock.mockResolvedValue({ userId: "u1", email: "a@b.com" });
+
+    const result = await updateTradingSettings(
+      undefined,
+      formData("500000000", { riskPerTradePct: "150" })
+    );
+
+    expect(result?.errors?.riskPerTradePct).toBeTruthy();
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 });

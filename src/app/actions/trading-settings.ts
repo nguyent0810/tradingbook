@@ -5,6 +5,26 @@ import { z } from "zod";
 import { getSession } from "@/lib/session";
 import { parsePositiveMoney } from "@/lib/trading-account-risk-config";
 
+/** Optional whole-percent field (e.g. "0.75" = 0.75%) — blank means "use the system default". */
+function optionalPercentField(label: string) {
+  return z
+    .string()
+    .nullish()
+    .transform((raw, ctx) => {
+      const trimmed = (raw ?? "").trim();
+      if (!trimmed) return null;
+      const n = Number(trimmed.replace(/,/g, ""));
+      if (!Number.isFinite(n) || n <= 0 || n > 100) {
+        ctx.addIssue({
+          code: "custom",
+          message: `${label} must be a percentage between 0 and 100 (e.g. 0.75), or left blank for the default.`,
+        });
+        return z.NEVER;
+      }
+      return n / 100;
+    });
+}
+
 const TradingSettingsSchema = z.object({
   accountEquityVnd: z
     .string()
@@ -19,6 +39,9 @@ const TradingSettingsSchema = z.object({
       }
       return parsed;
     }),
+  riskPerTradePct: optionalPercentField("Risk per trade"),
+  maxPositionPct: optionalPercentField("Max position size"),
+  liquidityCapPct: optionalPercentField("Liquidity cap"),
 });
 
 export type TradingSettingsState =
@@ -40,17 +63,27 @@ export async function updateTradingSettings(
 
   const parsed = TradingSettingsSchema.safeParse({
     accountEquityVnd: formData.get("accountEquityVnd"),
+    riskPerTradePct: formData.get("riskPerTradePct"),
+    maxPositionPct: formData.get("maxPositionPct"),
+    liquidityCapPct: formData.get("liquidityCapPct"),
   });
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
+  const values = {
+    accountEquityVnd: parsed.data.accountEquityVnd,
+    riskPerTradePct: parsed.data.riskPerTradePct,
+    maxPositionPct: parsed.data.maxPositionPct,
+    liquidityCapPct: parsed.data.liquidityCapPct,
+  };
+
   const { prisma } = await import("@/lib/prisma");
   await prisma.userTradingSettings.upsert({
     where: { userId: session.userId },
-    update: { accountEquityVnd: parsed.data.accountEquityVnd },
-    create: { userId: session.userId, accountEquityVnd: parsed.data.accountEquityVnd },
+    update: values,
+    create: { userId: session.userId, ...values },
   });
 
   revalidatePath("/dashboard");
