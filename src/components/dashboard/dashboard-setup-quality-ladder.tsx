@@ -4,6 +4,9 @@ import { SETUP_LADDER_STAGE_ORDER } from "@/lib/dashboard/decision-cockpit-dto";
 
 export type DashboardSetupQualityLadderProps = {
   ladder: SetupQualityLadderDto;
+  /** Nested inside a Signals rail row, which already renders an icon +
+   *  title + count for this widget — drop the duplicate header/card chrome. */
+  embedded?: boolean;
 };
 
 /**
@@ -14,23 +17,28 @@ export type DashboardSetupQualityLadderProps = {
  * Tomorrow's plan since this widget answers "how active was the scan?",
  * not "what should I do?".
  */
-export function DashboardSetupQualityLadder({ ladder }: DashboardSetupQualityLadderProps) {
+export function DashboardSetupQualityLadder({
+  ladder,
+  embedded = false,
+}: DashboardSetupQualityLadderProps) {
   const actionableStages = ladder.stages.filter((s) => s.count > 0);
 
   return (
     <section
-      className="dash-ladder dash-card dash-ladder--pulse"
+      className={`dash-ladder dash-ladder--pulse${embedded ? " dash-ladder--embedded" : " dash-card"}`}
       data-testid="dashboard-setup-quality-ladder"
-      aria-labelledby="dashboard-ladder-heading"
+      aria-labelledby={embedded ? undefined : "dashboard-ladder-heading"}
     >
-      <header className="dash-pulse-header">
-        <h2 id="dashboard-ladder-heading" className="dash-pulse-title">
-          Today&rsquo;s scan pulse
-        </h2>
-        <span className="dash-ladder__total tabular-nums">
-          {ladder.totalClassified} classified
-        </span>
-      </header>
+      {!embedded ? (
+        <header className="dash-pulse-header">
+          <h2 id="dashboard-ladder-heading" className="dash-pulse-title">
+            Today&rsquo;s scan pulse
+          </h2>
+          <span className="dash-ladder__total tabular-nums">
+            {ladder.totalClassified} classified
+          </span>
+        </header>
+      ) : null}
 
       <p className="dash-pulse-summary" data-testid="dashboard-ladder-summary">
         {ladder.summary}

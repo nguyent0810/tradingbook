@@ -57,4 +57,12 @@ describe("DashboardTomorrowPlan", () => {
     expect(html).toContain("dash-tomorrow--promoted");
     expect(html).not.toContain("dash-sym-card");
   });
+
+  it("non-promoted header uses the same zone-title hierarchy as Opportunity board (01)", () => {
+    const html = renderToStaticMarkup(<DashboardTomorrowPlan tomorrow={tomorrowDto()} />);
+
+    expect(html).toContain("dash-v2-zone-title");
+    expect(html).toContain("dash-v2-eyebrow");
+    expect(html).toContain(">02<");
+  });
 });
