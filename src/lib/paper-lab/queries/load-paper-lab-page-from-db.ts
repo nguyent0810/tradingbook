@@ -10,6 +10,11 @@ import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import { battleOutcomeToDisplay } from "@/lib/lab/battle/battle-engine";
 import type { RegimeDimensions } from "@/lib/lab/types/regime";
 import { getPaperLabExecutionMode } from "@/lib/paper-lab/llm-config";
+import type { Gate1Level } from "@/lib/scanner/gate2/types";
+import {
+  computeDailyTradingDecision,
+  parsePersistedDailyDecision,
+} from "@/lib/scanner/trading-decision";
 import { buildLatestCloseBySymbol } from "@/lib/dashboard/latest-close-by-symbol";
 import type { PortfolioSnapshot } from "@/generated/prisma/client";
 import {
@@ -114,6 +119,7 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       regimeCtx,
       battle,
       allBattles,
+      latestScanRun,
     ] = await Promise.all([
       prisma.paperAgent.findMany({
         where: { slug: { not: "cio" } },
@@ -160,8 +166,21 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
         },
       }),
       loadArenaBattles(),
+      prisma.dailyScanRun.findFirst({ orderBy: { runAt: "desc" } }),
     ]);
     const recentBattleRows = allBattles.slice(0, 3);
+
+    const scanNotesDecision =
+      latestScanRun?.notes && typeof latestScanRun.notes === "object"
+        ? (latestScanRun.notes as { decision?: unknown }).decision
+        : undefined;
+    const tradingDecision =
+      parsePersistedDailyDecision(scanNotesDecision) ??
+      computeDailyTradingDecision({
+        gate1Level: (latestScanRun?.gate1Level ?? "WARNING") as Gate1Level,
+        candidateCountA: latestScanRun?.candidateCountA ?? 0,
+        candidateCountB: latestScanRun?.candidateCountB ?? 0,
+      });
 
     const leaderboard = rankings.map((r) => {
       const perf = agents.find((a) => a.id === r.agentId)?.performance[0];
@@ -468,6 +487,19 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
           dimensions: dimensions as Record<string, string> | undefined,
           labels: regimeLabels,
           confidence: regimeSnapshot?.confidence,
+        },
+        tradingDecision: {
+          level: tradingDecision.level,
+          allocation: tradingDecision.allocation,
+          explanation: tradingDecision.explanation,
+          scanSessionDate: latestScanRun?.runAt
+            ? latestScanRun.runAt.toISOString().slice(0, 10)
+            : null,
+          funnel: {
+            universe: latestScanRun?.symbolCountTotal ?? 0,
+            tradable: latestScanRun?.symbolCountAfterTradability ?? 0,
+            setups: (latestScanRun?.candidateCountA ?? 0) + (latestScanRun?.candidateCountB ?? 0),
+          },
         },
         marketPulse: buildMarketPulse(regimeCtx, dimensions),
         latestEvaluationAt: latestPerf?.createdAt.toISOString() ?? null,
