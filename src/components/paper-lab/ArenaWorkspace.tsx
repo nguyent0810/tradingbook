@@ -4,6 +4,7 @@ import type { PaperLabPageDto } from "@/lib/paper-lab/types/arena-dto";
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AgentPortfolioRail } from "./AgentPortfolioRail";
+import { ArenaTradingStanceBanner } from "./ArenaTradingStanceBanner";
 import { DecisionsLogTable } from "./DecisionsLogTable";
 import { MarketRegimeExplanationCard } from "./MarketRegimeExplanationCard";
 import { PaperLabHeaderGrid } from "./PaperLabHeaderGrid";
@@ -180,6 +181,8 @@ export function ArenaWorkspace({
         <section id="arena-now" className="arena-zone" aria-labelledby="arena-now-h">
           <ZoneHead n="01" kicker="What is happening?" id="arena-now-h" title="Today's Arena Briefing"
             lead="If ten investment philosophies managed capital today — here is who is leading, the environment they are trading, and the house view." />
+
+          <ArenaTradingStanceBanner decision={data.overview.tradingDecision} />
 
           <div className="arena-briefing">
             <BriefingCard kind="leader" label="Today's leader" hint="Who is winning">

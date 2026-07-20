@@ -1,5 +1,6 @@
 import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import type { DecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
+import type { DailyTradingDecisionLevel } from "@/lib/scanner/trading-decision";
 
 export type MarketPulseDto = {
   vnindexClose: number | null;
@@ -33,6 +34,14 @@ export type ArenaOverviewDto = {
     dimensions?: Record<string, string>;
     labels?: string[];
     confidence?: number;
+  };
+  tradingDecision: {
+    level: DailyTradingDecisionLevel;
+    allocation: string;
+    explanation: string;
+    scanSessionDate: string | null;
+    /** Today's scan funnel: how the universe narrowed down to zero (or more) valid setups. */
+    funnel: { universe: number; tradable: number; setups: number };
   };
   marketPulse: MarketPulseDto;
   executionMode?: {

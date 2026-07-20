@@ -288,6 +288,13 @@ export function buildMockPaperLabPageDto(): PaperLabPageDto {
           liquidityRegime: "HighLiquidity",
         },
       },
+      tradingDecision: {
+        level: "PROBE",
+        allocation: "20-40%",
+        explanation: "Only small exposure is allowed because market conditions are mixed.",
+        scanSessionDate: SESSION,
+        funnel: { universe: 229, tradable: 72, setups: 3 },
+      },
       marketPulse: {
         vnindexClose: 1345.2,
         vnindexChangePct: 0.42,
