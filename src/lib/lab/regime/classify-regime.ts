@@ -8,14 +8,17 @@ function isoDay(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Slope magnitude below this is considered flat/sideways rather than trending. */
+const SIDEWAYS_SLOPE_THRESHOLD = 0.005;
+
 function classifyTrend(close: number, ma50: number, ma20: number | null): RegimeDimensions["trendRegime"] {
   const above50 = close > ma50;
   const slope = ma20 != null && ma50 > 0 ? (ma20 - ma50) / ma50 : 0;
+  if (Math.abs(slope) <= SIDEWAYS_SLOPE_THRESHOLD) return "Sideways";
   if (above50 && slope > 0.02) return "StrongBull";
   if (above50) return "WeakBull";
   if (!above50 && slope < -0.02) return "StrongBear";
-  if (!above50) return "WeakBear";
-  return "Sideways";
+  return "WeakBear";
 }
 
 function classifyVolatility(atrPct: number): RegimeDimensions["volatilityRegime"] {
@@ -35,11 +38,12 @@ export async function classifyRegimeForSession(
   prisma: PrismaClient,
   sessionDate: Date
 ): Promise<RegimeSnapshot> {
-  const indexBars = await prisma.indexDailyBar.findMany({
+  const indexBarsDesc = await prisma.indexDailyBar.findMany({
     where: { symbol: "VNINDEX", date: { lte: sessionDate } },
-    orderBy: { date: "asc" },
+    orderBy: { date: "desc" },
     take: 260,
   });
+  const indexBars = [...indexBarsDesc].reverse();
 
   const bars = indexBars.map((b) => ({
     time: b.date.getTime(),
@@ -50,7 +54,8 @@ export async function classifyRegimeForSession(
     volume: b.volume,
   }));
 
-  const gate1 = bars.length >= 50 ? evaluateMarketRegime(bars) : null;
+  const hasSufficientData = bars.length >= 50;
+  const gate1 = hasSufficientData ? evaluateMarketRegime(bars) : null;
   const closes = bars.map((b) => b.close);
   const lastClose = closes[closes.length - 1] ?? 0;
   const ma50Series = sma(closes, 50);
@@ -107,7 +112,8 @@ export async function classifyRegimeForSession(
     sessionDate: isoDay(sessionDate),
     gate1Level: gate1?.level ?? null,
     dimensions,
-    confidence: bars.length >= 120 ? 0.85 : 0.65,
+    hasSufficientData,
+    confidence: !hasSufficientData ? 0 : bars.length >= 120 ? 0.85 : 0.65,
     schemaVersion: LAB_REGIME_SCHEMA_VERSION,
     labels,
   };
