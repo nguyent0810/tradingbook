@@ -8,6 +8,7 @@ import {
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { evaluateBreakoutPullbackCandidate } from "@/lib/scanner/gate2";
+import { deriveGate1SurfacingRule } from "@/lib/scanner/gate2/collect-candidates";
 import {
   buildGate2ScanDiagnosticsSummary,
   toDailyScanGate2Notes,
@@ -239,8 +240,10 @@ export async function runDailyScanJob(
         if (ev.quality === "INVALID") continue;
         if (ev.quality === "A") candidateCountA++;
         else candidateCountB++;
-        if (regime.level === "FAIL") continue;
-        if (regime.level === "WARNING" && ev.quality !== "A") continue;
+
+        const surfacingRule = deriveGate1SurfacingRule(regime.level as Gate1Level);
+        if (surfacingRule === "none") continue;
+        if (surfacingRule === "tier-a-only" && ev.quality !== "A") continue;
 
         surfaced.push({
           symbolId,

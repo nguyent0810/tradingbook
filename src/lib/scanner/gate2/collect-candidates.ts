@@ -11,9 +11,9 @@ export type Gate1SurfacingRule = "none" | "tier-a-only" | "all";
 
 /**
  * Gate 1 × Gate 2 surfacing rule — FAIL surfaces nothing; WARNING surfaces A only;
- * PASS surfaces A and B. Single source of truth: the scan-time filter below and
- * the dashboard's funnel reconstruction (`gate-funnel-copy.ts`) both call this so
- * the two can't drift out of sync.
+ * PASS surfaces A and B. Single source of truth for this decision — called by both
+ * `run-daily-scan-job.ts` (the production scan path) and the dashboard's funnel
+ * reconstruction (`gate-funnel-copy.ts`) so the two can't drift out of sync.
  */
 export function deriveGate1SurfacingRule(gate1Level: Gate1Level): Gate1SurfacingRule {
   if (gate1Level === "FAIL") return "none";
