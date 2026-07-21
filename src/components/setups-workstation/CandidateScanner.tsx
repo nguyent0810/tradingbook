@@ -8,6 +8,7 @@ export function CandidateScanner({
   candidates,
   emptyReason,
   partialBanner,
+  positionSizingDefaults,
 }: CandidateScannerProps) {
   return (
     <>
@@ -56,7 +57,10 @@ export function CandidateScanner({
               Qualified setups — core scanner Tier A/B only
             </p>
           </header>
-          <SetupsCandidatesMasterDetail candidates={candidates} />
+          <SetupsCandidatesMasterDetail
+            candidates={candidates}
+            positionSizingDefaults={positionSizingDefaults}
+          />
         </section>
       )}
     </>

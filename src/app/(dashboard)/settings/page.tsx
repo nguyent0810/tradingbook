@@ -33,8 +33,8 @@ export default async function SettingsPage() {
           <p className="dash-v2-eyebrow">Account</p>
           <h1 className="dash-v2-page-header__title">Settings</h1>
           <p className="dash-v2-page-header__lead">
-            Configure account-level values used across Dashboard risk guardrails and position
-            sizing.
+            Configure account-level values used by Dashboard risk guardrails and the Setups
+            position-sizing panel.
           </p>
         </div>
       </header>
@@ -43,9 +43,11 @@ export default async function SettingsPage() {
         <div className="dash-card__header">
           <h2 className="dash-card__title">Trading account</h2>
           <p className="dash-card__lead">
-            Used to compute book-risk caps and recommended position sizing on the Dashboard. Risk
-            per trade, max position size, and liquidity cap are optional — leave blank to use the
-            system default for each.
+            Prefills the recommended position-sizing panel on the Setups page — equity, base risk
+            %, max trade %, and liquidity cap (% of a symbol&rsquo;s average daily traded value).
+            You can still edit any value on that panel for a what-if scenario. Risk per trade, max
+            position size, and liquidity cap are optional — leave blank to use the system default
+            for each.
           </p>
         </div>
         <TradingSettingsForm

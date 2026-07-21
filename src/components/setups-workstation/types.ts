@@ -5,7 +5,10 @@ import type { Gate2ClosestSymbolRow } from "@/lib/scanner/gate2-scan-diagnostics
 import type { RsDiagnosticUi } from "@/lib/scanner/gate2/rs-diagnostic-format";
 import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
-import type { SetupsCandidateBundle } from "@/components/setups/setups-candidates-master-detail";
+import type {
+  SetupsCandidateBundle,
+  SetupsPositionSizingDefaults,
+} from "@/components/setups/setups-candidates-master-detail";
 
 export type PipelineStageTone = "neutral" | "success" | "warning" | "danger";
 
@@ -29,6 +32,7 @@ export type CandidateScannerProps = {
   emptyReason?: string;
   scanMeta?: { gate1: string; tradabilityCount: number; scanId: string };
   partialBanner?: ReactNode;
+  positionSizingDefaults?: SetupsPositionSizingDefaults;
 };
 
 export type IntelligenceSidebarProps = {

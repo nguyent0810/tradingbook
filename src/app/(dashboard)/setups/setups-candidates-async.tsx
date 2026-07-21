@@ -33,6 +33,11 @@ import { fetchMarketContextUi } from "@/lib/market/fetch-market-context-ui";
 import { buildSymbolContextEvidenceLines } from "@/lib/market/build-market-context-evidence";
 
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import {
+  getPositionSizingConfig,
+  getTradingAccountEquityVnd,
+} from "@/lib/trading-account-risk-config";
 
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { RefreshButton } from "@/components/ui/refresh-button";
@@ -71,10 +76,20 @@ export async function SetupsCandidatesAsync() {
   const candidateRows = base.candidateRows;
 
   const symbolKeys = candidateRows.map((c) => c.symbolKey);
+  const symbolIds = candidateRows.map((c) => c.symbolId);
 
+  const session = await getSession();
+  const userId = session?.userId ?? null;
 
-
-  const [{ candidatesWithHealth, healthError }, perfPack, rsMap, marketContext] =
+  const [
+    { candidatesWithHealth, healthError },
+    perfPack,
+    rsMap,
+    marketContext,
+    equityVnd,
+    positionSizingConfig,
+    advRows,
+  ] =
 
     await Promise.all([
 
@@ -90,7 +105,31 @@ export async function SetupsCandidatesAsync() {
 
         : Promise.resolve(null),
 
+      userId ? getTradingAccountEquityVnd(userId) : Promise.resolve(null),
+
+      userId
+        ? getPositionSizingConfig(userId)
+        : Promise.resolve({ riskPerTradePct: null, maxPositionPct: null, liquidityCapPct: null }),
+
+      base.expectedSession && symbolIds.length > 0
+        ? prisma.symbolMarketContextDaily.findMany({
+            where: { sessionDate: base.expectedSession, symbolId: { in: symbolIds } },
+            select: { symbolId: true, close: true, volMa20: true },
+          })
+        : Promise.resolve([]),
+
     ]);
+
+  const advBySymbolId = new Map(
+    advRows.map((r) => [r.symbolId, r.close != null && r.volMa20 != null ? r.close * 1000 * r.volMa20 : null])
+  );
+
+  const positionSizingDefaults = {
+    equityVnd,
+    baseRiskPct: positionSizingConfig.riskPerTradePct,
+    maxTradePct: positionSizingConfig.maxPositionPct,
+    liquidityCapPct: positionSizingConfig.liquidityCapPct,
+  };
 
 
 
@@ -198,6 +237,8 @@ export async function SetupsCandidatesAsync() {
 
         setupType: c.setupType,
 
+        avgValueVnd20: advBySymbolId.get(c.symbolId) ?? null,
+
       },
 
       perfHint: fmtSetupPerfHint(tier, perfHint),
@@ -229,6 +270,7 @@ export async function SetupsCandidatesAsync() {
     <CandidateScanner
       candidates={candidateBundles}
       emptyReason={emptyReason}
+      positionSizingDefaults={positionSizingDefaults}
       scanMeta={{
         gate1: displayGate1ScanLevel(String(base.latest.gate1Level)),
         tradabilityCount: base.latest.symbolCountAfterTradability,

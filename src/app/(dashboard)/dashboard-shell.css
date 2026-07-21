@@ -5220,6 +5220,22 @@
   color: #fda4af;
 }
 
+.tosv3-setups-sizing-panel__adv-readout {
+  margin: 0;
+  font-size: 0.68rem;
+  padding: 0.28rem 0.38rem;
+  min-height: 1.65rem;
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+}
+
+.tosv3-setups-sizing-panel__liquidity-flag {
+  font-size: 0.58rem;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
 .tosv3-setups-sizing-results {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
