@@ -10,6 +10,8 @@ export type CandidateWithHealth = {
   lifecycleLabel: "NEW" | "WATCHING" | "READY";
   healthLevel: SetupHealthLevelValue | null;
   healthScore: number | null;
+  /** Gate2 rank score — final tiebreak so display order doesn't ignore it entirely. */
+  rankScore: number;
 };
 
 const LEVEL_RANK: Record<SetupHealthLevelValue, number> = {
@@ -28,8 +30,9 @@ export function sortCandidatesWithHealth(rows: CandidateWithHealth[]): Candidate
     const lr = LIFECYCLE_RANK[a.lifecycleLabel] - LIFECYCLE_RANK[b.lifecycleLabel];
     if (lr !== 0) return lr;
 
-    const da = distanceToZonePct(a.close, a.pullbackZoneLow, a.pullbackZoneHigh);
-    const db = distanceToZonePct(b.close, b.pullbackZoneLow, b.pullbackZoneHigh);
+    // Invalid zone data (null) sorts last — it must never look "perfectly centered".
+    const da = distanceToZonePct(a.close, a.pullbackZoneLow, a.pullbackZoneHigh) ?? Number.POSITIVE_INFINITY;
+    const db = distanceToZonePct(b.close, b.pullbackZoneLow, b.pullbackZoneHigh) ?? Number.POSITIVE_INFINITY;
     if (da !== db) return da - db;
 
     const ha = a.healthLevel ? LEVEL_RANK[a.healthLevel] : 0;
@@ -39,6 +42,8 @@ export function sortCandidatesWithHealth(rows: CandidateWithHealth[]): Candidate
     const sa = a.healthScore ?? 0;
     const sb = b.healthScore ?? 0;
     if (sa !== sb) return sb - sa;
+
+    if (a.rankScore !== b.rankScore) return b.rankScore - a.rankScore;
 
     return a.symbolKey.localeCompare(b.symbolKey);
   });

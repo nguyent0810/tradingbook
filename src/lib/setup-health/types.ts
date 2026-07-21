@@ -41,7 +41,8 @@ export type WatchHealthMeta = {
   sessionsAfterFirstSeen: number;
   sessionsSinceBreakout: number | null;
   extendedPct: number | null;
-  distanceToZonePct: number;
+  /** Null when zone data is invalid (zoneLow/zoneHigh <= 0) — distance is unknown, not zero. */
+  distanceToZonePct: number | null;
   median20Volume: number | null;
   /**
    * Provenance for the extension thresholds used this evaluation — "atr" when

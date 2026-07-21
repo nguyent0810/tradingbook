@@ -452,6 +452,7 @@ export function SetupsCandidatesMasterDetail({ candidates, positionSizingDefault
       {selected ? (
         <V3MasterDetail.Detail>
           <CandidateWorkstation
+            key={selected.candidate.id}
             bundle={selected}
             techOpen={techOpen}
             techId={techId}

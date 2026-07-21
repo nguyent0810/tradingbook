@@ -37,6 +37,13 @@ function closeInPullbackZone(
 /**
  * Loads bars + optional watch rows, evaluates health per surfaced candidate, applies merge sort order.
  */
+/**
+ * Generous lookback bound for the health-eval bar fetch — well beyond the 20-bar
+ * median/14-bar ATR windows actually needed, since SetupWatchItem has no expiry
+ * to derive a tighter bound from. Bounds the query without risking a truncated window.
+ */
+const FROM_DATE_LOOKBACK_DAYS = 180;
+
 export async function prepareSurfacedCandidatesHealthView(
   prisma: PrismaClient,
   candidates: SetupCandidateRow[],
@@ -45,9 +52,10 @@ export async function prepareSurfacedCandidatesHealthView(
   if (candidates.length === 0) return [];
 
   const symbolIds = [...new Set(candidates.map((c) => c.symbolId))];
+  const fromDate = new Date(evalBarDate.getTime() - FROM_DATE_LOOKBACK_DAYS * 86_400_000);
 
   const [barsBySymbol, watches] = await Promise.all([
-    fetchStockBarsGroupedAscThroughDate(prisma, symbolIds, evalBarDate),
+    fetchStockBarsGroupedAscThroughDate(prisma, symbolIds, evalBarDate, fromDate),
     prisma.setupWatchItem.findMany({
       where: {
         symbolId: { in: symbolIds },
@@ -106,6 +114,7 @@ export async function prepareSurfacedCandidatesHealthView(
     lifecycleLabel: row.lifecycleSortLabel,
     healthLevel: row.healthLevel,
     healthScore: row.healthScore,
+    rankScore: row.rankScore,
   }));
 
   const orderKeys = sortCandidatesWithHealth(forSort).map((r) => r.symbolKey);

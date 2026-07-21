@@ -39,6 +39,12 @@ describe("distanceToZonePct", () => {
   it("measures below zoneLow vs zoneLow", () => {
     expect(distanceToZonePct(85, 90, 100)).toBeCloseTo((90 - 85) / 90, 6);
   });
+
+  it("returns null (not 0) when zone data is invalid, instead of reading as perfectly centered", () => {
+    expect(distanceToZonePct(100, 0, 100)).toBeNull();
+    expect(distanceToZonePct(100, 100, 0)).toBeNull();
+    expect(distanceToZonePct(100, -1, 100)).toBeNull();
+  });
 });
 
 describe("extended tiers (mutually exclusive)", () => {
@@ -436,6 +442,25 @@ describe("DEAD_SETUP", () => {
     expect(r.flags).toContain("DEAD_SETUP");
     expect(r.level).toBe("DEAD");
   });
+
+  it("does not flag DEAD_SETUP from invalid zone data (null distance is unknown, not far)", () => {
+    // Known, accepted limitation: invalid zone data no longer falsely triggers
+    // DEAD_SETUP, but it also doesn't gain any other zone-derived flag — a setup
+    // with corrupt zone data and no other issue can still read HEALTHY here.
+    const r = evaluateWatchHealth({
+      breakoutLevel: 80,
+      pullbackZoneLow: 0,
+      pullbackZoneHigh: 0,
+      firstSeenBarDate: new Date("2026-06-01T12:00:00.000Z"),
+      evalBarDate: new Date("2026-06-02T12:00:00.000Z"),
+      barsAscThroughEval: [
+        bar("2026-06-01", { close: 110 }),
+        bar("2026-06-02", { close: 110, high: 111, low: 109 }),
+      ],
+    });
+    expect(r.flags).not.toContain("DEAD_SETUP");
+    expect(r.meta.distanceToZonePct).toBeNull();
+  });
 });
 
 describe("combined flags and score / level", () => {
@@ -467,6 +492,50 @@ describe("combined flags and score / level", () => {
     expect(r.level).toBe("AT_RISK");
     expect(r.score).toBeLessThan(100);
     expect(r.score).toBeGreaterThanOrEqual(0);
+  });
+
+  it("a single severe flag (REVERSAL_RISK, penalty 40) alone stays WARNING at the boundary", () => {
+    const bars: OhlcvBar[] = [];
+    for (let i = 1; i <= 9; i++) {
+      bars.push(bar(`2026-09-${String(i).padStart(2, "0")}`, { close: 100, high: 101, low: 99, volume: 500_000 }));
+    }
+    bars.push(bar("2026-09-10", { open: 100, high: 110, low: 100, close: 101, volume: 600_000 }));
+
+    const r = evaluateWatchHealth({
+      breakoutLevel: 1000, // never crossed — keeps FAILED_TO_PULLBACK out of play
+      pullbackZoneLow: 90,
+      pullbackZoneHigh: 105, // contains close — keeps EXTENDED/DEAD_SETUP out of play
+      firstSeenBarDate: bars[bars.length - 1]!.date, // same as evalBarDate — keeps AGING_SETUP out of play
+      evalBarDate: bars[bars.length - 1]!.date,
+      barsAscThroughEval: bars,
+    });
+
+    expect(r.flags).toEqual(["REVERSAL_RISK"]);
+    expect(r.level).toBe("WARNING");
+  });
+
+  it("two mild flags whose combined penalty exceeds the worst single flag become AT_RISK", () => {
+    const bars: OhlcvBar[] = [];
+    for (let i = 1; i <= 7; i++) {
+      bars.push(bar(`2026-09-${String(i).padStart(2, "0")}`, { close: 100, high: 100.5, low: 99.5, volume: 500_000 }));
+    }
+    bars.push(bar("2026-09-08", { close: 100, high: 100.5, low: 99.5, volume: 390_000 }));
+    bars.push(bar("2026-09-09", { close: 100, high: 100.5, low: 99.5, volume: 290_000 }));
+    bars.push(bar("2026-09-10", { open: 105, high: 107, low: 105, close: 106, volume: 190_000 }));
+
+    const r = evaluateWatchHealth({
+      breakoutLevel: 1000,
+      pullbackZoneLow: 94,
+      pullbackZoneHigh: 100, // close (106) is ~6% above — EXTENDED via the flat-pct fallback (< 15 bars for ATR)
+      firstSeenBarDate: bars[bars.length - 1]!.date,
+      evalBarDate: bars[bars.length - 1]!.date,
+      barsAscThroughEval: bars,
+    });
+
+    expect(r.flags).toContain("EXTENDED");
+    expect(r.flags).toContain("VOLUME_FADE");
+    expect(r.flags).not.toContain("REVERSAL_RISK");
+    expect(r.level).toBe("AT_RISK"); // 25+25=50 > 40 (REVERSAL_RISK's penalty, the old count-based system's implicit ceiling)
   });
 
   it("CHASE forces DEAD level even with other flags", () => {

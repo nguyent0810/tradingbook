@@ -10,6 +10,7 @@ function row(p: Partial<CandidateWithHealth> & Pick<CandidateWithHealth, "symbol
     lifecycleLabel: "WATCHING",
     healthLevel: "HEALTHY",
     healthScore: 100,
+    rankScore: 0,
     ...p,
   };
 }
@@ -53,5 +54,21 @@ describe("sortCandidatesWithHealth", () => {
       }),
     ]);
     expect(sorted.map((s) => s.symbolKey)).toEqual(["Hi", "Lo"]);
+  });
+
+  it("then rankScore descending as the final tiebreak before symbolKey", () => {
+    const sorted = sortCandidatesWithHealth([
+      row({ symbolKey: "LowRank", rankScore: 10 }),
+      row({ symbolKey: "HighRank", rankScore: 90 }),
+    ]);
+    expect(sorted.map((s) => s.symbolKey)).toEqual(["HighRank", "LowRank"]);
+  });
+
+  it("sorts invalid zone data (null distance) last, not as if perfectly centered", () => {
+    const sorted = sortCandidatesWithHealth([
+      row({ symbolKey: "InvalidZone", pullbackZoneLow: 0, pullbackZoneHigh: 0 }),
+      row({ symbolKey: "ValidFar", close: 110, pullbackZoneLow: 94, pullbackZoneHigh: 98 }),
+    ]);
+    expect(sorted.map((s) => s.symbolKey)).toEqual(["ValidFar", "InvalidZone"]);
   });
 });
