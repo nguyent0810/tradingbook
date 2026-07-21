@@ -8,6 +8,7 @@ import {
 import type { MarketContextBundle } from "@/lib/paper-lab/types/market-context-bundle";
 import { evaluateBreakoutPullbackCandidate } from "@/lib/scanner/gate2/breakout-pullback";
 import { computeRelativeStrengthDiagnostic } from "@/lib/scanner/gate2/relative-strength";
+import { extractRs20SpreadPct } from "@/lib/scanner/gate2/rs-rank-term";
 import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
 import {
   computeAtr14,
@@ -21,6 +22,22 @@ import { computePortfolioState } from "@/lib/paper-lab/portfolio/portfolio-servi
 import { classifyRegimeForSession } from "@/lib/lab/regime/classify-regime";
 import { computeSetupSignature, loadAgentMemoryRecall } from "@/lib/lab/memory/build-memory";
 import type { RegimeDimensions } from "@/lib/lab/types/regime";
+
+/**
+ * RS20 spread (pp) bucket threshold for agent-memory `setupSignature` recall.
+ * Distinct from UI display thresholds (e.g. `rsStrengthLabelFromRs20`) —
+ * this only groups setups for memory recall, not for scoring or copy.
+ */
+const RS_SIGNATURE_BUCKET_THRESHOLD_PP = 2;
+
+export function classifyRsBucketForSignature(
+  rs20SpreadPct: number | null
+): "strong" | "weak" | "neutral" {
+  if (rs20SpreadPct == null) return "neutral";
+  if (rs20SpreadPct > RS_SIGNATURE_BUCKET_THRESHOLD_PP) return "strong";
+  if (rs20SpreadPct < -RS_SIGNATURE_BUCKET_THRESHOLD_PP) return "weak";
+  return "neutral";
+}
 
 function toGate2Bars(
   rows: { date: Date; open: number; high: number; low: number; close: number; volume: number }[]
@@ -186,14 +203,7 @@ export async function buildMarketContextBundle(
 
   const setupSignature = computeSetupSignature({
     gate2Quality: gate2?.quality ?? null,
-    rsBucket:
-      rs?.returns[0] != null
-        ? rs.returns[0].rsSpreadPct > 2
-          ? "strong"
-          : rs.returns[0].rsSpreadPct < -2
-            ? "weak"
-            : "neutral"
-        : "neutral",
+    rsBucket: classifyRsBucketForSignature(extractRs20SpreadPct(rs)),
     regimeTag: regimeSnapshot?.dimensions.trendRegime,
     sector: null,
   });
