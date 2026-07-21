@@ -10,7 +10,7 @@ export type RsNearMissWatchlistPanelProps = {
 export function RsNearMissWatchlistPanel({ panel, testId = "rs-near-miss-watchlist" }: RsNearMissWatchlistPanelProps) {
   return (
     <section
-      className="pipeline-deck-panel dash-panel dash-surface-1 rs-near-miss-watchlist"
+      className="dash-card dash-rs-widget dash-card--tilt"
       data-testid={testId}
       aria-labelledby={`${testId}-heading`}
     >

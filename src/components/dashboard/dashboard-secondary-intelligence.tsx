@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { DashboardActionableBlockers } from "@/components/dashboard/dashboard-actionable-blockers";
 import type { DashboardWatchlistItem } from "@/components/dashboard/dashboard-watchlist-panel";
 import { DashboardWatchlistPanel } from "@/components/dashboard/dashboard-watchlist-panel";
@@ -21,6 +22,46 @@ export type DashboardSecondaryIntelligenceProps = {
 
 const PREVIEW_ROWS = 3;
 
+const IconBinoculars = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M9 3v3M15 3v3" />
+    <rect x="4" y="9" width="6" height="9" rx="3" />
+    <rect x="14" y="9" width="6" height="9" rx="3" />
+    <path d="M10 12h4" />
+  </svg>
+);
+const IconShieldAlert = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" />
+    <path d="M12 8v4M12 16h.01" />
+  </svg>
+);
+const IconChevron = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
+
+/** Presentation-only severity → ambient tone for the Gate blockers widget's
+ *  3D chrome — worst-first since ActionableDiagnosticsDto.blockers is
+ *  already severity-sorted (see decision-cockpit-dto.ts). */
+function resolveBlockersTone(diagnostics: ActionableDiagnosticsDto): string {
+  const top = diagnostics.blockers[0];
+  if (!top) return "var(--success)";
+  switch (top.severity) {
+    case "market_off":
+    case "structure_broken":
+      return "var(--danger)";
+    case "extension":
+      return "var(--warning)";
+    case "timing":
+      return "var(--accent)";
+    case "info":
+    default:
+      return "var(--success)";
+  }
+}
+
 export function DashboardSecondaryIntelligence({
   diagnostics,
   watchItems,
@@ -30,6 +71,7 @@ export function DashboardSecondaryIntelligence({
 }: DashboardSecondaryIntelligenceProps) {
   const previewWatch = watchItems.slice(0, PREVIEW_ROWS);
   const previewBlockers = diagnostics.blockers.slice(0, PREVIEW_ROWS - 1);
+  const blockersTone = resolveBlockersTone(diagnostics);
 
   return (
     <section
@@ -53,9 +95,16 @@ export function DashboardSecondaryIntelligence({
       </header>
 
       <div className="dash-si-grid dash-v2-zone__body">
-        <details className="dash-si-widget dash-card dash-si-widget--watch" data-testid="dashboard-secondary-watchlist-widget">
+        <details
+          className="dash-si-widget dash-card dash-si-widget--watch dash-card--tilt"
+          style={{ "--si-card-index": 0 } as CSSProperties}
+          data-testid="dashboard-secondary-watchlist-widget"
+        >
           <summary className="dash-si-widget__summary">
             <span className="dash-si-widget__top">
+              <span className="dash-si-widget__icon">
+                <IconBinoculars />
+              </span>
               <span className="dash-si-widget__title">Watchlist</span>
               <span className="dash-si-widget__count tabular-nums">{watchItems.length}</span>
             </span>
@@ -85,6 +134,9 @@ export function DashboardSecondaryIntelligence({
               {watchItems.length > previewWatch.length
                 ? `+${watchItems.length - previewWatch.length} more — view all`
                 : "View details"}
+              <span className="dash-si-widget__chevron">
+                <IconChevron />
+              </span>
             </span>
           </summary>
           <div className="dash-si-widget__full">
@@ -96,9 +148,18 @@ export function DashboardSecondaryIntelligence({
           </div>
         </details>
 
-        <details className="dash-si-widget dash-card dash-si-widget--blockers" data-testid="dashboard-secondary-blockers-widget">
+        <details
+          className={`dash-si-widget dash-card dash-si-widget--blockers dash-card--tilt${
+            blockersTone === "var(--danger)" ? " dash-card--breathe" : ""
+          }`}
+          style={{ "--si-card-index": 1, "--tone": blockersTone } as CSSProperties}
+          data-testid="dashboard-secondary-blockers-widget"
+        >
           <summary className="dash-si-widget__summary">
             <span className="dash-si-widget__top">
+              <span className="dash-si-widget__icon">
+                <IconShieldAlert />
+              </span>
               <span className="dash-si-widget__title">Gate blockers</span>
               <span className="dash-si-widget__count tabular-nums">{diagnostics.blockers.length}</span>
             </span>
@@ -123,6 +184,9 @@ export function DashboardSecondaryIntelligence({
               {diagnostics.blockers.length > previewBlockers.length
                 ? `+${diagnostics.blockers.length - previewBlockers.length} more — view all`
                 : "View details"}
+              <span className="dash-si-widget__chevron">
+                <IconChevron />
+              </span>
             </span>
           </summary>
           <div className="dash-si-widget__full">

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
-import { renderToStaticMarkup } from "react-dom/server";
+// @vitest-environment jsdom
+import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { buildMarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import {
   buildDecisionCockpitDto,
@@ -7,6 +8,8 @@ import {
 } from "@/lib/dashboard/decision-cockpit-dto";
 import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import { DashboardSignalsRail } from "./dashboard-signals-rail";
+
+afterEach(cleanup);
 
 const freshness = buildMarketFreshnessDto({
   snapshot: {
@@ -37,102 +40,141 @@ const fallingHistory: VnindexHistoryPoint[] = [
   { date: "2026-05-02", close: 1000 },
 ];
 
-describe("DashboardSignalsRail", () => {
-  it("renders all 5 signal rows expanded by default", () => {
-    const cockpitDto = buildDecisionCockpitDto(minimalInput());
-    const html = renderToStaticMarkup(
-      <DashboardSignalsRail
-        freshness={freshness}
-        latestScan={null}
-        scanDelayedBackdrop={null}
-        ladder={cockpitDto.setupQualityLadder}
-        verdict={cockpitDto.verdict}
-        vnindexHistory={risingHistory}
-      />
-    );
+function renderRail(vnindexHistory: VnindexHistoryPoint[] = risingHistory) {
+  const cockpitDto = buildDecisionCockpitDto(minimalInput());
+  return render(
+    <DashboardSignalsRail
+      freshness={freshness}
+      latestScan={null}
+      scanDelayedBackdrop={null}
+      ladder={cockpitDto.setupQualityLadder}
+      verdict={cockpitDto.verdict}
+      vnindexHistory={vnindexHistory}
+      surfacedCount={0}
+      evidence={cockpitDto.evidence}
+      blockers={cockpitDto.blockers}
+    />
+  );
+}
 
-    expect(html).toContain('data-testid="dashboard-signals-rail"');
-    expect(html).not.toContain("dash-signals-rail--collapsed");
-    expect(html).toContain("Market data");
-    expect(html).toContain("Scan pulse");
-    expect(html).toContain("Confidence");
-    expect(html).toContain("VNINDEX");
-    expect(html).toContain("Hostility");
+describe("DashboardSignalsRail / DashboardSignalsDock", () => {
+  it("renders 6 icon-only triggers by default, with no widget content visible", () => {
+    renderRail();
+    const dock = screen.getByTestId("dashboard-signals-rail");
+    const triggers = within(dock).getAllByRole("button");
+    expect(triggers).toHaveLength(6);
+    for (const trigger of triggers) {
+      expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    }
+
+    const names = triggers.map((t) => t.getAttribute("aria-label"));
+    for (const expected of ["Verdict", "Market data", "Scan pulse", "Confidence", "VNINDEX", "Hostility"]) {
+      expect(names.some((n) => n?.startsWith(expected))).toBe(true);
+    }
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("clicking an icon opens its popover with the matching widget content", () => {
+    renderRail();
+    const trigger = screen.getByRole("button", { name: /^Market data/ });
+
+    fireEvent.click(trigger);
+
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Market data" })).toBeTruthy();
+  });
+
+  it("clicking the same icon again closes the popover", async () => {
+    renderRail();
+    const trigger = screen.getByRole("button", { name: /^Scan pulse/ });
+
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("dialog")).not.toBeNull();
+
+    fireEvent.click(trigger);
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("pressing Escape closes the popover and returns focus to the trigger icon", async () => {
+    renderRail();
+    const trigger = screen.getByRole("button", { name: /^Confidence/ });
+
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("dialog")).not.toBeNull();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+
+    expect(document.activeElement).toBe(trigger);
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("clicking outside the popover closes it", async () => {
+    renderRail();
+    const trigger = screen.getByRole("button", { name: /^VNINDEX/ });
+
+    fireEvent.click(trigger);
+    expect(screen.queryByRole("dialog")).not.toBeNull();
+
+    fireEvent.pointerDown(document.body);
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("opening a different icon while one is open switches the popover to the new widget", () => {
+    renderRail();
+    fireEvent.click(screen.getByRole("button", { name: /^Hostility/ }));
+    expect(within(screen.getByRole("dialog")).getByRole("heading", { name: "Hostility" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: /^Verdict/ }));
+    expect(within(screen.getByRole("dialog")).getByRole("heading", { name: "Verdict" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Hostility/ }).getAttribute("aria-expanded")).toBe("false");
   });
 
   it("tints the market-data icon safe when data is aligned", () => {
-    const cockpitDto = buildDecisionCockpitDto(minimalInput());
-    const html = renderToStaticMarkup(
-      <DashboardSignalsRail
-        freshness={freshness}
-        latestScan={null}
-        scanDelayedBackdrop={null}
-        ladder={cockpitDto.setupQualityLadder}
-        verdict={cockpitDto.verdict}
-        vnindexHistory={risingHistory}
-      />
-    );
-    expect(html).toContain("Aligned");
-    expect(html).toContain("dash-rail-icon--safe");
+    renderRail();
+    const trigger = screen.getByRole("button", { name: /^Market data/ });
+    expect(trigger.getAttribute("aria-label")).toContain("Aligned");
+    expect(trigger.className).toContain("dash-rail-icon--safe");
   });
 
   it("tints the VNINDEX icon safe when the index closed up, danger when down", () => {
-    const cockpitDto = buildDecisionCockpitDto(minimalInput());
-    const up = renderToStaticMarkup(
-      <DashboardSignalsRail
-        freshness={freshness}
-        latestScan={null}
-        scanDelayedBackdrop={null}
-        ladder={cockpitDto.setupQualityLadder}
-        verdict={cockpitDto.verdict}
-        vnindexHistory={risingHistory}
-      />
-    );
-    const down = renderToStaticMarkup(
-      <DashboardSignalsRail
-        freshness={freshness}
-        latestScan={null}
-        scanDelayedBackdrop={null}
-        ladder={cockpitDto.setupQualityLadder}
-        verdict={cockpitDto.verdict}
-        vnindexHistory={fallingHistory}
-      />
-    );
-    expect(up).toContain("1,050");
-    expect(down).toContain("1,000");
+    const { unmount } = renderRail(risingHistory);
+    const up = screen.getByRole("button", { name: /^VNINDEX/ });
+    expect(up.className).toContain("dash-rail-icon--safe");
+    expect(up.getAttribute("aria-label")).toContain("1,050");
+    unmount();
+
+    renderRail(fallingHistory);
+    const down = screen.getByRole("button", { name: /^VNINDEX/ });
+    expect(down.className).toContain("dash-rail-icon--danger");
+    expect(down.getAttribute("aria-label")).toContain("1,000");
   });
 
-  it("shows the current confidence band label", () => {
+  it("shows the current confidence band label on the trigger", () => {
     const cockpitDto = buildDecisionCockpitDto(minimalInput());
-    const html = renderToStaticMarkup(
-      <DashboardSignalsRail
-        freshness={freshness}
-        latestScan={null}
-        scanDelayedBackdrop={null}
-        ladder={cockpitDto.setupQualityLadder}
-        verdict={cockpitDto.verdict}
-        vnindexHistory={risingHistory}
-      />
-    );
+    renderRail();
     const bandLabel = { high: "High", medium: "Medium", low: "Low" }[
       cockpitDto.verdict.confidenceBand.value
     ];
-    expect(html).toContain(bandLabel);
+    const trigger = screen.getByRole("button", { name: /^Confidence/ });
+    expect(trigger.getAttribute("aria-label")).toContain(bandLabel);
+  });
+
+  it("opens the Verdict widget to reveal Today's verdict content", () => {
+    renderRail();
+    fireEvent.click(screen.getByRole("button", { name: /^Verdict/ }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByText("Today's verdict")).toBeTruthy();
   });
 
   it("embeds the scan-pulse widget without its own duplicate header", () => {
-    const cockpitDto = buildDecisionCockpitDto(minimalInput());
-    const html = renderToStaticMarkup(
-      <DashboardSignalsRail
-        freshness={freshness}
-        latestScan={null}
-        scanDelayedBackdrop={null}
-        ladder={cockpitDto.setupQualityLadder}
-        verdict={cockpitDto.verdict}
-        vnindexHistory={risingHistory}
-      />
-    );
-    expect(html).toContain('data-testid="dashboard-setup-quality-ladder"');
-    expect(html).not.toContain("dash-pulse-header");
+    renderRail();
+    fireEvent.click(screen.getByRole("button", { name: /^Scan pulse/ }));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByTestId("dashboard-setup-quality-ladder")).toBeTruthy();
+    expect(dialog.innerHTML).not.toContain("dash-pulse-header");
   });
 });
