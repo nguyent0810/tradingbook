@@ -91,6 +91,29 @@ describe("computePositionSizing", () => {
     );
   });
 
+  it("does not constrain sizing when liquidityCapPct is unset", () => {
+    const withoutCap = computePositionSizing(base);
+    const withNullCap = computePositionSizing({ ...base, liquidityCapPct: null, symbolAvgDailyValueVnd: null });
+    expect(withoutCap.ok && withNullCap.ok).toBe(true);
+    if (!withoutCap.ok || !withNullCap.ok) return;
+    expect(withNullCap.value.qFinalShares).toBe(withoutCap.value.qFinalShares);
+    expect(withNullCap.value.liquidityCapBinding).toBe(false);
+  });
+
+  it("caps by liquidity (% of ADV) when it is the tightest constraint", () => {
+    // ADV small enough that 10% of it is far below the risk/exposure-based caps.
+    const r = computePositionSizing({
+      ...base,
+      liquidityCapPct: 0.1,
+      symbolAvgDailyValueVnd: 50_000_000, // 10% => 5,000,000 VND notional cap
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const expectedShares = Math.floor(5_000_000 / kVndToPerShareVnd(100));
+    expect(r.value.qFinalShares).toBe(expectedShares);
+    expect(r.value.liquidityCapBinding).toBe(true);
+  });
+
   it("rejects entry at or below stop", () => {
     const r = computePositionSizing({ ...base, entryKVnd: 95, stopKVnd: 97 });
     expect(r.ok).toBe(false);

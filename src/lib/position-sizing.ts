@@ -17,6 +17,8 @@ export type PositionSizingComputed = {
   stopDistancePctOfEntry: number;
   /** Planned loss at stop with qFinal shares */
   riskAtStopVnd: number;
+  /** True when the liquidity-cap constraint (vs. remaining exposure / per-trade cap) was the binding one. */
+  liquidityCapBinding: boolean;
 };
 
 export type PositionSizingErrorCode =
@@ -57,6 +59,10 @@ export function computePositionSizing(params: {
   /** Planned entry, k ₫ (same unit as scan rows). */
   entryKVnd: number;
   stopKVnd: number;
+  /** Market-impact cap as decimal, e.g. 0.10 for 10% of the symbol's average daily traded value. */
+  liquidityCapPct?: number | null;
+  /** Symbol's average daily traded value (VND, e.g. 20-session ADV). */
+  symbolAvgDailyValueVnd?: number | null;
 }): { ok: true; value: PositionSizingComputed } | { ok: false; code: PositionSizingErrorCode } {
   const {
     accountEquityVnd: E,
@@ -67,6 +73,8 @@ export function computePositionSizing(params: {
     quality,
     entryKVnd,
     stopKVnd,
+    liquidityCapPct,
+    symbolAvgDailyValueVnd,
   } = params;
 
   if (!Number.isFinite(E) || !Number.isFinite(mPort) || !Number.isFinite(curExp) || !Number.isFinite(mTrade)) {
@@ -92,9 +100,15 @@ export function computePositionSizing(params: {
 
   const capFromRemaining = remainingExposureVnd / entryVnd;
   const capFromPerTrade = (E * Math.max(0, Math.min(1, mTrade))) / entryVnd;
+  const capFromLiquidity =
+    liquidityCapPct != null && symbolAvgDailyValueVnd != null && symbolAvgDailyValueVnd > 0
+      ? (symbolAvgDailyValueVnd * Math.max(0, Math.min(1, liquidityCapPct))) / entryVnd
+      : Infinity;
 
-  const qFloored = Math.floor(Math.min(qRaw, capFromRemaining, capFromPerTrade));
+  const qFloored = Math.floor(Math.min(qRaw, capFromRemaining, capFromPerTrade, capFromLiquidity));
   const qFinalShares = Math.max(0, qFloored);
+  const liquidityCapBinding =
+    capFromLiquidity < Infinity && capFromLiquidity <= capFromRemaining && capFromLiquidity <= capFromPerTrade && capFromLiquidity < qRaw;
 
   const notionalVnd = qFinalShares * entryVnd;
   const positionPctOfAccount = E > 0 ? (notionalVnd / E) * 100 : 0;
@@ -119,6 +133,7 @@ export function computePositionSizing(params: {
       remainingExposureAfterTradeVnd,
       stopDistancePctOfEntry,
       riskAtStopVnd,
+      liquidityCapBinding,
     },
   };
 }

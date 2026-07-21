@@ -7,7 +7,7 @@
  * `TRADING_ACCOUNT_EQUITY_VND` remains a fallback default for equity for
  * anyone who hasn't set a value in the UI yet — the DB value always wins once
  * set. Position-sizing overrides have no env equivalent; null falls back to
- * the hardcoded defaults in `position-sizing-panel.ts`.
+ * the hardcoded defaults in `position-sizing.ts`.
  */
 import { cache } from "react";
 
@@ -69,7 +69,7 @@ export type PositionSizingConfigOverrides = {
   liquidityCapPct: number | null;
 };
 
-/** User overrides for position-sizing params — null fields fall back to position-sizing-panel.ts defaults. */
+/** User overrides for position-sizing params — null fields fall back to position-sizing.ts defaults. */
 export const getPositionSizingConfig = cache(
   async (userId: string): Promise<PositionSizingConfigOverrides> => {
     const row = await getUserTradingSettingsRow(userId);

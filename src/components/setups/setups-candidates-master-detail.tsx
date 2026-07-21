@@ -27,6 +27,14 @@ import {
 } from "@/components/setups/setups-candidate-evidence";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 
+/** Account-level position-sizing defaults from Settings — decimal fractions (0.15 = 15%). */
+export type SetupsPositionSizingDefaults = {
+  equityVnd: number | null;
+  baseRiskPct: number | null;
+  maxTradePct: number | null;
+  liquidityCapPct: number | null;
+};
+
 export type SetupsCandidateBundle = {
   candidate: {
     id: string;
@@ -45,6 +53,8 @@ export type SetupsCandidateBundle = {
     stopLevel: number;
     barDate: string;
     setupType: string;
+    /** 20-session average daily traded value (VND) — used for the liquidity-cap sizing constraint. */
+    avgValueVnd20: number | null;
   };
   perfHint: string;
   reasonsLines: string[];
@@ -125,11 +135,21 @@ function DeferredPositionSizing({
   quality,
   defaultEntryKVnd,
   defaultStopKVnd,
+  initialEquityVnd,
+  initialBaseRiskPct,
+  initialMaxTradePct,
+  initialLiquidityCapPct,
+  symbolAvgDailyValueVnd,
 }: {
   symbolKey: string;
   quality: "A" | "B";
   defaultEntryKVnd: number;
   defaultStopKVnd: number;
+  initialEquityVnd: number | null;
+  initialBaseRiskPct: number | null;
+  initialMaxTradePct: number | null;
+  initialLiquidityCapPct: number | null;
+  symbolAvgDailyValueVnd: number | null;
 }) {
   const [mounted, setMounted] = useState(false);
 
@@ -148,6 +168,11 @@ function DeferredPositionSizing({
       quality={quality}
       defaultEntryKVnd={defaultEntryKVnd}
       defaultStopKVnd={defaultStopKVnd}
+      initialEquityVnd={initialEquityVnd}
+      initialBaseRiskPct={initialBaseRiskPct}
+      initialMaxTradePct={initialMaxTradePct}
+      initialLiquidityCapPct={initialLiquidityCapPct}
+      symbolAvgDailyValueVnd={symbolAvgDailyValueVnd}
     />
   );
 }
@@ -158,12 +183,14 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
   techId,
   onToggleTech,
   onOpenTechnical,
+  positionSizingDefaults,
 }: {
   bundle: SetupsCandidateBundle;
   techOpen: boolean;
   techId: string;
   onToggleTech: () => void;
   onOpenTechnical: () => void;
+  positionSizingDefaults: SetupsPositionSizingDefaults | undefined;
 }) {
   const { candidate, reasonsLines, marketContextLines, rankBreakdownLines, rsRankPreviewLines, rsDiagnostic } = bundle;
   const tier = candidate.quality === "A" ? "A" : "B";
@@ -323,6 +350,11 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
           quality={tier}
           defaultEntryKVnd={candidate.close}
           defaultStopKVnd={candidate.stopLevel}
+          initialEquityVnd={positionSizingDefaults?.equityVnd ?? null}
+          initialBaseRiskPct={positionSizingDefaults?.baseRiskPct ?? null}
+          initialMaxTradePct={positionSizingDefaults?.maxTradePct ?? null}
+          initialLiquidityCapPct={positionSizingDefaults?.liquidityCapPct ?? null}
+          symbolAvgDailyValueVnd={candidate.avgValueVnd20}
         />
       </section>
     </article>
@@ -331,9 +363,10 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
 
 type Props = {
   candidates: SetupsCandidateBundle[];
+  positionSizingDefaults?: SetupsPositionSizingDefaults;
 };
 
-export function SetupsCandidatesMasterDetail({ candidates }: Props) {
+export function SetupsCandidatesMasterDetail({ candidates, positionSizingDefaults }: Props) {
   const techId = useId();
   const [selectedId, setSelectedId] = useState<string | null>(candidates[0]?.candidate.id ?? null);
   const [techOpen, setTechOpen] = useState(false);
@@ -424,6 +457,7 @@ export function SetupsCandidatesMasterDetail({ candidates }: Props) {
             techId={techId}
             onToggleTech={handleToggleTech}
             onOpenTechnical={handleOpenTechnical}
+            positionSizingDefaults={positionSizingDefaults}
           />
         </V3MasterDetail.Detail>
       ) : null}
