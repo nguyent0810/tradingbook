@@ -83,6 +83,9 @@ export function computePositionSizing(params: {
   if (!Number.isFinite(rBase) || !Number.isFinite(entryKVnd) || !Number.isFinite(stopKVnd)) {
     return { ok: false, code: "INVALID_INPUT" };
   }
+  if (liquidityCapPct != null && !Number.isFinite(liquidityCapPct)) {
+    return { ok: false, code: "INVALID_INPUT" };
+  }
   if (E <= 0) return { ok: false, code: "ZERO_EQUITY" };
 
   const entryVnd = kVndToPerShareVnd(entryKVnd);

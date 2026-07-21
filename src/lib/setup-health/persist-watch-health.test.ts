@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { evaluateAndPersistHealthForActiveWatchItems } from "./persist-watch-health";
+import {
+  evaluateAndPersistHealthForActiveWatchItems,
+  syncWatchItemsFromSurfacedCandidates,
+} from "./persist-watch-health";
 import { sortCandidatesWithHealth, type CandidateWithHealth } from "./sort-candidates";
 import { healthLevelActionHint } from "./health-ui-copy";
 import { healthLevelToBadgeVariant } from "@/components/command-deck/signal-badge";
@@ -70,6 +73,55 @@ describe("evaluateAndPersistHealthForActiveWatchItems — NO_DATA persistence", 
     expect(call.data.healthLevel).not.toBe("HEALTHY");
     expect(call.data.healthLevel).not.toBe("WARNING");
   });
+
+  it("one watch item failing to update does not abort the batch — the rest still get evaluated", async () => {
+    const evalDate = new Date("2026-07-14");
+    const update = vi
+      .fn()
+      .mockImplementationOnce(() => Promise.reject(new Error("row changed concurrently")))
+      .mockResolvedValue({});
+    const db = {
+      setupWatchItem: {
+        findMany: vi.fn().mockResolvedValue([
+          { id: "watch-fail", symbolId: "sym-fail", breakoutLevel: 100, pullbackZoneLow: 95, pullbackZoneHigh: 98, firstSeenBarDate: new Date("2026-07-01") },
+          { id: "watch-ok", symbolId: "sym-ok", breakoutLevel: 100, pullbackZoneLow: 95, pullbackZoneHigh: 98, firstSeenBarDate: new Date("2026-07-01") },
+        ]),
+        update,
+      },
+      stockDailyBar: { findMany: vi.fn().mockResolvedValue([]) },
+    } as unknown as PrismaClient;
+
+    const result = await evaluateAndPersistHealthForActiveWatchItems(db, evalDate, evalDate);
+
+    expect(result.updated).toBe(1); // only the second item counted — the first threw
+    expect(update).toHaveBeenCalledTimes(2); // both were attempted
+  });
+});
+
+describe("syncWatchItemsFromSurfacedCandidates — per-row isolation", () => {
+  it("one row failing to upsert does not abort sync for the rest", async () => {
+    const upsert = vi
+      .fn()
+      .mockImplementationOnce(() => Promise.reject(new Error("FK violation")))
+      .mockResolvedValue({});
+    const db = { setupWatchItem: { upsert } } as unknown as PrismaClient;
+
+    const candidate = (symbolId: string) => ({
+      symbolId,
+      quality: "A" as const,
+      close: 100,
+      breakoutLevel: 95,
+      pullbackZoneLow: 90,
+      pullbackZoneHigh: 96,
+      barDate: new Date("2026-07-14"),
+    });
+
+    await expect(
+      syncWatchItemsFromSurfacedCandidates(db, "scan-1", [candidate("sym-fail"), candidate("sym-ok")])
+    ).resolves.toBeUndefined();
+
+    expect(upsert).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("NO_DATA-turned-AT_RISK round trip — downstream never reads it as healthy/ready", () => {
@@ -112,6 +164,7 @@ describe("NO_DATA-turned-AT_RISK round trip — downstream never reads it as hea
         lifecycleLabel: "READY",
         healthLevel: "HEALTHY",
         healthScore: 90,
+        rankScore: 0,
       },
       {
         symbolKey: "WARNING_ROW",
@@ -122,6 +175,7 @@ describe("NO_DATA-turned-AT_RISK round trip — downstream never reads it as hea
         lifecycleLabel: "READY",
         healthLevel: "WARNING",
         healthScore: 70,
+        rankScore: 0,
       },
       {
         symbolKey: "REHYDRATED_NO_DATA_ROW",
@@ -132,6 +186,7 @@ describe("NO_DATA-turned-AT_RISK round trip — downstream never reads it as hea
         lifecycleLabel: "READY",
         healthLevel: "AT_RISK", // was NO_DATA before persistence
         healthScore: 0,
+        rankScore: 0,
       },
     ];
 

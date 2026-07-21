@@ -126,9 +126,13 @@ export function filterBarsThroughEval(bars: OhlcvBar[], evalBarDate: Date): Ohlc
     .sort((a, b) => compareDay(a.date, b.date));
 }
 
-/** Min distance from close to segment [zoneLow, zoneHigh] as fractional distance to nearest bound. */
-export function distanceToZonePct(close: number, zoneLow: number, zoneHigh: number): number {
-  if (zoneLow <= 0 || zoneHigh <= 0) return 0;
+/**
+ * Min distance from close to segment [zoneLow, zoneHigh] as fractional distance to
+ * nearest bound. Returns null when the zone itself is invalid data (<=0) — that must
+ * never be confused with 0, which means "sitting inside a valid zone".
+ */
+export function distanceToZonePct(close: number, zoneLow: number, zoneHigh: number): number | null {
+  if (zoneLow <= 0 || zoneHigh <= 0) return null;
   if (close >= zoneLow && close <= zoneHigh) return 0;
   if (close > zoneHigh) return (close - zoneHigh) / zoneHigh;
   return (zoneLow - close) / zoneLow;
@@ -181,20 +185,25 @@ function computeScore(flags: SetupHealthFlag[]): number {
   return Math.max(0, Math.min(100, score));
 }
 
+/**
+ * Buckets by cumulative SCORE_PENALTY of the non-dead-forcing flags rather than
+ * flag count, so level and score can never disagree (e.g. one severe flag no
+ * longer ranks below two mild ones just because "two" outnumbers "one").
+ */
 function deriveLevel(flags: SetupHealthFlag[]): SetupHealthLevelValue {
   if (flags.includes("CHASE") || flags.includes("TOO_EXTENDED") || flags.includes("DEAD_SETUP")) {
     return "DEAD";
   }
 
-  let n = 0;
-  if (flags.includes("EXTENDED")) n += 1;
-  if (flags.includes("AGING_SETUP")) n += 1;
-  if (flags.includes("VOLUME_FADE")) n += 1;
-  if (flags.includes("FAILED_TO_PULLBACK")) n += 1;
-  if (flags.includes("REVERSAL_RISK")) n += 1;
+  let penalty = 0;
+  if (flags.includes("EXTENDED")) penalty += SCORE_PENALTY.EXTENDED;
+  if (flags.includes("AGING_SETUP")) penalty += SCORE_PENALTY.AGING_SETUP;
+  if (flags.includes("VOLUME_FADE")) penalty += SCORE_PENALTY.VOLUME_FADE;
+  if (flags.includes("FAILED_TO_PULLBACK")) penalty += SCORE_PENALTY.FAILED_TO_PULLBACK;
+  if (flags.includes("REVERSAL_RISK")) penalty += SCORE_PENALTY.REVERSAL_RISK;
 
-  if (n === 0) return "HEALTHY";
-  if (n === 1) return "WARNING";
+  if (penalty === 0) return "HEALTHY";
+  if (penalty <= SCORE_PENALTY.REVERSAL_RISK) return "WARNING";
   return "AT_RISK";
 }
 
@@ -220,7 +229,7 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
     sessionsAfterFirstSeen: 0,
     sessionsSinceBreakout: null,
     extendedPct: null,
-    distanceToZonePct: 0,
+    distanceToZonePct: null,
     median20Volume: null,
     extensionThresholdSource: "flat_pct_fallback",
   };
@@ -258,7 +267,9 @@ export function evaluateWatchHealth(input: EvaluateWatchHealthInput): WatchHealt
       pullbackZoneHigh > 0 ? (close - pullbackZoneHigh) / pullbackZoneHigh : null;
   }
 
-  if (meta.distanceToZonePct > DEAD_SETUP_DISTANCE_PCT) flags.push("DEAD_SETUP");
+  if (meta.distanceToZonePct != null && meta.distanceToZonePct > DEAD_SETUP_DISTANCE_PCT) {
+    flags.push("DEAD_SETUP");
+  }
 
   /** First session where close clears breakout (full history through eval). */
   let breakoutIdx = -1;

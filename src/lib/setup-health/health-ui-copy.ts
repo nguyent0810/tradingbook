@@ -112,7 +112,7 @@ export function buildHealthLines(flags: SetupHealthFlag[], meta: WatchHealthMeta
     lines.push("→ Weak close on volume (reversal risk)");
   }
 
-  if (flags.includes("DEAD_SETUP")) {
+  if (flags.includes("DEAD_SETUP") && meta.distanceToZonePct != null) {
     lines.push(`→ ${(meta.distanceToZonePct * 100).toFixed(1)}% from pullback zone`);
   }
 

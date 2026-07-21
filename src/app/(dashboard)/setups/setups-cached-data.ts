@@ -166,7 +166,7 @@ export const loadRsNearMissWatchlistForSetupsCached = cache(
     }
     const excludeSymbols = base.candidateRows.map((c) => c.symbolKey);
     try {
-      const { rows } = await getCachedRsNearMissWatchlist({
+      const { rows, earlyEntryBySymbol } = await getCachedRsNearMissWatchlist({
         limit: 15,
         excludeSymbols,
       });
@@ -176,7 +176,7 @@ export const loadRsNearMissWatchlistForSetupsCached = cache(
         base.expectedSession
       );
       return {
-        panel: buildRsNearMissWatchlistPanel(rows, rsMap),
+        panel: buildRsNearMissWatchlistPanel(rows, rsMap, earlyEntryBySymbol),
         error: null,
       };
     } catch (e) {

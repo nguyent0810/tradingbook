@@ -34,10 +34,7 @@ import { buildSymbolContextEvidenceLines } from "@/lib/market/build-market-conte
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import {
-  getPositionSizingConfig,
-  getTradingAccountEquityVnd,
-} from "@/lib/trading-account-risk-config";
+import { safeLoadPositionSizingDefaults } from "./setups-position-sizing-defaults";
 
 import { ErrorStateWithEvidence } from "@/components/ui/error-state-with-evidence";
 import { RefreshButton } from "@/components/ui/refresh-button";
@@ -58,8 +55,6 @@ import {
 } from "./setups-shared-helpers";
 
 import type { SetupsCandidateBundle } from "@/components/setups/setups-candidates-master-detail";
-
-
 
 export async function SetupsCandidatesAsync() {
 
@@ -86,9 +81,7 @@ export async function SetupsCandidatesAsync() {
     perfPack,
     rsMap,
     marketContext,
-    equityVnd,
-    positionSizingConfig,
-    advRows,
+    positionSizing,
   ] =
 
     await Promise.all([
@@ -105,24 +98,11 @@ export async function SetupsCandidatesAsync() {
 
         : Promise.resolve(null),
 
-      userId ? getTradingAccountEquityVnd(userId) : Promise.resolve(null),
-
-      userId
-        ? getPositionSizingConfig(userId)
-        : Promise.resolve({ riskPerTradePct: null, maxPositionPct: null, liquidityCapPct: null }),
-
-      base.expectedSession && symbolIds.length > 0
-        ? prisma.symbolMarketContextDaily.findMany({
-            where: { sessionDate: base.expectedSession, symbolId: { in: symbolIds } },
-            select: { symbolId: true, close: true, volMa20: true },
-          })
-        : Promise.resolve([]),
+      safeLoadPositionSizingDefaults(prisma, userId, symbolIds, base.expectedSession),
 
     ]);
 
-  const advBySymbolId = new Map(
-    advRows.map((r) => [r.symbolId, r.close != null && r.volMa20 != null ? r.close * 1000 * r.volMa20 : null])
-  );
+  const { equityVnd, positionSizingConfig, advBySymbolId, error: positionSizingError } = positionSizing;
 
   const positionSizingDefaults = {
     equityVnd,
@@ -133,7 +113,7 @@ export async function SetupsCandidatesAsync() {
 
 
 
-  const perfBanner = [healthError, perfPack.error].filter(Boolean).join(" ") || null;
+  const perfBanner = [healthError, perfPack.error, positionSizingError].filter(Boolean).join(" ") || null;
 
 
 

@@ -114,6 +114,18 @@ describe("computePositionSizing", () => {
     expect(r.value.liquidityCapBinding).toBe(true);
   });
 
+  it("rejects a non-finite liquidityCapPct instead of silently poisoning the result with NaN", () => {
+    const nan = computePositionSizing({ ...base, liquidityCapPct: Number.NaN, symbolAvgDailyValueVnd: 50_000_000 });
+    expect(nan.ok).toBe(false);
+    if (nan.ok) return;
+    expect(nan.code).toBe("INVALID_INPUT");
+
+    const inf = computePositionSizing({ ...base, liquidityCapPct: Number.POSITIVE_INFINITY, symbolAvgDailyValueVnd: 50_000_000 });
+    expect(inf.ok).toBe(false);
+    if (inf.ok) return;
+    expect(inf.code).toBe("INVALID_INPUT");
+  });
+
   it("rejects entry at or below stop", () => {
     const r = computePositionSizing({ ...base, entryKVnd: 95, stopKVnd: 97 });
     expect(r.ok).toBe(false);
