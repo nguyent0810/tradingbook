@@ -1,5 +1,28 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import type { TomorrowPlanDto } from "@/lib/dashboard/decision-cockpit-dto";
+
+const IconEye = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+const IconBolt = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <polygon points="13 2 3 14 11 14 9 22 21 10 13 10 13 2" />
+  </svg>
+);
+const IconSlashCircle = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9" />
+    <line x1="5.5" y1="5.5" x2="18.5" y2="18.5" />
+  </svg>
+);
+
+function planCardIndexStyle(index: number): CSSProperties {
+  return { "--plan-card-index": index } as CSSProperties;
+}
 
 export type DashboardTomorrowPlanProps = {
   tomorrow: TomorrowPlanDto;
@@ -79,12 +102,20 @@ export function DashboardTomorrowPlan({
         </div>
       </header>
 
-      <div className="dash-tomorrow__body dash-v2-zone__body dash-card">
-        <div className="dash-tomorrow-blocks">
-          <div className="dash-tomorrow-block dash-tomorrow-block--wide dash-tomorrow-block--watch">
-            <p className="dash-tomorrow-block__label">
+      <div className="dash-plan-grid dash-v2-zone__body">
+        <div
+          className="dash-card dash-plan-card dash-plan-card--wide dash-plan-card--watch dash-card--tilt"
+          style={planCardIndexStyle(0)}
+        >
+          <div className="dash-plan-card__head">
+            <span className="dash-plan-card__icon">
+              <IconEye />
+            </span>
+            <span className="dash-plan-card__label">
               Watch{symbols.length > 0 ? " — hover a symbol for its reason" : ""}
-            </p>
+            </span>
+          </div>
+          <div className="dash-plan-card__body">
             {symbols.length > 0 ? (
               <ul className="dash-tomorrow-watch-cards" data-testid="dashboard-tomorrow-watch">
                 {symbols.map((symbol) => (
@@ -97,31 +128,51 @@ export function DashboardTomorrowPlan({
                 ))}
               </ul>
             ) : (
-              <p className="dash-tomorrow-block__body" data-testid="dashboard-tomorrow-watch">
-                {watchNote}
-              </p>
+              <p data-testid="dashboard-tomorrow-watch">{watchNote}</p>
             )}
-          </div>
-
-          <div className="dash-tomorrow-block dash-tomorrow-block--trigger" data-testid="dashboard-tomorrow-trigger">
-            <p className="dash-tomorrow-block__label">Trigger</p>
-            <p className="dash-tomorrow-block__body">{tomorrow.triggerLine.value}</p>
-          </div>
-
-          <div className="dash-tomorrow-block dash-tomorrow-block--avoid" data-testid="dashboard-tomorrow-avoid">
-            <p className="dash-tomorrow-block__label">Avoid</p>
-            <p className="dash-tomorrow-block__body">{tomorrow.avoidLine.value}</p>
           </div>
         </div>
 
-        {symbols.length === 0 ? (
-          <p className="dash-tomorrow__link">
-            <Link href="/setups" className="text-xs font-medium" style={{ color: "var(--accent-text)" }}>
-              Review /setups for pipeline context →
-            </Link>
-          </p>
-        ) : null}
+        <div
+          className="dash-card dash-plan-card dash-plan-card--trigger dash-card--tilt dash-card--breathe"
+          style={planCardIndexStyle(1)}
+          data-testid="dashboard-tomorrow-trigger"
+        >
+          <div className="dash-plan-card__head">
+            <span className="dash-plan-card__icon">
+              <IconBolt />
+            </span>
+            <span className="dash-plan-card__label">Trigger</span>
+          </div>
+          <div className="dash-plan-card__body">
+            <p>{tomorrow.triggerLine.value}</p>
+          </div>
+        </div>
+
+        <div
+          className="dash-card dash-plan-card dash-plan-card--avoid dash-card--tilt"
+          style={planCardIndexStyle(2)}
+          data-testid="dashboard-tomorrow-avoid"
+        >
+          <div className="dash-plan-card__head">
+            <span className="dash-plan-card__icon">
+              <IconSlashCircle />
+            </span>
+            <span className="dash-plan-card__label">Avoid</span>
+          </div>
+          <div className="dash-plan-card__body">
+            <p>{tomorrow.avoidLine.value}</p>
+          </div>
+        </div>
       </div>
+
+      {symbols.length === 0 ? (
+        <p className="dash-tomorrow__link">
+          <Link href="/setups" className="text-xs font-medium" style={{ color: "var(--accent-text)" }}>
+            Review /setups for pipeline context →
+          </Link>
+        </p>
+      ) : null}
     </section>
   );
 }

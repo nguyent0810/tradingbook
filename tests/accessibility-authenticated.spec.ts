@@ -4,7 +4,7 @@ import { formatViolations, runAxe, seriousViolations } from "./axe-helpers";
 test.describe("Accessibility audit (axe-core) — authenticated routes", () => {
   test("dashboard has no serious/critical violations", async ({ page }) => {
     await page.goto("/dashboard");
-    await page.waitForSelector('[data-testid="dashboard-v2-hero-band"]', { timeout: 30_000 });
+    await page.waitForSelector('[data-testid="dashboard-signals-rail"]', { timeout: 30_000 });
     const result = await runAxe(page);
     expect(seriousViolations(result), formatViolations(result)).toEqual([]);
   });

@@ -28,7 +28,7 @@ function minimalInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCo
 }
 
 describe("DashboardDecisionCockpit", () => {
-  it("renders every zone of the Decision Cockpit IA in order: trust/verdict, opportunity, tomorrow, secondary", () => {
+  it("renders every zone of the Decision Cockpit IA in order: opportunity, tomorrow, secondary", () => {
     const cockpitDto = buildDecisionCockpitDto(minimalInput());
 
     const html = renderToStaticMarkup(
@@ -45,7 +45,6 @@ describe("DashboardDecisionCockpit", () => {
     );
 
     const zoneOrder = [
-      'data-testid="dashboard-v2-hero-band"',
       'data-testid="dashboard-cockpit-zone-opportunity"',
       'data-testid="dashboard-tomorrow-plan"',
       'data-testid="dashboard-cockpit-zone-next-session"',
@@ -58,6 +57,26 @@ describe("DashboardDecisionCockpit", () => {
       expect(idx, `expected ${marker} to appear after the previous zone`).toBeGreaterThan(cursor);
       cursor = idx;
     }
+  });
+
+  it("moves Today's verdict into the signals dock as its own widget icon", () => {
+    const cockpitDto = buildDecisionCockpitDto(minimalInput());
+
+    const html = renderToStaticMarkup(
+      <DashboardDecisionCockpit
+        freshness={freshness}
+        latestScan={null}
+        scanDelayedBackdrop={null}
+        cockpitDto={cockpitDto}
+        surfacedCount={0}
+        activeWatchItems={[]}
+        latestCloseBySymbol={new Map()}
+        vnindexHistory={[]}
+      />
+    );
+
+    expect(html).toContain('data-testid="dashboard-signals-rail"');
+    expect(html).toContain('aria-label="Verdict');
   });
 
   it("renders the near-miss panel (not the candidates panel) when no candidates are surfaced", () => {

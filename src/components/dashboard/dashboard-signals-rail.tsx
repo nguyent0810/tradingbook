@@ -1,21 +1,28 @@
-import type { ReactNode } from "react";
 import type { MarketFreshnessDto } from "@/lib/market/market-freshness-dto";
 import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type {
+  ActionableBlockerDto,
   ConfidenceBand,
+  EvidenceChipDto,
   SetupQualityLadderDto,
   VerdictDto,
+  VerdictUxLevel,
 } from "@/lib/dashboard/decision-cockpit-dto";
 import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import type { HostilityGaugeTone } from "@/lib/dashboard/hostility-gauge";
 import { resolveHostilityGauge } from "@/lib/dashboard/hostility-gauge";
-import { DashboardSignalsRailShell } from "@/components/dashboard/dashboard-signals-rail-shell";
+import {
+  DashboardSignalsDock,
+  type DashboardSignalDescriptor,
+  type SignalTone,
+} from "@/components/dashboard/dashboard-signals-dock";
 import { DashboardMarketStatusBar } from "@/components/dashboard/dashboard-market-status-bar";
 import { DashboardScanMetaStrip } from "@/components/dashboard/dashboard-scan-meta-strip";
 import { DashboardSetupQualityLadder } from "@/components/dashboard/dashboard-setup-quality-ladder";
 import { DashboardConvictionRing } from "@/components/dashboard/dashboard-conviction-ring";
 import { DashboardVnindexTrendChartLazy } from "@/components/dashboard/dashboard-vnindex-trend-chart-lazy";
 import { DashboardHostilityGaugeLazy } from "@/components/dashboard/dashboard-hostility-gauge-lazy";
+import { DashboardDecisionHero } from "@/components/dashboard/dashboard-decision-hero";
 
 export type DashboardSignalsRailProps = {
   freshness: MarketFreshnessDto;
@@ -25,9 +32,10 @@ export type DashboardSignalsRailProps = {
   verdict: VerdictDto;
   vnindexHistory: VnindexHistoryPoint[];
   vnindexHistoryError?: boolean;
+  surfacedCount: number;
+  evidence: EvidenceChipDto[];
+  blockers: ActionableBlockerDto[];
 };
-
-type SignalTone = "safe" | "warn" | "danger" | "neutral";
 
 function resolveMarketDataTone(freshness: MarketFreshnessDto): SignalTone {
   const hasStale = freshness.delayedBackdrop || freshness.staleFlags.length > 0;
@@ -64,6 +72,19 @@ const HOSTILITY_TONE: Record<HostilityGaugeTone, SignalTone> = {
   hostile: "danger",
 };
 
+function resolveVerdictTone(uxLevel: VerdictUxLevel): SignalTone {
+  switch (uxLevel) {
+    case "NO_TRADE":
+      return "danger";
+    case "PROBE":
+      return "warn";
+    case "TRADE":
+      return "safe";
+    default:
+      return "safe";
+  }
+}
+
 const IconShield = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" />
@@ -93,40 +114,18 @@ const IconAlertTriangle = () => (
     <path d="M12 9v4M12 17h.01" />
   </svg>
 );
-
-function SignalRow({
-  icon,
-  tone,
-  title,
-  meta,
-  children,
-}: {
-  icon: ReactNode;
-  tone: SignalTone;
-  title: string;
-  meta: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="dash-rail-row">
-      <div className="dash-rail-row__head" title={`${title} — ${meta}`}>
-        <span className={`dash-rail-icon dash-rail-icon--${tone}`}>{icon}</span>
-        <span className="dash-rail-row__title">{title}</span>
-        <span className="dash-rail-row__meta">{meta}</span>
-      </div>
-      <div className="dash-rail-row__body">{children}</div>
-    </div>
-  );
-}
+const IconFlag = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 21V4" />
+    <path d="M4 4h13l-2.5 4L17 12H4" />
+  </svg>
+);
 
 /**
- * Collapsible right rail housing the "Market data aligned" / "Today's scan
- * pulse" widgets plus the existing conviction ring / VNINDEX chart /
- * hostility gauge (moved out of the command band). Server component — the
- * collapse/expand toggle itself lives in DashboardSignalsRailShell (a thin
- * client boundary) so the data-heavy row content below (which touches
- * Prisma-adjacent types via decision-cockpit-dto) never enters the client
- * bundle.
+ * Server component building the descriptor array for the icon-only signals
+ * dock — content is fully pre-rendered here (touching Prisma-adjacent types
+ * via decision-cockpit-dto) so DashboardSignalsDock (a thin client boundary
+ * owning only open/close + popover positioning) never needs those types.
  */
 export function DashboardSignalsRail({
   freshness,
@@ -136,73 +135,97 @@ export function DashboardSignalsRail({
   verdict,
   vnindexHistory,
   vnindexHistoryError = false,
+  surfacedCount,
+  evidence,
+  blockers,
 }: DashboardSignalsRailProps) {
   const gauge = resolveHostilityGauge(verdict.gate1Resolution.canonical);
   const confidenceBand = verdict.confidenceBand.value;
   const marketDataStale = freshness.delayedBackdrop || freshness.staleFlags.length > 0;
   const vnindexLast = vnindexHistory.length > 0 ? vnindexHistory[vnindexHistory.length - 1]!.close : null;
 
-  return (
-    <DashboardSignalsRailShell>
-      <SignalRow
-        icon={<IconShield />}
-        tone={resolveMarketDataTone(freshness)}
-        title="Market data"
-        meta={marketDataStale ? "Stale" : "Aligned"}
-      >
-        <DashboardMarketStatusBar freshness={freshness} />
-        <DashboardScanMetaStrip latestScan={latestScan} delayedBackdrop={scanDelayedBackdrop} />
-      </SignalRow>
-
-      <div className="dash-signals-rail__divider" aria-hidden="true" />
-
-      <SignalRow
-        icon={<IconPulse />}
-        tone={resolveScanPulseTone(ladder)}
-        title="Scan pulse"
-        meta={`${ladder.totalClassified} today`}
-      >
-        <DashboardSetupQualityLadder ladder={ladder} embedded />
-      </SignalRow>
-
-      <div className="dash-signals-rail__divider" aria-hidden="true" />
-
-      <SignalRow
-        icon={<IconTarget />}
-        tone={CONFIDENCE_TONE[confidenceBand]}
-        title="Confidence"
-        meta={CONFIDENCE_LABEL[confidenceBand]}
-      >
-        <div className="dash-signals-rail__ring-row">
+  const items: DashboardSignalDescriptor[] = [
+    {
+      id: "verdict",
+      icon: <IconFlag />,
+      tone: resolveVerdictTone(verdict.uxLevel.value),
+      title: "Verdict",
+      meta: verdict.headline.value,
+      content: (
+        <DashboardDecisionHero
+          verdict={verdict}
+          surfacedCount={surfacedCount}
+          evidence={evidence}
+          blockers={blockers}
+        />
+      ),
+    },
+    {
+      id: "market-data",
+      icon: <IconShield />,
+      tone: resolveMarketDataTone(freshness),
+      title: "Market data",
+      meta: marketDataStale ? "Stale" : "Aligned",
+      content: (
+        <div className="dash-dock-widget">
+          <DashboardMarketStatusBar freshness={freshness} />
+          <DashboardScanMetaStrip latestScan={latestScan} delayedBackdrop={scanDelayedBackdrop} />
+        </div>
+      ),
+    },
+    {
+      id: "scan-pulse",
+      icon: <IconPulse />,
+      tone: resolveScanPulseTone(ladder),
+      title: "Scan pulse",
+      meta: `${ladder.totalClassified} today`,
+      content: (
+        <div className="dash-dock-widget">
+          <DashboardSetupQualityLadder ladder={ladder} embedded />
+        </div>
+      ),
+    },
+    {
+      id: "confidence",
+      icon: <IconTarget />,
+      tone: CONFIDENCE_TONE[confidenceBand],
+      title: "Confidence",
+      meta: CONFIDENCE_LABEL[confidenceBand],
+      content: (
+        <div className="dash-dock-widget dash-signals-rail__ring-row">
           <DashboardConvictionRing band={confidenceBand} />
           <p className="dash-signals-rail__ring-copy">
             How much evidence backs today&rsquo;s verdict — based on gate alignment &amp; data
             coverage.
           </p>
         </div>
-      </SignalRow>
+      ),
+    },
+    {
+      id: "vnindex",
+      icon: <IconTrend />,
+      tone: resolveVnindexTone(vnindexHistory),
+      title: "VNINDEX",
+      meta: vnindexLast != null ? vnindexLast.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—",
+      content: (
+        <div className="dash-dock-widget">
+          <DashboardVnindexTrendChartLazy history={vnindexHistory} error={vnindexHistoryError} />
+        </div>
+      ),
+    },
+    {
+      id: "hostility",
+      icon: <IconAlertTriangle />,
+      tone: HOSTILITY_TONE[gauge.tone],
+      title: "Hostility",
+      meta: gauge.label,
+      content: (
+        <div className="dash-dock-widget">
+          <DashboardHostilityGaugeLazy gauge={gauge} />
+        </div>
+      ),
+    },
+  ];
 
-      <div className="dash-signals-rail__divider" aria-hidden="true" />
-
-      <SignalRow
-        icon={<IconTrend />}
-        tone={resolveVnindexTone(vnindexHistory)}
-        title="VNINDEX"
-        meta={vnindexLast != null ? vnindexLast.toLocaleString("en-US", { maximumFractionDigits: 2 }) : "—"}
-      >
-        <DashboardVnindexTrendChartLazy history={vnindexHistory} error={vnindexHistoryError} />
-      </SignalRow>
-
-      <div className="dash-signals-rail__divider" aria-hidden="true" />
-
-      <SignalRow
-        icon={<IconAlertTriangle />}
-        tone={HOSTILITY_TONE[gauge.tone]}
-        title="Hostility"
-        meta={gauge.label}
-      >
-        <DashboardHostilityGaugeLazy gauge={gauge} />
-      </SignalRow>
-    </DashboardSignalsRailShell>
-  );
+  return <DashboardSignalsDock items={items} />;
 }

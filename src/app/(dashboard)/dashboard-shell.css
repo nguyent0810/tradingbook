@@ -1253,69 +1253,171 @@
   margin-top: var(--space-3);
 }
 
-/* Tomorrow's plan — non-promoted card redesign: watch symbols as individual
-   hoverable amber cards (per-symbol reason on hover/focus), trigger green,
-   avoid red. */
-.dash-tomorrow-blocks {
+/* Tomorrow's plan — non-promoted card redesign: widget/card/3D/ambient
+   treatment shared with Secondary intelligence (03) below. */
+.dash-plan-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
 }
 
 @media (max-width: 640px) {
-  .dash-tomorrow-blocks {
+  .dash-plan-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.dash-tomorrow-block {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-primary);
-  background: color-mix(in srgb, var(--bg-elevated) 85%, transparent);
-  padding: var(--space-3) var(--space-4);
+/* Static 3D tilt — a resting perspective lean that flattens + lifts on
+   hover/focus. No JS mouse-tracking needed. */
+.dash-card--tilt {
+  transform: perspective(900px) rotateX(1.5deg);
+  transform-origin: 50% 100%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 24px rgba(0, 0, 0, 0.3);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, border-color 220ms ease;
+}
+.dash-card--tilt:hover,
+.dash-card--tilt:focus-within {
+  transform: perspective(900px) rotateX(0deg) translateY(-4px) translateZ(6px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 18px 40px rgba(0, 0, 0, 0.42),
+    0 0 0 1px color-mix(in srgb, var(--tone, var(--accent)) 25%, transparent);
 }
 
-.dash-tomorrow-block--wide {
+/* Low-amplitude breathing glow — reserved for the single most urgent card
+   (Trigger here; danger-severity Gate blockers in 03) so it reads as a cue,
+   not visual noise. */
+.dash-card--breathe {
+  animation: dash-card-breathe 3.2s ease-in-out infinite;
+}
+@keyframes dash-card-breathe {
+  0%,
+  100% {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 24px rgba(0, 0, 0, 0.3),
+      0 0 0 0 color-mix(in srgb, var(--tone, var(--accent)) 0%, transparent);
+  }
+  50% {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 10px 24px rgba(0, 0, 0, 0.3),
+      0 0 16px 1px color-mix(in srgb, var(--tone, var(--accent)) 30%, transparent);
+  }
+}
+
+.dash-plan-card {
+  --tone: var(--accent);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  opacity: 0;
+  transform: translateY(14px) perspective(900px) rotateX(6deg);
+  animation: dash-widget-card-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(80ms + var(--plan-card-index, 0) * 90ms);
+}
+.dash-plan-card::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tone) 35%, transparent) 0%, transparent 70%);
+  opacity: 0.5;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+.dash-plan-card:hover::after {
+  opacity: 0.8;
+}
+.dash-plan-card > * {
+  position: relative;
+  z-index: 1;
+}
+@keyframes dash-widget-card-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0) perspective(900px) rotateX(1.5deg);
+  }
+}
+
+.dash-plan-card--wide {
   grid-column: 1 / -1;
 }
 
-.dash-tomorrow-block__label {
-  margin: 0 0 var(--space-2);
+.dash-plan-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dash-plan-card__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--tone) 18%, transparent);
+  color: var(--tone);
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dash-plan-card__icon svg {
+  width: 15px;
+  height: 15px;
+}
+.dash-plan-card:hover .dash-plan-card__icon {
+  transform: scale(1.08) rotate(-4deg);
+}
+.dash-plan-card__label {
   font-size: 0.66rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-tertiary);
+  color: var(--tone);
 }
-
-.dash-tomorrow-block__body {
+.dash-plan-card__body {
   margin: 0;
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   line-height: var(--line-height-relaxed);
 }
+.dash-plan-card__body p {
+  margin: 0;
+}
 
-.dash-tomorrow-block--watch {
+.dash-plan-card--watch {
+  --tone: var(--warning);
   border-color: color-mix(in srgb, var(--warning) 30%, var(--border-primary));
 }
-.dash-tomorrow-block--watch .dash-tomorrow-block__label {
-  color: var(--warning);
-}
 
-.dash-tomorrow-block--trigger {
+.dash-plan-card--trigger {
+  --tone: var(--success);
   border-color: color-mix(in srgb, var(--success) 35%, var(--border-primary));
   background: color-mix(in srgb, var(--success-muted) 35%, var(--bg-elevated));
 }
-.dash-tomorrow-block--trigger .dash-tomorrow-block__label {
-  color: var(--success);
-}
 
-.dash-tomorrow-block--avoid {
+.dash-plan-card--avoid {
+  --tone: var(--danger);
   border-color: color-mix(in srgb, var(--danger) 35%, var(--border-primary));
   background: color-mix(in srgb, var(--danger-muted) 35%, var(--bg-elevated));
 }
-.dash-tomorrow-block--avoid .dash-tomorrow-block__label {
-  color: var(--danger);
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-plan-card,
+  .dash-plan-card::after,
+  .dash-plan-card__icon,
+  .dash-card--tilt,
+  .dash-card--breathe {
+    transition: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .dash-card--tilt:hover,
+  .dash-card--tilt:focus-within,
+  .dash-plan-card:hover .dash-plan-card__icon {
+    transform: none !important;
+  }
 }
 
 .dash-tomorrow-watch-cards {
@@ -1338,11 +1440,13 @@
   border: 1px solid color-mix(in srgb, var(--warning) 40%, transparent);
   color: var(--warning);
   cursor: default;
+  transition: transform 150ms ease, background 150ms ease;
 }
 .dash-sym-card:hover,
 .dash-sym-card:focus-visible {
   background: color-mix(in srgb, var(--warning) 22%, var(--warning-muted));
   outline: none;
+  transform: translateY(-1px);
 }
 
 .dash-sym-card__tip {
@@ -2716,16 +2820,6 @@
   margin-top: var(--space-1);
 }
 
-.command-deck__command-band {
-  padding: var(--space-5);
-  border-radius: var(--radius-xl);
-  background:
-    radial-gradient(ellipse 70% 50% at 8% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 50%),
-    var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-sm);
-}
-
 .command-deck__opportunity-row {
   display: grid;
   gap: var(--command-deck-gap);
@@ -2765,119 +2859,71 @@
   .command-deck__layout {
     grid-template-columns: minmax(0, 1fr);
   }
-  .dash-signals-rail {
+  .dash-signals-dock {
     position: static !important;
+    max-height: none !important;
     width: 100% !important;
+  }
+  .dash-signals-dock__icons {
+    flex-direction: row !important;
+    flex-wrap: wrap;
   }
 }
 
-.dash-signals-rail {
-  --dash-rail-width: 19rem;
-  --dash-rail-collapsed-width: 3.75rem;
-  width: var(--dash-rail-width);
+/* ═══════════════════════════════════════════════════════════════════════
+   Signals dock — always icon-only; clicking an icon opens a 3D popover
+   anchored beside it (DashboardSignalsDock, portalled to <body>).
+   ═══════════════════════════════════════════════════════════════════════ */
+.dash-signals-dock {
+  width: 3.75rem;
   min-width: 0;
   flex-shrink: 0;
   position: sticky;
-  top: var(--space-5);
+  top: calc(var(--app-header-height) + var(--space-3));
+  max-height: calc(100vh - var(--app-header-height) - var(--space-3) - var(--space-5));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  z-index: var(--z-sticky);
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-primary);
   background: color-mix(in srgb, var(--bg-secondary) 96%, transparent);
-  overflow: hidden;
-  transition: width 200ms var(--deck-motion-ease, ease);
-}
-.dash-signals-rail--collapsed {
-  width: var(--dash-rail-collapsed-width);
 }
 
-.dash-signals-rail__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-3) var(--space-2);
-  border-bottom: 1px solid var(--border-primary);
-}
-.dash-signals-rail__head-label {
-  font-size: var(--font-size-xs);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  white-space: nowrap;
-}
-.dash-signals-rail--collapsed .dash-signals-rail__head-label {
-  display: none;
-}
-.dash-signals-rail--collapsed .dash-signals-rail__head {
-  justify-content: center;
-}
-
-.dash-signals-rail__toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  background: none;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: color 150ms ease, background 150ms ease;
-}
-.dash-signals-rail__toggle:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
-}
-.dash-signals-rail__toggle-icon {
-  display: flex;
-  width: 15px;
-  height: 15px;
-  transition: transform 200ms var(--deck-motion-ease, ease);
-}
-.dash-signals-rail__toggle-icon--collapsed {
-  transform: rotate(180deg);
-}
-
-.dash-signals-rail__body {
+.dash-signals-dock__icons {
   display: flex;
   flex-direction: column;
-  padding: var(--space-3);
-  gap: var(--space-2);
-}
-.dash-signals-rail--collapsed .dash-signals-rail__body {
-  padding: var(--space-2);
-  gap: var(--space-3);
   align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-2);
 }
 
-.dash-rail-row__head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  border-radius: var(--radius-md);
+.dash-dock-trigger {
+  cursor: pointer;
+  border: none;
 }
-.dash-signals-rail--collapsed .dash-rail-row__head {
-  justify-content: center;
+.dash-dock-trigger[aria-expanded="true"] {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 2px color-mix(in srgb, currentColor 45%, transparent);
 }
 
 .dash-rail-icon {
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: var(--radius-md);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--shadow-sm);
   transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 180ms ease;
 }
 .dash-rail-icon svg {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
-.dash-rail-row__head:hover .dash-rail-icon {
+.dash-rail-icon:hover,
+.dash-rail-icon:focus-visible {
   transform: translateY(-1px) scale(1.08) perspective(240px) rotateX(6deg);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), var(--shadow-md);
 }
@@ -2897,48 +2943,48 @@
   background: var(--accent-muted);
   color: var(--accent-text);
 }
-.dash-signals-rail--collapsed .dash-rail-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-}
-.dash-signals-rail--collapsed .dash-rail-icon svg {
-  width: 17px;
-  height: 17px;
+
+/* Popover — anchored 3D pop-up, portalled to <body> so ancestor
+   overflow/backdrop-filter never clips or repositions it. */
+.dash-dock-popover-wrapper {
+  position: fixed;
+  perspective: 900px;
+  z-index: var(--z-overlay);
 }
 
-.dash-rail-row__title {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
+.dash-dock-popover {
+  --tone-color: var(--accent-hover);
+  width: 380px;
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--cd-radius-lg);
+  background: var(--cd-glass-bg);
+  border: 1px solid color-mix(in srgb, var(--tone-color) 32%, var(--cd-glass-border));
+  box-shadow: var(--cd-glass-highlight), var(--cd-glass-shadow), 0 0 32px color-mix(in srgb, var(--tone-color) 20%, transparent);
+  backdrop-filter: blur(18px);
+  transform-origin: right center;
 }
-.dash-rail-row__meta {
-  margin-left: auto;
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-  white-space: nowrap;
+.dash-dock-popover:focus {
+  outline: none;
 }
-.dash-signals-rail--collapsed .dash-rail-row__title,
-.dash-signals-rail--collapsed .dash-rail-row__meta,
-.dash-signals-rail--collapsed .dash-rail-row__body {
-  display: none;
+.dash-dock-popover--safe {
+  --tone-color: var(--success);
+}
+.dash-dock-popover--warn {
+  --tone-color: var(--warning);
+}
+.dash-dock-popover--danger {
+  --tone-color: var(--danger);
+}
+.dash-dock-popover--neutral {
+  --tone-color: var(--accent-hover);
 }
 
-.dash-rail-row__body {
-  padding: var(--space-2) 0 0 calc(1.75rem + var(--space-2));
-  font-size: var(--font-size-xs);
-  color: var(--text-secondary);
-}
-
-.dash-signals-rail__divider {
-  height: 1px;
-  background: var(--border-primary);
-  margin: var(--space-1) 0;
-}
-.dash-signals-rail--collapsed .dash-signals-rail__divider {
-  width: 1.5rem;
-  align-self: center;
-  margin: 0;
+.dash-dock-widget {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 .dash-signals-rail__ring-row {
@@ -2951,51 +2997,20 @@
   line-height: 1.4;
 }
 
-/* VNINDEX / hostility ChartFrames, now inside a rail row body */
-.dash-rail-row__body .chart-frame {
+/* VNINDEX / hostility ChartFrames, now inside a dock popover */
+.dash-dock-widget .chart-frame {
   border-radius: var(--radius-lg);
   border: 1px solid color-mix(in srgb, var(--border-primary) 85%, transparent);
   background: color-mix(in srgb, var(--bg-elevated) 92%, var(--bg-secondary));
   padding: var(--space-2) var(--space-3);
 }
 
-/* Entrance stagger — rows and dividers alternate as siblings, so odd
-   nth-child positions (1,3,5,7,9) are the 5 rows. */
-.dash-signals-rail__body > .dash-rail-row {
-  opacity: 0;
-  transform: translateY(6px);
-  animation: dash-rail-row-rise 320ms ease both;
-}
-.dash-signals-rail__body > .dash-rail-row:nth-child(1) {
-  animation-delay: 0ms;
-}
-.dash-signals-rail__body > .dash-rail-row:nth-child(3) {
-  animation-delay: 60ms;
-}
-.dash-signals-rail__body > .dash-rail-row:nth-child(5) {
-  animation-delay: 120ms;
-}
-.dash-signals-rail__body > .dash-rail-row:nth-child(7) {
-  animation-delay: 180ms;
-}
-.dash-signals-rail__body > .dash-rail-row:nth-child(9) {
-  animation-delay: 240ms;
-}
-@keyframes dash-rail-row-rise {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .dash-signals-rail,
-  .dash-signals-rail__toggle-icon,
+  .dash-signals-dock,
   .dash-rail-icon,
-  .dash-signals-rail__body > .dash-rail-row {
+  .dash-dock-popover {
     transition: none !important;
     animation: none !important;
-    opacity: 1 !important;
     transform: none !important;
   }
 }
@@ -3013,18 +3028,52 @@
 }
 
 .dash-si-widget {
-  border-left: 3px solid transparent;
-  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  --tone: var(--accent);
+  border-left: 3px solid var(--tone);
+  isolation: isolate;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(14px) perspective(900px) rotateX(6deg);
+  animation: dash-widget-card-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(80ms + var(--si-card-index, 0) * 90ms);
 }
-.dash-si-widget:hover {
-  transform: translateY(-2px);
+.dash-si-widget::after {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -40px;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--tone) 35%, transparent) 0%, transparent 70%);
+  opacity: 0.5;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+.dash-si-widget:hover::after {
+  opacity: 0.8;
+}
+.dash-si-widget > * {
+  position: relative;
+  z-index: 1;
+}
+/* Tilt/lift only while collapsed — leaning or lifting the whole card while
+   its expanded content is being read would be distracting. */
+.dash-si-widget[open] {
+  transform: none;
+}
+.dash-si-widget[open]:hover,
+.dash-si-widget[open]:focus-within {
+  transform: none;
   box-shadow: var(--shadow-md);
 }
 .dash-si-widget--watch {
-  border-left-color: var(--accent);
+  --tone: var(--accent);
 }
 .dash-si-widget--blockers {
-  border-left-color: var(--danger);
+  /* Overridden per-instance by an inline --tone style (dynamic, worst-severity-first). */
+  --tone: var(--danger);
 }
 
 .dash-si-widget__summary {
@@ -3043,8 +3092,26 @@
 .dash-si-widget__top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--space-2);
   margin-bottom: var(--space-3);
+}
+.dash-si-widget__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--tone) 18%, transparent);
+  color: var(--tone);
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dash-si-widget__icon svg {
+  width: 15px;
+  height: 15px;
+}
+.dash-si-widget:hover .dash-si-widget__icon {
+  transform: scale(1.08) rotate(-4deg);
 }
 .dash-si-widget__title {
   font-size: var(--font-size-sm);
@@ -3052,6 +3119,7 @@
   color: var(--text-primary);
 }
 .dash-si-widget__count {
+  margin-left: auto;
   font-size: var(--font-size-xl);
   font-weight: 700;
 }
@@ -3110,6 +3178,8 @@
 }
 
 .dash-si-widget__toggle {
+  display: inline-flex;
+  align-items: center;
   font-size: var(--font-size-xs);
   font-weight: 600;
   color: var(--accent-text);
@@ -3117,11 +3187,17 @@
 .dash-si-widget__summary:hover .dash-si-widget__toggle {
   text-decoration: underline;
 }
-.dash-si-widget[open] .dash-si-widget__summary .dash-si-widget__toggle::after {
-  content: " ▴";
+.dash-si-widget__chevron {
+  display: inline-flex;
+  margin-left: 4px;
+  transition: transform 220ms ease;
 }
-.dash-si-widget:not([open]) .dash-si-widget__summary .dash-si-widget__toggle::after {
-  content: " ▾";
+.dash-si-widget__chevron svg {
+  width: 11px;
+  height: 11px;
+}
+.dash-si-widget[open] .dash-si-widget__chevron {
+  transform: rotate(180deg);
 }
 
 .dash-si-widget__full {
@@ -3138,11 +3214,46 @@
     opacity: 1;
   }
 }
+/* Progressive enhancement — smoother open/close height for the native
+   <details> element itself. Falls back to the browser's default instant
+   toggle when interpolate-size isn't supported (no behavior regression). */
+@supports (interpolate-size: allow-keywords) {
+  .dash-si-widget__full {
+    interpolate-size: allow-keywords;
+    overflow: hidden;
+    height: auto;
+    transition: height 260ms ease, opacity 200ms ease;
+  }
+  .dash-si-widget:not([open]) .dash-si-widget__full {
+    height: 0;
+    opacity: 0;
+  }
+  @starting-style {
+    .dash-si-widget[open] .dash-si-widget__full {
+      height: 0;
+      opacity: 0;
+    }
+  }
+}
+
+.dash-rs-widget {
+  opacity: 0;
+  transform: translateY(14px) perspective(900px) rotateX(6deg);
+  animation: dash-widget-card-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: 260ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dash-si-widget,
-  .dash-si-widget__full {
+  .dash-si-widget__full,
+  .dash-si-widget__icon,
+  .dash-si-widget__chevron,
+  .dash-si-widget::after,
+  .dash-rs-widget {
     transition: none !important;
     animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

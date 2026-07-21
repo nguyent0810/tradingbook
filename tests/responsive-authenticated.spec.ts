@@ -11,7 +11,7 @@ const VIEWPORTS = [
 ];
 
 const ROUTES: Array<{ slug: string; path: string; readySelector: string }> = [
-  { slug: "dashboard", path: "/dashboard", readySelector: '[data-testid="dashboard-v2-hero-band"]' },
+  { slug: "dashboard", path: "/dashboard", readySelector: '[data-testid="dashboard-signals-rail"]' },
   { slug: "setups", path: "/setups", readySelector: 'h2:has-text("Setups workstation"), h1:has-text("Setups workstation")' },
   { slug: "paper-lab", path: "/paper-lab", readySelector: '[data-testid="paper-lab-workspace"]' },
 ];

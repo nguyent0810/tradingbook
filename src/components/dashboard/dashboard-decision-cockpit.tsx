@@ -3,7 +3,6 @@ import type { LatestScanWithCandidates } from "@/lib/scanner/setups-queries";
 import type { DecisionCockpitDto } from "@/lib/dashboard/decision-cockpit-dto";
 import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import { DashboardEntrance } from "@/components/dashboard/dashboard-entrance";
-import { DashboardCommandPanel } from "@/components/dashboard/dashboard-command-panel";
 import { DashboardSignalsRail } from "@/components/dashboard/dashboard-signals-rail";
 import { DashboardOpportunityCandidates } from "@/components/dashboard/dashboard-opportunity-candidates";
 import { DashboardNearMissRejectionsPanel } from "@/components/dashboard/dashboard-near-miss-rejections-panel";
@@ -45,15 +44,6 @@ export function DashboardDecisionCockpit({
   return (
     <div className="command-deck__layout" data-testid="dashboard-cockpit-layout">
       <DashboardEntrance>
-        <div className="command-deck__command-band" data-testid="dashboard-v2-hero-band">
-          <DashboardCommandPanel
-            verdict={cockpitDto.verdict}
-            surfacedCount={surfacedCount}
-            evidence={cockpitDto.evidence}
-            blockers={cockpitDto.blockers}
-          />
-        </div>
-
         <section
           className="command-deck-opportunity dash-v2-zone dash-v2-zone--context"
           data-testid="dashboard-cockpit-zone-opportunity"
@@ -104,6 +94,9 @@ export function DashboardDecisionCockpit({
         verdict={cockpitDto.verdict}
         vnindexHistory={vnindexHistory}
         vnindexHistoryError={vnindexHistoryError}
+        surfacedCount={surfacedCount}
+        evidence={cockpitDto.evidence}
+        blockers={cockpitDto.blockers}
       />
     </div>
   );

@@ -4,12 +4,15 @@ test.describe("Dashboard Decision Cockpit — production route smoke", () => {
   test("loads the Decision Cockpit on /dashboard", async ({ page }) => {
     await page.goto("/dashboard");
     await page.waitForURL("**/dashboard");
-    await page.waitForSelector('[data-testid="dashboard-v2-hero-band"]', { state: "visible" });
+    await page.waitForSelector('[data-testid="dashboard-signals-rail"]', { state: "visible" });
 
     await expect(page.getByTestId("dashboard-page-header")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Today's decision", level: 1 })).toBeVisible();
-    await expect(page.getByTestId("dashboard-decision-hero")).toBeVisible();
     await expect(page.getByTestId("dashboard-cockpit-zone-opportunity")).toBeVisible();
+
+    // Verdict now lives in the signals dock as an icon-triggered popover.
+    await page.getByRole("button", { name: /^Verdict/ }).click();
+    await expect(page.getByTestId("dashboard-decision-hero")).toBeVisible();
 
     const verdictHeading = page
       .locator('[data-testid="dashboard-decision-hero"] h2')
@@ -31,9 +34,10 @@ test.describe("Dashboard Decision Cockpit — production route smoke", () => {
 
     await expect(page.getByTestId("dashboard-setup-quality-ladder")).toBeVisible();
 
-    // Tomorrow's plan and the two collapsed secondary sections are always present.
+    // Tomorrow's plan and the two collapsed secondary widgets are always present.
     await expect(page.getByRole("heading", { name: "Tomorrow's plan" })).toBeVisible();
-    await expect(page.getByTestId("dashboard-secondary-collapsible")).toBeVisible();
+    await expect(page.getByTestId("dashboard-secondary-watchlist-widget")).toBeVisible();
+    await expect(page.getByTestId("dashboard-secondary-blockers-widget")).toBeVisible();
 
     // Guard against the retired cyber dashboard ever reappearing.
     await expect(page.getByTestId("dashboard-cyber")).toHaveCount(0);
