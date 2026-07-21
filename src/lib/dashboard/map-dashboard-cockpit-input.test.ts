@@ -15,7 +15,7 @@ describe("buildDashboardCockpitInput", () => {
         candidateCountSurfaced: 0,
         notes: null,
         candidates: [],
-      } as Parameters<typeof buildDashboardCockpitInput>[0]["latestScan"],
+      } as unknown as Parameters<typeof buildDashboardCockpitInput>[0]["latestScan"],
       scanNotes: {
         topRejectionCategories: {},
         closestToValidSymbols: [],
@@ -27,6 +27,7 @@ describe("buildDashboardCockpitInput", () => {
       },
       regime: {
         level: "WARNING",
+        reasons: [],
         symbol: "VNINDEX",
         latestBar: { date: new Date(Date.UTC(2026, 4, 25)), close: 100 },
         storedBarsCount: 60,
@@ -42,9 +43,6 @@ describe("buildDashboardCockpitInput", () => {
       }),
       candidatesWithHealth: [],
       activeWatchItems: [],
-      openExposureVnd: 1_000_000,
-      accountEquityVnd: null,
-      portfolioRiskConfigured: false,
     });
 
     expect(input.latestScan?.gate1Level).toBe("PASS");
@@ -70,7 +68,7 @@ describe("buildDashboardCockpitInput", () => {
         candidateCountSurfaced: 0,
         notes: null,
         candidates: [],
-      } as Parameters<typeof buildDashboardCockpitInput>[0]["latestScan"],
+      } as unknown as Parameters<typeof buildDashboardCockpitInput>[0]["latestScan"],
       scanNotes: {
         topRejectionCategories: { pullback_zone_interaction: 3 },
         rejectionSymbolsByCategory: { pullback_zone_interaction: ["HPG"] },
@@ -98,6 +96,7 @@ describe("buildDashboardCockpitInput", () => {
       },
       regime: {
         level: "PASS",
+        reasons: [],
         symbol: "VNINDEX",
         latestBar: null,
         storedBarsCount: 0,
@@ -113,9 +112,6 @@ describe("buildDashboardCockpitInput", () => {
       }),
       candidatesWithHealth: [],
       activeWatchItems: [],
-      openExposureVnd: 0,
-      accountEquityVnd: null,
-      portfolioRiskConfigured: false,
     });
 
     const dto = buildDecisionCockpitDto(input);

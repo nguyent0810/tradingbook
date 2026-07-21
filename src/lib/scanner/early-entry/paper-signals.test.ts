@@ -37,6 +37,7 @@ function mockEvaluation(): EarlyEntryEvaluationResult {
     sizingNote: null,
     whyNotPilotYet: null,
     rrRejectionReason: null,
+    distFromMa20Pct: null,
     metrics: {
       sessionDate: "2026-05-14",
       close: 22,

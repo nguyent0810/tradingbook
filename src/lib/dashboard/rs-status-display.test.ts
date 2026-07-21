@@ -93,6 +93,7 @@ describe("rs-status-display", () => {
         estimatedRiskReward: 0.3,
         suggestedPilotSizePct: 0,
         sizingNote: null,
+        whyNotPilotYet: null,
         rrRejectionReason: "Poor R:R",
         distFromMa20Pct: 2,
       },

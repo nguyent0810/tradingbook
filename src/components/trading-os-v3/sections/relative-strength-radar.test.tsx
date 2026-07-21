@@ -20,6 +20,7 @@ const EARLY_ENTRY: V3EarlyEntryDisplay = {
   sizingNote: "Display-only research: pilot candidate ~25% — not validated for live trading",
   whyNotPilotYet: null,
   rrRejectionReason: null,
+  distFromMa20Pct: null,
 };
 
 const EXTENDED_ENTRY: V3EarlyEntryDisplay = {
@@ -54,6 +55,7 @@ function panelWithEarlyEntry(includeEarly: boolean, extended = false): V3RsWatch
         rsStrengthScore: null,
         setupReadinessScore: null,
         rsConfidence: null,
+        terminalCode: null,
         earlyEntry: includeEarly ? (extended ? EXTENDED_ENTRY : EARLY_ENTRY) : null,
       },
     ],
@@ -121,6 +123,7 @@ describe("mapRsWatchlistEntryToV3Card flag behavior", () => {
       distanceToPullbackZoneFrac: null,
       actionHint: "",
       disclaimerLines: [],
+      rsDiagnostic: null,
       earlyEntry: {
         earlyReversalScore: 59,
         proposedTradeState: "PILOT_BUY",
@@ -138,6 +141,7 @@ describe("mapRsWatchlistEntryToV3Card flag behavior", () => {
         sizingNote: null,
         whyNotPilotYet: null,
         rrRejectionReason: null,
+        distFromMa20Pct: null,
       },
     });
     expect(card.earlyEntry?.proposedTradeState).toBe("Pilot Candidate");

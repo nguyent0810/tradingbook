@@ -55,11 +55,8 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
       universeScannedCount: 400,
     },
     scanNotes: {
-      gate2QualityCounts: { A: 0, B: 0, INVALID: 10 },
-      invalidCountByCategory: {},
       topRejectionCategories: { extension_cap: 5 },
       rejectionSymbolsByCategory: { extension_cap: ["MWG"] },
-      topRejectionTerminalReasons: {},
       closestToValidSymbols: [
         {
           symbol: "HPG",
@@ -123,7 +120,7 @@ function mapFromInput(
           universeScannedCount: input.latestScan.universeScannedCount,
           notes: null,
           candidates: [],
-        } as Parameters<typeof mapDashboardV3ViewModel>[0]["latestScan"])
+        } as unknown as Parameters<typeof mapDashboardV3ViewModel>[0]["latestScan"])
       : null,
     topSetups: [],
     trades: [],
@@ -188,6 +185,7 @@ describe("mapDashboardV3ViewModel — TRADE + candidates", () => {
             healthFlags: [],
             healthSummary: null,
             reasons: ["Pullback hold"],
+            rankSummary: null,
             close: 128,
             pullbackZoneLow: 127,
             pullbackZoneHigh: 129,

@@ -33,8 +33,6 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
       universeScannedCount: 412,
     },
     scanNotes: {
-      gate2QualityCounts: { A: 0, B: 0, INVALID: 120 },
-      invalidCountByCategory: {},
       topRejectionCategories: {
         pullback_zone_interaction: 42,
         extension_cap: 18,
@@ -43,7 +41,6 @@ function baseInput(overrides: Partial<DecisionCockpitInput> = {}): DecisionCockp
         pullback_zone_interaction: ["HPG", "FPT", "VNM"],
         extension_cap: ["SSI", "VCB"],
       },
-      topRejectionTerminalReasons: {},
       closestToValidSymbols: [
         {
           symbol: "HPG",
@@ -198,9 +195,6 @@ describe("buildDecisionCockpitDto — production-like zero surfaced", () => {
           },
           rejectionSymbolsByCategory: {},
           closestToValidSymbols: [],
-          gate2QualityCounts: { A: 0, B: 0, INVALID: 5 },
-          invalidCountByCategory: {},
-          topRejectionTerminalReasons: {},
           recommendation: {
             likelyBottleneck: "none_obvious",
             summary: "",

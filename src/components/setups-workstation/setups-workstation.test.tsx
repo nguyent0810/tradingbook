@@ -24,7 +24,7 @@ function mockScan(overrides: Partial<{
     candidateCountB: 1,
     tradabilityBreakdown: null,
     candidates: [],
-  } as Parameters<typeof buildPipelineStages>[0];
+  } as unknown as Parameters<typeof buildPipelineStages>[0];
 }
 
 describe("buildPipelineStages", () => {
