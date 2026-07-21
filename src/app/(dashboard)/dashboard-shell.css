@@ -3243,13 +3243,139 @@
   animation-delay: 260ms;
 }
 
+.dash-rs-widget__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.dash-rs-widget__count-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.25rem;
+  padding: 0 0.4rem;
+  border-radius: var(--radius-full, 999px);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--accent-text);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+/* Relative-strength watchlist — chip/widget rows with a subtle 3D hover
+   lift. No resting tilt here (unlike dash-plan-card): a dozen stacked rows
+   all leaning at once reads as noise, not polish. */
+.dash-rs-chip-grid {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.dash-rs-row {
+  position: relative;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+  background: color-mix(in srgb, var(--bg-secondary) 92%, transparent);
+  padding: var(--space-3);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: dash-widget-card-rise 360ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: calc(120ms + var(--rs-row-index, 0) * 60ms);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease, border-color 200ms ease;
+}
+.dash-rs-row:hover,
+.dash-rs-row:focus-within {
+  transform: translateY(-3px) perspective(700px) rotateX(-1.5deg);
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border-secondary));
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+}
+
+.dash-rs-row__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.dash-rs-row__symbol-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.dash-rs-spread-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-full, 999px);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+.dash-rs-spread-chip__icon {
+  display: inline-flex;
+  width: 11px;
+  height: 11px;
+}
+.dash-rs-spread-chip__icon svg {
+  width: 11px;
+  height: 11px;
+}
+.dash-rs-spread-chip--up {
+  background: var(--success-muted);
+  color: #86efac;
+}
+.dash-rs-spread-chip--down {
+  background: var(--danger-muted);
+  color: #fca5a5;
+}
+.dash-rs-spread-chip--sm {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.45rem;
+}
+
+.dash-rs-row__sub-chip-row {
+  margin-top: var(--space-2);
+}
+
+.dash-rs-row__meta {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+.dash-rs-row__meta--italic {
+  font-style: italic;
+  color: var(--text-tertiary);
+}
+
+.dash-rs-row__diagnostic {
+  margin-top: var(--space-2);
+}
+
+.dash-rs-row__hint {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dash-si-widget,
   .dash-si-widget__full,
   .dash-si-widget__icon,
   .dash-si-widget__chevron,
   .dash-si-widget::after,
-  .dash-rs-widget {
+  .dash-rs-widget,
+  .dash-rs-row {
     transition: none !important;
     animation: none !important;
     opacity: 1 !important;
