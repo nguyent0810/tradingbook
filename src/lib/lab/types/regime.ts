@@ -26,6 +26,8 @@ export type RegimeSnapshot = {
   sessionDate: string;
   gate1Level: Gate1ScanLevel | null;
   dimensions: RegimeDimensions;
+  /** False when fewer than 50 VNINDEX bars were available — dimensions are not meaningful. */
+  hasSufficientData: boolean;
   confidence: number;
   schemaVersion: string;
   labels: string[];
