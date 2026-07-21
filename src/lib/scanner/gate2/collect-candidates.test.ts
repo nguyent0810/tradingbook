@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { deriveGate1SurfacingRule, filterCandidatesByGate1Level } from "./collect-candidates";
+import type { PrismaClient } from "@/generated/prisma/client";
+import {
+  collectGate2SetupCandidatesWithStats,
+  deriveGate1SurfacingRule,
+  filterCandidatesByGate1Level,
+} from "./collect-candidates";
 import type { SetupCandidate } from "./types";
 
 const sample = (q: "A" | "B"): SetupCandidate => ({
@@ -37,5 +42,48 @@ describe("deriveGate1SurfacingRule", () => {
     expect(deriveGate1SurfacingRule("FAIL")).toBe("none");
     expect(deriveGate1SurfacingRule("WARNING")).toBe("tier-a-only");
     expect(deriveGate1SurfacingRule("PASS")).toBe("all");
+  });
+});
+
+describe("collectGate2SetupCandidatesWithStats — zero-candidate universe", () => {
+  const SESSION = new Date(Date.UTC(2026, 6, 17));
+
+  function fakePrismaWithBars(
+    barsBySymbol: Record<string, unknown[]>
+  ): PrismaClient {
+    return {
+      stockDailyBar: {
+        findMany: async ({ where }: { where: { symbolId: string } }) =>
+          barsBySymbol[where.symbolId] ?? [],
+      },
+    } as unknown as PrismaClient;
+  }
+
+  it("returns zero counts and no throw for an empty tradable-symbol list", async () => {
+    const prisma = fakePrismaWithBars({});
+    const stats = await collectGate2SetupCandidatesWithStats(prisma, [], "PASS", SESSION);
+    expect(stats.candidateCountA).toBe(0);
+    expect(stats.candidateCountB).toBe(0);
+    expect(stats.surfaced).toEqual([]);
+  });
+
+  it("returns zero counts when every tradable symbol has too few bars to evaluate (real-world incident shape)", async () => {
+    // Mirrors the production case audited: symbols pass tradability but every
+    // one evaluates INVALID at Gate 2, so nothing surfaces despite a non-empty universe.
+    const tooFewBars = Array.from({ length: 10 }, (_, i) => ({
+      date: new Date(SESSION.getTime() - (9 - i) * 86_400_000),
+      open: 20,
+      high: 20.5,
+      low: 19.5,
+      close: 20,
+      volume: 1_000_000,
+    }));
+    const symbolIds = ["sym-1", "sym-2", "sym-3"];
+    const prisma = fakePrismaWithBars(Object.fromEntries(symbolIds.map((id) => [id, tooFewBars])));
+
+    const stats = await collectGate2SetupCandidatesWithStats(prisma, symbolIds, "PASS", SESSION);
+    expect(stats.candidateCountA).toBe(0);
+    expect(stats.candidateCountB).toBe(0);
+    expect(stats.surfaced).toEqual([]);
   });
 });

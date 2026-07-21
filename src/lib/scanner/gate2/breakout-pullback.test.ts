@@ -156,7 +156,115 @@ describe("evaluateBreakoutPullbackCandidate", () => {
   });
 });
 
+describe("evaluateBreakoutPullbackCandidate — full-path terminalCode coverage", () => {
+  it("insufficient_bars: fewer than 50 bars", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i < 40; i++) bars.push(bar(i, 100, 101, 99, 100, V_BASE));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("insufficient_bars");
+  });
+
+  it("stale_or_session_mismatch: expectedLatestSession does not match the latest bar", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i < 55; i++) bars.push(bar(i, 100, 101, 99, 100, V_BASE));
+    const wrongSession = new Date(bars[bars.length - 1]!.date.getTime() + 86_400_000);
+    const res = evaluateBreakoutPullbackCandidate(bars, wrongSession);
+    expect(res.terminalCode).toBe("stale_or_session_mismatch");
+  });
+
+  it("ma_compute: NaN close breaks the MA20/MA50 computation", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i < 60; i++) bars.push(bar(i, 100, 101, 99, 100, V_BASE));
+    bars[55] = { ...bars[55]!, close: NaN };
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("ma_compute");
+  });
+
+  it("trend_below_ma50: close finishes below the 50-day average", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i < 69; i++) bars.push(bar(i, 100, 100, 99, 100, V_BASE));
+    bars.push(bar(69, 100, 100, 89, 90, V_BASE));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("trend_below_ma50");
+  });
+
+  it("trend_ma20_below_ma50: close above MA50 but MA20 has not caught up", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i <= 19; i++) bars.push(bar(i, 100, 100, 99, 100, V_BASE));
+    for (let i = 20; i <= 49; i++) bars.push(bar(i, 220, 221, 219, 220, V_BASE));
+    for (let i = 50; i <= 68; i++) bars.push(bar(i, 190, 191, 189, 190, V_BASE));
+    bars.push(bar(69, 210, 211, 209, 210, V_BASE));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("trend_ma20_below_ma50");
+  });
+
+  it("breakout_not_holding: a session after the breakout closes back under resistance", () => {
+    const path = baselineValidPath(2_000_000);
+    path[62] = { ...path[62]!, close: BASE - 1, low: BASE - 1.2 };
+    const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+    expect(res.terminalCode).toBe("breakout_not_holding");
+  });
+
+  it("volume_median_bad: the 20-session volume window is unusable (zero median)", () => {
+    const path = baselineValidPath(0);
+    for (let i = 50; i <= 69; i++) path[i] = { ...path[i]!, volume: 0 };
+    const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+    expect(res.terminalCode).toBe("volume_median_bad");
+  });
+
+  it("pullback_zone_interaction: today's bar never touches the pullback box", () => {
+    const path = baselineValidPath(2_000_000);
+    path[69] = { ...path[69]!, low: BASE + 10, close: BASE + 12, high: BASE + 13, open: BASE + 10 };
+    const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+    expect(res.terminalCode).toBe("pullback_zone_interaction");
+  });
+
+  it("mid_pullback_below_ma50: a mid-pullback close dips under a MA50 still elevated by older history", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i <= 19; i++) bars.push(bar(i, 160, 161, 159, 160, V_BASE));
+    for (let i = 20; i <= 58; i++) bars.push(bar(i, 100, 100, 99.5, 100, V_BASE));
+    bars.push(bar(59, 100, 109, 99, 108, V_BASE));
+    bars.push(bar(60, 108, 108, 104, 105, V_BASE)); // mid-pullback dip, below MA50 but >= breakoutLevel
+    for (let i = 61; i <= 68; i++) bars.push(bar(i, 109, 110, 107, 109, V_BASE));
+    bars.push(bar(69, 109, 111, 108, 110, 2_000_000));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("mid_pullback_below_ma50");
+  });
+
+  it("pullback_zone_two_closes: the last two sessions closed under the pullback zone floor", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i <= 58; i++) bars.push(bar(i, 100, 100, 99.5, 100, V_BASE));
+    bars.push(bar(59, 100, 116, 100, 115, V_BASE));
+    for (let i = 60; i <= 67; i++) bars.push(bar(i, 113, 114, 112, 113, V_BASE));
+    bars.push(bar(68, 105, 106, 104, 105, V_BASE));
+    bars.push(bar(69, 105, 106, 104, 105, 2_000_000));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("pullback_zone_two_closes");
+  });
+
+  it("swept_breakout_weak_close: a lower low than the breakout session plus a weak close vs MA20", () => {
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i <= 58; i++) bars.push(bar(i, 100, 100, 99.5, 100, V_BASE));
+    bars.push(bar(59, 100, 116, 99, 115, V_BASE));
+    for (let i = 60; i <= 68; i++) bars.push(bar(i, 113, 114, 112, 113, V_BASE));
+    bars.push(bar(69, 106, 107, 95, 104, 2_000_000));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("swept_breakout_weak_close");
+  });
+});
+
 describe("validateSwingTradeStructure", () => {
+  it("flags a malformed pullback zone (floor above ceiling)", () => {
+    const msg = validateSwingTradeStructure({
+      breakoutLevel: 100,
+      pullbackZoneLow: 105,
+      pullbackZoneHigh: 100,
+      stopLevel: 90,
+      close: 102,
+    });
+    expect(msg).toMatch(/malformed/i);
+  });
+
   it("rejects stop at or above entry", () => {
     const msg = validateSwingTradeStructure({
       breakoutLevel: 100,
