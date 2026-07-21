@@ -186,11 +186,17 @@ export function applyCalibrationVariant(
   return { state: base, demotedFromPilot: false, calibrationNote: null };
 }
 
+/** States a live paper-lab manager is allowed to act on when Early-Entry v1 is enabled. */
+const PRODUCTION_ACCEPTABLE_TRADE_STATES: ReadonlySet<EarlyEntryTradeState> = new Set([
+  "PILOT_BUY",
+  "CONFIRMED_BUY",
+]);
+
 export function isProductionPilotAcceptable(
   evaluation: Pick<EarlyEntryEvaluationResult, "proposedTradeState" | "metrics">
 ): boolean {
   return (
-    evaluation.proposedTradeState === "PILOT_BUY" &&
+    PRODUCTION_ACCEPTABLE_TRADE_STATES.has(evaluation.proposedTradeState) &&
     (evaluation.metrics.riskRewardRatio ?? 0) >= RR_ACCEPTABLE
   );
 }
