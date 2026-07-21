@@ -20,12 +20,13 @@ function card(
     strengthLabel: null,
     primaryInsight: "test",
     metrics: [],
-    blockerLabel: null,
+    blockerLabel: "",
     nextCondition: "test",
     technicalEvidence: [],
     rsStrengthScore: null,
     setupReadinessScore: null,
     rsConfidence: null,
+    terminalCode: null,
     earlyEntry: early,
   };
 }
@@ -48,6 +49,7 @@ describe("early-entry-ui", () => {
     sizingNote: null,
     whyNotPilotYet: null,
     rrRejectionReason: null,
+    distFromMa20Pct: null,
   });
 
   const extended = card("VCB", {
@@ -67,6 +69,7 @@ describe("early-entry-ui", () => {
     sizingNote: null,
     whyNotPilotYet: null,
     rrRejectionReason: null,
+    distFromMa20Pct: null,
   });
 
   it("filters pilot candidates only", () => {

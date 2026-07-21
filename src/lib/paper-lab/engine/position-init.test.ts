@@ -44,7 +44,7 @@ function buildFakePrisma(capture: { data: Record<string, unknown> | null }): Pri
       create: async () => ({ id: "order-1" }),
     },
     paperPortfolio: {
-      findUniqueOrThrow: async () => ({ id: "pf-1", cashVnd: 500_000_000n }),
+      findUniqueOrThrow: async () => ({ id: "pf-1", cashVnd: BigInt(500_000_000) }),
       update: async () => ({}),
     },
     paperPosition: {
