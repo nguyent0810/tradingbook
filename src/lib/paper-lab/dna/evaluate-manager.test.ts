@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { MarketContextBundle } from "@/lib/paper-lab/types/market-context-bundle";
+import type { EarlyEntryEvaluationResult, EarlyEntryTradeState } from "@/lib/scanner/early-entry/types";
 import { getManagerDna } from "@/lib/paper-lab/dna/manager-configs";
 import { neutralManagerState } from "@/lib/paper-lab/dna/manager-state";
 import { evaluateManager, ENGINE_VERSION } from "@/lib/paper-lab/dna/evaluate-manager";
@@ -18,6 +19,62 @@ interface Knobs {
   openPositions?: number;
   nav?: number;
   cash?: number;
+  earlyEntry?: MarketContextBundle["earlyEntry"];
+}
+
+/** Minimal but type-complete EarlyEntryEvaluationResult stub for the "devils_advocate" gate tests. */
+function makeEarlyEntry(
+  proposedTradeState: EarlyEntryTradeState,
+  riskRewardRatio: number
+): EarlyEntryEvaluationResult {
+  return {
+    earlyReversalScore: 60,
+    proposedTradeState,
+    entryType: "Early Reclaim",
+    reasonCodes: [],
+    transitionReasonCodes: [],
+    invalidLevel: 18,
+    invalidLevelReason: "swing_low",
+    stopDistancePct: 4,
+    targetPrice: 24,
+    targetReason: "prior_60d_high",
+    estimatedRewardPct: 10,
+    estimatedRiskReward: riskRewardRatio,
+    suggestedPilotSizePct: 25,
+    sizingNote: null,
+    whyNotPilotYet: null,
+    rrRejectionReason: null,
+    distFromMa20Pct: 2,
+    metrics: {
+      sessionDate: "2026-07-08",
+      close: 20,
+      ma20: 19,
+      ma50: 18,
+      volume: 1_500_000,
+      volumeMa20: 1_000_000,
+      volumeRatio: 1.5,
+      rs20SpreadPct: 5,
+      rs20Delta3d: 1,
+      bodyPct: 0.02,
+      atr14: 0.5,
+      closeNearHighPct: 0.8,
+      distFromMa20Pct: 2,
+      distFromMa50Pct: 8,
+      stopLevel: 18,
+      stopDistancePct: 4,
+      rewardTarget: 24,
+      targetPrice: 24,
+      targetReason: "prior_60d_high",
+      invalidLevelReason: "swing_low",
+      riskRewardRatio,
+      estimatedRewardPct: 10,
+      priorCompression: true,
+      reclaimMa20: true,
+      reclaimMa50: false,
+    },
+    extensionRiskScore: 10,
+    riskRewardScore: 80,
+  };
 }
 
 function makeBundle(k: Knobs = {}): MarketContextBundle {
@@ -35,7 +92,7 @@ function makeBundle(k: Knobs = {}): MarketContextBundle {
       dualUptrendMa50: k.dual ?? true,
       stockAboveMa50: k.aboveMa50 ?? true,
     },
-    earlyEntry: null,
+    earlyEntry: k.earlyEntry ?? null,
     gate2Setup:
       k.quality === null
         ? null
@@ -84,6 +141,30 @@ describe("evaluateManager BUY cases (3 archetypes)", () => {
     const d = evalFor("trend_follower");
     expect(d.action).toBe("BUY");
     expect(d.reason_codes).toContain("TR_BULL_ENTRY");
+  });
+});
+
+describe("evaluateManager — devils_advocate (Early Bird) early-entry gate", () => {
+  it("does not trigger when early-entry is null (flag off, or evaluator declined)", () => {
+    const d = evalFor("devils_advocate", { earlyEntry: null });
+    expect(d.action).toBe("HOLD");
+  });
+
+  it("triggers on PILOT_BUY with acceptable risk/reward", () => {
+    const d = evalFor("devils_advocate", { earlyEntry: makeEarlyEntry("PILOT_BUY", 2.5) });
+    expect(d.action).toBe("BUY");
+    expect(d.stop_loss).toBe(18);
+  });
+
+  it("triggers on CONFIRMED_BUY with acceptable risk/reward (defense-in-depth scope covers both states)", () => {
+    const d = evalFor("devils_advocate", { earlyEntry: makeEarlyEntry("CONFIRMED_BUY", 2.5) });
+    expect(d.action).toBe("BUY");
+    expect(d.stop_loss).toBe(18);
+  });
+
+  it("is blocked when risk/reward is below RR_ACCEPTABLE even with a valid trade state", () => {
+    const d = evalFor("devils_advocate", { earlyEntry: makeEarlyEntry("PILOT_BUY", 1.0) });
+    expect(d.action).toBe("HOLD");
   });
 });
 

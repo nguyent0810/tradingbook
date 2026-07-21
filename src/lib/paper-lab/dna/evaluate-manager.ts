@@ -24,6 +24,7 @@ import {
   NEUTRAL_MODULATION,
   type MarketMemory,
 } from "@/lib/paper-lab/dna/market-memory";
+import { isProductionPilotAcceptable } from "@/lib/scanner/early-entry/calibration";
 
 export const ENGINE_VERSION = "arena-evaluator@1.0.0";
 export const RULE_VERSION = "rules@1.0.0";
@@ -102,8 +103,7 @@ function setupPasses(bundle: MarketContextBundle, dna: FundManagerDna): boolean 
     if (ma20 == null || !(bundle.price.closeKVnd <= ma20 * 0.95)) return false;
   }
   if (e.customTrigger === "early_entry_ready") {
-    const st = bundle.earlyEntry?.proposedTradeState;
-    if (!(st === "PILOT_BUY" || st === "CONFIRMED_BUY")) return false;
+    if (!bundle.earlyEntry || !isProductionPilotAcceptable(bundle.earlyEntry)) return false;
   }
   if (e.requireDualUptrend && bundle.relativeStrength?.dualUptrendMa50 !== true) return false;
   if (e.requireStockAboveMa50 && bundle.relativeStrength?.stockAboveMa50 !== true) return false;

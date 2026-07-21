@@ -16,6 +16,7 @@ import {
   volumeMa20AtIndex,
 } from "@/lib/scanner/early-entry/bar-metrics";
 import { evaluateEarlyEntrySession } from "@/lib/scanner/early-entry/evaluate-early-entry";
+import { isEarlyEntryV1Enabled } from "@/lib/scanner/early-entry/feature-flag";
 import { evaluateTradabilityForSymbolId } from "@/lib/scanner/tradability";
 import { computeDailyTradingDecision } from "@/lib/scanner/trading-decision";
 import { computePortfolioState } from "@/lib/paper-lab/portfolio/portfolio-service";
@@ -130,11 +131,13 @@ export async function buildMarketContextBundle(
 
   const gate2 = evaluateBreakoutPullbackCandidate(stockBars, params.sessionDate);
   const rs = computeRelativeStrengthDiagnostic(stockBars, indexGate2, params.sessionDate);
-  const earlyEntry = evaluateEarlyEntrySession({
-    stockBars,
-    indexBars: indexGate2,
-    sessionDate: params.sessionDate,
-  });
+  const earlyEntry = isEarlyEntryV1Enabled()
+    ? evaluateEarlyEntrySession({
+        stockBars,
+        indexBars: indexGate2,
+        sessionDate: params.sessionDate,
+      })
+    : null;
   const tradability = await evaluateTradabilityForSymbolId(prisma, stock.id, params.sessionDate);
 
   const ctxDaily = await prisma.marketContextDaily.findUnique({
