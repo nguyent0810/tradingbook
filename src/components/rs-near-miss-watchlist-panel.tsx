@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useState, type CSSProperties } from "react";
 import { RelativeStrengthDiagnosticPanel } from "@/components/scanner/relative-strength-diagnostic-panel";
 import type { RsNearMissWatchlistPanelDto } from "@/lib/scanner/gate2/rs-near-miss-watchlist";
 
@@ -20,12 +22,23 @@ const IconTrendDown = () => (
     <polyline points="21 10 21 17 14 17" />
   </svg>
 );
+const IconClose = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
 
-function rsRowIndexStyle(index: number): CSSProperties {
-  return { "--rs-row-index": index } as CSSProperties;
-}
-
+/**
+ * Compact chip grid — all symbols glanceable at once — with a single
+ * click-to-expand detail panel underneath, instead of a dozen fully-expanded
+ * diagnostic cards stacked vertically (the previous layout's main source of
+ * dead space/scroll bloat on watchlists this size).
+ */
 export function RsNearMissWatchlistPanel({ panel, testId = "rs-near-miss-watchlist" }: RsNearMissWatchlistPanelProps) {
+  const [selectedSymbol, setSelectedSymbol] = useState<string | null>(null);
+  const selectedRow = panel.rows.find((r) => r.symbol === selectedSymbol) ?? null;
+
   return (
     <section
       className="dash-card dash-rs-widget dash-card--tilt"
@@ -52,70 +65,95 @@ export function RsNearMissWatchlistPanel({ panel, testId = "rs-near-miss-watchli
       </header>
 
       {panel.rows.length > 0 ? (
-        <ul className="dash-rs-chip-grid" data-testid={`${testId}-rows`}>
-          {panel.rows.map((row, index) => {
-            const rs20Positive = row.rs20SpreadPct >= 0;
-            return (
-              <li
-                key={row.symbol}
-                className="dash-rs-row"
-                style={rsRowIndexStyle(index)}
-                data-testid={`${testId}-row-${row.symbol}`}
-              >
-                <div className="dash-rs-row__top">
-                  <span className="dash-rs-row__symbol-chip font-mono">{row.symbol}</span>
-                  <span
-                    className={`dash-rs-spread-chip dash-rs-spread-chip--${rs20Positive ? "up" : "down"} tabular-nums`}
+        <>
+          <ul className="dash-rs-chip-grid" data-testid={`${testId}-rows`}>
+            {panel.rows.map((row, index) => {
+              const rs20Positive = row.rs20SpreadPct >= 0;
+              const isSelected = row.symbol === selectedSymbol;
+              return (
+                <li key={row.symbol} className="dash-rs-chip-cell" style={{ "--rs-row-index": index } as CSSProperties}>
+                  <button
+                    type="button"
+                    className={`dash-rs-chip dash-rs-chip--${rs20Positive ? "up" : "down"}${
+                      isSelected ? " dash-rs-chip--active" : ""
+                    }`}
+                    aria-pressed={isSelected}
+                    onClick={() => setSelectedSymbol(isSelected ? null : row.symbol)}
+                    data-testid={`${testId}-row-${row.symbol}`}
                   >
-                    <span className="dash-rs-spread-chip__icon">
-                      {rs20Positive ? <IconTrendUp /> : <IconTrendDown />}
+                    <span className="dash-rs-chip__symbol font-mono">{row.symbol}</span>
+                    <span className="dash-rs-chip__spread tabular-nums">
+                      <span className="dash-rs-chip__icon">{rs20Positive ? <IconTrendUp /> : <IconTrendDown />}</span>
+                      {rs20Positive ? "+" : ""}
+                      {row.rs20SpreadPct.toFixed(2)}
                     </span>
-                    RS20 {rs20Positive ? "+" : ""}
-                    {row.rs20SpreadPct.toFixed(2)} pp
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+
+          {selectedRow ? (
+            <div className="dash-rs-detail" data-testid={`${testId}-detail`}>
+              <div className="dash-rs-detail__head">
+                <span className="dash-rs-row__symbol-chip font-mono">{selectedRow.symbol}</span>
+                <span
+                  className={`dash-rs-spread-chip dash-rs-spread-chip--${
+                    selectedRow.rs20SpreadPct >= 0 ? "up" : "down"
+                  } tabular-nums`}
+                >
+                  RS20 {selectedRow.rs20SpreadPct >= 0 ? "+" : ""}
+                  {selectedRow.rs20SpreadPct.toFixed(2)} pp
+                </span>
+                {selectedRow.rs50SpreadPct != null ? (
+                  <span
+                    className={`dash-rs-spread-chip dash-rs-spread-chip--${
+                      selectedRow.rs50SpreadPct >= 0 ? "up" : "down"
+                    } tabular-nums`}
+                  >
+                    RS50 {selectedRow.rs50SpreadPct >= 0 ? "+" : ""}
+                    {selectedRow.rs50SpreadPct.toFixed(2)} pp
                   </span>
-                </div>
-
-                {row.rs50SpreadPct != null ? (
-                  <div className="dash-rs-row__sub-chip-row">
-                    <span
-                      className={`dash-rs-spread-chip dash-rs-spread-chip--sm dash-rs-spread-chip--${
-                        row.rs50SpreadPct >= 0 ? "up" : "down"
-                      } tabular-nums`}
-                    >
-                      RS50 {row.rs50SpreadPct >= 0 ? "+" : ""}
-                      {row.rs50SpreadPct.toFixed(2)} pp
-                    </span>
-                  </div>
                 ) : null}
+                <button
+                  type="button"
+                  className="dash-rs-detail__close"
+                  aria-label={`Close ${selectedRow.symbol} diagnostic`}
+                  onClick={() => setSelectedSymbol(null)}
+                >
+                  <IconClose />
+                </button>
+              </div>
 
-                <p className="dash-rs-row__meta">{row.failedGate2Because}</p>
-                {row.topRejectionReason ? (
-                  <p className="dash-rs-row__meta dash-rs-row__meta--italic">{row.topRejectionReason}</p>
-                ) : null}
+              <p className="dash-rs-row__meta">{selectedRow.failedGate2Because}</p>
+              {selectedRow.topRejectionReason ? (
+                <p className="dash-rs-row__meta dash-rs-row__meta--italic">{selectedRow.topRejectionReason}</p>
+              ) : null}
 
-                {row.distanceToPullbackZoneFrac != null &&
-                Number.isFinite(row.distanceToPullbackZoneFrac) ? (
-                  <p className="dash-rs-row__meta tabular-nums">
-                    Zone distance (diagnostic): {(100 * row.distanceToPullbackZoneFrac).toFixed(1)}%
-                    · stage rank {row.stageRank}
-                  </p>
-                ) : (
-                  <p className="dash-rs-row__meta">Stage rank {row.stageRank}</p>
-                )}
-
-                {row.rsDiagnostic ? (
-                  <div className="dash-rs-row__diagnostic">
-                    <RelativeStrengthDiagnosticPanel diagnostic={row.rsDiagnostic} compact />
-                  </div>
-                ) : null}
-
-                <p className="dash-rs-row__hint" data-testid={`${testId}-action-hint`}>
-                  {row.actionHint}
+              {selectedRow.distanceToPullbackZoneFrac != null &&
+              Number.isFinite(selectedRow.distanceToPullbackZoneFrac) ? (
+                <p className="dash-rs-row__meta tabular-nums">
+                  Zone distance (diagnostic): {(100 * selectedRow.distanceToPullbackZoneFrac).toFixed(1)}%
+                  · stage rank {selectedRow.stageRank}
                 </p>
-              </li>
-            );
-          })}
-        </ul>
+              ) : (
+                <p className="dash-rs-row__meta">Stage rank {selectedRow.stageRank}</p>
+              )}
+
+              {selectedRow.rsDiagnostic ? (
+                <div className="dash-rs-row__diagnostic">
+                  <RelativeStrengthDiagnosticPanel diagnostic={selectedRow.rsDiagnostic} compact />
+                </div>
+              ) : null}
+
+              <p className="dash-rs-row__hint" data-testid={`${testId}-action-hint`}>
+                {selectedRow.actionHint}
+              </p>
+            </div>
+          ) : (
+            <p className="dash-rs-detail__placeholder">Tap a symbol for its full diagnostic.</p>
+          )}
+        </>
       ) : (
         <p
           className="dash-empty-compact text-sm"
