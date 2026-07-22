@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isClayThemeRoute } from "@/lib/clay-theme-routes";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", deck: "Command" },
-  { href: "/setups", label: "Setups", deck: "Pipeline" },
-  { href: "/paper-lab", label: "Arena", deck: "Simulation" },
+  { href: "/dashboard", label: "Dashboard", labelVi: "Bảng điều khiển", deck: "Command", deckVi: "Sở chỉ huy" },
+  { href: "/setups", label: "Setups", labelVi: "Thiết lập", deck: "Pipeline", deckVi: "Đường ống" },
+  { href: "/paper-lab", label: "Arena", labelVi: "Đấu trường", deck: "Simulation", deckVi: "Mô phỏng" },
 ] as const;
 
 function isNavActive(pathname: string, href: string): boolean {
@@ -17,9 +18,10 @@ function isNavActive(pathname: string, href: string): boolean {
 /** Mobile primary nav — rendered between the header and main content (<768px). Desktop primary nav lives in `AppShellSidebar`. */
 export function AppShellNavMobile() {
   const pathname = usePathname() ?? "";
+  const vi = isClayThemeRoute(pathname);
   return (
     <nav className="app-shell-mobile-nav" aria-label="Primary mobile">
-      {NAV_ITEMS.map(({ href, label, deck }) => {
+      {NAV_ITEMS.map(({ href, label, labelVi, deck, deckVi }) => {
         const active = isNavActive(pathname, href);
         return (
           <Link
@@ -28,8 +30,8 @@ export function AppShellNavMobile() {
             className={active ? "app-shell-mobile-nav-link app-shell-mobile-nav-link--active" : "app-shell-mobile-nav-link"}
             aria-current={active ? "page" : undefined}
           >
-            <span className="app-shell-nav-link__label">{label}</span>
-            <span className="app-shell-nav-link__deck">{deck}</span>
+            <span className="app-shell-nav-link__label">{vi ? labelVi : label}</span>
+            <span className="app-shell-nav-link__deck">{vi ? deckVi : deck}</span>
           </Link>
         );
       })}

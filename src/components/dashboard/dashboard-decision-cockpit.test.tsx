@@ -76,7 +76,7 @@ describe("DashboardDecisionCockpit", () => {
     );
 
     expect(html).toContain('data-testid="dashboard-signals-rail"');
-    expect(html).toContain('aria-label="Verdict');
+    expect(html).toContain('aria-label="Phán quyết');
   });
 
   it("renders the near-miss panel (not the candidates panel) when no candidates are surfaced", () => {

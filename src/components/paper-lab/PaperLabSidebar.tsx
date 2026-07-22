@@ -10,11 +10,11 @@ import "./paper-lab-command-center.css";
  * and scroll-spies the active zone; from a deep link it carries ?focus=.
  */
 const SECTIONS = [
-  { id: "arena-now", focus: "now", label: "Now" },
-  { id: "arena-consensus", focus: "consensus", label: "Consensus" },
-  { id: "arena-conflict", focus: "conflict", label: "Conflict" },
-  { id: "arena-decision", focus: "decision", label: "Decision" },
-  { id: "arena-learning", focus: "learning", label: "Learning" },
+  { id: "arena-now", focus: "now", label: "Bây giờ" },
+  { id: "arena-consensus", focus: "consensus", label: "Đồng thuận" },
+  { id: "arena-conflict", focus: "conflict", label: "Tranh luận" },
+  { id: "arena-decision", focus: "decision", label: "Quyết định" },
+  { id: "arena-learning", focus: "learning", label: "Bài học" },
 ] as const;
 
 export function PaperLabSidebar() {
@@ -46,8 +46,8 @@ export function PaperLabSidebar() {
   };
 
   return (
-    <nav className="arena-index" data-testid="paper-lab-sidebar" aria-label="Arena sections">
-      <span className="arena-index__eyebrow">Report</span>
+    <nav className="arena-index" data-testid="paper-lab-sidebar" aria-label="Các mục Đấu trường">
+      <span className="arena-index__eyebrow">Mục lục</span>
       <ol className="arena-index__list">
         {SECTIONS.map((s, i) => {
           const isActive = s.id === active;

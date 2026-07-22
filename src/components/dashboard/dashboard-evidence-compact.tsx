@@ -95,7 +95,7 @@ export function DashboardEvidenceCompact({
 
       <details className="dash-evidence-compact__details">
         <summary className="dash-evidence-compact__summary" id="dashboard-evidence-heading">
-          Why this verdict?
+          Vì sao có phán quyết này?
         </summary>
         <div className="dash-evidence-compact__expanded">
           <div className="dash-evidence__chips dash-evidence__chips--wrap">
@@ -122,7 +122,7 @@ export function DashboardEvidenceCompact({
           ) : null}
           {chips.find((c) => c.id === "aligned") ? (
             <p className="dash-evidence__caption" data-testid="dashboard-evidence-caption">
-              Data alignment: {chips.find((c) => c.id === "aligned")!.display}
+              Đồng bộ dữ liệu: {chips.find((c) => c.id === "aligned")!.display}
             </p>
           ) : null}
         </div>

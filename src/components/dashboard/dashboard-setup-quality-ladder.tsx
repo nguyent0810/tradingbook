@@ -32,10 +32,10 @@ export function DashboardSetupQualityLadder({
       {!embedded ? (
         <header className="dash-pulse-header">
           <h2 id="dashboard-ladder-heading" className="dash-pulse-title">
-            Today&rsquo;s scan pulse
+            Nhịp quét hôm nay
           </h2>
           <span className="dash-ladder__total tabular-nums">
-            {ladder.totalClassified} classified
+            {ladder.totalClassified} đã phân loại
           </span>
         </header>
       ) : null}
@@ -104,7 +104,7 @@ export function DashboardSetupQualityLadder({
 
       <p className="dash-ladder__footer text-xs" style={{ color: "var(--text-tertiary)" }}>
         <Link href="/setups" className="dash-ladder__link">
-          Full pipeline on Setups →
+          Xem toàn bộ đường ống tại Thiết lập →
         </Link>
       </p>
     </section>

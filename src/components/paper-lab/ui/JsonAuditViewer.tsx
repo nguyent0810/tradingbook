@@ -5,7 +5,7 @@ import "../paper-lab-workstation.css";
 
 export function JsonAuditViewer({
   payload,
-  label = "View JSON",
+  label = "Xem JSON",
 }: {
   payload: Record<string, unknown> | null;
   label?: string;
@@ -32,17 +32,17 @@ export function JsonAuditViewer({
       </button>
       <dialog ref={dialogRef} className="paper-lab-json-dialog">
         <div className="paper-lab-json-dialog__header">
-          <strong>Decision payload (audit)</strong>
+          <strong>Dữ liệu quyết định (kiểm tra)</strong>
           <div className="flex gap-2">
             <button type="button" className="paper-lab-json-btn" onClick={copy}>
-              Copy
+              Sao chép
             </button>
             <button
               type="button"
               className="paper-lab-json-btn"
               onClick={() => dialogRef.current?.close()}
             >
-              Close
+              Đóng
             </button>
           </div>
         </div>

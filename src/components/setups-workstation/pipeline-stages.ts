@@ -20,33 +20,33 @@ export function buildPipelineStages(
   const stages: PipelineStage[] = [
     {
       id: "universe",
-      label: "Universe scanned",
+      label: "Đã quét vũ trụ mã",
       value: latestScan.symbolCountTotal,
-      hint: "symbols in run",
+      hint: "mã trong lần quét",
       tone: "neutral",
       active: latestScan.symbolCountTotal > 0,
     },
     {
       id: "regime",
-      label: "Regime filter",
+      label: "Bộ lọc chế độ",
       value: gate1Label,
-      hint: `${latestScan.symbolCountScanned} remaining`,
+      hint: `còn ${latestScan.symbolCountScanned}`,
       tone: regimeTone(gate1Label),
       active: latestScan.symbolCountScanned > 0,
     },
     {
       id: "tradability",
-      label: "Tradability",
+      label: "Đủ điều kiện GD",
       value: latestScan.symbolCountAfterTradability,
-      hint: "after liquidity filters",
+      hint: "sau lọc thanh khoản",
       tone: "neutral",
       active: latestScan.symbolCountAfterTradability > 0,
     },
     {
       id: "surfaced",
-      label: "Surfaced",
+      label: "Đã lọc ra",
       value: latestScan.candidateCountSurfaced,
-      hint: "Tier A/B",
+      hint: "Hạng A/B",
       tone: latestScan.candidateCountSurfaced > 0 ? "success" : "neutral",
       active: latestScan.candidateCountSurfaced > 0,
     },
@@ -55,9 +55,9 @@ export function buildPipelineStages(
   if (nearMissCount > 0) {
     stages.push({
       id: "near-miss",
-      label: "Near-miss",
+      label: "Suýt đạt",
       value: nearMissCount,
-      hint: "closest-to-valid",
+      hint: "gần đạt chuẩn nhất",
       tone: "warning",
       active: true,
     });

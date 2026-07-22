@@ -20,13 +20,13 @@ export function RecentBattlesCard({
     if (variant === "compact") {
       return (
         <div className="paper-lab-recent-battles-compact" data-testid="paper-lab-recent-battles">
-          <p className="text-sm text-[var(--pl-muted)]">No battles recorded yet.</p>
+          <p className="text-sm text-[var(--pl-muted)]">Chưa có trận đối đầu nào được ghi nhận.</p>
         </div>
       );
     }
     return (
-      <PaperLabPanel title="Recent Battles" testId="paper-lab-recent-battles">
-        <p className="text-sm text-[var(--pl-muted)]">No battles recorded yet.</p>
+      <PaperLabPanel title="Đối đầu gần đây" testId="paper-lab-recent-battles">
+        <p className="text-sm text-[var(--pl-muted)]">Chưa có trận đối đầu nào được ghi nhận.</p>
       </PaperLabPanel>
     );
   }
@@ -44,17 +44,17 @@ export function RecentBattlesCard({
         <div className="flex flex-wrap items-center gap-2 min-w-0">
           <span className="font-mono font-semibold text-sm">{primary.symbol}</span>
           {statusPill}
-          <span className="text-xs text-[var(--pl-muted)]">{primary.agentCount} agents</span>
+          <span className="text-xs text-[var(--pl-muted)]">{primary.agentCount} agent</span>
           <span className="text-xs text-[var(--pl-faint)]">{primary.sessionDate}</span>
         </div>
         <Link href={`/paper-lab/battles/${primary.id}`} className="paper-lab-link-btn text-xs shrink-0">
-          View Battle →
+          Xem đối đầu →
         </Link>
       </div>
 
       {primary.consensusAction && (
         <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-          <span className="text-[var(--pl-muted)]">Consensus</span>
+          <span className="text-[var(--pl-muted)]">Đồng thuận</span>
           <ActionBadge action={primary.consensusAction} />
           {primary.consensusConfidence != null && (
             <span className="paper-lab-tabular">{formatConfidencePct(primary.consensusConfidence)}</span>
@@ -71,23 +71,23 @@ export function RecentBattlesCard({
   if (variant === "compact") {
     return (
       <div className="paper-lab-recent-battles-compact" data-testid="paper-lab-recent-battles">
-        <div className="paper-lab-recent-battles-compact__label">Recent battle</div>
+        <div className="paper-lab-recent-battles-compact__label">Đối đầu gần đây</div>
         {body}
       </div>
     );
   }
 
   return (
-    <PaperLabPanel title="Recent Battles" testId="paper-lab-recent-battles">
+    <PaperLabPanel title="Đối đầu gần đây" testId="paper-lab-recent-battles">
       <div className="flex flex-wrap items-center gap-2 mb-2">
         <span className="font-mono font-semibold text-base">{primary.symbol}</span>
         {statusPill}
-        <span className="text-xs text-[var(--pl-muted)]">{primary.agentCount} agents</span>
+        <span className="text-xs text-[var(--pl-muted)]">{primary.agentCount} agent</span>
       </div>
 
       {primary.consensusAction && (
         <div className="flex flex-wrap items-center gap-2 text-xs mb-1">
-          <span className="text-[var(--pl-muted)]">Consensus</span>
+          <span className="text-[var(--pl-muted)]">Đồng thuận</span>
           <ActionBadge action={primary.consensusAction} />
           {primary.consensusConfidence != null && (
             <span className="paper-lab-tabular">{formatConfidencePct(primary.consensusConfidence)}</span>

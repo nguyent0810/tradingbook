@@ -19,7 +19,7 @@ function VoteSplit({ votes }: { votes: Rec["actionVotes"] }) {
     votes.reduce > 0 && `REDUCE ${votes.reduce}`,
     votes.exit > 0 && `EXIT ${votes.exit}`,
   ].filter(Boolean);
-  return <span>{parts.join(" · ") || "No votes"}</span>;
+  return <span>{parts.join(" · ") || "Không có phiếu"}</span>;
 }
 
 function CioRecBody({ rec }: { rec: Rec }) {
@@ -27,18 +27,18 @@ function CioRecBody({ rec }: { rec: Rec }) {
     <>
       <div className="paper-lab-cio-meta">
         <span>
-          Consensus:{" "}
+          Đồng thuận:{" "}
           <strong className="text-[var(--text-primary)]">{rec.consensusLabel}</strong>{" "}
           ({rec.consensusScoreDisplay})
           <PaperLabHelpIcon text={CONSENSUS_TOOLTIP} />
         </span>
         <span>
-          Vote split: <VoteSplit votes={rec.actionVotes} />
+          Chia phiếu: <VoteSplit votes={rec.actionVotes} />
         </span>
       </div>
 
       <div className="paper-lab-cio-meta mb-2">
-        <span>Regime: {rec.regimeContext}</span>
+        <span>Chế độ: {rec.regimeContext}</span>
       </div>
 
       <p className="text-sm text-[var(--text-primary)] mb-2 paper-lab-line-clamp-3">{rec.decisionSummary}</p>
@@ -46,7 +46,7 @@ function CioRecBody({ rec }: { rec: Rec }) {
       {rec.supportingReasons.length > 0 && (
         <div className="paper-lab-cio-section">
           <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">
-            Why CIO chose {rec.finalAction}
+            Vì sao CIO chọn {rec.finalAction}
           </div>
           <ul className="text-xs text-[var(--text-secondary)] space-y-0.5 list-disc list-inside">
             {rec.supportingReasons.map((r) => (
@@ -58,7 +58,7 @@ function CioRecBody({ rec }: { rec: Rec }) {
 
       {rec.risks.length > 0 && (
         <div className="paper-lab-cio-section">
-          <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Main risks</div>
+          <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Rủi ro chính</div>
           <ul className="text-xs text-[var(--warning)]/80 space-y-0.5 list-disc list-inside">
             {rec.risks.map((r) => (
               <li key={r} className="paper-lab-line-clamp-2">{r}</li>
@@ -69,7 +69,7 @@ function CioRecBody({ rec }: { rec: Rec }) {
 
       {rec.dissentingAgents.length > 0 && (
         <div className="paper-lab-cio-section">
-          <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Dissent</div>
+          <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Bất đồng</div>
           <ul className="text-xs text-[var(--text-tertiary)] space-y-2">
             {rec.dissentingAgents.map((d) => (
               <li key={d.agentId}>
@@ -87,12 +87,12 @@ function CioRecBody({ rec }: { rec: Rec }) {
 
 function CioCompactCard({ rec }: { rec: Rec }) {
   return (
-    <PaperLabPanel title="CIO Recommendation" testId="paper-lab-cio" tone="elevated">
+    <PaperLabPanel title="Khuyến nghị CIO" testId="paper-lab-cio" tone="elevated">
       <div className="flex flex-wrap items-center gap-2 mb-1">
         <span className="paper-lab-cio-compact__symbol">{rec.symbol}</span>
         <ActionBadge action={rec.finalAction} />
         <span className="text-xs paper-lab-tabular text-[var(--pl-muted)]">
-          {formatConfidencePct(rec.confidence)} confidence
+          {formatConfidencePct(rec.confidence)} độ tin cậy
         </span>
       </div>
       <p className="paper-lab-cio-compact__meta">
@@ -111,15 +111,15 @@ function CioCompactCard({ rec }: { rec: Rec }) {
       <p className="text-xs text-[var(--pl-muted)] line-clamp-2 mb-2">{rec.decisionSummary}</p>
       {rec.risks.length > 0 && (
         <p className="text-[0.7rem] text-[var(--pl-amber)] line-clamp-2 mb-1">
-          Risks: {rec.risks.join("; ")}
+          Rủi ro: {rec.risks.join("; ")}
         </p>
       )}
       {rec.dissentingAgents.length > 0 && (
         <p className="text-[0.7rem] text-[var(--pl-faint)] line-clamp-1 mb-2">
-          Dissent: {rec.dissentingAgents.map((d) => `${d.agentName} (${d.action})`).join(", ")}
+          Bất đồng: {rec.dissentingAgents.map((d) => `${d.agentName} (${d.action})`).join(", ")}
         </p>
       )}
-      <PaperLabDetailsDialog title={`CIO — ${rec.symbol}`} triggerLabel="View details">
+      <PaperLabDetailsDialog title={`CIO — ${rec.symbol}`} triggerLabel="Xem chi tiết">
         <CioRecBody rec={rec} />
       </PaperLabDetailsDialog>
     </PaperLabPanel>
@@ -136,15 +136,15 @@ export function CioRecommendationPanel({
   if (cio.recommendations.length === 0) {
     if (variant === "compact") {
       return (
-        <PaperLabPanel title="CIO Recommendation" testId="paper-lab-cio">
-          <p className="text-sm text-[var(--pl-muted)]">No CIO recommendation for this session yet.</p>
+        <PaperLabPanel title="Khuyến nghị CIO" testId="paper-lab-cio">
+          <p className="text-sm text-[var(--pl-muted)]">Chưa có khuyến nghị CIO cho phiên này.</p>
         </PaperLabPanel>
       );
     }
     return (
       <section className="paper-lab-cio-panel" data-testid="paper-lab-cio">
-        <h3 className="text-sm font-semibold text-[var(--accent-text)] mb-2">CIO Final Recommendation</h3>
-        <p className="text-sm text-[var(--text-tertiary)]">No CIO recommendation for this session yet.</p>
+        <h3 className="text-sm font-semibold text-[var(--accent-text)] mb-2">Khuyến nghị cuối của CIO</h3>
+        <p className="text-sm text-[var(--text-tertiary)]">Chưa có khuyến nghị CIO cho phiên này.</p>
       </section>
     );
   }
@@ -156,7 +156,7 @@ export function CioRecommendationPanel({
   return (
     <section className="paper-lab-cio-panel" data-testid="paper-lab-cio">
       <h3 className="text-sm font-semibold text-[var(--accent-text)] mb-3">
-        CIO Final Recommendation — {cio.sessionDate}
+        Khuyến nghị cuối của CIO — {cio.sessionDate}
       </h3>
       <ul className="space-y-4">
         {cio.recommendations.map((rec) => (
@@ -165,13 +165,13 @@ export function CioRecommendationPanel({
               <span className="font-mono font-semibold text-[var(--text-primary)] text-base">{rec.symbol}</span>
               <ActionBadge action={rec.finalAction} />
               <span className="text-xs text-[var(--text-secondary)] tabular-nums">
-                {formatConfidencePct(rec.confidence)} confidence
+                {formatConfidencePct(rec.confidence)} độ tin cậy
               </span>
             </div>
             <CioRecBody rec={rec} />
             {rec.dissentingAgents.some((d) => d.humanReason.length > 80) && (
               <div className="mt-2">
-                <PaperLabDetailsDialog title={`${rec.symbol} — dissenting agents`}>
+                <PaperLabDetailsDialog title={`${rec.symbol} — agent bất đồng`}>
                   <ul className="text-sm text-[var(--text-secondary)] space-y-3">
                     {rec.dissentingAgents.map((d) => (
                       <li key={d.agentId}>

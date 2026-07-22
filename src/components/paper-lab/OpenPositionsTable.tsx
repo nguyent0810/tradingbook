@@ -10,10 +10,12 @@ import "./paper-lab-command-center.css";
 
 function HeaderCell({
   label,
+  glossaryKey,
 }: {
-  label: keyof typeof POSITION_GLOSSARY | string;
+  label: string;
+  glossaryKey?: keyof typeof POSITION_GLOSSARY;
 }) {
-  const tip = POSITION_GLOSSARY[label as keyof typeof POSITION_GLOSSARY];
+  const tip = glossaryKey ? POSITION_GLOSSARY[glossaryKey] : undefined;
   return (
     <th>
       {label}
@@ -59,14 +61,14 @@ function RMultipleCell({ position }: { position: OpenPositionRowDto }) {
         <span className={`paper-lab-rr-badge__dot ${dotClass}`} aria-hidden />
         {rMultiple.toFixed(1)}R
       </span>
-      {flat && <span className="paper-lab-r-flat-hint">Flat / no progress yet</span>}
+      {flat && <span className="paper-lab-r-flat-hint">Đi ngang / chưa có tiến triển</span>}
     </div>
   );
 }
 
 function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
   if (positions.length === 0) {
-    return <p className="text-sm text-[var(--text-tertiary)]">No open positions.</p>;
+    return <p className="text-sm text-[var(--text-tertiary)]">Không có vị thế đang mở.</p>;
   }
 
   return (
@@ -79,15 +81,15 @@ function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
           <thead>
             <tr>
               <th>Agent</th>
-              <th>Symbol</th>
-              <HeaderCell label="Entry" />
-              <HeaderCell label="Stop" />
-              <HeaderCell label="TP" />
-              <HeaderCell label="Qty (Lot)" />
-              <HeaderCell label="Alloc %" />
-              <HeaderCell label="R" />
-              <HeaderCell label="Days" />
-              <HeaderCell label="Status" />
+              <th>Mã</th>
+              <HeaderCell label="Vào lệnh" glossaryKey="Entry" />
+              <HeaderCell label="Cắt lỗ" glossaryKey="Stop" />
+              <HeaderCell label="TP" glossaryKey="TP" />
+              <HeaderCell label="KL (Lô)" glossaryKey="Qty (Lot)" />
+              <HeaderCell label="Tỷ trọng %" glossaryKey="Alloc %" />
+              <HeaderCell label="R" glossaryKey="R" />
+              <HeaderCell label="Ngày" glossaryKey="Days" />
+              <HeaderCell label="Trạng thái" glossaryKey="Status" />
             </tr>
           </thead>
           <tbody>
@@ -106,9 +108,9 @@ function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
                   <td>
                     <PriceWithPct entry={p.entryPriceKVnd} value={p.takeProfitKVnd} tone="tp" />
                   </td>
-                  <td title={lot.isRounded ? "Quantity not on 100-share board lot" : undefined}>
+                  <td title={lot.isRounded ? "Khối lượng không tròn lô 100 cổ phiếu" : undefined}>
                     <div className="paper-lab-qty-cell__primary">{lot.sharesLabel}</div>
-                    <div className="paper-lab-qty-cell__sub">{lot.lots} lots</div>
+                    <div className="paper-lab-qty-cell__sub">{lot.lots} lô</div>
                   </td>
                   <td className="paper-lab-tabular">{p.allocationPct.toFixed(1)}%</td>
                   <td className={isFlatR(p) ? "" : p.rMultiple >= 0 ? "paper-lab-positive" : "paper-lab-negative"}>
@@ -123,7 +125,7 @@ function PositionsTable({ positions }: { positions: OpenPositionRowDto[] }) {
         </table>
       </div>
       <footer className="paper-lab-table-glossary paper-lab-table-glossary--subtle mt-2">
-        <StatusPill status="OPEN" /> active · <StatusPill status="PARTIAL" /> partial · Qty in 100-share board lots
+        <StatusPill status="OPEN" /> đang mở · <StatusPill status="PARTIAL" /> một phần · KL tính theo lô 100 cổ phiếu
       </footer>
     </>
   );
@@ -142,14 +144,14 @@ export function OpenPositionsTable({
 
   if (positions.length === 0) {
     return (
-      <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
-        <p className="text-sm text-[var(--text-tertiary)]">No open positions.</p>
+      <PaperLabPanel title="Vị thế đang mở" testId="paper-lab-positions" tone="elevated">
+        <p className="text-sm text-[var(--text-tertiary)]">Không có vị thế đang mở.</p>
       </PaperLabPanel>
     );
   }
 
   return (
-    <PaperLabPanel title="Open Positions" testId="paper-lab-positions" tone="elevated">
+    <PaperLabPanel title="Vị thế đang mở" testId="paper-lab-positions" tone="elevated">
       <PositionsTable positions={positions} />
     </PaperLabPanel>
   );

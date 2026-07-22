@@ -118,7 +118,7 @@ export function RsNearMissWatchlistPanel({ panel, testId = "rs-near-miss-watchli
                 <button
                   type="button"
                   className="dash-rs-detail__close"
-                  aria-label={`Close ${selectedRow.symbol} diagnostic`}
+                  aria-label={`Đóng chẩn đoán ${selectedRow.symbol}`}
                   onClick={() => setSelectedSymbol(null)}
                 >
                   <IconClose />
@@ -133,11 +133,11 @@ export function RsNearMissWatchlistPanel({ panel, testId = "rs-near-miss-watchli
               {selectedRow.distanceToPullbackZoneFrac != null &&
               Number.isFinite(selectedRow.distanceToPullbackZoneFrac) ? (
                 <p className="dash-rs-row__meta tabular-nums">
-                  Zone distance (diagnostic): {(100 * selectedRow.distanceToPullbackZoneFrac).toFixed(1)}%
-                  · stage rank {selectedRow.stageRank}
+                  K/c tới vùng (chẩn đoán): {(100 * selectedRow.distanceToPullbackZoneFrac).toFixed(1)}%
+                  · hạng giai đoạn {selectedRow.stageRank}
                 </p>
               ) : (
-                <p className="dash-rs-row__meta">Stage rank {selectedRow.stageRank}</p>
+                <p className="dash-rs-row__meta">Hạng giai đoạn {selectedRow.stageRank}</p>
               )}
 
               {selectedRow.rsDiagnostic ? (
@@ -151,7 +151,7 @@ export function RsNearMissWatchlistPanel({ panel, testId = "rs-near-miss-watchli
               </p>
             </div>
           ) : (
-            <p className="dash-rs-detail__placeholder">Tap a symbol for its full diagnostic.</p>
+            <p className="dash-rs-detail__placeholder">Bấm vào một mã để xem chẩn đoán đầy đủ.</p>
           )}
         </>
       ) : (

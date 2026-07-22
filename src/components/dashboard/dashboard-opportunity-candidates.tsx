@@ -74,7 +74,7 @@ function CandidateCard({ row }: { row: OpportunityCandidateDto }) {
       </div>
       {hasWhy ? (
         <details className="dash-tile__why">
-          <summary className="dash-tile__why-toggle">Why {row.quality}</summary>
+          <summary className="dash-tile__why-toggle">Vì sao Hạng {row.quality}</summary>
           {row.primaryReasons.length > 0 ? (
             <p className="dash-tile__why-line text-xs">{row.primaryReasons.slice(0, 2).join(" · ")}</p>
           ) : null}
@@ -94,9 +94,9 @@ export function DashboardOpportunityCandidates({
   return (
     <div className="dash-card dash-card--muted" data-testid="dashboard-opportunity-candidates-panel">
       <header className="dash-card__header">
-        <h3 className="dash-card__title">Best setups</h3>
+        <h3 className="dash-card__title">Cơ hội tốt nhất</h3>
         <p className="dash-card__lead">
-          Surfaced Tier A/B candidates — validated, ready to review.
+          Ứng viên Hạng A/B đã lọc — đã xác thực, sẵn sàng xem xét.
         </p>
       </header>
 
@@ -107,9 +107,9 @@ export function DashboardOpportunityCandidates({
       </ul>
 
       <p className="dash-near-miss__footer text-xs" style={{ color: "var(--text-tertiary)" }}>
-        Full pipeline and sizing on{" "}
+        Toàn bộ đường ống &amp; định cỡ vị thế tại{" "}
         <Link href="/setups" className="dash-v2-link">
-          Setups pipeline
+          Thiết lập
         </Link>
         .
       </p>

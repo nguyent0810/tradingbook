@@ -30,7 +30,7 @@ function OrderRef({ orderId }: { orderId: string | null }) {
     <button
       type="button"
       className="paper-lab-order-ref font-mono text-xs"
-      title={`Copy full order ID: ${orderId}`}
+      title={`Sao chép mã lệnh đầy đủ: ${orderId}`}
       onClick={copy}
     >
       {formatShortRef(orderId)}
@@ -49,11 +49,11 @@ function ReasoningCell({ decision }: { decision: DecisionLogRowDto }) {
       <p className="text-[var(--text-primary)] paper-lab-line-clamp-2 text-xs">{decision.explanation.summary}</p>
       {hasMore && (
         <div className="mt-1">
-          <PaperLabDetailsDialog title={`${decision.agentName} — reasoning`} triggerLabel="View reasoning">
+          <PaperLabDetailsDialog title={`${decision.agentName} — lý do`} triggerLabel="Xem lý do">
             <p className="text-sm text-[var(--text-primary)] mb-3">{decision.explanation.summary}</p>
             {decision.explanation.supporting.length > 0 && (
               <div className="mb-3">
-                <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">Supporting</div>
+                <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">Ủng hộ</div>
                 <ul className="text-xs text-[var(--success)]/85 list-disc list-inside space-y-1">
                   {decision.explanation.supporting.map((s) => (
                     <li key={s}>{s}</li>
@@ -63,7 +63,7 @@ function ReasoningCell({ decision }: { decision: DecisionLogRowDto }) {
             )}
             {decision.explanation.opposing.length > 0 && (
               <div>
-                <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Opposing</div>
+                <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Phản đối</div>
                 <ul className="text-xs text-[var(--warning)]/85 list-disc list-inside space-y-1">
                   {decision.explanation.opposing.map((s) => (
                     <li key={s}>{s}</li>
@@ -81,27 +81,27 @@ function ReasoningCell({ decision }: { decision: DecisionLogRowDto }) {
 export function DecisionsLogTable({ decisions }: { decisions: DecisionLogRowDto[] }) {
   if (decisions.length === 0) {
     return (
-      <PaperLabPanel title="Decisions Log" testId="paper-lab-decisions" tone="soft">
-        <p className="text-sm text-[var(--text-tertiary)]">No agent decisions logged yet.</p>
+      <PaperLabPanel title="Nhật ký quyết định" testId="paper-lab-decisions" tone="soft">
+        <p className="text-sm text-[var(--text-tertiary)]">Chưa có quyết định nào của agent được ghi nhận.</p>
       </PaperLabPanel>
     );
   }
 
   return (
-    <PaperLabPanel title="Decisions Log" testId="paper-lab-decisions" tone="soft">
+    <PaperLabPanel title="Nhật ký quyết định" testId="paper-lab-decisions" tone="soft">
       <div className="safe-table-wrap paper-lab-table-wrap">
         <table className="paper-lab-table paper-lab-table--decisions safe-table">
           <thead>
             <tr>
-              <th>Date</th>
+              <th>Ngày</th>
               <th>Agent</th>
-              <th>Symbol</th>
-              <th>Action</th>
-              <th>Conf</th>
-              <th>Reasoning</th>
+              <th>Mã</th>
+              <th>Hành động</th>
+              <th>Tin cậy</th>
+              <th>Lý do</th>
               <th>JSON</th>
-              <th>Validation</th>
-              <th>Order</th>
+              <th>Xác thực</th>
+              <th>Lệnh</th>
             </tr>
           </thead>
           <tbody>

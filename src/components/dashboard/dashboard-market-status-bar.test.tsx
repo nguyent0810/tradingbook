@@ -18,7 +18,7 @@ describe("DashboardMarketStatusBar — data timing mode chip", () => {
     const html = renderToStaticMarkup(<DashboardMarketStatusBar freshness={baseFreshness} />);
     expect(html).toContain('data-testid="dashboard-freshness-ok"');
     expect(html).toContain('data-testid="dashboard-data-timing-mode"');
-    expect(html).toContain("Data: EOD");
+    expect(html).toContain("Dữ liệu: EOD");
   });
 
   it("shows the EOD chip on the stale branch", () => {
@@ -32,6 +32,6 @@ describe("DashboardMarketStatusBar — data timing mode chip", () => {
     const html = renderToStaticMarkup(<DashboardMarketStatusBar freshness={staleFreshness} />);
     expect(html).toContain('data-testid="dashboard-freshness-stale"');
     expect(html).toContain('data-testid="dashboard-data-timing-mode"');
-    expect(html).toContain("Data: EOD");
+    expect(html).toContain("Dữ liệu: EOD");
   });
 });

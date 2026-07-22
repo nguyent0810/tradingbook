@@ -76,7 +76,7 @@ describe("DashboardSecondaryIntelligence", () => {
       />
     );
 
-    expect(html).toContain("No active watch items.");
+    expect(html).toContain("Không có mã đang theo dõi.");
     expect(html).toContain(emptyDiagnostics.emptyReason!);
   });
 

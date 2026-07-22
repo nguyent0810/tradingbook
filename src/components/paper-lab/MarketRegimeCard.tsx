@@ -14,7 +14,7 @@ export function MarketRegimeCard({ regime }: { regime: ArenaOverviewDto["marketR
   const confidence = regime.confidence ?? 0;
 
   return (
-    <PaperLabPanel title="Market Regime" testId="paper-lab-regime-card">
+    <PaperLabPanel title="Chế độ thị trường" testId="paper-lab-regime-card">
       <div className="flex gap-4 items-start">
         <ConfidenceRing pct={confidence} />
         <div className="min-w-0 flex-1">

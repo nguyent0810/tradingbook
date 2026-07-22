@@ -7,14 +7,14 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByTestId("paper-lab-command-shell")).toBeVisible();
     await expect(page.getByTestId("paper-lab-sidebar")).toBeVisible();
     await expect(page.getByTestId("paper-lab-disclaimer")).toBeVisible();
-    await expect(page.getByTestId("paper-lab-disclaimer")).toContainText("Simulation only");
+    await expect(page.getByTestId("paper-lab-disclaimer")).toContainText("Chỉ mô phỏng");
   });
 
   test("section index navigates the on-page zones (not a route sidebar)", async ({ page }) => {
     await page.goto("/paper-lab");
     const index = page.getByTestId("paper-lab-sidebar");
     // The former app sidebar is now a light section index of the 5 narrative zones.
-    for (const label of ["Now", "Consensus", "Conflict", "Decision", "Learning"]) {
+    for (const label of ["Bây giờ", "Đồng thuận", "Tranh luận", "Quyết định", "Bài học"]) {
       await expect(index.getByRole("link", { name: label })).toBeVisible();
     }
     // No standalone utility bar / route menu inside the page.
@@ -46,7 +46,7 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByTestId("paper-lab-arena-hero")).toBeVisible();
     await expect(page.getByTestId("paper-lab-header-grid")).toBeVisible();
     await expect(page.getByTestId("paper-lab-portfolios")).toBeVisible();
-    await expect(page.getByText("Agent League")).toBeVisible();
+    await expect(page.getByText("Đội hình Agent")).toBeVisible();
   });
 
   test("agent portfolio cards show full names", async ({ page }) => {
@@ -71,7 +71,7 @@ test.describe("/paper-lab arena", () => {
     await expect(page.getByTestId("paper-lab-cio")).toBeVisible();
     await expect(page.getByTestId("paper-lab-decisions")).toBeVisible();
     await expect(page.getByTestId("paper-lab-regime-explanation")).toBeVisible();
-    await expect(page.getByText("View JSON").first()).toBeVisible();
+    await expect(page.getByText("Xem JSON").first()).toBeVisible();
   });
 
   test("hall of fame route accessible for leaderboard data", async ({ page }) => {
@@ -86,8 +86,8 @@ test.describe("/paper-lab arena", () => {
     const drawer = page.getByTestId("paper-lab-agent-drawer");
     await expect(drawer).toBeVisible();
     await expect(drawer.getByText("Swing Trader")).toBeVisible();
-    await expect(drawer.getByText("Cash")).toBeVisible();
-    await drawer.getByRole("button", { name: "Close" }).click();
+    await expect(drawer.getByText("Tiền mặt")).toBeVisible();
+    await drawer.getByRole("button", { name: "Đóng" }).click();
     await expect(drawer).not.toBeVisible();
   });
 

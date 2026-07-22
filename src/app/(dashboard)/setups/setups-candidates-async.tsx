@@ -243,8 +243,8 @@ export async function SetupsCandidatesAsync() {
 
   const emptyReason =
     base.latest.candidateCountSurfaced === 0
-      ? `Latest run ${base.latest.id.slice(0, 12)}… completed with Gate 1 ${displayGate1ScanLevel(String(base.latest.gate1Level))} and ${base.latest.symbolCountAfterTradability} symbols passing tradability — none met Tier A/B surfacing rules. Use Market & setup insight and rejection diagnostics above, or closest-to-valid symbols below.`
-      : "No Tier A/B candidates in this scan run.";
+      ? `Lần quét gần nhất ${base.latest.id.slice(0, 12)}… hoàn tất với Gate 1 ${displayGate1ScanLevel(String(base.latest.gate1Level))} và ${base.latest.symbolCountAfterTradability} mã đạt điều kiện giao dịch — không mã nào đạt quy tắc nổi bật Hạng A/B. Xem thông tin thị trường & thiết lập cùng chẩn đoán lý do bị loại ở trên, hoặc các mã gần đạt chuẩn nhất bên dưới.`
+      : "Không có ứng viên Hạng A/B trong lần quét này.";
 
   return (
     <CandidateScanner
@@ -259,7 +259,7 @@ export async function SetupsCandidatesAsync() {
       partialBanner={
         perfBanner ? (
           <ErrorStateWithEvidence
-            title="Partial candidate data unavailable"
+            title="Dữ liệu ứng viên không đầy đủ"
             message={perfBanner}
             evidence="src/app/(dashboard)/setups/setups-candidates-async.tsx · loadSurfacedCandidatesHealthCached / loadSetupPerfRowsCached"
             data-testid="setups-candidates-partial-data"

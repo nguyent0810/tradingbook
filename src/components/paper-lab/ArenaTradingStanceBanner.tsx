@@ -86,25 +86,25 @@ export function ArenaTradingStanceBanner({ decision }: { decision: TradingDecisi
       transition={{ duration: 0.45, ease: "easeOut" }}
     >
       <div className="arena-stance__head">
-        <span className="arena-stance__kicker">Today&apos;s trading stance</span>
+        <span className="arena-stance__kicker">Lập trường giao dịch hôm nay</span>
         <div className="arena-stance__badge-row">
           <span className="arena-stance__dot" aria-hidden="true" />
           <span className="arena-stance__level">{formatDecisionLevelForDisplay(decision.level)}</span>
         </div>
         <p className="arena-stance__allocation">
-          Max exposure <strong>{decision.allocation}</strong>
+          Mức vốn tối đa <strong>{decision.allocation}</strong>
         </p>
         <p className="arena-stance__explanation">{decision.explanation}</p>
       </div>
 
       <div className="arena-stance__funnel">
-        <span className="arena-stance__funnel-label">Why — today&apos;s scan funnel</span>
+        <span className="arena-stance__funnel-label">Vì sao — phễu quét hôm nay</span>
         <div className="arena-stance__funnel-steps">
-          <FunnelStep name="Universe scanned" value={universe} pct={100} kind="universe" delay={0} reduced={reducedMotion} />
+          <FunnelStep name="Vũ trụ đã quét" value={universe} pct={100} kind="universe" delay={0} reduced={reducedMotion} />
           <span className="arena-stance__funnel-arrow" aria-hidden="true">→</span>
-          <FunnelStep name="Passed liquidity" value={tradable} pct={tradablePct} kind="tradable" delay={0.15} reduced={reducedMotion} />
+          <FunnelStep name="Lọc thanh khoản" value={tradable} pct={tradablePct} kind="tradable" delay={0.15} reduced={reducedMotion} />
           <span className="arena-stance__funnel-arrow" aria-hidden="true">→</span>
-          <FunnelStep name="Valid setups" value={setups} pct={setupsPct} kind="setups" delay={0.3} reduced={reducedMotion} />
+          <FunnelStep name="Thiết lập hợp lệ" value={setups} pct={setupsPct} kind="setups" delay={0.3} reduced={reducedMotion} />
         </div>
       </div>
     </motion.section>

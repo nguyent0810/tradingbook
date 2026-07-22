@@ -14,32 +14,32 @@ export function PaperLabHeaderGrid({
   cio: CioPanelDto;
 }) {
   const modeLabel =
-    overview.executionMode?.label ?? "Rule Agents Active · LLM Disabled";
+    overview.executionMode?.label ?? "Agent theo quy tắc đang hoạt động · LLM tắt";
 
   return (
     <header className="paper-lab-header-grid" data-testid="paper-lab-header-grid">
       <PaperLabPanel className="paper-lab-title-block">
-        <h1>Arena</h1>
+        <h1>Đấu trường</h1>
         <div className="paper-lab-title-block__chips">
           <span className="paper-lab-title-chip paper-lab-title-chip--paper" data-testid="paper-lab-disclaimer">
-            Simulation only
+            Chỉ mô phỏng
           </span>
-          <span className="paper-lab-title-chip">{overview.totalAgents} Agents</span>
+          <span className="paper-lab-title-chip">{overview.totalAgents} Agent</span>
           <span className="paper-lab-title-chip">
-            {formatArenaVndCompact(overview.totalVirtualCapitalVnd)} simulated capital
+            {formatArenaVndCompact(overview.totalVirtualCapitalVnd)} vốn mô phỏng
           </span>
           <span className="paper-lab-title-chip paper-lab-title-chip--mode">{modeLabel}</span>
         </div>
         <p className="paper-lab-title-block__status">
-          Agents competing under identical market data.
+          Các agent cạnh tranh trên cùng dữ liệu thị trường.
         </p>
         <p className="paper-lab-title-block__lead">
-          Regime intelligence · agent battles · simulation only
+          Thông tin chế độ thị trường · đối đầu agent · chỉ mô phỏng
         </p>
         {overview.stale && (
           <p className="text-xs text-[var(--pl-amber)] mt-2 line-clamp-2">
-            Market data may be stale — review regime and bar freshness before interpreting
-            agent decisions.
+            Dữ liệu thị trường có thể bị trễ — kiểm tra chế độ thị trường và độ mới của dữ liệu
+            trước khi diễn giải quyết định của agent.
           </p>
         )}
       </PaperLabPanel>

@@ -21,7 +21,7 @@ export async function SetupsOverviewAsync() {
     <div className="tosv3-setups-overview-fallback space-y-4" data-testid="setups-overview-no-run-section">
       {dbBanner ? (
         <ErrorStateWithEvidence
-          title="Partial scanner data unavailable"
+          title="Dữ liệu bộ quét không đầy đủ"
           message={dbBanner}
           evidence="src/app/(dashboard)/setups/setups-overview-async.tsx · loadSetupsBaseData"
           data-testid="setups-overview-db-banner-no-run"
@@ -31,8 +31,8 @@ export async function SetupsOverviewAsync() {
       ) : null}
       <V3Panel className="tosv3-empty-state-wrap">
         <EmptyStateWithReason
-          title="No scanner runs yet"
-          reason="No daily scan run in the database yet. Production uses the GitHub Actions “Production bar import” workflow (import + scan); locally run npx tsx scripts/run-daily-scanner.ts after bars are imported."
+          title="Chưa có lần quét nào"
+          reason="Chưa có lần quét hằng ngày nào trong dữ liệu. Trên production dùng workflow GitHub Actions “Production bar import” (import + quét); ở local chạy npx tsx scripts/run-daily-scanner.ts sau khi đã import dữ liệu giá."
           data-testid="setups-overview-no-scan-run"
         />
       </V3Panel>

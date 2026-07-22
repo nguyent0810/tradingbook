@@ -38,9 +38,9 @@ export function AgentPortfolioRail({
       >
         <div className="paper-lab-portfolio-section__head">
           <h2 className="paper-lab-panel__title" style={{ marginBottom: 0 }}>
-            {variant === "fund-strip" ? "Agent League" : `Agent Portfolios (${portfolios.length})`}
+            {variant === "fund-strip" ? "Đội hình Agent" : `Danh mục Agent (${portfolios.length})`}
           </h2>
-          <span className="text-xs text-[var(--pl-faint)]">Click to filter · i for details</span>
+          <span className="text-xs text-[var(--pl-faint)]">Bấm để lọc · i để xem chi tiết</span>
         </div>
         <div className="paper-lab-agent-rail paper-lab-agent-rail--wide">
           {portfolios.map((p) => {
@@ -58,7 +58,7 @@ export function AgentPortfolioRail({
                 <button
                   type="button"
                   className="paper-lab-agent-tile__details-btn"
-                  aria-label={`Details for ${p.agentName}`}
+                  aria-label={`Chi tiết cho ${p.agentName}`}
                   data-testid={`agent-details-btn-${p.agentId}`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -82,7 +82,7 @@ export function AgentPortfolioRail({
                   }}
                   role={onSelectAgent ? "button" : undefined}
                   tabIndex={onSelectAgent ? 0 : undefined}
-                  aria-label={onSelectAgent ? `Select ${p.agentName} to filter` : undefined}
+                  aria-label={onSelectAgent ? `Chọn ${p.agentName} để lọc` : undefined}
                 >
                   <div className="paper-lab-agent-tile__head paper-lab-agent-tile__head--wide">
                     <span className="paper-lab-agent-tile__avatar" aria-hidden title={p.style}>

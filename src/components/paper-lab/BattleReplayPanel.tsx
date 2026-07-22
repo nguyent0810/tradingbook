@@ -25,7 +25,7 @@ function BattleReplayContent({
   const { sessionDate, symbol, insight, rows } = battleReplay;
 
   if (rows.length === 0) {
-    return <p className="text-sm text-[var(--text-tertiary)]">No battle replay data for this session.</p>;
+    return <p className="text-sm text-[var(--text-tertiary)]">Không có dữ liệu tái hiện đối đầu cho phiên này.</p>;
   }
 
   const votes = countVotes(rows);
@@ -38,7 +38,7 @@ function BattleReplayContent({
 
       <div className="paper-lab-battle-replay__session">
         <p className="text-sm text-[var(--text-secondary)] font-medium">
-          Session replay — {sessionDate} · <span className="font-mono">{symbol}</span>
+          Tái hiện phiên — {sessionDate} · <span className="font-mono">{symbol}</span>
         </p>
         <p className="text-xs text-[var(--text-tertiary)] mt-1 line-clamp-2">{insight}</p>
       </div>
@@ -65,14 +65,14 @@ export function BattleReplayPanel({
 
   if (battleReplay.rows.length === 0) {
     return (
-      <PaperLabPanel title="Battle Replay" testId="paper-lab-battle-replay">
-        <p className="text-sm text-[var(--text-tertiary)]">No battle replay data for this session.</p>
+      <PaperLabPanel title="Tái hiện đối đầu" testId="paper-lab-battle-replay">
+        <p className="text-sm text-[var(--text-tertiary)]">Không có dữ liệu tái hiện đối đầu cho phiên này.</p>
       </PaperLabPanel>
     );
   }
 
   return (
-    <PaperLabPanel title="Battle Replay" testId="paper-lab-battle-replay">
+    <PaperLabPanel title="Tái hiện đối đầu" testId="paper-lab-battle-replay">
       <BattleReplayContent battleReplay={battleReplay} recentBattles={recentBattles} />
     </PaperLabPanel>
   );

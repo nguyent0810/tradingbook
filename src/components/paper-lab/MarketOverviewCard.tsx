@@ -17,7 +17,7 @@ export function MarketOverviewCard({ pulse }: { pulse: MarketPulseDto }) {
   const delta = formatPct(pulse.vnindexChangePct);
 
   return (
-    <PaperLabPanel title="Market Overview" testId="paper-lab-market-overview">
+    <PaperLabPanel title="Tổng quan thị trường" testId="paper-lab-market-overview">
       <div className="paper-lab-market-grid">
         <div className="paper-lab-market-grid__cell paper-lab-market-grid__cell--hero">
           <div className="paper-lab-label">VNINDEX</div>
@@ -35,17 +35,17 @@ export function MarketOverviewCard({ pulse }: { pulse: MarketPulseDto }) {
           </div>
         </div>
         <div className="paper-lab-market-grid__cell">
-          <div className="paper-lab-label" title="Breadth regime proxy — not exchange adv/dec">
-            Breadth
+          <div className="paper-lab-label" title="Chỉ báo độ rộng thị trường — không phải số mã tăng/giảm sàn">
+            Độ rộng
           </div>
           <div className="text-sm truncate-1">{pulse.breadthLabel}</div>
         </div>
         <div className="paper-lab-market-grid__cell">
-          <div className="paper-lab-label">Liquidity</div>
+          <div className="paper-lab-label">Thanh khoản</div>
           <div className="text-sm">{pulse.liquidityLabel}</div>
         </div>
         <div className="paper-lab-market-grid__cell">
-          <div className="paper-lab-label">Volatility</div>
+          <div className="paper-lab-label">Biến động</div>
           <div className="text-sm">{pulse.volatilityLabel}</div>
         </div>
       </div>

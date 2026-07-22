@@ -84,12 +84,12 @@ export function DashboardSecondaryIntelligence({
           03
         </span>
         <div>
-          <p className="dash-v2-eyebrow">Secondary intelligence</p>
+          <p className="dash-v2-eyebrow">Thông tin bổ sung</p>
           <h2 id="dashboard-watch-zone-heading" className="dash-v2-zone-title">
-            Watchlist &amp; gate blockers
+            Danh sách theo dõi &amp; rào cản cổng
           </h2>
           <p className="dash-v2-zone-lead">
-            Background context — check when you want more than the verdict.
+            Bối cảnh nền — xem khi bạn cần nhiều hơn phán quyết.
           </p>
         </div>
       </header>
@@ -105,11 +105,11 @@ export function DashboardSecondaryIntelligence({
               <span className="dash-si-widget__icon">
                 <IconBinoculars />
               </span>
-              <span className="dash-si-widget__title">Watchlist</span>
+              <span className="dash-si-widget__title">Danh sách theo dõi</span>
               <span className="dash-si-widget__count tabular-nums">{watchItems.length}</span>
             </span>
             {previewWatch.length === 0 ? (
-              <p className="dash-si-widget__empty">No active watch items.</p>
+              <p className="dash-si-widget__empty">Không có mã đang theo dõi.</p>
             ) : (
               <ul className="dash-si-mini-rows">
                 {previewWatch.map((w) => {
@@ -132,8 +132,8 @@ export function DashboardSecondaryIntelligence({
             )}
             <span className="dash-si-widget__toggle">
               {watchItems.length > previewWatch.length
-                ? `+${watchItems.length - previewWatch.length} more — view all`
-                : "View details"}
+                ? `+${watchItems.length - previewWatch.length} nữa — xem tất cả`
+                : "Xem chi tiết"}
               <span className="dash-si-widget__chevron">
                 <IconChevron />
               </span>
@@ -160,12 +160,12 @@ export function DashboardSecondaryIntelligence({
               <span className="dash-si-widget__icon">
                 <IconShieldAlert />
               </span>
-              <span className="dash-si-widget__title">Gate blockers</span>
+              <span className="dash-si-widget__title">Rào cản cổng</span>
               <span className="dash-si-widget__count tabular-nums">{diagnostics.blockers.length}</span>
             </span>
             {previewBlockers.length === 0 ? (
               <p className="dash-si-widget__empty">
-                {diagnostics.emptyReason ?? "No actionable blockers."}
+                {diagnostics.emptyReason ?? "Không có rào cản cần xử lý."}
               </p>
             ) : (
               <ul className="dash-si-mini-rows">
@@ -182,8 +182,8 @@ export function DashboardSecondaryIntelligence({
             )}
             <span className="dash-si-widget__toggle">
               {diagnostics.blockers.length > previewBlockers.length
-                ? `+${diagnostics.blockers.length - previewBlockers.length} more — view all`
-                : "View details"}
+                ? `+${diagnostics.blockers.length - previewBlockers.length} nữa — xem tất cả`
+                : "Xem chi tiết"}
               <span className="dash-si-widget__chevron">
                 <IconChevron />
               </span>

@@ -32,7 +32,7 @@ export function NearMissWatchlistGrid({
         <div className="min-w-0 border-[var(--border-primary)]/40 lg:border-r">
           <header className="flex items-center justify-between border-b border-[var(--border-primary)]/40 px-4 py-3">
             <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-              Near-miss pipeline
+              Đường ống suýt đạt
             </span>
             <span className="font-mono text-xs tabular-nums text-[var(--warning)]/90">
               {closestRows.length}
@@ -42,8 +42,8 @@ export function NearMissWatchlistGrid({
           {closestRows.length === 0 ? (
             <div className="p-4">
               <EmptyStateWithReason
-                title="No near-miss symbols saved"
-                reason="This scan did not persist closest-to-valid rows in notes, or none qualified."
+                title="Không có mã suýt đạt được lưu"
+                reason="Lần quét này không lưu các mã gần đạt chuẩn trong ghi chú, hoặc không có mã nào đạt."
                 data-testid="setups-near-miss-empty"
               />
             </div>
@@ -52,10 +52,10 @@ export function NearMissWatchlistGrid({
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-[var(--border-primary)]/40 font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2">Symbol</th>
-                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2">Status</th>
-                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2 text-right">Close</th>
-                    <th className="px-3 py-2">Blocker</th>
+                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2">Mã</th>
+                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2">Trạng thái</th>
+                    <th className="border-r border-[var(--border-primary)]/40 px-3 py-2 text-right">Giá đóng</th>
+                    <th className="px-3 py-2">Rào cản</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -68,7 +68,7 @@ export function NearMissWatchlistGrid({
                     );
                     const blocker = row.terminalReasonPreview
                       ? formatScannerReasonForUser(row.terminalReasonPreview)
-                      : "Not ready";
+                      : "Chưa sẵn sàng";
                     const isAwaiting = status === "WAIT";
 
                     return (
@@ -103,7 +103,7 @@ export function NearMissWatchlistGrid({
 
         <aside className="min-w-0 p-4">
           <p className="mb-3 font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-            RS checklist
+            Danh sách kiểm tra RS
           </p>
           {closestRows.length > 0 ? (
             <div className="space-y-3">
@@ -119,7 +119,7 @@ export function NearMissWatchlistGrid({
           ) : rsPanel && rsPanel.rows.length > 0 ? (
             <SetupsRsWatchlistV3 panel={rsPanel} />
           ) : (
-            <p className="text-xs text-[var(--text-tertiary)]">No RS diagnostics available.</p>
+            <p className="text-xs text-[var(--text-tertiary)]">Không có chẩn đoán RS.</p>
           )}
         </aside>
       </div>
@@ -128,7 +128,7 @@ export function NearMissWatchlistGrid({
         <div className="sw-glass-panel p-4">
           <header className="mb-3 flex items-center justify-between">
             <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-              Relative strength watchlist
+              Danh sách theo dõi sức mạnh tương đối
             </span>
             <span className="font-mono text-xs tabular-nums text-[var(--text-tertiary)]">
               {rsPanel.rows.length}

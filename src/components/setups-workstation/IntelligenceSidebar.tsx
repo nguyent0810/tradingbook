@@ -38,9 +38,9 @@ export function IntelligenceSidebar({
 
   const tabs: { id: TabId; label: string }[] = useMemo(
     () => [
-      { id: "stance", label: "Stance" },
-      { id: "funnel", label: "Pipeline" },
-      { id: "diagnostics", label: "Diagnostics" },
+      { id: "stance", label: "Lập trường" },
+      { id: "funnel", label: "Đường ống" },
+      { id: "diagnostics", label: "Chẩn đoán" },
     ],
     []
   );
@@ -65,12 +65,12 @@ export function IntelligenceSidebar({
     <aside
       className="sw-glass-panel flex h-full flex-col overflow-hidden"
       data-testid="setups-sidebar"
-      aria-label="Pipeline intelligence dock"
+      aria-label="Bảng thông tin đường ống"
     >
       <div
         className="relative flex border-b border-[var(--border-primary)]/60"
         role="tablist"
-        aria-label="Pipeline intelligence"
+        aria-label="Thông tin đường ống"
       >
         {tabs.map((t) => (
           <SidebarTabButton
@@ -106,7 +106,7 @@ export function IntelligenceSidebar({
                   <SetupsStanceCompact decision={tradingDecision} />
                 </div>
               ) : (
-                <p className="text-sm text-[var(--text-tertiary)]">No trading stance for this scan.</p>
+                <p className="text-sm text-[var(--text-tertiary)]">Không có lập trường giao dịch cho lần quét này.</p>
               )}
             </motion.div>
           ) : null}
@@ -150,8 +150,8 @@ export function IntelligenceSidebar({
                 rejectionBuckets={rejectionBuckets}
                 scanNotes={scanNotes}
                 latestScan={latestScan}
-                title="Rejection diagnostics"
-                subtitle="Why setups fell short"
+                title="Chẩn đoán lý do bị loại"
+                subtitle="Vì sao thiết lập chưa đạt"
                 embedded
               />
             </motion.div>
