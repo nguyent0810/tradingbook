@@ -89,13 +89,13 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="app-shell command-deck-shell">
-      <DashboardClayThemeEffect
-        fontVariableClassName={`${clayHeadingFont.variable} ${clayBodyFont.variable}`}
-      />
       <a href="#main-content" className="app-shell-skip">
         Skip to content
       </a>
       <Suspense fallback={<LoadingSkeleton height="100vh" aria-label="Loading" />}>
+        <DashboardClayThemeEffect
+          fontVariableClassName={`${clayHeadingFont.variable} ${clayBodyFont.variable}`}
+        />
         <AppShellSidebar />
         <DashboardShellBody>{children}</DashboardShellBody>
       </Suspense>
