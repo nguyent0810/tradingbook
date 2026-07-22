@@ -38,6 +38,17 @@ const campTone = (c: Camp) => (c === "buy" ? "pos" : c === "sell" ? "neg" : "neu
 const fmtPct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 const conf = (c: number | null) => (c == null ? "—" : `${Math.round(c * 100)}%`);
 
+/** Status key stays English (drives the arena-status--{key} CSS class); the
+ *  Vietnamese label is looked up separately so translating copy never
+ *  changes which class name gets rendered. */
+const STANDING_STATUS_LABEL_VI: Record<string, string> = {
+  champion: "Vô địch",
+  climbing: "Đang lên",
+  falling: "Đang xuống",
+  atrisk: "Rủi ro",
+  holding: "Ổn định",
+};
+
 export function ArenaWorkspace({
   data,
   learning,
@@ -179,45 +190,45 @@ export function ArenaWorkspace({
       <div className="arena-zones">
         {/* ═══ NOW — Today's Arena Briefing ═══ */}
         <section id="arena-now" className="arena-zone" aria-labelledby="arena-now-h">
-          <ZoneHead n="01" kicker="What is happening?" id="arena-now-h" title="Today's Arena Briefing"
-            lead="If ten investment philosophies managed capital today — here is who is leading, the environment they are trading, and the house view." />
+          <ZoneHead n="01" kicker="Đang diễn ra điều gì?" id="arena-now-h" title="Tóm tắt Đấu trường hôm nay"
+            lead="Nếu mười triết lý đầu tư cùng quản lý vốn hôm nay — đây là ai đang dẫn đầu, môi trường họ đang giao dịch, và quan điểm chung." />
 
           <ArenaTradingStanceBanner decision={data.overview.tradingDecision} />
 
           <div className="arena-briefing">
-            <BriefingCard kind="leader" label="Today's leader" hint="Who is winning">
+            <BriefingCard kind="leader" label="Dẫn đầu hôm nay" hint="Ai đang thắng">
               {champion ? (<>
                 <span className="arena-briefing__title">{champion.name}</span>
                 <span className="arena-briefing__meta">{champion.philosophy} · <b className={champion.returnPct >= 0 ? "pos" : "neg"}>{fmtPct(champion.returnPct)}</b></span>
-              </>) : <span className="arena-briefing__meta">No standings yet</span>}
+              </>) : <span className="arena-briefing__meta">Chưa có bảng xếp hạng</span>}
             </BriefingCard>
 
-            <BriefingCard kind="env" label="Environment" hint="The market they trade">
+            <BriefingCard kind="env" label="Môi trường" hint="Thị trường họ đang giao dịch">
               <span className={`arena-briefing__title arena-regime--${(data.overview.marketRegime.level ?? "WARNING").toLowerCase()}`}>{data.overview.marketRegime.level ?? "—"}</span>
               <span className="arena-briefing__meta">{data.overview.marketRegime.labels?.slice(0, 3).join(" · ") || data.overview.marketRegime.label}</span>
             </BriefingCard>
 
-            <BriefingCard kind="opportunity" label="Biggest opportunity" hint="Where conviction points">
+            <BriefingCard kind="opportunity" label="Cơ hội lớn nhất" hint="Nơi niềm tin tập trung">
               {opportunity ? (<>
                 <span className="arena-briefing__title pos">{opportunity.symbol} · {opportunity.finalAction}</span>
-                <span className="arena-briefing__meta">{conf(opportunity.confidence)} conviction — {opportunity.decisionSummary ?? opportunity.reasoning}</span>
-              </>) : <span className="arena-briefing__meta">No strong buy consensus today</span>}
+                <span className="arena-briefing__meta">{conf(opportunity.confidence)} độ tin cậy — {opportunity.decisionSummary ?? opportunity.reasoning}</span>
+              </>) : <span className="arena-briefing__meta">Chưa có đồng thuận mua mạnh hôm nay</span>}
             </BriefingCard>
 
-            <BriefingCard kind="danger" label="Biggest danger" hint="What to avoid">
+            <BriefingCard kind="danger" label="Rủi ro lớn nhất" hint="Điều cần tránh">
               {danger ? (<>
                 <span className="arena-briefing__title neg">{danger.symbol} · {danger.finalAction}</span>
-                <span className="arena-briefing__meta">{conf(danger.confidence)} conviction — {danger.decisionSummary ?? danger.reasoning}</span>
+                <span className="arena-briefing__meta">{conf(danger.confidence)} độ tin cậy — {danger.decisionSummary ?? danger.reasoning}</span>
               </>) : loser ? (<>
                 <span className="arena-briefing__title neg">{loser.name}</span>
-                <span className="arena-briefing__meta">{loser.philosophy} is bleeding — {fmtPct(loser.returnPct)}, drawdown {loser.drawdown.toFixed(1)}%</span>
-              </>) : <span className="arena-briefing__meta">No acute risk flagged</span>}
+                <span className="arena-briefing__meta">{loser.philosophy} đang lỗ — {fmtPct(loser.returnPct)}, sụt giảm {loser.drawdown.toFixed(1)}%</span>
+              </>) : <span className="arena-briefing__meta">Không có rủi ro cấp bách</span>}
             </BriefingCard>
           </div>
 
           {cioTop && (
             <p className="arena-briefing__verdict">
-              <span className="arena-briefing__verdict-tag">CIO conclusion</span>
+              <span className="arena-briefing__verdict-tag">Kết luận CIO</span>
               {cioTop.decisionSummary ?? cioTop.reasoning}
             </p>
           )}
@@ -231,24 +242,24 @@ export function ArenaWorkspace({
 
         {/* ═══ CONSENSUS — League Standings ═══ */}
         <section id="arena-consensus" className="arena-zone" aria-labelledby="arena-consensus-h">
-          <ZoneHead n="02" kicker="Who agrees?" id="arena-consensus-h" title="League Standings"
-            lead="Ten philosophies, one scoreboard. Who is climbing, who is falling, and how much the league agrees today." />
+          <ZoneHead n="02" kicker="Ai đồng thuận?" id="arena-consensus-h" title="Bảng xếp hạng"
+            lead="Mười triết lý, một bảng điểm. Ai đang lên, ai đang xuống, và cả sàn đồng thuận đến đâu hôm nay." />
 
           <div className="arena-podium">
-            <PodiumCard rank="Champion" tone="gold" name={champion?.name} sub={champion ? `${champion.philosophy} · ${fmtPct(champion.returnPct)}` : "—"} />
-            <PodiumCard rank="Biggest mover" tone="up" name={mover?.name} sub={mover ? `${mover.philosophy} · ${mover.rankChange > 0 ? `▲ ${mover.rankChange}` : "steady"}` : "—"} />
-            <PodiumCard rank="Biggest faller" tone="down" name={loser?.name} sub={loser ? `${loser.philosophy} · ${loser.rankChange < 0 ? `▼ ${Math.abs(loser.rankChange)}` : fmtPct(loser.returnPct)}` : "—"} />
-            <PodiumCard rank="League agreement" tone="cyan" name={`${agreement.pct}%`} sub={`avg conviction ${agreement.avgConf}% · ${agreement.total} calls`} />
+            <PodiumCard rank="Vô địch" tone="gold" name={champion?.name} sub={champion ? `${champion.philosophy} · ${fmtPct(champion.returnPct)}` : "—"} />
+            <PodiumCard rank="Tăng hạng mạnh nhất" tone="up" name={mover?.name} sub={mover ? `${mover.philosophy} · ${mover.rankChange > 0 ? `▲ ${mover.rankChange}` : "ổn định"}` : "—"} />
+            <PodiumCard rank="Giảm hạng mạnh nhất" tone="down" name={loser?.name} sub={loser ? `${loser.philosophy} · ${loser.rankChange < 0 ? `▼ ${Math.abs(loser.rankChange)}` : fmtPct(loser.returnPct)}` : "—"} />
+            <PodiumCard rank="Mức đồng thuận" tone="cyan" name={`${agreement.pct}%`} sub={`độ tin cậy TB ${agreement.avgConf}% · ${agreement.total} lệnh`} />
           </div>
 
-          <div className="paper-lab-panel arena-standings" aria-label="League table">
+          <div className="paper-lab-panel arena-standings" aria-label="Bảng đấu">
             <div className="paper-lab-panel__title-row">
-              <h3 className="paper-lab-panel__title">League table</h3>
-              <span className="arena-standings__hint">Return · today&apos;s call · conviction · status</span>
+              <h3 className="paper-lab-panel__title">Bảng đấu</h3>
+              <span className="arena-standings__hint">Lợi nhuận · lệnh hôm nay · độ tin cậy · trạng thái</span>
             </div>
             <div className="safe-table-wrap paper-lab-table-wrap">
               <table className="paper-lab-table safe-table arena-standings__table">
-                <thead><tr><th>#</th><th>Fund</th><th>Philosophy</th><th>Return</th><th>Today</th><th>Conv.</th><th>Status</th></tr></thead>
+                <thead><tr><th>#</th><th>Quỹ</th><th>Triết lý</th><th>Lợi nhuận</th><th>Hôm nay</th><th>Tin cậy</th><th>Trạng thái</th></tr></thead>
                 <tbody>
                   {standings.map((r) => (
                     <tr key={r.agentId}>
@@ -258,7 +269,7 @@ export function ArenaWorkspace({
                       <td className={`tabular-nums ${r.returnPct >= 0 ? "pos" : "neg"}`}>{fmtPct(r.returnPct)}</td>
                       <td>{r.action ? <span className={`arena-act arena-act--${campTone(campOf(r.action))}`}>{r.action}</span> : <span className="arena-muted">—</span>}</td>
                       <td className="tabular-nums arena-muted">{conf(r.confidence)}</td>
-                      <td><span className={`arena-status arena-status--${r.status.toLowerCase().replace(/\s/g, "")}`}>{r.status}</span></td>
+                      <td><span className={`arena-status arena-status--${r.status.toLowerCase().replace(/\s/g, "")}`}>{STANDING_STATUS_LABEL_VI[r.status.toLowerCase().replace(/\s/g, "")] ?? r.status}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -275,7 +286,7 @@ export function ArenaWorkspace({
           />
           {agentFilter && (
             <button type="button" className="paper-lab-link-btn text-xs mb-3" onClick={() => setAgentFilter(null)}>
-              Clear filter: {data.portfolios.find((p) => p.agentId === agentFilter)?.agentName}
+              Xóa bộ lọc: {data.portfolios.find((p) => p.agentId === agentFilter)?.agentName}
             </button>
           )}
           <DecisionsLogTable decisions={data.decisions} />
@@ -283,15 +294,15 @@ export function ArenaWorkspace({
 
         {/* ═══ CONFLICT — Today's Biggest Debate ═══ */}
         <section id="arena-conflict" className="arena-zone" aria-labelledby="arena-conflict-h">
-          <ZoneHead n="03" kicker="Who disagrees?" id="arena-conflict-h" title="Today's Biggest Debate"
-            lead="The emotional centre of the Arena — where philosophies collide on the same stock, and why." />
+          <ZoneHead n="03" kicker="Ai phản đối?" id="arena-conflict-h" title="Tranh luận lớn nhất hôm nay"
+            lead="Tâm điểm cảm xúc của Đấu trường — nơi các triết lý va chạm trên cùng một cổ phiếu, và vì sao." />
 
           {debate ? (
             <div className="arena-debate">
               <div className="arena-debate__head">
-                <span className="arena-debate__tag">The floor is split on</span>
+                <span className="arena-debate__tag">Cả sàn chia rẽ về</span>
                 <span className="arena-debate__sym">{debate.symbol}</span>
-                <span className="arena-debate__count">{debate.count} agents weighing in</span>
+                <span className="arena-debate__count">{debate.count} agent đang cân nhắc</span>
               </div>
               <div className="arena-debate__camps">
                 {(["buy", "hold", "sell"] as Camp[]).map((c) => (
@@ -300,26 +311,26 @@ export function ArenaWorkspace({
               </div>
               {debate.cioRec && (
                 <div className="arena-debate__verdict">
-                  <span className="arena-debate__verdict-tag">Why — CIO ruling</span>
+                  <span className="arena-debate__verdict-tag">Vì sao — phán quyết CIO</span>
                   <span className={`arena-act arena-act--${campTone(campOf(debate.cioRec.finalAction))}`}>{debate.cioRec.finalAction}</span>
                   <p>{debate.cioRec.reasoning}</p>
                 </div>
               )}
             </div>
           ) : (
-            <p className="arena-empty">No open debate today — the league is aligned.</p>
+            <p className="arena-empty">Không có tranh luận nào hôm nay — cả sàn đồng thuận.</p>
           )}
 
           {/* Battle history (secondary) */}
           <details className="arena-more" open>
-            <summary className="arena-more__summary">Battle history &amp; open book</summary>
+            <summary className="arena-more__summary">Lịch sử đối đầu &amp; sổ lệnh mở</summary>
             <PaperLabWorkspaceTabs positions={filteredPositions} battleReplay={data.battleReplay} recentBattles={data.recentBattles} />
             {learning.battles.length > 0 && (
               <div className="paper-lab-panel arena-learning-panel" data-testid="paper-lab-battles-ledger">
-                <h3 className="paper-lab-panel__title">Battle ledger</h3>
+                <h3 className="paper-lab-panel__title">Sổ đối đầu</h3>
                 <div className="safe-table-wrap paper-lab-table-wrap">
                   <table className="paper-lab-table safe-table">
-                    <thead><tr><th>Session</th><th>Symbol</th><th>Status</th><th>Agents</th><th>5d bench</th></tr></thead>
+                    <thead><tr><th>Phiên</th><th>Mã</th><th>Trạng thái</th><th>Agent</th><th>Chuẩn 5N</th></tr></thead>
                     <tbody>
                       {learning.battles.map((b) => (
                         <tr key={b.id}>
@@ -340,40 +351,40 @@ export function ArenaWorkspace({
 
         {/* ═══ DECISION — Human PM Control Room ═══ */}
         <section id="arena-decision" className="arena-zone" aria-labelledby="arena-decision-h">
-          <ZoneHead n="04" kicker="What would I do?" id="arena-decision-h" title="Human PM Control Room"
-            lead="The AI league proposes. You dispose. Every call is scored against the machines on the same simulated capital." />
+          <ZoneHead n="04" kicker="Tôi sẽ làm gì?" id="arena-decision-h" title="Phòng điều hành PM"
+            lead="Hội đồng AI đề xuất. Bạn quyết định. Mỗi lệnh đều được chấm điểm so với các cỗ máy trên cùng vốn mô phỏng." />
 
           <div className="paper-lab-panel arena-control" data-testid="paper-lab-human-review">
             <div className="paper-lab-panel__title-row">
-              <h3 className="paper-lab-panel__title">Review queue</h3>
-              <span className="arena-standings__hint">AI consensus → your call → pending outcome</span>
+              <h3 className="paper-lab-panel__title">Hàng chờ xem xét</h3>
+              <span className="arena-standings__hint">Đồng thuận AI → quyết định của bạn → kết quả chờ</span>
             </div>
             {controlRoom.length > 0 ? (
               <ul className="arena-flow-list">
                 {controlRoom.map((c) => (
                   <li key={c.id} className="arena-flow">
-                    <FlowStep label="AI consensus" value={c.aiAction ?? "—"} tone={c.aiAction ? campTone(campOf(c.aiAction)) : "neutral"} sub={conf(c.aiConfidence)} />
+                    <FlowStep label="Đồng thuận AI" value={c.aiAction ?? "—"} tone={c.aiAction ? campTone(campOf(c.aiAction)) : "neutral"} sub={conf(c.aiConfidence)} />
                     <span className="arena-flow__arrow" aria-hidden="true">→</span>
-                    <FlowStep label="Human PM" value={c.action} tone={campTone(campOf(c.action))} sub={c.symbol} />
+                    <FlowStep label="PM con người" value={c.action} tone={campTone(campOf(c.action))} sub={c.symbol} />
                     <span className="arena-flow__arrow" aria-hidden="true">→</span>
-                    <FlowStep label="Outcome" value="Pending" tone="neutral" sub="review later" />
+                    <FlowStep label="Kết quả" value="Đang chờ" tone="neutral" sub="xem lại sau" />
                     <span className={`arena-flow__verdict arena-flow__verdict--${c.agrees ? "agree" : "override"}`}>
-                      {c.agrees ? "Accepted consensus" : "Override"}
+                      {c.agrees ? "Theo đồng thuận" : "Ghi đè"}
                     </span>
                     <p className="arena-flow__reason">{c.reasoning}</p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="arena-empty">No human calls yet today. Add one below to enter the league.</p>
+              <p className="arena-empty">Chưa có quyết định con người nào hôm nay. Thêm một lệnh bên dưới để tham gia.</p>
             )}
           </div>
 
           <details className="arena-more">
-            <summary className="arena-more__summary">Add a discretionary call</summary>
+            <summary className="arena-more__summary">Thêm quyết định tùy ý</summary>
             <div className="paper-lab-panel arena-decision-panel">
               <p className="arena-decision-panel__note">
-                Human PM runs the same 500M ₫ simulated capital and validation as the AI agents. Your call is recorded and scored alongside them.
+                PM con người dùng cùng 500 triệu ₫ vốn mô phỏng và cùng cách xác thực như các agent AI. Quyết định của bạn được ghi lại và chấm điểm cùng họ.
               </p>
               <HumanPmForm />
             </div>
@@ -382,25 +393,25 @@ export function ArenaWorkspace({
 
         {/* ═══ LEARNING — Season Awards ═══ */}
         <section id="arena-learning" className="arena-zone" aria-labelledby="arena-learning-h">
-          <ZoneHead n="05" kicker="What did we learn?" id="arena-learning-h" title="Season Awards"
-            lead="The trophies of the season so far — and the evolution behind them." />
+          <ZoneHead n="05" kicker="Chúng ta học được gì?" id="arena-learning-h" title="Giải thưởng mùa giải"
+            lead="Những chiếc cúp của mùa giải tính đến nay — và hành trình phía sau chúng." />
 
           <div className="arena-awards">
-            <AwardCard trophy="🏆" title="Champion" name={awards.champion?.name} sub={awards.champion ? `${awards.champion.philosophy} · ${fmtPct(awards.champion.returnPct)}` : "—"} tone="gold" />
-            <AwardCard trophy="📈" title="Most improved" name={awards.improved?.name} sub={awards.improved ? (awards.improved.rankChange > 0 ? `▲ ${awards.improved.rankChange} places` : awards.improved.philosophy) : "—"} tone="up" />
-            <AwardCard trophy="🩸" title="Worst drawdown" name={awards.worstDd?.name} sub={awards.worstDd ? `−${awards.worstDd.drawdown.toFixed(1)}% · ${awards.worstDd.philosophy}` : "—"} tone="down" />
-            <AwardCard trophy="🎯" title="Best regime specialist" name={awards.specialist?.agent} sub={awards.specialist ? `${awards.specialist.type} · ${awards.specialist.value.toFixed(2)}` : "No award yet"} tone="cyan" />
-            <AwardCard trophy="🧪" title="Experiment winner" name={awards.experiment?.name} sub={awards.experiment ? `${awards.experiment.status} · ${awards.experiment.arms} arms` : "No experiments"} tone="purple" />
-            <AwardCard trophy="🧬" title="Strategy evolution" name={`${awards.sessions} sessions`} sub={awards.record ? `record: ${awards.record.type} (${awards.record.agent})` : "tracked over time"} tone="cyan" />
+            <AwardCard trophy="🏆" title="Vô địch" name={awards.champion?.name} sub={awards.champion ? `${awards.champion.philosophy} · ${fmtPct(awards.champion.returnPct)}` : "—"} tone="gold" />
+            <AwardCard trophy="📈" title="Tiến bộ nhất" name={awards.improved?.name} sub={awards.improved ? (awards.improved.rankChange > 0 ? `▲ ${awards.improved.rankChange} bậc` : awards.improved.philosophy) : "—"} tone="up" />
+            <AwardCard trophy="🩸" title="Sụt giảm mạnh nhất" name={awards.worstDd?.name} sub={awards.worstDd ? `−${awards.worstDd.drawdown.toFixed(1)}% · ${awards.worstDd.philosophy}` : "—"} tone="down" />
+            <AwardCard trophy="🎯" title="Chuyên gia chế độ giỏi nhất" name={awards.specialist?.agent} sub={awards.specialist ? `${awards.specialist.type} · ${awards.specialist.value.toFixed(2)}` : "Chưa có giải"} tone="cyan" />
+            <AwardCard trophy="🧪" title="Thử nghiệm chiến thắng" name={awards.experiment?.name} sub={awards.experiment ? `${awards.experiment.status} · ${awards.experiment.arms} nhánh` : "Chưa có thử nghiệm"} tone="purple" />
+            <AwardCard trophy="🧬" title="Tiến hóa chiến lược" name={`${awards.sessions} phiên`} sub={awards.record ? `kỷ lục: ${awards.record.type} (${awards.record.agent})` : "theo dõi theo thời gian"} tone="cyan" />
           </div>
 
           <details className="arena-more" open>
-            <summary className="arena-more__summary">Records, experiments &amp; timeline</summary>
+            <summary className="arena-more__summary">Kỷ lục, thử nghiệm &amp; dòng thời gian</summary>
             <div className="arena-learning-grid">
-              <LearningPanel title="Experiments" empty="No experiments running.">
+              <LearningPanel title="Thử nghiệm" empty="Không có thử nghiệm đang chạy.">
                 {learning.experiments.length > 0 && (
                   <table className="paper-lab-table safe-table">
-                    <thead><tr><th>Name</th><th>Status</th><th>Arms</th><th>Started</th></tr></thead>
+                    <thead><tr><th>Tên</th><th>Trạng thái</th><th>Nhánh</th><th>Bắt đầu</th></tr></thead>
                     <tbody>
                       {learning.experiments.map((e) => (
                         <tr key={e.id}><td>{e.name}</td><td>{e.status}</td><td className="tabular-nums">{e.arms}</td><td className="tabular-nums">{e.started}</td></tr>
@@ -410,10 +421,10 @@ export function ArenaWorkspace({
                 )}
               </LearningPanel>
 
-              <LearningPanel title="Evolution — sessions" empty="No sessions recorded yet.">
+              <LearningPanel title="Diễn biến — các phiên" empty="Chưa có phiên nào được ghi nhận.">
                 {learning.timeline.length > 0 && (
                   <table className="paper-lab-table safe-table">
-                    <thead><tr><th>Session</th><th>Decisions</th><th>Battles</th></tr></thead>
+                    <thead><tr><th>Phiên</th><th>Quyết định</th><th>Đối đầu</th></tr></thead>
                     <tbody>
                       {learning.timeline.map((t) => (
                         <tr key={t.id}>
@@ -428,13 +439,13 @@ export function ArenaWorkspace({
               </LearningPanel>
 
               <div className="paper-lab-panel arena-learning-panel" data-testid="paper-lab-leaderboard">
-                <h3 className="paper-lab-panel__title">Hall of Fame</h3>
+                <h3 className="paper-lab-panel__title">Đại sảnh danh vọng</h3>
                 {learning.achievements.length === 0 ? (
-                  <p className="arena-empty">No records set yet.</p>
+                  <p className="arena-empty">Chưa có kỷ lục nào.</p>
                 ) : (
                   <div className="safe-table-wrap paper-lab-table-wrap">
                     <table className="paper-lab-table safe-table">
-                      <thead><tr><th>Achievement</th><th>Agent</th><th>Session</th><th>Value</th></tr></thead>
+                      <thead><tr><th>Thành tích</th><th>Agent</th><th>Phiên</th><th>Giá trị</th></tr></thead>
                       <tbody>
                         {learning.achievements.map((a) => (
                           <tr key={a.id}><td>{a.type}</td><td>{a.agent}</td><td className="tabular-nums">{a.session}</td><td className="tabular-nums">{a.value.toFixed(2)}</td></tr>
@@ -486,7 +497,7 @@ function PodiumCard({ rank, tone, name, sub }: { rank: string; tone: string; nam
 }
 
 function DebateCamp({ camp, members }: { camp: Camp; members: { name: string; philosophy: string; action: string; confidence: number; reason: string }[] }) {
-  const heading = camp === "buy" ? "Buy" : camp === "sell" ? "Sell / Reduce" : "Hold";
+  const heading = camp === "buy" ? "Mua" : camp === "sell" ? "Bán / Giảm" : "Giữ";
   return (
     <div className={`arena-camp arena-camp--${campTone(camp)}`}>
       <div className="arena-camp__head">
@@ -496,8 +507,8 @@ function DebateCamp({ camp, members }: { camp: Camp; members: { name: string; ph
       {members.length === 0 ? (
         <EmptyStateWithReason
           compact
-          title="No takers"
-          reason="No agents are recommending this move right now."
+          title="Không ai tham gia"
+          reason="Hiện chưa có agent nào đề xuất hành động này."
         />
       ) : (
         <ul className="arena-camp__list">

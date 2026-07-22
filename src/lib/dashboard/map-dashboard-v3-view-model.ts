@@ -246,19 +246,19 @@ function buildHeaderCta(
   if (mode === "PROTECT CAPITAL") {
     if (openPositionCount > 0) {
       return {
-        lead: "No new swing entries today. Review risk, watch the pipeline, and wait for the next scan.",
+        lead: "Không có lệnh swing mới hôm nay. Xem lại rủi ro, theo dõi đường ống, và chờ lần quét tiếp theo.",
         primaryHref: "/setups",
-        primaryLabel: "Review setups",
+        primaryLabel: "Xem lại thiết lập",
         secondaryHref: "/paper-lab",
-        secondaryLabel: "Open Arena",
+        secondaryLabel: "Mở Đấu trường",
         tertiaryHref: null,
         tertiaryLabel: null,
       };
     }
     return {
-      lead: "No new swing entries today. Review risk, watch the pipeline, and wait for the next scan.",
+      lead: "Không có lệnh swing mới hôm nay. Xem lại rủi ro, theo dõi đường ống, và chờ lần quét tiếp theo.",
       primaryHref: "/setups",
-      primaryLabel: "Open pipeline",
+      primaryLabel: "Mở đường ống",
       secondaryHref: null,
       secondaryLabel: null,
       tertiaryHref: null,
@@ -268,11 +268,11 @@ function buildHeaderCta(
 
   if (mode === "WAIT") {
     return {
-      lead: "Reduced-risk day. Watch developing setups — nothing is confirmed for full-size entry yet.",
+      lead: "Ngày giảm rủi ro. Theo dõi các thiết lập đang hình thành — chưa có gì được xác nhận để vào lệnh đầy đủ.",
       primaryHref: "/setups",
-      primaryLabel: "Open pipeline",
+      primaryLabel: "Mở đường ống",
       secondaryHref: "/paper-lab",
-      secondaryLabel: "Open Arena",
+      secondaryLabel: "Mở Đấu trường",
       tertiaryHref: null,
       tertiaryLabel: null,
     };
@@ -280,22 +280,22 @@ function buildHeaderCta(
 
   if (mode === "TRADE") {
     return {
-      lead: "Normal risk mode. Qualified setups passed filters — enter only when your playbook confirms.",
+      lead: "Chế độ rủi ro bình thường. Thiết lập đạt chuẩn đã qua bộ lọc — chỉ vào lệnh khi playbook của bạn xác nhận.",
       primaryHref: "/setups",
-      primaryLabel: "Review setups",
+      primaryLabel: "Xem lại thiết lập",
       secondaryHref: "/paper-lab",
-      secondaryLabel: "Open Arena",
+      secondaryLabel: "Mở Đấu trường",
       tertiaryHref: null,
       tertiaryLabel: null,
     };
   }
 
   return {
-    lead: "Watchlist-only day. Monitor names on your list — no new swing entries from the latest scan.",
+    lead: "Ngày chỉ theo dõi. Theo dõi các mã trong danh sách của bạn — không có lệnh swing mới từ lần quét gần nhất.",
     primaryHref: "/setups",
-    primaryLabel: "Open pipeline",
+    primaryLabel: "Mở đường ống",
     secondaryHref: "/paper-lab",
-    secondaryLabel: "Open Arena",
+    secondaryLabel: "Mở Đấu trường",
     tertiaryHref: null,
     tertiaryLabel: null,
   };

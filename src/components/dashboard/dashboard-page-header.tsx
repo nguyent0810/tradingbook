@@ -11,8 +11,8 @@ export function DashboardPageHeader({ cta, slim = false }: Props) {
     return (
       <header className="dash-v2-page-header command-deck-page-header command-deck-page-header--slim" data-testid="dashboard-page-header">
         <div className="dash-v2-page-header__copy">
-          <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Command deck</p>
-          <h1 className="dash-v2-page-header__title">Today&apos;s decision</h1>
+          <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Sở chỉ huy</p>
+          <h1 className="dash-v2-page-header__title">Quyết định hôm nay</h1>
           <p className="dash-v2-page-header__lead">{cta.lead}</p>
         </div>
       </header>
@@ -26,8 +26,8 @@ export function DashboardPageHeader({ cta, slim = false }: Props) {
   return (
     <header className="dash-v2-page-header command-deck-page-header" data-testid="dashboard-page-header">
       <div className="dash-v2-page-header__copy">
-        <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Command deck</p>
-        <h1 className="dash-v2-page-header__title">Today&apos;s decision</h1>
+        <p className="dash-v2-eyebrow dash-v2-eyebrow--accent">Sở chỉ huy</p>
+        <h1 className="dash-v2-page-header__title">Quyết định hôm nay</h1>
         <p className="dash-v2-page-header__lead">{cta.lead}</p>
       </div>
       <div className="dash-v2-page-header__actions">

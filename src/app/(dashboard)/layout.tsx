@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { Baloo_2, Nunito } from "next/font/google";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 import { AppShellNavMobile } from "@/components/app-shell-nav";
@@ -8,7 +9,26 @@ import { AppBreadcrumbs } from "@/components/app-breadcrumbs";
 import { LogoutButton } from "@/components/logout-button";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { FocusMainOnRouteChange } from "@/components/focus-main-on-route-change";
+import { DashboardClayThemeEffect } from "@/components/dashboard-clay-theme-effect";
 import "./dashboard-shell.css";
+import "./dashboard-clay-theme.css";
+import "./setups-clay-theme.css";
+import "./arena-clay-theme.css";
+
+// ClayMorphism redesign (Dashboard route only) — Baloo 2 for headings/numerals,
+// Nunito for body copy. Loaded here (not the root layout) so Setups/Arena/
+// Settings never pay for fonts they don't render; dashboard-clay-theme.css
+// only applies these vars under body.dash-clay-active.
+const clayHeadingFont = Baloo_2({
+  subsets: ["latin", "vietnamese"],
+  weight: ["600", "700", "800"],
+  variable: "--font-clay-heading",
+});
+const clayBodyFont = Nunito({
+  subsets: ["latin", "vietnamese"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-clay-body",
+});
 
 /** Session check is a Request-time API (cookies()) — isolated in its own component (and
  *  the header that needs `session.email`) so the static sidebar can render immediately. */
@@ -69,6 +89,9 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="app-shell command-deck-shell">
+      <DashboardClayThemeEffect
+        fontVariableClassName={`${clayHeadingFont.variable} ${clayBodyFont.variable}`}
+      />
       <a href="#main-content" className="app-shell-skip">
         Skip to content
       </a>

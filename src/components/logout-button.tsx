@@ -1,8 +1,13 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
+import { isClayThemeRoute } from "@/lib/clay-theme-routes";
 
 export function LogoutButton() {
+  // Clay redesign copy applies only on the redesigned routes — see AppShellSidebar.
+  const isClayRoute = isClayThemeRoute(usePathname() ?? "");
+
   return (
     <form action={logout}>
       <button type="submit" className="cd-nav-signout" data-testid="nav-signout">
@@ -21,7 +26,7 @@ export function LogoutButton() {
           <polyline points="16 17 21 12 16 7" />
           <line x1="21" y1="12" x2="9" y2="12" />
         </svg>
-        <span className="hidden sm:inline">Sign out</span>
+        <span className="hidden sm:inline">{isClayRoute ? "Đăng xuất" : "Sign out"}</span>
       </button>
     </form>
   );

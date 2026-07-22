@@ -43,10 +43,10 @@ export function fmtSetupPerfHint(
   tier: "A" | "B",
   perf: SetupPerfHint | null
 ): string {
-  if (!perf || perf.tradeCount < 10) return `${tier}-tier · Not enough data`;
+  if (!perf || perf.tradeCount < 10) return `Hạng ${tier} · Chưa đủ dữ liệu`;
   const avgR = perf.avgR ?? 0;
   const avgRLabel = `${avgR >= 0 ? "+" : ""}${avgR.toFixed(1)}R`;
-  return `${tier}-tier · ${perf.winRatePct.toFixed(0)}% win · ${avgRLabel} (n=${perf.tradeCount})`;
+  return `Hạng ${tier} · ${perf.winRatePct.toFixed(0)}% thắng · ${avgRLabel} (n=${perf.tradeCount})`;
 }
 
 export function dominantCategoryFromNotes(

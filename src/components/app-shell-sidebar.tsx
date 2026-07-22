@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { isClayThemeRoute } from "@/lib/clay-theme-routes";
 
 type SidebarIcon = (props: { className?: string }) => React.ReactElement;
 
@@ -65,16 +66,18 @@ const IconChevron: SidebarIcon = ({ className }) => (
 type SidebarItem = {
   href: string;
   label: string;
+  labelVi: string;
   deck: string;
+  deckVi: string;
   Icon: SidebarIcon;
 };
 
 /** Real, navigable routes. */
 const ACTIVE_ITEMS: SidebarItem[] = [
-  { href: "/dashboard", label: "Dashboard", deck: "Command Deck", Icon: IconGrid },
-  { href: "/setups", label: "Setups", deck: "Pipeline", Icon: IconFunnel },
-  { href: "/paper-lab", label: "Arena", deck: "Simulation", Icon: IconTarget },
-  { href: "/settings", label: "Settings", deck: "Account", Icon: IconSettings },
+  { href: "/dashboard", label: "Dashboard", labelVi: "Bảng điều khiển", deck: "Command Deck", deckVi: "Sở chỉ huy", Icon: IconGrid },
+  { href: "/setups", label: "Setups", labelVi: "Thiết lập", deck: "Pipeline", deckVi: "Đường ống", Icon: IconFunnel },
+  { href: "/paper-lab", label: "Arena", labelVi: "Đấu trường", deck: "Simulation", deckVi: "Mô phỏng", Icon: IconTarget },
+  { href: "/settings", label: "Settings", labelVi: "Cài đặt", deck: "Account", deckVi: "Tài khoản", Icon: IconSettings },
 ];
 
 /**
@@ -83,10 +86,10 @@ const ACTIVE_ITEMS: SidebarItem[] = [
  * doesn't exist, per product decision to show the full planned nav shape
  * without fabricating functionality.
  */
-const COMING_SOON_ITEMS: Array<{ label: string; deck: string; Icon: SidebarIcon }> = [
-  { label: "Book", deck: "Ledger", Icon: IconBook },
-  { label: "Analytics", deck: "Insights", Icon: IconBarChart },
-  { label: "Watchlist", deck: "Tracking", Icon: IconEye },
+const COMING_SOON_ITEMS: Array<{ label: string; labelVi: string; deck: string; deckVi: string; Icon: SidebarIcon }> = [
+  { label: "Book", labelVi: "Sổ lệnh", deck: "Ledger", deckVi: "Nhật ký", Icon: IconBook },
+  { label: "Analytics", labelVi: "Phân tích", deck: "Insights", deckVi: "Thống kê", Icon: IconBarChart },
+  { label: "Watchlist", labelVi: "Danh mục", deck: "Tracking", deckVi: "Theo dõi", Icon: IconEye },
 ];
 
 function isNavActive(pathname: string, href: string): boolean {
@@ -98,6 +101,10 @@ function isNavActive(pathname: string, href: string): boolean {
 export function AppShellSidebar() {
   const pathname = usePathname() ?? "";
   const [collapsed, setCollapsed] = useState(false);
+  // Clay redesign copy applies only on the redesigned routes — Settings and
+  // Arena sub-routes keep the existing English nav labels so this shared
+  // sidebar doesn't visually change there.
+  const vi = isClayThemeRoute(pathname);
 
   return (
     <aside
@@ -105,20 +112,21 @@ export function AppShellSidebar() {
       aria-label="Primary"
     >
       <nav className="app-shell-sidebar__nav">
-        {ACTIVE_ITEMS.map(({ href, label, deck, Icon }) => {
+        {ACTIVE_ITEMS.map(({ href, label, labelVi, deck, deckVi, Icon }) => {
           const active = isNavActive(pathname, href);
+          const shownLabel = vi ? labelVi : label;
           return (
             <Link
               key={href}
               href={href}
               className={active ? "app-shell-sidebar-link app-shell-sidebar-link--active" : "app-shell-sidebar-link"}
               aria-current={active ? "page" : undefined}
-              title={collapsed ? label : undefined}
+              title={collapsed ? shownLabel : undefined}
             >
               <Icon className="app-shell-sidebar-link__icon" />
               <span className="app-shell-sidebar-link__text">
-                <span className="app-shell-sidebar-link__label">{label}</span>
-                <span className="app-shell-sidebar-link__deck">{deck}</span>
+                <span className="app-shell-sidebar-link__label">{shownLabel}</span>
+                <span className="app-shell-sidebar-link__deck">{vi ? deckVi : deck}</span>
               </span>
             </Link>
           );
@@ -126,21 +134,24 @@ export function AppShellSidebar() {
 
         <div className="app-shell-sidebar__divider" role="separator" aria-hidden="true" />
 
-        {COMING_SOON_ITEMS.map(({ label, deck, Icon }) => (
-          <span
-            key={label}
-            className="app-shell-sidebar-link app-shell-sidebar-link--disabled"
-            aria-disabled="true"
-            title={`${label} — coming soon`}
-          >
-            <Icon className="app-shell-sidebar-link__icon" />
-            <span className="app-shell-sidebar-link__text">
-              <span className="app-shell-sidebar-link__label">{label}</span>
-              <span className="app-shell-sidebar-link__deck">{deck}</span>
+        {COMING_SOON_ITEMS.map(({ label, labelVi, deck, deckVi, Icon }) => {
+          const shownLabel = vi ? labelVi : label;
+          return (
+            <span
+              key={label}
+              className="app-shell-sidebar-link app-shell-sidebar-link--disabled"
+              aria-disabled="true"
+              title={vi ? `${shownLabel} — sắp có` : `${label} — coming soon`}
+            >
+              <Icon className="app-shell-sidebar-link__icon" />
+              <span className="app-shell-sidebar-link__text">
+                <span className="app-shell-sidebar-link__label">{shownLabel}</span>
+                <span className="app-shell-sidebar-link__deck">{vi ? deckVi : deck}</span>
+              </span>
+              <span className="app-shell-sidebar-link__badge">{vi ? "Sắp có" : "Soon"}</span>
             </span>
-            <span className="app-shell-sidebar-link__badge">Soon</span>
-          </span>
-        ))}
+          );
+        })}
       </nav>
 
       <button
@@ -158,7 +169,7 @@ export function AppShellSidebar() {
           }
         />
         <span className="app-shell-sidebar__collapse-label" aria-hidden="true">
-          {collapsed ? "Expand" : "Collapse"}
+          {vi ? (collapsed ? "Mở rộng" : "Thu gọn") : collapsed ? "Expand" : "Collapse"}
         </span>
       </button>
     </aside>

@@ -7,9 +7,9 @@ export type DashboardConvictionRingProps = {
 /** Ring fill + color per band — 3 discrete tiers, not a synthesized percentage
  *  (the underlying model only ever produces high/medium/low, never a raw score). */
 const BAND_CONFIG: Record<ConfidenceBand, { fillPct: number; color: string; label: string }> = {
-  high: { fillPct: 88, color: "var(--success)", label: "High" },
-  medium: { fillPct: 58, color: "var(--warning)", label: "Medium" },
-  low: { fillPct: 28, color: "var(--text-tertiary)", label: "Low" },
+  high: { fillPct: 88, color: "var(--success)", label: "Cao" },
+  medium: { fillPct: 58, color: "var(--warning)", label: "Trung bình" },
+  low: { fillPct: 28, color: "var(--text-tertiary)", label: "Thấp" },
 };
 
 const RADIUS = 42;
@@ -39,7 +39,7 @@ export function DashboardConvictionRing({ band }: DashboardConvictionRingProps) 
         <span className="dash-conviction-ring__label" style={{ color: config.color }}>
           {config.label}
         </span>
-        <span className="dash-conviction-ring__caption">Evidence</span>
+        <span className="dash-conviction-ring__caption">Bằng chứng</span>
       </div>
     </div>
   );

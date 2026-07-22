@@ -36,7 +36,7 @@ export async function SetupsSidebarAsync() {
       {dbBanner ? (
         <ErrorStateWithEvidence
           className="tosv3-setups-cockpit__banner"
-          title="Partial scanner data unavailable"
+          title="Dữ liệu bộ quét không đầy đủ"
           message={dbBanner}
           evidence="src/app/(dashboard)/setups/setups-sidebar-async.tsx"
           data-testid="setups-overview-db-banner"

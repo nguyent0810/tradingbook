@@ -233,7 +233,7 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
             </SignalBadge>
             <SignalBadge
               variant={healthLevelToBadgeVariant(candidate.healthLevel)}
-              title={`Health: ${candidate.healthLevel.replace("_", " ")}`}
+              title={`Sức khỏe: ${candidate.healthLevel.replace("_", " ")}`}
             >
               {candidate.healthLevel.replace("_", " ")}
             </SignalBadge>
@@ -246,31 +246,31 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
           href={`/paper-lab?setupCandidateId=${candidate.id}`}
           className="tosv3-btn tosv3-btn--primary tosv3-btn--sm"
         >
-          Validate setup
+          Xác thực thiết lập
         </Link>
       </header>
 
-      <dl className="tosv3-setups-metric-strip" aria-label="Key levels">
+      <dl className="tosv3-setups-metric-strip" aria-label="Các mức giá quan trọng">
         <div className="tosv3-setups-metric-card">
-          <dt>Close</dt>
+          <dt>Giá đóng</dt>
           <dd className="tabular-nums">{fmtThousands(candidate.close)}</dd>
         </div>
         <div className="tosv3-setups-metric-card">
-          <dt>Stop</dt>
+          <dt>Cắt lỗ</dt>
           <dd className="tabular-nums">{fmtThousands(candidate.stopLevel)}</dd>
         </div>
         <div className="tosv3-setups-metric-card">
-          <dt>Zone</dt>
+          <dt>Vùng</dt>
           <dd className="tabular-nums">
             {fmtThousands(candidate.pullbackZoneLow)} – {fmtThousands(candidate.pullbackZoneHigh)}
           </dd>
         </div>
         <div className="tosv3-setups-metric-card">
-          <dt>Bar</dt>
+          <dt>Nến</dt>
           <dd>{candidate.barDate}</dd>
         </div>
         <div className="tosv3-setups-metric-card">
-          <dt>Setup score</dt>
+          <dt>Điểm thiết lập</dt>
           <dd className="tabular-nums">{bundle.rankScore.toFixed(2)}</dd>
         </div>
       </dl>
@@ -302,7 +302,7 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
             aria-controls={techId}
             onClick={onToggleTech}
           >
-            {techOpen ? "Hide" : "Show"} technical evidence
+            {techOpen ? "Ẩn" : "Hiện"} bằng chứng kỹ thuật
           </button>
           {techOpen ? (
             <div id={techId} className="tosv3-setups-tech-block__body">
@@ -344,7 +344,7 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
       ) : null}
 
       <section className="tosv3-setups-workstation-panel__section tosv3-setups-workstation-panel__section--sizing">
-        <h4 className="tosv3-setups-workstation-panel__section-title">Position sizing</h4>
+        <h4 className="tosv3-setups-workstation-panel__section-title">Định cỡ vị thế</h4>
         <DeferredPositionSizing
           symbolKey={candidate.symbolKey}
           quality={tier}
@@ -420,18 +420,18 @@ export function SetupsCandidatesMasterDetail({ candidates, positionSizingDefault
       <V3MasterDetail.Selector>
         <div className="tosv3-setups-selector">
           <p className="tosv3-setups-selector__label">
-            <span className="tosv3-kicker">Candidates</span>
+            <span className="tosv3-kicker">Ứng viên</span>
             <span className="tosv3-setups-selector__count tabular-nums">{candidates.length}</span>
           </p>
           <div className="tosv3-setups-selector__scroll">
-            <table className="tosv3-setups-selector-table" aria-label="Surfaced candidates">
+            <table className="tosv3-setups-selector-table" aria-label="Ứng viên nổi bật">
               <thead>
                 <tr>
-                  <th>Sym</th>
-                  <th>Tier</th>
-                  <th className="table-num">Scr</th>
-                  <th className="table-num">Close</th>
-                  <th className="table-num">Stop</th>
+                  <th>Mã</th>
+                  <th>Hạng</th>
+                  <th className="table-num">Điểm</th>
+                  <th className="table-num">Giá</th>
+                  <th className="table-num">Cắt lỗ</th>
                 </tr>
               </thead>
               <tbody>

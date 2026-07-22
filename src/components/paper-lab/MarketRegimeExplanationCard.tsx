@@ -13,10 +13,10 @@ export function MarketRegimeExplanationCard({
   const dimensions = regime.dimensions ?? {};
 
   return (
-    <PaperLabPanel title="Market Regime Explanation" testId="paper-lab-regime-explanation" tone="soft">
+    <PaperLabPanel title="Giải thích chế độ thị trường" testId="paper-lab-regime-explanation" tone="soft">
       <p className="text-sm font-medium text-[var(--pl-text)] mb-2">{regime.label}</p>
       <p className="text-xs text-[var(--pl-muted)] line-clamp-3 mb-3">{explanation}</p>
-      <PaperLabDetailsDialog title="Regime dimensions" triggerLabel="View Regime Details">
+      <PaperLabDetailsDialog title="Các chiều chế độ" triggerLabel="Xem chi tiết chế độ">
         <dl className="text-xs space-y-2 text-[var(--pl-muted)]">
           {Object.entries(dimensions).map(([k, v]) => (
             <div key={k}>
@@ -25,7 +25,7 @@ export function MarketRegimeExplanationCard({
             </div>
           ))}
           {Object.keys(dimensions).length === 0 && (
-            <p>No dimension breakdown available for this session.</p>
+            <p>Không có phân tích chi tiết cho phiên này.</p>
           )}
         </dl>
       </PaperLabDetailsDialog>

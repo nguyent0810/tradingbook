@@ -48,7 +48,7 @@ describe("DashboardTomorrowPlan", () => {
     );
 
     expect(html).toContain("No names on watch this session.");
-    expect(html).toContain("Review /setups for pipeline context");
+    expect(html).toContain("Xem /setups để hiểu bối cảnh đường ống");
   });
 
   it("promoted variant keeps the compact dl layout without watch cards", () => {

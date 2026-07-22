@@ -68,7 +68,7 @@ describe("DashboardSignalsRail / DashboardSignalsDock", () => {
     }
 
     const names = triggers.map((t) => t.getAttribute("aria-label"));
-    for (const expected of ["Verdict", "Market data", "Scan pulse", "Confidence", "VNINDEX", "Hostility"]) {
+    for (const expected of ["Phán quyết", "Dữ liệu", "Nhịp quét", "Độ tin cậy", "VNINDEX", "Khắc nghiệt"]) {
       expect(names.some((n) => n?.startsWith(expected))).toBe(true);
     }
 
@@ -77,18 +77,18 @@ describe("DashboardSignalsRail / DashboardSignalsDock", () => {
 
   it("clicking an icon opens its popover with the matching widget content", () => {
     renderRail();
-    const trigger = screen.getByRole("button", { name: /^Market data/ });
+    const trigger = screen.getByRole("button", { name: /^Dữ liệu/ });
 
     fireEvent.click(trigger);
 
     expect(trigger.getAttribute("aria-expanded")).toBe("true");
     const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByRole("heading", { name: "Market data" })).toBeTruthy();
+    expect(within(dialog).getByRole("heading", { name: "Dữ liệu" })).toBeTruthy();
   });
 
   it("clicking the same icon again closes the popover", async () => {
     renderRail();
-    const trigger = screen.getByRole("button", { name: /^Scan pulse/ });
+    const trigger = screen.getByRole("button", { name: /^Nhịp quét/ });
 
     fireEvent.click(trigger);
     expect(screen.queryByRole("dialog")).not.toBeNull();
@@ -100,7 +100,7 @@ describe("DashboardSignalsRail / DashboardSignalsDock", () => {
 
   it("pressing Escape closes the popover and returns focus to the trigger icon", async () => {
     renderRail();
-    const trigger = screen.getByRole("button", { name: /^Confidence/ });
+    const trigger = screen.getByRole("button", { name: /^Độ tin cậy/ });
 
     fireEvent.click(trigger);
     expect(screen.queryByRole("dialog")).not.toBeNull();
@@ -125,18 +125,18 @@ describe("DashboardSignalsRail / DashboardSignalsDock", () => {
 
   it("opening a different icon while one is open switches the popover to the new widget", () => {
     renderRail();
-    fireEvent.click(screen.getByRole("button", { name: /^Hostility/ }));
-    expect(within(screen.getByRole("dialog")).getByRole("heading", { name: "Hostility" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /^Khắc nghiệt/ }));
+    expect(within(screen.getByRole("dialog")).getByRole("heading", { name: "Khắc nghiệt" })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Verdict/ }));
-    expect(within(screen.getByRole("dialog")).getByRole("heading", { name: "Verdict" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: /^Hostility/ }).getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(screen.getByRole("button", { name: /^Phán quyết/ }));
+    expect(within(screen.getByRole("dialog")).getByRole("heading", { name: "Phán quyết" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Khắc nghiệt/ }).getAttribute("aria-expanded")).toBe("false");
   });
 
   it("tints the market-data icon safe when data is aligned", () => {
     renderRail();
-    const trigger = screen.getByRole("button", { name: /^Market data/ });
-    expect(trigger.getAttribute("aria-label")).toContain("Aligned");
+    const trigger = screen.getByRole("button", { name: /^Dữ liệu/ });
+    expect(trigger.getAttribute("aria-label")).toContain("Đồng bộ");
     expect(trigger.className).toContain("dash-rail-icon--safe");
   });
 
@@ -156,23 +156,23 @@ describe("DashboardSignalsRail / DashboardSignalsDock", () => {
   it("shows the current confidence band label on the trigger", () => {
     const cockpitDto = buildDecisionCockpitDto(minimalInput());
     renderRail();
-    const bandLabel = { high: "High", medium: "Medium", low: "Low" }[
+    const bandLabel = { high: "Cao", medium: "Trung bình", low: "Thấp" }[
       cockpitDto.verdict.confidenceBand.value
     ];
-    const trigger = screen.getByRole("button", { name: /^Confidence/ });
+    const trigger = screen.getByRole("button", { name: /^Độ tin cậy/ });
     expect(trigger.getAttribute("aria-label")).toContain(bandLabel);
   });
 
   it("opens the Verdict widget to reveal Today's verdict content", () => {
     renderRail();
-    fireEvent.click(screen.getByRole("button", { name: /^Verdict/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Phán quyết/ }));
     const dialog = screen.getByRole("dialog");
-    expect(within(dialog).getByText("Today's verdict")).toBeTruthy();
+    expect(within(dialog).getByText("Phán quyết hôm nay")).toBeTruthy();
   });
 
   it("embeds the scan-pulse widget without its own duplicate header", () => {
     renderRail();
-    fireEvent.click(screen.getByRole("button", { name: /^Scan pulse/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^Nhịp quét/ }));
     const dialog = screen.getByRole("dialog");
     expect(within(dialog).getByTestId("dashboard-setup-quality-ladder")).toBeTruthy();
     expect(dialog.innerHTML).not.toContain("dash-pulse-header");

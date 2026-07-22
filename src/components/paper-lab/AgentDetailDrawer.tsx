@@ -42,38 +42,38 @@ export function AgentDetailDrawer({
           </dd>
         </div>
         <div>
-          <dt>Cash</dt>
+          <dt>Tiền mặt</dt>
           <dd>{formatArenaVndCompact(portfolio.cashVnd)}</dd>
         </div>
         <div>
-          <dt>Invested</dt>
+          <dt>Đã đầu tư</dt>
           <dd>{formatArenaVndCompact(portfolio.investedVnd)}</dd>
         </div>
         <div>
-          <dt>Exposure</dt>
+          <dt>Phơi nhiễm</dt>
           <dd>{portfolio.exposurePct.toFixed(1)}%</dd>
         </div>
         <div>
-          <dt>Open risk</dt>
+          <dt>Rủi ro mở</dt>
           <dd>{formatArenaVndCompact(portfolio.openRiskVnd)}</dd>
         </div>
         <div>
-          <dt>Buying power</dt>
+          <dt>Sức mua</dt>
           <dd>{formatArenaVndCompact(portfolio.buyingPowerVnd)}</dd>
         </div>
         <div>
-          <dt>Win rate</dt>
+          <dt>Tỷ lệ thắng</dt>
           <dd>{(portfolio.winRate * 100).toFixed(0)}%</dd>
         </div>
         <div>
-          <dt>Max DD</dt>
+          <dt>DD tối đa</dt>
           <dd>{portfolio.maxDrawdownPct.toFixed(1)}%</dd>
         </div>
       </dl>
 
       {Object.keys(portfolio.sectorExposure).length > 0 && (
         <div className="mt-3">
-          <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Sector exposure</div>
+          <div className="text-xs font-semibold text-[var(--text-tertiary)] mb-1">Phân bổ ngành</div>
           <ul className="text-xs text-[var(--text-secondary)] space-y-0.5">
             {Object.entries(portfolio.sectorExposure).map(([k, v]) => (
               <li key={k}>
@@ -94,7 +94,7 @@ export function AgentDetailDrawer({
               onClose();
             }}
           >
-            Filter positions for this agent
+            Lọc vị thế theo agent này
           </button>
         )}
         <Link
@@ -102,7 +102,7 @@ export function AgentDetailDrawer({
           className="paper-lab-link-btn text-sm text-center block"
           onClick={onClose}
         >
-          View agent page →
+          Xem trang agent →
         </Link>
       </div>
     </PaperLabSideDrawer>

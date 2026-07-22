@@ -32,13 +32,13 @@ export function VoteSegmentBar({
       {showLabels && (
         <div className="paper-lab-vote-segment__labels">
           <span className="paper-lab-vote-segment__label paper-lab-vote-segment__label--buy">
-            BUY {votes.buy}
+            MUA {votes.buy}
           </span>
           <span className="paper-lab-vote-segment__label paper-lab-vote-segment__label--hold">
-            HOLD {votes.hold}
+            GIỮ {votes.hold}
           </span>
           <span className="paper-lab-vote-segment__label paper-lab-vote-segment__label--sell">
-            SELL/REDUCE {sellTotal}
+            BÁN/GIẢM {sellTotal}
           </span>
         </div>
       )}

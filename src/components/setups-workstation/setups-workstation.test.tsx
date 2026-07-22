@@ -52,7 +52,7 @@ describe("PipelineMetrics", () => {
       <PipelineMetrics latestScan={mockScan()} nearMissCount={2} gate1Label="Favorable" />
     );
     expect(html).toContain('data-testid="setups-pipeline-metrics"');
-    expect(html).toContain("Near-miss");
+    expect(html).toContain("Suýt đạt");
   });
 
   it("renders empty state when no scan", () => {

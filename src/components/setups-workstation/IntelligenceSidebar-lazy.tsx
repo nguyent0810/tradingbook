@@ -13,7 +13,7 @@ export const IntelligenceSidebarLazy = dynamic(
         className="sw-glass-panel flex h-full flex-col overflow-hidden"
         data-testid="setups-sidebar"
         role="status"
-        aria-label="Loading intelligence sidebar"
+        aria-label="Đang tải bảng thông tin"
       >
         <LoadingSkeletonGroup rows={5} className="p-4" />
       </div>

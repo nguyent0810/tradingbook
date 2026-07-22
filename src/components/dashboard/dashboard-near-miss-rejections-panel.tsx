@@ -22,10 +22,10 @@ const LADDER_ACCENT: Partial<Record<SetupLadderStage, string>> = {
 
 function nearMissTraderNote(row: OpportunityNearMissDto): string | null {
   if (row.symbol === "VND" && row.terminalCategory === "pullback_zone_interaction") {
-    return "Near-miss — price is above the pullback box, not actionable in the current breakout-pullback template.";
+    return "Suýt đạt chuẩn — giá đang ở trên vùng pullback, chưa hành động được theo mẫu breakout-pullback hiện tại.";
   }
   if (row.symbol === "PDR" && row.terminalCategory === "breakout_recency") {
-    return "Gate2 failed breakout-recency; may still appear in Momentum Watch (observational fresh breakout, not a validated setup).";
+    return "Trượt Gate2 vì breakout chưa đủ mới; vẫn có thể xuất hiện trong Nhóm động lượng (chỉ mang tính quan sát, chưa phải thiết lập đã xác thực).";
   }
   return null;
 }
@@ -69,7 +69,7 @@ function NearMissCard({ row }: { row: OpportunityNearMissDto }) {
       </div>
       {note ? (
         <details className="dash-tile__why">
-          <summary className="dash-tile__why-toggle">Note</summary>
+          <summary className="dash-tile__why-toggle">Ghi chú</summary>
           <p className="dash-tile__why-line text-xs">{note}</p>
         </details>
       ) : null}
@@ -86,24 +86,24 @@ export function DashboardNearMissRejectionsPanel({
   return (
     <div className="dash-card dash-card--muted" data-testid="dashboard-near-miss-panel">
       <header className="dash-card__header">
-        <h3 className="dash-card__title">Near miss / rejection</h3>
+        <h3 className="dash-card__title">Suýt đạt / bị loại</h3>
         <p className="dash-card__lead">
-          Gate 2 diagnostics only — closest INVALID names, not SetupCandidate trade signals.
+          Chỉ chẩn đoán Gate 2 — mã gần đạt chuẩn nhất, không phải tín hiệu giao dịch SetupCandidate.
         </p>
       </header>
 
       {rows.length === 0 ? (
         <div className="dash-v2-empty">
           <EmptyStateWithReason
-            title="No near-miss ranking in latest scan"
+            title="Không có xếp hạng suýt đạt trong lần quét gần nhất"
             reason={
               opportunity.emptyReason ??
-              "Scanner notes did not include closest-to-valid symbols for this run."
+              "Ghi chú bộ quét không có danh sách mã gần đạt chuẩn cho lần chạy này."
             }
             data-testid="dashboard-near-miss-empty"
           >
             <Link href="/setups" className="btn btn-secondary dash-v2-btn-secondary">
-              Open pipeline
+              Mở đường ống
             </Link>
           </EmptyStateWithReason>
         </div>
@@ -115,9 +115,9 @@ export function DashboardNearMissRejectionsPanel({
             ))}
           </ul>
           <p className="dash-near-miss__footer text-xs">
-            Full rejection buckets and symbol lists are on{" "}
+            Toàn bộ nhóm lý do bị loại &amp; danh sách mã có tại{" "}
             <Link href="/setups" className="dash-v2-link">
-              Setups pipeline
+              Thiết lập
             </Link>
             .
           </p>

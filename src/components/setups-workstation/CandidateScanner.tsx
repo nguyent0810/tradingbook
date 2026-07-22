@@ -18,10 +18,10 @@ export function CandidateScanner({
         <section className="sw-glass-panel p-6" data-testid="setups-candidates-panel">
           <header className="mb-6">
             <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-              Surfaced candidates
+              Ứng viên nổi bật
             </p>
             <h2 className="mt-1 text-base font-medium text-[var(--text-primary)]">
-              Qualified setups — core scanner Tier A/B only
+              Thiết lập đạt chuẩn — chỉ Hạng A/B từ bộ quét lõi
             </h2>
           </header>
 
@@ -31,7 +31,7 @@ export function CandidateScanner({
           >
             <RadarSweepEmpty />
             <div className="max-w-md space-y-2">
-              <p className="text-sm font-medium text-[var(--text-secondary)]">No surfaced candidates on this scan</p>
+              <p className="text-sm font-medium text-[var(--text-secondary)]">Không có ứng viên nổi bật trong lần quét này</p>
               {emptyReason ? (
                 <p className="text-sm leading-relaxed text-[var(--text-tertiary)]">{emptyReason}</p>
               ) : null}
@@ -40,7 +40,7 @@ export function CandidateScanner({
               href="/dashboard"
               className="rounded-md border border-[var(--accent)]/40 bg-[var(--accent)]/10 px-4 py-2 font-mono text-xs uppercase tracking-wide text-[var(--accent-text)] transition hover:bg-[var(--accent)]/20"
             >
-              Back to Dashboard
+              Về Bảng điều khiển
             </Link>
           </div>
         </section>
@@ -48,13 +48,13 @@ export function CandidateScanner({
         <section className="sw-glass-panel p-4" data-testid="setups-candidates-panel">
           <header className="mb-4">
             <p className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-              Surfaced candidates
+              Ứng viên nổi bật
             </p>
             <h2 className="mt-1 text-base font-medium text-[var(--text-primary)]">
-              Surfaced candidates ({candidates.length})
+              Ứng viên nổi bật ({candidates.length})
             </h2>
             <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">
-              Qualified setups — core scanner Tier A/B only
+              Thiết lập đạt chuẩn — chỉ Hạng A/B từ bộ quét lõi
             </p>
           </header>
           <SetupsCandidatesMasterDetail

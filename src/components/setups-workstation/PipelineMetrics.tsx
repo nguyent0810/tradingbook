@@ -26,7 +26,7 @@ export function PipelineMetrics({ latestScan, nearMissCount, gate1Label }: Pipel
         data-testid="setups-pipeline-summary-empty"
       >
         <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-          No scan run — pipeline counts unavailable
+          Chưa có lần quét — không có số liệu đường ống
         </span>
       </div>
     );
@@ -64,7 +64,7 @@ export function PipelineMetrics({ latestScan, nearMissCount, gate1Label }: Pipel
         className="mt-2 inline-block font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]"
         title={latestScan.id}
       >
-        Run {fmtRunDate(latestScan.runAt)}
+        Chạy lúc {fmtRunDate(latestScan.runAt)}
       </span>
     </div>
   );

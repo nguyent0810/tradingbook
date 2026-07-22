@@ -25,11 +25,11 @@ export function DashboardActionableBlockers({
           id="dashboard-actionable-blockers-heading"
           className={`dash-section-title${compact ? " dash-section-title--muted" : ""}`}
         >
-          Actionable blockers
+          Rào cản cần xử lý
         </h2>
         {!compact ? (
           <p className="dash-panel__subtitle">
-            Top conditions blocking new swing entries — full detail on Setups
+            Các điều kiện hàng đầu đang chặn lệnh swing mới — chi tiết đầy đủ tại Thiết lập
           </p>
         ) : null}
       </header>
@@ -37,12 +37,12 @@ export function DashboardActionableBlockers({
       {blockers.length === 0 ? (
         <div className="dash-empty-compact">
           <EmptyStateWithReason
-            title="No actionable blockers"
-            reason={emptyReason ?? "Rejection summary unavailable for this scan."}
+            title="Không có rào cản cần xử lý"
+            reason={emptyReason ?? "Không có tóm tắt lý do bị loại cho lần quét này."}
             data-testid="dashboard-diagnostics-empty"
           >
             <Link href="/setups" className="btn btn-secondary text-xs">
-              Setups
+              Thiết lập
             </Link>
           </EmptyStateWithReason>
         </div>
@@ -75,10 +75,10 @@ export function DashboardActionableBlockers({
                   <div className="dash-blocker-details__body">
                     <p>{b.meaning}</p>
                     <p className="text-xs">
-                      <span className="font-medium">Next:</span> {b.waitFor}
+                      <span className="font-medium">Tiếp theo:</span> {b.waitFor}
                     </p>
                     {b.sampleSymbols.length > 0 ? (
-                      <p className="font-mono text-xs">Sample: {b.sampleSymbols.join(", ")}</p>
+                      <p className="font-mono text-xs">Ví dụ: {b.sampleSymbols.join(", ")}</p>
                     ) : null}
                   </div>
                 </details>
@@ -95,11 +95,11 @@ export function DashboardActionableBlockers({
                   </div>
                   <p className="dash-actionable-blockers__meaning">{b.meaning}</p>
                   <p className="dash-actionable-blockers__wait">
-                    <span className="font-medium">Next:</span> {b.waitFor}
+                    <span className="font-medium">Tiếp theo:</span> {b.waitFor}
                   </p>
                   {b.sampleSymbols.length > 0 ? (
                     <p className="dash-actionable-blockers__symbols">
-                      Sample: {b.sampleSymbols.join(", ")}
+                      Ví dụ: {b.sampleSymbols.join(", ")}
                     </p>
                   ) : null}
                 </>
@@ -111,7 +111,7 @@ export function DashboardActionableBlockers({
 
       <p className="dash-actionable-blockers__footer">
         <Link href="/setups" className="text-xs font-medium" style={{ color: "var(--accent-text)" }}>
-          Full diagnostics on Setups →
+          Xem toàn bộ chẩn đoán tại Thiết lập →
         </Link>
       </p>
     </section>

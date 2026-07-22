@@ -25,34 +25,34 @@ export function DashboardScanMetaStrip({
         className="dash-scan-strip dash-surface-1"
         data-testid="dashboard-scan-meta-empty"
       >
-        <span className="dash-chip dash-chip--muted">No completed scan in database</span>
+        <span className="dash-chip dash-chip--muted">Chưa có lần quét nào hoàn tất trong dữ liệu</span>
       </div>
     );
   }
 
   const backdropLabel =
     delayedBackdrop === true
-      ? "Delayed backdrop"
+      ? "Nền thị trường bị trễ"
       : delayedBackdrop === false
-        ? "Backdrop OK"
-        : "Backdrop —";
+        ? "Nền thị trường ổn"
+        : "Nền thị trường —";
 
   return (
     <div className="dash-scan-strip dash-surface-1" data-testid="dashboard-scan-meta">
       <span className="dash-chip" title={latestScan.id}>
-        Run {formatRunAt(latestScan.runAt)}
+        Chạy lúc {formatRunAt(latestScan.runAt)}
       </span>
       <span className="dash-chip mono" title={latestScan.id}>
         {scanIdChip(latestScan.id)}
       </span>
       <span className="dash-chip">
-        {latestScan.symbolCountScanned}/{latestScan.symbolCountTotal} scanned
+        {latestScan.symbolCountScanned}/{latestScan.symbolCountTotal} đã quét
       </span>
       <span className="dash-chip">
-        Tradable {latestScan.symbolCountAfterTradability}
+        Đủ điều kiện GD {latestScan.symbolCountAfterTradability}
       </span>
       <span className="dash-chip">
-        Surfaced {latestScan.candidateCountSurfaced} (A {latestScan.candidateCountA} · B{" "}
+        Đã lọc ra {latestScan.candidateCountSurfaced} (A {latestScan.candidateCountA} · B{" "}
         {latestScan.candidateCountB})
       </span>
       <span className="dash-chip">{displayGate1ScanLevel(latestScan.gate1Level)}</span>

@@ -49,8 +49,8 @@ export function PaperLabSideDrawer({
       <div className="paper-lab-side-drawer__panel">
         <header className="paper-lab-side-drawer__header">
           <strong>{title}</strong>
-          <button type="button" className="paper-lab-json-btn" onClick={handleClose} aria-label="Close">
-            Close
+          <button type="button" className="paper-lab-json-btn" onClick={handleClose} aria-label="Đóng">
+            Đóng
           </button>
         </header>
         <div className="paper-lab-side-drawer__body">{children}</div>

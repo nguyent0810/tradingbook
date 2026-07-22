@@ -40,7 +40,7 @@ export function PaperLabWorkspaceTabs({
 
   return (
     <section className="paper-lab-workspace" data-testid="paper-lab-workspace">
-      <div className="paper-lab-workspace-tabs" role="tablist" aria-label="Arena workspace">
+      <div className="paper-lab-workspace-tabs" role="tablist" aria-label="Không gian làm việc Đấu trường">
         <button
           type="button"
           role="tab"
@@ -49,7 +49,7 @@ export function PaperLabWorkspaceTabs({
           data-testid="workspace-tab-positions"
           onClick={() => setTab("positions")}
         >
-          Open Positions
+          Vị thế đang mở
         </button>
         <button
           type="button"
@@ -59,7 +59,7 @@ export function PaperLabWorkspaceTabs({
           data-testid="workspace-tab-battle"
           onClick={() => setTab("battle")}
         >
-          Battle Replay
+          Tái hiện đối đầu
         </button>
       </div>
 

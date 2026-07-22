@@ -5,7 +5,7 @@ import "../paper-lab-workstation.css";
 
 export function PaperLabDetailsDialog({
   title,
-  triggerLabel = "View details",
+  triggerLabel = "Xem chi tiết",
   children,
   testId,
 }: {
@@ -39,7 +39,7 @@ export function PaperLabDetailsDialog({
         <div className="paper-lab-details-dialog__header">
           <strong>{title}</strong>
           <button type="button" className="paper-lab-json-btn" onClick={close}>
-            Close
+            Đóng
           </button>
         </div>
         <div className="paper-lab-details-dialog__body">{children}</div>

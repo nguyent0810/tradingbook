@@ -54,7 +54,7 @@ export const SetupsCandidateEvidence = memo(function SetupsCandidateEvidence({
 
   return (
     <section className="tosv3-setups-workstation-panel__section" aria-label="Surfaced evidence">
-      <h4 className="tosv3-setups-workstation-panel__section-title">Evidence</h4>
+      <h4 className="tosv3-setups-workstation-panel__section-title">Bằng chứng</h4>
       <ul className="tosv3-setups-evidence-grid">
         {preview.map((item) => (
           <li
@@ -68,17 +68,17 @@ export const SetupsCandidateEvidence = memo(function SetupsCandidateEvidence({
       </ul>
       {hiddenCount > 0 ? (
         <p className="tosv3-setups-workstation-panel__more">
-          {hiddenCount} more item{hiddenCount === 1 ? "" : "s"} in{" "}
+          còn {hiddenCount} mục nữa trong{" "}
           {technicalAvailable && onOpenTechnical ? (
             <button
               type="button"
               className="tosv3-setups-workstation-panel__more-link"
               onClick={onOpenTechnical}
             >
-              technical evidence
+              bằng chứng kỹ thuật
             </button>
           ) : (
-            "technical evidence"
+            "bằng chứng kỹ thuật"
           )}
         </p>
       ) : null}

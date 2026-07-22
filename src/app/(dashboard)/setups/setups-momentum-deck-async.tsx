@@ -6,7 +6,7 @@ import { V3Collapsible, V3Panel } from "@/components/trading-os-v3/layout";
 export async function SetupsMomentumDeckAsync() {
   return (
     <V3Collapsible
-      summary="Extended momentum context — fresh breakouts audit"
+      summary="Bối cảnh động lượng mở rộng — kiểm tra breakout mới"
       testId="setups-momentum-deck"
       className="tosv3-setups-momentum"
     >

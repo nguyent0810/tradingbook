@@ -7,14 +7,14 @@ export function SetupsStanceCompact({ decision }: { decision: DailyTradingDecisi
   return (
     <section className="tosv3-setups-stance" data-testid="setups-todays-action">
       <div className="tosv3-setups-stance__head">
-        <span className="tosv3-kicker">Trading stance</span>
+        <span className="tosv3-kicker">Lập trường giao dịch</span>
         <span className="tosv3-setups-stance__mode">{actionLabel}</span>
       </div>
       <p className="tosv3-setups-stance__allocation">
-        Max exposure <strong className="tabular-nums">{decision.allocation}</strong>
+        Mức vốn tối đa <strong className="tabular-nums">{decision.allocation}</strong>
       </p>
       <p className="tosv3-setups-stance__reason">{decision.explanation}</p>
-      <p className="tosv3-setups-stance__note">Portfolio guide — not a buy signal.</p>
+      <p className="tosv3-setups-stance__note">Hướng dẫn danh mục — không phải tín hiệu mua.</p>
     </section>
   );
 }

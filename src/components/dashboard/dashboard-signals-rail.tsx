@@ -56,9 +56,9 @@ const CONFIDENCE_TONE: Record<ConfidenceBand, SignalTone> = {
   low: "neutral",
 };
 const CONFIDENCE_LABEL: Record<ConfidenceBand, string> = {
-  high: "High",
-  medium: "Medium",
-  low: "Low",
+  high: "Cao",
+  medium: "Trung bình",
+  low: "Thấp",
 };
 
 function resolveVnindexTone(history: VnindexHistoryPoint[]): SignalTone {
@@ -149,7 +149,7 @@ export function DashboardSignalsRail({
       id: "verdict",
       icon: <IconFlag />,
       tone: resolveVerdictTone(verdict.uxLevel.value),
-      title: "Verdict",
+      title: "Phán quyết",
       meta: verdict.headline.value,
       content: (
         <DashboardDecisionHero
@@ -164,8 +164,8 @@ export function DashboardSignalsRail({
       id: "market-data",
       icon: <IconShield />,
       tone: resolveMarketDataTone(freshness),
-      title: "Market data",
-      meta: marketDataStale ? "Stale" : "Aligned",
+      title: "Dữ liệu",
+      meta: marketDataStale ? "Trễ" : "Đồng bộ",
       content: (
         <div className="dash-dock-widget">
           <DashboardMarketStatusBar freshness={freshness} />
@@ -177,8 +177,8 @@ export function DashboardSignalsRail({
       id: "scan-pulse",
       icon: <IconPulse />,
       tone: resolveScanPulseTone(ladder),
-      title: "Scan pulse",
-      meta: `${ladder.totalClassified} today`,
+      title: "Nhịp quét",
+      meta: `${ladder.totalClassified} hôm nay`,
       content: (
         <div className="dash-dock-widget">
           <DashboardSetupQualityLadder ladder={ladder} embedded />
@@ -189,14 +189,13 @@ export function DashboardSignalsRail({
       id: "confidence",
       icon: <IconTarget />,
       tone: CONFIDENCE_TONE[confidenceBand],
-      title: "Confidence",
+      title: "Độ tin cậy",
       meta: CONFIDENCE_LABEL[confidenceBand],
       content: (
         <div className="dash-dock-widget dash-signals-rail__ring-row">
           <DashboardConvictionRing band={confidenceBand} />
           <p className="dash-signals-rail__ring-copy">
-            How much evidence backs today&rsquo;s verdict — based on gate alignment &amp; data
-            coverage.
+            Lượng bằng chứng ủng hộ phán quyết hôm nay — dựa trên mức khớp cổng lọc &amp; độ phủ dữ liệu.
           </p>
         </div>
       ),
@@ -217,7 +216,7 @@ export function DashboardSignalsRail({
       id: "hostility",
       icon: <IconAlertTriangle />,
       tone: HOSTILITY_TONE[gauge.tone],
-      title: "Hostility",
+      title: "Khắc nghiệt",
       meta: gauge.label,
       content: (
         <div className="dash-dock-widget">

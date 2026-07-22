@@ -34,13 +34,13 @@ function watchActionHint(
   }
   switch (lifecycle) {
     case "READY":
-      return "Eligible for execution workflow.";
+      return "Đủ điều kiện vào quy trình thực thi.";
     case "WATCHING":
-      return "Wait for pullback into entry zone.";
+      return "Chờ pullback vào vùng vào lệnh.";
     case "NEW":
-      return "Monitor for first valid retest.";
+      return "Theo dõi lần retest hợp lệ đầu tiên.";
     default:
-      return "Review setup state before action.";
+      return "Xem lại trạng thái thiết lập trước khi hành động.";
   }
 }
 
@@ -52,15 +52,15 @@ export function DashboardWatchlistPanel({
   return (
     <section className="dash-panel dash-surface-1" data-testid="dashboard-watchlist-panel">
       <header className="dash-panel__header">
-        <h2 className="dash-section-title">Watchlist</h2>
-        <p className="dash-panel__subtitle">NEW · WATCHING · READY lifecycle</p>
+        <h2 className="dash-section-title">Danh sách theo dõi</h2>
+        <p className="dash-panel__subtitle">Vòng đời MỚI · ĐANG THEO DÕI · SẴN SÀNG</p>
       </header>
 
       {items.length === 0 ? (
         <div className="dash-empty-compact">
           <EmptyStateWithReason
-            title="Watchlist is empty"
-            reason="Items appear when surfaced setups enter NEW, WATCHING, or READY. Zero candidates today still allows manual watch entries from future scans."
+            title="Danh sách theo dõi đang trống"
+            reason="Mã sẽ xuất hiện khi thiết lập nổi bật chuyển sang MỚI, ĐANG THEO DÕI, hoặc SẴN SÀNG. Không có ứng viên hôm nay vẫn cho phép thêm mã theo dõi thủ công từ các lần quét sau."
             data-testid="dashboard-watchlist-empty"
           />
         </div>
@@ -69,11 +69,11 @@ export function DashboardWatchlistPanel({
           <table className="table min-w-[640px]">
             <thead>
               <tr>
-                <th>Symbol</th>
-                <th>Status</th>
-                <th>Health</th>
-                <th className="table-num">Dist. to zone</th>
-                <th>Hint</th>
+                <th>Mã</th>
+                <th>Trạng thái</th>
+                <th>Sức khỏe</th>
+                <th className="table-num">K/c tới vùng</th>
+                <th>Gợi ý</th>
               </tr>
             </thead>
             <tbody>
@@ -93,7 +93,7 @@ export function DashboardWatchlistPanel({
                       {w.healthLevel ? displaySetupHealthLevel(w.healthLevel) : "—"}
                     </td>
                     <td className="table-num">
-                      {dist == null ? "N/A" : `${(dist * 100).toFixed(1)}%`}
+                      {dist == null ? "—" : `${(dist * 100).toFixed(1)}%`}
                     </td>
                     <td className="text-xs" style={{ color: "var(--text-secondary)" }}>
                       {watchActionHint(w.lifecycleStatus, w.healthLevel)}
@@ -108,8 +108,8 @@ export function DashboardWatchlistPanel({
               className="dash-panel__subtitle text-xs"
               data-testid="dashboard-watchlist-truncated-note"
             >
-              Showing the first {items.length} — more active watch items exist. Narrow via the{" "}
-              Setups pipeline to see the rest.
+              Đang hiện {items.length} mã đầu tiên — còn nhiều mã đang theo dõi khác. Vào đường ống
+              Thiết lập để xem toàn bộ.
             </p>
           ) : null}
         </div>

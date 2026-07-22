@@ -354,7 +354,7 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
 
   it("hides duplicate Open pipeline CTA when NO_TRADE and no open positions", () => {
     const vm = mapFromInput(baseInput());
-    expect(vm.headerCta.primaryLabel).toBe("Open pipeline");
+    expect(vm.headerCta.primaryLabel).toBe("Mở đường ống");
     expect(vm.headerCta.secondaryHref).toBeNull();
     expect(vm.headerCta.secondaryLabel).toBeNull();
   });
@@ -362,9 +362,9 @@ describe("mapDashboardV3ViewModel — product spec v1 acceptance", () => {
   it("prioritizes review CTA when NO_TRADE and open positions exist", () => {
     const vm = mapFromInput(baseInput(), { openPositionCount: 2 });
     expect(vm.headerCta.primaryHref).toBe("/setups");
-    expect(vm.headerCta.primaryLabel).toBe("Review setups");
+    expect(vm.headerCta.primaryLabel).toBe("Xem lại thiết lập");
     expect(vm.headerCta.secondaryHref).toBe("/paper-lab");
-    expect(vm.headerCta.secondaryLabel).toBe("Open Arena");
+    expect(vm.headerCta.secondaryLabel).toBe("Mở Đấu trường");
     expect(vm.headerCta.tertiaryHref).toBeNull();
     expect(vm.headerCta.tertiaryLabel).toBeNull();
   });

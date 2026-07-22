@@ -45,14 +45,14 @@ export function HumanPmForm() {
       const json = await res.json();
       if (json.ok) {
         setStatus("ok");
-        setMessage(`Submitted decision ${json.decisionId}`);
+        setMessage(`Đã gửi quyết định ${json.decisionId}`);
       } else {
         setStatus("error");
-        setMessage(json.error ?? "Submission failed.");
+        setMessage(json.error ?? "Gửi thất bại.");
       }
     } catch {
       setStatus("error");
-      setMessage("Network error — could not reach the server.");
+      setMessage("Lỗi mạng — không thể kết nối máy chủ.");
     }
   }
 
@@ -62,7 +62,7 @@ export function HumanPmForm() {
     <div className="arena-human-form" data-testid="paper-lab-human-form">
       <div className="arena-human-form__fields">
         <label className="arena-human-form__label">
-          Symbol
+          Mã
           <input
             className="arena-human-form__input"
             value={symbol}
@@ -71,7 +71,7 @@ export function HumanPmForm() {
           />
         </label>
         <label className="arena-human-form__label">
-          Action
+          Hành động
           <select
             className="arena-human-form__input"
             value={action}
@@ -89,7 +89,7 @@ export function HumanPmForm() {
           aria-busy={pending}
           onClick={() => void submit()}
         >
-          {pending ? "Submitting…" : "Submit decision"}
+          {pending ? "Đang gửi…" : "Gửi quyết định"}
         </button>
       </div>
       {message && (

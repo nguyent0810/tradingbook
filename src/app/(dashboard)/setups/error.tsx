@@ -19,23 +19,23 @@ export default function SetupsError({
     <V3PageShell pageClassName="tosv3-setups-page">
       <V3Panel className="tosv3-route-error" glass={false}>
         <div className="ui-state-panel" role="alert">
-          <p className="ui-state-panel__eyebrow">Setups unavailable</p>
-          <h1 className="ui-state-panel__title">Setups could not load</h1>
+          <p className="ui-state-panel__eyebrow">Thiết lập không khả dụng</p>
+          <h1 className="ui-state-panel__title">Không tải được Thiết lập</h1>
           <p className="ui-state-panel__body">
-            Scanner and candidate data are unchanged — retry or return to the dashboard.
+            Dữ liệu bộ quét và ứng viên không đổi — thử lại hoặc quay về bảng điều khiển.
           </p>
           {error.digest ? (
             <p className="ui-state-panel__evidence">{error.digest}</p>
           ) : null}
           <div className="ui-state-actions mt-4 flex flex-wrap gap-3">
             <button type="button" className="tosv3-btn tosv3-btn--primary" onClick={() => reset()}>
-              Try again
+              Thử lại
             </button>
             <Link href="/setups" className="tosv3-btn tosv3-btn--secondary">
-              Reload setups
+              Tải lại Thiết lập
             </Link>
             <Link href="/dashboard" className="tosv3-btn tosv3-btn--ghost">
-              Dashboard
+              Bảng điều khiển
             </Link>
           </div>
         </div>

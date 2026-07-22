@@ -28,7 +28,7 @@ export function TerminalFilterLog({ breakdown, defaultOpen = false }: TerminalFi
         onClick={toggle}
       >
         <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--text-tertiary)]">
-          Liquidity &amp; session filters
+          Bộ lọc thanh khoản &amp; phiên
         </span>
         <span className="font-mono text-xs text-[var(--text-tertiary)]">{open ? "▾" : "▸"}</span>
       </button>

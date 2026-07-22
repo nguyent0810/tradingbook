@@ -48,16 +48,16 @@ export function DashboardTomorrowPlan({
       >
         <header className="dash-card__header">
           <h2 id="dashboard-tomorrow-heading" className="dash-section-title">
-            What next
+            Tiếp theo là gì
           </h2>
           <p className="dash-card__lead">
-            Watch · trigger · avoid · posture for the next session
+            Theo dõi · kích hoạt · tránh · tư thế cho phiên tiếp theo
           </p>
         </header>
 
         <dl className="dash-tomorrow__grid dash-tomorrow__grid--promoted">
           <div data-testid="dashboard-tomorrow-watch">
-            <dt>Watch</dt>
+            <dt>Theo dõi</dt>
             <dd>
               {symbols.length > 0 ? (
                 <span className="dash-tomorrow__symbols font-mono">{symbols.join(", ")}</span>
@@ -67,13 +67,13 @@ export function DashboardTomorrowPlan({
             </dd>
           </div>
           <div data-testid="dashboard-tomorrow-trigger">
-            <dt>Trigger</dt>
+            <dt>Kích hoạt</dt>
             <dd className="dash-tomorrow__line-clamp" title={tomorrow.triggerLine.value}>
               {tomorrow.triggerLine.value}
             </dd>
           </div>
           <div data-testid="dashboard-tomorrow-avoid">
-            <dt>Avoid</dt>
+            <dt>Tránh</dt>
             <dd className="dash-tomorrow__line-clamp" title={tomorrow.avoidLine.value}>
               {tomorrow.avoidLine.value}
             </dd>
@@ -94,11 +94,11 @@ export function DashboardTomorrowPlan({
           02
         </span>
         <div>
-          <p className="dash-v2-eyebrow">Plan</p>
+          <p className="dash-v2-eyebrow">Kế hoạch</p>
           <h2 id="dashboard-tomorrow-heading" className="dash-v2-zone-title">
-            Tomorrow&rsquo;s plan
+            Kế hoạch ngày mai
           </h2>
-          <p className="dash-v2-zone-lead">Watch, triggers, and avoid rules for the next session.</p>
+          <p className="dash-v2-zone-lead">Theo dõi, kích hoạt, và quy tắc tránh cho phiên tiếp theo.</p>
         </div>
       </header>
 
@@ -112,7 +112,7 @@ export function DashboardTomorrowPlan({
               <IconEye />
             </span>
             <span className="dash-plan-card__label">
-              Watch{symbols.length > 0 ? " — hover a symbol for its reason" : ""}
+              Theo dõi{symbols.length > 0 ? " — di chuột vào mã để xem lý do" : ""}
             </span>
           </div>
           <div className="dash-plan-card__body">
@@ -142,7 +142,7 @@ export function DashboardTomorrowPlan({
             <span className="dash-plan-card__icon">
               <IconBolt />
             </span>
-            <span className="dash-plan-card__label">Trigger</span>
+            <span className="dash-plan-card__label">Kích hoạt</span>
           </div>
           <div className="dash-plan-card__body">
             <p>{tomorrow.triggerLine.value}</p>
@@ -158,7 +158,7 @@ export function DashboardTomorrowPlan({
             <span className="dash-plan-card__icon">
               <IconSlashCircle />
             </span>
-            <span className="dash-plan-card__label">Avoid</span>
+            <span className="dash-plan-card__label">Tránh</span>
           </div>
           <div className="dash-plan-card__body">
             <p>{tomorrow.avoidLine.value}</p>
@@ -169,7 +169,7 @@ export function DashboardTomorrowPlan({
       {symbols.length === 0 ? (
         <p className="dash-tomorrow__link">
           <Link href="/setups" className="text-xs font-medium" style={{ color: "var(--accent-text)" }}>
-            Review /setups for pipeline context →
+            Xem /setups để hiểu bối cảnh đường ống →
           </Link>
         </p>
       ) : null}

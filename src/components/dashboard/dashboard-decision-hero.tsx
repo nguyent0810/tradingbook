@@ -32,9 +32,14 @@ function decisionModifier(uxLevel: VerdictUxLevel): string {
   }
 }
 
+const CONFIDENCE_BAND_LABEL_VI: Record<"high" | "medium" | "low", string> = {
+  high: "Cao",
+  medium: "Trung bình",
+  low: "Thấp",
+};
+
 function formatConfidenceBand(band: "high" | "medium" | "low"): string {
-  const label = band.charAt(0).toUpperCase() + band.slice(1);
-  return label;
+  return CONFIDENCE_BAND_LABEL_VI[band];
 }
 
 export function DashboardDecisionHero({
@@ -55,7 +60,7 @@ export function DashboardDecisionHero({
       data-testid="dashboard-decision-hero"
       aria-labelledby="dashboard-decision-heading"
     >
-      <p className="dash-eyebrow">Today&apos;s verdict</p>
+      <p className="dash-eyebrow">Phán quyết hôm nay</p>
       <h2 id="dashboard-decision-heading" className="dash-decision-hero__title">
         {verdict.headline.value}
       </h2>
@@ -77,16 +82,16 @@ export function DashboardDecisionHero({
       ) : null}
       {ux === "NO_TRADE" ? (
         <p className="dash-decision-hero__preservation" data-testid="dashboard-verdict-preservation">
-          Capital preservation — no new swing risk today.
+          Bảo toàn vốn — không thêm rủi ro swing mới hôm nay.
         </p>
       ) : null}
       <p className="dash-decision-hero__allocation">
-        Max book{" "}
+        Tối đa danh mục{" "}
         <span className="font-semibold tabular-nums">{verdict.allocation.value}</span>
         {showPerTrade ? (
           <>
             {" "}
-            · Per trade{" "}
+            · Mỗi lệnh{" "}
             <span className="font-semibold tabular-nums">{perTrade}</span>
           </>
         ) : null}
@@ -98,7 +103,7 @@ export function DashboardDecisionHero({
               {displayGate1ScanLevel(gate1Resolution.canonical)}
             </span>
             {" "}
-            · Surfaced{" "}
+            · Đã lọc ra{" "}
             <span className="tabular-nums" data-testid="dashboard-verdict-surfaced">
               {surfacedCount}
             </span>
@@ -108,17 +113,17 @@ export function DashboardDecisionHero({
 
       {compact ? (
         <details className="dash-decision-hero__details">
-          <summary>Verdict detail</summary>
+          <summary>Chi tiết phán quyết</summary>
           <p className="dash-decision-hero__explanation">{verdict.explanation.value}</p>
           <p className="dash-decision-hero__confidence" data-testid="dashboard-verdict-confidence">
-            Evidence strength:{" "}
+            Độ mạnh bằng chứng:{" "}
             <span className="font-semibold">
               {formatConfidenceBand(verdict.confidenceBand.value)}
             </span>
           </p>
           {gate1Resolution.mismatch ? (
             <p className="dash-decision-hero__meta-live text-xs" title={gate1Resolution.note}>
-              Live Gate 1:{" "}
+              Gate 1 (trực tiếp):{" "}
               <span data-testid="dashboard-verdict-gate1-live">
                 {displayGate1ScanLevel(gate1Resolution.liveRegimeGate1)}
               </span>
@@ -132,21 +137,21 @@ export function DashboardDecisionHero({
             className="dash-decision-hero__confidence"
             data-testid="dashboard-verdict-confidence"
           >
-            Evidence strength:{" "}
+            Độ mạnh bằng chứng:{" "}
             <span className="font-semibold">
               {formatConfidenceBand(verdict.confidenceBand.value)}
             </span>
           </p>
           <dl className="dash-decision-hero__meta">
             <div>
-              <dt>Gate 1 (verdict)</dt>
+              <dt>Gate 1 (phán quyết)</dt>
               <dd data-testid="dashboard-verdict-gate1">
                 {displayGate1ScanLevel(gate1Resolution.canonical)}
               </dd>
             </div>
             {gate1Resolution.mismatch ? (
               <div>
-                <dt>Gate 1 (live)</dt>
+                <dt>Gate 1 (trực tiếp)</dt>
                 <dd
                   className="dash-decision-hero__meta-live"
                   data-testid="dashboard-verdict-gate1-live"
@@ -157,7 +162,7 @@ export function DashboardDecisionHero({
               </div>
             ) : null}
             <div>
-              <dt>Surfaced</dt>
+              <dt>Đã lọc ra</dt>
               <dd className="tabular-nums" data-testid="dashboard-verdict-surfaced">
                 {surfacedCount}
               </dd>

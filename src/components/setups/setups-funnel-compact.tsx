@@ -10,17 +10,17 @@ export function SetupsFunnelCompact({ latestScan, nearMissCount }: SetupsFunnelC
   const gate1Label = displayGate1ScanLevel(String(latestScan.gate1Level));
 
   const steps = [
-    { label: "Universe", value: latestScan.symbolCountTotal, hint: "scanned" },
-    { label: "Regime", value: latestScan.symbolCountScanned, hint: gate1Label },
-    { label: "Tradable", value: latestScan.symbolCountAfterTradability, hint: "passed" },
-    { label: "Surfaced", value: latestScan.candidateCountSurfaced, hint: "Tier A/B" },
-    { label: "Near-miss", value: nearMissCount, hint: "queue" },
+    { label: "Vũ trụ", value: latestScan.symbolCountTotal, hint: "đã quét" },
+    { label: "Chế độ", value: latestScan.symbolCountScanned, hint: gate1Label },
+    { label: "Đủ ĐK GD", value: latestScan.symbolCountAfterTradability, hint: "đạt" },
+    { label: "Đã lọc ra", value: latestScan.candidateCountSurfaced, hint: "Hạng A/B" },
+    { label: "Suýt đạt", value: nearMissCount, hint: "hàng chờ" },
   ];
 
   return (
     <div className="tosv3-setups-funnel-compact" data-testid="setups-pipeline-funnel">
       <p className="tosv3-setups-funnel-compact__intro">
-        Symbols remaining after each stage — not rejection counts.
+        Số mã còn lại sau mỗi giai đoạn — không phải số lượng bị loại.
       </p>
       <ul className="tosv3-setups-funnel-compact__steps">
         {steps.map((step) => (

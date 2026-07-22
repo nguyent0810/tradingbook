@@ -52,34 +52,34 @@ export function BattleReplayCardList({ rows }: { rows: BattleReplayRowDto[] }) {
           </div>
 
           <p className="line-clamp-2 text-xs text-[var(--text-secondary)] mt-2 mb-2">
-            <span className="text-[var(--text-tertiary)]">Summary: </span>
+            <span className="text-[var(--text-tertiary)]">Tóm tắt: </span>
             {row.explanation.summary}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
             <div>
-              <div className="paper-lab-label mb-1">Supports</div>
+              <div className="paper-lab-label mb-1">Ủng hộ</div>
               <BulletList items={row.explanation.supporting} className="text-[var(--success)]/85" />
             </div>
             <div>
-              <div className="paper-lab-label mb-1">Concerns</div>
+              <div className="paper-lab-label mb-1">Lo ngại</div>
               <BulletList items={row.explanation.opposing} className="text-[var(--warning)]/85" />
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[var(--border-secondary)]/30">
             <p className="text-xs text-[var(--text-tertiary)] line-clamp-1 flex-1 min-w-0">
-              <span className="text-[var(--text-tertiary)]">Style lens: </span>
+              <span className="text-[var(--text-tertiary)]">Góc nhìn phong cách: </span>
               {row.explanation.styleLens}
             </p>
             <PaperLabDetailsDialog
-              title={`${row.agentName} — battle details`}
+              title={`${row.agentName} — chi tiết đối đầu`}
               testId={`battle-details-${row.agentId}`}
-              triggerLabel="View details"
+              triggerLabel="Xem chi tiết"
             >
               <p className="text-sm text-[var(--text-primary)] mb-3">{row.explanation.summary}</p>
               <div className="mb-3">
-                <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">Supports</div>
+                <div className="text-xs font-semibold text-[var(--success)]/90 mb-1">Ủng hộ</div>
                 <ul className="text-xs text-[var(--success)]/85 list-disc list-inside space-y-1">
                   {row.explanation.supporting.map((s) => (
                     <li key={s}>{s}</li>
@@ -87,7 +87,7 @@ export function BattleReplayCardList({ rows }: { rows: BattleReplayRowDto[] }) {
                 </ul>
               </div>
               <div className="mb-3">
-                <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Concerns</div>
+                <div className="text-xs font-semibold text-[var(--warning)]/90 mb-1">Lo ngại</div>
                 <ul className="text-xs text-[var(--warning)]/85 list-disc list-inside space-y-1">
                   {row.explanation.opposing.map((s) => (
                     <li key={s}>{s}</li>
@@ -95,7 +95,7 @@ export function BattleReplayCardList({ rows }: { rows: BattleReplayRowDto[] }) {
                 </ul>
               </div>
               <p className="text-xs text-[var(--text-tertiary)]">
-                <span className="text-[var(--text-tertiary)]">Style lens: </span>
+                <span className="text-[var(--text-tertiary)]">Góc nhìn phong cách: </span>
                 {row.explanation.styleLens}
               </p>
             </PaperLabDetailsDialog>

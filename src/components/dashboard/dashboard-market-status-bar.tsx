@@ -6,7 +6,7 @@ export type DashboardMarketStatusBarProps = {
 };
 
 function formatScanRunLabel(iso: string | null): string {
-  if (!iso) return "No scan";
+  if (!iso) return "Chưa quét";
   try {
     const d = new Date(iso);
     return `${d.toISOString().slice(0, 10)} ${d.toISOString().slice(11, 16)} UTC`;
@@ -23,7 +23,7 @@ export function DashboardMarketStatusBar({ freshness }: DashboardMarketStatusBar
   if (hasStale) {
     const primaryMessage =
       freshness.staleFlags[0]?.message ??
-      "Market benchmark data is stale or incomplete relative to other feeds.";
+      "Dữ liệu chuẩn thị trường bị trễ hoặc chưa đầy đủ so với các nguồn khác.";
 
     return (
       <div
@@ -33,19 +33,19 @@ export function DashboardMarketStatusBar({ freshness }: DashboardMarketStatusBar
       >
         <div className="dash-market-status__lead">
           <span className="dash-market-status__dot dash-market-status__dot--stale" aria-hidden />
-          <span className="dash-market-status__label">Data alignment</span>
+          <span className="dash-market-status__label">Đồng bộ dữ liệu</span>
           <span className="dash-market-status__value">{primaryMessage}</span>
         </div>
         <div className="dash-market-status__chips">
           <span className="dash-chip">VNINDEX {freshness.benchmarkDate ?? "—"}</span>
-          <span className="dash-chip">Equity {freshness.equityMaxDate ?? "—"}</span>
-          <span className="dash-chip">Scan {formatScanRunLabel(freshness.scanRunAt)}</span>
-          <span className="dash-chip" data-testid="dashboard-data-timing-mode" title="All data below is end-of-day — no intraday/realtime feed exists in this app.">
-            Data: EOD
+          <span className="dash-chip">Cổ phiếu {freshness.equityMaxDate ?? "—"}</span>
+          <span className="dash-chip">Quét {formatScanRunLabel(freshness.scanRunAt)}</span>
+          <span className="dash-chip" data-testid="dashboard-data-timing-mode" title="Toàn bộ dữ liệu bên dưới là cuối ngày — ứng dụng không có nguồn dữ liệu trong phiên/thời gian thực.">
+            Dữ liệu: EOD
           </span>
         </div>
         <Link href="/setups" className="dash-market-status__action text-xs font-medium">
-          Setups →
+          Thiết lập →
         </Link>
       </div>
     );
@@ -59,17 +59,17 @@ export function DashboardMarketStatusBar({ freshness }: DashboardMarketStatusBar
     >
       <div className="dash-market-status__lead">
         <span className="dash-market-status__dot dash-market-status__dot--ok" aria-hidden />
-        <span className="dash-market-status__label">Market data aligned</span>
+        <span className="dash-market-status__label">Dữ liệu thị trường đồng bộ</span>
         <span className="dash-market-status__value dash-market-status__value--muted">
-          Backdrop current
+          Dữ liệu chuẩn cập nhật
         </span>
       </div>
       <div className="dash-market-status__chips">
         <span className="dash-chip">VNINDEX {freshness.benchmarkDate ?? "—"}</span>
-        <span className="dash-chip">Equity {freshness.equityMaxDate ?? "—"}</span>
-        <span className="dash-chip">Scan {formatScanRunLabel(freshness.scanRunAt)}</span>
-        <span className="dash-chip" data-testid="dashboard-data-timing-mode" title="All data below is end-of-day — no intraday/realtime feed exists in this app.">
-          Data: EOD
+        <span className="dash-chip">Cổ phiếu {freshness.equityMaxDate ?? "—"}</span>
+        <span className="dash-chip">Quét {formatScanRunLabel(freshness.scanRunAt)}</span>
+        <span className="dash-chip" data-testid="dashboard-data-timing-mode" title="Toàn bộ dữ liệu bên dưới là cuối ngày — ứng dụng không có nguồn dữ liệu trong phiên/thời gian thực.">
+          Dữ liệu: EOD
         </span>
       </div>
     </div>
