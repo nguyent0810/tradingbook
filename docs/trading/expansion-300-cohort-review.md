@@ -170,3 +170,22 @@ suspended, delisted, or otherwise structurally inactive rather than just low-vol
 4. ~~Separate approval for additive activation script~~ — done, 52/71 activated 2026-07-23.
 5. 300-symbol import+scan pilot — partially done; current universe is 281, not 300 (19 Tier B stragglers held back). Run `SMOKE_DATABASE=production npx tsx scripts/run-daily-scanner.ts` to validate the 281-symbol scan.
 6. Beyond 300: reaching a 500-symbol target requires a **new cohort selection** (~220 more symbols) drawn from the ~1210 currently-excluded pool in `expansion-300-cohort.json`, applying the same `≥120 bars` / liquidity rules used for this cohort.
+
+## 500-symbol target: investigated 2026-07-23, not currently feasible
+
+Ran `scripts/prepare-expansion-500-cohort.ts` (same selection rules as the 300-cohort, live-queried against
+the post-Tier-B-activation universe of 281). Result: **only 25 additional symbols** have ≥120 bars and aren't
+already active — nowhere near the 219 needed to reach 500.
+
+Root cause: of the ~1231 remaining excluded symbols, **1177 (96%) have zero bars** — they were never fetched at
+all (not a rate-limit or data-availability issue; this pipeline simply never backfilled them). The 25 that do
+qualify are mostly the same stragglers skipped from the Tier B activation (session-stale), plus a handful of
+never-before-cohorted names — and all 25 have `avgValue20Vnd` in the **hundreds of thousands of VND**, several
+orders of magnitude below the 2B VND Gate 1 tradability floor. Activating them would not surface additional scan
+candidates.
+
+**Decision (2026-07-23): hold at 281.** Pursuing 500 further would require a cold-start backfill project for the
+~1177 zero-bar symbols (new tooling — the existing stale-fetch/cohort-backfill scripts only refresh symbols that
+already have bar history) with no clear payoff, since VN's ~300 most liquid names are already covered by this
+cohort and the deep tail is overwhelmingly sub-floor micro-caps. Cohort snapshot kept at
+`data/expansion-500-cohort.json` for reference if this is revisited.
