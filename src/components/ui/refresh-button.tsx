@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 /** Re-runs the current route's server data fetch — a recovery action for
  *  server-rendered error banners that aren't inside an error.tsx boundary
  *  (so there's no `reset()` to call). */
-export function RefreshButton({ label = "Retry" }: { label?: string }) {
+export function RefreshButton({ label = "Thử lại" }: { label?: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [clicked, setClicked] = useState(false);
@@ -22,7 +22,7 @@ export function RefreshButton({ label = "Retry" }: { label?: string }) {
         startTransition(() => router.refresh());
       }}
     >
-      {isPending && clicked ? "Retrying…" : label}
+      {isPending && clicked ? "Đang thử lại…" : label}
     </button>
   );
 }

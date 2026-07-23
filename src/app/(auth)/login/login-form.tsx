@@ -70,7 +70,7 @@ export function LoginForm() {
 
       <div className="cd-auth-field">
         <label htmlFor="password" className="cd-auth-label">
-          Password <span className="cd-auth-label__required" aria-hidden="true">*</span>
+          Mật khẩu <span className="cd-auth-label__required" aria-hidden="true">*</span>
         </label>
         <PasswordInput
           ref={passwordRef}
@@ -110,10 +110,10 @@ export function LoginForm() {
               <circle cx="12" cy="12" r="10" opacity="0.25" />
               <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75" />
             </svg>
-            Signing in…
+            Đang đăng nhập…
           </>
         ) : (
-          "Sign in"
+          "Đăng nhập"
         )}
       </Button>
     </form>

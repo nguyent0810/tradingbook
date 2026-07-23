@@ -50,7 +50,7 @@ export async function safeLoadPositionSizingDefaults(
       equityVnd: null,
       positionSizingConfig: EMPTY_POSITION_SIZING_CONFIG,
       advBySymbolId: new Map(),
-      error: "Position sizing defaults unavailable (risk-config/ADV).",
+      error: "Giá trị mặc định định cỡ vị thế không khả dụng (risk-config/ADV).",
     };
   }
 }

@@ -95,14 +95,14 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
   return (
     <div className="tosv3-setups-sizing-panel" data-testid="setups-position-sizing">
       <p className="tosv3-setups-sizing-panel__hint">
-        {symbolKey} · Tier {quality} · k ₫ prices · guidance only
+        {symbolKey} · Hạng {quality} · giá tính theo nghìn ₫ · chỉ để tham khảo
       </p>
 
       <div className="tosv3-setups-sizing-panel__group">
-        <p className="tosv3-setups-sizing-panel__group-title">Account &amp; exposure</p>
+        <p className="tosv3-setups-sizing-panel__group-title">Vốn &amp; tỷ trọng</p>
         <div className="tosv3-setups-sizing-panel__fields">
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Equity (₫)</span>
+            <span className="tosv3-setups-sizing-field__label">Vốn (₫)</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={equity}
@@ -111,7 +111,7 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
             />
           </label>
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Max port %</span>
+            <span className="tosv3-setups-sizing-field__label">Tỷ trọng tối đa %</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={maxPortPct}
@@ -120,7 +120,7 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
             />
           </label>
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Current exp (₫)</span>
+            <span className="tosv3-setups-sizing-field__label">Tỷ trọng hiện tại (₫)</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={currentExp}
@@ -129,7 +129,7 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
             />
           </label>
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Max trade %</span>
+            <span className="tosv3-setups-sizing-field__label">Tối đa mỗi lệnh %</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={maxTradePct}
@@ -138,7 +138,7 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
             />
           </label>
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Base risk %</span>
+            <span className="tosv3-setups-sizing-field__label">Rủi ro cơ bản %</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={baseRiskPct}
@@ -150,10 +150,10 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
       </div>
 
       <div className="tosv3-setups-sizing-panel__group">
-        <p className="tosv3-setups-sizing-panel__group-title">Entry &amp; stop</p>
+        <p className="tosv3-setups-sizing-panel__group-title">Điểm vào &amp; cắt lỗ</p>
         <div className="tosv3-setups-sizing-panel__fields tosv3-setups-sizing-panel__fields--2">
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Entry (k ₫)</span>
+            <span className="tosv3-setups-sizing-field__label">Điểm vào (nghìn ₫)</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={entryK}
@@ -162,7 +162,7 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
             />
           </label>
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Stop (k ₫)</span>
+            <span className="tosv3-setups-sizing-field__label">Cắt lỗ (nghìn ₫)</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={stopK}
@@ -174,10 +174,10 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
       </div>
 
       <div className="tosv3-setups-sizing-panel__group">
-        <p className="tosv3-setups-sizing-panel__group-title">Liquidity</p>
+        <p className="tosv3-setups-sizing-panel__group-title">Thanh khoản</p>
         <div className="tosv3-setups-sizing-panel__fields tosv3-setups-sizing-panel__fields--2">
           <label className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">Liquidity cap (% of ADV)</span>
+            <span className="tosv3-setups-sizing-field__label">Trần thanh khoản (% ADV)</span>
             <input
               className="input tosv3-setups-sizing-field__input"
               value={liquidityCapPct}
@@ -186,7 +186,7 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
             />
           </label>
           <div className="tosv3-setups-sizing-field">
-            <span className="tosv3-setups-sizing-field__label">20D ADV (₫)</span>
+            <span className="tosv3-setups-sizing-field__label">ADV 20 ngày (₫)</span>
             <p className="tosv3-setups-sizing-panel__adv-readout tabular-nums">
               {symbolAvgDailyValueVnd != null ? formatVND(symbolAvgDailyValueVnd) : "—"}
             </p>
@@ -198,47 +198,47 @@ export const SetupsCandidatePositionSizing = memo(function SetupsCandidatePositi
         {!computed.ok ? (
           <p className="tosv3-setups-sizing-panel__error">
             {computed.code === "ENTRY_NOT_ABOVE_STOP"
-              ? "Entry must be above stop for long risk sizing."
+              ? "Điểm vào phải cao hơn cắt lỗ để tính rủi ro cho lệnh mua."
               : computed.code === "ZERO_EQUITY"
-                ? "Enter a positive account equity."
-                : "Check numeric inputs."}
+                ? "Nhập số vốn dương."
+                : "Kiểm tra lại các giá trị số đã nhập."}
           </p>
         ) : (
           <dl className="tosv3-setups-sizing-results">
             <div>
-              <dt>Shares</dt>
+              <dt>Số cổ phiếu</dt>
               <dd className="mono tabular-nums">
                 {computed.value.qFinalShares.toLocaleString("en-US")}
                 {computed.value.liquidityCapBinding ? (
-                  <span className="tosv3-setups-sizing-panel__liquidity-flag" title="Capped by liquidity (% of ADV), not by risk or exposure">
+                  <span className="tosv3-setups-sizing-panel__liquidity-flag" title="Bị giới hạn bởi thanh khoản (% ADV), không phải bởi rủi ro hay tỷ trọng">
                     {" "}
-                    (liquidity-capped)
+                    (giới hạn thanh khoản)
                   </span>
                 ) : null}
               </dd>
             </div>
             <div>
-              <dt>Notional</dt>
+              <dt>Giá trị lệnh</dt>
               <dd className="tabular-nums">{formatVND(computed.value.notionalVnd)}</dd>
             </div>
             <div>
-              <dt>Risk at stop</dt>
+              <dt>Rủi ro tại cắt lỗ</dt>
               <dd className="tabular-nums">{formatVND(computed.value.riskAtStopVnd)}</dd>
             </div>
             <div>
-              <dt>Stop dist</dt>
+              <dt>Khoảng cách cắt lỗ</dt>
               <dd className="tabular-nums">{computed.value.stopDistancePctOfEntry.toFixed(2)}%</dd>
             </div>
             <div>
-              <dt>Position %</dt>
+              <dt>Tỷ trọng %</dt>
               <dd className="tabular-nums">{computed.value.positionPctOfAccount.toFixed(2)}%</dd>
             </div>
             <div>
-              <dt>Exp after</dt>
+              <dt>Tỷ trọng sau lệnh</dt>
               <dd className="tabular-nums">{formatVND(computed.value.exposureAfterTradeVnd)}</dd>
             </div>
             <div className="tosv3-setups-sizing-results__wide">
-              <dt>Remaining capacity</dt>
+              <dt>Dư địa còn lại</dt>
               <dd className="tabular-nums">{formatVND(computed.value.remainingExposureAfterTradeVnd)}</dd>
             </div>
           </dl>

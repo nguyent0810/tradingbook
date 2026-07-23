@@ -53,7 +53,7 @@ export const SetupsCandidateEvidence = memo(function SetupsCandidateEvidence({
   const hiddenCount = items.length - preview.length;
 
   return (
-    <section className="tosv3-setups-workstation-panel__section" aria-label="Surfaced evidence">
+    <section className="tosv3-setups-workstation-panel__section" aria-label="Bằng chứng đã lọc ra">
       <h4 className="tosv3-setups-workstation-panel__section-title">Bằng chứng</h4>
       <ul className="tosv3-setups-evidence-grid">
         {preview.map((item) => (

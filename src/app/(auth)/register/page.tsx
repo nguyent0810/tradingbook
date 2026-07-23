@@ -3,8 +3,8 @@ import Link from "next/link";
 import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = {
-  title: "Create Account — TradeLog",
-  description: "Create your setup intelligence workspace.",
+  title: "Tạo tài khoản — TradeLog",
+  description: "Tạo không gian làm việc phân tích setup của bạn.",
 };
 
 export default function RegisterPage() {
@@ -26,19 +26,19 @@ export default function RegisterPage() {
             <polyline points="16 7 22 7 22 13" />
           </svg>
         </span>
-        <p className="cd-auth__eyebrow">Setup Intelligence</p>
-        <h1 className="cd-auth__title">Create your account</h1>
+        <p className="cd-auth__eyebrow">Trí tuệ Setup</p>
+        <h1 className="cd-auth__title">Tạo tài khoản của bạn</h1>
         <p className="cd-auth__lead">
-          Set up your workspace to surface high-quality setups and validate the edge before you act.
+          Thiết lập không gian làm việc để phát hiện các setup chất lượng cao và xác thực lợi thế trước khi hành động.
         </p>
       </header>
 
       <RegisterForm />
 
       <p className="cd-auth__footer">
-        Already have an account?{" "}
+        Đã có tài khoản?{" "}
         <Link href="/login" className="cd-auth__link">
-          Sign in
+          Đăng nhập
         </Link>
       </p>
     </>

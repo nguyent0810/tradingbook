@@ -12,7 +12,7 @@ const RAW_ROW = {
   rs20SpreadPct: 18.16,
   rs50SpreadPct: 24.91,
   terminalCode: "breakout_recency",
-  failedGate2Because: "Failed Gate 2 because: No recent breakout (breakout_recency)",
+  failedGate2Because: "Trượt Gate 2 vì: Chưa có breakout gần đây (breakout_recency)",
   topRejectionReason: "Not a Gate 2 SetupCandidate.",
   stageRank: 58,
   distanceToPullbackZoneFrac: 0.04,
@@ -23,9 +23,9 @@ const RAW_ROW = {
     disclaimer:
       "Relative strength diagnostic only — not used in current Gate 2 pass/fail and not part of rankScore yet.",
     lines: [
-      "RS20: +18.16 pp vs VNINDEX — Outperforming VNINDEX over 20 sessions.",
-      "Stock above MA50: yes",
-      "VNINDEX above MA50: yes",
+      "RS20: +18.16 pp vs VNINDEX — Vượt trội hơn VNINDEX trong 20 phiên.",
+      "Cổ phiếu trên MA50: có",
+      "VNINDEX trên MA50: có",
     ],
     rs20SpreadPct: 18.16,
     rs50SpreadPct: 24.91,
@@ -60,12 +60,12 @@ describe("mapRsWatchlistEntryToV3Card", () => {
     expect(card.symbol).toBe("CDC");
     expect(card.stateBadge).toBe("Watch: breakout");
     expect(card.setupState).toBe("Watch: breakout");
-    expect(card.setupReason).toBe("Needs fresh breakout");
+    expect(card.setupReason).toBe("Cần breakout mới");
     expect(card.rs20SpreadPct).toBe(18.16);
-    expect(card.strengthLabel).toBe("Strong RS");
-    expect(card.primaryInsight).toMatch(/fresh breakout/i);
-    expect(card.nextCondition).toBe("Needs fresh breakout");
-    expect(card.blockerLabel).toBe("Needs fresh breakout");
+    expect(card.strengthLabel).toBe("RS mạnh");
+    expect(card.primaryInsight).toMatch(/breakout mới/i);
+    expect(card.nextCondition).toBe("Cần breakout mới");
+    expect(card.blockerLabel).toBe("Cần breakout mới");
     expect(card.metrics.some((m) => m.label === "RS20")).toBe(true);
     expectNoForbidden(serialized);
     expect(serialized).not.toMatch(/RS20 \+/);
@@ -73,8 +73,8 @@ describe("mapRsWatchlistEntryToV3Card", () => {
 
   it("humanizes technical evidence lines when expanded", () => {
     const card = mapRsWatchlistEntryToV3Card(RAW_ROW);
-    expect(card.technicalEvidence.join(" ")).toMatch(/50-day average/i);
-    expect(card.technicalEvidence.join(" ")).toMatch(/Market backdrop: supportive/i);
+    expect(card.technicalEvidence.join(" ")).toMatch(/đường trung bình 50 ngày/i);
+    expect(card.technicalEvidence.join(" ")).toMatch(/Bối cảnh thị trường: thuận lợi/i);
     for (const line of card.technicalEvidence) {
       expectNoForbidden(line);
     }
@@ -92,7 +92,7 @@ describe("mapRsWatchlistToV3Panel", () => {
       rows: [RAW_ROW],
     });
 
-    expect(panel.title).toBe("Relative Strength Radar");
+    expect(panel.title).toBe("Radar sức mạnh tương đối");
     expect(panel.cards).toHaveLength(1);
     const copyOnly = { ...panel, cards: panel.cards.map((c) => ({ ...c, terminalCode: undefined })) };
     expectNoForbidden(JSON.stringify(copyOnly));
@@ -102,8 +102,8 @@ describe("mapRsWatchlistToV3Panel", () => {
 describe("formatActionHintForUser", () => {
   it("formats the confirmed-entry action hint sentinel", () => {
     expect(
-      formatActionHintForUser("Log trade — entry confirmed")
-    ).toBe("Log trade when entry confirms.");
+      formatActionHintForUser("Ghi lệnh — đã xác nhận điểm vào")
+    ).toBe("Ghi lệnh khi điểm vào được xác nhận.");
   });
 });
 
@@ -115,7 +115,7 @@ describe("mapRsWatchlistEntryToV3Card — setup reasons", () => {
       rs20SpreadPct: 2.8,
       rs50SpreadPct: -42.5,
       terminalCode: "trend_below_ma50",
-      failedGate2Because: "Failed Gate 2 because: Below long-term trend (trend_below_ma50)",
+      failedGate2Because: "Trượt Gate 2 vì: Dưới xu hướng dài hạn (trend_below_ma50)",
       topRejectionReason: "Trend not supportive",
       stageRank: 15,
       distanceToPullbackZoneFrac: null,
@@ -124,17 +124,17 @@ describe("mapRsWatchlistEntryToV3Card — setup reasons", () => {
       rsDiagnostic: null,
     });
     expect(card.setupState).toBe("Blocked: MA50");
-    expect(card.setupReason).toBe("Below 50-day average");
-    expect(card.strengthLabel).toBe("Mild RS");
+    expect(card.setupReason).toBe("Dưới đường trung bình 50 ngày");
+    expect(card.strengthLabel).toBe("RS nhẹ");
   });
 });
 
 describe("formatGateFailureForUser", () => {
   it("rewrites breakout_recency failures", () => {
     const copy = formatGateFailureForUser(
-      "Failed Gate 2 because: No recent breakout (breakout_recency)"
+      "Trượt Gate 2 vì: Chưa có breakout gần đây (breakout_recency)"
     );
-    expect(copy).toMatch(/Not ready/i);
+    expect(copy).toMatch(/Chưa sẵn sàng/i);
     expect(copy).not.toMatch(/breakout_recency/);
   });
 });

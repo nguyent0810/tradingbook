@@ -16,7 +16,7 @@ describe("computeDailyTradingDecision", () => {
     ).toEqual({
       level: "NO_TRADE",
       allocation: "0%",
-      explanation: "Market conditions are unfavorable.",
+      explanation: "Điều kiện thị trường không thuận lợi.",
     });
   });
 
@@ -30,7 +30,7 @@ describe("computeDailyTradingDecision", () => {
     ).toEqual({
       level: "NORMAL",
       allocation: "50-70%",
-      explanation: "Market is supportive and valid setups are available.",
+      explanation: "Thị trường đang hỗ trợ và có thiết lập hợp lệ.",
     });
     expect(
       computeDailyTradingDecision({
@@ -51,7 +51,7 @@ describe("computeDailyTradingDecision", () => {
     ).toEqual({
       level: "NO_TRADE",
       allocation: "0%",
-      explanation: "Market is supportive, but no valid setup is available.",
+      explanation: "Thị trường đang hỗ trợ, nhưng không có thiết lập hợp lệ nào.",
     });
   });
 
@@ -65,7 +65,7 @@ describe("computeDailyTradingDecision", () => {
     ).toEqual({
       level: "PROBE",
       allocation: "20-40%",
-      explanation: "Only small exposure is allowed because market conditions are mixed.",
+      explanation: "Chỉ được phép vào lệnh nhỏ vì điều kiện thị trường đang lẫn lộn.",
     });
   });
 
@@ -79,7 +79,7 @@ describe("computeDailyTradingDecision", () => {
     ).toEqual({
       level: "NO_TRADE",
       allocation: "0%",
-      explanation: "Market is mixed and no Tier A setup is available.",
+      explanation: "Thị trường đang lẫn lộn và không có thiết lập Hạng A.",
     });
   });
 });
@@ -105,7 +105,7 @@ describe("parsePersistedDailyDecision", () => {
     ).toEqual({
       level: "NORMAL",
       allocation: "50-70%",
-      explanation: "Market is supportive and valid setups are available.",
+      explanation: "Thị trường đang hỗ trợ và có thiết lập hợp lệ.",
     });
   });
 });

@@ -29,14 +29,14 @@ export const RS_WORKBENCH_FILTER_OPTIONS: ReadonlyArray<{
   label: string;
   requiresEarlyEntry?: boolean;
 }> = [
-  { id: "all", label: "All" },
-  { id: "avoid_chase", label: "Avoid Chase", requiresEarlyEntry: true },
-  { id: "watch_trigger", label: "Watch Trigger" },
-  { id: "wait_better_zone", label: "Wait Better Zone" },
-  { id: "below_ma50", label: "Below MA50" },
-  { id: "pilot_research", label: "Pilot Research", requiresEarlyEntry: true },
-  { id: "bank_only", label: "Bank" },
-  { id: "bad_rr", label: "Bad R:R", requiresEarlyEntry: true },
+  { id: "all", label: "Tất cả" },
+  { id: "avoid_chase", label: "Tránh đuổi giá", requiresEarlyEntry: true },
+  { id: "watch_trigger", label: "Theo dõi điểm kích hoạt" },
+  { id: "wait_better_zone", label: "Chờ vùng tốt hơn" },
+  { id: "below_ma50", label: "Dưới MA50" },
+  { id: "pilot_research", label: "Nghiên cứu Pilot", requiresEarlyEntry: true },
+  { id: "bank_only", label: "Ngân hàng" },
+  { id: "bad_rr", label: "R:R xấu", requiresEarlyEntry: true },
 ];
 
 export const RS_WORKBENCH_SORT_OPTIONS: ReadonlyArray<{
@@ -45,10 +45,10 @@ export const RS_WORKBENCH_SORT_OPTIONS: ReadonlyArray<{
 }> = [
   { id: "rs20_desc", label: "RS20" },
   { id: "rs50_desc", label: "RS50" },
-  { id: "score_desc", label: "Early Score" },
+  { id: "score_desc", label: "Điểm Early" },
   { id: "rr_desc", label: "R:R" },
-  { id: "ma20_dist_asc", label: "Distance to MA20" },
-  { id: "most_extended", label: "Most Extended" },
+  { id: "ma20_dist_asc", label: "Khoảng cách đến MA20" },
+  { id: "most_extended", label: "Extended nhiều nhất" },
 ];
 
 export function hasAnyEarlyEntryRows(rows: readonly RelativeStrengthRow[]): boolean {
@@ -81,15 +81,15 @@ export function filterEmptyStateMessage(
 ): string | null {
   if (resultCount > 0) return null;
   if (filter === "pilot_research") {
-    return "No Pilot Research candidates today. This is normal. Do not force trades.";
+    return "Không có ứng viên Pilot Research hôm nay. Đây là điều bình thường. Đừng ép giao dịch.";
   }
   if (filter === "bank_only") {
-    return "No bank symbols in the current filtered set.";
+    return "Không có mã ngân hàng trong tập đã lọc hiện tại.";
   }
   if (filter === "avoid_chase") {
-    return "No overextended symbols in the current scan.";
+    return "Không có mã bị đuổi giá quá mức trong lần quét hiện tại.";
   }
-  return "No symbols match this filter.";
+  return "Không có mã nào khớp với bộ lọc này.";
 }
 
 function matchesTerminal(row: RelativeStrengthRow, code: string): boolean {
@@ -121,11 +121,11 @@ export function filterWorkbenchRows(
       case "avoid_chase":
         return rowMatchesAvoidChase(row);
       case "watch_trigger":
-        return workbenchActionLabel(row) === "Watch trigger";
+        return workbenchActionLabel(row) === "Theo dõi kích hoạt";
       case "wait_better_zone":
-        return workbenchActionLabel(row) === "Wait better zone";
+        return workbenchActionLabel(row) === "Chờ vùng tốt hơn";
       case "below_ma50":
-        return workbenchActionLabel(row) === "Too early";
+        return workbenchActionLabel(row) === "Còn quá sớm";
       case "pilot_research":
         return row.earlyEntry?.proposedTradeState.includes("Pilot Candidate") ?? false;
       case "bad_rr":

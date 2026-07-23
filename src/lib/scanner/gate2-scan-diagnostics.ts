@@ -63,9 +63,9 @@ export function buildGate2Recommendation(
 ): Gate2Recommendation {
   if (totalInvalid === 0) {
     return {
-      summary: "No INVALID evaluations — bottleneck analysis not applicable.",
+      summary: "Không có đánh giá INVALID nào — không áp dụng phân tích điểm nghẽn.",
       likelyBottleneck: "none_obvious",
-      note: "All tradable symbols produced Tier A or B under current rules.",
+      note: "Tất cả mã có thể giao dịch đều đạt Hạng A hoặc B theo quy tắc hiện hành.",
     };
   }
 
@@ -114,13 +114,13 @@ export function buildGate2Recommendation(
   let summary: string;
   if (!dominant || top.n === 0) {
     summary =
-      "Rejections are spread across several checks — zero surfacing can be a normal regime/template mismatch rather than one broken threshold.";
+      "Từ chối trải đều trên nhiều bước kiểm tra — không có mã nào lọt qua có thể chỉ là do chế độ thị trường/mẫu hình không khớp, chứ không phải một ngưỡng bị lỗi.";
   } else {
-    summary = `Largest INVALID bucket is "${top.key}" (${top.n} symbols, ${pct(top.n)} of INVALID).`;
+    summary = `Nhóm INVALID lớn nhất là "${top.key}" (${top.n} mã, ${pct(top.n)} tổng số INVALID).`;
   }
 
   const note =
-    "Zero candidates can be normal when the market is not shaped like this playbook (fresh breakout + digestion + zone interaction + liquidity spike on the evaluation bar). Use closest-to-valid rows to see how deep names get before failing.";
+    "Không có ứng viên nào có thể là chuyện bình thường khi thị trường không có hình thái phù hợp với playbook này (breakout mới + digestion + tương tác vùng + đột biến thanh khoản tại nến đánh giá). Xem các dòng gần đạt nhất để biết các mã đi được sâu tới đâu trước khi bị loại.";
 
   return { summary, likelyBottleneck, note };
 }

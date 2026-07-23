@@ -62,14 +62,14 @@ describe("computeClosestExecutionStatus", () => {
 
 describe("pullbackProximityLabel", () => {
   it("maps bands per UX spec", () => {
-    expect(pullbackProximityLabel(0)).toBe("Very close");
-    expect(pullbackProximityLabel(0.009)).toBe("Very close");
-    expect(pullbackProximityLabel(0.01)).toBe("Near");
-    expect(pullbackProximityLabel(0.032)).toBe("Near");
-    expect(pullbackProximityLabel(0.039)).toBe("Near");
-    expect(pullbackProximityLabel(0.04)).toBe("Moderate");
-    expect(pullbackProximityLabel(0.06)).toBe("Moderate");
-    expect(pullbackProximityLabel(0.061)).toBe("Far");
+    expect(pullbackProximityLabel(0)).toBe("Rất gần");
+    expect(pullbackProximityLabel(0.009)).toBe("Rất gần");
+    expect(pullbackProximityLabel(0.01)).toBe("Gần");
+    expect(pullbackProximityLabel(0.032)).toBe("Gần");
+    expect(pullbackProximityLabel(0.039)).toBe("Gần");
+    expect(pullbackProximityLabel(0.04)).toBe("Trung bình");
+    expect(pullbackProximityLabel(0.06)).toBe("Trung bình");
+    expect(pullbackProximityLabel(0.061)).toBe("Xa");
   });
 
   it("returns null for non-finite inputs", () => {
@@ -79,9 +79,9 @@ describe("pullbackProximityLabel", () => {
 
 describe("closestExecutionActionHint", () => {
   it("returns fixed copy per status", () => {
-    expect(closestExecutionActionHint("READY")).toContain("Monitor");
+    expect(closestExecutionActionHint("READY")).toContain("Theo dõi");
     expect(closestExecutionActionHint("WAIT")).toContain("pullback");
-    expect(closestExecutionActionHint("INVALID")).toContain("Do not consider");
+    expect(closestExecutionActionHint("INVALID")).toContain("Không xem xét");
   });
 });
 

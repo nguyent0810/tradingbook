@@ -19,7 +19,7 @@ export type RetryActionPanelProps = {
 export function RetryActionPanel({
   message,
   onRetry,
-  retryLabel = "Try again",
+  retryLabel = "Thử lại",
   busy = false,
   children,
   className = "",

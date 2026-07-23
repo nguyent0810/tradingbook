@@ -13,10 +13,10 @@ describe("rs-setup-labels", () => {
   });
 
   it("assigns RS strength labels from RS20 thresholds only", () => {
-    expect(rsStrengthLabelFromRs20(15)).toBe("Strong RS");
-    expect(rsStrengthLabelFromRs20(14.9)).toBe("Positive RS");
-    expect(rsStrengthLabelFromRs20(5)).toBe("Positive RS");
-    expect(rsStrengthLabelFromRs20(2)).toBe("Mild RS");
+    expect(rsStrengthLabelFromRs20(15)).toBe("RS mạnh");
+    expect(rsStrengthLabelFromRs20(14.9)).toBe("RS dương");
+    expect(rsStrengthLabelFromRs20(5)).toBe("RS dương");
+    expect(rsStrengthLabelFromRs20(2)).toBe("RS nhẹ");
   });
 
   it("returns terminal-specific setup reasons", () => {
@@ -34,7 +34,7 @@ describe("rs-setup-labels", () => {
       disclaimerLines: [],
       rsDiagnostic: null,
     });
-    expect(reason).toBe("Not in pullback entry zone");
+    expect(reason).toBe("Chưa vào vùng pullback");
     expect(reason).not.toMatch(/Blocked/i);
   });
 });

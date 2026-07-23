@@ -198,7 +198,7 @@ describe("mapDashboardV3ViewModel — TRADE + candidates", () => {
 
     expect(vm.decision.mode).toBe("TRADE");
     expect(vm.decision.stanceLabel).toBe("TRADE MODE");
-    expect(vm.decision.primaryReason).toMatch(/not an automatic instruction/i);
+    expect(vm.decision.primaryReason).toMatch(/không phải là chỉ thị tự động/i);
     expect(vm.radar.qualified.length).toBeGreaterThan(0);
     expect(vm.radar.mapDots.some((d) => d.symbol === "FPT" && d.status === "qualified")).toBe(
       true
@@ -248,16 +248,16 @@ describe("mapUxVerdictToDecisionMode", () => {
 describe("v3 user-facing copy", () => {
   it("humanizes breakout_recency gate failure without internal codes", () => {
     const copy = formatGateFailureForUser(
-      "Failed Gate 2 because: No recent breakout (breakout_recency)"
+      "Trượt Gate 2 vì: Chưa có breakout gần đây (breakout_recency)"
     );
-    expect(copy).toMatch(/Not ready/i);
+    expect(copy).toMatch(/Chưa sẵn sàng/i);
     expect(copy).not.toMatch(/breakout_recency/);
-    expect(copy).not.toMatch(/Failed Gate 2 because/);
+    expect(copy).not.toMatch(/Trượt Gate 2 vì/);
   });
 
   it("humanizes relative strength summary lines", () => {
     const copy = formatRelativeStrengthSummaryForUser("RS20 +18.16 pp · RS50 +24.91 pp");
-    expect(copy).toMatch(/20 sessions/i);
+    expect(copy).toMatch(/20 phiên/i);
     expect(copy).not.toMatch(/RS20/);
     expect(copy).not.toMatch(/pp · RS50/);
   });
@@ -278,7 +278,7 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
         },
       })
     );
-    expect(vm.marketPulse.breadth).toMatch(/1 strong setup/i);
+    expect(vm.marketPulse.breadth).toMatch(/1 thiết lập mạnh/i);
     expect(vm.marketPulse.breadth).not.toMatch(/G2/);
     expect(vm.marketPulse.breadth).not.toMatch(/surfaced 1$/);
   });
@@ -332,7 +332,7 @@ describe("mapDashboardV3ViewModel — readable breadth and diagnostics", () => {
       ...vm.rsWatchlist,
       cards: vm.rsWatchlist.cards.map((c) => ({ ...c, terminalCode: undefined })),
     });
-    expect(vm.rsWatchlist.title).toBe("Relative Strength Radar");
+    expect(vm.rsWatchlist.title).toBe("Radar sức mạnh tương đối");
     expect(card.primaryInsight).toMatch(/breakout/i);
     expect(card.stateBadge).toBe("Watch: breakout");
     expect(card.setupState).toBe("Watch: breakout");

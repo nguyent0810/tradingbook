@@ -13,7 +13,7 @@ export type StaleDataWarningProps = {
  * Market/bar freshness warning — presentation only; caller supplies real dates/context.
  */
 export function StaleDataWarning({
-  title = "Stale market data",
+  title = "Dữ liệu thị trường đã cũ",
   message,
   detail,
   children,
@@ -26,7 +26,7 @@ export function StaleDataWarning({
       role="status"
       data-testid={testId ?? "stale-data-warning"}
     >
-      <p className="ui-state-panel__eyebrow">Data freshness</p>
+      <p className="ui-state-panel__eyebrow">Độ mới dữ liệu</p>
       <p className="ui-state-panel__title">{title}</p>
       <p className="ui-state-panel__body">{message}</p>
       {detail?.trim() ? (

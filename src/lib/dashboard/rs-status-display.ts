@@ -2,44 +2,54 @@ import type { RelativeStrengthRow } from "@/components/command-deck/types";
 import { isExtendedDoNotChase } from "./early-entry-ui";
 
 const SETUP_STATE_LABELS: Record<string, string> = {
-  "Watch: breakout": "Wait Breakout",
-  "Blocked: zone": "Bad Zone",
-  "Blocked: MA50": "Below MA50",
-  "Blocked: extended": "Too Extended",
+  "Watch: breakout": "Chờ breakout",
+  "Blocked: zone": "Sai vùng",
+  "Watch: volume": "Theo dõi: khối lượng",
+  "Blocked: MA50": "Dưới MA50",
+  "Watch: momentum": "Theo dõi: động lượng",
+  "Blocked: extended": "Quá mở rộng",
+  "Watch: hold": "Theo dõi: giữ nhịp",
+  "Watch: digestion": "Theo dõi: tích lũy",
+  "Watch: monitor": "Theo dõi",
 };
 
 const SETUP_STATE_TOOLTIPS: Record<string, string> = {
-  "Wait Breakout":
-    "Relative strength is good but price has not cleared the breakout trigger.",
-  "Bad Zone": "Price is outside the valid entry zone. Wait for better R:R.",
-  "Below MA50": "Trend filter has not confirmed yet.",
-  "Too Extended": "Price is too far from a low-risk entry zone. Avoid FOMO.",
+  "Chờ breakout":
+    "Sức mạnh tương đối tốt nhưng giá chưa vượt ngưỡng kích hoạt breakout.",
+  "Sai vùng": "Giá đang ở ngoài vùng vào lệnh hợp lệ. Chờ tỷ lệ R:R tốt hơn.",
+  "Theo dõi: khối lượng": "Cần thêm khối lượng xác nhận trước khi đạt điều kiện.",
+  "Dưới MA50": "Bộ lọc xu hướng chưa xác nhận.",
+  "Theo dõi: động lượng": "Động lượng ngắn hạn chưa theo kịp xu hướng dài hạn.",
+  "Quá mở rộng": "Giá đã cách quá xa vùng vào lệnh rủi ro thấp. Tránh FOMO.",
+  "Theo dõi: giữ nhịp": "Breakout chưa giữ vững — cần theo dõi thêm.",
+  "Theo dõi: tích lũy": "Cần thời gian tích lũy sau breakout trước khi vào lệnh.",
+  "Theo dõi": "Đang theo dõi — chưa đủ điều kiện vào lệnh.",
 };
 
 const EARLY_STATE_LABELS: Record<string, string> = {
-  "Extended — Do Not Chase": "Too Extended",
-  "Pilot Candidate": "Pilot Research",
-  "Add Zone": "Add Watch",
-  Watch: "Watch",
+  "Extended — Do Not Chase": "Quá mở rộng",
+  "Pilot Candidate": "Nghiên cứu thử nghiệm",
+  "Add Zone": "Vùng gia tăng theo dõi",
+  Watch: "Theo dõi",
 };
 
 const EARLY_STATE_TOOLTIPS: Record<string, string> = {
-  "Too Extended": "Price is too far from a low-risk entry zone. Avoid FOMO.",
-  "Pilot Research":
-    "Early signal for observation only — not a buy recommendation.",
-  "Add Watch":
-    "Possible add area only after confirmation and only if already tracking the trade.",
-  Watch: "Monitor for confirmation — not a buy signal.",
+  "Quá mở rộng": "Giá đã cách quá xa vùng vào lệnh rủi ro thấp. Tránh FOMO.",
+  "Nghiên cứu thử nghiệm":
+    "Tín hiệu sớm chỉ để quan sát — không phải khuyến nghị mua.",
+  "Vùng gia tăng theo dõi":
+    "Chỉ là vùng có thể gia tăng sau khi xác nhận và chỉ khi đã theo dõi giao dịch này.",
+  "Theo dõi": "Theo dõi để xác nhận — không phải tín hiệu mua.",
 };
 
 export const WORKBENCH_ACTION_TOOLTIPS: Record<string, string> = {
-  "Avoid chase": "Price is extended or R:R is poor. Do not FOMO.",
-  "Wait better zone": "Price is outside a valid entry zone.",
-  "Watch trigger": "Wait for breakout confirmation.",
-  "Too early": "Trend filter has not confirmed.",
-  "Validation watch": "Research signal only, not a buy recommendation.",
-  "Wait confirmation": "Add only after confirmation.",
-  Observe: "Monitor only.",
+  "Tránh đuổi giá": "Giá đã mở rộng hoặc R:R kém. Đừng FOMO.",
+  "Chờ vùng tốt hơn": "Giá đang ở ngoài vùng vào lệnh hợp lệ.",
+  "Theo dõi kích hoạt": "Chờ xác nhận breakout.",
+  "Còn quá sớm": "Bộ lọc xu hướng chưa xác nhận.",
+  "Theo dõi xác thực": "Chỉ là tín hiệu nghiên cứu, không phải khuyến nghị mua.",
+  "Chờ xác nhận": "Chỉ gia tăng sau khi có xác nhận.",
+  "Quan sát": "Chỉ theo dõi.",
 };
 
 export type WorkbenchBadgeTone = "danger" | "warning" | "info" | "neutral";
@@ -83,38 +93,38 @@ export function workbenchActionLabel(row: RelativeStrengthRow): string {
     ? friendlyEarlyStateLabel(row.earlyEntry.proposedTradeState)
     : null;
 
-  if (early === "Too Extended") return "Avoid chase";
-  if (setup === "Bad Zone" && hasBadRiskReward(row)) return "Avoid chase";
-  if (setup === "Too Extended") return "Avoid chase";
+  if (early === "Quá mở rộng") return "Tránh đuổi giá";
+  if (setup === "Sai vùng" && hasBadRiskReward(row)) return "Tránh đuổi giá";
+  if (setup === "Quá mở rộng") return "Tránh đuổi giá";
 
-  if (setup === "Bad Zone") return "Wait better zone";
-  if (setup === "Wait Breakout") return "Watch trigger";
-  if (setup === "Below MA50") return "Too early";
+  if (setup === "Sai vùng") return "Chờ vùng tốt hơn";
+  if (setup === "Chờ breakout") return "Theo dõi kích hoạt";
+  if (setup === "Dưới MA50") return "Còn quá sớm";
 
-  if (early === "Pilot Research") return "Validation watch";
-  if (early === "Add Watch") return "Wait confirmation";
+  if (early === "Nghiên cứu thử nghiệm") return "Theo dõi xác thực";
+  if (early === "Vùng gia tăng theo dõi") return "Chờ xác nhận";
 
-  return "Observe";
+  return "Quan sát";
 }
 
 export function workbenchActionTooltip(row: RelativeStrengthRow): string {
   const label = workbenchActionLabel(row);
-  return WORKBENCH_ACTION_TOOLTIPS[label] ?? WORKBENCH_ACTION_TOOLTIPS.Observe;
+  return WORKBENCH_ACTION_TOOLTIPS[label] ?? WORKBENCH_ACTION_TOOLTIPS["Quan sát"];
 }
 
 export function setupBadgeTone(setupState: string): WorkbenchBadgeTone {
   const friendly = friendlySetupStateLabel(setupState);
-  if (friendly === "Bad Zone" || friendly === "Below MA50" || friendly === "Too Extended") {
+  if (friendly === "Sai vùng" || friendly === "Dưới MA50" || friendly === "Quá mở rộng") {
     return "danger";
   }
-  if (friendly === "Wait Breakout") return "warning";
+  if (friendly === "Chờ breakout") return "warning";
   return "neutral";
 }
 
 export function earlyResearchBadgeTone(proposedTradeState: string): WorkbenchBadgeTone {
   const friendly = friendlyEarlyStateLabel(proposedTradeState);
-  if (friendly === "Too Extended") return "danger";
-  if (friendly === "Pilot Research" || friendly === "Add Watch" || friendly === "Watch") {
+  if (friendly === "Quá mở rộng") return "danger";
+  if (friendly === "Nghiên cứu thử nghiệm" || friendly === "Vùng gia tăng theo dõi" || friendly === "Theo dõi") {
     return "info";
   }
   return "neutral";
@@ -125,7 +135,7 @@ export function rowMatchesAvoidChase(row: RelativeStrengthRow): boolean {
     return true;
   }
   const setup = friendlySetupStateLabel(row.setupState);
-  if (setup === "Bad Zone" && hasBadRiskReward(row)) return true;
-  if (setup === "Too Extended") return true;
+  if (setup === "Sai vùng" && hasBadRiskReward(row)) return true;
+  if (setup === "Quá mở rộng") return true;
   return false;
 }

@@ -11,6 +11,7 @@ import {
   isTierQuality,
   rsNearMissWatchlistActionHint,
   RS_NEAR_MISS_WATCHLIST_COPY,
+  RS_NEAR_MISS_WATCHLIST_TITLE,
   sortRsNearMissWatchlist,
   type RsNearMissWatchlistRow,
 } from "./rs-near-miss-watchlist";
@@ -179,13 +180,13 @@ describe("rs-near-miss-watchlist", () => {
       bars,
     });
     const panel = buildRsNearMissWatchlistPanel([row]);
-    expect(panel.title).toBe("Relative-strength watchlist");
+    expect(panel.title).toBe(RS_NEAR_MISS_WATCHLIST_TITLE);
     expect(panel.disclaimerLines).toContain(RS_NEAR_MISS_WATCHLIST_COPY.diagnosticOnly);
     expect(panel.disclaimerLines).toContain(RS_NEAR_MISS_WATCHLIST_COPY.notSetupCandidate);
-    expect(panel.actionHint).toMatch(/not used in current trading decision/i);
-    expect(row.failedGate2Because).toMatch(/^Failed Gate 2 because:/);
+    expect(panel.actionHint).toMatch(/không dùng trong quyết định giao dịch hiện tại/i);
+    expect(row.failedGate2Because).toMatch(/^Trượt Gate 2 vì:/);
     expect(formatRsNearMissFailedGate2Because("volume_ratio", "volume_ratio")).toMatch(
-      /Failed Gate 2 because/
+      /Trượt Gate 2 vì/
     );
     expect(rsNearMissWatchlistActionHint()).toMatch(/SetupCandidate/i);
   });

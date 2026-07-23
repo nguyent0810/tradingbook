@@ -9,14 +9,14 @@ import { z } from "zod";
 // ─── Validation Schemas ───
 
 const LoginSchema = z.object({
-  email: z.string().email("Please enter a valid email."),
-  password: z.string().min(1, "Password is required."),
+  email: z.string().email("Vui lòng nhập email hợp lệ."),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu."),
 });
 
 const RegisterSchema = z.object({
-  email: z.string().email("Please enter a valid email."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
-  name: z.string().min(1, "Name is required.").optional(),
+  email: z.string().email("Vui lòng nhập email hợp lệ."),
+  password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự."),
+  name: z.string().min(1, "Vui lòng nhập tên.").optional(),
 });
 
 // ─── Types ───
@@ -48,12 +48,12 @@ export async function login(
   });
 
   if (!user) {
-    return { message: "Invalid email or password." };
+    return { message: "Email hoặc mật khẩu không đúng." };
   }
 
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
-    return { message: "Invalid email or password." };
+    return { message: "Email hoặc mật khẩu không đúng." };
   }
 
   await createSession(user.id, user.email);
@@ -83,7 +83,7 @@ export async function register(
   });
 
   if (existing) {
-    return { message: "An account with this email already exists." };
+    return { message: "Đã tồn tại tài khoản với email này." };
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

@@ -14,6 +14,6 @@ export const DashboardVnindexTrendChartLazy = dynamic(
       (m) => m.DashboardVnindexTrendChart
     ),
   {
-    loading: () => <LoadingSkeleton height="140px" aria-label="Loading VNINDEX trend chart" />,
+    loading: () => <LoadingSkeleton height="140px" aria-label="Đang tải biểu đồ xu hướng VNINDEX" />,
   }
 );

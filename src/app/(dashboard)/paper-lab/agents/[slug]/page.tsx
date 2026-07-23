@@ -8,7 +8,7 @@ import type { AgentDnaProfile } from "@/lib/lab/types/regime";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
-  title: "Agent Profile | Arena",
+  title: "Hồ sơ Agent | Arena",
 };
 
 export default async function AgentProfilePage({
@@ -43,28 +43,28 @@ export default async function AgentProfilePage({
         <PaperLabPanel title="Agent DNA">
           {dna ? (
             <ul className="text-sm text-[var(--text-secondary)] space-y-1">
-              <li>Avg confidence: {(dna.avgConfidence * 100).toFixed(0)}%</li>
-              <li>Trade frequency: {dna.tradeFrequency.toFixed(2)}/day</li>
-              <li>Specialization: {(dna.specializationScore * 100).toFixed(0)}%</li>
-              <li>Loves: {dna.loves.map((l) => l.signal).join(", ") || "—"}</li>
-              <li>Avoids: {dna.avoids.map((a) => a.signal).join(", ") || "—"}</li>
+              <li>Độ tự tin TB: {(dna.avgConfidence * 100).toFixed(0)}%</li>
+              <li>Tần suất giao dịch: {dna.tradeFrequency.toFixed(2)}/ngày</li>
+              <li>Chuyên biệt hóa: {(dna.specializationScore * 100).toFixed(0)}%</li>
+              <li>Ưa thích: {dna.loves.map((l) => l.signal).join(", ") || "—"}</li>
+              <li>Tránh: {dna.avoids.map((a) => a.signal).join(", ") || "—"}</li>
             </ul>
           ) : (
-            <p className="text-sm text-[var(--text-tertiary)]">DNA not computed yet.</p>
+            <p className="text-sm text-[var(--text-tertiary)]">Chưa tính DNA.</p>
           )}
         </PaperLabPanel>
-        <PaperLabPanel title="Calibration & Evolution">
+        <PaperLabPanel title="Hiệu chỉnh & Tiến hóa">
           <p className="text-sm text-[var(--text-secondary)]">
             Brier: {agent.calibration[0]?.brierScore.toFixed(3) ?? "—"}
           </p>
           <p className="text-sm text-[var(--text-secondary)]">
-            Overconfidence:{" "}
+            Tự tin thái quá:{" "}
             {agent.calibration[0]
               ? `${(agent.calibration[0].overconfidence * 100).toFixed(1)}%`
               : "—"}
           </p>
           <p className="text-sm text-[var(--text-secondary)]">
-            Evolution: {agent.evolution[0]?.score.toFixed(3) ?? "—"} (
+            Tiến hóa: {agent.evolution[0]?.score.toFixed(3) ?? "—"} (
             {agent.evolution[0]?.trend ?? "—"})
           </p>
         </PaperLabPanel>

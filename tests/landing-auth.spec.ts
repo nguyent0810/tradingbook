@@ -4,7 +4,7 @@ test.describe("Landing and auth — production route smoke", () => {
   test("landing page loads for a signed-out visitor", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Sign in" }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: "Đăng nhập" }).first()).toBeVisible();
   });
 
   test("login page renders the auth form with the approved indigo accent", async ({ page }) => {

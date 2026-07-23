@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
-  title: "Ops | Arena",
+  title: "Vận hành | Arena",
 };
 
 export default async function LabOpsPage() {
@@ -15,35 +15,35 @@ export default async function LabOpsPage() {
 
   return (
     <>
-      <PaperLabPanel title="Production Observability" className="mb-4">
+      <PaperLabPanel title="Giám sát vận hành" className="mb-4">
         <div className="paper-lab-kpi-grid mb-4">
           <div className="paper-lab-kpi">
-            <div className="paper-lab-kpi__label">Events (24h)</div>
+            <div className="paper-lab-kpi__label">Sự kiện (24h)</div>
             <div className="paper-lab-kpi__value tabular-nums">{summary.eventsLast24h}</div>
           </div>
           <div className="paper-lab-kpi">
-            <div className="paper-lab-kpi__label">Last paper-lab run</div>
+            <div className="paper-lab-kpi__label">Lần chạy paper-lab gần nhất</div>
             <div className="paper-lab-kpi__value" style={{ fontSize: "0.85rem" }}>
               {summary.lastPaperLabRun ?? "—"}
             </div>
           </div>
           <div className="paper-lab-kpi">
-            <div className="paper-lab-kpi__label">Last analytics run</div>
+            <div className="paper-lab-kpi__label">Lần chạy analytics gần nhất</div>
             <div className="paper-lab-kpi__value" style={{ fontSize: "0.85rem" }}>
               {summary.lastAnalyticsRun ?? "—"}
             </div>
           </div>
         </div>
       </PaperLabPanel>
-      <PaperLabPanel title="Job telemetry">
+      <PaperLabPanel title="Đo lường job">
         <div className="safe-table-wrap paper-lab-table-wrap">
           <table className="paper-lab-table safe-table">
             <thead>
               <tr>
                 <th>Job</th>
-                <th>Events</th>
-                <th>Errors</th>
-                <th>Avg latency</th>
+                <th>Sự kiện</th>
+                <th>Lỗi</th>
+                <th>Độ trễ TB</th>
               </tr>
             </thead>
             <tbody>

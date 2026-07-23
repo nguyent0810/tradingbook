@@ -46,7 +46,7 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
         console.error("[setups] getLatestDailyScanRun failed:", e);
         return {
           latest: null,
-          error: "Database temporarily unavailable (scanner data).",
+          error: "Cơ sở dữ liệu tạm thời không khả dụng (dữ liệu quét).",
         };
       }),
     getExpectedLatestSessionFromIndexBars(prisma)
@@ -55,7 +55,7 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
         console.error("[setups] expectedLatestSession lookup failed:", e);
         return {
           session: null,
-          error: "Database temporarily unavailable (benchmark session).",
+          error: "Cơ sở dữ liệu tạm thời không khả dụng (phiên chuẩn).",
         };
       }),
     prisma.stockDailyBar
@@ -65,7 +65,7 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
         console.error("[setups] equity max bar date failed:", e);
         return {
           maxDate: null as Date | null,
-          error: "Database temporarily unavailable (equity bar dates).",
+          error: "Cơ sở dữ liệu tạm thời không khả dụng (ngày nến vốn chủ).",
         };
       }),
   ]);
@@ -96,7 +96,7 @@ export const loadGate2BreakdownCached = cache(
       console.error("[setups] fetchGate2InvalidBreakdown failed:", e);
       return {
         breakdown: [],
-        error: "Database temporarily unavailable (setup diagnostics).",
+        error: "Cơ sở dữ liệu tạm thời không khả dụng (chẩn đoán thiết lập).",
       };
     }
   }
@@ -128,7 +128,7 @@ export const loadSetupPerfRowsCached = cache(
       console.error("[setups] setupPerfRows query failed:", e);
       return {
         rows: [],
-        error: "Database temporarily unavailable (setup performance stats).",
+        error: "Cơ sở dữ liệu tạm thời không khả dụng (thống kê hiệu suất thiết lập).",
       };
     }
   }
@@ -183,7 +183,7 @@ export const loadRsNearMissWatchlistForSetupsCached = cache(
       console.error("[setups] computeRsNearMissWatchlistFromDb failed:", e);
       return {
         panel: buildRsNearMissWatchlistPanel([]),
-        error: "Database temporarily unavailable (RS watchlist).",
+        error: "Cơ sở dữ liệu tạm thời không khả dụng (danh sách theo dõi RS).",
       };
     }
   }
@@ -223,7 +223,7 @@ export const loadSurfacedCandidatesHealthCached = cache(async () => {
     console.error("[setups] prepareSurfacedCandidatesHealthView failed:", e);
     return {
       candidatesWithHealth: [],
-      healthError: "Database temporarily unavailable (candidate health).",
+      healthError: "Cơ sở dữ liệu tạm thời không khả dụng (sức khỏe ứng viên).",
     };
   }
 });

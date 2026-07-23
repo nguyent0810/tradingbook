@@ -18,6 +18,6 @@ describe("rs-workbench-format", () => {
 
   it("exposes column tooltips for target and invalid", () => {
     expect(WORKBENCH_COLUMN_TOOLTIPS.target).toContain("R:R");
-    expect(WORKBENCH_COLUMN_TOOLTIPS.invalid).toContain("invalid");
+    expect(WORKBENCH_COLUMN_TOOLTIPS.invalid).toContain("hợp lệ");
   });
 });

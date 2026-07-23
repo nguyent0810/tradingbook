@@ -34,19 +34,19 @@ function baseRow(partial: Partial<RelativeStrengthRow> = {}): RelativeStrengthRo
 
 describe("rs-status-display", () => {
   it("maps setup state labels for workbench UI", () => {
-    expect(friendlySetupStateLabel("Watch: breakout")).toBe("Wait Breakout");
-    expect(friendlySetupStateLabel("Blocked: zone")).toBe("Bad Zone");
-    expect(friendlySetupStateLabel("Blocked: MA50")).toBe("Below MA50");
+    expect(friendlySetupStateLabel("Watch: breakout")).toBe("Chờ breakout");
+    expect(friendlySetupStateLabel("Blocked: zone")).toBe("Sai vùng");
+    expect(friendlySetupStateLabel("Blocked: MA50")).toBe("Dưới MA50");
   });
 
   it("maps early state labels for workbench UI", () => {
-    expect(friendlyEarlyStateLabel("Pilot Candidate")).toBe("Pilot Research");
-    expect(friendlyEarlyStateLabel("Extended — Do Not Chase")).toBe("Too Extended");
-    expect(friendlyEarlyStateLabel("Add Zone")).toBe("Add Watch");
+    expect(friendlyEarlyStateLabel("Pilot Candidate")).toBe("Nghiên cứu thử nghiệm");
+    expect(friendlyEarlyStateLabel("Extended — Do Not Chase")).toBe("Quá mở rộng");
+    expect(friendlyEarlyStateLabel("Add Zone")).toBe("Vùng gia tăng theo dõi");
   });
 
   it("provides tooltips for friendly labels", () => {
-    expect(setupStateTooltip("Blocked: zone")).toContain("entry zone");
+    expect(setupStateTooltip("Blocked: zone")).toContain("vùng vào lệnh");
     expect(setupStateTooltip("Watch: breakout")).toContain("breakout");
   });
 
@@ -72,7 +72,7 @@ describe("rs-status-display", () => {
         distFromMa20Pct: 6,
       },
     });
-    expect(workbenchActionLabel(row)).toBe("Avoid chase");
+    expect(workbenchActionLabel(row)).toBe("Tránh đuổi giá");
     expect(rowMatchesAvoidChase(row)).toBe(true);
   });
 
@@ -99,11 +99,11 @@ describe("rs-status-display", () => {
       },
     });
     expect(hasBadRiskReward(row)).toBe(true);
-    expect(workbenchActionLabel(row)).toBe("Avoid chase");
+    expect(workbenchActionLabel(row)).toBe("Tránh đuổi giá");
   });
 
   it("maps wait better zone for bad zone without bad R:R", () => {
-    expect(workbenchActionLabel(baseRow())).toBe("Wait better zone");
+    expect(workbenchActionLabel(baseRow())).toBe("Chờ vùng tốt hơn");
   });
 
   it("prioritizes watch trigger over pilot research when setup is wait breakout", () => {
@@ -130,7 +130,7 @@ describe("rs-status-display", () => {
         distFromMa20Pct: 3.2,
       },
     });
-    expect(workbenchActionLabel(row)).toBe("Watch trigger");
+    expect(workbenchActionLabel(row)).toBe("Theo dõi kích hoạt");
   });
 
   it("maps paper watch only when no setup gate applies", () => {
@@ -157,12 +157,12 @@ describe("rs-status-display", () => {
         distFromMa20Pct: 2.1,
       },
     });
-    expect(workbenchActionLabel(row)).toBe("Validation watch");
+    expect(workbenchActionLabel(row)).toBe("Theo dõi xác thực");
   });
 
   it("provides concise action tooltips", () => {
-    expect(WORKBENCH_ACTION_TOOLTIPS["Avoid chase"]).toContain("FOMO");
-    expect(workbenchActionTooltip(baseRow())).toContain("entry zone");
+    expect(WORKBENCH_ACTION_TOOLTIPS["Tránh đuổi giá"]).toContain("FOMO");
+    expect(workbenchActionTooltip(baseRow())).toContain("vùng vào lệnh");
   });
 
   it("uses danger for blocked setup and info for early research", () => {

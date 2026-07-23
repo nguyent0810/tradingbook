@@ -18,7 +18,7 @@ export function DenseTable({
   testId,
   className = "",
   stickyFirstColumn = true,
-  ariaLabel = "Data table",
+  ariaLabel = "Bảng dữ liệu",
   scrollHint,
 }: DenseTableProps) {
   return (

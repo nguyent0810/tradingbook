@@ -92,20 +92,20 @@ describe("rs-workbench-ui", () => {
 
   it("returns pilot research empty state copy", () => {
     expect(filterEmptyStateMessage("pilot_research", 0)).toBe(
-      "No Pilot Research candidates today. This is normal. Do not force trades."
+      "Không có ứng viên Pilot Research hôm nay. Đây là điều bình thường. Đừng ép giao dịch."
     );
     expect(filterEmptyStateMessage("pilot_research", 2)).toBeNull();
   });
 
   it("returns bank-only empty state copy", () => {
     expect(filterEmptyStateMessage("bank_only", 0)).toBe(
-      "No bank symbols in the current filtered set."
+      "Không có mã ngân hàng trong tập đã lọc hiện tại."
     );
   });
 
   it("returns avoid chase empty state copy", () => {
     expect(filterEmptyStateMessage("avoid_chase", 0)).toBe(
-      "No overextended symbols in the current scan."
+      "Không có mã bị đuổi giá quá mức trong lần quét hiện tại."
     );
   });
 

@@ -27,7 +27,7 @@ export function BackendBlockedState({
       role="status"
       data-testid={testId ?? "backend-blocked-state"}
     >
-      <p className="ui-state-panel__eyebrow">Backend blocked</p>
+      <p className="ui-state-panel__eyebrow">Backend chưa hỗ trợ</p>
       <p className="ui-state-panel__title">{feature}</p>
       <p className="ui-state-panel__body">{reason}</p>
       {contractRef?.trim() ? (

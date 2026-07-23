@@ -69,16 +69,16 @@ export function computeGateFunnelSnapshot(
 
 export function formatGateFunnelSummaryLine(funnel: GateFunnelSnapshot): string {
   const parts = [
-    `Gate 2 qualified (pre-regime): A ${funnel.qualifiedCountA} · B ${funnel.qualifiedCountB}`,
-    `Surfaced after Gate 1: ${funnel.surfacedTotal}`,
+    `Đạt Gate 2 (trước chế độ): A ${funnel.qualifiedCountA} · B ${funnel.qualifiedCountB}`,
+    `Đã lọc ra sau Gate 1: ${funnel.surfacedTotal}`,
   ];
   if (funnel.suppressedTotal > 0) {
     parts.push(
-      `Suppressed by Gate 1: ${funnel.suppressedTotal}` +
+      `Bị chặn bởi Gate 1: ${funnel.suppressedTotal}` +
         (funnel.suppressedCountB > 0
-          ? ` (incl. ${funnel.suppressedCountB} Tier B)`
+          ? ` (gồm ${funnel.suppressedCountB} Hạng B)`
           : funnel.suppressedCountA > 0
-            ? ` (incl. ${funnel.suppressedCountA} Tier A)`
+            ? ` (gồm ${funnel.suppressedCountA} Hạng A)`
             : "")
     );
   }
@@ -102,16 +102,16 @@ export function buildVerdictUxCopy(params: {
 
   const persistedLevelNote =
     persistedLevel === "NORMAL"
-      ? "Persisted stance: NORMAL (normal book-risk mode)"
+      ? "Trạng thái đã ghi nhận: NORMAL (chế độ rủi ro sổ lệnh bình thường)"
       : persistedLevel === "PROBE"
-        ? "Persisted stance: PROBE (reduced book-risk mode)"
-        : "Persisted stance: NO_TRADE (0% book cap)";
+        ? "Trạng thái đã ghi nhận: PROBE (chế độ rủi ro sổ lệnh giảm)"
+        : "Trạng thái đã ghi nhận: NO_TRADE (giới hạn sổ lệnh 0%)";
 
   if (uxLevel === "TRADE") {
     return {
       headline: "TRADE MODE",
       subtitle:
-        "Normal risk mode — Gate 2 setups passed and market regime allows sizing. This is not an automatic instruction to enter every name.",
+        "Chế độ rủi ro bình thường — các thiết lập đã đạt Gate 2 và chế độ thị trường cho phép định cỡ vị thế. Đây không phải là chỉ thị tự động vào lệnh mọi mã.",
       persistedLevelNote,
     };
   }
@@ -119,23 +119,23 @@ export function buildVerdictUxCopy(params: {
   if (uxLevel === "PROBE") {
     const bHidden =
       funnel.suppressedCountB > 0
-        ? ` Tier B (${funnel.suppressedCountB}) qualified Gate 2 but is hidden while Gate 1 is ${gate1}.`
+        ? ` Hạng B (${funnel.suppressedCountB}) đã đạt Gate 2 nhưng đang bị ẩn khi Gate 1 là ${gate1}.`
         : "";
     return {
       headline: "WATCH",
       subtitle:
-        `Reduced book-risk mode — only Tier A setups surface when Gate 1 is cautious.${bHidden} Not a full-risk day.`,
+        `Chế độ rủi ro sổ lệnh giảm — chỉ các thiết lập Hạng A được hiển thị khi Gate 1 thận trọng.${bHidden} Không phải ngày giao dịch toàn lực.`,
       persistedLevelNote,
     };
   }
 
   const suppressedNote =
     funnel.suppressedTotal > 0
-      ? ` ${funnel.suppressedTotal} Gate 2-qualified setup(s) were suppressed by Gate 1 (${gate1}).`
+      ? ` ${funnel.suppressedTotal} thiết lập đã đạt Gate 2 bị chặn bởi Gate 1 (${gate1}).`
       : "";
   return {
     headline: "NO TRADE",
-    subtitle: `Preserve capital — no new swing entries under current stance.${suppressedNote}`,
+    subtitle: `Bảo toàn vốn — không vào lệnh swing mới theo trạng thái hiện tại.${suppressedNote}`,
     persistedLevelNote,
   };
 }

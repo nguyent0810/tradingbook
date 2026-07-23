@@ -13,14 +13,14 @@ import { useBreadcrumbLabel } from "@/components/breadcrumb-label-store";
  * noise. Driven entirely by the pathname; no route data is duplicated.
  */
 const SEGMENT_LABELS: Record<string, string> = {
-  "paper-lab": "Arena",
-  agents: "Agents",
-  battles: "Battles",
-  experiments: "Experiments",
-  hof: "Hall of Fame",
-  human: "Human",
-  ops: "Ops",
-  timeline: "Timeline",
+  "paper-lab": "Đấu trường",
+  agents: "Agent",
+  battles: "Đối đầu",
+  experiments: "Thử nghiệm",
+  hof: "Bảng vàng",
+  human: "PM con người",
+  ops: "Vận hành",
+  timeline: "Dòng thời gian",
 };
 
 function labelFor(segment: string): string {
@@ -50,7 +50,7 @@ export function AppBreadcrumbs() {
   });
 
   return (
-    <nav className="cd-breadcrumbs" aria-label="Breadcrumb">
+    <nav className="cd-breadcrumbs" aria-label="Đường dẫn điều hướng">
       {crumbs.map((crumb, i) => (
         <span key={crumb.href} style={{ display: "contents" }}>
           {i > 0 && (

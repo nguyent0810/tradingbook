@@ -5,14 +5,14 @@ describe("resolveHostilityGauge", () => {
   it("maps PASS to the calm zone, low score", () => {
     const g = resolveHostilityGauge("PASS");
     expect(g.tone).toBe("calm");
-    expect(g.label).toBe("Calm");
+    expect(g.label).toBe("Ổn định");
     expect(g.score).toBeLessThan(40);
   });
 
   it("maps WARNING to the caution zone, mid score", () => {
     const g = resolveHostilityGauge("WARNING");
     expect(g.tone).toBe("caution");
-    expect(g.label).toBe("Caution");
+    expect(g.label).toBe("Thận trọng");
     expect(g.score).toBeGreaterThanOrEqual(40);
     expect(g.score).toBeLessThan(70);
   });
@@ -20,7 +20,7 @@ describe("resolveHostilityGauge", () => {
   it("maps FAIL to the hostile zone, high score", () => {
     const g = resolveHostilityGauge("FAIL");
     expect(g.tone).toBe("hostile");
-    expect(g.label).toBe("Hostile");
+    expect(g.label).toBe("Thù nghịch");
     expect(g.score).toBeGreaterThanOrEqual(70);
   });
 

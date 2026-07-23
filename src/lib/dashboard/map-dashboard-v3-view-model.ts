@@ -560,8 +560,8 @@ function buildEvidence(
   if (dto.scanRunId) {
     const scan = dto.evidence.find((c) => c.id === "surfaced");
     items.push({
-      label: "Scanner diagnostics",
-      value: formatScannerReasonForUser(scan?.display ?? "See latest scan"),
+      label: "Chẩn đoán bộ quét",
+      value: formatScannerReasonForUser(scan?.display ?? "Xem lần quét gần nhất"),
       state: "ok",
     });
   }
@@ -572,16 +572,16 @@ function buildEvidence(
       ? "warn"
       : "ok";
   items.push({
-    label: "Data freshness",
+    label: "Độ mới dữ liệu",
     value:
       freshness.staleFlags[0]?.message ??
-      (freshness.delayedBackdrop ? "Delayed backdrop" : "Aligned"),
+      (freshness.delayedBackdrop ? "Bối cảnh bị trễ" : "Đồng bộ"),
     state: staleSeverity,
   });
 
   if (dto.blockers.length > 0) {
     items.push({
-      label: "Market blockers",
+      label: "Yếu tố cản trở thị trường",
       value: dto.blockers
         .slice(0, 2)
         .map((b) => formatScannerReasonForUser(b.title))
@@ -593,7 +593,7 @@ function buildEvidence(
   const gate1 = dto.evidence.find((c) => c.id === "gate1");
   if (gate1) {
     items.push({
-      label: "Technical evidence",
+      label: "Bằng chứng kỹ thuật",
       value: formatScannerReasonForUser(gate1.display),
       state: dto.verdict.gate1Resolution.canonical === "PASS" ? "ok" : "warn",
     });
@@ -602,7 +602,7 @@ function buildEvidence(
   const topReject = dto.blockers.find((b) => b.severity === "extension");
   if (topReject) {
     items.push({
-      label: "Rejected reasons",
+      label: "Lý do bị loại",
       value: `${formatScannerReasonForUser(topReject.title)} (${topReject.count})`,
       state: "warn",
     });

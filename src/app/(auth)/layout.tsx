@@ -28,16 +28,16 @@ export default function AuthLayout({
         </div>
 
         {/* Where signing in leads — the product journey, stated calmly */}
-        <nav className="cd-auth__journey" aria-label="What you get after signing in">
-          <span className="cd-auth__step">Dashboard</span>
+        <nav className="cd-auth__journey" aria-label="Những gì bạn nhận được sau khi đăng nhập">
+          <span className="cd-auth__step">Bảng điều khiển</span>
           <span className="cd-auth__step-sep" aria-hidden="true">
             →
           </span>
-          <span className="cd-auth__step">Setups</span>
+          <span className="cd-auth__step">Thiết lập</span>
           <span className="cd-auth__step-sep" aria-hidden="true">
             →
           </span>
-          <span className="cd-auth__step">Arena</span>
+          <span className="cd-auth__step">Đấu trường</span>
         </nav>
       </div>
     </div>

@@ -85,13 +85,13 @@ describe("RelativeStrengthRadar early-entry UI", () => {
     );
     expect(html).toContain("Extended — Do Not Chase");
     expect(html).toContain('data-testid="dashboard-v3-rs-extended-warning"');
-    expect(html).toContain("Anti-FOMO caution");
+    expect(html).toContain("Cảnh báo Anti-FOMO");
   });
 
   it("does not render early-entry panel when metadata absent", () => {
     const html = renderToStaticMarkup(<RelativeStrengthRadar panel={panelWithEarlyEntry(false)} />);
     expect(html).not.toContain('data-testid="dashboard-v3-rs-early-entry"');
-    expect(html).not.toContain("Early state");
+    expect(html).not.toContain("Trạng thái sớm");
     expect(html).not.toContain("Pilot Candidate");
     expect(html).not.toContain("dashboard-v3-rs-early-research-section");
   });

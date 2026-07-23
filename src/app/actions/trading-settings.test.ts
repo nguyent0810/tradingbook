@@ -45,7 +45,7 @@ describe("updateTradingSettings", () => {
 
     const result = await updateTradingSettings(undefined, formData("500000000"));
 
-    expect(result?.message).toMatch(/sign in/i);
+    expect(result?.message).toMatch(/đăng nhập/i);
     expect(upsertMock).not.toHaveBeenCalled();
   });
 

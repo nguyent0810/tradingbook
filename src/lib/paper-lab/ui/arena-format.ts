@@ -40,7 +40,7 @@ export function formatBoardLotQty(quantity: number): {
   const lots = Math.floor(quantity / BOARD_LOT);
   const sharesLabel = new Intl.NumberFormat("en-US").format(quantity);
   const isRounded = quantity % BOARD_LOT !== 0;
-  const display = `${sharesLabel} (${lots} lot${lots === 1 ? "" : "s"})`;
+  const display = `${sharesLabel} (${lots} lô)`;
   return { sharesLabel, lots, display, isRounded };
 }
 
@@ -58,17 +58,17 @@ export function formatConfidencePct(confidence: number): string {
   return `${Math.round(confidence * 100)}%`;
 }
 
-export function confidenceBand(confidence: number): "Low" | "Medium" | "High" {
-  if (confidence >= 0.7) return "High";
-  if (confidence >= 0.5) return "Medium";
-  return "Low";
+export function confidenceBand(confidence: number): "Thấp" | "Trung bình" | "Cao" {
+  if (confidence >= 0.7) return "Cao";
+  if (confidence >= 0.5) return "Trung bình";
+  return "Thấp";
 }
 
-export function consensusLabel(score: number): "Weak" | "Medium" | "Strong" {
+export function consensusLabel(score: number): "Yếu" | "Trung bình" | "Mạnh" {
   const abs = Math.abs(score);
-  if (abs >= 0.5) return "Strong";
-  if (abs >= 0.25) return "Medium";
-  return "Weak";
+  if (abs >= 0.5) return "Mạnh";
+  if (abs >= 0.25) return "Trung bình";
+  return "Yếu";
 }
 
 export function consensusScoreDisplay(score: number): string {

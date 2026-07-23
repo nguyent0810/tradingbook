@@ -16,7 +16,7 @@ describe("arena-format", () => {
     expect(formatBoardLotQty(3900)).toEqual({
       sharesLabel: "3,900",
       lots: 39,
-      display: "3,900 (39 lots)",
+      display: "3,900 (39 lô)",
       isRounded: false,
     });
   });
@@ -47,7 +47,7 @@ describe("arena-copy", () => {
     expect(exp.summary).toContain("CSM");
     expect(exp.supporting.length).toBeGreaterThan(0);
     expect(exp.opposing.length).toBeGreaterThan(0);
-    expect(exp.styleLens).toContain("weaker regime");
+    expect(exp.styleLens).toContain("chế độ thị trường yếu hơn");
   });
 
   it("builds momentum HOLD reason", () => {
@@ -61,7 +61,7 @@ describe("arena-copy", () => {
         market_regime_assumption: "WARNING",
       },
     });
-    expect(exp.summary.toLowerCase()).toMatch(/volume|momentum|insufficient/);
+    expect(exp.summary.toLowerCase()).toMatch(/khối lượng|động lượng|chưa đủ/);
   });
 
   it("buildAgentReasoningSummary returns single line", () => {
@@ -100,22 +100,22 @@ describe("arena-copy", () => {
           reason: "aggressive_investor rule evaluation on CSM: regime WARNING, gate2 A.",
         },
       ],
-      risks: ["Agent disagreement on direction"],
+      risks: ["Agent bất đồng về hướng giao dịch"],
       agent_weights_used: {},
       metadata: { cio_version: "2.0.0", regime: "WARNING" },
       regime_context: "Weak Bull · Contracting · Rotation",
     });
-    expect(pres.consensusLabel).toBe("Weak");
+    expect(pres.consensusLabel).toBe("Yếu");
     expect(pres.consensusScoreDisplay).toBe("18/100");
     expect(pres.decisionSummary).not.toContain("weighted consensus 0.18");
-    expect(pres.dissent[0]?.humanReason).toContain("weaker regime");
+    expect(pres.dissent[0]?.humanReason).toContain("chế độ thị trường yếu hơn");
   });
 });
 
 describe("consensusLabel", () => {
   it("maps score bands", () => {
-    expect(consensusLabel(0.18)).toBe("Weak");
-    expect(consensusLabel(0.4)).toBe("Medium");
-    expect(consensusLabel(0.6)).toBe("Strong");
+    expect(consensusLabel(0.18)).toBe("Yếu");
+    expect(consensusLabel(0.4)).toBe("Trung bình");
+    expect(consensusLabel(0.6)).toBe("Mạnh");
   });
 });

@@ -28,11 +28,11 @@ function fmtPct1FromFrac(frac: number): string {
 function executionHeadline(status: ReturnType<typeof computeClosestExecutionStatus>): string {
   switch (status) {
     case "READY":
-      return "Price is inside the pullback zone — diagnostic only, not a validated setup.";
+      return "Giá đang trong vùng pullback — chỉ để chẩn đoán, chưa phải thiết lập đã xác thực.";
     case "INVALID":
-      return "Structure is no longer valid for this template.";
+      return "Cấu trúc không còn hợp lệ với mẫu hình này.";
     default:
-      return "Price is outside the zone — waiting for a pullback.";
+      return "Giá đang ở ngoài vùng — chờ pullback.";
   }
 }
 
@@ -42,16 +42,16 @@ function zoneDistanceLineWithProximity(
   zoneHigh: number
 ): string {
   if (!hasExecutableZone(close, zoneLow, zoneHigh)) {
-    return "Entry zone: levels unavailable for this stop";
+    return "Vùng vào lệnh: không có mức giá cho cắt lỗ này";
   }
   const dist = computeDistanceToPullbackZoneFrac(close, zoneLow, zoneHigh);
   const prox = pullbackProximityLabel(dist);
   const suffix = prox ? ` (${prox})` : "";
 
-  if (dist === 0) return `At entry zone${suffix}`;
-  if (!Number.isFinite(dist)) return "Entry zone: —";
-  if (close > zoneHigh) return `${fmtPct1FromFrac(dist)} above entry zone${suffix}`;
-  return `${fmtPct1FromFrac(dist)} below entry zone${suffix}`;
+  if (dist === 0) return `Tại vùng vào lệnh${suffix}`;
+  if (!Number.isFinite(dist)) return "Vùng vào lệnh: —";
+  if (close > zoneHigh) return `Cao hơn vùng vào lệnh ${fmtPct1FromFrac(dist)}${suffix}`;
+  return `Thấp hơn vùng vào lệnh ${fmtPct1FromFrac(dist)}${suffix}`;
 }
 
 function statusStyle(status: ReturnType<typeof computeClosestExecutionStatus>): {
@@ -98,10 +98,10 @@ export function SetupsClosestSymbolsSection({
         <table className="tosv3-setups-near-miss-table">
           <thead>
             <tr>
-              <th>Symbol</th>
-              <th>Status</th>
-              <th className="table-num">Close</th>
-              <th>Blocker</th>
+              <th>Mã</th>
+              <th>Trạng thái</th>
+              <th className="table-num">Giá đóng cửa</th>
+              <th>Cản trở</th>
             </tr>
           </thead>
           <tbody>
@@ -114,7 +114,7 @@ export function SetupsClosestSymbolsSection({
               );
               const blocker = row.terminalReasonPreview
                 ? formatScannerReasonForUser(row.terminalReasonPreview)
-                : "Not ready";
+                : "Chưa sẵn sàng";
               return (
                 <tr key={`${row.symbol}-${row.stageRank}`}>
                   <td className="tosv3-setups-near-miss-table__symbol">{row.symbol}</td>
@@ -141,11 +141,11 @@ export function SetupsClosestSymbolsSection({
   return (
     <section className="card p-6">
       <h2 className="text-lg font-medium !text-[var(--text-primary)]">
-        Closest to qualifying
+        Gần đạt chuẩn nhất
       </h2>
       <p className="mt-1 text-sm leading-snug !text-[var(--text-tertiary)]">
-        Ranked by proximity to a valid entry zone, then scanner quality. Execution context from the
-        same Gate 2 evaluation — not recommendations. Expand levels for prices (k ₫).
+        Xếp hạng theo khoảng cách đến vùng vào lệnh hợp lệ, sau đó theo chất lượng quét. Bối cảnh thực thi
+        từ cùng lần đánh giá Gate 2 — không phải khuyến nghị. Mở rộng để xem các mức giá (nghìn ₫).
       </p>
 
       <ul className="mt-5 space-y-4">
@@ -196,7 +196,7 @@ export function SetupsClosestSymbolsSection({
                 </p>
                 <p>
                   <span className="!text-[var(--text-tertiary)]">→ </span>
-                  Risk: {fmtPct1FromFrac(riskFrac)}
+                  Rủi ro: {fmtPct1FromFrac(riskFrac)}
                 </p>
                 <p>
                   <span className="!text-[var(--text-tertiary)]">→ </span>
@@ -219,12 +219,12 @@ export function SetupsClosestSymbolsSection({
                   <span className="details-marker-open mr-1 inline !text-[var(--text-tertiary)]" aria-hidden>
                     ▾
                   </span>
-                  Price levels (k ₫)
+                  Các mức giá (nghìn ₫)
                 </summary>
                 <dl className="mt-2 grid gap-1 sm:grid-cols-2 !text-[var(--text-tertiary)]">
                   <div>
                     <dt className="inline font-medium !text-[var(--text-secondary)]">
-                      Close:{" "}
+                      Đóng cửa:{" "}
                     </dt>
                     <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.close > 0 ? fmtThousands(row.close) : "—"}
@@ -240,7 +240,7 @@ export function SetupsClosestSymbolsSection({
                   </div>
                   <div>
                     <dt className="inline font-medium !text-[var(--text-secondary)]">
-                      Zone low–high:{" "}
+                      Vùng thấp–cao:{" "}
                     </dt>
                     <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.pullbackZoneLow > 0 || row.pullbackZoneHigh > 0
@@ -250,7 +250,7 @@ export function SetupsClosestSymbolsSection({
                   </div>
                   <div>
                     <dt className="inline font-medium !text-[var(--text-secondary)]">
-                      Stop:{" "}
+                      Cắt lỗ:{" "}
                     </dt>
                     <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {row.stopLevel > 0 ? fmtThousands(row.stopLevel) : "—"}
@@ -258,7 +258,7 @@ export function SetupsClosestSymbolsSection({
                   </div>
                   <div className="sm:col-span-2">
                     <dt className="inline font-medium !text-[var(--text-secondary)]">
-                      Above breakout (vs level):{" "}
+                      Trên breakout (so với mức):{" "}
                     </dt>
                     <dd className="inline mono font-semibold !text-[var(--text-primary)]">
                       {hasExecutableBreakout(row.breakoutLevel)
