@@ -1,11 +1,11 @@
 /** Display-only formatters for RS Workbench table — no trading logic. */
 
 export const WORKBENCH_COLUMN_TOOLTIPS = {
-  target: "Technical upside reference used for R:R.",
-  invalid: "Level where setup becomes invalid.",
-  earlyScore: "Early reversal research score — observation only.",
-  rr: "Estimated reward-to-risk ratio from early-entry research.",
-  ma20Dist: "Distance from MA20 as a percentage.",
+  target: "Mốc giá mục tiêu kỹ thuật dùng để tính R:R.",
+  invalid: "Mức giá khiến thiết lập không còn hợp lệ.",
+  earlyScore: "Điểm nghiên cứu đảo chiều sớm — chỉ mang tính quan sát.",
+  rr: "Tỷ lệ reward-to-risk ước tính từ nghiên cứu vào lệnh sớm.",
+  ma20Dist: "Khoảng cách so với MA20 tính theo phần trăm.",
 } as const;
 
 export function formatRiskReward(value: number | null | undefined): string {

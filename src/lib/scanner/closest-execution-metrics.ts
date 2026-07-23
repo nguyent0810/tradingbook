@@ -60,21 +60,21 @@ export function computeRiskToStopFrac(close: number, stopLevel: number): number 
 /** UX-only label from pullback distance fraction (same inputs as `computeDistanceToPullbackZoneFrac`). */
 export function pullbackProximityLabel(distanceFrac: number): string | null {
   if (!Number.isFinite(distanceFrac) || distanceFrac < 0) return null;
-  if (distanceFrac < 0.01) return "Very close";
+  if (distanceFrac < 0.01) return "Rất gần";
   // “1–3% Near” in UX copy; upper bound extended slightly so ~3.2% reads as Near (see product example).
-  if (distanceFrac < 0.04) return "Near";
-  if (distanceFrac <= 0.06) return "Moderate";
-  return "Far";
+  if (distanceFrac < 0.04) return "Gần";
+  if (distanceFrac <= 0.06) return "Trung bình";
+  return "Xa";
 }
 
 export function closestExecutionActionHint(status: ClosestExecutionStatus): string {
   switch (status) {
     case "READY":
-      return "Entry conditions met. Monitor for execution.";
+      return "Đã đủ điều kiện vào lệnh. Theo dõi để thực hiện.";
     case "WAIT":
-      return "Wait for pullback into entry zone.";
+      return "Chờ giá pullback vào vùng vào lệnh.";
     case "INVALID":
-      return "Structure invalid. Do not consider.";
+      return "Cấu trúc không hợp lệ. Không xem xét.";
   }
 }
 

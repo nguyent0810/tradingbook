@@ -17,7 +17,7 @@ function optionalPercentField(label: string) {
       if (!Number.isFinite(n) || n <= 0 || n > 100) {
         ctx.addIssue({
           code: "custom",
-          message: `${label} must be a percentage between 0 and 100 (e.g. 0.75), or left blank for the default.`,
+          message: `${label} phải là phần trăm từ 0 đến 100 (ví dụ: 0.75), hoặc để trống để dùng mặc định.`,
         });
         return z.NEVER;
       }
@@ -33,15 +33,15 @@ const TradingSettingsSchema = z.object({
       if (parsed == null) {
         ctx.addIssue({
           code: "custom",
-          message: "Enter a positive VND amount (e.g. 500000000).",
+          message: "Nhập số tiền VND dương (ví dụ: 500000000).",
         });
         return z.NEVER;
       }
       return parsed;
     }),
-  riskPerTradePct: optionalPercentField("Risk per trade"),
-  maxPositionPct: optionalPercentField("Max position size"),
-  liquidityCapPct: optionalPercentField("Liquidity cap"),
+  riskPerTradePct: optionalPercentField("Rủi ro mỗi lệnh"),
+  maxPositionPct: optionalPercentField("Kích thước vị thế tối đa"),
+  liquidityCapPct: optionalPercentField("Trần thanh khoản"),
 });
 
 export type TradingSettingsState =
@@ -58,7 +58,7 @@ export async function updateTradingSettings(
 ): Promise<TradingSettingsState> {
   const session = await getSession();
   if (!session) {
-    return { message: "Your session has expired — please sign in again." };
+    return { message: "Phiên đăng nhập đã hết hạn — vui lòng đăng nhập lại." };
   }
 
   const parsed = TradingSettingsSchema.safeParse({
@@ -89,5 +89,5 @@ export async function updateTradingSettings(
   revalidatePath("/dashboard");
   revalidatePath("/settings");
 
-  return { success: true, message: "Account equity updated." };
+  return { success: true, message: "Đã cập nhật vốn tài khoản." };
 }

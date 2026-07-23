@@ -50,6 +50,10 @@ describe("buildMarketContextCockpitChips", () => {
       "159/206 OK (77%)"
     );
   });
+  // NOTE: chip `label`/`display` text ("Foreign 1D", "Foreign cov.", "OK (%)") is
+  // intentionally left in English — it cascades into
+  // src/lib/dashboard/map-dashboard-v3-view-model.test.ts via exact-match
+  // assertions on the mapped V3 evidence, which is out of scope for this pass.
 
   it("omits 5D/10D chips while rollups are null", () => {
     const chips = buildMarketContextCockpitChips(prodLikeContext);
@@ -89,7 +93,7 @@ describe("buildSymbolContextEvidenceLines", () => {
       volRatioMa20: 1.35,
       volMa20: null,
     });
-    expect(lines).toEqual(["Foreign 1D: −12.40B ₫ net", "Vol 1.4× MA20 (context)"]);
+    expect(lines).toEqual(["Khối ngoại 1D: −12.40B ₫ ròng", "KL 1.4× MA20 (tham khảo)"]);
   });
 
   it("shows ALL_ZERO label without numeric foreign lines", () => {
@@ -102,7 +106,7 @@ describe("buildSymbolContextEvidenceLines", () => {
         volRatioMa20: null,
         volMa20: null,
       })
-    ).toEqual(["Foreign: all zero"]);
+    ).toEqual(["Khối ngoại: toàn bộ bằng 0"]);
   });
 
   it("shows PARTIAL label and omits numeric foreign when not OK", () => {
@@ -115,7 +119,7 @@ describe("buildSymbolContextEvidenceLines", () => {
         volRatioMa20: 0.9,
         volMa20: null,
       })
-    ).toEqual(["Foreign: partial data", "Vol 0.9× MA20 (context)"]);
+    ).toEqual(["Khối ngoại: dữ liệu một phần", "KL 0.9× MA20 (tham khảo)"]);
   });
 
   it("omits missing/null fields", () => {

@@ -109,19 +109,19 @@ export function effectiveGate2RankScore(
 }
 
 export const RS_RANK_PREVIEW_DISCLAIMER =
-  "Preview only — RS rank term is not active in production ordering unless GATE2_RS_RANK_TERM_ENABLED is set.";
+  "Chỉ xem trước — thành phần xếp hạng RS chưa áp dụng vào thứ tự production trừ khi bật GATE2_RS_RANK_TERM_ENABLED.";
 
 /** Lines for Setups expanded detail / CLI. */
 export function formatRsRankPreviewLines(preview: Gate2RankWithRsPreview): string[] {
   const rsLabel =
     preview.rs20SpreadPct == null
-      ? "RS20 unavailable"
+      ? "RS20 không có dữ liệu"
       : `RS20 ${preview.rs20SpreadPct >= 0 ? "+" : ""}${preview.rs20SpreadPct.toFixed(2)} pp`;
   return [
     `${RS_RANK_PREVIEW_DISCLAIMER}`,
-    `Base rankScore: ${preview.rankScoreBase.toFixed(2)}`,
-    `RS rank term: ${preview.rsTerm >= 0 ? "+" : ""}${preview.rsTerm.toFixed(2)} (${rsLabel} × ${GATE2_RS_RANK_TERM_MULTIPLIER}, cap ±${GATE2_RS_RANK_TERM_CAP})`,
-    `Hypothetical rankScore with RS: ${preview.rankScoreWithRs.toFixed(2)}`,
+    `Điểm xếp hạng gốc: ${preview.rankScoreBase.toFixed(2)}`,
+    `Thành phần xếp hạng RS: ${preview.rsTerm >= 0 ? "+" : ""}${preview.rsTerm.toFixed(2)} (${rsLabel} × ${GATE2_RS_RANK_TERM_MULTIPLIER}, giới hạn ±${GATE2_RS_RANK_TERM_CAP})`,
+    `Điểm xếp hạng giả định kèm RS: ${preview.rankScoreWithRs.toFixed(2)}`,
   ];
 }
 
@@ -197,12 +197,12 @@ export function formatRankOrderingComparisonTable(
 ): string {
   const lines: string[] = [];
   lines.push(
-    "symbol".padEnd(12) +
-      "base".padStart(8) +
+    "mã".padEnd(12) +
+      "gốc".padStart(8) +
       "rsTerm".padStart(8) +
       "withRs".padStart(8) +
-      "R#".padStart(5) +
-      "R#+RS".padStart(7)
+      "H#".padStart(5) +
+      "H#+RS".padStart(7)
   );
   lines.push("-".repeat(48));
   const sorted = [...comparison.entries].sort((a, b) => a.baseRank - b.baseRank);
@@ -219,19 +219,19 @@ export function formatRankOrderingComparisonTable(
   }
   if (comparison.promoted.length > 0) {
     lines.push("");
-    lines.push("Promoted (RS-adjusted rank better):");
+    lines.push("Tăng hạng (thứ hạng điều chỉnh theo RS tốt hơn):");
     for (const p of comparison.promoted.slice(0, 20)) {
       lines.push(
-        `  ${p.symbol}: ${p.baseRank} → ${p.rsAdjustedRank} (+${p.delta} positions)`
+        `  ${p.symbol}: ${p.baseRank} → ${p.rsAdjustedRank} (+${p.delta} bậc)`
       );
     }
   }
   if (comparison.demoted.length > 0) {
     lines.push("");
-    lines.push("Demoted:");
+    lines.push("Giảm hạng:");
     for (const d of comparison.demoted.slice(0, 20)) {
       lines.push(
-        `  ${d.symbol}: ${d.baseRank} → ${d.rsAdjustedRank} (${d.delta} positions)`
+        `  ${d.symbol}: ${d.baseRank} → ${d.rsAdjustedRank} (${d.delta} bậc)`
       );
     }
   }

@@ -122,8 +122,8 @@ function EarlyEntryResearchHeader({
   return (
     <div className="tosv3-rs-early-research" data-testid="dashboard-v3-rs-early-research-section">
       <header className="tosv3-rs-early-research__head">
-        <h3 className="tosv3-rs-early-research__title">Early Entry Research</h3>
-        <span className="tosv3-rs-early-research__badge">Research only</span>
+        <h3 className="tosv3-rs-early-research__title">Nghiên cứu vào lệnh sớm</h3>
+        <span className="tosv3-rs-early-research__badge">Chỉ mang tính nghiên cứu</span>
       </header>
       <p
         className="tosv3-rs-early-research__disclaimer"
@@ -133,7 +133,7 @@ function EarlyEntryResearchHeader({
       </p>
       <div className="tosv3-rs-early-research__controls">
         <label className="tosv3-rs-early-research__control">
-          <span>Filter</span>
+          <span>Lọc</span>
           <select
             value={filter}
             onChange={(e) => onFilterChange(e.target.value as EarlyEntryFilterId)}
@@ -147,7 +147,7 @@ function EarlyEntryResearchHeader({
           </select>
         </label>
         <label className="tosv3-rs-early-research__control">
-          <span>Sort</span>
+          <span>Sắp xếp</span>
           <select
             value={sort}
             onChange={(e) => onSortChange(e.target.value as EarlyEntrySortId)}
@@ -162,7 +162,7 @@ function EarlyEntryResearchHeader({
         </label>
       </div>
       <details className="tosv3-rs-early-research__checklist" data-testid="dashboard-v3-rs-daily-checklist">
-        <summary className="tosv3-rs-early-research__checklist-title">Daily research checklist</summary>
+        <summary className="tosv3-rs-early-research__checklist-title">Danh sách kiểm tra nghiên cứu hàng ngày</summary>
         <ul>
           {EARLY_ENTRY_DAILY_CHECKLIST.map((line) => (
             <li key={line}>{line}</li>
@@ -170,9 +170,9 @@ function EarlyEntryResearchHeader({
         </ul>
       </details>
       <p className="tosv3-rs-early-research__paper" data-testid="dashboard-v3-rs-paper-commands">
-        <span>Daily:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.daily}</code>
+        <span>Hàng ngày:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.daily}</code>
         <span className="tosv3-rs-early-research__paper-sep">·</span>
-        <span>Weekly:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.weeklyValidate}</code>
+        <span>Hàng tuần:</span> <code>{EARLY_ENTRY_PAPER_COMMANDS.weeklyValidate}</code>
         <span className="tosv3-rs-early-research__paper-sep">·</span>
         <code>{EARLY_ENTRY_PAPER_COMMANDS.weeklySummary}</code>
       </p>
@@ -195,10 +195,10 @@ function EarlyEntryPanel({
     <div
       className={`tosv3-rs-early-entry ${extended ? "tosv3-rs-early-entry--extended" : ""}`}
       data-testid="dashboard-v3-rs-early-entry"
-      aria-label="Early entry display-only metadata"
+      aria-label="Dữ liệu chỉ hiển thị — vào lệnh sớm"
     >
       <header className="tosv3-rs-early-entry__head">
-        <span className="tosv3-rs-early-entry__label">Early entry research</span>
+        <span className="tosv3-rs-early-entry__label">Nghiên cứu vào lệnh sớm</span>
         <span className={`tosv3-rs-chip ${earlyStateClass(earlyEntry.proposedTradeState)}`}>
           {friendlyEarlyStateLabel(earlyEntry.proposedTradeState)}
         </span>
@@ -208,15 +208,15 @@ function EarlyEntryPanel({
       </header>
       {extended ? (
         <p className="tosv3-rs-early-entry__extended-banner" data-testid="dashboard-v3-rs-extended-warning">
-          Anti-FOMO caution — Extended — Do Not Chase. Not a buy signal.
+          Cảnh báo Anti-FOMO — Mở rộng quá đà — Không đuổi giá. Không phải tín hiệu mua.
         </p>
       ) : null}
       <p className="tosv3-rs-early-entry__research-warning">
-        Not a buy recommendation · Needs forward validation
+        Không phải khuyến nghị mua · Cần được kiểm chứng thêm
       </p>
-      <ul className="tosv3-rs-card__metrics" aria-label="Early entry metrics">
+      <ul className="tosv3-rs-card__metrics" aria-label="Chỉ số vào lệnh sớm">
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
-          <span className="tosv3-rs-chip__label">Score</span>
+          <span className="tosv3-rs-chip__label">Điểm</span>
           <span className="tosv3-rs-chip__value tabular-nums">{earlyEntry.earlyReversalScore}</span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
@@ -224,26 +224,26 @@ function EarlyEntryPanel({
           <span className="tosv3-rs-chip__value tabular-nums">{formatRr(earlyEntry.estimatedRiskReward)}</span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
-          <span className="tosv3-rs-chip__label">Stop %</span>
+          <span className="tosv3-rs-chip__label">% Cắt lỗ</span>
           <span className="tosv3-rs-chip__value tabular-nums">{formatPct(earlyEntry.stopDistancePct)}</span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
-          <span className="tosv3-rs-chip__label">Reward %</span>
+          <span className="tosv3-rs-chip__label">% Lợi nhuận</span>
           <span className="tosv3-rs-chip__value tabular-nums">
             {formatPct(earlyEntry.estimatedRewardPct)}
           </span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
-          <span className="tosv3-rs-chip__label">Target</span>
+          <span className="tosv3-rs-chip__label">Mục tiêu</span>
           <span className="tosv3-rs-chip__value tabular-nums">{formatPrice(earlyEntry.targetPrice)}</span>
         </li>
         <li className="tosv3-rs-chip tosv3-rs-chip--context">
-          <span className="tosv3-rs-chip__label">Invalid</span>
+          <span className="tosv3-rs-chip__label">Vô hiệu</span>
           <span className="tosv3-rs-chip__value tabular-nums">{formatPrice(earlyEntry.invalidLevel)}</span>
         </li>
       </ul>
       {chips.length > 0 ? (
-        <ul className="tosv3-rs-early-entry__chips" aria-label="Early entry reason chips">
+        <ul className="tosv3-rs-early-entry__chips" aria-label="Nhãn lý do vào lệnh sớm">
           {chips.map((code) => (
             <li key={code} className="tosv3-rs-early-entry__chip">
               {truncateForChip(formatReasonChip(code), 28)}
@@ -256,29 +256,29 @@ function EarlyEntryPanel({
       earlyEntry.whyNotPilotYet ||
       earlyEntry.rrRejectionReason ? (
         <details className="tosv3-rs-card__why">
-          <summary className="tosv3-rs-card__why-toggle">Why</summary>
+          <summary className="tosv3-rs-card__why-toggle">Vì sao</summary>
           {earlyEntry.targetReason || earlyEntry.invalidLevelReason ? (
             <p className="tosv3-rs-early-entry__explain">
               {earlyEntry.targetReason ? (
                 <span>
-                  <strong>Target reason:</strong> {earlyEntry.targetReason}.
+                  <strong>Lý do mục tiêu:</strong> {earlyEntry.targetReason}.
                 </span>
               ) : null}{" "}
               {earlyEntry.invalidLevelReason ? (
                 <span>
-                  <strong>Invalid reason:</strong> {earlyEntry.invalidLevelReason}.
+                  <strong>Lý do vô hiệu:</strong> {earlyEntry.invalidLevelReason}.
                 </span>
               ) : null}
             </p>
           ) : null}
           {earlyEntry.whyNotPilotYet ? (
             <p className="tosv3-rs-early-entry__why-not" data-testid="dashboard-v3-rs-why-not-pilot">
-              <strong>Why not pilot yet:</strong> {earlyEntry.whyNotPilotYet}
+              <strong>Lý do chưa vào lệnh thử:</strong> {earlyEntry.whyNotPilotYet}
             </p>
           ) : null}
           {earlyEntry.rrRejectionReason ? (
             <p className="tosv3-rs-early-entry__why-not">
-              <strong>R:R rejection:</strong> {earlyEntry.rrRejectionReason}
+              <strong>Từ chối do R:R:</strong> {earlyEntry.rrRejectionReason}
             </p>
           ) : null}
         </details>
@@ -316,7 +316,7 @@ function RsDetailPanel({
         </span>
       </header>
       <p className="tosv3-rs-card__insight">{card.primaryInsight}</p>
-      <ul className="tosv3-rs-card__metrics" aria-label={`${card.symbol} metrics`}>
+      <ul className="tosv3-rs-card__metrics" aria-label={`Chỉ số ${card.symbol}`}>
         {card.metrics.map((metric) => (
           <li key={`${card.symbol}-${metric.label}`} className={`tosv3-rs-chip ${metricClass(metric.tone)}`}>
             <span className="tosv3-rs-chip__label">{metric.label}</span>
@@ -326,9 +326,9 @@ function RsDetailPanel({
       </ul>
       {card.nextCondition || card.blockerLabel ? (
         <details className="tosv3-rs-card__why">
-          <summary className="tosv3-rs-card__why-toggle">Why</summary>
+          <summary className="tosv3-rs-card__why-toggle">Vì sao</summary>
           <p className="tosv3-rs-card__next">
-            <span className="tosv3-rs-card__next-label">Next</span>
+            <span className="tosv3-rs-card__next-label">Tiếp theo</span>
             {card.nextCondition}
           </p>
           {card.blockerLabel ? (
@@ -345,7 +345,7 @@ function RsDetailPanel({
             aria-expanded={evidenceOpen}
             onClick={onToggleEvidence}
           >
-            {evidenceOpen ? "Hide technical evidence" : "Show technical evidence"}
+            {evidenceOpen ? "Ẩn bằng chứng kỹ thuật" : "Hiện bằng chứng kỹ thuật"}
           </button>
           {evidenceOpen ? (
             <ul
@@ -393,7 +393,7 @@ export function RelativeStrengthRadar({ panel }: Props) {
   return (
     <section
       className="tosv3-panel tosv3-rs-radar tosv3-rs-radar--compact"
-      aria-label="Relative strength radar"
+      aria-label="Ra-đa sức mạnh tương đối"
       data-testid="dashboard-v3-relative-strength-radar"
     >
       <div className="tosv3-section-head tosv3-section-head--stack">
@@ -402,7 +402,7 @@ export function RelativeStrengthRadar({ panel }: Props) {
           <p className="tosv3-type-muted">{panel.subtitle}</p>
         </div>
         {visibleCards.length > 0 ? (
-          <span className="tosv3-rs-radar__count tabular-nums">{visibleCards.length} leaders</span>
+          <span className="tosv3-rs-radar__count tabular-nums">{visibleCards.length} mã dẫn đầu</span>
         ) : null}
       </div>
 
@@ -423,7 +423,7 @@ export function RelativeStrengthRadar({ panel }: Props) {
             aria-expanded={contextOpen}
             onClick={() => setContextOpen((v) => !v)}
           >
-            {contextOpen ? "Hide context" : "Session context"}
+            {contextOpen ? "Ẩn bối cảnh" : "Bối cảnh phiên"}
           </button>
           {contextOpen ? (
             <p className="tosv3-rs-radar__context">{panel.contextNote}</p>
@@ -434,28 +434,28 @@ export function RelativeStrengthRadar({ panel }: Props) {
       {visibleCards.length > 0 && selected ? (
         <div className="tosv3-rs-radar__master-detail">
           <div className="tosv3-rs-radar__master" id={listId}>
-            <table className="tosv3-rs-table" role="tablist" aria-label="Relative strength leaders">
+            <table className="tosv3-rs-table" role="tablist" aria-label="Danh sách mã dẫn đầu sức mạnh tương đối">
               <thead>
                 <tr>
-                  <th scope="col">Ticker</th>
-                  <th scope="col">Setup state</th>
+                  <th scope="col">Mã</th>
+                  <th scope="col">Trạng thái thiết lập</th>
                   <th scope="col" className="table-num">
                     RS20
                   </th>
                   <th scope="col" className="table-num">
                     RS50
                   </th>
-                  <th scope="col">Reason</th>
+                  <th scope="col">Lý do</th>
                   {showEarlyEntry ? (
                     <>
-                      <th scope="col">Early state</th>
+                      <th scope="col">Trạng thái sớm</th>
                       <th scope="col" className="table-num">
-                        Score
+                        Điểm
                       </th>
                       <th scope="col" className="table-num">
                         R:R
                       </th>
-                      <th scope="col">Entry type</th>
+                      <th scope="col">Loại vào lệnh</th>
                     </>
                   ) : null}
                 </tr>
@@ -550,8 +550,8 @@ export function RelativeStrengthRadar({ panel }: Props) {
       ) : (
         <p className="tosv3-empty-state" data-testid="dashboard-v3-rs-empty">
           {showEarlyEntry && filter !== "all"
-            ? "No RS leaders match the selected Early Entry filter."
-            : (panel.emptyReason ?? "No relative-strength leaders on watch for this session.")}
+            ? "Không có mã dẫn đầu RS nào khớp với bộ lọc Vào lệnh sớm đã chọn."
+            : (panel.emptyReason ?? "Không có mã dẫn đầu sức mạnh tương đối nào được theo dõi trong phiên này.")}
         </p>
       )}
     </section>

@@ -20,7 +20,7 @@ import {
 } from "@/lib/tactical-universe";
 
 export const MOMENTUM_WATCH_UI_DISCLAIMER =
-  "Watch only — not a validated setup";
+  "Chỉ theo dõi — chưa phải thiết lập đã được xác thực";
 
 export type MomentumWatchUiRow = {
   symbol: string;

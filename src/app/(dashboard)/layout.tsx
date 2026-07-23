@@ -90,7 +90,7 @@ export default function DashboardLayout({
   return (
     <div className="app-shell command-deck-shell">
       <a href="#main-content" className="app-shell-skip">
-        Skip to content
+        Bỏ qua để đến nội dung chính
       </a>
       <Suspense fallback={<LoadingSkeleton height="100vh" aria-label="Loading" />}>
         <DashboardClayThemeEffect

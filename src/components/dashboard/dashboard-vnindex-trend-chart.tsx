@@ -23,10 +23,10 @@ export function DashboardVnindexTrendChart({
     return (
       <ChartFrame
         testId="dashboard-vnindex-trend-chart"
-        title="VNINDEX — 30D"
+        title="VNINDEX — 30 ngày"
         height={CHART_HEIGHT}
         state="error"
-        errorMessage="VNINDEX history could not be loaded."
+        errorMessage="Không thể tải dữ liệu lịch sử VNINDEX."
       />
     );
   }
@@ -35,10 +35,10 @@ export function DashboardVnindexTrendChart({
     return (
       <ChartFrame
         testId="dashboard-vnindex-trend-chart"
-        title={`VNINDEX — ${history.length === 0 ? "no history" : "30D"}`}
+        title={`VNINDEX — ${history.length === 0 ? "chưa có dữ liệu" : "30 ngày"}`}
         height={CHART_HEIGHT}
         state="empty"
-        emptyMessage="Not enough VNINDEX history to chart yet."
+        emptyMessage="Chưa đủ dữ liệu lịch sử VNINDEX để vẽ biểu đồ."
       />
     );
   }
@@ -51,7 +51,7 @@ export function DashboardVnindexTrendChart({
   return (
     <ChartFrame
       testId="dashboard-vnindex-trend-chart"
-      title="VNINDEX — 30D"
+      title="VNINDEX — 30 ngày"
       height={CHART_HEIGHT}
     >
       <ChartPlot height={CHART_HEIGHT}>

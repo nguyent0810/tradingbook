@@ -3,8 +3,8 @@ import Link from "next/link";
 import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
-  title: "Sign In — TradeLog",
-  description: "Sign in to your setup intelligence workspace.",
+  title: "Đăng nhập — TradeLog",
+  description: "Đăng nhập vào không gian làm việc phân tích setup của bạn.",
 };
 
 export default function LoginPage() {
@@ -26,19 +26,19 @@ export default function LoginPage() {
             <polyline points="16 7 22 7 22 13" />
           </svg>
         </span>
-        <p className="cd-auth__eyebrow">Setup Intelligence</p>
-        <h1 className="cd-auth__title">Welcome back</h1>
+        <p className="cd-auth__eyebrow">Trí tuệ Setup</p>
+        <h1 className="cd-auth__title">Chào mừng trở lại</h1>
         <p className="cd-auth__lead">
-          Sign in to scan the market, validate high-quality setups, and act with conviction.
+          Đăng nhập để quét thị trường, xác thực các setup chất lượng cao và hành động dứt khoát.
         </p>
       </header>
 
       <LoginForm />
 
       <p className="cd-auth__footer">
-        New to the terminal?{" "}
+        Mới sử dụng terminal?{" "}
         <Link href="/register" className="cd-auth__link">
-          Create an account
+          Tạo tài khoản
         </Link>
       </p>
     </>

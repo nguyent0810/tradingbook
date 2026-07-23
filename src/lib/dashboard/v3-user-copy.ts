@@ -21,20 +21,20 @@ import {
 } from "./rs-setup-labels";
 
 const INTERNAL_PHRASE_REPLACEMENTS: ReadonlyArray<[RegExp, string]> = [
-  [/Relative strength diagnostic only[^.]*\.?/gi, "Relative strength is for context only — it does not change the setup score."],
+  [/Relative strength diagnostic only[^.]*\.?/gi, "Sức mạnh tương đối chỉ là bối cảnh — không thay đổi điểm số thiết lập."],
   [/not used in current Gate 2 pass\/fail[^.]*\.?/gi, ""],
   [/not part of rankScore yet\.?/gi, ""],
-  [/Not a Gate 2 SetupCandidate\.?/gi, "Watchlist-only signal — not a qualified setup."],
+  [/Not a Gate 2 SetupCandidate\.?/gi, "Chỉ để theo dõi — không phải thiết lập đạt chuẩn."],
   [/Not used in current trading decision\.?/gi, ""],
-  [/Diagnostic only\.?/gi, "Context only — not a trade signal."],
-  [/Gate 2 SetupCandidate/gi, "qualified setup"],
-  [/rankScore/gi, "setup score"],
-  [/extension_cap/gi, "extended above breakout"],
-  [/Gate 2/gi, "setup filter"],
-  [/Gate 1/gi, "market regime filter"],
+  [/Diagnostic only\.?/gi, "Chỉ để tham khảo — không phải tín hiệu giao dịch."],
+  [/Gate 2 SetupCandidate/gi, "thiết lập đạt chuẩn"],
+  [/rankScore/gi, "điểm số thiết lập"],
+  [/extension_cap/gi, "đã mở rộng khỏi breakout"],
+  [/Gate 2/gi, "bộ lọc thiết lập"],
+  [/Gate 1/gi, "bộ lọc chế độ thị trường"],
 ];
 
-const FAILED_GATE2_RE = /^Failed Gate 2 because:\s*(.+?)(?:\s*\(([a-z0-9_]+)\))?\.?$/i;
+const FAILED_GATE2_RE = /^Trượt Gate 2 vì:\s*(.+?)(?:\s*\(([a-z0-9_]+)\))?\.?$/i;
 const RS_SUMMARY_RE = /RS20\s*([+-]?\d+(?:\.\d+)?)\s*pp(?:\s*·\s*RS50\s*([+-]?\d+(?:\.\d+)?)\s*pp)?/i;
 const TREND_OK_RE = /^Trend OK for long-bias pullback:\s*(.+)$/i;
 
@@ -56,20 +56,20 @@ export function formatGateFailureForUser(raw: string): string {
     const body = match[1]!.trim();
     const code = match[2] ?? extractCategoryKey(body);
     if (code === "breakout_recency") {
-      return "Not ready — no fresh breakout confirmed.";
+      return "Chưa sẵn sàng — chưa có breakout mới được xác nhận.";
     }
     if (code) {
       const label = rejectionBucketTraderGuide(code).meaning;
       const sentence = label.endsWith(".") ? label.slice(0, -1) : label;
-      return `Not ready — ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}.`;
+      return `Chưa sẵn sàng — ${sentence.charAt(0).toLowerCase()}${sentence.slice(1)}.`;
     }
-    return `Not ready — ${body.replace(/\s*\([^)]+\)\s*$/, "")}.`;
+    return `Chưa sẵn sàng — ${body.replace(/\s*\([^)]+\)\s*$/, "")}.`;
   }
 
   const category = extractCategoryKey(trimmed);
   if (category?.includes("_")) {
     const guide = rejectionBucketTraderGuide(category);
-    return `Not ready — ${guide.meaning}`;
+    return `Chưa sẵn sàng — ${guide.meaning}`;
   }
 
   return formatScannerReasonForUser(trimmed);
@@ -87,19 +87,19 @@ export function formatRelativeStrengthSummaryForUser(raw: string): string {
   if (Number.isFinite(rs20)) {
     parts.push(
       rs20 > 0
-        ? `Outperforming the index over 20 sessions (${rs20 >= 0 ? "+" : ""}${rs20.toFixed(1)} pp).`
+        ? `Vượt trội hơn chỉ số trong 20 phiên (${rs20 >= 0 ? "+" : ""}${rs20.toFixed(1)} pp).`
         : rs20 < 0
-          ? `Lagging the index over 20 sessions (${rs20.toFixed(1)} pp).`
-          : "In line with the index over 20 sessions."
+          ? `Kém hơn chỉ số trong 20 phiên (${rs20.toFixed(1)} pp).`
+          : "Ngang bằng chỉ số trong 20 phiên."
     );
   }
   if (rs50 != null && Number.isFinite(rs50)) {
     parts.push(
       rs50 > 0
-        ? `Longer-term RS also positive (${rs50 >= 0 ? "+" : ""}${rs50.toFixed(1)} pp vs index).`
+        ? `RS dài hạn cũng dương (${rs50 >= 0 ? "+" : ""}${rs50.toFixed(1)} pp so với chỉ số).`
         : rs50 < 0
-          ? `Longer-term RS is negative (${rs50.toFixed(1)} pp vs index).`
-          : "Longer-term RS is neutral vs the index."
+          ? `RS dài hạn đang âm (${rs50.toFixed(1)} pp so với chỉ số).`
+          : "RS dài hạn trung tính so với chỉ số."
     );
   }
   return parts.join(" ");
@@ -119,7 +119,7 @@ export function formatScannerReasonForUser(raw: string | null | undefined): stri
 
   const trendOk = text.match(TREND_OK_RE);
   if (trendOk) {
-    return "Trend is supportive: price is above the 50-day average and short-term momentum is aligned.";
+    return "Xu hướng thuận lợi: giá trên đường trung bình 50 ngày và động lượng ngắn hạn đồng thuận.";
   }
 
   for (const [pattern, replacement] of INTERNAL_PHRASE_REPLACEMENTS) {
@@ -130,7 +130,7 @@ export function formatScannerReasonForUser(raw: string | null | undefined): stri
   text = cleanWhitespace(text);
 
   if (/^Not in zone$/i.test(text)) {
-    return "Price is not in the pullback entry zone yet.";
+    return "Giá chưa vào vùng pullback.";
   }
 
   return text;
@@ -152,13 +152,13 @@ export function formatBreadthSummary(
     const strong = qualifiedCountA;
     const secondary = qualifiedCountB;
     const surfaced = surfacedTotal;
-    let line = `${strong} strong setup${strong === 1 ? "" : "s"}`;
+    let line = `${strong} thiết lập mạnh`;
     if (secondary > 0) {
-      line += ` · ${secondary} watchlist candidate${secondary === 1 ? "" : "s"}`;
+      line += ` · ${secondary} ứng viên theo dõi`;
     }
-    line += ` · ${surfaced} surfaced after regime filter`;
+    line += ` · ${surfaced} lọt qua bộ lọc chế độ`;
     if (suppressedTotal > 0) {
-      line += ` · ${suppressedTotal} held back by regime`;
+      line += ` · ${suppressedTotal} bị chặn bởi chế độ`;
     }
     return line;
   }
@@ -167,7 +167,7 @@ export function formatBreadthSummary(
   if (candidateCountA === 0 && candidateCountB === 0 && candidateCountSurfaced === 0) {
     return null;
   }
-  return `${candidateCountA} strong setup${candidateCountA === 1 ? "" : "s"} · ${candidateCountB} watchlist candidate${candidateCountB === 1 ? "" : "s"} · ${candidateCountSurfaced} surfaced`;
+  return `${candidateCountA} thiết lập mạnh · ${candidateCountB} ứng viên theo dõi · ${candidateCountSurfaced} đã lọt qua`;
 }
 
 export function formatSetupDiagnosticCopy(raw: string | null | undefined): string | null {
@@ -181,9 +181,9 @@ export function formatActionHintForUser(raw: string | null | undefined): string 
   if (!raw) return null;
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  if (/Log trade — entry confirmed/i.test(trimmed)) return "Log trade when entry confirms.";
-  if (/Wait for entry zone/i.test(trimmed)) return "Wait for pullback entry zone.";
-  if (/Review on Setups/i.test(trimmed)) return "Review full setup on Setups.";
+  if (/Ghi lệnh — đã xác nhận điểm vào/i.test(trimmed)) return "Ghi lệnh khi điểm vào được xác nhận.";
+  if (/Chờ vùng vào lệnh/i.test(trimmed)) return "Chờ vùng vào lệnh pullback.";
+  if (/Xem tại Thiết lập/i.test(trimmed)) return "Xem đầy đủ thiết lập tại trang Thiết lập.";
   return formatScannerReasonForUser(trimmed) || null;
 }
 
@@ -194,13 +194,13 @@ export function truncateForChip(text: string, max = 48): string {
 }
 
 const NEXT_CONDITION_BY_CODE: Record<string, string> = {
-  breakout_recency: "Needs fresh breakout",
-  pullback_zone_interaction: "Needs pullback-zone interaction",
-  volume_ratio: "Needs volume confirmation",
-  trend_below_ma50: "Needs trend recovery above 50-day average",
-  trend_ma20_below_ma50: "Needs short-term momentum alignment",
-  breakout_not_holding: "Needs breakout to hold",
-  digestion: "Needs post-breakout digestion",
+  breakout_recency: "Cần breakout mới",
+  pullback_zone_interaction: "Cần vào vùng pullback",
+  volume_ratio: "Cần khối lượng xác nhận",
+  trend_below_ma50: "Cần xu hướng phục hồi trên đường trung bình 50 ngày",
+  trend_ma20_below_ma50: "Cần động lượng ngắn hạn đồng thuận",
+  breakout_not_holding: "Cần breakout giữ vững",
+  digestion: "Cần tích lũy sau breakout",
 };
 
 const STATE_BADGE_BY_CODE: Record<string, { badge: string; tone: V3RsStateTone }> = {
@@ -230,13 +230,13 @@ function humanizeDiagnosticLine(line: string): string {
     const spread = Number.parseFloat(rsLine[2]!);
     const sessions = rsLine[1] === "50" ? 50 : 20;
     const dir =
-      spread > 0 ? "Outperforming index" : spread < 0 ? "Underperforming index" : "In line with index";
-    return `${sessions}-session RS: ${dir} (${spread >= 0 ? "+" : ""}${spread.toFixed(1)} pp).`;
+      spread > 0 ? "Vượt trội chỉ số" : spread < 0 ? "Kém hơn chỉ số" : "Ngang bằng chỉ số";
+    return `RS ${sessions} phiên: ${dir} (${spread >= 0 ? "+" : ""}${spread.toFixed(1)} pp).`;
   }
-  if (/Stock above MA50:\s*yes/i.test(text)) return "Trend: above 50-day average.";
-  if (/Stock above MA50:\s*no/i.test(text)) return "Trend: below 50-day average.";
-  if (/VNINDEX above MA50:\s*yes/i.test(text)) return "Market backdrop: supportive.";
-  if (/VNINDEX above MA50:\s*no/i.test(text)) return "Market backdrop: cautious.";
+  if (/Cổ phiếu trên MA50:\s*có/i.test(text)) return "Xu hướng: trên đường trung bình 50 ngày.";
+  if (/Cổ phiếu trên MA50:\s*không/i.test(text)) return "Xu hướng: dưới đường trung bình 50 ngày.";
+  if (/VNINDEX trên MA50:\s*có/i.test(text)) return "Bối cảnh thị trường: thuận lợi.";
+  if (/VNINDEX trên MA50:\s*không/i.test(text)) return "Bối cảnh thị trường: thận trọng.";
   return formatScannerReasonForUser(text);
 }
 
@@ -251,24 +251,24 @@ function metricsFromDiagnostic(row: RsNearMissWatchlistEntryDto): V3RsWatchlistM
   let trendSet = false;
 
   for (const line of row.rsDiagnostic?.lines ?? []) {
-    if (/Stock above MA50:\s*yes/i.test(line)) {
-      metrics.push({ label: "Trend", value: "above MA50", tone: "strong" });
+    if (/Cổ phiếu trên MA50:\s*có/i.test(line)) {
+      metrics.push({ label: "Xu hướng", value: "trên MA50", tone: "strong" });
       trendSet = true;
-    } else if (/Stock above MA50:\s*no/i.test(line)) {
-      metrics.push({ label: "Trend", value: "below MA50", tone: "blocker" });
+    } else if (/Cổ phiếu trên MA50:\s*không/i.test(line)) {
+      metrics.push({ label: "Xu hướng", value: "dưới MA50", tone: "blocker" });
       trendSet = true;
     }
-    if (/VNINDEX above MA50:\s*yes/i.test(line)) {
-      metrics.push({ label: "Market", value: "supportive", tone: "context" });
-    } else if (/VNINDEX above MA50:\s*no/i.test(line)) {
-      metrics.push({ label: "Market", value: "cautious", tone: "watch" });
+    if (/VNINDEX trên MA50:\s*có/i.test(line)) {
+      metrics.push({ label: "Thị trường", value: "thuận lợi", tone: "context" });
+    } else if (/VNINDEX trên MA50:\s*không/i.test(line)) {
+      metrics.push({ label: "Thị trường", value: "thận trọng", tone: "watch" });
     }
   }
 
-  metrics.push({ label: "Trigger", value: "not confirmed", tone: "watch" });
+  metrics.push({ label: "Kích hoạt", value: "chưa xác nhận", tone: "watch" });
 
   if (!trendSet && row.rs20SpreadPct > 0) {
-    metrics.push({ label: "Trend", value: "RS positive", tone: "context" });
+    metrics.push({ label: "Xu hướng", value: "RS dương", tone: "context" });
   }
 
   return metrics.slice(0, 5);
@@ -279,19 +279,19 @@ function buildPrimaryInsight(row: RsNearMissWatchlistEntryDto): string {
   const rsPositive = row.rs20SpreadPct > 0;
 
   if (code === "breakout_recency" && rsPositive) {
-    return "Strong relative strength, but no fresh breakout yet.";
+    return "Sức mạnh tương đối tốt, nhưng chưa có breakout mới.";
   }
   if (code === "pullback_zone_interaction" && rsPositive) {
-    return "Outperforming VNINDEX, waiting for a clean entry trigger.";
+    return "Vượt trội hơn VNINDEX, đang chờ điểm kích hoạt vào lệnh rõ ràng.";
   }
   if (code === "volume_ratio" && rsPositive) {
-    return "Relative strength is building, but participation is still thin.";
+    return "Sức mạnh tương đối đang hình thành, nhưng khối lượng tham gia còn mỏng.";
   }
   if (code === "trend_below_ma50" && rsPositive) {
-    return "RS is positive, but price is still below the long-term trend filter.";
+    return "RS dương, nhưng giá vẫn dưới bộ lọc xu hướng dài hạn.";
   }
   if (rsPositive) {
-    return "Outperforming VNINDEX — setup filters have not cleared yet.";
+    return "Vượt trội hơn VNINDEX — chưa vượt qua bộ lọc thiết lập.";
   }
   if (code) {
     const guide = rejectionBucketTraderGuide(code);
@@ -310,9 +310,9 @@ function buildNextCondition(row: RsNearMissWatchlistEntryDto): string {
     const guide = rejectionBucketTraderGuide(code);
     const wait = guide.waitFor;
     if (wait.length <= 72) return wait.endsWith(".") ? wait.slice(0, -1) : wait;
-    return "Watch for structure to improve before acting.";
+    return "Theo dõi đến khi cấu trúc cải thiện trước khi hành động.";
   }
-  return "Watch only — not a qualified setup.";
+  return "Chỉ theo dõi — chưa phải thiết lập đạt chuẩn.";
 }
 
 function buildTechnicalEvidence(row: RsNearMissWatchlistEntryDto): string[] {
@@ -330,12 +330,12 @@ function buildTechnicalEvidence(row: RsNearMissWatchlistEntryDto): string[] {
     Number.isFinite(row.distanceToPullbackZoneFrac)
   ) {
     lines.push(
-      `Pullback zone distance: ${(100 * row.distanceToPullbackZoneFrac).toFixed(1)}% (context only).`
+      `Khoảng cách đến vùng pullback: ${(100 * row.distanceToPullbackZoneFrac).toFixed(1)}% (chỉ để tham khảo).`
     );
   }
   if (row.rsDiagnostic?.disclaimer) {
     lines.push(
-      "Relative strength is context only. It does not currently qualify the setup."
+      "Sức mạnh tương đối chỉ để tham khảo. Hiện chưa xác nhận thiết lập đạt chuẩn."
     );
   }
   return [...new Set(lines.filter(Boolean))];
@@ -344,13 +344,13 @@ function buildTechnicalEvidence(row: RsNearMissWatchlistEntryDto): string[] {
 function humanizeTargetReason(reason: string | null | undefined): string | null {
   if (!reason) return null;
   const labels: Record<string, string> = {
-    resistance_cluster: "Resistance cluster",
-    prior_60d_high: "60-day high",
-    prior_20d_high: "20-day high",
-    pivot_high: "Pivot high",
-    congestion_ceiling: "Congestion ceiling",
-    atr_floor: "ATR minimum target",
-    pct_floor: "Minimum % target",
+    resistance_cluster: "Vùng kháng cự",
+    prior_60d_high: "Đỉnh 60 ngày",
+    prior_20d_high: "Đỉnh 20 ngày",
+    pivot_high: "Đỉnh pivot",
+    congestion_ceiling: "Trần tích lũy",
+    atr_floor: "Mục tiêu tối thiểu theo ATR",
+    pct_floor: "Mục tiêu % tối thiểu",
   };
   return labels[reason] ?? reason.replace(/_/g, " ");
 }
@@ -358,12 +358,12 @@ function humanizeTargetReason(reason: string | null | undefined): string | null 
 function humanizeInvalidReason(reason: string | null | undefined): string | null {
   if (!reason) return null;
   const labels: Record<string, string> = {
-    swing_low: "Recent swing low",
-    compression_low: "Compression low",
-    reclaim_candle_low: "Reclaim candle low",
-    ma20_failure: "MA20 failure",
-    ma50_failure: "MA50 failure",
-    atr_stop_floor: "ATR stop floor",
+    swing_low: "Đáy swing gần nhất",
+    compression_low: "Đáy tích lũy",
+    reclaim_candle_low: "Đáy nến reclaim",
+    ma20_failure: "Thủng MA20",
+    ma50_failure: "Thủng MA50",
+    atr_stop_floor: "Cắt lỗ tối thiểu theo ATR",
   };
   return labels[reason] ?? reason.replace(/_/g, " ");
 }
@@ -433,10 +433,10 @@ export function mapRsWatchlistToV3Panel(
   }
 ): V3RsWatchlistPanel {
   return {
-    title: "Relative Strength Radar",
-    subtitle: "Leaders vs VNINDEX that have not cleared setup filters yet.",
+    title: "Radar sức mạnh tương đối",
+    subtitle: "Các mã dẫn dắt so với VNINDEX nhưng chưa vượt qua bộ lọc thiết lập.",
     contextNote:
-      "Context only — relative strength does not qualify a setup and does not change today’s stance.",
+      "Chỉ để tham khảo — sức mạnh tương đối không xác nhận thiết lập và không thay đổi lập trường hôm nay.",
     cards: panel.rows.map((row) =>
       mapRsWatchlistEntryToV3Card(row, options?.scoringBySymbol?.get(row.symbol) ?? null)
     ),
@@ -451,14 +451,14 @@ export function humanizeRsNearMissWatchlistPanel(
   panel: RsNearMissWatchlistPanelDto
 ): RsNearMissWatchlistPanelDto {
   return {
-    title: "Relative strength watchlist",
+    title: "Danh sách theo dõi sức mạnh tương đối",
     subtitle:
-      "Leaders vs the index that failed setup filters — context only, not trade signals.",
+      "Các mã dẫn dắt so với chỉ số nhưng trượt bộ lọc thiết lập — chỉ để tham khảo, không phải tín hiệu giao dịch.",
     disclaimerLines: [
-      "For monitoring only — does not count as a qualified setup.",
-      "Does not change today’s trade decision.",
+      "Chỉ để theo dõi — không tính là thiết lập đạt chuẩn.",
+      "Không thay đổi quyết định giao dịch hôm nay.",
     ],
-    actionHint: "Review for context; wait for setup filters to clear before acting.",
+    actionHint: "Xem để tham khảo; chờ bộ lọc thiết lập thông qua trước khi hành động.",
     emptyReason: panel.emptyReason
       ? formatScannerReasonForUser(panel.emptyReason)
       : null,
@@ -468,17 +468,17 @@ export function humanizeRsNearMissWatchlistPanel(
       topRejectionReason: row.topRejectionReason
         ? formatScannerReasonForUser(row.topRejectionReason)
         : "",
-      actionHint: "Watchlist context only — not a qualified setup.",
+      actionHint: "Chỉ để theo dõi — không phải thiết lập đạt chuẩn.",
       disclaimerLines: [
-        "Context only — not a trade signal.",
-        "Does not affect the setup score.",
+        "Chỉ để tham khảo — không phải tín hiệu giao dịch.",
+        "Không ảnh hưởng đến điểm số thiết lập.",
       ],
       rsDiagnostic: row.rsDiagnostic
         ? {
             ...row.rsDiagnostic,
             summary: formatRelativeStrengthSummaryForUser(row.rsDiagnostic.summary),
             disclaimer:
-              "Relative strength is shown for context only. It does not drive the setup score.",
+              "Sức mạnh tương đối chỉ hiển thị để tham khảo. Không quyết định điểm số thiết lập.",
             lines: row.rsDiagnostic.lines.map((line) => formatScannerReasonForUser(line)),
           }
         : null,

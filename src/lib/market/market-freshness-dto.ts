@@ -59,7 +59,7 @@ function staleFlagsFromAlignment(
           code: issue,
           severity: "error",
           message:
-            "VNINDEX benchmark EOD is not available — import index daily bars before trusting Gate 1.",
+            "Chưa có dữ liệu EOD của VNINDEX — hãy nhập dữ liệu chỉ số theo ngày trước khi tin tưởng Gate 1.",
         });
         break;
       case "benchmark_behind_equity":
@@ -67,7 +67,7 @@ function staleFlagsFromAlignment(
           code: issue,
           severity: "warning",
           message:
-            "Latest equity bar session in DB is newer than the stored VNINDEX session date.",
+            "Phiên nến cổ phiếu mới nhất trong DB mới hơn ngày phiên VNINDEX đã lưu.",
         });
         break;
       case "scan_runtime_after_benchmark_session":
@@ -75,14 +75,14 @@ function staleFlagsFromAlignment(
           code: issue,
           severity: "warning",
           message:
-            "Last scan completed after the stored VNINDEX session — market backdrop may be delayed.",
+            "Lượt quét gần nhất hoàn tất sau phiên VNINDEX đã lưu — bối cảnh thị trường có thể bị trễ.",
         });
         break;
       default:
         flags.push({
           code: issue,
           severity: "info",
-          message: `Market alignment issue: ${issue}`,
+          message: `Vấn đề đồng bộ dữ liệu thị trường: ${issue}`,
         });
     }
   }
@@ -99,7 +99,7 @@ function staleFlagsFromScanSessionCoverage(
       severity: "warning",
       message:
         coverage.operatorWarning ??
-        "Data coverage is weak for the expected session. Scanner result may be incomplete because many symbols are stale.",
+        "Độ phủ dữ liệu cho phiên dự kiến còn yếu. Kết quả quét có thể chưa đầy đủ vì nhiều mã đang có dữ liệu cũ.",
     },
   ];
 }

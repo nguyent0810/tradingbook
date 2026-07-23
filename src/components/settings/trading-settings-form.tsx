@@ -31,7 +31,7 @@ function PercentField({ name, label, defaultValue, systemDefaultPct, errors }: P
     <div className="cd-auth-field">
       <label htmlFor={name} className="cd-auth-label">
         {label} (%){" "}
-        <span className="cd-auth-label__hint">— blank uses the default, {systemDefaultPct}%</span>
+        <span className="cd-auth-label__hint">— để trống dùng mặc định, {systemDefaultPct}%</span>
       </label>
       <input
         id={name}
@@ -84,7 +84,7 @@ export function TradingSettingsForm({
 
       <div className="cd-auth-field">
         <label htmlFor="accountEquityVnd" className="cd-auth-label">
-          Account equity (VND)
+          Vốn tài khoản (VND)
         </label>
         <input
           id="accountEquityVnd"
@@ -108,28 +108,28 @@ export function TradingSettingsForm({
 
       <PercentField
         name="riskPerTradePct"
-        label="Risk per trade"
+        label="Rủi ro mỗi lệnh"
         defaultValue={toPercentDisplay(currentRiskPerTradePct)}
         systemDefaultPct="1"
         errors={state?.errors?.riskPerTradePct}
       />
       <PercentField
         name="maxPositionPct"
-        label="Max position size"
+        label="Kích thước vị thế tối đa"
         defaultValue={toPercentDisplay(currentMaxPositionPct)}
         systemDefaultPct="20"
         errors={state?.errors?.maxPositionPct}
       />
       <PercentField
         name="liquidityCapPct"
-        label="Liquidity cap (% of ADV)"
+        label="Trần thanh khoản (% ADV)"
         defaultValue={toPercentDisplay(currentLiquidityCapPct)}
         systemDefaultPct="10"
         errors={state?.errors?.liquidityCapPct}
       />
 
       <Button type="submit" variant="primary" disabled={pending} aria-busy={pending}>
-        {pending ? "Saving…" : "Save"}
+        {pending ? "Đang lưu…" : "Lưu"}
       </Button>
     </form>
   );

@@ -6,7 +6,7 @@ import {
 } from "@/lib/market/format-foreign-flow-vnd";
 
 const FOREIGN_ROLLUP_HINT =
-  "5D/10D rollups appear after 5–10 forward sessions.";
+  "Số liệu gộp 5D/10D chỉ xuất hiện sau 5–10 phiên giao dịch tới.";
 
 function formatCoverageDisplay(ok: number, total: number, pct: number | null): string {
   if (pct == null || !Number.isFinite(pct)) {
@@ -18,7 +18,7 @@ function formatCoverageDisplay(ok: number, total: number, pct: number | null): s
 }
 
 function formatVolRatioMa20Context(ratio: number): string {
-  return `Vol ${ratio.toFixed(1)}× MA20 (context)`;
+  return `KL ${ratio.toFixed(1)}× MA20 (tham khảo)`;
 }
 
 /** Dashboard evidence chips — omits 5D/10D while null. */
@@ -89,28 +89,28 @@ export function buildSymbolContextEvidenceLines(
   const { foreignDataQuality } = symbolContext;
 
   if (foreignDataQuality === "ALL_ZERO") {
-    lines.push("Foreign: all zero");
+    lines.push("Khối ngoại: toàn bộ bằng 0");
     return lines;
   }
 
   if (foreignDataQuality === "PARTIAL") {
-    lines.push("Foreign: partial data");
+    lines.push("Khối ngoại: dữ liệu một phần");
   }
 
   if (foreignDataQuality === "OK") {
     const foreign1d = formatForeignFlowVnd(symbolContext.foreignNetValue1d, { compact: true });
     if (foreign1d != null) {
-      lines.push(`Foreign 1D: ${foreign1d} net`);
+      lines.push(`Khối ngoại 1D: ${foreign1d} ròng`);
     }
 
     const foreign5d = formatForeignFlowVnd(symbolContext.foreignNetValue5d, { compact: true });
     if (foreign5d != null) {
-      lines.push(`Foreign 5D: ${foreign5d} net`);
+      lines.push(`Khối ngoại 5D: ${foreign5d} ròng`);
     }
 
     const foreign10d = formatForeignFlowVnd(symbolContext.foreignNetValue10d, { compact: true });
     if (foreign10d != null) {
-      lines.push(`Foreign 10D: ${foreign10d} net`);
+      lines.push(`Khối ngoại 10D: ${foreign10d} ròng`);
     }
   }
 

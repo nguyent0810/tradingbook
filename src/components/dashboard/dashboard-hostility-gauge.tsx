@@ -17,9 +17,9 @@ const TONE_COLOR: Record<HostilityGaugeTone, string> = {
 const GAUGE_HEIGHT = 140;
 
 const TONE_CAPTION: Record<HostilityGaugeTone, string> = {
-  calm: "Favorable risk environment",
-  caution: "Mixed risk environment",
-  hostile: "High risk environment",
+  calm: "Môi trường rủi ro thuận lợi",
+  caution: "Môi trường rủi ro hỗn hợp",
+  hostile: "Môi trường rủi ro cao",
 };
 
 export function DashboardHostilityGauge({ gauge }: DashboardHostilityGaugeProps) {
@@ -29,7 +29,7 @@ export function DashboardHostilityGauge({ gauge }: DashboardHostilityGaugeProps)
   return (
     <ChartFrame
       testId="dashboard-hostility-gauge"
-      title="Hostility Index"
+      title="Chỉ số mức độ thù địch"
       height={GAUGE_HEIGHT}
       className="dash-hostility-gauge"
     >

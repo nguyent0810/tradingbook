@@ -22,7 +22,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           className="cd-auth-password-toggle"
           onClick={() => setVisible((v) => !v)}
           aria-pressed={visible}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
         >
           {visible ? (
             <svg

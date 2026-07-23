@@ -35,12 +35,12 @@ import {
 } from "@/lib/scanner/early-entry";
 
 /** Primary UI title — diagnostic lane only. */
-export const RS_NEAR_MISS_WATCHLIST_TITLE = "Relative-strength watchlist";
+export const RS_NEAR_MISS_WATCHLIST_TITLE = "Danh sách theo dõi sức mạnh tương đối";
 
 export const RS_NEAR_MISS_WATCHLIST_COPY = {
-  diagnosticOnly: "Diagnostic only",
-  notSetupCandidate: "Not a Gate 2 SetupCandidate",
-  notInTradingDecision: "Not used in current trading decision",
+  diagnosticOnly: "Chỉ chẩn đoán",
+  notSetupCandidate: "Không phải SetupCandidate Gate 2",
+  notInTradingDecision: "Không dùng trong quyết định giao dịch hiện tại",
 } as const;
 
 export const RS_NEAR_MISS_WATCHLIST_DISCLAIMER = [
@@ -127,7 +127,7 @@ export function formatRsNearMissFailedGate2Because(
 ): string {
   const label = rejectionBucketLabel(terminalCategory);
   const codeSuffix = terminalCode ? ` (${terminalCode})` : "";
-  return `Failed Gate 2 because: ${label}${codeSuffix}`;
+  return `Trượt Gate 2 vì: ${label}${codeSuffix}`;
 }
 
 export function rs20SpreadFromDiagnostic(
@@ -289,7 +289,7 @@ export function buildRsNearMissWatchlistPanel(
   return {
     title: RS_NEAR_MISS_WATCHLIST_TITLE,
     subtitle:
-      "INVALID Gate 2 names with RS20 > 0 vs VNINDEX — leaders that failed on monitorable checks. Separate from Tier A/B.",
+      "Các mã INVALID ở Gate 2 có RS20 > 0 so với VNINDEX — mã dẫn đầu nhưng trượt các kiểm tra có thể theo dõi. Tách biệt với Hạng A/B.",
     disclaimerLines: [
       RS_NEAR_MISS_WATCHLIST_COPY.diagnosticOnly,
       RS_NEAR_MISS_WATCHLIST_COPY.notSetupCandidate,
@@ -305,7 +305,7 @@ export function buildRsNearMissWatchlistPanel(
     ),
     emptyReason:
       sorted.length === 0
-        ? "No INVALID symbols with positive RS20 and a monitor terminal code on this session."
+        ? "Không có mã INVALID nào có RS20 dương và mã lý do thuộc diện theo dõi trong phiên này."
         : null,
   };
 }

@@ -50,7 +50,7 @@ describe("safeLoadPositionSizingDefaults", () => {
 
     const r = await safeLoadPositionSizingDefaults(prisma, "user-1", ["s1"], SESSION);
 
-    expect(r.error).toBe("Position sizing defaults unavailable (risk-config/ADV).");
+    expect(r.error).toBe("Giá trị mặc định định cỡ vị thế không khả dụng (risk-config/ADV).");
     expect(r.equityVnd).toBeNull();
     expect(r.positionSizingConfig).toEqual({ riskPerTradePct: null, maxPositionPct: null, liquidityCapPct: null });
     expect(r.advBySymbolId.size).toBe(0);

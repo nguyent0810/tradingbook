@@ -47,7 +47,7 @@ export function RegisterForm() {
 
       <div className="cd-auth-field">
         <label htmlFor="name" className="cd-auth-label">
-          Name <span className="cd-auth-label__hint">(optional)</span>
+          Tên <span className="cd-auth-label__hint">(không bắt buộc)</span>
         </label>
         <input
           id="name"
@@ -84,7 +84,7 @@ export function RegisterForm() {
 
       <div className="cd-auth-field">
         <label htmlFor="password" className="cd-auth-label">
-          Password <span className="cd-auth-label__required" aria-hidden="true">*</span>
+          Mật khẩu <span className="cd-auth-label__required" aria-hidden="true">*</span>
         </label>
         <PasswordInput
           ref={passwordRef}
@@ -105,7 +105,7 @@ export function RegisterForm() {
           </p>
         ) : (
           <p id="password-hint" className="cd-auth-error !text-[var(--cd-text-dim)]">
-            At least 6 characters.
+            Tối thiểu 6 ký tự.
           </p>
         )}
       </div>
@@ -130,10 +130,10 @@ export function RegisterForm() {
               <circle cx="12" cy="12" r="10" opacity="0.25" />
               <path d="M12 2a10 10 0 0 1 10 10" opacity="0.75" />
             </svg>
-            Creating account…
+            Đang tạo tài khoản…
           </>
         ) : (
-          "Create account"
+          "Tạo tài khoản"
         )}
       </Button>
     </form>

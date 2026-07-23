@@ -11,7 +11,7 @@ import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import "@/components/paper-lab/paper-lab-workstation.css";
 
 export const metadata: Metadata = {
-  title: "Battle Replay | Arena",
+  title: "Xem lại trận đấu | Arena",
 };
 
 export default async function BattleDetailPage({
@@ -43,10 +43,10 @@ export default async function BattleDetailPage({
           <thead>
             <tr>
               <th>Agent</th>
-              <th>Action</th>
-              <th>Conf</th>
-              <th>Verdict</th>
-              <th>Why</th>
+              <th>Hành động</th>
+              <th>Độ tin</th>
+              <th>Phán quyết</th>
+              <th>Lý do</th>
             </tr>
           </thead>
           <tbody>

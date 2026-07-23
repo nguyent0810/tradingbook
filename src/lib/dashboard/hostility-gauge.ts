@@ -20,12 +20,12 @@ export type HostilityGaugeDto = {
 export function resolveHostilityGauge(gate1: Gate1Level): HostilityGaugeDto {
   switch (gate1) {
     case "PASS":
-      return { score: 20, label: "Calm", tone: "calm" };
+      return { score: 20, label: "Ổn định", tone: "calm" };
     case "WARNING":
-      return { score: 55, label: "Caution", tone: "caution" };
+      return { score: 55, label: "Thận trọng", tone: "caution" };
     case "FAIL":
-      return { score: 85, label: "Hostile", tone: "hostile" };
+      return { score: 85, label: "Thù nghịch", tone: "hostile" };
     default:
-      return { score: 55, label: "Caution", tone: "caution" };
+      return { score: 55, label: "Thận trọng", tone: "caution" };
   }
 }

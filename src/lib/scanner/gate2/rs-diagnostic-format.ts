@@ -11,7 +11,7 @@ import {
  * free of internal scoring jargon.
  */
 export const RS_DIAGNOSTIC_DISCLAIMER =
-  "Relative strength is a context signal — it helps prioritize, but doesn't approve or rank a setup on its own.";
+  "Sức mạnh tương đối là tín hiệu bối cảnh — giúp ưu tiên, nhưng không tự phê duyệt hay xếp hạng setup.";
 
 export type RsTrendLabel = "leading" | "dual-uptrend" | "lagging" | "neutral";
 
@@ -35,22 +35,22 @@ export type RsDiagnosticUi = {
 
 export function interpretRs20Spread(rsSpreadPct: number): string {
   if (rsSpreadPct > 0) {
-    return "Outperforming VNINDEX over 20 sessions.";
+    return "Vượt trội hơn VNINDEX trong 20 phiên.";
   }
   if (rsSpreadPct < 0) {
-    return "Underperforming VNINDEX over 20 sessions.";
+    return "Kém hơn VNINDEX trong 20 phiên.";
   }
-  return "In line with VNINDEX over 20 sessions.";
+  return "Ngang bằng VNINDEX trong 20 phiên.";
 }
 
 export function interpretRs50Spread(rsSpreadPct: number): string {
   if (rsSpreadPct > 0) {
-    return "Outperforming VNINDEX over 50 sessions.";
+    return "Vượt trội hơn VNINDEX trong 50 phiên.";
   }
   if (rsSpreadPct < 0) {
-    return "Underperforming VNINDEX over 50 sessions.";
+    return "Kém hơn VNINDEX trong 50 phiên.";
   }
-  return "In line with VNINDEX over 50 sessions.";
+  return "Ngang bằng VNINDEX trong 50 phiên.";
 }
 
 function formatSpreadLine(
@@ -64,7 +64,7 @@ function formatSpreadLine(
 
 function formatMa50Flag(value: boolean | null, label: string): string | null {
   if (value === null) return null;
-  return `${label}: ${value ? "yes" : "no"}`;
+  return `${label}: ${value ? "có" : "không"}`;
 }
 
 /**
@@ -84,17 +84,17 @@ export function formatRelativeStrengthDiagnosticForUi(
     lines.push(formatSpreadLine("RS50", r50.rsSpreadPct, interpretRs50Spread));
   }
 
-  const stockMa = formatMa50Flag(d.stockAboveMa50, "Stock above MA50");
-  const indexMa = formatMa50Flag(d.indexAboveMa50, "VNINDEX above MA50");
+  const stockMa = formatMa50Flag(d.stockAboveMa50, "Cổ phiếu trên MA50");
+  const indexMa = formatMa50Flag(d.indexAboveMa50, "VNINDEX trên MA50");
   if (stockMa) lines.push(stockMa);
   if (indexMa) lines.push(indexMa);
 
   let trendLabel: RsTrendLabel = "neutral";
   if (d.stockLeadingMa50 === true) {
-    lines.push("Stock above MA50 while VNINDEX is not — relative leadership vs benchmark.");
+    lines.push("Cổ phiếu trên MA50 trong khi VNINDEX thì không — dẫn dắt tương đối so với chỉ số.");
     trendLabel = "leading";
   } else if (d.dualUptrendMa50 === true) {
-    lines.push("Both stock and VNINDEX above MA50 — broad risk-on backdrop.");
+    lines.push("Cả cổ phiếu và VNINDEX đều trên MA50 — bối cảnh risk-on trên diện rộng.");
     trendLabel = "dual-uptrend";
   } else if (d.stockAboveMa50 === false && d.indexAboveMa50 !== false) {
     trendLabel = "lagging";

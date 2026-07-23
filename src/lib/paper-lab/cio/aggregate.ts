@@ -119,7 +119,7 @@ export async function generateCioRecommendations(
       stop_loss: null,
       take_profit: null,
       suggested_position_size_vnd: null,
-      reasoning: `Consensus score ${consensus.toFixed(2)} from ${panel.length} agents on ${symbol}.`,
+      reasoning: `Điểm đồng thuận ${consensus.toFixed(2)} từ ${panel.length} agent về ${symbol}.`,
       supporting_agents: supporting.slice(0, 5).map((p) => ({
         agent_id: p.agentSlug,
         action: p.action as AgentDecisionOutput["action"],
@@ -131,7 +131,7 @@ export async function generateCioRecommendations(
         action: p.action as AgentDecisionOutput["action"],
         reason: p.reasoning.slice(0, 200),
       })),
-      risks: dissent.length > 0 ? ["Agent disagreement on direction"] : [],
+      risks: dissent.length > 0 ? ["Agent bất đồng về hướng giao dịch"] : [],
       agent_weights_used: Object.fromEntries(panel.map((p) => [p.agentSlug, p.weight])),
       metadata: { cio_version: "1.0.0", regime: regime as "PASS" | "WARNING" | "FAIL" | "UNKNOWN" },
     };

@@ -143,7 +143,7 @@ export type CioRecommendationDto = {
   reasoning: string;
   risks: string[];
   consensusScore: number;
-  consensusLabel: "Weak" | "Medium" | "Strong";
+  consensusLabel: "Yếu" | "Trung bình" | "Mạnh";
   consensusScoreDisplay: string;
   regimeContext: string;
   decisionSummary: string;

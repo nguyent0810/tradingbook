@@ -1,11 +1,11 @@
 import type { V3EarlyEntryDisplay, V3RsWatchlistCard } from "./dashboard-v3-view-model";
 
 export const EARLY_ENTRY_DAILY_CHECKLIST = [
-  "Check Pilot Candidates, but do not treat them as buy signals.",
-  "Prefer candidates that later confirm with follow-through.",
-  "Watch whether EXTENDED_DO_NOT_CHASE helps avoid FOMO.",
-  "Run paper-log after each session.",
-  "Run paper-validate weekly.",
+  "Xem các Pilot Candidate, nhưng đừng xem đó là tín hiệu mua.",
+  "Ưu tiên các ứng viên sau đó xác nhận bằng follow-through.",
+  "Theo dõi xem EXTENDED_DO_NOT_CHASE có giúp tránh FOMO không.",
+  "Chạy paper-log sau mỗi phiên.",
+  "Chạy paper-validate hằng tuần.",
 ] as const;
 
 export const EARLY_ENTRY_PAPER_COMMANDS = {
@@ -35,25 +35,25 @@ export const EARLY_ENTRY_FILTER_OPTIONS: ReadonlyArray<{
   id: EarlyEntryFilterId;
   label: string;
 }> = [
-  { id: "all", label: "Show all" },
-  { id: "pilot_candidate", label: "Pilot Candidate only" },
-  { id: "add_zone", label: "Add Zone only" },
-  { id: "extended", label: "Extended — Do Not Chase only" },
-  { id: "watch_high_score", label: "Watch with high score only" },
-  { id: "bad_rr", label: "Bad R:R blocked" },
-  { id: "confirmation_needed", label: "Confirmation needed" },
+  { id: "all", label: "Hiện tất cả" },
+  { id: "pilot_candidate", label: "Chỉ Pilot Candidate" },
+  { id: "add_zone", label: "Chỉ Add Zone" },
+  { id: "extended", label: "Chỉ Extended — Do Not Chase" },
+  { id: "watch_high_score", label: "Chỉ Watch điểm cao" },
+  { id: "bad_rr", label: "R:R xấu bị chặn" },
+  { id: "confirmation_needed", label: "Cần xác nhận" },
 ];
 
 export const EARLY_ENTRY_SORT_OPTIONS: ReadonlyArray<{
   id: EarlyEntrySortId;
   label: string;
 }> = [
-  { id: "score_desc", label: "Highest Early Reversal Score" },
-  { id: "rr_desc", label: "Best R:R" },
-  { id: "closest_invalid", label: "Closest to invalid level" },
-  { id: "most_extended", label: "Most extended / chase risk" },
-  { id: "rs_desc", label: "Strongest RS" },
-  { id: "symbol_asc", label: "Latest signal" },
+  { id: "score_desc", label: "Early Reversal Score cao nhất" },
+  { id: "rr_desc", label: "R:R tốt nhất" },
+  { id: "closest_invalid", label: "Gần mức hủy nhất" },
+  { id: "most_extended", label: "Extended nhiều nhất / rủi ro đuổi giá" },
+  { id: "rs_desc", label: "RS mạnh nhất" },
+  { id: "symbol_asc", label: "Tín hiệu mới nhất" },
 ];
 
 export function hasAnyEarlyEntry(cards: readonly V3RsWatchlistCard[]): boolean {

@@ -54,9 +54,9 @@ export async function MomentumWatchSection({ embedded = false }: { embedded?: bo
     >
       {!embedded ? (
         <header className="dash-v2-card__header">
-          <h3 className="dash-v2-card__title">Momentum Watch</h3>
+          <h3 className="dash-v2-card__title">Theo dõi động lượng</h3>
           <p className="dash-v2-card__lead">
-            {MOMENTUM_WATCH_UI_DISCLAIMER}. Observational only — not a validated Best Setup.
+            {MOMENTUM_WATCH_UI_DISCLAIMER}. Chỉ mang tính quan sát — chưa phải Best Setup đã được xác thực.
           </p>
         </header>
       ) : (
@@ -65,8 +65,8 @@ export async function MomentumWatchSection({ embedded = false }: { embedded?: bo
 
       {rows.length === 0 && dbError ? (
         <ErrorStateWithEvidence
-          title="Momentum watch unavailable"
-          message="Momentum watch temporarily unavailable."
+          title="Theo dõi động lượng không khả dụng"
+          message="Theo dõi động lượng tạm thời không khả dụng."
           evidence={
             dbError instanceof Error
               ? dbError.message
@@ -78,8 +78,8 @@ export async function MomentumWatchSection({ embedded = false }: { embedded?: bo
         </ErrorStateWithEvidence>
       ) : rows.length === 0 ? (
         <EmptyStateWithReason
-          title="No momentum watch names"
-          reason="No momentum watch names today."
+          title="Không có mã theo dõi động lượng"
+          reason="Không có mã theo dõi động lượng nào hôm nay."
           data-testid="momentum-watch-empty"
         />
       ) : (
@@ -88,15 +88,15 @@ export async function MomentumWatchSection({ embedded = false }: { embedded?: bo
             <table className="table min-w-[640px]">
               <thead>
                 <tr>
-                  <th>Symbol</th>
-                  <th>Source</th>
-                  <th>Group</th>
-                  <th>Labels</th>
-                  <th>Risks</th>
-                  <th className="table-num">Close</th>
-                  <th className="table-num">Vol / 20D avg</th>
-                  <th className="table-num">Ext %</th>
-                  <th aria-label="Context link">Context</th>
+                  <th>Mã</th>
+                  <th>Nguồn</th>
+                  <th>Nhóm</th>
+                  <th>Nhãn</th>
+                  <th>Rủi ro</th>
+                  <th className="table-num">Đóng cửa</th>
+                  <th className="table-num">KL / TB 20 phiên</th>
+                  <th className="table-num">% Mở rộng</th>
+                  <th aria-label="Liên kết bối cảnh">Bối cảnh</th>
                 </tr>
               </thead>
               <tbody>
@@ -134,13 +134,13 @@ export async function MomentumWatchSection({ embedded = false }: { embedded?: bo
                     <td>
                       <details className="text-xs">
                         <summary className="cursor-pointer font-medium text-[var(--accent-text)] hover:underline">
-                          View details
+                          Xem chi tiết
                         </summary>
                         <p className="mt-2 max-w-md leading-snug" style={{ color: "var(--text-secondary)" }}>
                           {row.whyNotCoreSetup}
                         </p>
                         <p className="mt-1 text-[10px] leading-snug" style={{ color: "var(--text-tertiary)" }}>
-                          Bar date: {row.latestBarDate}
+                          Ngày nến: {row.latestBarDate}
                         </p>
                       </details>
                     </td>

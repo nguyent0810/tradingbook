@@ -23,9 +23,9 @@ export function DiagnosticsReasonStack({
   rejectionBuckets,
   scanNotes,
   latestScan,
-  title = "Rejection diagnostics",
-  subtitle = "Gate 2 — why setups fell short",
-  emptyTitle = "No rejection diagnostics",
+  title = "Chẩn đoán từ chối",
+  subtitle = "Gate 2 — lý do thiết lập chưa đạt",
+  emptyTitle = "Không có chẩn đoán từ chối",
   testIdPanel = "setups-diagnostics-panel",
   testIdEmpty = "setups-diagnostics-empty",
   testIdStack = "setups-diagnostics-stack",
@@ -38,8 +38,8 @@ export function DiagnosticsReasonStack({
           title={emptyTitle}
           reason={
             latestScan
-              ? "Latest scan notes have no rejection buckets to summarize, or tradability passed without Gate 2 failures."
-              : "Run a daily scan to populate rejection diagnostics."
+              ? "Ghi chú lần quét gần nhất không có nhóm từ chối nào để tổng hợp, hoặc đủ điều kiện GD mà không có lỗi Gate 2."
+              : "Chạy quét hàng ngày để có dữ liệu chẩn đoán từ chối."
           }
           data-testid={testIdEmpty}
         />

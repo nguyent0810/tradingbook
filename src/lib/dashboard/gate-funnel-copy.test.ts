@@ -46,9 +46,9 @@ describe("formatGateFunnelSummaryLine", () => {
         "WARNING"
       )
     );
-    expect(line).toMatch(/pre-regime/i);
-    expect(line).toMatch(/Suppressed by Gate 1/i);
-    expect(line).toMatch(/Tier B/);
+    expect(line).toMatch(/trước chế độ/i);
+    expect(line).toMatch(/Bị chặn bởi Gate 1/i);
+    expect(line).toMatch(/Hạng B/);
   });
 });
 
@@ -64,7 +64,7 @@ describe("buildVerdictUxCopy", () => {
       ),
     });
     expect(copy.headline).toBe("TRADE MODE");
-    expect(copy.subtitle).toMatch(/not an automatic instruction/i);
+    expect(copy.subtitle).toMatch(/không phải là chỉ thị tự động/i);
     expect(copy.persistedLevelNote).toMatch(/NORMAL/);
   });
 });

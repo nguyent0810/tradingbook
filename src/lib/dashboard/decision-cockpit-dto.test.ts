@@ -162,7 +162,7 @@ describe("buildDecisionCockpitDto — production-like zero surfaced", () => {
     // But the "what the scan actually persisted" fields must NOT collapse to
     // the override value — that would hide the fact that anything changed.
     expect(dto.verdict.persistedLevel.value).toBe("NORMAL");
-    expect(dto.verdict.persistedLevelNote.value).toMatch(/Persisted stance: NORMAL/);
+    expect(dto.verdict.persistedLevelNote.value).toMatch(/Trạng thái đã ghi nhận: NORMAL/);
   });
 
   it("surfaces near-miss opportunity board when zero candidates", () => {
@@ -171,7 +171,9 @@ describe("buildDecisionCockpitDto — production-like zero surfaced", () => {
     expect(dto.opportunity.nearMiss[0]?.symbol).toBe("HPG");
     expect(dto.opportunity.nearMiss[0]?.waitFor).toContain("pullback");
     expect(dto.opportunity.nearMiss[0]?.executionStatusLabel).not.toBe("At entry zone");
-    expect(dto.opportunity.nearMiss[0]?.actionHint).toMatch(/not a trade signal|watch only|do not trade/i);
+    expect(dto.opportunity.nearMiss[0]?.actionHint).toMatch(
+      /không phải tín hiệu giao dịch|chỉ theo dõi|không giao dịch/i
+    );
   });
 
   it("does not expose confidence percent — only band", () => {
@@ -251,10 +253,10 @@ describe("buildDecisionCockpitDto — TRADE day", () => {
     expect(dto.verdict.uxLevel.value).toBe("TRADE");
     expect(dto.verdict.persistedLevel.value).toBe("NORMAL");
     expect(dto.verdict.headline.value).toBe("TRADE MODE");
-    expect(dto.verdict.subtitle.value).toMatch(/not an automatic instruction/i);
+    expect(dto.verdict.subtitle.value).toMatch(/không phải là chỉ thị tự động/i);
     expect(dto.opportunity.mode).toBe("candidates");
     expect(dto.opportunity.candidates[0]?.ladderStage).toBe("tier_a");
-    expect(dto.opportunity.candidates[0]?.actionHint).toBe("Log trade — entry confirmed");
+    expect(dto.opportunity.candidates[0]?.actionHint).toBe("Ghi lệnh — đã xác nhận điểm vào");
   });
 });
 
@@ -332,7 +334,7 @@ describe("buildDecisionCockpitDto — tomorrow plan", () => {
     );
     expect(dto.opportunity.mode).toBe("empty");
     expect(dto.tomorrow.watchSymbols.value).toHaveLength(0);
-    expect(dto.tomorrow.watchNote.value).toContain("No near-miss symbols");
+    expect(dto.tomorrow.watchNote.value).toContain("Không có mã suýt đạt");
     expect(dto.tomorrow.watchNote.value).toContain("/setups");
   });
 
@@ -510,15 +512,15 @@ describe("buildDecisionCockpitDto — scan pulse summary (S5 reframe)", () => {
         ],
       })
     );
-    expect(dto.setupQualityLadder.summary).toContain("Active day");
-    expect(dto.setupQualityLadder.summary).toContain("1 name");
+    expect(dto.setupQualityLadder.summary).toContain("Ngày sôi động");
+    expect(dto.setupQualityLadder.summary).toContain("1 mã");
   });
 
   it("quiet day: only watch-stage matches produce a 'Quiet day' summary", () => {
     const dto = buildDecisionCockpitDto(baseInput());
     expect(dto.setupQualityLadder.stages.find((s) => s.stage === "tier_a")?.count).toBe(0);
     expect(dto.setupQualityLadder.stages.find((s) => s.stage === "watch")?.count).toBeGreaterThan(0);
-    expect(dto.setupQualityLadder.summary).toContain("Quiet day");
+    expect(dto.setupQualityLadder.summary).toContain("Ngày yên ắng");
   });
 
   it("no candidates at all: falls back to a neutral no-classification summary", () => {
@@ -531,7 +533,7 @@ describe("buildDecisionCockpitDto — scan pulse summary (S5 reframe)", () => {
       })
     );
     expect(dto.setupQualityLadder.totalClassified).toBe(0);
-    expect(dto.setupQualityLadder.summary).toBe("No candidates classified in the latest scan.");
+    expect(dto.setupQualityLadder.summary).toBe("Không có ứng viên nào được phân loại trong lần quét gần nhất.");
   });
 });
 
@@ -562,7 +564,7 @@ describe("buildDecisionCockpitDto — RS diagnostic (Batch D1)", () => {
     expect(dto.opportunity.mode).toBe("near_miss");
     const row = dto.opportunity.nearMiss.find((n) => n.symbol === "HPG");
     expect(row?.rsDiagnostic?.lines[0]).toMatch(/outperforming/i);
-    expect(row?.actionHint).toMatch(/not a trade signal|watch only|do not trade/i);
+    expect(row?.actionHint).toMatch(/không phải tín hiệu giao dịch|chỉ theo dõi|không giao dịch/i);
   });
 
   it("rsNearMissWatchlist panel uses non-actionable diagnostic copy", () => {
@@ -641,7 +643,7 @@ describe("buildDecisionCockpitDto — Gate funnel (Batch F)", () => {
     expect(dto.gateFunnel?.suppressedCountB).toBe(2);
     expect(dto.gateFunnel?.surfacedCountB).toBe(0);
     const suppressed = dto.evidence.find((c) => c.id === "gate2_suppressed");
-    expect(suppressed?.display).toMatch(/Tier B hidden/i);
+    expect(suppressed?.display).toMatch(/Hạng B bị ẩn/i);
     const surfaced = dto.evidence.find((c) => c.id === "gate2_surfaced");
     expect(surfaced?.display).toMatch(/B 0/);
   });
@@ -685,9 +687,9 @@ describe("resolveBestSetupsPanelPresentation (S5 dedup)", () => {
       gateFunnel: dto.gateFunnel,
     });
     expect(p.mode).toBe("compact_empty");
-    expect(p.emptyTitle).toMatch(/No validated breakout-pullback/i);
-    expect(p.emptyReason).toMatch(/pre-regime|Gate 2 qualified/i);
-    expect(p.emptyReason).toMatch(/diagnostic/i);
+    expect(p.emptyTitle).toMatch(/Không có thiết lập breakout-pullback/i);
+    expect(p.emptyReason).toMatch(/trước chế độ|Đạt Gate 2/i);
+    expect(p.emptyReason).toMatch(/chẩn đoán/i);
   });
 });
 

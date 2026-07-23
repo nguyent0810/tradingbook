@@ -36,11 +36,11 @@ function sampleDiagnostic(overrides: Partial<RelativeStrengthDiagnostic> = {}): 
 
 describe("interpretRs20Spread", () => {
   it("positive spread uses outperforming copy", () => {
-    expect(interpretRs20Spread(3.2)).toMatch(/outperforming/i);
+    expect(interpretRs20Spread(3.2)).toMatch(/vượt trội/i);
   });
 
   it("negative spread uses underperforming copy", () => {
-    expect(interpretRs20Spread(-1.5)).toMatch(/underperforming/i);
+    expect(interpretRs20Spread(-1.5)).toMatch(/kém hơn/i);
   });
 });
 
@@ -50,12 +50,12 @@ describe("formatRelativeStrengthDiagnosticForUi", () => {
     expect(ui.disclaimer).toBe(RS_DIAGNOSTIC_DISCLAIMER);
     expect(ui.rs20SpreadPct).toBe(6);
     expect(ui.lines.some((l) => l.startsWith("RS20:"))).toBe(true);
-    expect(ui.lines.some((l) => /outperforming/i.test(l))).toBe(true);
+    expect(ui.lines.some((l) => /vượt trội/i.test(l))).toBe(true);
   });
 
   it("stockLeadingMa50 adds leadership line", () => {
     const ui = formatRelativeStrengthDiagnosticForUi(sampleDiagnostic());
-    expect(ui.lines.some((l) => /stock above MA50 while VNINDEX is not/i.test(l))).toBe(true);
+    expect(ui.lines.some((l) => /Cổ phiếu trên MA50 trong khi VNINDEX thì không/i.test(l))).toBe(true);
   });
 
   it("negative RS20 renders underperforming copy", () => {
@@ -74,7 +74,7 @@ describe("formatRelativeStrengthDiagnosticForUi", () => {
       })
     );
     expect(ui.lines[0]).toMatch(/RS20:/);
-    expect(ui.lines[0]).toMatch(/underperforming/i);
-    expect(interpretRs50Spread(-3)).toMatch(/underperforming/i);
+    expect(ui.lines[0]).toMatch(/kém hơn/i);
+    expect(interpretRs50Spread(-3)).toMatch(/kém hơn/i);
   });
 });

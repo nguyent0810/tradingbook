@@ -105,12 +105,12 @@ export function computeGate2RankBreakdown(params: Gate2RankScoreParams): Gate2Ra
 /** Human-readable lines for Setups / debug panels. */
 export function formatGate2RankBreakdownLines(c: Gate2RankComponents): string[] {
   return [
-    `Rank score ${c.rankScore.toFixed(2)} = volume ${c.volumeTerm.toFixed(2)} + extension ${c.extensionTerm.toFixed(2)} + MA distance ${c.maDistanceTerm.toFixed(2)} − depth penalty ${c.depthPenalty.toFixed(2)}`,
-    `Inputs: vol ${c.inputs.volRatio.toFixed(2)}× median, extension ${c.inputs.extensionPct.toFixed(2)}% above breakout, ${c.inputs.maDistancePct.toFixed(2)}% above MA50, depth ${(c.inputs.depthFrac * 100).toFixed(2)}% under breakout`,
+    `Điểm xếp hạng ${c.rankScore.toFixed(2)} = khối lượng ${c.volumeTerm.toFixed(2)} + độ mở rộng ${c.extensionTerm.toFixed(2)} + khoảng cách MA ${c.maDistanceTerm.toFixed(2)} − phạt độ sâu ${c.depthPenalty.toFixed(2)}`,
+    `Đầu vào: KL ${c.inputs.volRatio.toFixed(2)}× trung vị, mở rộng ${c.inputs.extensionPct.toFixed(2)}% trên breakout, ${c.inputs.maDistancePct.toFixed(2)}% trên MA50, độ sâu ${(c.inputs.depthFrac * 100).toFixed(2)}% dưới breakout`,
   ];
 }
 
 /** One-line summary for dashboard chips. */
 export function formatGate2RankSummary(c: Gate2RankComponents): string {
-  return `Rank ${c.rankScore.toFixed(0)} (vol +${c.volumeTerm.toFixed(0)}, ext +${c.extensionTerm.toFixed(0)}, MA +${c.maDistanceTerm.toFixed(0)}, depth −${c.depthPenalty.toFixed(0)})`;
+  return `Hạng ${c.rankScore.toFixed(0)} (KL +${c.volumeTerm.toFixed(0)}, mở rộng +${c.extensionTerm.toFixed(0)}, MA +${c.maDistanceTerm.toFixed(0)}, độ sâu −${c.depthPenalty.toFixed(0)})`;
 }

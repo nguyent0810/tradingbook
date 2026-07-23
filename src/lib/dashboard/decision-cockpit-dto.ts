@@ -303,12 +303,12 @@ export type DecisionCockpitDto = {
 };
 
 const LADDER_STAGE_UI: Record<SetupLadderStage, { label: string; subtitle: string }> = {
-  tier_a: { label: "Tier A", subtitle: "Tradeable" },
-  tier_b: { label: "Tier B", subtitle: "Reduced size" },
-  watch: { label: "Watch", subtitle: "Near miss" },
-  extended: { label: "Extended", subtitle: "Good stock, bad entry" },
-  invalid: { label: "Invalid", subtitle: "Rule broken" },
-  avoid: { label: "Avoid", subtitle: "Risk too high" },
+  tier_a: { label: "Hạng A", subtitle: "Có thể giao dịch" },
+  tier_b: { label: "Hạng B", subtitle: "Khối lượng giảm" },
+  watch: { label: "Theo dõi", subtitle: "Suýt đạt" },
+  extended: { label: "Đã mở rộng", subtitle: "Mã tốt, điểm vào xấu" },
+  invalid: { label: "Không hợp lệ", subtitle: "Vi phạm quy tắc" },
+  avoid: { label: "Tránh", subtitle: "Rủi ro quá cao" },
 };
 
 /** Trader-facing ladder stage label (shared with dashboard panels). */
@@ -320,15 +320,15 @@ export function formatSetupLadderStageLabel(stage: SetupLadderStage): string {
 export function formatBlockerSeverity(severity: BlockerSeverity): string {
   switch (severity) {
     case "market_off":
-      return "Market off";
+      return "Thị trường bất lợi";
     case "structure_broken":
-      return "Structure broken";
+      return "Vỡ cấu trúc";
     case "extension":
-      return "Extension / chase";
+      return "Mở rộng / đuổi giá";
     case "timing":
-      return "Timing / wait";
+      return "Thời điểm / chờ";
     default:
-      return "Data / liquidity";
+      return "Dữ liệu / thanh khoản";
   }
 }
 
@@ -366,10 +366,10 @@ export function resolveCanonicalGate1(input: {
       mismatch,
       liveOverrideApplied,
       note: liveOverrideApplied
-        ? "Live regime is worse than the scan-run Gate 1 — verdict downgraded to the live reading; the persisted scan decision is shown for reference only."
+        ? "Chế độ trực tiếp xấu hơn Gate 1 tại thời điểm quét — phán quyết bị hạ theo dữ liệu trực tiếp; quyết định quét đã lưu chỉ hiển thị để tham khảo."
         : mismatch
-          ? "Verdict uses scan-run Gate 1; live regime differs but is not worse — see evidence chips."
-          : "Verdict uses scan-run Gate 1 (aligned with Setups page).",
+          ? "Phán quyết dùng Gate 1 tại thời điểm quét; chế độ trực tiếp có khác nhưng không xấu hơn — xem các chip bằng chứng."
+          : "Phán quyết dùng Gate 1 tại thời điểm quét (khớp với trang Thiết lập).",
     };
   }
   return {
@@ -379,7 +379,7 @@ export function resolveCanonicalGate1(input: {
     liveRegimeGate1,
     mismatch: false,
     liveOverrideApplied: false,
-    note: "No daily scan — verdict uses live VNINDEX regime only.",
+    note: "Chưa có lần quét hằng ngày — phán quyết chỉ dùng chế độ VNINDEX trực tiếp.",
   };
 }
 
@@ -537,7 +537,7 @@ function resolveDecision(
     return {
       ...recomputed,
       explanation: persisted
-        ? `${recomputed.explanation} Live regime downgraded from the scan-time decision (was ${persisted.level} ${persisted.allocation}).`
+        ? `${recomputed.explanation} Chế độ trực tiếp bị hạ so với quyết định tại thời điểm quét (trước đó là ${persisted.level} ${persisted.allocation}).`
         : recomputed.explanation,
     };
   }
@@ -552,7 +552,7 @@ function resolveDecision(
   return {
     level: "NO_TRADE",
     allocation: "0%",
-    explanation: "No scan run found yet.",
+    explanation: "Chưa có lần quét nào.",
   };
 }
 
@@ -585,12 +585,12 @@ function resolvePersistedDecision(
   return {
     level: "NO_TRADE",
     allocation: "0%",
-    explanation: "No scan run found yet.",
+    explanation: "Chưa có lần quét nào.",
   };
 }
 
 function perTradeGuidanceForLevel(level: DailyTradingDecisionLevel): string {
-  return level === "PROBE" ? "10–15% of equity" : level === "NORMAL" ? "10–20% of equity" : "None";
+  return level === "PROBE" ? "10–15% vốn" : level === "NORMAL" ? "10–20% vốn" : "Không có";
 }
 
 function buildEvidenceStack(
@@ -613,7 +613,7 @@ function buildEvidenceStack(
   if (gate1.mismatch) {
     chips.push({
       id: "gate1_live",
-      label: "Gate 1 (live)",
+      label: "Gate 1 (trực tiếp)",
       display: displayGate1ScanLevel(gate1.liveRegimeGate1),
       provenance: "real",
     });
@@ -632,24 +632,24 @@ function buildEvidenceStack(
     chips.push(
       {
         id: "gate2_qualified",
-        label: "Gate 2 qualified",
-        display: `A ${gateFunnel.qualifiedCountA} · B ${gateFunnel.qualifiedCountB} (pre-regime)`,
+        label: "Đạt Gate 2",
+        display: `A ${gateFunnel.qualifiedCountA} · B ${gateFunnel.qualifiedCountB} (trước chế độ)`,
         provenance: "real",
       },
       {
         id: "gate2_surfaced",
-        label: "Surfaced",
-        display: `A ${gateFunnel.surfacedCountA} · B ${gateFunnel.surfacedCountB} (after Gate 1)`,
+        label: "Đã lọc ra",
+        display: `A ${gateFunnel.surfacedCountA} · B ${gateFunnel.surfacedCountB} (sau Gate 1)`,
         provenance: "real",
       }
     );
     if (gateFunnel.suppressedTotal > 0) {
       chips.push({
         id: "gate2_suppressed",
-        label: "Suppressed",
+        label: "Bị chặn",
         display:
           gateFunnel.suppressedCountB > 0
-            ? `${gateFunnel.suppressedTotal} (incl. ${gateFunnel.suppressedCountB} Tier B hidden)`
+            ? `${gateFunnel.suppressedTotal} (gồm ${gateFunnel.suppressedCountB} Hạng B bị ẩn)`
             : String(gateFunnel.suppressedTotal),
         provenance: "derived",
       });
@@ -657,7 +657,7 @@ function buildEvidenceStack(
     if (latestScan.universeScannedCount != null) {
       chips.push({
         id: "universe",
-        label: "Universe scanned",
+        label: "Vũ trụ đã quét",
         display: String(latestScan.universeScannedCount),
         provenance: "real",
       });
@@ -668,16 +668,16 @@ function buildEvidenceStack(
 
   chips.push({
     id: "aligned",
-    label: "Data aligned",
+    label: "Dữ liệu đồng bộ",
     display:
-      freshness.delayedBackdrop || freshness.staleFlags.length > 0 ? "Review flags" : "Yes",
+      freshness.delayedBackdrop || freshness.staleFlags.length > 0 ? "Cần xem cờ" : "Có",
     provenance: "derived",
   });
 
   if (freshness.scanRunAt) {
     chips.push({
       id: "scan_at",
-      label: "Scan",
+      label: "Quét",
       display: freshness.scanRunAt.slice(0, 16).replace("T", " "),
       provenance: "real",
     });
@@ -704,12 +704,12 @@ function buildOpportunityBoard(
           .slice(0, 2)
           .map((r) => String(r));
         const summary = c.healthSummary ?? healthFlagSummary(c.healthFlags);
-        let actionHint = "Review on Setups";
+        let actionHint = "Xem tại Thiết lập";
         if (ladder === "tier_a" || ladder === "tier_b") {
           actionHint =
             c.lifecycleSortLabel === "READY"
-              ? "Log trade — entry confirmed"
-              : "Wait for entry zone";
+              ? "Ghi lệnh — đã xác nhận điểm vào"
+              : "Chờ vùng vào lệnh";
         }
         return {
           candidateId: c.id,
@@ -773,8 +773,8 @@ function buildOpportunityBoard(
     candidates: [],
     nearMiss: [],
     emptyReason: latestScan
-      ? "No surfaced candidates and no near-miss ranking in latest scan notes."
-      : "No daily scan yet.",
+      ? "Không có ứng viên nổi bật và không có xếp hạng suýt đạt trong ghi chú lần quét gần nhất."
+      : "Chưa có lần quét hằng ngày.",
   };
 }
 
@@ -858,15 +858,15 @@ function buildScanPulseSummary(stages: LadderStageGroupDto[]): string {
   const total = stages.reduce((sum, s) => sum + s.count, 0);
 
   if (tierAB > 0) {
-    return `Active day — ${tierAB} name${tierAB === 1 ? "" : "s"} cleared Tier A/B today.`;
+    return `Ngày sôi động — ${tierAB} mã đạt Hạng A/B hôm nay.`;
   }
   if (watch > 0) {
-    return `Quiet day — ${watch} name${watch === 1 ? "" : "s"} on watch, nothing cleared Tier A/B yet.`;
+    return `Ngày yên ắng — ${watch} mã đang theo dõi, chưa mã nào đạt Hạng A/B.`;
   }
   if (total === 0) {
-    return "No candidates classified in the latest scan.";
+    return "Không có ứng viên nào được phân loại trong lần quét gần nhất.";
   }
-  return "No names cleared Tier A/B or watch today — check Setups for the full breakdown.";
+  return "Không có mã nào đạt Hạng A/B hoặc theo dõi hôm nay — xem chi tiết đầy đủ tại Thiết lập.";
 }
 
 /**
@@ -893,21 +893,21 @@ export function resolveBestSetupsPanelPresentation(params: {
     if (!latestScan) {
       return {
         mode: "compact_empty",
-        emptyTitle: "No validated breakout-pullback setups today",
-        emptyReason: "No daily scan yet — check Setups after the next scan run.",
+        emptyTitle: "Không có thiết lập breakout-pullback đã xác thực hôm nay",
+        emptyReason: "Chưa có lần quét hằng ngày — xem lại tại Thiết lập sau lần quét tiếp theo.",
       };
     }
     const funnelLine = gateFunnel
       ? formatGateFunnelSummaryLine(gateFunnel)
-      : `Surfaced after Gate 1: ${latestScan.candidateCountSurfaced} (Gate 2 qualified A ${latestScan.candidateCountA} · B ${latestScan.candidateCountB} before regime filter).`;
+      : `Đã lọc ra sau Gate 1: ${latestScan.candidateCountSurfaced} (Đạt Gate 2 A ${latestScan.candidateCountA} · B ${latestScan.candidateCountB} trước bộ lọc chế độ).`;
     const nearHint = extraNearMissHint
-      ? " Near-miss rows are Gate 2 diagnostics only — not trade signals."
-      : " See near-miss / rejection panels for observational context only.";
+      ? " Các dòng suýt đạt chỉ là chẩn đoán Gate 2 — không phải tín hiệu giao dịch."
+      : " Xem bảng suýt đạt / bị loại để có thêm bối cảnh quan sát.";
     return {
       mode: "compact_empty",
-      emptyTitle: "No validated breakout-pullback setups today",
+      emptyTitle: "Không có thiết lập breakout-pullback đã xác thực hôm nay",
       emptyReason: [
-        "No SetupCandidate rows surfaced for the detail table on this run.",
+        "Không có dòng SetupCandidate nào nổi bật cho bảng chi tiết trong lần chạy này.",
         funnelLine,
         nearHint,
       ].join(" "),
@@ -921,9 +921,9 @@ export function resolveBestSetupsPanelPresentation(params: {
   if (opportunity.mode === "candidates") {
     return {
       mode: "compact_empty",
-      emptyTitle: "No validated breakout-pullback setups today",
+      emptyTitle: "Không có thiết lập breakout-pullback đã xác thực hôm nay",
       emptyReason:
-        "Surfaced names appear in Opportunity preview — none scored for this detail table.",
+        "Các mã nổi bật đã hiện ở phần xem trước Cơ hội — chưa mã nào được chấm điểm cho bảng chi tiết này.",
     };
   }
 
@@ -944,11 +944,11 @@ function buildActionableBlockers(
   if (gate1 === "FAIL") {
     blockers.push({
       severity: "market_off",
-      title: "Gate 1 — market backdrop unfavorable",
-      meaning: "Index trend filter failed — new swing longs are off the table.",
+      title: "Gate 1 — nền thị trường bất lợi",
+      meaning: "Bộ lọc xu hướng chỉ số không đạt — không mở lệnh swing mua mới.",
       count: 0,
       sampleSymbols: [],
-      waitFor: "VNINDEX regime to improve before new swing risk.",
+      waitFor: "Chờ chế độ VNINDEX cải thiện trước khi nhận thêm rủi ro swing mới.",
       provenance: "derived",
     });
   }
@@ -999,7 +999,7 @@ function buildTomorrowPlan(
   for (const w of watchlist.slice(0, 5)) {
     if (!watchSymbols.includes(w.symbol)) watchSymbols.push(w.symbol);
     if (!watchReasons[w.symbol]) {
-      watchReasons[w.symbol] = "On active watchlist — no fresh Gate 2 diagnostic yet this session.";
+      watchReasons[w.symbol] = "Đang trong danh sách theo dõi — chưa có chẩn đoán Gate 2 mới trong phiên này.";
     }
   }
 
@@ -1011,16 +1011,16 @@ function buildTomorrowPlan(
     const c = opportunity.candidates[0];
     triggerParts.push(`${c.symbol}: ${c.actionHint}`);
   } else {
-    triggerParts.push("Next scan with Gate 1 PASS and Tier A/B surfaced.");
+    triggerParts.push("Chờ lần quét tiếp theo có Gate 1 PASS và Hạng A/B nổi bật.");
   }
 
   const avoidParts: string[] = [];
   if (ux === "NO_TRADE") {
-    avoidParts.push(`No new swing risk — ${decision.allocation} book cap.`);
+    avoidParts.push(`Không rủi ro swing mới — giới hạn sổ lệnh ${decision.allocation}.`);
   }
   const topExtension = blockers.find((b) => b.severity === "extension");
   if (topExtension) {
-    avoidParts.push(`Avoid chase: ${topExtension.title} (${topExtension.count} names).`);
+    avoidParts.push(`Tránh đuổi giá: ${topExtension.title} (${topExtension.count} mã).`);
   }
 
   let watchNote: string | null = null;
@@ -1028,10 +1028,10 @@ function buildTomorrowPlan(
     if (opportunity.mode === "near_miss") {
       watchNote = null;
     } else if (opportunity.mode === "candidates") {
-      watchNote = "Focus on surfaced Tier A/B names above; add manual watches from Setups if needed.";
+      watchNote = "Tập trung vào các mã Hạng A/B đã nổi bật ở trên; thêm mã theo dõi thủ công từ Thiết lập nếu cần.";
     } else {
       watchNote =
-        "No near-miss symbols surfaced in the latest scan; review /setups for full pipeline diagnostics.";
+        "Không có mã suýt đạt nổi bật trong lần quét gần nhất; xem /setups để có chẩn đoán đường ống đầy đủ.";
     }
   }
 
@@ -1040,7 +1040,7 @@ function buildTomorrowPlan(
     watchNote: { value: watchNote, provenance: watchNote ? "static_copy" : "derived" },
     watchReasons,
     triggerLine: { value: triggerParts.join(" "), provenance: "derived" },
-    avoidLine: { value: avoidParts.join(" ") || "Follow verdict caps.", provenance: "derived" },
+    avoidLine: { value: avoidParts.join(" ") || "Theo đúng giới hạn phán quyết.", provenance: "derived" },
   };
 }
 
@@ -1163,8 +1163,8 @@ export function buildDecisionCockpitDto(input: DecisionCockpitInput): DecisionCo
       emptyReason:
         blockers.length === 0
           ? input.latestScan
-            ? "No Gate 2 rejection buckets in latest scan notes."
-            : "Run a daily scan to populate actionable blockers."
+            ? "Không có nhóm lý do bị loại Gate 2 trong ghi chú lần quét gần nhất."
+            : "Chạy lần quét hằng ngày để có rào cản cần xử lý."
           : null,
     },
     blockers,

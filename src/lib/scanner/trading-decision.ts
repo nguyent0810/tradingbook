@@ -28,7 +28,7 @@ export function computeDailyTradingDecision(params: {
     return {
       level: "NO_TRADE",
       allocation: "0%",
-      explanation: "Market conditions are unfavorable.",
+      explanation: "Điều kiện thị trường không thuận lợi.",
     };
   }
 
@@ -37,13 +37,13 @@ export function computeDailyTradingDecision(params: {
       return {
         level: "NORMAL",
         allocation: "50-70%",
-        explanation: "Market is supportive and valid setups are available.",
+        explanation: "Thị trường đang hỗ trợ và có thiết lập hợp lệ.",
       };
     }
     return {
       level: "NO_TRADE",
       allocation: "0%",
-      explanation: "Market is supportive, but no valid setup is available.",
+      explanation: "Thị trường đang hỗ trợ, nhưng không có thiết lập hợp lệ nào.",
     };
   }
 
@@ -52,14 +52,14 @@ export function computeDailyTradingDecision(params: {
     return {
       level: "PROBE",
       allocation: "20-40%",
-      explanation: "Only small exposure is allowed because market conditions are mixed.",
+      explanation: "Chỉ được phép vào lệnh nhỏ vì điều kiện thị trường đang lẫn lộn.",
     };
   }
 
   return {
     level: "NO_TRADE",
     allocation: "0%",
-    explanation: "Market is mixed and no Tier A setup is available.",
+    explanation: "Thị trường đang lẫn lộn và không có thiết lập Hạng A.",
   };
 }
 
@@ -83,7 +83,7 @@ function normalizeLegacyAggressive(): DailyTradingDecision {
   return {
     level: "NORMAL",
     allocation: "50-70%",
-    explanation: "Market is supportive and valid setups are available.",
+    explanation: "Thị trường đang hỗ trợ và có thiết lập hợp lệ.",
   };
 }
 

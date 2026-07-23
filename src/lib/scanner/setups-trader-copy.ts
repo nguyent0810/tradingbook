@@ -2,25 +2,25 @@ import type { TerminalCategory } from "./gate2-scan-diagnostics";
 
 /** Gate 2 INVALID bucket key → trader-facing label (presentation only). */
 export const REJECTION_BUCKET_LABELS: Record<string, string> = {
-  trend_below_ma50: "Below long-term trend",
-  trend_ma20_below_ma50: "Short-term trend weaker than long-term",
-  breakout_recency: "No recent breakout",
-  pullback_zone_interaction: "Not in pullback entry zone",
-  breakout_not_holding: "Breakout failed to hold",
-  digestion: "No consolidation after breakout",
-  mid_pullback_below_ma50: "Pullback closed under the 50-day line",
-  swept_breakout_weak_close: "Weak finish after sweeping breakout lows",
-  pullback_zone_two_closes: "Two closes below pullback zone floor",
-  pullback_zone_malformed: "Pullback zone structure unclear",
-  volume_median_bad: "Volume baseline unreliable",
-  volume_ratio: "Participation too thin vs median volume",
-  extension_cap: "Chasing — extended too far above breakout",
-  depth_cap: "Pullback deeper than playbook allows",
-  stop_structure: "Entry/stop distance not actionable",
-  insufficient_bars: "Insufficient history for Gate 2",
-  stale_or_session_mismatch: "Session date misaligned with benchmark",
-  ma_compute: "Moving averages unavailable",
-  unknown: "Other template mismatch",
+  trend_below_ma50: "Dưới xu hướng dài hạn",
+  trend_ma20_below_ma50: "Xu hướng ngắn hạn yếu hơn dài hạn",
+  breakout_recency: "Không có breakout gần đây",
+  pullback_zone_interaction: "Chưa vào vùng pullback",
+  breakout_not_holding: "Breakout không giữ được",
+  digestion: "Không tích lũy sau breakout",
+  mid_pullback_below_ma50: "Pullback đóng cửa dưới đường MA50",
+  swept_breakout_weak_close: "Đóng cửa yếu sau khi quét đáy breakout",
+  pullback_zone_two_closes: "Hai phiên đóng cửa dưới đáy vùng pullback",
+  pullback_zone_malformed: "Cấu trúc vùng pullback không rõ ràng",
+  volume_median_bad: "Nền khối lượng không đáng tin cậy",
+  volume_ratio: "Thanh khoản quá mỏng so với khối lượng trung vị",
+  extension_cap: "Đuổi giá — vượt quá xa trên breakout",
+  depth_cap: "Pullback sâu hơn mức mẫu hình cho phép",
+  stop_structure: "Khoảng cách vào lệnh/dừng lỗ không khả thi",
+  insufficient_bars: "Không đủ dữ liệu lịch sử cho Gate 2",
+  stale_or_session_mismatch: "Ngày phiên không khớp với chỉ số tham chiếu",
+  ma_compute: "Không tính được đường trung bình động",
+  unknown: "Không khớp mẫu hình khác",
 };
 
 export function rejectionBucketLabel(categoryKey: string): string {
@@ -35,8 +35,8 @@ export type RejectionBucketTraderGuide = {
 };
 
 const DEFAULT_GUIDE: RejectionBucketTraderGuide = {
-  meaning: "This rule removed the name under today’s breakout-pullback template.",
-  waitFor: "Structure or participation to improve so the next scan can clear this step.",
+  meaning: "Quy tắc này đã loại mã theo mẫu hình breakout-pullback hôm nay.",
+  waitFor: "Cấu trúc hoặc thanh khoản cải thiện để lần quét tiếp theo vượt qua bước này.",
 };
 
 /** Trader-facing copy for diagnostics accordion (does not change Gate 2 rules). */
@@ -44,98 +44,98 @@ export function rejectionBucketTraderGuide(categoryKey: string): RejectionBucket
   switch (categoryKey) {
     case "trend_below_ma50":
       return {
-        meaning: "Price is on the wrong side of the long-term trend filter for this swing style.",
-        waitFor: "Strength back above the slow trend line before treating bias as supportive.",
+        meaning: "Giá đang nằm sai phía bộ lọc xu hướng dài hạn cho phong cách swing này.",
+        waitFor: "Giá mạnh trở lại trên đường xu hướng chậm trước khi xem thiên hướng là hỗ trợ.",
       };
     case "trend_ma20_below_ma50":
       return {
-        meaning: "Shorter-term trend is weaker than the slower one — momentum isn’t confirming.",
-        waitFor: "Short-term trend to firm up vs the long-term line before prioritizing breakouts.",
+        meaning: "Xu hướng ngắn hạn yếu hơn xu hướng chậm — động lượng chưa xác nhận.",
+        waitFor: "Xu hướng ngắn hạn cần vững lên so với đường dài hạn trước khi ưu tiên breakout.",
       };
     case "breakout_recency":
       return {
-        meaning: "There hasn’t been a qualifying breakout in the recent session window.",
-        waitFor: "A decisive push through resistance, then reassess digestion and pullback.",
+        meaning: "Chưa có breakout đạt chuẩn trong khung phiên gần đây.",
+        waitFor: "Một cú bứt phá dứt khoát qua kháng cự, sau đó đánh giá lại tích lũy và pullback.",
       };
     case "breakout_not_holding":
       return {
-        meaning: "Price pierced resistance but didn’t finish the session holding the break.",
-        waitFor: "A close that holds above the breakout level so the level acts as support.",
+        meaning: "Giá xuyên qua kháng cự nhưng không giữ được đến cuối phiên.",
+        waitFor: "Một phiên đóng cửa giữ trên mức breakout để mức này trở thành hỗ trợ.",
       };
     case "pullback_zone_interaction":
       return {
-        meaning: "The latest bar doesn’t touch or work inside the pullback box after the break.",
-        waitFor: "A dip or reclaim into the pullback zone so entry timing matches the playbook.",
+        meaning: "Cây nến gần nhất chưa chạm hoặc chưa hoạt động trong vùng pullback sau breakout.",
+        waitFor: "Một nhịp giảm hoặc giành lại vào vùng pullback để thời điểm vào lệnh khớp với mẫu hình.",
       };
     case "digestion":
       return {
-        meaning: "Price went vertical without the pause/digestion the template expects after the impulse.",
-        waitFor: "A controlled pullback or chop under the breakout-day close (digest) before entry.",
+        meaning: "Giá tăng thẳng đứng mà không có nhịp nghỉ/tích lũy như mẫu hình yêu cầu sau đợt bứt phá.",
+        waitFor: "Một nhịp pullback có kiểm soát hoặc dao động dưới giá đóng cửa ngày breakout (tích lũy) trước khi vào lệnh.",
       };
     case "pullback_zone_two_closes":
       return {
-        meaning: "Two closes in a row lost the floor of the pullback zone.",
-        waitFor: "Reclaim above the zone floor so structure isn’t breaking down into the box.",
+        meaning: "Hai phiên đóng cửa liên tiếp mất đáy vùng pullback.",
+        waitFor: "Giành lại trên đáy vùng để cấu trúc không vỡ vào trong vùng.",
       };
     case "pullback_zone_malformed":
       return {
-        meaning: "The pullback zone couldn’t be drawn cleanly from recent swings.",
-        waitFor: "Cleaner swings so the zone anchors are well-defined.",
+        meaning: "Không thể vẽ rõ vùng pullback từ các đợt dao động gần đây.",
+        waitFor: "Các đợt dao động rõ ràng hơn để mốc vùng được xác định tốt.",
       };
     case "mid_pullback_below_ma50":
       return {
-        meaning: "During the pullback phase, price violated the 50-day line.",
-        waitFor: "Pullback that respects major trend support before continuation setups.",
+        meaning: "Trong giai đoạn pullback, giá đã phá vỡ đường MA50.",
+        waitFor: "Pullback tôn trọng hỗ trợ xu hướng chính trước khi có thiết lập tiếp diễn.",
       };
     case "swept_breakout_weak_close":
       return {
-        meaning: "Weak close after sweeping under breakout-related lows — fragile structure.",
-        waitFor: "A stronger close that rejects the sweep and defends the breakout area.",
+        meaning: "Đóng cửa yếu sau khi quét dưới các đáy liên quan đến breakout — cấu trúc mong manh.",
+        waitFor: "Một phiên đóng cửa mạnh hơn từ chối cú quét và bảo vệ vùng breakout.",
       };
     case "volume_median_bad":
       return {
-        meaning: "Volume baseline isn’t reliable enough to score participation.",
-        waitFor: "More regular volume history so median comparisons are meaningful.",
+        meaning: "Nền khối lượng chưa đủ tin cậy để chấm điểm thanh khoản.",
+        waitFor: "Lịch sử khối lượng đều đặn hơn để so sánh trung vị có ý nghĩa.",
       };
     case "volume_ratio":
       return {
-        meaning: "Participation on the bar is too thin versus the playbook threshold.",
-        waitFor: "Heavier volume on supportive price action at the level.",
+        meaning: "Thanh khoản trên cây nến quá mỏng so với ngưỡng mẫu hình.",
+        waitFor: "Khối lượng lớn hơn đi kèm hành động giá hỗ trợ tại mức này.",
       };
     case "extension_cap":
       return {
-        meaning: "Price has stretched too far above the breakout — chasing risk.",
-        waitFor: "A shallower pullback or reset so reward/risk isn’t stretched.",
+        meaning: "Giá đã vươn quá xa trên breakout — rủi ro đuổi giá.",
+        waitFor: "Một nhịp pullback nông hơn hoặc reset để tỷ lệ lợi nhuận/rủi ro không bị kéo căng.",
       };
     case "depth_cap":
       return {
-        meaning: "The pullback retraced deeper than this template allows.",
-        waitFor: "A shallower digest or a fresh structure reset.",
+        meaning: "Pullback thoái lui sâu hơn mức mẫu hình này cho phép.",
+        waitFor: "Một nhịp tích lũy nông hơn hoặc cấu trúc được reset mới.",
       };
     case "stop_structure":
       return {
-        meaning: "Stop vs entry doesn’t give an actionable risk definition.",
-        waitFor: "Structure where a clear stop and entry separation exists.",
+        meaning: "Dừng lỗ so với điểm vào không tạo ra định nghĩa rủi ro khả thi.",
+        waitFor: "Cấu trúc có khoảng cách rõ ràng giữa điểm dừng lỗ và điểm vào.",
       };
     case "insufficient_bars":
       return {
-        meaning: "Not enough daily history to run the full Gate 2 checklist.",
-        waitFor: "More bars imported before evaluating this name.",
+        meaning: "Không đủ dữ liệu lịch sử theo ngày để chạy đầy đủ danh sách kiểm tra Gate 2.",
+        waitFor: "Nhập thêm dữ liệu nến trước khi đánh giá mã này.",
       };
     case "stale_or_session_mismatch":
       return {
-        meaning: "Stock data isn’t aligned with the benchmark session date.",
-        waitFor: "Up-to-date bars for the same session as the index.",
+        meaning: "Dữ liệu cổ phiếu không khớp với ngày phiên của chỉ số tham chiếu.",
+        waitFor: "Dữ liệu nến cập nhật cùng phiên với chỉ số.",
       };
     case "ma_compute":
       return {
-        meaning: "Moving averages couldn’t be computed for this series.",
-        waitFor: "Clean bar data without gaps that block MA calculation.",
+        meaning: "Không thể tính đường trung bình động cho chuỗi dữ liệu này.",
+        waitFor: "Dữ liệu nến sạch, không có khoảng trống cản trở tính MA.",
       };
     case "unknown":
       return {
-        meaning: "Stopped on a reason that wasn’t classified into a standard bucket.",
-        waitFor: "Review closest-to-valid lines or re-scan after data fixes.",
+        meaning: "Dừng lại vì lý do chưa được phân loại vào nhóm chuẩn.",
+        waitFor: "Xem lại các dòng gần đạt chuẩn nhất hoặc quét lại sau khi sửa dữ liệu.",
       };
     default:
       return DEFAULT_GUIDE;
@@ -160,26 +160,26 @@ export function buildSetupsInsightCopy(params: {
     return {
       headline:
         surfacedCount === 1
-          ? "One qualified breakout-pullback setup surfaced today."
-          : `${surfacedCount} qualified breakout-pullback setups surfaced today.`,
+          ? "Một thiết lập breakout-pullback đạt chuẩn xuất hiện hôm nay."
+          : `${surfacedCount} thiết lập breakout-pullback đạt chuẩn xuất hiện hôm nay.`,
       contextLine:
         tradableCount > 0
-          ? `Evaluated against ${tradableCount} tradable symbol${tradableCount === 1 ? "" : "s"} on the latest session.`
+          ? `Đã đánh giá trên ${tradableCount} mã có thể giao dịch trong phiên gần nhất.`
           : "",
-      explanation: "Review levels and reasons below before allocating risk.",
-      action: "Confirm liquidity and your plan at each tier (A vs B).",
+      explanation: "Xem lại các mức giá và lý do bên dưới trước khi phân bổ rủi ro.",
+      action: "Xác nhận thanh khoản và kế hoạch của bạn ở từng hạng (A và B).",
     };
   }
 
-  const headline = "Market is not favorable for breakout setups.";
+  const headline = "Thị trường chưa thuận lợi cho các thiết lập breakout.";
   const { explanation, action } = dominantInsightExplanationAndAction(dominantCategoryKey);
 
   return {
     headline,
     contextLine:
       tradableCount > 0
-        ? `${tradableCount} symbol${tradableCount === 1 ? "" : "s"} passed tradability but none cleared every Gate 2 check.`
-        : "No symbols met tradability on this session.",
+        ? `${tradableCount} mã đạt điều kiện giao dịch nhưng không mã nào vượt qua đầy đủ các kiểm tra Gate 2.`
+        : "Không có mã nào đạt điều kiện giao dịch trong phiên này.",
     explanation,
     action,
   };
@@ -192,61 +192,61 @@ function dominantInsightExplanationAndAction(dominant: string | null): {
   switch (dominant) {
     case "trend_below_ma50":
       return {
-        explanation: "Most stocks are still below key trend levels.",
-        action: "Wait for trend recovery before scanning for setups.",
+        explanation: "Hầu hết cổ phiếu vẫn ở dưới các mức xu hướng quan trọng.",
+        action: "Chờ xu hướng hồi phục trước khi quét tìm thiết lập.",
       };
     case "trend_ma20_below_ma50":
       return {
-        explanation: "Short-term momentum is weaker than the slower trend on many names.",
-        action: "Wait for MA20 to regain MA50 before prioritizing breakouts.",
+        explanation: "Động lượng ngắn hạn yếu hơn xu hướng chậm ở nhiều mã.",
+        action: "Chờ MA20 vượt lại MA50 trước khi ưu tiên các breakout.",
       };
     case "breakout_recency":
       return {
-        explanation: "Few symbols printed a fresh breakout in the last 10 sessions.",
-        action: "Watch for a decisive push above the 20-day range high.",
+        explanation: "Rất ít mã ghi nhận breakout mới trong 10 phiên gần đây.",
+        action: "Theo dõi cú bứt phá dứt khoát trên đỉnh biên độ 20 phiên.",
       };
     case "breakout_not_holding":
       return {
-        explanation: "Several names lost the breakout level before qualifying.",
-        action: "Prefer clean holds above resistance before pullback entries.",
+        explanation: "Một số mã đã mất mức breakout trước khi đạt chuẩn.",
+        action: "Ưu tiên các cú giữ giá sạch trên kháng cự trước khi vào lệnh pullback.",
       };
     case "pullback_zone_interaction":
     case "pullback_zone_two_closes":
     case "pullback_zone_malformed":
       return {
-        explanation: "Price is not interacting cleanly with the pullback box.",
-        action: "Wait for a touch or reclaim inside the pullback zone.",
+        explanation: "Giá chưa tương tác rõ ràng với vùng pullback.",
+        action: "Chờ giá chạm hoặc giành lại bên trong vùng pullback.",
       };
     case "digestion":
       return {
-        explanation: "Straight-line breaks without consolidation are being skipped.",
-        action: "Look for a digest dip under the breakout-day close first.",
+        explanation: "Các cú breakout tăng thẳng không tích lũy đang bị bỏ qua.",
+        action: "Tìm nhịp giảm tích lũy dưới giá đóng cửa ngày breakout trước.",
       };
     case "volume_ratio":
     case "volume_median_bad":
       return {
-        explanation: "Participation at the evaluation bar is softer than the playbook requires.",
-        action: "Stand aside until volume confirms interest at the level.",
+        explanation: "Thanh khoản tại cây nến đánh giá yếu hơn mức mẫu hình yêu cầu.",
+        action: "Đứng ngoài cho đến khi khối lượng xác nhận sự quan tâm tại mức này.",
       };
     case "extension_cap":
       return {
-        explanation: "Many closes sit too far above the breakout level for this swing template.",
-        action: "Avoid chasing; wait for a shallower pullback structure.",
+        explanation: "Nhiều giá đóng cửa nằm quá xa trên mức breakout đối với mẫu hình swing này.",
+        action: "Tránh đuổi giá; chờ cấu trúc pullback nông hơn.",
       };
     case "depth_cap":
       return {
-        explanation: "Pullbacks are retracing too deeply versus the breakout anchor.",
-        action: "Wait for shallower digestion or a cleaner reset.",
+        explanation: "Các pullback đang thoái lui quá sâu so với mốc breakout.",
+        action: "Chờ tích lũy nông hơn hoặc reset sạch hơn.",
       };
     case "stop_structure":
       return {
-        explanation: "Stop placement relative to entry does not meet minimum swing risk.",
-        action: "Skip marginal structures until stops can be defined cleanly.",
+        explanation: "Vị trí dừng lỗ so với điểm vào không đạt mức rủi ro swing tối thiểu.",
+        action: "Bỏ qua các cấu trúc biên cho đến khi xác định được điểm dừng lỗ rõ ràng.",
       };
     default:
       return {
-        explanation: "Filters are strict — several different checks are trimming the list.",
-        action: "Stay patient until structure aligns with the full playbook.",
+        explanation: "Bộ lọc đang chặt chẽ — nhiều kiểm tra khác nhau đang thu hẹp danh sách.",
+        action: "Kiên nhẫn chờ đến khi cấu trúc khớp hoàn toàn với mẫu hình.",
       };
   }
 }
@@ -256,28 +256,28 @@ export function traderClosestOneLiner(symbol: string, category: TerminalCategory
   const c = category;
   switch (c) {
     case "pullback_zone_interaction":
-      return `${symbol} → Broke out but not yet in pullback entry zone`;
+      return `${symbol} → Đã breakout nhưng chưa vào vùng pullback`;
     case "breakout_not_holding":
-      return `${symbol} → Breakout failed to hold above resistance`;
+      return `${symbol} → Breakout không giữ được trên kháng cự`;
     case "trend_below_ma50":
-      return `${symbol} → Still below the 50-day trend filter`;
+      return `${symbol} → Vẫn dưới bộ lọc xu hướng MA50`;
     case "trend_ma20_below_ma50":
-      return `${symbol} → Short-term trend weaker than long-term`;
+      return `${symbol} → Xu hướng ngắn hạn yếu hơn dài hạn`;
     case "breakout_recency":
-      return `${symbol} → No qualifying breakout in the last 10 sessions`;
+      return `${symbol} → Không có breakout đạt chuẩn trong 10 phiên gần đây`;
     case "digestion":
-      return `${symbol} → Needs consolidation after the impulse`;
+      return `${symbol} → Cần tích lũy sau đợt bứt phá`;
     case "pullback_zone_two_closes":
-      return `${symbol} → Lost pullback zone — needs reclaim`;
+      return `${symbol} → Mất vùng pullback — cần giành lại`;
     case "volume_ratio":
-      return `${symbol} → Participation below playbook threshold`;
+      return `${symbol} → Thanh khoản dưới ngưỡng mẫu hình`;
     case "extension_cap":
-      return `${symbol} → Extended too far vs breakout (chasing risk)`;
+      return `${symbol} → Vượt quá xa so với breakout (rủi ro đuổi giá)`;
     case "depth_cap":
-      return `${symbol} → Pullback deeper than playbook allows`;
+      return `${symbol} → Pullback sâu hơn mức mẫu hình cho phép`;
     case "stop_structure":
-      return `${symbol} → Entry/stop structure not actionable yet`;
+      return `${symbol} → Cấu trúc vào lệnh/dừng lỗ chưa khả thi`;
     default:
-      return `${symbol} → Close to template — one Gate 2 rule still blocking`;
+      return `${symbol} → Gần khớp mẫu hình — còn một quy tắc Gate 2 đang chặn`;
   }
 }

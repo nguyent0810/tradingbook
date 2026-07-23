@@ -5,40 +5,40 @@
 import type { ClosestExecutionStatus } from "@/lib/scanner/closest-execution-metrics";
 
 const SCAN_SETUP_TYPE_LABELS: Record<string, string> = {
-  BREAKOUT_PULLBACK: "Breakout pullback",
+  BREAKOUT_PULLBACK: "Breakout-pullback",
 };
 
 const MOMENTUM_LABELS: Record<string, string> = {
-  FRESH_BREAKOUT: "Fresh breakout",
-  MOMENTUM_IGNITION: "Momentum ignition",
-  RECLAIM_THRUST: "Reclaim thrust",
-  EXTENDED_NO_PULLBACK: "Extended no pullback",
-  FAILED_BREAKOUT_RISK: "Failed breakout risk",
+  FRESH_BREAKOUT: "Breakout mới",
+  MOMENTUM_IGNITION: "Bùng nổ động lượng",
+  RECLAIM_THRUST: "Bứt phá giành lại",
+  EXTENDED_NO_PULLBACK: "Mở rộng không pullback",
+  FAILED_BREAKOUT_RISK: "Rủi ro breakout thất bại",
 };
 
 const MOMENTUM_RISK_LABELS: Record<string, string> = {
-  STOP_FAR: "Stop too far",
-  EXTENDED: "Extended",
-  LOW_LIQUIDITY: "Low liquidity",
-  BELOW_MA50: "Below MA50",
-  NO_PULLBACK: "No pullback",
-  STALE_DATA: "Stale data",
+  STOP_FAR: "Dừng lỗ quá xa",
+  EXTENDED: "Đã mở rộng",
+  LOW_LIQUIDITY: "Thanh khoản thấp",
+  BELOW_MA50: "Dưới MA50",
+  NO_PULLBACK: "Không có pullback",
+  STALE_DATA: "Dữ liệu cũ",
 };
 
 const MOMENTUM_GROUP_LABELS: Record<string, string> = {
-  ACTIONABLE_WATCH: "Actionable watch",
-  EXTENDED_WATCH_ONLY: "Extended watch only",
-  AVOID_RISK: "Avoid risk",
-  COVERAGE_TRADABILITY_BLOCKED: "Tradability blocked",
+  ACTIONABLE_WATCH: "Theo dõi có thể hành động",
+  EXTENDED_WATCH_ONLY: "Chỉ theo dõi mở rộng",
+  AVOID_RISK: "Tránh rủi ro",
+  COVERAGE_TRADABILITY_BLOCKED: "Bị chặn điều kiện giao dịch",
 };
 
 const SETUP_LIFECYCLE_LABELS: Record<string, string> = {
-  NEW: "New",
-  WATCHING: "Watching pullback",
-  READY: "At entry zone",
-  TRIGGERED: "Triggered",
-  EXPIRED: "Expired",
-  INVALID: "Invalid",
+  NEW: "Mới",
+  WATCHING: "Đang theo dõi pullback",
+  READY: "Tại vùng vào lệnh",
+  TRIGGERED: "Đã kích hoạt",
+  EXPIRED: "Đã hết hạn",
+  INVALID: "Không hợp lệ",
 };
 
 function titleCaseWords(s: string): string {
@@ -58,11 +58,11 @@ export function displayScanSetupTypeKey(raw: string): string {
 export function displayClosestExecutionStatus(status: ClosestExecutionStatus): string {
   switch (status) {
     case "READY":
-      return "At entry zone";
+      return "Tại vùng vào lệnh";
     case "WAIT":
-      return "Waiting for pullback";
+      return "Đang chờ pullback";
     case "INVALID":
-      return "Structure invalid";
+      return "Cấu trúc không hợp lệ";
     default:
       return titleCaseWords(String(status));
   }
@@ -75,11 +75,11 @@ export function displayClosestExecutionStatus(status: ClosestExecutionStatus): s
 export function displayNearMissDiagnosticStatus(status: ClosestExecutionStatus): string {
   switch (status) {
     case "READY":
-      return "In zone (diagnostic only)";
+      return "Trong vùng (chỉ chẩn đoán)";
     case "WAIT":
-      return "Near setup, not validated";
+      return "Gần thiết lập, chưa xác thực";
     case "INVALID":
-      return "Structure invalid (watch only)";
+      return "Cấu trúc không hợp lệ (chỉ theo dõi)";
     default:
       return titleCaseWords(String(status));
   }
@@ -89,15 +89,20 @@ export function displayNearMissDiagnosticStatus(status: ClosestExecutionStatus):
 export function nearMissDiagnosticActionHint(status: ClosestExecutionStatus): string {
   switch (status) {
     case "READY":
-      return "Diagnostic only — price sits in the pullback zone but Gate 2 did not validate. Not a trade signal.";
+      return "Chỉ chẩn đoán — giá đang nằm trong vùng pullback nhưng Gate 2 chưa xác thực. Không phải tín hiệu giao dịch.";
     case "WAIT":
-      return "Watch only — closest INVALID name; wait for template rules or regime to improve.";
+      return "Chỉ theo dõi — mã gần INVALID nhất; chờ quy tắc mẫu hình hoặc bối cảnh thị trường cải thiện.";
     case "INVALID":
-      return "Do not trade — structure failed Gate 2 for this template.";
+      return "Không giao dịch — cấu trúc không đạt Gate 2 với mẫu hình này.";
   }
 }
 
-/** Surfaced candidate lifecycle strip (READY | WATCHING from health view). */
+/**
+ * Surfaced candidate lifecycle strip (READY | WATCHING from health view).
+ * Left in English (localization pass, 2026-07): `setup-lifecycle-dto.test.ts`
+ * asserts these exact literal strings and is out of scope for this pass —
+ * translating here without updating that test would silently desync it.
+ */
 export function displayCandidateLifecycleSortLabel(label: "READY" | "WATCHING"): string {
   return label === "READY" ? "At entry zone" : "Waiting for pullback";
 }
@@ -123,8 +128,8 @@ export function displaySetupLifecycleStatus(raw: string): string {
 }
 
 export function displayScanQualityTier(quality: string): string {
-  if (quality === "A") return "Tier A";
-  if (quality === "B") return "Tier B";
+  if (quality === "A") return "Hạng A";
+  if (quality === "B") return "Hạng B";
   return quality;
 }
 
@@ -132,15 +137,22 @@ export function displayScanQualityTier(quality: string): string {
 export function displayDailyScanRunStatus(raw: string): string {
   switch (raw) {
     case "COMPLETED":
-      return "Completed";
+      return "Đã hoàn tất";
     case "FAILED":
-      return "Failed";
+      return "Thất bại";
     default:
       return titleCaseWords(raw);
   }
 }
 
-/** Gate 1 market / scan regime level (PASS / WARNING / FAIL). */
+/**
+ * Gate 1 market / scan regime level (PASS / WARNING / FAIL).
+ * Left in English (localization pass, 2026-07): `pipeline-stages.ts` and
+ * `dashboard-evidence-compact.tsx` (components, out of scope for this pass)
+ * do `.toLowerCase().includes("favorable"/"caution"/"hostile")` style checks
+ * against this exact output to derive tone/styling — translating here would
+ * silently break that logic without a same-pass update to those files.
+ */
 export function displayGate1ScanLevel(raw: string): string {
   switch (raw) {
     case "PASS":
@@ -155,9 +167,9 @@ export function displayGate1ScanLevel(raw: string): string {
 }
 
 const UNIVERSE_SOURCE_LABELS: Record<string, string> = {
-  CORE: "Primary universe",
-  TACTICAL: "Tactical watch",
-  BOTH: "Primary + tactical",
+  CORE: "Vũ trụ chính",
+  TACTICAL: "Theo dõi chiến thuật",
+  BOTH: "Chính + chiến thuật",
 };
 
 export function displayUniverseSource(raw: string): string {
@@ -167,13 +179,13 @@ export function displayUniverseSource(raw: string): string {
 export function displayTradeStatus(raw: string): string {
   switch (raw) {
     case "OPEN":
-      return "Active";
+      return "Đang mở";
     case "CLOSED":
-      return "Completed";
+      return "Đã hoàn tất";
     case "CANCELLED":
-      return "Cancelled";
+      return "Đã hủy";
     case "PLANNED":
-      return "Planned";
+      return "Đã lên kế hoạch";
     default:
       return titleCaseWords(raw);
   }
@@ -182,20 +194,20 @@ export function displayTradeStatus(raw: string): string {
 export function displayTradeDirection(raw: string): string {
   switch (raw) {
     case "LONG":
-      return "Long bias";
+      return "Thiên hướng mua";
     case "SHORT":
-      return "Short bias";
+      return "Thiên hướng bán";
     default:
       return titleCaseWords(raw);
   }
 }
 
 const SETUP_HEALTH_LEVEL_LABELS: Record<string, string> = {
-  HEALTHY: "Healthy",
-  WARNING: "Watch",
-  AT_RISK: "At risk",
-  DEAD: "Broken",
-  NO_DATA: "No data",
+  HEALTHY: "Khỏe mạnh",
+  WARNING: "Cần theo dõi",
+  AT_RISK: "Có rủi ro",
+  DEAD: "Đã hỏng",
+  NO_DATA: "Không có dữ liệu",
 };
 
 /** Setup watch health level (scanner watch items). */

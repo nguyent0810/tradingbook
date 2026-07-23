@@ -6,12 +6,12 @@ describe("DashboardVnindexTrendChart", () => {
   it("renders an empty state with fewer than 2 points", () => {
     const html = renderToStaticMarkup(<DashboardVnindexTrendChart history={[]} />);
     expect(html).toContain('data-testid="dashboard-vnindex-trend-chart"');
-    expect(html).toContain("no history");
+    expect(html).toContain("chưa có dữ liệu");
 
     const single = renderToStaticMarkup(
       <DashboardVnindexTrendChart history={[{ date: "2026-07-14", close: 1300 }]} />
     );
-    expect(single).toContain("Not enough VNINDEX history");
+    expect(single).toContain("Chưa đủ dữ liệu lịch sử VNINDEX");
   });
 
   it("renders the chart with 2+ points", () => {
@@ -24,7 +24,7 @@ describe("DashboardVnindexTrendChart", () => {
       />
     );
     expect(html).toContain('data-testid="dashboard-vnindex-trend-chart"');
-    expect(html).toContain("VNINDEX — 30D");
-    expect(html).not.toContain("Not enough VNINDEX history");
+    expect(html).toContain("VNINDEX — 30 ngày");
+    expect(html).not.toContain("Chưa đủ dữ liệu lịch sử VNINDEX");
   });
 });

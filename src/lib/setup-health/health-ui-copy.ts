@@ -29,21 +29,21 @@ export function healthLevelActionHint(level: SetupHealthLevelValue): string | nu
 function flagReason(flag: SetupHealthFlag): string | null {
   switch (flag) {
     case "CHASE":
-      return "is in chase territory";
+      return "đang trong vùng đuổi giá";
     case "TOO_EXTENDED":
-      return "is too extended";
+      return "đã vượt quá xa vùng vào lệnh";
     case "EXTENDED":
-      return "is extended";
+      return "đã vượt xa vùng vào lệnh";
     case "VOLUME_FADE":
-      return "volume is fading";
+      return "khối lượng đang suy yếu";
     case "FAILED_TO_PULLBACK":
-      return "failed to retest entry zone";
+      return "chưa quay lại kiểm định vùng vào lệnh";
     case "AGING_SETUP":
-      return "is aging";
+      return "đang cũ dần";
     case "REVERSAL_RISK":
-      return "shows reversal risk";
+      return "có dấu hiệu rủi ro đảo chiều";
     case "DEAD_SETUP":
-      return "is too far from entry zone";
+      return "đã cách quá xa vùng vào lệnh";
     default:
       return null;
   }
@@ -51,7 +51,7 @@ function flagReason(flag: SetupHealthFlag): string | null {
 
 /**
  * Trader-friendly explanation from flags, capped at two reasons.
- * Example: "Setup is extended and volume is fading."
+ * Example: "Thiết lập đã vượt xa vùng vào lệnh và khối lượng đang suy yếu."
  */
 export function healthFlagSummary(flags: SetupHealthFlag[]): string | null {
   const priority: SetupHealthFlag[] = [
@@ -74,8 +74,8 @@ export function healthFlagSummary(flags: SetupHealthFlag[]): string | null {
     if (reasons.length >= 2) break;
   }
   if (reasons.length === 0) return null;
-  if (reasons.length === 1) return `Setup ${reasons[0]}.`;
-  return `Setup ${reasons[0]} and ${reasons[1]}.`;
+  if (reasons.length === 1) return `Thiết lập ${reasons[0]}.`;
+  return `Thiết lập ${reasons[0]} và ${reasons[1]}.`;
 }
 
 /** Bullet lines under symbol row on /setups */
@@ -89,7 +89,7 @@ export function buildHealthLines(flags: SetupHealthFlag[], meta: WatchHealthMeta
       flags.some((f) => f === "EXTENDED" || f === "TOO_EXTENDED" || f === "CHASE") ||
       flags.includes("AGING_SETUP"))
   ) {
-    lines.push(`→ ${meta.sessionsSinceBreakout} sessions since breakout`);
+    lines.push(`→ ${meta.sessionsSinceBreakout} phiên kể từ breakout`);
   }
 
   if (meta.extendedPct != null && meta.extendedPct > 0) {
@@ -99,25 +99,25 @@ export function buildHealthLines(flags: SetupHealthFlag[], meta: WatchHealthMeta
       : flags.includes("TOO_EXTENDED")
         ? "TOO_EXTENDED"
         : "EXTENDED";
-    lines.push(`→ ${pct}% above entry zone (${tag})`);
+    lines.push(`→ Cao hơn vùng vào lệnh ${pct}% (${tag})`);
   }
 
-  if (flags.includes("VOLUME_FADE")) lines.push("→ Volume fading");
+  if (flags.includes("VOLUME_FADE")) lines.push("→ Khối lượng đang suy yếu");
 
   if (flags.includes("FAILED_TO_PULLBACK")) {
-    lines.push("→ No pullback interaction in window");
+    lines.push("→ Chưa có tương tác pullback trong khung thời gian này");
   }
 
   if (flags.includes("REVERSAL_RISK")) {
-    lines.push("→ Weak close on volume (reversal risk)");
+    lines.push("→ Đóng cửa yếu kèm khối lượng (rủi ro đảo chiều)");
   }
 
   if (flags.includes("DEAD_SETUP") && meta.distanceToZonePct != null) {
-    lines.push(`→ ${(meta.distanceToZonePct * 100).toFixed(1)}% from pullback zone`);
+    lines.push(`→ Cách vùng pullback ${(meta.distanceToZonePct * 100).toFixed(1)}%`);
   }
 
   if (flags.includes("AGING_SETUP")) {
-    lines.push(`→ ${meta.sessionsAfterFirstSeen} sessions since first seen`);
+    lines.push(`→ ${meta.sessionsAfterFirstSeen} phiên kể từ lần đầu xuất hiện`);
   }
 
   return lines;

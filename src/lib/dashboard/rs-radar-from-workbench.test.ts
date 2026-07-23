@@ -86,7 +86,7 @@ describe("rs-radar-from-workbench", () => {
     const nodes = buildRadarNodesFromWorkbenchRows(workbenchRows);
     const abb = nodes.find((n) => n.symbol === "ABB");
     expect(abb?.classification).toBe("avoid");
-    expect(abb?.tier).toBe("Too Extended");
+    expect(abb?.tier).toBe("Quá mở rộng");
   });
 
   it("summarizes pilot research, watch, and too extended counts", () => {

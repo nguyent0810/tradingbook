@@ -27,7 +27,7 @@ export function ErrorStateWithEvidence({
       role="alert"
       data-testid={testId}
     >
-      <p className="ui-state-panel__eyebrow">Error</p>
+      <p className="ui-state-panel__eyebrow">Lỗi</p>
       <p className="ui-state-panel__title">{title}</p>
       <p className="ui-state-panel__body">{message}</p>
       {evidence?.trim() ? (

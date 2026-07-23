@@ -13,7 +13,7 @@ export type DecisionExplanation = {
 export type CioPresentation = {
   decisionSummary: string;
   supportingReasons: string[];
-  consensusLabel: "Weak" | "Medium" | "Strong";
+  consensusLabel: "Yếu" | "Trung bình" | "Mạnh";
   consensusScoreDisplay: string;
   regimeContext: string;
   actionVotes: { buy: number; hold: number; sell: number; reduce: number; exit: number };
@@ -21,22 +21,22 @@ export type CioPresentation = {
 };
 
 const SIGNAL_LABELS: Record<string, string> = {
-  gate2_quality_A: "Setup quality rated A (strong breakout-pullback pattern)",
-  gate2_quality_B: "Setup quality rated B (acceptable pattern)",
-  weak_regime: "Broader market regime is still weak (Gate 1 WARNING)",
-  llm_unavailable: "LLM unavailable — rule fallback applied",
+  gate2_quality_A: "Chất lượng thiết lập hạng A (mẫu hình breakout-pullback mạnh)",
+  gate2_quality_B: "Chất lượng thiết lập hạng B (mẫu hình chấp nhận được)",
+  weak_regime: "Chế độ thị trường chung vẫn còn yếu (Gate 1 CẢNH BÁO)",
+  llm_unavailable: "LLM không khả dụng — đã áp dụng quy tắc dự phòng",
 };
 
 const STYLE_LENSES: Record<string, string> = {
-  Defensive: "Requires strong market confirmation before committing capital.",
-  Offensive: "Accepts weaker regime when setup quality is acceptable.",
-  Trend: "Needs aligned intermediate and slow trend before entry.",
-  Momentum: "Needs volume expansion and relative strength leadership.",
-  Value: "Looks for attractive price relative to setup quality tier.",
-  Swing: "Focuses on risk/reward of breakout-pullback setups.",
-  MeanRev: "Prefers mean-reversion conditions over trend continuation.",
-  Risk: "Prioritizes portfolio exposure limits and downside protection.",
-  Contrarian: "Challenges consensus and flags asymmetric downside risk.",
+  Defensive: "Yêu cầu xác nhận thị trường mạnh trước khi giải ngân vốn.",
+  Offensive: "Chấp nhận chế độ thị trường yếu hơn khi chất lượng thiết lập đạt yêu cầu.",
+  Trend: "Cần xu hướng trung hạn và dài hạn đồng thuận trước khi vào lệnh.",
+  Momentum: "Cần khối lượng gia tăng và sức mạnh tương đối dẫn dắt.",
+  Value: "Tìm mức giá hấp dẫn tương ứng với hạng chất lượng thiết lập.",
+  Swing: "Tập trung vào rủi ro/lợi nhuận của thiết lập breakout-pullback.",
+  MeanRev: "Ưu tiên điều kiện đảo chiều về trung bình hơn là xu hướng tiếp diễn.",
+  Risk: "Ưu tiên giới hạn tỷ trọng danh mục và bảo vệ trước rủi ro giảm giá.",
+  Contrarian: "Thách thức đồng thuận và cảnh báo rủi ro giảm giá bất cân xứng.",
 };
 
 function agentDisplayName(slug: string): string {
@@ -68,47 +68,47 @@ function buildAgentActionSummary(
   if (action === "BUY" || action === "ADD") {
     switch (style) {
       case "Offensive":
-        return `Setup on ${symbol} is valid; this agent accepts weaker regime conditions when quality is ${q}.`;
+        return `Thiết lập trên ${symbol} hợp lệ; agent này chấp nhận điều kiện chế độ thị trường yếu hơn khi chất lượng là ${q}.`;
       case "Swing":
-        return `Pullback setup on ${symbol} passed minimum risk/reward rules — agent opened a long position.`;
+        return `Thiết lập pullback trên ${symbol} đạt tiêu chuẩn tối thiểu về rủi ro/lợi nhuận — agent đã mở vị thế mua.`;
       case "Trend":
-        return `Trend alignment supports a long entry on ${symbol} under current regime (${regime}).`;
+        return `Xu hướng đồng thuận ủng hộ việc vào lệnh mua ${symbol} trong chế độ thị trường hiện tại (${regime}).`;
       case "Momentum":
-        return `Relative strength and momentum criteria support buying ${symbol}.`;
+        return `Sức mạnh tương đối và tiêu chí động lượng ủng hộ việc mua ${symbol}.`;
       case "Defensive":
-        return `Strong setup and favorable regime — defensive agent approved a measured entry on ${symbol}.`;
+        return `Thiết lập mạnh và chế độ thị trường thuận lợi — agent phòng thủ chấp thuận vào lệnh có kiểm soát trên ${symbol}.`;
       case "Value":
-        return `Price and setup tier on ${symbol} meet value-entry criteria.`;
+        return `Giá và hạng thiết lập của ${symbol} đáp ứng tiêu chí vào lệnh theo giá trị.`;
       default:
-        return `Agent sees enough confirmation to ${action === "ADD" ? "add to" : "open"} ${symbol}.`;
+        return `Agent nhận thấy đủ xác nhận để ${action === "ADD" ? "gia tăng vị thế" : "mở vị thế"} ${symbol}.`;
     }
   }
 
   if (action === "REDUCE" || action === "EXIT" || action === "SELL") {
-    return `Agent recommends reducing exposure on ${symbol} due to risk or exit rules.`;
+    return `Agent khuyến nghị giảm tỷ trọng ${symbol} do quy tắc rủi ro hoặc thoát lệnh.`;
   }
 
   switch (style) {
     case "Momentum":
-      return `Volume expansion is insufficient for a momentum entry on ${symbol}.`;
+      return `Khối lượng gia tăng chưa đủ để vào lệnh theo động lượng trên ${symbol}.`;
     case "Value":
-      return `Price is not attractive enough relative to intrinsic criteria for ${symbol}.`;
+      return `Giá chưa đủ hấp dẫn so với tiêu chí giá trị nội tại của ${symbol}.`;
     case "Risk":
-      return `Regime is ${regime} and portfolio risk limits favor waiting on ${symbol}.`;
+      return `Chế độ thị trường đang ở mức ${regime} và giới hạn rủi ro danh mục ủng hộ việc chờ đợi với ${symbol}.`;
     case "Contrarian":
-      return `Setup may work, but downside asymmetry on ${symbol} is still concerning.`;
+      return `Thiết lập có thể hiệu quả, nhưng rủi ro giảm giá bất cân xứng trên ${symbol} vẫn đáng lo ngại.`;
     case "Defensive":
-      return `Trend confirmation is still weak — agent prefers to wait on ${symbol}.`;
+      return `Xác nhận xu hướng vẫn còn yếu — agent ưu tiên chờ đợi với ${symbol}.`;
     case "Offensive":
-      return `Despite offensive posture, current signals on ${symbol} do not justify entry yet.`;
+      return `Dù có lập trường tấn công, các tín hiệu hiện tại trên ${symbol} chưa đủ để vào lệnh.`;
     case "Trend":
-      return `Intermediate trend has not confirmed — waiting on ${symbol}.`;
+      return `Xu hướng trung hạn chưa được xác nhận — đang chờ đợi với ${symbol}.`;
     case "Swing":
-      return `Pullback zone or R:R threshold not met for ${symbol} today.`;
+      return `Vùng pullback hoặc ngưỡng R:R chưa đạt cho ${symbol} hôm nay.`;
     case "MeanRev":
-      return `Mean-reversion conditions not present — no action on ${symbol}.`;
+      return `Điều kiện đảo chiều về trung bình chưa xuất hiện — không hành động với ${symbol}.`;
     default:
-      return `Not enough confirmation to trade ${symbol} under current conditions.`;
+      return `Chưa đủ xác nhận để giao dịch ${symbol} trong điều kiện hiện tại.`;
   }
 }
 
@@ -196,32 +196,32 @@ export function buildCioPresentation(
 
   const supportingReasons: string[] = [];
   if (rec.final_action === "HOLD") {
-    supportingReasons.push("Most agents do not see enough confirmation for a high-conviction trade.");
-    supportingReasons.push("Broader market regime reduces collective confidence.");
+    supportingReasons.push("Hầu hết agent không thấy đủ xác nhận cho một giao dịch có độ tin cậy cao.");
+    supportingReasons.push("Chế độ thị trường chung làm giảm độ tin cậy tập thể.");
   } else if (rec.final_action === "BUY" || rec.final_action === "ADD") {
-    supportingReasons.push("Weighted agent consensus favors taking exposure.");
+    supportingReasons.push("Đồng thuận có trọng số của các agent ủng hộ việc tham gia vị thế.");
     if (rec.supporting_agents.length > 0) {
       supportingReasons.push(
-        `${rec.supporting_agents.length} agent(s) support directional entry with positive weight.`
+        `${rec.supporting_agents.length} agent ủng hộ vào lệnh theo hướng này với trọng số dương.`
       );
     }
   } else {
-    supportingReasons.push("Consensus favors reducing or exiting exposure.");
+    supportingReasons.push("Đồng thuận ủng hộ việc giảm hoặc thoát vị thế.");
   }
 
   const regimeContext =
     (rec as { regime_context?: string }).regime_context ??
     rec.metadata?.regime ??
-    "Unknown regime";
+    "Chế độ thị trường không xác định";
 
   let decisionSummary = rec.reasoning;
   if (rec.reasoning.includes("weighted consensus")) {
     decisionSummary =
       rec.final_action === "HOLD"
-        ? "CIO recommends waiting — agent consensus is mixed and conviction is limited."
+        ? "CIO khuyến nghị chờ đợi — đồng thuận giữa các agent còn phân tán và độ tin cậy hạn chế."
         : rec.final_action === "BUY"
-          ? "CIO sees enough weighted support to favor entry, with caveats."
-          : "CIO recommends defensive action based on weighted agent scores.";
+          ? "CIO nhận thấy đủ sự ủng hộ có trọng số để nghiêng về vào lệnh, kèm một số lưu ý."
+          : "CIO khuyến nghị hành động phòng thủ dựa trên điểm số có trọng số của các agent.";
   }
 
   const dissent = rec.dissenting_agents.map((d) => ({
@@ -246,37 +246,37 @@ function buildDissentReason(agentId: string, action: AgentAction, rawReason: str
     const style = agentStyle(agentId);
     if (action === "BUY" || action === "ADD") {
       if (style === "Offensive") {
-        return "Prefers BUY because it accepts weaker regime when setup quality is acceptable.";
+        return "Ưu tiên MUA vì chấp nhận chế độ thị trường yếu hơn khi chất lượng thiết lập ở mức chấp nhận được.";
       }
       if (style === "Swing") {
-        return "Prefers BUY because pullback setup meets minimum risk/reward rules.";
+        return "Ưu tiên MUA vì thiết lập pullback đạt tiêu chuẩn tối thiểu về rủi ro/lợi nhuận.";
       }
-      return "Sees valid setup and favors entry despite CIO caution.";
+      return "Nhận thấy thiết lập hợp lệ và ủng hộ vào lệnh bất chấp thận trọng của CIO.";
     }
     if (style === "Contrarian") {
-      return "Flags downside asymmetry even when setup looks valid.";
+      return "Cảnh báo rủi ro giảm giá bất cân xứng ngay cả khi thiết lập có vẻ hợp lệ.";
     }
-    return "Prefers to wait until market confirmation improves.";
+    return "Ưu tiên chờ đợi đến khi thị trường xác nhận rõ ràng hơn.";
   }
   return rawReason;
 }
 
 export const POSITION_GLOSSARY: Record<string, string> = {
-  Entry: "Average entry price per share (thousand VND).",
-  Stop: "Stop-loss level — exit if price closes below this level.",
-  TP: "Take-profit target price for the position.",
-  "Qty (Lot)": "Share quantity in board lots of 100 shares (VN market rule).",
-  "Alloc %": "Position size as a percentage of agent portfolio NAV.",
-  Risk: "Maximum capital at risk if stop-loss is hit.",
-  UPNL: "Unrealized profit/loss in VND at latest mark.",
-  "UPNL %": "Unrealized return on position cost.",
-  R: "R = current profit or loss divided by the initial risk from entry to stop loss.",
-  Days: "Calendar days since position was opened.",
-  Status: "OPEN = fully filled; PARTIAL = partially filled.",
+  Entry: "Giá vào lệnh trung bình trên mỗi cổ phiếu (nghìn VNĐ).",
+  Stop: "Mức cắt lỗ — thoát lệnh nếu giá đóng cửa dưới mức này.",
+  TP: "Giá mục tiêu chốt lời cho vị thế.",
+  "Qty (Lot)": "Khối lượng cổ phiếu tính theo lô 100 cổ phiếu (quy định thị trường VN).",
+  "Alloc %": "Quy mô vị thế tính theo phần trăm NAV danh mục của agent.",
+  Risk: "Vốn tối đa gặp rủi ro nếu chạm mức cắt lỗ.",
+  UPNL: "Lãi/lỗ chưa thực hiện tính bằng VNĐ theo giá đánh giá gần nhất.",
+  "UPNL %": "Tỷ suất sinh lời chưa thực hiện trên vốn gốc của vị thế.",
+  R: "R = lãi/lỗ hiện tại chia cho mức rủi ro ban đầu từ giá vào lệnh đến cắt lỗ.",
+  Days: "Số ngày theo lịch kể từ khi mở vị thế.",
+  Status: "OPEN = khớp toàn bộ; PARTIAL = khớp một phần.",
 };
 
 export const CONSENSUS_TOOLTIP =
-  "Weighted consensus combines each agent's action, confidence, and trust weight into a single score from -100 to +100. Scores near zero indicate mixed conviction.";
+  "Đồng thuận có trọng số kết hợp hành động, độ tin cậy và trọng số uy tín của từng agent thành một điểm số duy nhất từ -100 đến +100. Điểm gần 0 cho thấy mức độ tin cậy phân tán.";
 
 export function buildBattleInsight(
   rows: Array<{ action: AgentAction }>,
@@ -289,29 +289,29 @@ export function buildBattleInsight(
   ).length;
 
   if (buy > 0 && hold > buy) {
-    return `Most agents stayed out of ${symbol} despite a valid setup — regime and style filters split the panel (${buy} BUY, ${hold} HOLD).`;
+    return `Hầu hết agent đứng ngoài ${symbol} dù có thiết lập hợp lệ — bộ lọc chế độ thị trường và phong cách khiến hội đồng chia rẽ (${buy} MUA, ${hold} GIỮ).`;
   }
   if (buy === 0 && hold > 0) {
-    return `No agents committed to ${symbol}; the panel prefers to wait for stronger confirmation.`;
+    return `Không agent nào cam kết với ${symbol}; hội đồng ưu tiên chờ xác nhận mạnh hơn.`;
   }
   if (buy > hold) {
-    return `Majority of agents favor entry on ${symbol} (${buy} BUY vs ${hold} HOLD).`;
+    return `Đa số agent ủng hộ vào lệnh ${symbol} (${buy} MUA so với ${hold} GIỮ).`;
   }
-  return `Mixed panel on ${symbol}: ${buy} BUY, ${hold} HOLD, ${sell} reduce/exit.`;
+  return `Hội đồng phân tán về ${symbol}: ${buy} MUA, ${hold} GIỮ, ${sell} giảm/thoát.`;
 }
 
 const DIMENSION_LABELS: Record<string, string> = {
-  WeakBull: "Weak bull trend",
-  StrongBull: "Strong bull trend",
-  Bear: "Bear trend",
-  Sideways: "Sideways trend",
-  Contracting: "Contracting volatility",
-  Expanding: "Expanding volatility",
-  Rotation: "Sector rotation",
-  Broad: "Broad participation",
-  Narrow: "Narrow leadership",
-  HighLiquidity: "High liquidity",
-  LowLiquidity: "Low liquidity",
+  WeakBull: "Xu hướng tăng yếu",
+  StrongBull: "Xu hướng tăng mạnh",
+  Bear: "Xu hướng giảm",
+  Sideways: "Xu hướng đi ngang",
+  Contracting: "Biến động thu hẹp",
+  Expanding: "Biến động mở rộng",
+  Rotation: "Xoay vòng ngành",
+  Broad: "Tham gia rộng",
+  Narrow: "Dẫn dắt hẹp",
+  HighLiquidity: "Thanh khoản cao",
+  LowLiquidity: "Thanh khoản thấp",
 };
 
 export function formatRegimeDimension(value: string): string {
@@ -324,23 +324,23 @@ export function buildRegimeExplanation(input: {
   confidence?: number;
   dimensions?: Record<string, string>;
 }): string {
-  const conf = input.confidence != null ? `${Math.round(input.confidence)}% model confidence` : "confidence pending";
+  const conf = input.confidence != null ? `${Math.round(input.confidence)}% độ tin cậy mô hình` : "đang chờ độ tin cậy";
   const trend = input.dimensions?.trendRegime
     ? formatRegimeDimension(input.dimensions.trendRegime)
-    : "mixed trend";
+    : "xu hướng hỗn hợp";
   const vol = input.dimensions?.volatilityRegime
     ? formatRegimeDimension(input.dimensions.volatilityRegime)
-    : "neutral volatility";
+    : "biến động trung tính";
   const breadth = input.dimensions?.breadthRegime
     ? formatRegimeDimension(input.dimensions.breadthRegime)
-    : "mixed breadth";
+    : "độ rộng hỗn hợp";
 
   const gate =
     input.level === "PASS"
-      ? "Gate 1 market scan is supportive for selective risk-taking."
+      ? "Gate 1 quét thị trường ủng hộ việc chọn lọc chấp nhận rủi ro."
       : input.level === "WARNING"
-        ? "Gate 1 is in WARNING — agents apply stricter filters before committing capital."
-        : "Gate 1 is FAIL — most agents defer new entries until conditions improve.";
+        ? "Gate 1 đang ở mức CẢNH BÁO — các agent áp dụng bộ lọc chặt chẽ hơn trước khi giải ngân vốn."
+        : "Gate 1 ở mức KHÔNG ĐẠT — hầu hết agent trì hoãn vào lệnh mới cho đến khi điều kiện cải thiện.";
 
-  return `${input.label} (${conf}). ${trend}, ${vol}, and ${breadth} shape today's panel. ${gate}`;
+  return `${input.label} (${conf}). ${trend}, ${vol} và ${breadth} định hình hội đồng hôm nay. ${gate}`;
 }

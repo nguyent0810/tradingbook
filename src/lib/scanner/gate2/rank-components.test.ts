@@ -32,8 +32,8 @@ describe("computeGate2RankBreakdown", () => {
     const b = computeGate2RankBreakdown(params);
     const lines = formatGate2RankBreakdownLines(b);
     expect(lines.length).toBe(2);
-    expect(lines[0]).toMatch(/Rank score/);
-    expect(lines[1]).toMatch(/Inputs:/);
+    expect(lines[0]).toMatch(/Điểm xếp hạng/);
+    expect(lines[1]).toMatch(/Đầu vào:/);
   });
 });
 

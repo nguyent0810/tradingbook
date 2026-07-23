@@ -11,12 +11,12 @@ export default function PaperLabError({
 }) {
   return (
     <ErrorStateWithEvidence
-      title="Arena failed to load"
+      title="Không tải được Arena"
       message={error.message}
       evidence={`digest: ${error.digest ?? "none"}`}
     >
       <button type="button" className="tosv3-btn tosv3-btn--secondary" onClick={reset}>
-        Retry
+        Thử lại
       </button>
     </ErrorStateWithEvidence>
   );

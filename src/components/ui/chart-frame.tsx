@@ -36,8 +36,8 @@ export function ChartFrame({
   testId,
   height = "default",
   state = "ready",
-  emptyMessage = "No data to chart yet.",
-  errorMessage = "Chart could not be loaded.",
+  emptyMessage = "Chưa có dữ liệu để vẽ biểu đồ.",
+  errorMessage = "Không thể tải biểu đồ.",
   children,
   className = "",
 }: ChartFrameProps) {
@@ -72,7 +72,7 @@ export function ChartFrame({
           <LoadingSkeleton
             className="chart-frame__skeleton"
             height={plotHeight}
-            aria-label="Loading chart"
+            aria-label="Đang tải biểu đồ"
           />
         ) : state === "empty" ? (
           <p className="chart-frame__state-message">{emptyMessage}</p>

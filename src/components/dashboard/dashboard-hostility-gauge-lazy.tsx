@@ -14,6 +14,6 @@ export const DashboardHostilityGaugeLazy = dynamic(
       (m) => m.DashboardHostilityGauge
     ),
   {
-    loading: () => <LoadingSkeleton height="140px" aria-label="Loading hostility gauge" />,
+    loading: () => <LoadingSkeleton height="140px" aria-label="Đang tải chỉ số mức độ thù địch" />,
   }
 );

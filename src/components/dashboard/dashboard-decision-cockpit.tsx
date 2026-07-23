@@ -54,12 +54,12 @@ export function DashboardDecisionCockpit({
               01
             </span>
             <div>
-              <p className="dash-v2-eyebrow">Opportunities</p>
+              <p className="dash-v2-eyebrow">Cơ hội</p>
               <h2 id="dashboard-opportunity-heading" className="dash-v2-zone-title">
-                Opportunity board
+                Bảng cơ hội
               </h2>
               <p className="dash-v2-zone-lead">
-                Tier actions and near-miss path — compare before you log risk.
+                Hành động theo Hạng và các mã suýt đạt — so sánh trước khi ghi nhận rủi ro.
               </p>
             </div>
           </header>

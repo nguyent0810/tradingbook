@@ -20,7 +20,7 @@ export function AppShellNavMobile() {
   const pathname = usePathname() ?? "";
   const vi = isClayThemeRoute(pathname);
   return (
-    <nav className="app-shell-mobile-nav" aria-label="Primary mobile">
+    <nav className="app-shell-mobile-nav" aria-label="Điều hướng chính (di động)">
       {NAV_ITEMS.map(({ href, label, labelVi, deck, deckVi }) => {
         const active = isNavActive(pathname, href);
         return (
