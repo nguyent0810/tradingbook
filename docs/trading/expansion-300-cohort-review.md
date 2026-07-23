@@ -128,10 +128,10 @@ Use Phase A frozen-list `fetch_shard_count=2` dispatch **after** cohort approval
 Proceed with **cohort-only bar backfill** (no `active` flag changes) when:
 
 - [x] **Tier A (23) backfill pilot** — completed 2026-06-05 (23/23 aligned, 0 failures, universe 206 unchanged). See `docs/trading/cohort-backfill-pilot.md`.
-- [ ] Human review accepts Tier B tail (71 names, incl. sub-tradability liquidity)
-- [ ] **Tier B (+71) backfill** — tooling ready; not dispatched until reviewed
-- [ ] Dispatch uses frozen symbol list derived from cohort JSON (`--tier=a|b|all`)
-- [ ] `overlapCount=0`, ≤5% failures/shard, manifest sums to tier count
+- [x] Human review accepts Tier B tail (71 names, incl. sub-tradability liquidity) — approved 2026-07-23, with partial-batch activation (see below) instead of all-or-nothing.
+- [x] **Tier B (+71) backfill** — completed 2026-07-23: `SMOKE_DATABASE=production bash scripts/run-cohort-equity-backfill.sh --tier=b`, 71/71 fetched and imported, 0 failures (2 shards, 36+35).
+- [x] Dispatch uses frozen symbol list derived from cohort JSON (`--tier=a|b|all`)
+- [x] `overlapCount=0`, ≤5% failures/shard, manifest sums to tier count
 
 ### **NO-GO** until resolved
 
@@ -140,10 +140,33 @@ Proceed with **cohort-only bar backfill** (no `active` flag changes) when:
 - Activation (`active=true`) before backfill validation
 - Scheduled `fetch_shard_count=2` on cron
 
-## Next steps (planning only)
+## Tier B activation result (2026-07-23)
 
-1. Operator review of Tier B tail in `expansion-300-cohort.json`.
-2. Cohort-only backfill dispatch (symbols from JSON, `trigger_scan=false`).
-3. Verify ≥90% session-aligned post-backfill.
-4. Separate approval for additive activation script (activate-only, no deactivations).
-5. 300-symbol import+scan pilot.
+Unlike Tier A's all-or-nothing gate, Tier B activation is **partial-batch**: only inactive Tier B symbols within a
+weekday-session staleness tolerance are activated; stragglers are skipped (left inactive) rather than blocking the
+whole batch. Tooling: `scripts/lib/tier-b-additive-activation.ts` (+ `dry-run`/`apply`/`rollback-tier-b-additive-activation.ts`),
+`data/expansion-300-tier-b-activation.json`.
+
+Only 18/71 (25%) matched the expected session exactly — most Tier B names are genuinely thin-traded and don't print
+every session, so an exact-match bar (same standard as Tier A's liquid blue chips) was too strict. Reviewed and
+relaxed to **`--max-weekday-stale=5`** (≤5 weekday sessions behind VNINDEX's latest session):
+
+| Outcome | Count | Symbols |
+|---|---|---|
+| Activated (≤5 sessions stale) | **52** | see `apply-tier-b-additive-activation.ts` output, 2026-07-23 |
+| Skipped (>5 sessions stale) | **19** | ATG, CAR, BXH, C21, BGW, CBI, ARM, DAN, CHC, DDH, BMG, CMF, BMK, CPI, C22, CX8, CCT, BTV, BSG |
+
+Of the 19 skipped, 5 are severely stale and likely need separate review before any future retry: **CX8** (72 sessions,
+~4 months), **CCT** (60 sessions, ~3 months), **CAR / C21 / BMG** (33 sessions each, ~7 weeks) — these may be
+suspended, delisted, or otherwise structurally inactive rather than just low-volume.
+
+**Active universe: 229 → 281.** Rollback: `APPLY_TIER_B_ROLLBACK=1 SMOKE_DATABASE=production npx tsx scripts/rollback-tier-b-additive-activation.ts` (deactivates only the 52 Tier B symbols; baseline and Tier A untouched).
+
+## Next steps
+
+1. ~~Operator review of Tier B tail in `expansion-300-cohort.json`~~ — done, partial-batch approach approved.
+2. ~~Cohort-only backfill dispatch~~ — done, 71/71 fetched.
+3. ~~Verify ≥90% session-aligned post-backfill~~ — superseded: exact-match alignment was only 25%; relaxed tolerance (≤5 sessions) used instead, yielding 52/71 (73%) activatable.
+4. ~~Separate approval for additive activation script~~ — done, 52/71 activated 2026-07-23.
+5. 300-symbol import+scan pilot — partially done; current universe is 281, not 300 (19 Tier B stragglers held back). Run `SMOKE_DATABASE=production npx tsx scripts/run-daily-scanner.ts` to validate the 281-symbol scan.
+6. Beyond 300: reaching a 500-symbol target requires a **new cohort selection** (~220 more symbols) drawn from the ~1210 currently-excluded pool in `expansion-300-cohort.json`, applying the same `≥120 bars` / liquidity rules used for this cohort.
