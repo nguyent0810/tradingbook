@@ -7,9 +7,21 @@ import { getSession } from "@/lib/session";
 import { loadAutoPopulatedTradeLevels } from "@/lib/trades/auto-populate-from-setup";
 import { computePositionSizing } from "@/lib/position-sizing";
 import { roundDownToBoardLotShares } from "@/lib/paper-lab/engine/board-lot";
-import { getPositionSizingConfig, getTradingAccountEquityVnd } from "@/lib/trading-account-risk-config";
+import {
+  getPositionSizingConfig,
+  getTradingAccountEquityVnd,
+  type PositionSizingConfigOverrides,
+} from "@/lib/trading-account-risk-config";
 import { computeOpenPhase2Metrics } from "@/lib/trades/position-health";
 import { computePnl } from "@/lib/validations";
+import { sortDedupeGate2Bars } from "@/lib/scanner/gate2/breakout-pullback";
+import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
+import { computeMaAtIndex } from "@/lib/scanner/early-entry/bar-metrics";
+import {
+  computeEarlyEntryRiskReward,
+  type InvalidLevelReason,
+  type TargetReason,
+} from "@/lib/scanner/early-entry/risk-reward";
 
 export type TradeActionState =
   | {
@@ -26,6 +38,29 @@ const DEFAULT_MAX_PER_TRADE_PCT = 0.2;
 const DEFAULT_BASE_RISK_PER_TRADE_PCT = 0.01;
 const DEFAULT_LIQUIDITY_CAP_PCT = 0.1;
 const DEFAULT_EQUITY_VND = 500_000_000;
+
+/** Minimum bar history the early-entry stop/target formula needs for a full-quality read. */
+const MIN_BARS_FOR_MANUAL_SUGGESTION = 65;
+
+type PositionSizingInputs = {
+  equityVnd: number | null;
+  sizingConfig: PositionSizingConfigOverrides;
+  currentPortfolioExposureVnd: number;
+};
+
+/** Shared by every flow that sizes a new position — setup-based and manual alike. */
+async function loadPositionSizingInputs(userId: string): Promise<PositionSizingInputs> {
+  const [equityVnd, sizingConfig, openTrades] = await Promise.all([
+    getTradingAccountEquityVnd(userId),
+    getPositionSizingConfig(userId),
+    prisma.trade.findMany({
+      where: { userId, status: "OPEN" },
+      select: { entryPrice: true, quantity: true },
+    }),
+  ]);
+  const currentPortfolioExposureVnd = openTrades.reduce((sum, t) => sum + t.entryPrice * 1000 * t.quantity, 0);
+  return { equityVnd, sizingConfig, currentPortfolioExposureVnd };
+}
 
 // ─── Preview auto-populated levels (before the user commits to a fill price) ───
 
@@ -141,17 +176,8 @@ export async function createTradeFromSetup(
     return { errors: { confirmedEntryPrice: ["Giá vào lệnh phải cao hơn giá cắt lỗ."] } };
   }
 
-  const [equityVnd, sizingConfig, openTrades] = await Promise.all([
-    getTradingAccountEquityVnd(session.userId),
-    getPositionSizingConfig(session.userId),
-    prisma.trade.findMany({
-      where: { userId: session.userId, status: "OPEN" },
-      select: { entryPrice: true, quantity: true },
-    }),
-  ]);
-  const currentPortfolioExposureVnd = openTrades.reduce(
-    (sum, t) => sum + t.entryPrice * 1000 * t.quantity,
-    0
+  const { equityVnd, sizingConfig, currentPortfolioExposureVnd } = await loadPositionSizingInputs(
+    session.userId
   );
 
   const sizing = computePositionSizing({
@@ -308,4 +334,187 @@ export async function closeTrade(
   revalidatePath("/dashboard");
 
   return { success: true, message: `Đã đóng lệnh ${trade.symbol}.` };
+}
+
+// ─── Manual trade entry (no scanner setup) ───
+
+function barRowToGate2Input(row: {
+  date: Date;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}): Gate2BarInput {
+  return { date: row.date, open: row.open, high: row.high, low: row.low, close: row.close, volume: row.volume };
+}
+
+export type ManualTradeLevelsPreview =
+  | {
+      ok: true;
+      latestClose: number;
+      suggestedStopLoss: number;
+      stopReason: InvalidLevelReason;
+      suggestedTakeProfit: number;
+      targetReason: TargetReason;
+      riskRewardRatio: number | null;
+      suggestedQuantity: number | null;
+      asOfBarDate: string;
+    }
+  | { ok: false; message: string };
+
+/**
+ * Formula-based stop/target suggestion for a symbol with no scanner setup —
+ * reuses the early-entry module's own technical read (swing/compression/MA/ATR
+ * candidates for the stop, structural resistance for the target), the same
+ * engine `auto-populate-from-setup.ts` partially reuses for setup-based
+ * trades. Read-only — no trade is created here.
+ */
+export async function previewManualTradeLevels(symbolInput: string): Promise<ManualTradeLevelsPreview> {
+  const session = await getSession();
+  if (!session) {
+    return { ok: false, message: "Phiên đăng nhập đã hết hạn — vui lòng đăng nhập lại." };
+  }
+
+  const symbol = symbolInput.trim().toUpperCase();
+  if (!symbol) {
+    return { ok: false, message: "Vui lòng nhập mã cổ phiếu." };
+  }
+
+  const stockSymbol = await prisma.stockSymbol.findUnique({ where: { symbol } });
+  if (!stockSymbol) {
+    return {
+      ok: false,
+      message: "Mã chưa được hệ thống theo dõi — không thể tính gợi ý hoặc theo dõi sức khỏe tự động cho mã này.",
+    };
+  }
+
+  const rows = await prisma.stockDailyBar.findMany({
+    where: { symbolId: stockSymbol.id },
+    orderBy: { date: "desc" },
+    take: 120,
+    select: { date: true, open: true, high: true, low: true, close: true, volume: true },
+  });
+  if (rows.length < MIN_BARS_FOR_MANUAL_SUGGESTION) {
+    return { ok: false, message: "Không đủ dữ liệu lịch sử giá để tính gợi ý (tối thiểu 65 phiên)." };
+  }
+
+  const bars = sortDedupeGate2Bars(rows.reverse().map(barRowToGate2Input));
+  const idx = bars.length - 1;
+  const close = bars[idx]!.close;
+  const { ma20, ma50 } = computeMaAtIndex(bars, idx);
+  const result = computeEarlyEntryRiskReward(bars, idx, ma20, ma50);
+  if (result.stopLevel == null || result.targetPrice == null || result.invalidLevelReason == null || result.targetReason == null) {
+    return { ok: false, message: "Không tìm được mức cắt lỗ/chốt lãi hợp lệ từ dữ liệu giá gần đây của mã này." };
+  }
+
+  const { equityVnd, sizingConfig, currentPortfolioExposureVnd } = await loadPositionSizingInputs(session.userId);
+  // No scanner quality tier for a manual entry — use the more conservative
+  // Tier-B risk multiplier (half budget) rather than assuming Tier A.
+  const sizing = computePositionSizing({
+    accountEquityVnd: equityVnd ?? DEFAULT_EQUITY_VND,
+    maxPortfolioExposurePct: DEFAULT_MAX_PORTFOLIO_EXPOSURE_PCT,
+    currentPortfolioExposureVnd,
+    maxPerTradeExposurePct: sizingConfig.maxPositionPct ?? DEFAULT_MAX_PER_TRADE_PCT,
+    baseRiskPerTradePct: sizingConfig.riskPerTradePct ?? DEFAULT_BASE_RISK_PER_TRADE_PCT,
+    quality: "B",
+    entryKVnd: close,
+    stopKVnd: result.stopLevel,
+    liquidityCapPct: sizingConfig.liquidityCapPct ?? DEFAULT_LIQUIDITY_CAP_PCT,
+    symbolAvgDailyValueVnd: null,
+  });
+  const suggestedQuantity = sizing.ok ? roundDownToBoardLotShares(sizing.value.qFinalShares) : null;
+
+  return {
+    ok: true,
+    latestClose: close,
+    suggestedStopLoss: result.stopLevel,
+    stopReason: result.invalidLevelReason,
+    suggestedTakeProfit: result.targetPrice,
+    targetReason: result.targetReason,
+    riskRewardRatio: result.riskRewardRatio,
+    suggestedQuantity: suggestedQuantity?.ok ? suggestedQuantity.quantity : null,
+    asOfBarDate: bars[idx]!.date.toISOString(),
+  };
+}
+
+const ManualTradeSchema = z.object({
+  symbol: z
+    .string()
+    .min(1, "Vui lòng nhập mã cổ phiếu.")
+    .max(10, "Mã cổ phiếu quá dài.")
+    .transform((v) => v.toUpperCase().trim()),
+  entryPrice: z.coerce.number().positive("Giá vào lệnh phải là số dương."),
+  quantity: z.coerce.number().positive("Khối lượng phải là số dương."),
+  stopLoss: z.coerce.number().positive("Cắt lỗ phải là số dương."),
+  takeProfit: z.coerce.number().positive("Chốt lãi phải là số dương.").optional().or(z.literal("")),
+  fees: z.coerce.number().min(0, "Phí không được âm.").default(0),
+  notes: z.string().max(2000, "Ghi chú quá dài.").optional().default(""),
+});
+
+/**
+ * Trades logged outside a scanner setup — e.g. a symbol/thesis the scanner
+ * never surfaced. Requires the symbol to already be tracked (StockSymbol +
+ * daily bars) so the nightly health-check job can actually monitor it; a
+ * trade the system can't price would sit unwatched, defeating the whole
+ * point of automated tracking.
+ */
+export async function createManualTrade(
+  _prevState: TradeActionState,
+  formData: FormData
+): Promise<TradeActionState> {
+  const session = await getSession();
+  if (!session) {
+    return { message: "Phiên đăng nhập đã hết hạn — vui lòng đăng nhập lại." };
+  }
+
+  const parsed = ManualTradeSchema.safeParse({
+    symbol: formData.get("symbol"),
+    entryPrice: formData.get("entryPrice"),
+    quantity: formData.get("quantity"),
+    stopLoss: formData.get("stopLoss"),
+    takeProfit: formData.get("takeProfit"),
+    fees: formData.get("fees"),
+    notes: formData.get("notes"),
+  });
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+  const { symbol, entryPrice, quantity, stopLoss, takeProfit, fees, notes } = parsed.data;
+
+  if (entryPrice <= stopLoss) {
+    return { errors: { stopLoss: ["Cắt lỗ phải thấp hơn giá vào lệnh."] } };
+  }
+
+  const stockSymbol = await prisma.stockSymbol.findUnique({ where: { symbol } });
+  if (!stockSymbol) {
+    return {
+      message: "Mã chưa được hệ thống theo dõi — không thể ghi lệnh (sẽ không được theo dõi sức khỏe tự động).",
+    };
+  }
+
+  const trade = await prisma.trade.create({
+    data: {
+      userId: session.userId,
+      setupId: null,
+      symbol,
+      direction: "LONG",
+      status: "OPEN",
+      entryDate: new Date(),
+      entryPrice,
+      quantity,
+      stopLoss,
+      takeProfit: takeProfit === "" || takeProfit == null ? null : takeProfit,
+      fees,
+      notes: notes || null,
+      positionSize: entryPrice * quantity,
+    },
+  });
+
+  revalidatePath("/book");
+
+  return {
+    success: true,
+    message: `Đã ghi lệnh thủ công ${trade.symbol} — ${quantity.toLocaleString("en-US")} cp @ ${entryPrice.toLocaleString("en-US")} nghìn ₫.`,
+  };
 }

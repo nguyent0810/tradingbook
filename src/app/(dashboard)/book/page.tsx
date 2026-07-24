@@ -14,6 +14,7 @@ import {
 import { formatSignedPct } from "@/lib/trades/unrealized-from-close";
 import { LoadingSkeletonGroup } from "@/components/ui/loading-skeleton";
 import { OpenTradeRow, type OpenTradeRowData } from "@/components/book/open-trade-row";
+import { ManualTradeForm } from "@/components/book/manual-trade-form";
 import "./book.css";
 
 export const metadata: Metadata = {
@@ -102,15 +103,18 @@ async function BookContent() {
   return (
     <>
       <div className="dash-card">
-        <div className="dash-card__header">
-          <h2 className="dash-card__title">Đang mở ({openRows.length})</h2>
-          <p className="dash-card__lead">
-            Sức khỏe lệnh được đánh giá tự động mỗi đêm từ dữ liệu quét. Giá gần nhất và lãi/lỗ chưa
-            thực hiện được tính lại mỗi lần tải trang.
-          </p>
+        <div className="dash-card__header book-section-header">
+          <div>
+            <h2 className="dash-card__title">Đang mở ({openRows.length})</h2>
+            <p className="dash-card__lead">
+              Sức khỏe lệnh được đánh giá tự động mỗi đêm từ dữ liệu quét. Giá gần nhất và lãi/lỗ chưa
+              thực hiện được tính lại mỗi lần tải trang.
+            </p>
+          </div>
+          <ManualTradeForm />
         </div>
         {openRows.length === 0 ? (
-          <p className="book-empty">Chưa có lệnh nào đang mở. Ghi lệnh từ trang Thiết lập khi có setup đạt điều kiện.</p>
+          <p className="book-empty">Chưa có lệnh nào đang mở. Ghi lệnh từ trang Thiết lập, hoặc ghi thủ công một mã đã được hệ thống theo dõi.</p>
         ) : (
           <div className="book-table-scroll">
             <table className="book-table">
