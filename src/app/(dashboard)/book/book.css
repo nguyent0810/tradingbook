@@ -116,3 +116,21 @@
   grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
   gap: var(--space-4);
 }
+
+.book-close-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.book-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.book-section-header > .tosv3-log-trade-panel {
+  flex-basis: 100%;
+}
