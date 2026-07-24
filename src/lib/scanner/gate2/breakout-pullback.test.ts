@@ -79,6 +79,27 @@ describe("evaluateBreakoutPullbackCandidate", () => {
     expect(res.reasons.some((r) => r.includes("Tier A"))).toBe(true);
   });
 
+  it("clamps the pullback zone floor to the ceiling instead of inverting when MA20 has caught up past breakoutLevel", () => {
+    // Same shape as baselineValidPath, but the pre-breakout baseline closes
+    // sit AT BASE (not BASE-1) so the trailing 20-session MA at evaluation
+    // lands just above breakoutLevel (~BASE) instead of just below it.
+    const path: Gate2BarInput[] = [];
+    const lastIdx = 69;
+    for (let i = 0; i <= lastIdx; i++) {
+      if (i < 59) path.push(bar(i, BASE, BASE, BASE - 1, BASE - 1, V_BASE));
+      else if (i === 59) path.push(bar(i, BASE, BASE + 2, BASE, BASE + 1, V_BASE));
+      else if (i === 60) path.push(bar(i, BASE + 1, BASE + 1, BASE - 3, BASE + 0.5, V_BASE));
+      else if (i < 68) path.push(bar(i, BASE + 2, BASE + 2.6, BASE + 1.8, BASE + 2, V_BASE));
+      else if (i === 68) path.push(bar(i, BASE + 2, BASE + 2.6, BASE + 1.8, BASE + 2.5, V_BASE));
+      else path.push(bar(i, BASE + 5, BASE + 7, BASE - 1, BASE + 6, 1_200_000));
+    }
+    const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+    expect(res.quality).not.toBe("INVALID");
+    expect(res.pullbackZoneLow).toBeLessThanOrEqual(res.pullbackZoneHigh);
+    // MA20 caught up past breakoutLevel here, so the floor should clamp exactly to the ceiling.
+    expect(res.pullbackZoneLow).toBe(res.pullbackZoneHigh);
+  });
+
   it("attaches rankComponents that reconcile to rankScore without changing score", () => {
     const path = baselineValidPath(2_000_000);
     const res = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
@@ -231,7 +252,18 @@ describe("evaluateBreakoutPullbackCandidate — full-path terminalCode coverage"
     expect(res.terminalCode).toBe("mid_pullback_below_ma50");
   });
 
-  it("pullback_zone_two_closes: the last two sessions closed under the pullback zone floor", () => {
+  it("pullback_zone_interaction (was pullback_zone_two_closes pre-fix): this fixture only ever passed via the zone-inversion bug", () => {
+    // This fixture used to produce terminalCode "pullback_zone_two_closes" —
+    // but only because the pullback-zone-floor formula could invert above the
+    // ceiling (fixed above: pullbackZoneLow now clamps to pullbackZoneHigh).
+    // Once the floor can never exceed breakoutLevel, "close < floor" always
+    // implies "close < breakoutLevel", which the earlier breakout-holding
+    // loop (tB..L) already rejects first — so with a non-inverted floor this
+    // fixture (closes of 105 staying >= breakoutLevel ~100) now correctly
+    // reads as "extended past the zone, never dipped in" instead.
+    // NOTE: this means "pullback_zone_two_closes" looks unreachable via any
+    // legitimate (non-inverted) input given the current check ordering —
+    // worth a follow-up look, not fixed here (out of scope for this pass).
     const bars: Gate2BarInput[] = [];
     for (let i = 0; i <= 58; i++) bars.push(bar(i, 100, 100, 99.5, 100, V_BASE));
     bars.push(bar(59, 100, 116, 100, 115, V_BASE));
@@ -239,7 +271,7 @@ describe("evaluateBreakoutPullbackCandidate — full-path terminalCode coverage"
     bars.push(bar(68, 105, 106, 104, 105, V_BASE));
     bars.push(bar(69, 105, 106, 104, 105, 2_000_000));
     const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
-    expect(res.terminalCode).toBe("pullback_zone_two_closes");
+    expect(res.terminalCode).toBe("pullback_zone_interaction");
   });
 
   it("swept_breakout_weak_close: a lower low than the breakout session plus a weak close vs MA20", () => {

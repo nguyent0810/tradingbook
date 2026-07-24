@@ -66,6 +66,17 @@ describe("classifyStopPriceBand", () => {
     ).toBe("breached");
   });
 
+  it("LONG breached when distanceToStop is exactly zero (close at stop, not just past it)", () => {
+    expect(
+      classifyStopPriceBand({
+        direction: "LONG",
+        entryPrice: 100,
+        distanceToStop: 0,
+        stopValidity: "valid",
+      }).band
+    ).toBe("breached");
+  });
+
   it("LONG tight when cushion pct below threshold", () => {
     const r = classifyStopPriceBand({
       direction: "LONG",
