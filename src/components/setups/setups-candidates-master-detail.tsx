@@ -26,6 +26,7 @@ import {
   SETUPS_EVIDENCE_PREVIEW_COUNT,
 } from "@/components/setups/setups-candidate-evidence";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
+import { LogTradeAction } from "@/components/setups/log-trade-action";
 
 /** Account-level position-sizing defaults from Settings — decimal fractions (0.15 = 15%). */
 export type SetupsPositionSizingDefaults = {
@@ -242,12 +243,15 @@ const CandidateWorkstation = memo(function CandidateWorkstation({
             </span>
           </div>
         </div>
-        <Link
-          href={`/paper-lab?setupCandidateId=${candidate.id}`}
-          className="tosv3-btn tosv3-btn--primary tosv3-btn--sm"
-        >
-          Xác thực thiết lập
-        </Link>
+        <div className="tosv3-setups-workstation-panel__header-actions">
+          <Link
+            href={`/paper-lab?setupCandidateId=${candidate.id}`}
+            className="tosv3-btn tosv3-btn--primary tosv3-btn--sm"
+          >
+            Xác thực thiết lập
+          </Link>
+          <LogTradeAction setupId={candidate.id} symbolKey={candidate.symbolKey} />
+        </div>
       </header>
 
       <dl className="tosv3-setups-metric-strip" aria-label="Các mức giá quan trọng">

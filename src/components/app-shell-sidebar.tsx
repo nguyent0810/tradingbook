@@ -77,6 +77,7 @@ const ACTIVE_ITEMS: SidebarItem[] = [
   { href: "/dashboard", label: "Dashboard", labelVi: "Bảng điều khiển", deck: "Command Deck", deckVi: "Sở chỉ huy", Icon: IconGrid },
   { href: "/setups", label: "Setups", labelVi: "Thiết lập", deck: "Pipeline", deckVi: "Đường ống", Icon: IconFunnel },
   { href: "/paper-lab", label: "Arena", labelVi: "Đấu trường", deck: "Simulation", deckVi: "Mô phỏng", Icon: IconTarget },
+  { href: "/book", label: "Book", labelVi: "Sổ lệnh", deck: "Ledger", deckVi: "Nhật ký", Icon: IconBook },
   { href: "/settings", label: "Settings", labelVi: "Cài đặt", deck: "Account", deckVi: "Tài khoản", Icon: IconSettings },
 ];
 
@@ -87,7 +88,6 @@ const ACTIVE_ITEMS: SidebarItem[] = [
  * without fabricating functionality.
  */
 const COMING_SOON_ITEMS: Array<{ label: string; labelVi: string; deck: string; deckVi: string; Icon: SidebarIcon }> = [
-  { label: "Book", labelVi: "Sổ lệnh", deck: "Ledger", deckVi: "Nhật ký", Icon: IconBook },
   { label: "Analytics", labelVi: "Phân tích", deck: "Insights", deckVi: "Thống kê", Icon: IconBarChart },
   { label: "Watchlist", labelVi: "Danh mục", deck: "Tracking", deckVi: "Theo dõi", Icon: IconEye },
 ];

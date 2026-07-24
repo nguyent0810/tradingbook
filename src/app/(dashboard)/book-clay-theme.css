@@ -1,0 +1,33 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * ClayMorphism reskin — Sổ lệnh (/book) route (follow-up extension, same as
+ * settings-clay-theme.css — no mockup of its own).
+ *
+ * dashboard-clay-theme.css already reskins .dash-card, .btn-primary/secondary
+ * /danger and the base bg/text/border color tokens for every Clay route,
+ * which covers this page's header + section cards for free. What's left
+ * here is book.css's own table/badge/form-row classes.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+body.dash-clay-active .book-table th {
+  border-bottom-color: var(--border-primary);
+}
+
+body.dash-clay-active .book-table td {
+  border-bottom-color: var(--border-primary);
+}
+
+body.dash-clay-active .book-table__row:hover {
+  background: var(--bg-tertiary);
+}
+
+body.dash-clay-active .book-badge {
+  box-shadow: var(--clay-sm);
+}
+
+body.dash-clay-active .book-table__form-row td {
+  background: var(--bg-tertiary);
+}
+
+body.dash-clay-active .book-close-form .cd-auth-alert {
+  margin-bottom: var(--space-4, 1rem);
+}

@@ -1,0 +1,118 @@
+.book-empty {
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  padding: var(--space-4) 0;
+}
+
+.book-table-scroll {
+  overflow-x: auto;
+}
+
+.book-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.book-table th {
+  text-align: left;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.book-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border-primary);
+  vertical-align: top;
+}
+
+.book-table__row:hover {
+  background: var(--bg-elevated);
+}
+
+.book-symbol {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.book-direction {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.book-cell-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.book-cell-sub--warn {
+  color: var(--warning);
+}
+
+.book-cell-muted {
+  color: var(--text-tertiary);
+}
+
+.book-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.book-badge--ok {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 15%, transparent);
+}
+
+.book-badge--warn {
+  color: var(--warning);
+  background: var(--warning-muted);
+}
+
+.book-badge--risk {
+  color: var(--danger);
+  background: var(--danger-muted);
+}
+
+.book-badge--dead {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+.book-badge--muted {
+  color: var(--text-tertiary);
+  background: color-mix(in srgb, var(--text-tertiary) 12%, transparent);
+}
+
+.book-table__hint-row td {
+  padding-top: 0;
+  padding-bottom: var(--space-2);
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  white-space: normal;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.book-table__form-row td {
+  white-space: normal;
+  background: var(--bg-elevated);
+}
+
+.book-close-form {
+  max-width: 40rem;
+}
+
+.book-close-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: var(--space-4);
+}
