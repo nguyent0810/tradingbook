@@ -211,9 +211,16 @@ export function collectStopCandidates(params: {
   return out.filter((c) => c.level > 0 && c.level < close);
 }
 
+/**
+ * Picks the TIGHTEST (highest, closest-to-close) valid candidate — an early
+ * entry is a tentative, not-yet-Gate-2-confirmed position, so it should cut
+ * losses fast rather than lean on the widest structural level available.
+ * All candidates are already filtered to 0 < level < close upstream, so the
+ * highest one is also the smallest planned risk per share.
+ */
 export function selectStopLevel(candidates: readonly StopCandidate[]): StopCandidate | null {
   if (candidates.length === 0) return null;
-  return candidates.reduce((best, c) => (c.level < best.level ? c : best));
+  return candidates.reduce((best, c) => (c.level > best.level ? c : best));
 }
 
 export function selectRewardTarget(

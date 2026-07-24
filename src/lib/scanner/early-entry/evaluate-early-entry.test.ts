@@ -158,7 +158,14 @@ describe("real ACB fixture replay (when present)", () => {
     }
   });
 
-  it("ACB 2026-04-08: strong score but WATCH when BAD_RR", async () => {
+  it("ACB 2026-04-08: strong score, PILOT_BUY once the stop is the tightest valid candidate", async () => {
+    // Was WATCH/BAD_RR when selectStopLevel picked the widest candidate here
+    // (a wider, less realistic stop inflates planned risk and tanks R:R).
+    // With the tightest valid candidate (reclaim_candle_low, ~2.6% below
+    // close — the low of the actual reclaim session, a real technical
+    // level) the same real setup clears RR_ACCEPTABLE (~2.70) on its own
+    // merits: RECLAIM_MA20/MA50 + POCKET_PIVOT + COMPRESSION_BREAKOUT all
+    // still hold, so this is a corrected true-positive, not a regression.
     const data = await loadAcbFixture();
     if (!data) return;
     const session = data.toBars.find((b) => b.date.toISOString().slice(0, 10) === "2026-04-08");
@@ -170,8 +177,10 @@ describe("real ACB fixture replay (when present)", () => {
       sessionDate: session.date,
     });
     expect(result!.earlyReversalScore).toBeGreaterThanOrEqual(55);
-    expect(result!.proposedTradeState).toBe("WATCH");
-    expect(result!.reasonCodes).toContain("BAD_RR");
+    expect(result!.metrics.invalidLevelReason).toBe("reclaim_candle_low");
+    expect(result!.metrics.riskRewardRatio).toBeGreaterThanOrEqual(2.0);
+    expect(result!.proposedTradeState).toBe("PILOT_BUY");
+    expect(result!.reasonCodes).toContain("RR_ACCEPTABLE");
     expect(result!.targetPrice).not.toBeNull();
     expect(result!.invalidLevelReason).not.toBeNull();
   });

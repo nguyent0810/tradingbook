@@ -253,6 +253,22 @@ export function evaluateBreakoutPullbackCandidate(
     pullbackZoneHigh
   );
 
+  // Checked before the broader breakout-holding loop below: since the floor
+  // can never sit above the ceiling (breakoutLevel), any close under the
+  // floor is also under the ceiling and would otherwise always be caught
+  // there first with a more generic message — this gives the more specific
+  // "fell through the pullback floor" reason priority when it actually
+  // applies, while the loop below still catches any other-day violation.
+  if (L >= 1) {
+    const z = pullbackZoneLow;
+    if (sorted[L - 1]!.close < z && c < z) {
+      reasons.push(
+        "Two closes in a row under the pullback zone floor—stand aside until price reclaims the zone."
+      );
+      return invalidBase(reasons, lastBar.date, "pullback_zone_two_closes", lastBar.close);
+    }
+  }
+
   for (let i = tB; i <= L; i++) {
     if (sorted[i]!.close < breakoutLevel) {
       reasons.push(
@@ -285,16 +301,6 @@ export function evaluateBreakoutPullbackCandidate(
       "Lower lows vs the breakout session with a weak finish—pattern broken for this template."
     );
     return invalidBase(reasons, lastBar.date, "swept_breakout_weak_close", lastBar.close);
-  }
-
-  if (L >= 1) {
-    const z = pullbackZoneLow;
-    if (sorted[L - 1]!.close < z && c < z) {
-      reasons.push(
-        "Two closes in a row under the pullback zone floor—stand aside until price reclaims the zone."
-      );
-      return invalidBase(reasons, lastBar.date, "pullback_zone_two_closes", lastBar.close);
-    }
   }
 
   if (lastBar.low > pullbackZoneHigh || c < pullbackZoneLow) {
