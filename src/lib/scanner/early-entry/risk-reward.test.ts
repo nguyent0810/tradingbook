@@ -55,7 +55,7 @@ describe("risk-reward Phase 3", () => {
     expect(["resistance_cluster", "pivot_high", "prior_60d_high"]).toContain(targetReason);
   });
 
-  it("selects swing low stop when tightest", () => {
+  it("selects the tightest (highest) valid stop candidate", () => {
     const bars: Gate2BarInput[] = [];
     for (let i = 0; i < 55; i++) {
       const dk = new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10);
@@ -74,8 +74,11 @@ describe("risk-reward Phase 3", () => {
       ma50: 22,
       atr14: 0.8,
     });
+    // Candidates here: swing_low ~21.29 (widest), reclaim_candle_low ~22.97
+    // (the recent reclaim of ma20/ma50, tightest), ma20/ma50_failure ~22.5/21.6,
+    // atr_stop_floor ~22.9 — selectStopLevel must pick the highest (tightest).
     const stop = selectStopLevel(candidates);
-    expect(stop?.reason).toBe("swing_low");
+    expect(stop?.reason).toBe("reclaim_candle_low");
   });
 
   it("includes compression low in stop candidates", () => {
@@ -133,7 +136,7 @@ describe("risk-reward Phase 3", () => {
     expect(isRiskRewardAcceptable(reward / risk)).toBe(true);
   });
 
-  it("does not inflate reward by picking max resistance", () => {
+  it("reaches for the farther resistance only when the nearer one fails to clear RR_ACCEPTABLE off the selected (now tighter) stop", () => {
     const bars: Gate2BarInput[] = [];
     for (let i = 0; i < 55; i++) {
       const dk = new Date(Date.UTC(2026, 0, 1 + i)).toISOString().slice(0, 10);
@@ -143,6 +146,12 @@ describe("risk-reward Phase 3", () => {
     const idx = bars.length - 1;
     bars[idx] = bar(bars[idx]!.date.toISOString().slice(0, 10), 24, 24.5, 23.8, 24.2, 2e6);
     const rr = computeEarlyEntryRiskReward(bars, idx);
-    expect(rr.targetPrice).toBeLessThanOrEqual(27);
+    // stopLevel is now the tightest candidate (swing_low ~22.275, risk ~1.93 off
+    // close 24.2), so 27's reward (2.8) no longer clears RR_ACCEPTABLE (needs
+    // >= ~3.85) — the algorithm correctly reaches to 30 (RR ~3.01) instead of
+    // settling for a nearer level that doesn't justify the trade at 2:1.
+    expect(rr.stopLevel).toBeCloseTo(22.275, 3);
+    expect(rr.targetPrice).toBe(30);
+    expect(rr.riskRewardRatio).toBeGreaterThanOrEqual(RR_ACCEPTABLE);
   });
 });
