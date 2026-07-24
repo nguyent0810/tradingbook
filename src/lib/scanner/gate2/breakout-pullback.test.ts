@@ -252,18 +252,15 @@ describe("evaluateBreakoutPullbackCandidate — full-path terminalCode coverage"
     expect(res.terminalCode).toBe("mid_pullback_below_ma50");
   });
 
-  it("pullback_zone_interaction (was pullback_zone_two_closes pre-fix): this fixture only ever passed via the zone-inversion bug", () => {
+  it("pullback_zone_interaction: this fixture only ever passed as pullback_zone_two_closes via the zone-inversion bug", () => {
     // This fixture used to produce terminalCode "pullback_zone_two_closes" —
     // but only because the pullback-zone-floor formula could invert above the
     // ceiling (fixed above: pullbackZoneLow now clamps to pullbackZoneHigh).
-    // Once the floor can never exceed breakoutLevel, "close < floor" always
-    // implies "close < breakoutLevel", which the earlier breakout-holding
-    // loop (tB..L) already rejects first — so with a non-inverted floor this
-    // fixture (closes of 105 staying >= breakoutLevel ~100) now correctly
-    // reads as "extended past the zone, never dipped in" instead.
-    // NOTE: this means "pullback_zone_two_closes" looks unreachable via any
-    // legitimate (non-inverted) input given the current check ordering —
-    // worth a follow-up look, not fixed here (out of scope for this pass).
+    // With a non-inverted floor, closes of 105 stay >= breakoutLevel ~100 (=
+    // the clamped floor here too), so this specific fixture now correctly
+    // reads as "extended past the zone, never dipped in" instead. See the
+    // next test for a genuine (non-degenerate) pullback_zone_two_closes case,
+    // now reachable again after the check-ordering fix below.
     const bars: Gate2BarInput[] = [];
     for (let i = 0; i <= 58; i++) bars.push(bar(i, 100, 100, 99.5, 100, V_BASE));
     bars.push(bar(59, 100, 116, 100, 115, V_BASE));
@@ -273,6 +270,25 @@ describe("evaluateBreakoutPullbackCandidate — full-path terminalCode coverage"
     const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
     expect(res.terminalCode).toBe("pullback_zone_interaction");
   });
+
+  it("pullback_zone_two_closes: reachable again once the floor-specific check runs before the broader breakout-holding loop", () => {
+    // Pre-breakout closes sit well under their own highs (97 vs high 100) so
+    // MA50 (~97.98) lands meaningfully below breakoutLevel (100), leaving
+    // room for a non-degenerate floor (MA20 ~99.45, still under the 100
+    // ceiling) above MA50. The last two closes (98.5) sit between the two:
+    // above MA50 (passes the trend gate) but under the floor — exactly the
+    // two-closes-under-floor case, which now returns before the broader
+    // breakout-holding loop would otherwise catch the same bars first.
+    const bars: Gate2BarInput[] = [];
+    for (let i = 0; i <= 58; i++) bars.push(bar(i, 100, 100, 96, 97, V_BASE));
+    bars.push(bar(59, 100, 116, 100, 115, V_BASE));
+    for (let i = 60; i <= 67; i++) bars.push(bar(i, 100.5, 101, 99.8, 100.5, V_BASE));
+    bars.push(bar(68, 98.5, 99, 98, 98.5, V_BASE));
+    bars.push(bar(69, 98.5, 99, 98, 98.5, 1_200_000));
+    const res = evaluateBreakoutPullbackCandidate(bars, bars[bars.length - 1]!.date);
+    expect(res.terminalCode).toBe("pullback_zone_two_closes");
+  });
+
 
   it("swept_breakout_weak_close: a lower low than the breakout session plus a weak close vs MA20", () => {
     const bars: Gate2BarInput[] = [];
