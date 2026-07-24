@@ -2450,6 +2450,9 @@
   padding: var(--space-4) var(--space-5);
   transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
+.dash-card--danger {
+  border-color: var(--danger);
+}
 .dash-card::before {
   content: "";
   position: absolute;

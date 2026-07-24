@@ -16,9 +16,9 @@ export type DashboardClayThemeEffectProps = {
 
 /**
  * Toggles a body class on the Clay-redesigned routes (Dashboard, Setups,
- * Arena overview) so the ClayMorphism reskin (dashboard-clay-theme.css)
- * applies only there — Settings and every Arena sub-route share the same
- * shell markup and must render unchanged.
+ * Arena overview, Settings) so the ClayMorphism reskin (dashboard-clay-theme.css
+ * + settings-clay-theme.css) applies only there — every Arena sub-route
+ * shares the same shell markup and must render unchanged.
  */
 export function DashboardClayThemeEffect({ fontVariableClassName }: DashboardClayThemeEffectProps) {
   const pathname = usePathname() ?? "";
