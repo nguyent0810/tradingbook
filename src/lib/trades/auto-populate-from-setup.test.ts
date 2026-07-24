@@ -43,13 +43,16 @@ function baseSetup(overrides: Partial<SetupLevelsInput> = {}): SetupLevelsInput 
 }
 
 describe("deriveAutoPopulatedTradeLevels", () => {
-  it("anchors take-profit/R:R to the given stopLevel using structural resistance", () => {
+  it("anchors take-profit to the given stopLevel using structural resistance, and R:R to the suggested entry (not the raw close)", () => {
     const result = deriveAutoPopulatedTradeLevels(baseSetup(), baselineBars());
     expect(result).not.toBeNull();
     expect(result!.stopLoss).toBe(95);
     expect(result!.takeProfit).toBeCloseTo(115, 5);
     expect(result!.targetReason).toBe("prior_60d_high");
-    expect(result!.riskRewardRatio).toBeCloseTo(3, 5);
+    // Zone [90,100] tightens to [99.5,100] (see the tightening test below) -> suggestedEntry=99.75,
+    // so R:R = (115-99.75)/(99.75-95) = 15.25/4.75, NOT (115-100)/(100-95)=3 off the raw close.
+    expect(result!.suggestedEntry).toBeCloseTo(99.75, 5);
+    expect(result!.riskRewardRatio).toBeCloseTo(15.25 / 4.75, 5);
   });
 
   it("tightens a pullback zone that's much wider than the prior session's true range", () => {
@@ -70,6 +73,9 @@ describe("deriveAutoPopulatedTradeLevels", () => {
     expect(result).not.toBeNull();
     expect(result!.entryRangeLow).toBe(99);
     expect(result!.entryRangeHigh).toBe(100);
+    // suggestedEntry = 99.5 here (not close=100) -> R:R must anchor to that, not to setup.close.
+    expect(result!.suggestedEntry).toBe(99.5);
+    expect(result!.riskRewardRatio).toBeCloseTo((115 - 99.5) / (99.5 - 95), 5);
   });
 
   it("returns null when there isn't enough bar history", () => {

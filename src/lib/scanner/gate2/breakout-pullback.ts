@@ -243,9 +243,14 @@ export function evaluateBreakoutPullbackCandidate(
   );
 
   const pullbackZoneHigh = breakoutLevel;
-  const pullbackZoneLow = Math.max(
-    breakoutLevel * (1 - p.deltaPullback),
-    ma20
+  // ma20 can have caught up past breakoutLevel by the time we evaluate (price
+  // ran further after the breakout) — clamp so the floor never exceeds the
+  // fixed ceiling, instead of producing an inverted zone that then gets
+  // rejected downstream as "malformed" for what is actually a too-extended,
+  // not corrupted, setup.
+  const pullbackZoneLow = Math.min(
+    Math.max(breakoutLevel * (1 - p.deltaPullback), ma20),
+    pullbackZoneHigh
   );
 
   for (let i = tB; i <= L; i++) {

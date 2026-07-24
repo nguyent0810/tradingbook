@@ -84,18 +84,6 @@ export function deriveAutoPopulatedTradeLevels(
   const { sorted, idx } = through;
   const lastBar = sorted[idx]!;
 
-  const atr14 = computeAtr14(sorted, idx);
-  const structural = collectResistanceCandidates(sorted, idx, setup.close);
-  const { targetPrice, targetReason } = selectRewardTarget(
-    structural,
-    setup.close,
-    atr14,
-    setup.stopLevel
-  );
-  const risk = setup.close - setup.stopLevel;
-  const reward = targetPrice - setup.close;
-  const riskRewardRatio = risk > 0 ? reward / risk : null;
-
   const trueRange = lastBar.high - lastBar.low;
   let entryRangeLow = setup.pullbackZoneLow;
   let entryRangeHigh = setup.pullbackZoneHigh;
@@ -114,11 +102,30 @@ export function deriveAutoPopulatedTradeLevels(
       entryRangeHigh = nearBoundary;
     }
   }
+  const suggestedEntry = (entryRangeLow + entryRangeHigh) / 2;
+
+  const atr14 = computeAtr14(sorted, idx);
+  const structural = collectResistanceCandidates(sorted, idx, setup.close);
+  // Target selection stays anchored to the actual last close (a real-market-
+  // structure question: which resistance is realistically reachable from
+  // here), but the R:R shown to the user must anchor to the entry we're
+  // actually suggesting they pay — using setup.close there would silently
+  // mismatch whenever suggestedEntry drifts from close (e.g. after zone
+  // tightening).
+  const { targetPrice, targetReason } = selectRewardTarget(
+    structural,
+    setup.close,
+    atr14,
+    setup.stopLevel
+  );
+  const risk = suggestedEntry - setup.stopLevel;
+  const reward = targetPrice - suggestedEntry;
+  const riskRewardRatio = risk > 0 ? reward / risk : null;
 
   return {
     entryRangeLow,
     entryRangeHigh,
-    suggestedEntry: (entryRangeLow + entryRangeHigh) / 2,
+    suggestedEntry,
     stopLoss: setup.stopLevel,
     takeProfit: targetPrice,
     targetReason,

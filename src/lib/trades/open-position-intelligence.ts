@@ -87,7 +87,10 @@ export function classifyStopPriceBand(params: {
 
   const cushionPct = (distanceToStop / entryPrice) * 100;
 
-  if (distanceToStop < 0) return { band: "breached", cushionPctOfEntry: cushionPct };
+  // Close AT the stop, not just past it, still counts as breached — a plan
+  // that only fires on strictly-past-stop closes under-alerts the exact
+  // session an order would have filled.
+  if (distanceToStop <= 0) return { band: "breached", cushionPctOfEntry: cushionPct };
 
   if (cushionPct < NEAR_STOP_CUSHION_PCT) return { band: "tight", cushionPctOfEntry: cushionPct };
 
