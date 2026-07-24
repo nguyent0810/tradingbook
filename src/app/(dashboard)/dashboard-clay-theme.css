@@ -20,6 +20,11 @@
  * accents) plus the Clay-specific additions with no existing token
  * equivalent (multi-layer clay shadows, Baloo 2 / Nunito, the floating
  * background blobs, entrance motion).
+ *
+ * This token/component layer is shared by every Clay route (Dashboard,
+ * Setups, Arena, Settings) — it doesn't distinguish which one is active.
+ * Settings' own remaining gaps (cd-auth-* form fields, .btn-danger) live in
+ * settings-clay-theme.css.
  * ───────────────────────────────────────────────────────────────────────── */
 
 /* ═══ 1. Token layer — tokens.css overrides ═══ */
