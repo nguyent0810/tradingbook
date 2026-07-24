@@ -28,6 +28,7 @@ import {
   evaluateAndPersistHealthForActiveWatchItems,
   syncWatchItemsFromSurfacedCandidates,
 } from "@/lib/setup-health";
+import { evaluateAndPersistHealthForOpenTrades } from "@/lib/trades/persist-trade-health";
 import {
   loadEffectiveScanUniverse,
   type UniverseSource,
@@ -385,6 +386,7 @@ export async function runDailyScanJob(
       prisma,
       expectedLatestSession
     );
+    await evaluateAndPersistHealthForOpenTrades(prisma, expectedLatestSession);
 
     const failedPreview = [...failedSymbolKeys].slice(0, 10);
     const summaryJson: Record<string, unknown> = {

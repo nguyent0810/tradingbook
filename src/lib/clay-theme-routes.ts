@@ -7,7 +7,7 @@
  * dark theme. Shared by the theme-toggle effect and every shell component
  * that needs to switch its own copy (sidebar, mobile nav, logout button).
  */
-const CLAY_THEME_ROUTES = new Set(["/dashboard", "/setups", "/paper-lab", "/settings"]);
+const CLAY_THEME_ROUTES = new Set(["/dashboard", "/setups", "/paper-lab", "/settings", "/book"]);
 
 export function isClayThemeRoute(pathname: string): boolean {
   return CLAY_THEME_ROUTES.has(pathname);

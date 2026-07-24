@@ -5269,6 +5269,54 @@
   border-bottom: 1px solid rgba(102, 128, 159, 0.2);
 }
 
+.tosv3-setups-workstation-panel__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tosv3-log-trade-panel {
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 0.75rem;
+  background: var(--bg-elevated);
+}
+
+.tosv3-log-trade-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.tosv3-log-trade-panel__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.tosv3-log-trade-panel__close {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+}
+
+.tosv3-log-trade-panel__close:hover {
+  color: var(--text-primary);
+}
+
+.tosv3-log-trade-panel__hint {
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  margin: 0.5rem 0;
+}
+
 .tosv3-setups-workstation-panel__symbol {
   margin: 0;
   font-size: 1rem;

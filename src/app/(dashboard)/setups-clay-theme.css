@@ -204,6 +204,26 @@ body.dash-clay-active .tosv3-setups-tech-block__list {
   color: var(--text-secondary);
 }
 
+/* ═══ 5b. Ghi lệnh (log-trade) confirm panel ═══ */
+body.dash-clay-active .tosv3-log-trade-panel {
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  box-shadow: var(--clay-inset);
+}
+body.dash-clay-active .tosv3-log-trade-panel__title {
+  color: var(--text-primary);
+}
+body.dash-clay-active .tosv3-log-trade-panel__close {
+  color: var(--text-tertiary);
+}
+body.dash-clay-active .tosv3-log-trade-panel__close:hover {
+  color: var(--text-primary);
+}
+body.dash-clay-active .tosv3-log-trade-panel__hint {
+  color: var(--text-tertiary);
+}
+
 /* ═══ 6. Chips + position sizing ═══ */
 body.dash-clay-active .tosv3-setups-chip {
   border: none;

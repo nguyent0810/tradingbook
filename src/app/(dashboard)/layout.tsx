@@ -15,6 +15,7 @@ import "./dashboard-clay-theme.css";
 import "./setups-clay-theme.css";
 import "./arena-clay-theme.css";
 import "./settings-clay-theme.css";
+import "./book-clay-theme.css";
 
 // ClayMorphism redesign (Dashboard route only) — Baloo 2 for headings/numerals,
 // Nunito for body copy. Loaded here (not the root layout) so Setups/Arena/
