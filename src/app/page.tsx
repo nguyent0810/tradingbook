@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
+import { LandingHeader } from "@/components/marketing/landing-header";
+import { LandingFooter } from "@/components/marketing/landing-footer";
 
 export const metadata: Metadata = {
   title: "TradeLog — Nền tảng Trí tuệ Thiết lập Giao dịch",
@@ -25,7 +27,6 @@ export const metadata: Metadata = {
   },
 };
 
-const YEAR = 2026;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tradelog.app";
 
 // Structured data — factual only (no fabricated ratings, prices, or reviews).
@@ -39,26 +40,6 @@ const STRUCTURED_DATA = {
   description:
     "TradeLog là nền tảng trí tuệ thiết lập giao dịch: quét thị trường, phát hiện các thiết lập chất lượng cao kèm đầy đủ bằng chứng, và kiểm nghiệm mọi quyết định trước khi bạn xuống tiền.",
 };
-
-function BrandMark({ size = 18 }: { size?: number }) {
-  return (
-    <svg
-      className="cd-landing__brand-mark"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-      <polyline points="16 7 22 7 22 13" />
-    </svg>
-  );
-}
 
 /* ── Faithful, static product previews rendered in the app's own language ── */
 
@@ -178,22 +159,7 @@ export default function Home() {
       <a href="#main" className="cd-landing__skip">
         Chuyển đến nội dung chính
       </a>
-      <header className="cd-landing__header">
-        <div className="cd-landing__container cd-landing__header-inner">
-          <Link href="/" className="cd-landing__brand" aria-label="Trang chủ TradeLog">
-            <BrandMark />
-            TradeLog
-          </Link>
-          <nav className="cd-landing__nav" aria-label="Tài khoản">
-            <Link href="/login" className="cd-landing-btn cd-landing-btn--ghost">
-              Đăng nhập
-            </Link>
-            <Link href="/register" className="cd-landing-btn cd-landing-btn--primary">
-              Tạo tài khoản
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <LandingHeader />
 
       <main className="cd-landing__main" id="main" tabIndex={-1}>
         {/* Hero */}
@@ -380,43 +346,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="cd-landing-footer">
-        <div className="cd-landing__container">
-          <div className="cd-landing-footer__inner">
-            <div className="cd-landing-footer__brand">
-              <Link href="/" className="cd-landing__brand" aria-label="Trang chủ TradeLog">
-                <BrandMark />
-                TradeLog
-              </Link>
-              <p className="cd-landing-footer__tagline">
-                Trí tuệ thiết lập giao dịch dành cho nhà đầu tư quyết đoán — hỗ trợ quyết định dựa
-                trên bằng chứng, từ nhận định trong ngày đến thiết lập đã xác thực.
-              </p>
-            </div>
-            <div className="cd-landing-footer__links">
-              <div className="cd-landing-footer__col">
-                <span className="cd-landing-footer__col-title">Khám phá</span>
-                <a href="#workflow" className="cd-landing-footer__link">Cách vận hành</a>
-                <a href="#pillars" className="cd-landing-footer__link">Nền tảng</a>
-                <a href="#evidence" className="cd-landing-footer__link">Vì sao đáng tin</a>
-              </div>
-              <div className="cd-landing-footer__col">
-                <span className="cd-landing-footer__col-title">Tài khoản</span>
-                <Link href="/login" className="cd-landing-footer__link">Đăng nhập</Link>
-                <Link href="/register" className="cd-landing-footer__link">Tạo tài khoản</Link>
-              </div>
-            </div>
-          </div>
-          <div className="cd-landing-footer__legal">
-            <p className="cd-landing-footer__disclaimer">
-              TradeLog cung cấp công cụ nghiên cứu và hỗ trợ quyết định. Đây không phải là lời
-              khuyên đầu tư và không thực hiện đặt lệnh. Kết quả mô phỏng không đảm bảo kết quả
-              trong tương lai.
-            </p>
-            <p>© {YEAR} TradeLog</p>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter />
     </div>
   );
 }

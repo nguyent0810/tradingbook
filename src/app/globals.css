@@ -882,7 +882,8 @@ body {
 }
 .cd-landing-footer__links {
   display: flex;
-  gap: 3rem;
+  flex-wrap: wrap;
+  gap: 2.5rem 3rem;
 }
 .cd-landing-footer__col {
   display: flex;
@@ -918,6 +919,57 @@ body {
 }
 .cd-landing-footer__disclaimer {
   max-width: 46rem;
+}
+
+/* Legal pages (Privacy / Terms) — long-form content */
+.cd-legal-hero {
+  padding-top: 3.5rem;
+  padding-bottom: 2.5rem;
+}
+.cd-legal-meta {
+  margin: var(--cd-space-4) 0 0;
+  font-size: var(--cd-fs-xs);
+  color: var(--cd-text-dim);
+}
+.cd-legal-body {
+  max-width: 42rem;
+  padding-bottom: 4.5rem;
+}
+.cd-legal-body h2 {
+  margin: var(--cd-space-8) 0 var(--cd-space-3);
+  font-size: var(--cd-fs-xl);
+  font-weight: var(--cd-fw-bold);
+  letter-spacing: -0.01em;
+  color: var(--cd-text);
+}
+.cd-legal-body h2:first-child {
+  margin-top: 0;
+}
+.cd-legal-body p {
+  margin: 0 0 var(--cd-space-4);
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-normal);
+  color: var(--cd-text-muted);
+}
+.cd-legal-body ul {
+  margin: 0 0 var(--cd-space-4);
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cd-space-2);
+  font-size: var(--cd-fs-sm);
+  line-height: var(--cd-lh-normal);
+  color: var(--cd-text-muted);
+  list-style: disc;
+}
+.cd-legal-body strong {
+  color: var(--cd-text);
+  font-weight: var(--cd-fw-semibold);
+}
+.cd-legal-body a {
+  color: var(--cd-cyan);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* Product mock panels — faithful, static previews in the app's own language */
