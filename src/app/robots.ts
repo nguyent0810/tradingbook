@@ -8,7 +8,8 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Authenticated + API surfaces have no public content to index.
-      disallow: ["/dashboard", "/setups", "/paper-lab", "/api"],
+      // /tiktok-demo is a review-only utility page, not a marketing surface.
+      disallow: ["/dashboard", "/setups", "/paper-lab", "/api", "/tiktok-demo"],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
     host: SITE_URL,
