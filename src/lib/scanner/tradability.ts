@@ -3,7 +3,8 @@ import { fetchStockBarsGroupedAscThroughDate } from "@/lib/setup-health/load-bar
 import type { OhlcvBar } from "@/lib/setup-health/types";
 import { equityPriceToVnd, tradedValueVnd } from "./price-units";
 import {
-  TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS,
+  TRADABILITY_BATCH_CHUNK_SIZE,
+  tradabilityLookbackFromDate,
   TRADABILITY_MAX_CALENDAR_GAP_DAYS,
   TRADABILITY_MIN_AVG_VALUE_VND_20,
   TRADABILITY_MIN_AVG_VOLUME_20,
@@ -207,32 +208,62 @@ export async function evaluateTradabilityForSymbolId(
 }
 
 /**
- * Batch-fetch bars (one query, bounded lookback) for the given symbols and evaluate
- * tradability for each from the in-memory result — replaces an N-query-per-symbol loop
- * with a single round trip. Returns a `symbolId -> { result, bars }` map so callers that
+ * Batch-fetch bars (bounded lookback, `TRADABILITY_BATCH_CHUNK_SIZE` symbols per query)
+ * and evaluate tradability for each from the in-memory result — replaces an
+ * N-query-per-symbol loop. Returns a `symbolId -> { result, bars }` map so callers that
  * also need the bars for downstream evaluation (breakout/pullback, RS diagnostic) can
  * reuse them instead of re-querying.
+ *
+ * Failure isolation: a chunk whose query fails contributes **no entries**, so callers can
+ * tell "fetch failed for this symbol" (absent) apart from "symbol has no bars" (present
+ * with `bars: []`). If *every* chunk fails the first error is rethrown, preserving the
+ * hard-failure path callers rely on to surface a DB outage instead of rendering an
+ * empty result as if it were real data.
  */
 export async function evaluateTradabilityForSymbolIdsBatched(
   prisma: PrismaClient,
   symbols: ReadonlyArray<{ id: string; symbol: string }>,
   expectedLatestSession: Date
 ): Promise<Map<string, { result: TradabilityResult; bars: OhlcvBar[] }>> {
-  const fromDate = new Date(expectedLatestSession);
-  fromDate.setUTCDate(fromDate.getUTCDate() - TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS);
-
-  const barsBySymbolId = await fetchStockBarsGroupedAscThroughDate(
-    prisma,
-    symbols.map((s) => s.id),
-    expectedLatestSession,
-    fromDate
-  );
+  const fromDate = tradabilityLookbackFromDate(expectedLatestSession);
 
   const out = new Map<string, { result: TradabilityResult; bars: OhlcvBar[] }>();
-  for (const s of symbols) {
-    const bars = barsBySymbolId.get(s.id) ?? [];
-    out.set(s.id, { result: evaluateTradability(bars, expectedLatestSession), bars });
+  const chunks: Array<ReadonlyArray<{ id: string; symbol: string }>> = [];
+  for (let i = 0; i < symbols.length; i += TRADABILITY_BATCH_CHUNK_SIZE) {
+    chunks.push(symbols.slice(i, i + TRADABILITY_BATCH_CHUNK_SIZE));
   }
+
+  let firstError: unknown = null;
+  let succeededChunks = 0;
+
+  for (const chunk of chunks) {
+    try {
+      const barsBySymbolId = await fetchStockBarsGroupedAscThroughDate(
+        prisma,
+        chunk.map((s) => s.id),
+        expectedLatestSession,
+        fromDate
+      );
+      for (const s of chunk) {
+        const bars = barsBySymbolId.get(s.id) ?? [];
+        out.set(s.id, {
+          result: evaluateTradability(bars, expectedLatestSession),
+          bars,
+        });
+      }
+      succeededChunks++;
+    } catch (error) {
+      if (firstError === null) firstError = error;
+      console.error("[tradability] batched_bar_chunk_failed", {
+        symbolCount: chunk.length,
+        firstSymbol: chunk[0]?.symbol ?? null,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
+  if (firstError !== null && succeededChunks === 0) throw firstError;
+
   return out;
 }
 

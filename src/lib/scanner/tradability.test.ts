@@ -1,10 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { TRADABILITY_REASON } from "./tradability-constants";
+import {
+  TRADABILITY_BATCH_CHUNK_SIZE,
+  tradabilityLookbackFromDate,
+  TRADABILITY_REASON,
+} from "./tradability-constants";
 import {
   aggregateTradabilityResults,
   countWeekdaysExclusive,
   evaluateTradability,
+  evaluateTradabilityForSymbolIdsBatched,
 } from "./tradability";
 import { symbolIdsEligibleForGate2 } from "./scan-session-coverage";
 import type { TradabilityBarInput } from "./tradability-types";
@@ -251,5 +256,87 @@ describe("getExpectedLatestSessionFromIndexBars", () => {
         where: { symbol: "OTHER" },
       })
     );
+  });
+});
+
+describe("evaluateTradabilityForSymbolIdsBatched — chunked fetch", () => {
+  const SESSION = utc(2026, 7, 17);
+
+  function symbolsFor(n: number): Array<{ id: string; symbol: string }> {
+    return Array.from({ length: n }, (_, i) => ({
+      id: `id-${i}`,
+      symbol: `S${i}`,
+    }));
+  }
+
+  it("splits the universe into chunks of TRADABILITY_BATCH_CHUNK_SIZE", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = { stockDailyBar: { findMany } } as unknown as PrismaClient;
+    const symbols = symbolsFor(TRADABILITY_BATCH_CHUNK_SIZE * 2 + 1);
+
+    const out = await evaluateTradabilityForSymbolIdsBatched(prisma, symbols, SESSION);
+
+    expect(findMany).toHaveBeenCalledTimes(3);
+    // Every symbol still resolves to an entry when all chunks succeed.
+    expect(out.size).toBe(symbols.length);
+    for (const chunkCall of findMany.mock.calls) {
+      expect(
+        chunkCall[0].where.symbolId.in.length
+      ).toBeLessThanOrEqual(TRADABILITY_BATCH_CHUNK_SIZE);
+    }
+  });
+
+  it("bounds each chunk query to the shared lookback window", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = { stockDailyBar: { findMany } } as unknown as PrismaClient;
+
+    await evaluateTradabilityForSymbolIdsBatched(prisma, symbolsFor(2), SESSION);
+
+    expect(findMany.mock.calls[0]![0].where.date).toEqual({
+      gte: tradabilityLookbackFromDate(SESSION),
+      lte: SESSION,
+    });
+  });
+
+  it("isolates a failed chunk: its symbols are absent, the rest still evaluate", async () => {
+    const symbols = symbolsFor(TRADABILITY_BATCH_CHUNK_SIZE + 2);
+    const findMany = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("connection reset"))
+      .mockResolvedValueOnce([]);
+    const prisma = { stockDailyBar: { findMany } } as unknown as PrismaClient;
+
+    const out = await evaluateTradabilityForSymbolIdsBatched(prisma, symbols, SESSION);
+
+    // First chunk failed → no entries; second chunk succeeded → entries present.
+    expect(out.has("id-0")).toBe(false);
+    expect(out.size).toBe(2);
+    expect(out.get(`id-${TRADABILITY_BATCH_CHUNK_SIZE}`)?.result.passed).toBe(false);
+  });
+
+  it("distinguishes a fetched-but-barless symbol (present) from a failed chunk (absent)", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const prisma = { stockDailyBar: { findMany } } as unknown as PrismaClient;
+
+    const out = await evaluateTradabilityForSymbolIdsBatched(prisma, symbolsFor(1), SESSION);
+
+    expect(out.has("id-0")).toBe(true);
+    expect(out.get("id-0")!.bars).toEqual([]);
+    expect(out.get("id-0")!.result.reasons).toContain(
+      TRADABILITY_REASON.INSUFFICIENT_HISTORY
+    );
+  });
+
+  it("rethrows when every chunk fails, so callers can surface a DB outage", async () => {
+    const findMany = vi.fn().mockRejectedValue(new Error("ECONNREFUSED"));
+    const prisma = { stockDailyBar: { findMany } } as unknown as PrismaClient;
+
+    await expect(
+      evaluateTradabilityForSymbolIdsBatched(
+        prisma,
+        symbolsFor(TRADABILITY_BATCH_CHUNK_SIZE + 1),
+        SESSION
+      )
+    ).rejects.toThrow("ECONNREFUSED");
   });
 });

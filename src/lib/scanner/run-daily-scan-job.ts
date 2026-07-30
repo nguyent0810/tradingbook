@@ -21,7 +21,7 @@ import {
 } from "@/lib/scanner/trading-decision";
 import {
   aggregateTradabilityResults,
-  evaluateTradabilityForSymbolId,
+  evaluateTradabilityForSymbolIdsBatched,
 } from "@/lib/scanner/tradability";
 import type { SetupCandidate } from "@/lib/scanner/gate2/types";
 import {
@@ -163,18 +163,49 @@ export async function runDailyScanJob(
       error: string;
     }> = [];
 
+    // Chunked, bounded-lookback bar fetch for the whole scan universe. The bars it
+    // returns are reused for Gate 2 below, replacing what were previously two
+    // unbounded full-history round trips per symbol (tradability, then Gate 2).
+    //
+    // The loader omits entries for symbols whose chunk failed, so those surface as
+    // per-symbol `tradability`-stage failures in the loop below and the rest of the
+    // universe still scans. A total failure (every chunk down) rethrows and is caught
+    // here, marking all symbols failed — the same terminal state the old per-symbol
+    // loop reached when every query failed — so the job still completes with
+    // diagnostics and a persisted error summary rather than aborting the scan.
+    let evaluated: Awaited<
+      ReturnType<typeof evaluateTradabilityForSymbolIdsBatched>
+    > = new Map();
+    let barLoadError: string | null = null;
+    try {
+      evaluated = await evaluateTradabilityForSymbolIdsBatched(
+        prisma,
+        symbolsToScan.map((s) => ({ id: s.symbolId, symbol: s.symbol })),
+        expectedLatestSession
+      );
+    } catch (error) {
+      barLoadError = error instanceof Error ? error.message : String(error);
+      console.error("[runDailyScanJob] batched_bar_load_failed", {
+        error: barLoadError,
+        symbolCount: symbolsToScan.length,
+      });
+    }
+
     for (const symbol of symbolsToScan) {
       try {
-        const result = await evaluateTradabilityForSymbolId(
-          prisma,
-          symbol.symbolId,
-          expectedLatestSession
-        );
+        const entry = evaluated.get(symbol.symbolId);
+        if (!entry) {
+          throw new Error(
+            barLoadError
+              ? `Batched bar load failed: ${barLoadError}`
+              : `No batched tradability evaluation returned for symbolId ${symbol.symbolId}`
+          );
+        }
         tradItems.push({
           symbolId: symbol.symbolId,
           symbolKey: symbol.symbol,
           universeSource: symbol.universeSource,
-          result,
+          result: entry.result,
         });
       } catch (error) {
         const message =
@@ -220,18 +251,7 @@ export async function runDailyScanJob(
     for (const symbolId of tradableSymbolIds) {
       const symbolKey = symbolKeyById.get(symbolId) ?? symbolId;
       try {
-        const rows = await prisma.stockDailyBar.findMany({
-          where: { symbolId },
-          orderBy: { date: "asc" },
-          select: {
-            date: true,
-            open: true,
-            high: true,
-            low: true,
-            close: true,
-            volume: true,
-          },
-        });
+        const rows = evaluated.get(symbolId)?.bars ?? [];
         const ev = evaluateBreakoutPullbackCandidate(rows, expectedLatestSession);
         diagnosticRows.push({
           symbol: symbolKey,

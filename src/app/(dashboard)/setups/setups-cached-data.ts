@@ -85,12 +85,29 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
   };
 }
 
+/**
+ * Full-universe Gate 2 diagnostic — the most expensive read on this page. Persisted
+ * until the next daily scan rather than deduped per-request, since it is derived
+ * entirely from bars that only change when `daily-scan` is revalidated.
+ *
+ * Errors deliberately propagate: a throw is not cached, so a transient DB failure
+ * can't pin the sidebar to an error state for the whole revalidate window.
+ */
+async function computeGate2BreakdownCached(
+  expectedSession: Date
+): Promise<Gate2CategoryBreakdownRow[]> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600, expire: 86400 });
+  cacheTag("daily-scan");
+  return fetchGate2InvalidBreakdown(prisma, expectedSession);
+}
+
 export const loadGate2BreakdownCached = cache(
   async (): Promise<{ breakdown: Gate2CategoryBreakdownRow[]; error: string | null }> => {
     const { expectedSession } = await loadSetupsBaseData();
     if (!expectedSession) return { breakdown: [], error: null };
     try {
-      const breakdown = await fetchGate2InvalidBreakdown(prisma, expectedSession);
+      const breakdown = await computeGate2BreakdownCached(expectedSession);
       return { breakdown, error: null };
     } catch (e) {
       console.error("[setups] fetchGate2InvalidBreakdown failed:", e);

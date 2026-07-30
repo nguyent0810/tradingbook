@@ -20,8 +20,30 @@ export const TRADABILITY_ROLLING_DAYS = 20;
  * Calendar-day lookback used when batch-fetching bars for tradability/RS evaluation
  * (comfortable margin above `TRADABILITY_MIN_BARS` trading days, accounting for
  * weekends, VN holidays, and the max allowed suspension gap).
+ *
+ * Single source of truth for every bounded bar fetch — do not inline the number.
+ * Derive the window's lower bound with {@link tradabilityLookbackFromDate}.
  */
 export const TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS = 300;
+
+/**
+ * Symbols per batched bar query. Bounded so one malformed/failed chunk isolates to its
+ * own slice of the universe instead of taking down a whole-universe fetch, while still
+ * collapsing hundreds of per-symbol round trips into a handful.
+ */
+export const TRADABILITY_BATCH_CHUNK_SIZE = 75;
+
+/**
+ * Lower bound of the bounded bar-fetch window for `sessionDate`, in UTC.
+ * Shared so every call site derives the same window from the same constant.
+ */
+export function tradabilityLookbackFromDate(sessionDate: Date): Date {
+  const fromDate = new Date(sessionDate);
+  fromDate.setUTCDate(
+    fromDate.getUTCDate() - TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS
+  );
+  return fromDate;
+}
 
 /**
  * Fail if any consecutive pair of bar dates (after sort/dedupe) is separated by more

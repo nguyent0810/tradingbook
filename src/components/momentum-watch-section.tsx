@@ -1,6 +1,5 @@
-import { prisma } from "@/lib/prisma";
 import {
-  getMomentumWatchRowsForPhase1,
+  getCachedMomentumWatchRows,
   MOMENTUM_WATCH_UI_DISCLAIMER,
 } from "@/lib/scanner/momentum-watch";
 import {
@@ -32,10 +31,10 @@ function riskEmphasisClass(code: string): string {
 }
 
 export async function MomentumWatchSection({ embedded = false }: { embedded?: boolean } = {}) {
-  let rows: Awaited<ReturnType<typeof getMomentumWatchRowsForPhase1>> = [];
+  let rows: Awaited<ReturnType<typeof getCachedMomentumWatchRows>> = [];
   let dbError: unknown = null;
   try {
-    rows = await getMomentumWatchRowsForPhase1(prisma, {
+    rows = await getCachedMomentumWatchRows({
       limit: 8,
       includeExtendedWatchOnly: true,
       includeFailedRisk: false,

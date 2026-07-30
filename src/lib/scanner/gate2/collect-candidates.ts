@@ -4,6 +4,8 @@ import {
   type Gate2DiagnosticEvaluationRow,
   type Gate2ScanDiagnosticsSummary,
 } from "../gate2-scan-diagnostics";
+import { fetchStockBarsGroupedAscThroughDate } from "@/lib/setup-health/load-bars";
+import { tradabilityLookbackFromDate } from "../tradability-constants";
 import { evaluateBreakoutPullbackCandidate } from "./breakout-pullback";
 import type { Gate1Level, Gate2BarInput, SetupCandidate } from "./types";
 
@@ -72,21 +74,17 @@ export async function collectGate2SetupCandidatesWithStats(
   const surfaced: SetupCandidate[] = [];
   const diagnosticRows: Gate2DiagnosticEvaluationRow[] = [];
 
-  for (const symbolId of tradableSymbolIds) {
-    const rows = await prisma.stockDailyBar.findMany({
-      where: { symbolId },
-      orderBy: { date: "asc" },
-      select: {
-        date: true,
-        open: true,
-        high: true,
-        low: true,
-        close: true,
-        volume: true,
-      },
-    });
+  // One batched, bounded-lookback query instead of a full-history findMany per symbol.
+  const fromDate = tradabilityLookbackFromDate(expectedLatestSession);
+  const barsBySymbolId = await fetchStockBarsGroupedAscThroughDate(
+    prisma,
+    tradableSymbolIds,
+    expectedLatestSession,
+    fromDate
+  );
 
-    const bars = rows.map(barRowToInput);
+  for (const symbolId of tradableSymbolIds) {
+    const bars = (barsBySymbolId.get(symbolId) ?? []).map(barRowToInput);
     const ev = evaluateBreakoutPullbackCandidate(bars, expectedLatestSession);
     diagnosticRows.push({
       symbol: symbolKeyById.get(symbolId) ?? symbolId,

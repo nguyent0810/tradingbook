@@ -386,6 +386,19 @@ export async function computeRsNearMissWatchlistFromDb(
     expectedLatestSession
   );
 
+  // A chunk whose query failed contributes no entries. Ranking over a silently reduced
+  // universe would understate `tradabilityPassedCount` and drop real watchlist rows, so
+  // fail loudly instead — callers already turn this into a visible error state.
+  const missingCount = symbols.reduce(
+    (n, s) => (evaluated.has(s.id) ? n : n + 1),
+    0
+  );
+  if (missingCount > 0) {
+    throw new Error(
+      `Bar fetch failed for ${missingCount}/${symbols.length} symbols — refusing to rank a partial RS watchlist.`
+    );
+  }
+
   const tradable: { id: string; symbol: string }[] = [];
   for (const s of symbols) {
     if (evaluated.get(s.id)?.result.passed) tradable.push({ id: s.id, symbol: s.symbol });

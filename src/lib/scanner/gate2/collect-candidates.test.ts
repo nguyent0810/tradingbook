@@ -48,13 +48,23 @@ describe("deriveGate1SurfacingRule", () => {
 describe("collectGate2SetupCandidatesWithStats — zero-candidate universe", () => {
   const SESSION = new Date(Date.UTC(2026, 6, 17));
 
+  /**
+   * Mirrors the batched shape `fetchStockBarsGroupedAscThroughDate` issues:
+   * one `findMany` for all symbol ids, each row carrying its own `symbolId`.
+   */
   function fakePrismaWithBars(
-    barsBySymbol: Record<string, unknown[]>
+    barsBySymbol: Record<string, Array<Record<string, unknown>>>
   ): PrismaClient {
     return {
       stockDailyBar: {
-        findMany: async ({ where }: { where: { symbolId: string } }) =>
-          barsBySymbol[where.symbolId] ?? [],
+        findMany: async ({
+          where,
+        }: {
+          where: { symbolId: { in: string[] } };
+        }) =>
+          where.symbolId.in.flatMap((id) =>
+            (barsBySymbol[id] ?? []).map((bar) => ({ ...bar, symbolId: id }))
+          ),
       },
     } as unknown as PrismaClient;
   }

@@ -3,6 +3,7 @@
  * Does not persist SetupCandidate or mutate scanner state.
  */
 import type { PrismaClient } from "@/generated/prisma/client";
+import { cacheLife, cacheTag } from "next/cache";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
 import {
   classifyFreshBreakout,
@@ -13,6 +14,7 @@ import {
   type FreshBreakoutAuditGroup,
 } from "@/lib/scanner/fresh-breakout-audit";
 import { evaluateTradability } from "@/lib/scanner/tradability";
+import { tradabilityLookbackFromDate } from "@/lib/scanner/tradability-constants";
 import {
   computeEffectiveScanUniverse,
   listActiveTacticalSymbols,
@@ -102,8 +104,15 @@ export async function getMomentumWatchRowsForPhase1(
   const symbolIds = effectiveUniverse.symbols.map((s) => s.symbolId);
   if (symbolIds.length === 0) return [];
 
+  // Bounded lookback: the deepest window any consumer needs is `evaluateTradability`
+  // (TRADABILITY_MIN_BARS = 120 trading days); fresh-breakout metrics only reach back 50
+  // (MA50). 300 calendar days clears both with the same margin the batched tradability
+  // loader uses. Upper bound is deliberately left open so `staleSession` still compares
+  // against the true latest bar, exactly as before.
+  const barsFromDate = tradabilityLookbackFromDate(expectedLatestSession);
+
   const allBars = await prisma.stockDailyBar.findMany({
-    where: { symbolId: { in: symbolIds } },
+    where: { symbolId: { in: symbolIds }, date: { gte: barsFromDate } },
     orderBy: [{ symbolId: "asc" }, { date: "asc" }],
     select: { symbolId: true, date: true, close: true, volume: true },
   });
@@ -229,4 +238,41 @@ export async function getMomentumWatchRowsForPhase1(
     latestBarDate: c.latestBarDate,
     whyNotCoreSetup: c.whyNotCoreSetup,
   }));
+}
+
+/**
+ * Cached full-universe evaluation, keyed by session so it invalidates naturally on a
+ * new trading day in addition to the `daily-scan` tag.
+ *
+ * `sessionDate` is resolved by the caller **outside** this cache scope on purpose:
+ * under `cacheComponents`, a throw inside a `"use cache"` boundary fails the prerender
+ * even when the caller catches it, so the DB-unavailable path must never reach here.
+ */
+async function getMomentumWatchRowsForSessionCached(
+  sessionDate: Date,
+  options: GetMomentumWatchRowsOptions
+): Promise<MomentumWatchUiRow[]> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 3600, expire: 86400 });
+  cacheTag("daily-scan");
+  const { prisma } = await import("@/lib/prisma");
+  return getMomentumWatchRowsForPhase1(prisma, options);
+}
+
+/**
+ * Cached wrapper around {@link getMomentumWatchRowsForPhase1} using the shared prisma
+ * singleton. Rows derive purely from bars written by the daily import + scan, so they
+ * only change when `daily-scan` is revalidated — previously this full-universe
+ * evaluation re-ran on every `/setups` render.
+ *
+ * The session probe is a single indexed one-row read; everything expensive sits behind
+ * the cache. Errors propagate to the caller (and are never cached).
+ */
+export async function getCachedMomentumWatchRows(
+  options: GetMomentumWatchRowsOptions = {}
+): Promise<MomentumWatchUiRow[]> {
+  const { prisma } = await import("@/lib/prisma");
+  const sessionDate = await getExpectedLatestSessionFromIndexBars(prisma);
+  if (!sessionDate) return [];
+  return getMomentumWatchRowsForSessionCached(sessionDate, options);
 }
