@@ -21,6 +21,18 @@ export type FetchManifestSymbol = {
   bars: number;
   firstTimeMs: number | null;
   lastTimeMs: number | null;
+  /**
+   * Day-of-year values actually fetched, per calendar year. Counts and bounds
+   * cannot prove an import landed — a store already holding rows outside the
+   * fetch window satisfies both while missing fetched dates inside it.
+   */
+  yearDays?: Record<string, number[]>;
+  /**
+   * md5 over the fetched rows in a canonical fixed-precision form. Date coverage
+   * proves the rows exist; this proves their VALUES landed — which is the actual
+   * purpose of the backfill, since the whole point is correcting stored values.
+   */
+  valueChecksum?: string | null;
 };
 
 export type FetchManifest = {

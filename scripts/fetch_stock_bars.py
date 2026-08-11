@@ -18,6 +18,7 @@ Requires: pip install -r requirements.txt
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import time
@@ -311,12 +312,34 @@ def main() -> None:
                 ok_syms += 1
             elif sym not in errored:
                 empty_symbols.append(sym)
+            # Day-of-year set per calendar year. Bar counts and date bounds cannot
+            # prove an import landed: a store already holding rows outside the
+            # fetch window can satisfy both while missing fetched dates inside it.
+            # The date set can, and folds into a 46-byte bitmap downstream.
+            year_days: dict[str, list[int]] = {}
+            # Canonical per-row rendering, fixed to 6 decimals so Python and
+            # Postgres agree byte-for-byte. Proves the VALUES landed, not merely
+            # that the dates exist — the whole point of the backfill is to correct
+            # values, so date coverage alone would verify the wrong thing.
+            canon: list[str] = []
+            for b in bars:
+                d = datetime.fromtimestamp(b["time"] / 1000, tz=timezone.utc)
+                year_days.setdefault(str(d.year), []).append(d.timetuple().tm_yday)
+                canon.append(
+                    f"{d.date().isoformat()}|{b['open']:.6f}|{b['high']:.6f}|"
+                    f"{b['low']:.6f}|{b['close']:.6f}|{b['volume']:.6f}"
+                )
+            value_checksum = (
+                hashlib.md5("\n".join(sorted(canon)).encode("utf-8")).hexdigest() if bars else None
+            )
             manifest_rows.append(
                 {
                     "symbol": sym,
                     "bars": len(bars),
                     "firstTimeMs": bars[0]["time"] if bars else None,
                     "lastTimeMs": bars[-1]["time"] if bars else None,
+                    "yearDays": {y: sorted(set(v)) for y, v in year_days.items()},
+                    "valueChecksum": value_checksum,
                 }
             )
 
