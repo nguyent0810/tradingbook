@@ -1,2 +1,32 @@
-vnstock>=3.0
-pandas>=2.0
+# DIRECT pins — do NOT loosen to >= without reading this.
+#
+# Scope, stated honestly: these are direct pins, not a lock file. Transitive
+# deps (requests, urllib3, pydantic, beautifulsoup4, numpy, the matplotlib
+# stack) still float. This freezes the packages whose behaviour we actually
+# depend on; it does not make the environment fully reproducible. If that is
+# ever needed, generate a hashed constraints file from a clean install.
+#
+# Why it matters here more than in a typical app: GitHub Actions reinstalls
+# these on every scheduled run, so `vnstock>=3.0` meant production silently
+# took whatever PyPI served that morning. vnstock was verified (this version,
+# sampled VCI data — not a documented contract) to return BACK-ADJUSTED prices,
+# for splits and for cash dividends alike, and the daily import upserts-with-
+# update over a 200-day window. A release that changed the adjustment basis
+# would rewrite 200 days of stored bars overnight, shifting MA20/MA50, breakout
+# levels and RS ranks, with nothing in the pipeline comparing old against new
+# to raise an alarm.
+#
+# `vnai` is vnstock's dependency (declared `vnai>=2.4.8`) and handles device
+# registration, license verification and API quota — an unpinned upgrade there
+# can change or block data access outright, not just reshape it. It was already
+# drifting: local ran 2.4.8 while 2.5.6 was live on PyPI, so CI had been
+# installing a different build than anything tested.
+#
+# To upgrade: bump the version here in its own commit, run
+# `python scripts/fetch_vnindex.py` plus `npx tsx scripts/verify-bar-import-health.ts`,
+# and diff a known symbol against the previous basis before merging.
+
+vnstock==4.0.4
+vnai==2.4.8
+vnstock_ezchart==1.0.2
+pandas==2.3.0

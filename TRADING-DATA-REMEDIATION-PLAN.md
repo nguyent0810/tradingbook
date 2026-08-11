@@ -1,7 +1,7 @@
 # Trading App — Data Remediation & POC Plan
 
 **Date:** 2026-08-07 · **Branch:** `main` @ `b4da734` · **Baseline:** [OPENBB_FEASIBILITY_AUDIT.md](OPENBB_FEASIBILITY_AUDIT.md) accepted — **OpenBB is not being integrated.**
-**Status:** Plan only. No production code modified. Nothing committed or deployed.
+**Status:** Plan. The only item executed so far is NOW #2 (dependency pinning, 2026-08-11) — see §1.3/§1.4/§9. No data-pipeline logic, schema, or provider has been changed.
 **Review:** Two independent reviews completed — an adversarial subagent review and a Codex CLI review. Material findings resolved (§8).
 
 **Evidence legend:** **[VERIFIED]** ran in this session · **[CODE]** read in this repo · **[ESTIMATED]** derived, stated uncertainty · **[UNVERIFIED]** could not test, flagged.
@@ -59,7 +59,7 @@ This app (public, Neon US)  ← stores and serves derived analytics
 | vnstock License = *"Custom: Personal, research, non-commercial; contact support@vnstocks.com for other use"*; classifier `License :: Other/Proprietary License` | **[VERIFIED]** `importlib.metadata` |
 | vnstock free tier caps financial statements at **4 periods** — *"Phiên bản cộng đồng: Báo cáo tài chính được giới hạn tối đa 4 kỳ… Insiders Program"* | **[VERIFIED]** runtime banner |
 | `vnai` ships license-enforcement + fingerprinting endpoints: `/auth/device-register`, `/license/verify`, `hq.vnstocks.com/analytics`, `/v1/user/profile/sync` | **[VERIFIED]** extracted from installed package |
-| `requirements.txt` pins only `vnstock>=3.0`; `vnai` undeclared; reinstalled every CI run | **[VERIFIED]** + **[CODE]** `production-bar-import.yml:83` |
+| ~~`requirements.txt` pins only `vnstock>=3.0`; `vnai` undeclared~~ — **FIXED 2026-08-11**: now pins `vnstock==4.0.4`, `vnai==2.4.8`, `vnstock_ezchart==1.0.2`, `pandas==2.3.0`. Direct pins only; transitive deps still float | **[VERIFIED]** + **[CODE]** `production-bar-import.yml:83` |
 | App is public-facing: registration, login, Privacy Policy, ToS, TikTok domain verification | **[CODE]** |
 | yfinance/Yahoo is *"intended for personal use only"* | **[VERIFIED]** README |
 
@@ -71,7 +71,7 @@ This app (public, Neon US)  ← stores and serves derived analytics
 | **L2** | Underlying exchange data is licensed by HOSE/HNX via Vietcap; no agreement exists at any level | 🔴 P0 | Chain **assumed**; needs counsel |
 | **L3** | `vnai` gives the vendor active means to detect commercial use — "use quietly" is not viable | 🟠 P1 | Endpoints **confirmed**; enforcement behaviour **assumed** |
 | **L4** | `vnai` transmits device fingerprints from CI to a Vietnamese third party, undisclosed in the app's Privacy Policy | 🟠 P1 | Endpoints **confirmed**; payload contents **[UNVERIFIED]** |
-| **L5** | Unpinned `vnstock>=3.0` — a minor release could silently change adjustment semantics and rewrite 200 days of bars overnight | 🟠 P1 | **Confirmed** |
+| **L5** | ~~Unpinned `vnstock>=3.0`~~ — **RESOLVED 2026-08-11.** Direct pins added after confirming `vnai` had already drifted (local 2.4.8 vs 2.5.6 live on PyPI, i.e. CI was installing an untested build). Residual: transitive deps still float — a hashed constraints file would close that | 🟢 Closed | **Confirmed, then fixed** |
 | **L6** | Storing VN exchange data in Neon `us-east-1` may constitute redistribution | 🟡 P2 | **Assumed** |
 | **L7** | Derived analytics (Gate scores, RS) are lower risk than raw quotes, but `market_context_daily` stores near-raw VN-Index OHLC | 🟡 P2 | **Confirmed** storage; risk **assumed** |
 
@@ -532,7 +532,7 @@ One independent subagent review (opus, 51 tool calls). Material findings and how
 | E5 | "Live signals unaffected" is wrong — frozen levels vs re-based bars | **Accepted, verified** at `persist-watch-health.ts:110` + `DEAD_SETUP_DISTANCE_PCT = 0.1`. Rewrote §2.4 |
 | E6 | `sectorExposureJson` is a production no-op; "2–3 days" optimistic | **Partly accepted.** "2–3 days" optimistic — yes. **"No-op" rejected** on Codex re-check: it is populated, but collapsed into one `UNKNOWN` bucket, and has no allocation consumer (§3.1) |
 | M1 | Rights holder is Vietcap/HOSE, not vnstock | **Accepted.** Reframed §1.2 |
-| M2 | `vnstock>=3.0` unpinned | **Accepted.** L5, NOW |
+| M2 | `vnstock>=3.0` unpinned | **Accepted and DONE** — pinned 2026-08-11; verified by installing from the pinned file in a clean venv and re-running all three CI fetch scripts |
 | M3 | `vnai` is license enforcement + fingerprinting | **Accepted after verifying endpoints myself.** L3/L4 |
 | M4 | `Finance()` costs 2 requests; `com_type_code` gives bank/non-bank | **Accepted.** §3.2, §3.5 |
 | M5 | No T+2, board lots, or price bands → Arena fills unexecutable | ❌ **REJECTED on Codex re-check — I accepted this without verifying.** 100-share board lots and a VN limit band **are** enforced **[CODE:** `engine/order-validator.ts:66,88`; `constants.ts:9` `PAPER_VN_LIMIT_BAND_PCT = 0.07`**]**, plus a 15% session-close outlier check. Real remaining gaps are narrower: no T+2, and one flat 7% band instead of HOSE 7% / HNX 10% / UPCOM 15% |
@@ -564,7 +564,7 @@ Run after the adversarial review. It **blocked the commit** and was right to —
 | # | Action | Why | Effort |
 |---|---|---|---|
 | 1 | **Email `support@vnstocks.com`**; request SSI FastConnect + FiinGroup pricing; counsel review of §1.2 | L1/L2 gate everything | 0.5 d + wait |
-| 2 | **Pin `vnstock==4.0.4`** in `requirements.txt`; declare `vnai` | One line; protects every finding here from an overnight silent rewrite | 15 min |
+| 2 | ~~**Pin `vnstock==4.0.4`**~~ ✅ **DONE 2026-08-11** — also pinned `vnai`, `vnstock_ezchart`, `pandas`; verified in a clean venv against all three CI fetch scripts | Protects every finding here from an overnight silent rewrite | done |
 | 3 | **POC step 0** — measure stale-basis bars via `updatedAt` | Settles the one **[UNVERIFIED]** claim | 0.5 d |
 | 4 | **Detect** the volume-basis mismatch (§2.3) — read-only report of affected symbols/sessions. ⚠️ **Do NOT mutate bars yet** — rebasing must wait for confirmed action factors (NEXT #7/#8), not factors inferred from volume steps | Live: wrong tradability floor + inflated Gate 2 volume passes. Quantify first, mutate second | 1 d |
 | 5 | **Guard frozen levels** (§2.4) — alert when an action lands on an open watch/trade | Live: false DEAD_SETUP on every action | 1 d (alert) |
