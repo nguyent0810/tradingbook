@@ -36,6 +36,10 @@ import {
 import { isBenchmarkStaleVsEquity } from "@/lib/market/market-data-freshness-report";
 import { computeScanSessionCoverage } from "@/lib/scanner/scan-session-coverage";
 import { serializeSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
+import {
+  decideScanIdempotency,
+  resolveScanForceRerun,
+} from "@/lib/scanner/scan-idempotency";
 
 function toGate1ScanLevel(level: string): Gate1ScanLevel {
   switch (level) {
@@ -54,6 +58,11 @@ export type DailyScanJobOutcome =
   | {
       ok: true;
       kind: "COMPLETED";
+      summaryJson: Record<string, unknown>;
+    }
+  | {
+      ok: true;
+      kind: "SKIPPED_ALREADY_COMPLETED";
       summaryJson: Record<string, unknown>;
     }
   | {
@@ -79,7 +88,7 @@ function resolveScanLimit(envScanLimit: string | undefined): number {
  */
 export async function runDailyScanJob(
   prisma: PrismaClient,
-  options?: { scanSymbolLimit?: number }
+  options?: { scanSymbolLimit?: number; force?: boolean }
 ): Promise<DailyScanJobOutcome> {
   const scanLimit =
     options?.scanSymbolLimit ?? resolveScanLimit(process.env.SCAN_SYMBOL_LIMIT);
@@ -123,6 +132,40 @@ export async function runDailyScanJob(
         summaryJson: {
           status: "FAILED",
           errorSummary: "No VNINDEX session date in database.",
+        },
+      };
+    }
+
+    // Idempotency: this endpoint has two triggers (GitHub Actions after the bar
+    // import, then the Vercel cron as backup). Without this guard both ran and
+    // production accumulated ~2 COMPLETED runs per session, double-counting
+    // setup_candidates and everything derived from them.
+    const force =
+      options?.force ?? resolveScanForceRerun(process.env.SCAN_FORCE_RERUN);
+    const priorRuns = await prisma.dailyScanRun.findMany({
+      where: { expectedSessionDate: expectedLatestSession },
+      select: { id: true, status: true, expectedSessionDate: true },
+      orderBy: { runAt: "desc" },
+      take: 10,
+    });
+    const idempotency = decideScanIdempotency({
+      expectedSession: expectedLatestSession,
+      priorRuns,
+      force,
+    });
+    if (!idempotency.proceed) {
+      console.info("[runDailyScanJob] skipped_already_completed", {
+        expectedSession: expectedLatestSession.toISOString().slice(0, 10),
+        existingRunId: idempotency.existingRunId,
+      });
+      return {
+        ok: true,
+        kind: "SKIPPED_ALREADY_COMPLETED",
+        summaryJson: {
+          status: "SKIPPED",
+          reason: idempotency.reason,
+          existingRunId: idempotency.existingRunId,
+          expectedLatestSession: expectedLatestSession.toISOString(),
         },
       };
     }
@@ -343,6 +386,7 @@ export async function runDailyScanJob(
         data: {
           startedAt,
           finishedAt,
+          expectedSessionDate: expectedLatestSession,
           gate1Level,
           status: DailyScanRunStatus.COMPLETED,
           symbolCountTotal: totalSymbols,

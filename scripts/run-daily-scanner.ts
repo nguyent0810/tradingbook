@@ -24,6 +24,17 @@ async function main() {
     return;
   }
 
+  // Without this branch the summary below would print "Scanned 0/0 symbols ·
+  // 0 setups found", which reads like an empty scan rather than a skipped one.
+  if (result.kind === "SKIPPED_ALREADY_COMPLETED") {
+    console.log(
+      `Skipped — session ${String(result.summaryJson.expectedLatestSession).slice(0, 10)} already has a COMPLETED scan ` +
+        `(run ${String(result.summaryJson.existingRunId)}). Re-run with SCAN_FORCE_RERUN=1 to override.`
+    );
+    console.log(JSON.stringify(result.summaryJson, null, 2));
+    return;
+  }
+
   const j = result.summaryJson;
   const scanned =
     typeof j.symbolCountScanned === "number" ? j.symbolCountScanned : 0;

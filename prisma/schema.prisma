@@ -383,6 +383,11 @@ model SymbolMarketContextDaily {
 model DailyScanRun {
   id                          String             @id @default(cuid())
   runAt                       DateTime           @default(now()) @map("run_at")
+  /// Trading session this run evaluated (from VNINDEX bars). Idempotency key:
+  /// the scan is triggered twice a day (GitHub Actions after bar import, then
+  /// the Vercel cron as backup), so a COMPLETED run for a session suppresses
+  /// the second. Null on rows written before this column existed.
+  expectedSessionDate         DateTime?          @map("expected_session_date") @db.Date
   startedAt                   DateTime?          @map("started_at")
   finishedAt                  DateTime?          @map("finished_at")
   gate1Level                  Gate1ScanLevel     @map("gate1_level")
@@ -404,6 +409,7 @@ model DailyScanRun {
   candidates SetupCandidate[]
 
   @@index([runAt(sort: Desc)])
+  @@index([expectedSessionDate, status])
   @@map("daily_scan_runs")
 }
 

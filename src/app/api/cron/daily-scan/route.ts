@@ -60,6 +60,20 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ ok: false, error: result.error }, { status: 500 });
   }
 
+  // A skipped run wrote nothing, so there is no new scan data to expose and no
+  // reason to churn the cache. Only a real scan invalidates.
+  if (result.kind === "SKIPPED_ALREADY_COMPLETED") {
+    console.info("[cron daily-scan] skipped", {
+      ...result.summaryJson,
+      elapsedMs: Date.now() - started,
+      databaseUrlHint: dbHint,
+    });
+    return NextResponse.json(
+      { ok: true, kind: result.kind, databaseUrlHint: dbHint, ...result.summaryJson },
+      { status: 200 }
+    );
+  }
+
   // Cron-triggered, not a user-facing Server Action — expire immediately rather than
   // stale-while-revalidate so the next dashboard/setups visit gets fresh scan data.
   revalidateTag("daily-scan", { expire: 0 });
