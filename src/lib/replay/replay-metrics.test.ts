@@ -18,6 +18,7 @@ function trade(over: Partial<SimulatedTrade> = {}): SimulatedTrade {
     exitReason: "TIME_EXIT",
     sessionsHeld: 20,
     riskPerShare: 10,
+    riskPct: 10,
     rMultiple: 1,
     returnPct: 10,
     mfePct: 12,
@@ -176,5 +177,79 @@ describe("judgeEdge", () => {
     const j = judgeEdge(buildReplayReport(signals));
     expect(j.verdict).toBe("EDGE");
     expect(j.failureConcentration.join(" ")).toContain("not broad-based");
+  });
+});
+
+describe("degenerate stops — R is not trustworthy when the stop is a rounding error", () => {
+  const near = (over: Partial<SimulatedTrade> = {}) =>
+    sig({ trade: trade({ riskPct: 0.05, rMultiple: 286, returnPct: 14.1, ...over }) });
+
+  it("counts trades whose stop is under 1% of entry", () => {
+    const s = computeStats([trade({ riskPct: 0.05 }), trade({ riskPct: 4 })]);
+    expect(s.degenerateRiskTrades).toBe(1);
+    expect(s.minRiskPct).toBeCloseTo(0.05, 3);
+  });
+
+  it("flags them in the verdict, naming R as the artefact", () => {
+    const signals = [
+      ...Array.from({ length: 149 }, () => sig({ trade: trade({ rMultiple: 0.05, riskPct: 4 }) })),
+      near(),
+    ];
+    const j = judgeEdge(buildReplayReport(signals));
+    expect(j.failureConcentration.join(" ")).toContain("stop under 1% of entry");
+    expect(j.failureConcentration.join(" ")).toContain("percent return, not R");
+  });
+
+  it("reports percent return beside R so the inflation is visible", () => {
+    // The real case: +14.1% is an ordinary gain; 286R is the same gain divided
+    // by a 0.05% stop. Both must be on the page.
+    const s = computeStats([trade({ riskPct: 0.05, rMultiple: 286, returnPct: 14.1 })]);
+    expect(s.expectancyR).toBeCloseTo(286, 0);
+    expect(s.avgReturnPct).toBeCloseTo(14.1, 2);
+  });
+
+  it("calls NO_EDGE when R is positive but percent return is not", () => {
+    const signals = Array.from({ length: 150 }, (_, i) =>
+      sig({ symbol: `S${i % 40}`, trade: trade({ rMultiple: 0.5, returnPct: -0.4, riskPct: 4 }) })
+    );
+    const j = judgeEdge(buildReplayReport(signals));
+    expect(j.verdict).toBe("NO_EDGE");
+    expect(j.reasons.join(" ")).toContain("artefact of stop distance");
+  });
+});
+
+describe("year concentration — one good regime is not an edge", () => {
+  it("reports the best year's share and expectancy without it", () => {
+    const signals = [
+      ...Array.from({ length: 40 }, () => sig({ sessionDate: "2020-06-01", trade: trade({ rMultiple: 6 }) })),
+      ...Array.from({ length: 110 }, (_, i) =>
+        sig({ symbol: `S${i % 30}`, sessionDate: "2023-06-01", trade: trade({ rMultiple: 0.05 }) })
+      ),
+    ];
+    const r = buildReplayReport(signals);
+    expect(r.concentration.bestYear).toBe("2020");
+    expect(r.concentration.bestYearShareOfGrossR).toBeGreaterThan(90);
+    expect(r.concentration.expectancyExBestYearR).toBeCloseTo(0.05, 2);
+  });
+
+  it("flags it in the verdict even when overall expectancy is strongly positive", () => {
+    const signals = [
+      ...Array.from({ length: 40 }, () => sig({ sessionDate: "2020-06-01", trade: trade({ rMultiple: 6 }) })),
+      ...Array.from({ length: 110 }, (_, i) =>
+        sig({ symbol: `S${i % 30}`, sessionDate: "2023-06-01", trade: trade({ rMultiple: 0.05 }) })
+      ),
+    ];
+    const j = judgeEdge(buildReplayReport(signals));
+    expect(j.failureConcentration.join(" ")).toContain("one market regime");
+  });
+
+  it("does not flag a result spread evenly across years", () => {
+    const signals = ["2021", "2022", "2023", "2024"].flatMap((y) =>
+      Array.from({ length: 40 }, (_, i) =>
+        sig({ symbol: `S${i % 20}`, sessionDate: `${y}-06-01`, trade: trade({ rMultiple: 0.3 }) })
+      )
+    );
+    const j = judgeEdge(buildReplayReport(signals));
+    expect(j.failureConcentration.join(" ")).not.toContain("one market regime");
   });
 });

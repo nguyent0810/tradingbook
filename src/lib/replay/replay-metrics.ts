@@ -39,6 +39,18 @@ export type PerformanceStats = {
   avgMfePct: number | null;
   avgMaePct: number | null;
   avgSessionsHeld: number | null;
+  /**
+   * Percent-return figures sit beside the R figures deliberately. R divides by
+   * the stop distance, so a degenerate stop inflates it without any extra profit
+   * being made; percent return is immune to that and is the honesty check.
+   */
+  avgReturnPct: number | null;
+  medianReturnPct: number | null;
+  totalReturnPct: number | null;
+  avgRiskPct: number | null;
+  minRiskPct: number | null;
+  /** Trades whose stop was under 1% of entry — untradeable in practice. */
+  degenerateRiskTrades: number;
 };
 
 function median(xs: readonly number[]): number | null {
@@ -63,6 +75,8 @@ export function computeStats(trades: readonly SimulatedTrade[]): PerformanceStat
       n: 0, wins: 0, losses: 0, winRatePct: null, stopRatePct: null, avgR: null,
       medianR: null, expectancyR: null, totalR: null, avgWinR: null, avgLossR: null,
       profitFactor: null, avgMfePct: null, avgMaePct: null, avgSessionsHeld: null,
+      avgReturnPct: null, medianReturnPct: null, totalReturnPct: null,
+      avgRiskPct: null, minRiskPct: null, degenerateRiskTrades: 0,
     };
   }
 
@@ -93,6 +107,12 @@ export function computeStats(trades: readonly SimulatedTrade[]): PerformanceStat
     avgMfePct: round(mean(trades.map((t) => t.mfePct)), 2),
     avgMaePct: round(mean(trades.map((t) => t.maePct)), 2),
     avgSessionsHeld: round(mean(trades.map((t) => t.sessionsHeld)), 1),
+    avgReturnPct: round(mean(trades.map((t) => t.returnPct)), 2),
+    medianReturnPct: round(median(trades.map((t) => t.returnPct)), 2),
+    totalReturnPct: round(trades.reduce((a, t) => a + t.returnPct, 0), 2),
+    avgRiskPct: round(mean(trades.map((t) => t.riskPct)), 2),
+    minRiskPct: round(Math.min(...trades.map((t) => t.riskPct)), 3),
+    degenerateRiskTrades: trades.filter((t) => t.riskPct < 1).length,
   };
 }
 
@@ -132,6 +152,16 @@ export type ReplayReport = {
     topSymbolsByTotalR: Array<{ symbol: string; n: number; totalR: number }>;
     bottomSymbolsByTotalR: Array<{ symbol: string; n: number; totalR: number }>;
     topSymbolShareOfGrossR: number | null;
+    /**
+     * Share of gross R contributed by the single best year. A strategy whose
+     * result comes from one market regime has been measured once, not proven —
+     * and symbol concentration alone will not reveal it.
+     */
+    bestYearShareOfGrossR: number | null;
+    bestYear: string | null;
+    /** Expectancy with the single best year removed. */
+    expectancyExBestYearR: number | null;
+    nExBestYear: number;
   };
 };
 
@@ -156,6 +186,16 @@ export function buildReplayReport(signals: readonly ReplaySignal[]): ReplayRepor
   const grossAbs = symbolTotals.reduce((a, s) => a + Math.abs(s.totalR), 0);
   const top5 = symbolTotals.slice(0, 5).reduce((a, s) => a + Math.abs(s.totalR), 0);
 
+  const byYear = breakdownBy(signals, (s) => s.sessionDate.slice(0, 4));
+  const yearTotals = Object.entries(byYear)
+    .map(([year, st]) => ({ year, n: st.n, totalR: st.totalR ?? 0 }))
+    .sort((a, b) => b.totalR - a.totalR);
+  const best = yearTotals[0] ?? null;
+  const yearGrossAbs = yearTotals.reduce((a, y) => a + Math.abs(y.totalR), 0);
+  const totalR = trades.reduce((a, t) => a + t.rMultiple, 0);
+  const nExBest = trades.length - (best?.n ?? 0);
+  const rExBest = totalR - (best?.totalR ?? 0);
+
   return {
     overall: computeStats(trades),
     signalCounts: {
@@ -164,7 +204,7 @@ export function buildReplayReport(signals: readonly ReplaySignal[]): ReplayRepor
       unscored: signals.length - scored.length,
       unscoredByReason,
     },
-    byYear: breakdownBy(signals, (s) => s.sessionDate.slice(0, 4)),
+    byYear,
     byGate1Regime: breakdownBy(signals, (s) => s.gate1Level),
     byQuality: breakdownBy(signals, (s) => `Tier ${s.quality}`),
     bySymbol,
@@ -172,6 +212,13 @@ export function buildReplayReport(signals: readonly ReplaySignal[]): ReplayRepor
       topSymbolsByTotalR: symbolTotals.slice(0, 10),
       bottomSymbolsByTotalR: symbolTotals.slice(-10).reverse(),
       topSymbolShareOfGrossR: grossAbs === 0 ? null : Number(((top5 / grossAbs) * 100).toFixed(1)),
+      bestYearShareOfGrossR:
+        yearGrossAbs === 0 || best == null
+          ? null
+          : Number(((Math.abs(best.totalR) / yearGrossAbs) * 100).toFixed(1)),
+      bestYear: best?.year ?? null,
+      expectancyExBestYearR: nExBest > 0 ? Number((rExBest / nExBest).toFixed(3)) : null,
+      nExBestYear: nExBest,
     },
   };
 }
@@ -207,6 +254,28 @@ export function judgeEdge(report: ReplayReport): {
         `trades go against the entry more than for it.`
     );
   }
+  if (o.degenerateRiskTrades > 0) {
+    const pct = ((o.degenerateRiskTrades / o.n) * 100).toFixed(1);
+    failure.push(
+      `${o.degenerateRiskTrades} trade(s) (${pct}%) have a stop under 1% of entry (min ${o.minRiskPct}%). ` +
+        `R divides by that distance, so these inflate expectancy without earning more. Judge them on ` +
+        `percent return, not R.`
+    );
+  }
+  if (o.avgReturnPct != null && o.expectancyR != null && o.expectancyR > 0 && o.avgReturnPct <= 0) {
+    reasons.push(
+      `Expectancy is positive in R (${o.expectancyR}) but NEGATIVE in percent return ` +
+        `(${o.avgReturnPct}%) — the R figure is an artefact of stop distance, not profit.`
+    );
+  }
+  const yearShare = report.concentration.bestYearShareOfGrossR;
+  if (yearShare != null && yearShare >= 40) {
+    failure.push(
+      `${yearShare}% of gross R comes from ${report.concentration.bestYear} alone. Excluding it, ` +
+        `expectancy falls to ${report.concentration.expectancyExBestYearR}R over ` +
+        `${report.concentration.nExBestYear} trades — the result reflects one market regime, not an edge.`
+    );
+  }
   const share = report.concentration.topSymbolShareOfGrossR;
   if (share != null && share >= 50) {
     failure.push(`${share}% of gross R sits in 5 symbols — the result is not broad-based.`);
@@ -217,12 +286,11 @@ export function judgeEdge(report: ReplayReport): {
     }
   }
 
+  // The verdict must follow the reasons, not be computed alongside them. Deriving
+  // it independently let a blocking reason be recorded while the headline still
+  // read EDGE — the failure mode this whole function exists to prevent.
   const verdict =
-    o.n < 100
-      ? "INCONCLUSIVE"
-      : o.expectancyR != null && o.expectancyR > 0
-        ? "EDGE"
-        : "NO_EDGE";
+    o.n < 100 ? "INCONCLUSIVE" : reasons.length > 0 ? "NO_EDGE" : "EDGE";
 
   return { verdict, reasons, failureConcentration: failure };
 }

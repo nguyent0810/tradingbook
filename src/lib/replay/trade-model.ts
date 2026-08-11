@@ -42,6 +42,13 @@ export type SimulatedTrade = {
   exitReason: "STOP_HIT" | "TIME_EXIT";
   sessionsHeld: number;
   riskPerShare: number;
+  /**
+   * Stop distance as a percent of entry. The scanner floor is 0.3%
+   * (GATE2_MIN_RISK_TO_STOP_FRAC), which is below anything tradeable in VN once
+   * tick size, spread and normal noise are considered — and R explodes as it
+   * approaches zero, so this must be visible next to every R.
+   */
+  riskPct: number;
   rMultiple: number;
   returnPct: number;
   /** Best/worst excursion versus entry, over the held window. */
@@ -120,6 +127,7 @@ export function simulateTrade(params: {
       exitReason,
       sessionsHeld,
       riskPerShare,
+      riskPct: (riskPerShare / entryPrice) * 100,
       rMultiple: (exitPrice - entryPrice) / riskPerShare,
       returnPct: ((exitPrice - entryPrice) / entryPrice) * 100,
       mfePct: mfe === -Infinity ? 0 : mfe,
