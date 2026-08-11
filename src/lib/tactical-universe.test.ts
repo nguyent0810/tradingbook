@@ -74,11 +74,15 @@ describe("isTacticalSymbolActiveNow", () => {
 });
 
 describe("buildActiveTacticalSymbolWhere", () => {
-  it("builds status+scanner+expiry filter", () => {
+  it("bounds the window on BOTH sides, so a row added after `now` cannot leak in", () => {
+    // `expiresAt > now` alone is satisfied by a symbol added long after `now`.
+    // Harmless at the wall clock, but a point-in-time replay passes a historical
+    // `now` and would otherwise scan symbols that did not exist in the universe yet.
     const now = new Date("2026-05-07T00:00:00.000Z");
     expect(buildActiveTacticalSymbolWhere(now)).toEqual({
       status: "ACTIVE",
       activeForScanner: true,
+      addedAt: { lte: now },
       expiresAt: { gt: now },
     });
   });

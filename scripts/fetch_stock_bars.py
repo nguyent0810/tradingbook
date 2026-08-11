@@ -93,6 +93,24 @@ def load_symbols(symbols_file: Path | None) -> list[str]:
     raise ValueError(f"Unrecognized JSON shape in {path}")
 
 
+def _bar_is_usable(o: float, h: float, l: float, c: float, v: float) -> bool:
+    """
+    Same rules both importers already enforce (scripts/import-stock-bars.ts).
+
+    VCI returns a no-trade session as the reference price in `open` with H/L/C
+    zeroed, and occasionally emits high < low. Neither is a real OHLC bar and
+    neither has ever reached the database, because the importer drops them. The
+    fetcher used to keep them anyway, which made the manifest count rows that
+    could never be written — so a backfill could not reconcile against itself.
+    """
+    for x in (o, h, l, c):
+        if x != x or x <= 0:  # NaN or non-positive
+            return False
+    if v != v or v < 0:
+        return False
+    return h >= l
+
+
 def fetch_symbol_bars(symbol: str, start_s: str, end_s: str) -> list[dict]:
     quote = Quote(symbol=symbol, source="VCI")
     df = quote.history(start=start_s, end=end_s, interval="1D")
@@ -106,6 +124,7 @@ def fetch_symbol_bars(symbol: str, start_s: str, end_s: str) -> list[dict]:
             raise RuntimeError(f"{symbol}: missing column {need}, got {list(df.columns)}")
 
     out: list[dict] = []
+    dropped = 0
     for _, row in df.iterrows():
         t = row[col_map["time"]]
         if hasattr(t, "to_pydatetime"):
@@ -116,15 +135,21 @@ def fetch_symbol_bars(symbol: str, start_s: str, end_s: str) -> list[dict]:
             t = datetime.fromisoformat(str(t))
 
         ms = date_to_utc_midnight_ms(t)
+        o = float(row[col_map["open"]])
+        h = float(row[col_map["high"]])
+        lo = float(row[col_map["low"]])
+        c = float(row[col_map["close"]])
+        v = float(row[col_map["volume"]])
+        if not _bar_is_usable(o, h, lo, c, v):
+            dropped += 1
+            continue
         out.append(
-            {
-                "time": ms,
-                "open": float(row[col_map["open"]]),
-                "high": float(row[col_map["high"]]),
-                "low": float(row[col_map["low"]]),
-                "close": float(row[col_map["close"]]),
-                "volume": float(row[col_map["volume"]]),
-            }
+            {"time": ms, "open": o, "high": h, "low": lo, "close": c, "volume": v}
+        )
+    if dropped:
+        print(
+            f"{symbol}: dropped {dropped} unusable bar(s) (no-trade session or high<low)",
+            file=sys.stderr,
         )
     return out
 

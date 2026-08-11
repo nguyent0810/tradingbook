@@ -35,6 +35,11 @@ export function buildActiveTacticalSymbolWhere(
   return {
     status: TACTICAL_ACTIVE_STATUS,
     activeForScanner: true,
+    // Both bounds, not just the upper one. `expiresAt > now` alone is satisfied
+    // by a row added long AFTER `now` — harmless when `now` is the wall clock,
+    // but a point-in-time replay passes a historical `now`, and a tactical symbol
+    // added in 2026 would then leak into a 2024 session it was never part of.
+    addedAt: { lte: now },
     expiresAt: { gt: now },
   };
 }
