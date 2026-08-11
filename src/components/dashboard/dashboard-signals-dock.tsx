@@ -88,10 +88,21 @@ export function DashboardSignalsDock({ items }: DashboardSignalsDockProps) {
   // Second measure pass: the popover mounts invisibly at its natural height
   // first, then we read that height and compute the final anchored/clamped
   // position before revealing it.
+  // Deliberate setState-in-effect, and the one case the rule cannot express:
+  // this is a DOM measurement pass, which is the canonical reason
+  // useLayoutEffect exists. The popover's height is only knowable after it
+  // mounts, and the final position depends on that height, so the second render
+  // is required rather than accidental. It is bounded by the `open.ready` guard
+  // (runs at most once per open) and commits before paint, so it cannot cascade
+  // or flicker. The alternative — writing top/left/visibility straight to the
+  // node from a ref callback — would remove the render but move layout outside
+  // React while framer-motion's AnimatePresence is animating the same element,
+  // which is a worse trade for a lint rule.
   useLayoutEffect(() => {
     if (!open || open.ready) return;
     const height = popoverRef.current?.getBoundingClientRect().height ?? 0;
     const { top, left } = computePosition(open.iconRect, height);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above
     setOpen((current) => (current && !current.ready ? { ...current, top, left, ready: true } : current));
   }, [open]);
 

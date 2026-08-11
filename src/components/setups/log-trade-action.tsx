@@ -31,7 +31,12 @@ export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbol
     }
   }, [open, preview, setupId]);
 
+  // Load-bearing effect — see manual-trade-form.tsx for the full rationale.
+  // `state.message` ("Đã ghi lệnh …", role="status") renders inside the open
+  // panel; the effect guarantees a committed render containing it before the
+  // panel closes. Doing this in the action would drop it entirely.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above
     if (state?.success) setOpen(false);
   }, [state]);
 

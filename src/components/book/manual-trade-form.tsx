@@ -48,8 +48,19 @@ export function ManualTradeForm() {
     });
   }
 
+  // The effect is load-bearing here, not incidental. `state.message` (which
+  // carries the confirmed quantity and fill price, with role="status") renders
+  // INSIDE this panel. Running the reset in an effect guarantees a separate
+  // committed render in which that message exists, before the close update is
+  // applied. Moving the reset into the action or into render collapses both
+  // into a single commit, so the confirmation is never rendered at all.
+  // (Caveat: React does not promise the browser paints between the two commits
+  // for interaction-driven effects, so this makes the message renderable and
+  // announceable, not guaranteed-seen.) Revisit by moving the success alert
+  // outside the collapsing region; until then the extra render is deliberate.
   useEffect(() => {
     if (state?.success) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above
       setOpen(false);
       setPreview(null);
       setSymbolInput("");

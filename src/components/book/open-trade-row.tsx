@@ -60,8 +60,13 @@ export function OpenTradeRow({ row }: { row: OpenTradeRowData }) {
   const [state, formAction, pending] = useActionState<TradeActionState, FormData>(closeTrade, undefined);
   const formRef = useRef<HTMLFormElement>(null);
 
+  // Load-bearing effect — see manual-trade-form.tsx for the full rationale.
+  // `state.message` ("Đã đóng lệnh …", role="status") renders inside the
+  // `expanded` region; the effect guarantees a committed render containing it
+  // before the row collapses. Doing this in the action would drop it entirely.
   useEffect(() => {
     if (state?.success) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above
       setExpanded(false);
     }
   }, [state]);
