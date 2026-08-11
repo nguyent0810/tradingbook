@@ -1,0 +1,5432 @@
+{
+  "capturedAt": "2026-08-11T06:02:33.820Z",
+  "databaseHint": "ep-tiny-meadow-ana0vrxq-pooler.c-6.us-east-1.aws.neon.tech/neondb",
+  "totals": {
+    "symbols": 281,
+    "equityBars": 61667,
+    "indexBars": 373,
+    "staleBars90d": 7553,
+    "medianBarsPerSymbol": 228
+  },
+  "symbols": [
+    {
+      "symbol": "A32",
+      "barCount": 288,
+      "minDate": "2025-06-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "caf905ce6c656e3178b28b5b527da037",
+        "2026": "4ed859440993f7c46f4c2aced7407e2a"
+      },
+      "yearBarCounts": {
+        "2025": 144,
+        "2026": 144
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAACcz+fz+Xw+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6HSgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 16
+    },
+    {
+      "symbol": "AAA",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "59145047b3aabea08a64e4a5a118b598",
+        "2026": "5be082d728bbf06911e2c3d04a09607a"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AAH",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "44095d0ccbe91119046aa9385fe5e4b8",
+        "2026": "1f2e1b1a6a20d8c04c00c72dc1c5afba"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AAM",
+      "barCount": 224,
+      "minDate": "2025-09-08",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9fdb5e3a0c352dd0428780e87c75dd5c",
+        "2026": "b9923d6f454d525fca4012f4c3855fc9"
+      },
+      "yearBarCounts": {
+        "2025": 82,
+        "2026": 142
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPh8Pp/P5/P5fD6fz6fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xg+n8/H8Pl8Op/HZfP5fD6XTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "AAS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f50d6a5fa45473c5f971978239f620ad",
+        "2026": "700fed467c18a749fe8749f49b37a128"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "AAT",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "961aaca6f1a5388778505f52d3076978",
+        "2026": "521817e402a258d896be0c24674a3e0a"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AAV",
+      "barCount": 222,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b92fc4f4630026785e4bf53d34208d6a",
+        "2026": "8777c7378b9bb99c3366548d9ca1a594"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 141
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8HkAPJ/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "ABB",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b5950d5d2107c7bc0977feb71b008b18",
+        "2026": "77420c97ae56e5cb40453cadee747ec9"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "ABC",
+      "barCount": 227,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "54a96d3ad83dc926a568e87573b778c3",
+        "2026": "65560f5e41fd407bea6daacc661137a2"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 146
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P4/P5fD6fTgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ABI",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "de41c1f173162c7975f83b96c41b4958",
+        "2026": "815c0c189ab56378412dab8811898983"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "ABR",
+      "barCount": 236,
+      "minDate": "2025-08-12",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4c27c2b1e3622b18cbebefb72231cd70",
+        "2026": "2b093a7edf607a099ef223520662083a"
+      },
+      "yearBarCounts": {
+        "2025": 97,
+        "2026": 139
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM/nw/l8Pp/P5/N5aD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/PwbCKfQQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "ABS",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "935cd2bfcbfd8c004fe77a5eed8ee03e",
+        "2026": "bc746bb7435e2ce89ee040e35a87228d"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ABT",
+      "barCount": 228,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "93b94ea1f5eeae374503c890bcba7f19",
+        "2026": "12d3b3040b8a341fe59477f13ccaa73b"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P4/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ABW",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "92de936ad3dfde90622ef5314141facc",
+        "2026": "0e1696bd595689e9929c1fb1b9ea755a"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ACB",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "47d1c4677f3f6d50d4993143e1ce127d",
+        "2026": "221b5745f35ae9dee6a20842355581b4"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ACC",
+      "barCount": 228,
+      "minDate": "2025-08-29",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "5d9b88e0069f439534fdcdf70cd51f57",
+        "2026": "d9856f7d1917c5d3bedc2d0244300ec4"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 142
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwvl8Pp/Pp/P5fD6fz+fzOQ==",
+        "2026": "4PP5XD4fwMfj+Xw+n0/D8Pl8Po/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "ACE",
+      "barCount": 206,
+      "minDate": "2025-09-03",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "46cdd3564ef8deb8a3327639c44ffaf2",
+        "2026": "cd2feccd9f904ac3054f3e2081c93a4f"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 120
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw8nk/F4Pl8JozA5dAZUBiXTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ACG",
+      "barCount": 226,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f6d08326a15a64894b6b3a60bbb93833",
+        "2026": "6c1c8c541befd573eb1d69b0fa2cf4e1"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 145
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Pp/P5/P5fD6ez+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp3P5/O5fD6fRwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ACL",
+      "barCount": 215,
+      "minDate": "2025-09-04",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "5539bad289f8cdded6465091d20ce640",
+        "2026": "6a49407114576c3d236fa3abd7c50d4c"
+      },
+      "yearBarCounts": {
+        "2025": 85,
+        "2026": 130
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Dw+n89F8Pk8PoHP55L5PASfSwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "ACM",
+      "barCount": 175,
+      "minDate": "2024-04-10",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "2ccd1f4b195487ad99bd7050af5ffdc0",
+        "2025": "5bb05cb89473ff453601ed3fe1e62c6b",
+        "2026": "edea81a714cdeb9ee6dc327b32ae6cef"
+      },
+      "yearBarCounts": {
+        "2024": 96,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAA4Fw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "ACV",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "32429f6b2d60c7b273d2d87f05cddd55",
+        "2026": "ffce6656a3fa20264d86f8eb6e1d851f"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "ADC",
+      "barCount": 172,
+      "minDate": "2025-08-21",
+      "maxDate": "2026-07-30",
+      "yearChecksums": {
+        "2025": "6a9aa451d22f41323acda0ea400a6120",
+        "2026": "f9f490d70194055f8c49b0fe0b093db8"
+      },
+      "yearBarCounts": {
+        "2025": 93,
+        "2026": 79
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADmw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+XwOiwsEUAAECgAABHEAAAgMAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "ADG",
+      "barCount": 216,
+      "minDate": "2025-08-29",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "959adbf7bba1c912ab64d4631e9e5707",
+        "2026": "8c09b575435a38f2014af3426197f577"
+      },
+      "yearBarCounts": {
+        "2025": 84,
+        "2026": 132
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwtl8Pp/P5/PpfB6fz+fzOQ==",
+        "2026": "4PP5fDofwOfz+Xw+l8/G8KlcLh9H5fP5ND6NRwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "ADP",
+      "barCount": 228,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "42f03b146d6badcedf6b3c1220ada72d",
+        "2026": "497f01d3baf0b6de3a4ab6fbafc30959"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6XTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "ADS",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "fd06f875f2d222bfd3f79a482d0dd0c4",
+        "2026": "625ab1ea84eaa3ca16b10c0df476efa0"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AFX",
+      "barCount": 229,
+      "minDate": "2025-08-29",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d914481951af2d9345faa0c7323a8fdd",
+        "2026": "86e190e0b08322b85130f0ff6943ed86"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwvl8Pp/P5/P5fD4PwOfzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AG1",
+      "barCount": 255,
+      "minDate": "2025-07-02",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "53c3749300fb589244a87a592654aff3",
+        "2026": "4db8015e0541744bba808cd9d7e91807"
+      },
+      "yearBarCounts": {
+        "2025": 114,
+        "2026": 141
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIDj+Xw+n09nw4lQPg+B5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/ORfD6VDgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 62
+    },
+    {
+      "symbol": "AGG",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "cf569ed6d5516c175614d8638f93e881",
+        "2026": "d600277ca0673c08cce598ea2eeec228"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AGM",
+      "barCount": 175,
+      "minDate": "2024-11-18",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "e2b7d0f22b6fbe53462a1fb95f23d8dc",
+        "2025": "b19891c6a2b68302e8f6b8cc3a0d8124",
+        "2026": "d76dae91b0a1d2efe6e36fa46b4cdfde"
+      },
+      "yearBarCounts": {
+        "2024": 32,
+        "2025": 114,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPh8Pp/PZw==",
+        "2025": "zOfzAXw+n8/n8/l8PJ/P4AGAQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "AGP",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "ca3863bfd9bf034042a2c9aa0e696dab",
+        "2026": "181657e9c6ead67b01e216bc22978285"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AGR",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "35f6dfbe99efc4df2a490cc549aa866e",
+        "2026": "0df7bdad05c8e27023b59d4ed86df55b"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AGX",
+      "barCount": 263,
+      "minDate": "2025-06-09",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "ae83eb49cfeee69f7255c64008adb0c8",
+        "2026": "0b6209f942080c69867d195f475ae70b"
+      },
+      "yearBarCounts": {
+        "2025": 116,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAACZz+fjyXw+n8vnw/l8HodP52CocD6HRiOwOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fDwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "AIC",
+      "barCount": 184,
+      "minDate": "2025-04-14",
+      "maxDate": "2026-08-06",
+      "yearChecksums": {
+        "2025": "ec4e7da332459c352e4ba2c03ad0691f",
+        "2026": "5d2bea858aa98415630709cc98eeea3b"
+      },
+      "yearBarCounts": {
+        "2025": 118,
+        "2026": 66
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAIvLYBJIKAaejWTz2Xwen8/nwvk8No+PRZCxHAQSQQBSIQ==",
+        "2026": "gHNpeAQdgKJQiFQaGswHACh4AgEIQGEIfAISBAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "AIG",
+      "barCount": 229,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9d4942c1f903f48dff3196b16659f46e",
+        "2026": "ba70c5794bc4373fe49b235eac1255ea"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Lp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ALT",
+      "barCount": 188,
+      "minDate": "2025-05-21",
+      "maxDate": "2026-07-27",
+      "yearChecksums": {
+        "2025": "4b90625d8527a413c589c2f4084b0854",
+        "2026": "b9444d931fb7b66c5d3619423aaed8a5"
+      },
+      "yearBarCounts": {
+        "2025": 125,
+        "2026": 63
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAADgfD6fz+fz+Xw+n8/nw/l8Pp8HBGFpOBAKCKTxCQ==",
+        "2026": "AOIBIC4IQMEwwGgWl8cEgPlEPp8JIAAAZAABAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 34
+    },
+    {
+      "symbol": "ALV",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "12953b936a80f2937fbe29cb4680262e",
+        "2026": "4d114a5f7ad55788cc3b1c5cea0b4b5b"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AMC",
+      "barCount": 248,
+      "minDate": "2025-07-24",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "bf807a91563e3c91e22b9c5a2a36ea90",
+        "2026": "6a413065b56c42618e7180c11b95712a"
+      },
+      "yearBarCounts": {
+        "2025": 113,
+        "2026": 135
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGA+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5DBgUCgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "AME",
+      "barCount": 174,
+      "minDate": "2025-03-17",
+      "maxDate": "2026-07-30",
+      "yearChecksums": {
+        "2025": "89df2c8464604eff58a8d78c3b39613d",
+        "2026": "0a61152c57001a0cff84c5d04931f964"
+      },
+      "yearBarCounts": {
+        "2025": 131,
+        "2026": 43
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAA8Pl8PB9IgDHoXD6Pxifj+Xw+lc/ngQh0NpoDRJMYQBqRwYACIA==",
+        "2026": "4MG5dDwAwIFAAGQAgAIBAHAAAoRAAAKAABYIAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "AMP",
+      "barCount": 200,
+      "minDate": "2025-08-14",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4425d802aef30b9fdb36cbf42075d078",
+        "2026": "8a076b387bbbc3e688e31dd860b72fa2"
+      },
+      "yearBarCounts": {
+        "2025": 96,
+        "2026": 104
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMznw/l8Pp3P5+P5fD6fz+fzOQ==",
+        "2026": "4PP5eD4bgMdB+Xw+HwdFYEhYKoLA5TLofDYSTQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "AMS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "89ffe08391755767cc4a86f7f891b580",
+        "2026": "eb8e37b4a738583b9a2f1dcdeb9282f7"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "AMV",
+      "barCount": 228,
+      "minDate": "2024-06-26",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2024": "7d5a2cbac6c20a3fadc8b8e4fec77c0a",
+        "2025": "9e0217072b6adc62e8461e457718b9c9",
+        "2026": "84bdd7900970537a4b6b1d096a04721b"
+      },
+      "yearBarCounts": {
+        "2024": 98,
+        "2025": 10,
+        "2026": 120
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAJzP5/P5fD6fD+fz+Xw+n88FAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+        "2026": "AAAAAAAYwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "ANT",
+      "barCount": 229,
+      "minDate": "2025-09-03",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "787105818f92ca9419bc23816220398c",
+        "2026": "fbc50014550d4bed9f9864fc93c510e4"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 143
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4BPwfD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ANV",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "35529351a78a6bb4abcfd1b6f9bd3121",
+        "2026": "e14a1328bf1e15ecd9769ab1325295dd"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "APF",
+      "barCount": 230,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b9fd4c93ee24d280ea8510e9afd2f2aa",
+        "2026": "30bb7aa40eed5cd03a286fbc663e2958"
+      },
+      "yearBarCounts": {
+        "2025": 82,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 30
+    },
+    {
+      "symbol": "APG",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "70f9505bf4d74378d46a4678888b28f1",
+        "2026": "213b6063c8e3f7d354908db51814a73c"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "APH",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "a2fdeb0f8cdc74bd6588c69dbe5fc40f",
+        "2026": "4e1e9934b023a5fdd2656a499aee8d04"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "API",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b9a8ba02afcacb6d8bfc5c5cf4122abc",
+        "2026": "645d76ae2aadb21272d9c678b69726eb"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "APP",
+      "barCount": 223,
+      "minDate": "2025-09-03",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "69feac45aca17ee212a6359a54ec5be9",
+        "2026": "4ad88bcbb992e2b7ffc4379189d0a782"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 137
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4ON5dD4fwOXz+Xw8n8/H8Pl0Pp/Pp/P5fDwPTgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "APS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "561d049925b6c3ff155ad5e9af0c2ca3",
+        "2026": "326881e54ce18624a5f877205a02a2b1"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "ASG",
+      "barCount": 200,
+      "minDate": "2025-06-04",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "99f5c5788a9ec8f8271236698c27fd6d",
+        "2026": "a3100d0a8cdc28d75ab10d4127a06c19"
+      },
+      "yearBarCounts": {
+        "2025": 111,
+        "2026": 89
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAADiezKei+Xw+n8/nw+l8FJnP5zOIADyfBkRSGA==",
+        "2026": "4FHQdC4XwOKj0XAslMJAMPEMChbJwGKxIDadDwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "ASM",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3c3f39f00c6039876b08337934a2bb0a",
+        "2026": "3dd5dc8230e330f77abc7fafae72c5c0"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ASP",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "5a5520b343fae812c6b7d1098535215f",
+        "2026": "8e47197247f5fe44f58477cd58e92771"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "AST",
+      "barCount": 230,
+      "minDate": "2025-09-08",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "94d34cc2985428862b806be7c21a4a75",
+        "2026": "44d93e38fc1603843326db12e8e5237d"
+      },
+      "yearBarCounts": {
+        "2025": 83,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPh8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6dTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "ATA",
+      "barCount": 175,
+      "minDate": "2024-04-10",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "49a617b8ab0dbf1ac006dcda2b276ca6",
+        "2025": "88cdc9196d77ec1f4e1ef5c55e1af7b2",
+        "2026": "c6718c7562529254a6fa0368432c2080"
+      },
+      "yearBarCounts": {
+        "2024": 96,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAA4Fw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "AVC",
+      "barCount": 210,
+      "minDate": "2025-08-21",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4bc4ba79a71b79bd1e46706c8d37ade2",
+        "2026": "bf9dcb76de8060e08e86692fff05d7c2"
+      },
+      "yearBarCounts": {
+        "2025": 93,
+        "2026": 117
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADmw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4PwOfy+DweCU3D8DF8Cg3F5+O5bD6QSwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "AVG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "dc60b4c23551167a2403cd81f6274a19",
+        "2026": "135eed95c8624f9e5166f3dc68cf5086"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "BAB",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "357187a441d3097a4a250b97106b7c35",
+        "2026": "a1d33da9404177ac9a0793605423acad"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BAF",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6a3c8acd44e3aff0923fcafcaab396af",
+        "2026": "03f2462d77a2333c8211d653daab6bcc"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "BAL",
+      "barCount": 163,
+      "minDate": "2025-04-01",
+      "maxDate": "2026-07-30",
+      "yearChecksums": {
+        "2025": "0b6ff63883488c45199701d6d2acca85",
+        "2026": "d80a82a3bac1b2220e6427549bfe3660"
+      },
+      "yearBarCounts": {
+        "2025": 141,
+        "2026": 22
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAB4PJ/P4PP5fD6fz+fz+Xw+n8/nw/l8PgKAgAJAHDSAiCEAGA==",
+        "2026": "IEKAAAIIgGUQEAAIhQACUAEAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 16
+    },
+    {
+      "symbol": "BAX",
+      "barCount": 264,
+      "minDate": "2025-06-13",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "9061e001e9890003dc2f9fa8bf70703a",
+        "2026": "af20db53d75ac15df2a5f620bbdb2bbf"
+      },
+      "yearBarCounts": {
+        "2025": 142,
+        "2026": 122
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAACQz+fz+Xw+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/PZ6AAACQaAgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "BBH",
+      "barCount": 288,
+      "minDate": "2025-02-27",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "a396cbe33d8934f500dbb5c70fcb4eac",
+        "2026": "1b250b7559c839f6433061e3dbfcf43f"
+      },
+      "yearBarCounts": {
+        "2025": 149,
+        "2026": 139
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAMzn8/l8PJ/P4PP5fD6fz+fz+Xw+n0GgAgEAEBEAAAAAAACfzuXzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5LCoUDwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "BBS",
+      "barCount": 284,
+      "minDate": "2025-03-07",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "418e953a9f2f83df23dbd9302041f9b5",
+        "2026": "0c025c8e706186ed0d1f574d5ab42fe2"
+      },
+      "yearBarCounts": {
+        "2025": 138,
+        "2026": 146
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAADk8/l8PJ/P4PP5fD6fz+fz+Xw+n89DwpkwAACEAFCpJAARAAAAAA==",
+        "2026": "wPP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fDwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BBT",
+      "barCount": 241,
+      "minDate": "2025-08-13",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c0b9d4405e9bb98d4b979699a5969384",
+        "2026": "b9842895cdb104ed48d95582f2efd63f"
+      },
+      "yearBarCounts": {
+        "2025": 94,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM7nw/l8Pp/Pp+N5eB6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fSwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 25
+    },
+    {
+      "symbol": "BCA",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "04123cc214e5c48e6a518ca526cc25ff",
+        "2026": "ee6fa42ca5fb5fe606aeef54295392a9"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "BCC",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7658cad07fdaa54f02a034a94d557820",
+        "2026": "cd275b1ca2f4cfa8afcd1f0793cb4b23"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "BCE",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b94f4dfc552f9f2ebe62ca109aaf1a63",
+        "2026": "2b4127dc274592ced9681a533e31a134"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 29
+    },
+    {
+      "symbol": "BCF",
+      "barCount": 198,
+      "minDate": "2025-08-01",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2eb4e1a677ef5ac2e3a48614ac30ea40",
+        "2026": "b6556374dbf344ab28a88e49800f9cda"
+      },
+      "yearBarCounts": {
+        "2025": 106,
+        "2026": 92
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgn8/nw/l8Pp/P5/P5fD6fz+fzOA==",
+        "2026": "YPH5fD4DwKLTwVwqjMkBMHkkMgyBpqJIUD6ZSgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BCM",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7384ed53b97667ce94d2bc6df8e2f51a",
+        "2026": "722b0f97eaf157f421a10c316c8ea43d"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BCP",
+      "barCount": 173,
+      "minDate": "2024-05-15",
+      "maxDate": "2026-08-04",
+      "yearChecksums": {
+        "2024": "a797a7e711fc97ad0abbe221c1cf5c7c",
+        "2025": "8092894147ea57ac444cf42dda18291e",
+        "2026": "a939ce15b0aa0917e0bcf9add3ad6380"
+      },
+      "yearBarCounts": {
+        "2024": 66,
+        "2025": 62,
+        "2026": 45
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAADn8/l8Pp/P5/MgCBQRAQACQAAABAAAAAAAAgDAAQ==",
+        "2025": "AAAAAQwAAgAAAAAQAIBAYJOBeByIBaIBAAAwkAYCAAhAHgJNghAAAAAMgqOiAA==",
+        "2026": "AEAJHAISwCaz0HwCAAADMGAAGIAHQABgQAAAAQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "BCR",
+      "barCount": 167,
+      "minDate": "2024-12-06",
+      "maxDate": "2026-06-19",
+      "yearChecksums": {
+        "2024": "5e9a0b85ece795195fd05d1027e325bb",
+        "2025": "c67bb8003690393f75978fa78ac45972",
+        "2026": "304939f5fc7b2ae59919287c9657f3e8"
+      },
+      "yearBarCounts": {
+        "2024": 18,
+        "2025": 127,
+        "2026": 22
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIJ/PZw==",
+        "2025": "zOfzAXw+n8/n8/l8PJ/P4PP5XCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BDG",
+      "barCount": 276,
+      "minDate": "2025-05-26",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "15fd4e8a204492ec322e7d46c1a29ae2",
+        "2026": "a6335f822a990faff94a1b8ea27abef6"
+      },
+      "yearBarCounts": {
+        "2025": 129,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAfD6fz+fz+Xw+n8/nw/kQOpOMR2KAeD4VSufzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6bTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BDT",
+      "barCount": 217,
+      "minDate": "2025-09-05",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "6bd0dbbc128a9e2e8b24a6c669409de7",
+        "2026": "e37ba01d3757c6f0831ec8cb1457efff"
+      },
+      "yearBarCounts": {
+        "2025": 84,
+        "2026": 133
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+XweG8/H4Ol8Pp+P5/N5YD4PDAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BDW",
+      "barCount": 262,
+      "minDate": "2025-05-14",
+      "maxDate": "2026-08-06",
+      "yearChecksums": {
+        "2025": "2c84126872689f2ec0e96d4621801925",
+        "2026": "95395450015c7c9c7e88c6c90e2522f8"
+      },
+      "yearBarCounts": {
+        "2025": 116,
+        "2026": 146
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAMD5fD6fz+fz+Xw+n8+nARFIOgOL4ZAATCABj2DwOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fBwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "BFC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3873796fb0d0ddec008cda26cac8fa8d",
+        "2026": "13ca35c79f225273e3c4fecef0e851cf"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BGE",
+      "barCount": 174,
+      "minDate": "2024-12-06",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "f589bb7bb57619d5ef0f083cf80fd276",
+        "2025": "c6ff7f869fb54f5fd94462e4babc64fd",
+        "2026": "55941b8235a87984ea62cfa378e7794b"
+      },
+      "yearBarCounts": {
+        "2024": 18,
+        "2025": 127,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIJ/PZw==",
+        "2025": "zOfzAXw+n8/n8/l8PJ/P4PP5XCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BHA",
+      "barCount": 184,
+      "minDate": "2025-07-15",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "a0cbda297eaf3648ca5f6364bd9ed2d7",
+        "2026": "b8a66ef9a2afdb579679fee045612807"
+      },
+      "yearBarCounts": {
+        "2025": 113,
+        "2026": 71
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8Hw+n8/nw/l8Pp/P5/P5fD6fzwcwOQ==",
+        "2026": "4IHIQD4fwGfz2HwAgEcAwCkEABgIgGCZJDgJSAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BHN",
+      "barCount": 222,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0f380ee25a0b4b5e5674e75a0efb5660",
+        "2026": "d4998420fe9ae71f301b30eb214139de"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 142
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Hp/P5/P5fD6ez+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8PlsPp/P50P5XC6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BIC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f5672a0f7e589a0e560286267ed4a561",
+        "2026": "fcb9b2d022bc9a73590b0ceef391fd34"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BID",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3f1c4bc9d46b9a12d66fb2095b312ee7",
+        "2026": "7ce7c4f8c86d1872386759d84242ed04"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BIG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2b171b66d3953eb856baa70a7d60eb23",
+        "2026": "b03122b73788d0b858e3623086353766"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BIO",
+      "barCount": 263,
+      "minDate": "2025-05-08",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "49cde27edcfc71dc94f10655b2a1c4b5",
+        "2026": "a06a2c92f084ee939772da631745dd68"
+      },
+      "yearBarCounts": {
+        "2025": 126,
+        "2026": 137
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAPP5fD6fz+fz+Xw+k8/ngJk0NpGIxYB4YAAWwOPzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/PZbA6BQQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BKC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4c28cf7ddc37f1da9daad06785c8ad77",
+        "2026": "2fec353ab56657c02a32e727dcedba90"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BKG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7ae2def7cf96415741d2afbc999274bd",
+        "2026": "2a7a1049fbb9336ab200dccf0825c773"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BLF",
+      "barCount": 211,
+      "minDate": "2025-01-08",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "5b27c7d2ff59967f8e5b93c20b0789f9",
+        "2026": "2c3cee3dfd9ed086e292ee2309a56be4"
+      },
+      "yearBarCounts": {
+        "2025": 145,
+        "2026": 66
+      },
+      "yearDayBitmaps": {
+        "2025": "AOfTAXQ+n8fn8/l8PJ/P4PP5fD6fz+fzgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIJ/P5/P5fD6eQQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "BLI",
+      "barCount": 216,
+      "minDate": "2025-08-07",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "611887166fb69791a1b1d0e657a8ef3c",
+        "2026": "b0e9548d48ab17e2c8b1ac908bdd882a"
+      },
+      "yearBarCounts": {
+        "2025": 91,
+        "2026": 125
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmM/nw/k0Cp/P5/O5cC6fz+fwKQ==",
+        "2026": "YPL5fD4fQOPzuXw6mwXH8Pl0Lp/P5/OxdD6ATAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BLT",
+      "barCount": 230,
+      "minDate": "2025-07-31",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "a13bf29bbb82750fd2336de95d58bbbc",
+        "2026": "6ccf7b4cfb455f068f58a57c017a0cf1"
+      },
+      "yearBarCounts": {
+        "2025": 102,
+        "2026": 128
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwn8/nw9l8Pp8P5vPJfD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/Pp1FgWBCNCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BMC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b21b5e86c6f45bbcae2630360f95efde",
+        "2026": "3ed6239100abdc591404f9cd28dc076f"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BMF",
+      "barCount": 186,
+      "minDate": "2025-03-20",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "cd066d988fc3efbaf4b489b9e2661356",
+        "2026": "8bd9e703ef6ea284613809614513756b"
+      },
+      "yearBarCounts": {
+        "2025": 113,
+        "2026": 73
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAgPl8FJEG4OFpPBSAjMeCaWQel8/ngaAAPoqKZfGBDAYFgAHAGA==",
+        "2026": "gDL4VAQWQKbCqXwIEY3G8MkEFAvDAHABBBACSwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "BMI",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b3f7acf0b75c5ed8b7a9834c2e37b730",
+        "2026": "5e594e751b9b240eb3bec94d77265edf"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BMP",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7456c9f1f0abf13a4a4b6e8f7b4fffe4",
+        "2026": "8b0a043bbcca89e57dada9dd4030c99b"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BMS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "e736c446ad018eff14e001d31f365ed7",
+        "2026": "ad4210d61bfe1aa28e981a04434d1966"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BMV",
+      "barCount": 169,
+      "minDate": "2025-04-21",
+      "maxDate": "2026-07-20",
+      "yearChecksums": {
+        "2025": "f0f3b498b558df52fa78b01d02c5c4f4",
+        "2026": "cacc4e45afd0e58a3ab36f31f341e839"
+      },
+      "yearBarCounts": {
+        "2025": 136,
+        "2026": 33
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAIDP4PP5fD6fz+fz+Xw+n8/nw/l8Pp/PAQAAABAAh2QzIA==",
+        "2026": "ALGAQAAIAACw2FACiQKAUAEcAAAAABAZAAIAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "BNA",
+      "barCount": 184,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "26b9def36b2603033e89bb8948bc98b5",
+        "2026": "c6bac1884de27cf893fe0896b209db3f"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 104
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8IhAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BNW",
+      "barCount": 225,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "426b29bdf9af8d12401484591b40605f",
+        "2026": "7fdb2e27d3712b6d46868589b7d15dae"
+      },
+      "yearBarCounts": {
+        "2025": 82,
+        "2026": 143
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fB4HSwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "BOT",
+      "barCount": 174,
+      "minDate": "2024-11-28",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "d93771cdd8d645d85a88d679224c0083",
+        "2025": "012b43c83af85b44a695c7e48af95765",
+        "2026": "08658ea3bf095ecd0bbc4f1408612837"
+      },
+      "yearBarCounts": {
+        "2024": 24,
+        "2025": 121,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgPp/PZw==",
+        "2025": "zOfzAXw+n8/n8/l8PJ/P4POJQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BQB",
+      "barCount": 201,
+      "minDate": "2025-07-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "a15e7d54891ac82974b01ce78a125a7b",
+        "2026": "24362cef444a2337c37e3c3a5127d36a"
+      },
+      "yearBarCounts": {
+        "2025": 108,
+        "2026": 93
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA+Xw+n8/Hw/l8Oo6HxrNZUC6fz+fzGQ==",
+        "2026": "wPHoAC4UgMeDkHw+lc7DkNlcKpsL4OChVBiOSAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 31
+    },
+    {
+      "symbol": "BRC",
+      "barCount": 206,
+      "minDate": "2025-08-14",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "8851800a5f1dcda3e1d95c4c2209bff3",
+        "2026": "4579f4f9a7cd3162be4c9efc9cb378fe"
+      },
+      "yearBarCounts": {
+        "2025": 92,
+        "2026": 114
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMznw/l8Pp/P5/P4XDafS+dzOQ==",
+        "2026": "YNP5fD4PwOTxuXgujc+HcJAcPBvG5fOoZDybRgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "BRR",
+      "barCount": 189,
+      "minDate": "2025-07-07",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "5b88b3fb7ac28553fc2e025b2b45227d",
+        "2026": "7fa6957d544335b8167848d1cdc150eb"
+      },
+      "yearBarCounts": {
+        "2025": 107,
+        "2026": 82
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADw+Xw+n8/nw/lYOp/Ah2LgfD6fzYfyOQ==",
+        "2026": "4PN5HD4cwMeAiBQckc5HoLF0EAxDYYAQMAQaRQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "BRS",
+      "barCount": 230,
+      "minDate": "2025-08-05",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "36872f0e3e3c1661744cd25fd9deb9bb",
+        "2026": "6dc0424f0438693a1ffc7ccdb5eaf242"
+      },
+      "yearBarCounts": {
+        "2025": 82,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAnsvnwnl8PJ/P4/MhJCSdguZyOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BSA",
+      "barCount": 210,
+      "minDate": "2025-09-03",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "7f2d51de094b5680c264087734f2a068",
+        "2026": "2eb7c02b0a931e6f31b221dc5f8a006e"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 124
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4DP5fD4ewGfx+Xw+n8+HcOlIPp/P5tOZBDyPAwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "BSH",
+      "barCount": 183,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-07-27",
+      "yearChecksums": {
+        "2025": "121278e7482f03b796d1406d3b72d396",
+        "2026": "8ca68ab5f1f1e0c82c556b1a28314ff2"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 103
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8NhAMhKAgWNAUBABAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "BSI",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c1f30187fac148147d3b61cc2f4e3ad3",
+        "2026": "42e20084cd87b0d95a9d6229271c4416"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BSL",
+      "barCount": 257,
+      "minDate": "2025-05-28",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "fae8a91b71d85a4595f5c1d7783ce687",
+        "2026": "39c95f680153075f279658946aec077d"
+      },
+      "yearBarCounts": {
+        "2025": 118,
+        "2026": 139
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAcD6fR8dAYXQ6n8vHwDEwLoAJJvP5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp+PQ/IwfD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "BSP",
+      "barCount": 278,
+      "minDate": "2025-03-13",
+      "maxDate": "2026-07-27",
+      "yearChecksums": {
+        "2025": "5b7ba06bd5face4ec80bd5d781be1bbf",
+        "2026": "a3ea349a7b040d9f5979f1379ed16062"
+      },
+      "yearBarCounts": {
+        "2025": 168,
+        "2026": 110
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAA8/l8PJ/P4PP5fD4fT+Ez+Hw6h4HHgAlYFgOA4/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8PoEAgAIIfAoBAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 115
+    },
+    {
+      "symbol": "BSQ",
+      "barCount": 269,
+      "minDate": "2025-02-18",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "80ebb8b4877087daabfc63f4cf17dcf0",
+        "2026": "c3c0b32c267a61379fd5c3e4ddf5c5f7"
+      },
+      "yearBarCounts": {
+        "2025": 155,
+        "2026": 114
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAns/n8/l8PJ/P4PP5eCYWRQQwqCQInoEHwBgAAACAxPP5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8PhAFwAFoYAIPCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 103
+    },
+    {
+      "symbol": "BSR",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f869ee1e1dd8a5c1abbffa77bf043b01",
+        "2026": "f4f713f6d9319ea68c27bf957429fd94"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BT1",
+      "barCount": 175,
+      "minDate": "2025-06-23",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "25e339dd80e9dc464095fbc24e79fc0f",
+        "2026": "5858964803df7058aed1a02b934eeeb7"
+      },
+      "yearBarCounts": {
+        "2025": 130,
+        "2026": 45
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAwOfz+Xw+n8/nw/l8Pp/P5/P5fD6Pz0fSKQ==",
+        "2026": "AEAAGCIAAAIwOHg2HIDG8KgIAJFIAABIBACACAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BTB",
+      "barCount": 178,
+      "minDate": "2025-05-08",
+      "maxDate": "2026-08-04",
+      "yearChecksums": {
+        "2025": "4f06e2667f482ac305ca8054cea19339",
+        "2026": "036783be272337c41a9cc43ab759c764"
+      },
+      "yearBarCounts": {
+        "2025": 119,
+        "2026": 59
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAPP4QBwMSyTReWQ+n4rmgHBoPJ/PY9L5fD6PzyaSIA==",
+        "2026": "YNHQCAoIAAcjAHw+Fo+BUIAAAA4CJHABQBSYAQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 15
+    },
+    {
+      "symbol": "BTD",
+      "barCount": 173,
+      "minDate": "2025-06-20",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "30e73e79c04958dbdaa0c9ea889aeb67",
+        "2026": "ff324d303c840b6bd29aec9519783379"
+      },
+      "yearBarCounts": {
+        "2025": 125,
+        "2026": 48
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAyOfz+Xw+n8/nw/l8Pp/P5/P5fD4HjiUyOA==",
+        "2026": "wPNpCAoKQOPxKQAAAADA0CEEAA4AABCAAACKAgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "BTH",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d0b3bc9d971af1bf3c88d55d94b1074c",
+        "2026": "198579098165bd2d3e40652cb081e858"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BTN",
+      "barCount": 183,
+      "minDate": "2025-04-01",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "bd93986a0c78b1c947496b98db92b478",
+        "2026": "4790928a4fa9b4e1fcd099f95bb37cfa"
+      },
+      "yearBarCounts": {
+        "2025": 120,
+        "2026": 63
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAABoPJ3PoOOxXB6Vy+cw+AAOk8/nw2lQNhbAIgGhSCYezwIACA==",
+        "2026": "gJNoRCIDQKOSyTAMEcNGQFFIIJOPAACBRACYQAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BTP",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "54c8893cac665c9f4c66f9025ccdaebd",
+        "2026": "951371d9fcba82f6d406d75cb8840317"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BTS",
+      "barCount": 217,
+      "minDate": "2025-08-28",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "bf6fed5b029337feb60d3e384e0155c4",
+        "2026": "591b784ccf334c4a1749cea6d4227088"
+      },
+      "yearBarCounts": {
+        "2025": 83,
+        "2026": 134
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAw/lsPp/P5/P5fD6fx+fxCQ==",
+        "2026": "4PP5fD4fwOfz+Tw+l8/G8Pk8Po7Pp7M4fBqfTQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "BTT",
+      "barCount": 297,
+      "minDate": "2025-02-24",
+      "maxDate": "2026-07-21",
+      "yearChecksums": {
+        "2025": "4e4c483e4ad1f8dbd6ca24f2f7209c84",
+        "2026": "e432e99151e8f44e75a0a375a74dffd4"
+      },
+      "yearBarCounts": {
+        "2025": 163,
+        "2026": 134
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAgM/n8/l8PJ/P4PP5fD6fz+fz+Xw+n8/nw5EEBhAAAoAZQAQCQMbzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fAYAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BTU",
+      "barCount": 255,
+      "minDate": "2025-06-03",
+      "maxDate": "2026-08-04",
+      "yearChecksums": {
+        "2025": "685e83017290f2a58ff8388333a73382",
+        "2026": "b477394c47a92f6a5499923e075ba795"
+      },
+      "yearBarCounts": {
+        "2025": 115,
+        "2026": 140
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAADyfz+fz+Xw+n83jwth4JI9IpLLALDSIB+bzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD4DAQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "BTW",
+      "barCount": 285,
+      "minDate": "2025-03-07",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d84080b2554646099f0d41d9646c2ab8",
+        "2026": "26f934dbf8932a4fce1f24d801078631"
+      },
+      "yearBarCounts": {
+        "2025": 176,
+        "2026": 109
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAADk8/l8PJ/P4PP5fD6fz+fz+Xw+n8/nAyAAAAUKAPL5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8HgEBAYMgEAABRwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 127
+    },
+    {
+      "symbol": "BVB",
+      "barCount": 220,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "fcc5441b9af25197c300e15c8fe11295",
+        "2026": "8cf414ff34580df7335151af4716b02e"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 140
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/M5ADyfTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BVG",
+      "barCount": 174,
+      "minDate": "2024-04-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "6d1cd959376ffdb93fd071d2b8652db9",
+        "2025": "4cee2a6fbd2d4074df97500dd9aebf96",
+        "2026": "f7f167e56a2f37238eec17e5f9d06004"
+      },
+      "yearBarCounts": {
+        "2024": 95,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAwFw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "BVH",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "80dae8ccc176241348908682e500dfe7",
+        "2026": "84edc0dcc1542715f3501b66186ffb47"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BVL",
+      "barCount": 198,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "f8dcfbfbfcdb615ac2a7fd132503e198",
+        "2026": "06ecae969cf98a95c1fe8d6cfb906fb2"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 118
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8HlsPBHOx4FpXAIAAgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 25
+    },
+    {
+      "symbol": "BVN",
+      "barCount": 167,
+      "minDate": "2025-04-10",
+      "maxDate": "2026-08-03",
+      "yearChecksums": {
+        "2025": "fa052a69c37b6b26cd1a2a4aba16d15a",
+        "2026": "324efd3de463fd514211ffb601e52668"
+      },
+      "yearBarCounts": {
+        "2025": 129,
+        "2026": 38
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAMJmPYOPwdC6eT6bz+Tw4n8/jg7F8DAsJpDEoUD4DAEfzMQ==",
+        "2026": "IMJgRAAQAAMgYXgklwxFAAAQAgAAABAAQCCQAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 16
+    },
+    {
+      "symbol": "BVS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c6d3c1cbf2985d5463fcc37d348ffd62",
+        "2026": "4a97a79d675e8ad079539fcf6fa9bf81"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BWA",
+      "barCount": 169,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "d003890b61420188bfbfc1fc9ac87415",
+        "2026": "4abbceb48f3f38aa5bc9b538f18607fe"
+      },
+      "yearBarCounts": {
+        "2025": 82,
+        "2026": 87
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/HwAAAAAAAAEBIAACYCgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 15
+    },
+    {
+      "symbol": "BWE",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2ce08bfe4868850640646f3b933bb7d2",
+        "2026": "e49dad2d4d978cc75307dc09f385d62a"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "BWS",
+      "barCount": 233,
+      "minDate": "2025-09-04",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "8815c4944d97df66ae240855db60c9fe",
+        "2026": "5b69f944226061dc1c069f78965646b1"
+      },
+      "yearBarCounts": {
+        "2025": 85,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "C32",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c8087600af9b36a1583ce446272a433d",
+        "2026": "32dd52f29af82e767fbdbeead47d5b55"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "C47",
+      "barCount": 227,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2d3bfa398dc055f49da582c5f7d94f12",
+        "2026": "8cc6db91bd0059a9f65e9a7dcea1414b"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/O5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "C4G",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6e711623e8bce06cd2257c213da8ef56",
+        "2026": "b3a415afe9c72ed6ada3939df4baf4f0"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "C69",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "1747c248ff988b5dbd2ece02457dafd5",
+        "2026": "c8c2b616d1edf7a10fabdb7cedded25e"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "C92",
+      "barCount": 191,
+      "minDate": "2025-07-01",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "bc2f29dc78c8f248c2ce50b057d075a6",
+        "2026": "28b621be1784619c96f8cebca63e05eb"
+      },
+      "yearBarCounts": {
+        "2025": 120,
+        "2026": 71
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDz+Xw+n8/nw/l8Pp/P5/N5dD6fxoDzGQ==",
+        "2026": "4PDxMBwNgORxCVAaBACCEAAcHBHHATBwUDiRTQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "CAD",
+      "barCount": 174,
+      "minDate": "2024-04-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "1db3b7e17c1448474652ab2f0a3317f1",
+        "2025": "c477031ca38720787cfe3ad194dca61e",
+        "2026": "cea652545a750613887c8132f3bde6b0"
+      },
+      "yearBarCounts": {
+        "2024": 95,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAwFw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CAG",
+      "barCount": 211,
+      "minDate": "2025-08-28",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6dc1939c24d5feda4868d51577ff3b5d",
+        "2026": "bcc5f72bbd9b9fc3807a8b96b3ac3ab7"
+      },
+      "yearBarCounts": {
+        "2025": 85,
+        "2026": 126
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAw/k8Pp/P5vP5eD6fz+fzOQ==",
+        "2026": "4PP5fD4fwKfT+Vw+Hs/H8AFwOp/O5fO5ODaVRwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "CAN",
+      "barCount": 171,
+      "minDate": "2024-07-05",
+      "maxDate": "2026-07-20",
+      "yearChecksums": {
+        "2024": "b344e55ff586125101b18af1f0b88bf1",
+        "2025": "873dbcae1535891587c1f2b2ef46d798",
+        "2026": "80e096216151876cf3469ad9320ed720"
+      },
+      "yearBarCounts": {
+        "2024": 36,
+        "2025": 93,
+        "2026": 42
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADI5/OpCAAACgAAQQAEAQQA4nEABAAAAA==",
+        "2025": "CAIAACAAEA8GAAAAABBCoBFhACYAQWez6XwUj4XnQOBEEBYK4wAYWBINhCIgAA==",
+        "2026": "IPN4TDYVAIcBAAgQCggAAAAEAIDJgUAAIAIAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 15
+    },
+    {
+      "symbol": "CAP",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2e8e1849395ea047e001da635b6b66e4",
+        "2026": "f6154cba8785d9b4587b2cf64886df79"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CAT",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "63004b2ae87fce3af6d1c31345fd4224",
+        "2026": "c7e10e628464abee8831b0d02bce65c3"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CBS",
+      "barCount": 223,
+      "minDate": "2025-09-05",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3ef9bbce1479afb6a03e2b3935f834db",
+        "2026": "f4fd326efa438539d3c1561941c24c20"
+      },
+      "yearBarCounts": {
+        "2025": 83,
+        "2026": 140
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPl8Pp/P5/P5fD6fz+dzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw8n83H0Pl8Pp/P53PZdD6aTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CC1",
+      "barCount": 200,
+      "minDate": "2025-07-24",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "b743ee6c6b1a9363d8d388823e1ce859",
+        "2026": "15c6076b6f39f118731aa9dd0a8c28b5"
+      },
+      "yearBarCounts": {
+        "2025": 95,
+        "2026": 105
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGA+ns+nwvl8Lp/PZ6PhfA4eyGfTOQ==",
+        "2026": "wPN5fD4fwOPzKXwSn0vEQNlMKhAIxKE4fD6fAwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 24
+    },
+    {
+      "symbol": "CCA",
+      "barCount": 287,
+      "minDate": "2025-05-29",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "846491b5d26fa6a9ba7686750a975ceb",
+        "2026": "60dbc936420f2ba877b4ead2a7db756e"
+      },
+      "yearBarCounts": {
+        "2025": 145,
+        "2026": 142
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAYD6fz+fz+Xw+n8/nw/l8Pp/PR3GIfD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/O5HD6dDQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "CCC",
+      "barCount": 212,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "712fdb42611be39590dcbbbb09dbb0b9",
+        "2026": "b3f6f6c9e454e350f58c0f0576af3e4c"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 131
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOXz+Xw+n8/H8Pl8GprPY9P5ZDSOCgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CCI",
+      "barCount": 224,
+      "minDate": "2025-09-04",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d90104e221c1256ac738fcdbaa1d715e",
+        "2026": "97dab53cfd63c15188ce2b2e2368b774"
+      },
+      "yearBarCounts": {
+        "2025": 85,
+        "2026": 139
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgPl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fAaSQgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "CCL",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "8d9b124d8d167f7ee309a45d5c28e83e",
+        "2026": "a27f9c6bed730553a3fe00388e9eaee1"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CCM",
+      "barCount": 171,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-07-20",
+      "yearChecksums": {
+        "2025": "3e8101c30d68cd57808245365d7ea595",
+        "2026": "e0e1de9f2cd896fa7e636936ada6c188"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 91
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8DlAAAwEIAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "CCR",
+      "barCount": 248,
+      "minDate": "2025-07-04",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "61fe57e7efacde64d3766fcbec36601c",
+        "2026": "2b3748e38f615d856cee9730a4949619"
+      },
+      "yearBarCounts": {
+        "2025": 112,
+        "2026": 136
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADy+Xw+n8/nw+l8NhvDxlERfD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P53MgfCqLTAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 25
+    },
+    {
+      "symbol": "CDC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3c681db21b8865462758101732bc2659",
+        "2026": "49e342fde6fd00098df9cf21ca3a21cb"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CDN",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "1bec6df8d3faa4a85353054cc9fae2a7",
+        "2026": "c4d497926c2e834e0e604ef9730c853a"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CDO",
+      "barCount": 174,
+      "minDate": "2024-04-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "00ca7d3f95c17ae3a0179354dcfde6f9",
+        "2025": "b347df2f2055a5bd990dffbb53cf5642",
+        "2026": "c898195528e628e23f222c601a4ecfcb"
+      },
+      "yearBarCounts": {
+        "2024": 95,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAwFw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CDP",
+      "barCount": 222,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "cfd2346e7bb69a92c3b7b2096235bde3",
+        "2026": "5083f1ab256e921af30c8c4e0cc54582"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 141
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fB6RAwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 25
+    },
+    {
+      "symbol": "CDR",
+      "barCount": 213,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "80c7d3213d8f90c1c4b96bcebc876675",
+        "2026": "08c1fe4b27d091d30966080d17f9e562"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 132
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfzeXw+n8/H8Pk8PpYGJuOheD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "CEN",
+      "barCount": 174,
+      "minDate": "2024-04-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "799a785b2c2b6c99218fb1d1191ab33d",
+        "2025": "f14a996e5f4f02b43a9ba08cc25efcbb",
+        "2026": "fdfea0ccfd24e8f3b6ebf703e563edab"
+      },
+      "yearBarCounts": {
+        "2024": 95,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAwFw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CEO",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "abfa1f732ad34cd9e7c9f878f98ae9ce",
+        "2026": "64e884a4b786927944741665efee1276"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CET",
+      "barCount": 173,
+      "minDate": "2025-03-17",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "fbab2ef89f6eb418f4e5b0b92102d281",
+        "2026": "486048040f8679cedc866f01823d3673"
+      },
+      "yearBarCounts": {
+        "2025": 145,
+        "2026": 28
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAA8Pl8PJ/PoPP5fD6fz+fg+Xg+n8/mw/h8Pp8JBAKBQCAQCAQAAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAAFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "CFM",
+      "barCount": 169,
+      "minDate": "2025-05-30",
+      "maxDate": "2026-07-27",
+      "yearChecksums": {
+        "2025": "281211967eab0eb27edef0eb4da84941",
+        "2026": "7f4c348eba502a335aadd3c2b735d0be"
+      },
+      "yearBarCounts": {
+        "2025": 135,
+        "2026": 34
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAQD6fz+fz+Xw+n8/nw/l8Pp/P5/P5fD6fBwIQAA==",
+        "2026": "IHM5NAQAAMQgAAAABMSEQOAAMAACAAAAIAgBAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "CGV",
+      "barCount": 210,
+      "minDate": "2025-06-03",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0fde1b44fcb1ea5a7efcfe66aca04faa",
+        "2026": "fe66fc3fb93f3e28e2b203d622981e10"
+      },
+      "yearBarCounts": {
+        "2025": 111,
+        "2026": 99
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAADyfjufy2XQ+kc/nw/l8LB/F5DOIfAKZRSZREA==",
+        "2026": "gOEBABgCwOPC+XwEH87HcLlwLg2K5/LZbDwfRgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 24
+    },
+    {
+      "symbol": "CHP",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4791f927b6a2d507aa29481d9aaba852",
+        "2026": "6bdb7964821881f9f17b9f909051a37c"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CHS",
+      "barCount": 177,
+      "minDate": "2025-07-28",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "5fc90f49e55635e575b5659581cc99ef",
+        "2026": "56b15aeecb79e362291e3eacbebfea05"
+      },
+      "yearBarCounts": {
+        "2025": 103,
+        "2026": 74
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA+n8/nw/l8Pp/P5/P5fD6fzwcwMQ==",
+        "2026": "oOP5PC4agOfyAQwMi8+DcLg8BAAAARJoAAACCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "CI5",
+      "barCount": 178,
+      "minDate": "2025-03-13",
+      "maxDate": "2026-07-14",
+      "yearChecksums": {
+        "2025": "bc32840613b85b952915045f2e3d9622",
+        "2026": "ee59b545ba3be725018e2d1af82418f8"
+      },
+      "yearBarCounts": {
+        "2025": 132,
+        "2026": 46
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAA02hwMAAOwDPxfC4fz0Dy6QQSA8+Bg/E8JoaI5nPIfD6XA6bTKA==",
+        "2026": "gAMAQAAYAEIAAAA2nMvD8AgAAJ6JhcEQCAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 16
+    },
+    {
+      "symbol": "CIA",
+      "barCount": 207,
+      "minDate": "2025-08-25",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "497ad224a13e776271ac7b5615a23a6f",
+        "2026": "e97bbf2a79322a8aa814aa976b6c888a"
+      },
+      "yearBarCounts": {
+        "2025": 88,
+        "2026": 119
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgw/l8Pp/P5/P5XDqfz+ezOQ==",
+        "2026": "wHP5fD4fwOPz8Xw+n0/A8LlwGhvPA7J5NByUTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 25
+    },
+    {
+      "symbol": "CID",
+      "barCount": 269,
+      "minDate": "2025-04-24",
+      "maxDate": "2026-08-03",
+      "yearChecksums": {
+        "2025": "6de1dc9df7048be5df478aa4d9295c2c",
+        "2026": "46f90efc43f38162bc5af7f809408005"
+      },
+      "yearBarCounts": {
+        "2025": 147,
+        "2026": 122
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAADM4PP5fD6fz+fzMXwOlo8kAgFAPodP5vP5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Po6NxLJgdBKCAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 95
+    },
+    {
+      "symbol": "CIG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "021a9ce44acd99bfdc00b1de4ec1f337",
+        "2026": "7069ef16955a6c6f76c8369a87e5768f"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CII",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "fb16972614ead5c45d8fa20d51aad700",
+        "2026": "14b6e33e5c0b72aa52c180c7d0e6d2cf"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CIP",
+      "barCount": 203,
+      "minDate": "2025-07-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "19052e22990c91a8b1a961e88b6f7d9c",
+        "2026": "d3d08eeea875847ead31ef85c640a908"
+      },
+      "yearBarCounts": {
+        "2025": 90,
+        "2026": 113
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAeXw+n8fngugYMp/P5/LJbAYBTccCCA==",
+        "2026": "oPL5fD4bgOfz+Xwunw/E4JlsApsPA+PoHAaWTgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 24
+    },
+    {
+      "symbol": "CKA",
+      "barCount": 227,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "bab73fc3bcfdf1d3de865de1c3c7f0df",
+        "2026": "8dd2730b49a788576672e79f46ea8482"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Po/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CKD",
+      "barCount": 233,
+      "minDate": "2025-08-13",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9bbd2b2d0c1bfcb37c84c918572a6ca1",
+        "2026": "fc0e08261d176a1349e3e30dec4d11d3"
+      },
+      "yearBarCounts": {
+        "2025": 98,
+        "2026": 135
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM7nw/l8Pp/P5+P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/PY/CxfCIKTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CKG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "94f70597d053c89fcc8bbb9871f3b8d5",
+        "2026": "e84d848bf7fe6b55763496d3bb0e94ed"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CKV",
+      "barCount": 168,
+      "minDate": "2025-01-08",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "14740791f2ebd28acfe00b636647b2a5",
+        "2026": "af04fce74f6592c6bfa05703ba3dd9df"
+      },
+      "yearBarCounts": {
+        "2025": 144,
+        "2026": 24
+      },
+      "yearDayBitmaps": {
+        "2025": "AOfzAXw+n8/n8/l8PJ/P4PP5fD4CAAADEEQAiEFgAkAQAAAAIACQACifz6XyOQ==",
+        "2026": "4OMhBAACgEIAAAAAAAAAIBAAAAAAAAAIACIJAwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 15
+    },
+    {
+      "symbol": "CLC",
+      "barCount": 234,
+      "minDate": "2025-08-26",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f641809e8d4bfe7ac18cb187595a0cad",
+        "2026": "b4ac81f69e10c58f1d30ee1aa87d21ec"
+      },
+      "yearBarCounts": {
+        "2025": 90,
+        "2026": 144
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fB4OTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 24
+    },
+    {
+      "symbol": "CLH",
+      "barCount": 233,
+      "minDate": "2025-08-25",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "252a08a335d68cac3f14e3e16c77bbdf",
+        "2026": "bb133b52e311cd6c730e8d0caba8ca18"
+      },
+      "yearBarCounts": {
+        "2025": 90,
+        "2026": 143
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgw+l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/Pp/O4fB6fSwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 37
+    },
+    {
+      "symbol": "CLL",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "35f7a2a63db93238488a47702eb968eb",
+        "2026": "57180c9ccfcda817d13c8fbaeff0d723"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "CLM",
+      "barCount": 284,
+      "minDate": "2025-04-14",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "148d28ac08d2b8d8e4f02317e1736fef",
+        "2026": "436e38582758532fbd2e32c2dbd9095f"
+      },
+      "yearBarCounts": {
+        "2025": 136,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAJ/P4PP5XBYZxwEjYHwKjMCHg9k0FhmI4PP5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 83
+    },
+    {
+      "symbol": "CLW",
+      "barCount": 271,
+      "minDate": "2025-06-13",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6742b0085e9a8a1a6307ca4fdae56dfd",
+        "2026": "c3e831cd03ce6a0fd8ac66346a74cd00"
+      },
+      "yearBarCounts": {
+        "2025": 142,
+        "2026": 129
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAACQz+fz+Xw+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/PJ/NpHAABQgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 97
+    },
+    {
+      "symbol": "CLX",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "de01f4376fe18af182284ae16d619396",
+        "2026": "4f7bc8c81bbaafb16f61c74b627ebb67"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CMC",
+      "barCount": 183,
+      "minDate": "2025-05-12",
+      "maxDate": "2026-07-29",
+      "yearChecksums": {
+        "2025": "906c4f0f6dcbf85ee280a7d17a9106d0",
+        "2026": "5c130e84d2fcf759984c95166dc904a1"
+      },
+      "yearBarCounts": {
+        "2025": 119,
+        "2026": 64
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAPD5fD6fz+fz+Xw2n4enwuksGJLAoiPYGD4CAiEROQ==",
+        "2026": "4GHgXC4QwOHSiFAQBEFFYEkAHJQAJKCweCAFAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "CMD",
+      "barCount": 228,
+      "minDate": "2025-09-09",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "482158551eb87ce354c1fc91f6ce4a65",
+        "2026": "57efe0f1ac3df3c7dfbb7446063515de"
+      },
+      "yearBarCounts": {
+        "2025": 82,
+        "2026": 146
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5bD6bTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CMG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "e0e2a265556b20dead0a7446341a51bd",
+        "2026": "d64ab7146da8cc5f479c896899e3d8b8"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CMI",
+      "barCount": 174,
+      "minDate": "2024-03-25",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "9cb436b84d39c393b1e6fee1641000af",
+        "2025": "c8290fd312a7eea88bcd53eff26bea8f",
+        "2026": "6c6aa01e1339b6b106a2b4cdf022a2a9"
+      },
+      "yearBarCounts": {
+        "2024": 97,
+        "2025": 48,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAODz+Vw+mM/n8/l8Pp/P5/MBAAAQAAACgUAgEAAEAAEAAAAIBA==",
+        "2025": "AAACAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CMM",
+      "barCount": 185,
+      "minDate": "2025-05-15",
+      "maxDate": "2026-07-27",
+      "yearChecksums": {
+        "2025": "e77900083555f277695f22b216cd009b",
+        "2026": "09bab6361df0b3d50a7827baab0879b8"
+      },
+      "yearBarCounts": {
+        "2025": 111,
+        "2026": 74
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAIDpfD6fz0fzcTg+msvGQzgAAJHMx5MAADyfTsOzOA==",
+        "2026": "YAFJYAIUwObweHQ+iczHYCEoOpYCAIC5ZBIBAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "CMN",
+      "barCount": 237,
+      "minDate": "2025-06-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d5c81b6c08dc148388bcb97f98a77a1c",
+        "2026": "ef6ce6df247b143133ae57e7bd9d5397"
+      },
+      "yearBarCounts": {
+        "2025": 90,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAACez+fz+Rw4AYgBAAEoAJrAIADBfD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6eTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "CMS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f3c9a9be55c02ac9b600cd8aa1e36a0f",
+        "2026": "2cc2bcdae64292dde541e16548904de9"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CMT",
+      "barCount": 195,
+      "minDate": "2025-08-01",
+      "maxDate": "2026-08-04",
+      "yearChecksums": {
+        "2025": "16ee7557db64f279b01b23b98d37082a",
+        "2026": "0f9c47b6e8febf46699507fd804ecdcf"
+      },
+      "yearBarCounts": {
+        "2025": 95,
+        "2026": 100
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgn8/nw/k8Pp/P5/P5HD6fzQeRKA==",
+        "2026": "oPP5fD4bwOfxeVQaGI6H8CkEGgJAwNOpFD6fAQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "CMV",
+      "barCount": 177,
+      "minDate": "2025-06-03",
+      "maxDate": "2026-08-04",
+      "yearChecksums": {
+        "2025": "c93497bb20907e1926ede639ff654c3c",
+        "2026": "8a7bcaab05025de93c12a0d5b57477ea"
+      },
+      "yearBarCounts": {
+        "2025": 116,
+        "2026": 61
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAADSfzufz8Xg+n8/lgmF4Ph+P4fP5dDyOgOIiAA==",
+        "2026": "APL5fD4ewOOBYEAAiIgA8CFQBAACgIBwEAiQAQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "CMX",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6c4e1a4c966e8d8518afb9fc16e7ee93",
+        "2026": "c8a3e3532621f965c2321ac7d2e1f4a4"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CNC",
+      "barCount": 248,
+      "minDate": "2025-08-07",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2e6d51be83e48f325762cedd6dda5816",
+        "2026": "f7159e3f9fee81deb370ed20b5592889"
+      },
+      "yearBarCounts": {
+        "2025": 103,
+        "2026": 145
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmM/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/N5fD6fTAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "CNG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6b6154a2e0a015494ffa0b35fcabc01d",
+        "2026": "d242ae576111725908ac21424bb94e7b"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CNN",
+      "barCount": 293,
+      "minDate": "2025-04-01",
+      "maxDate": "2026-08-06",
+      "yearChecksums": {
+        "2025": "6a9c2789df90349d80b1b5162b9daa46",
+        "2026": "86e4c382d315ee91f2fcbf5fcc716938"
+      },
+      "yearBarCounts": {
+        "2025": 147,
+        "2026": 146
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAB4PJ/P4PP5fD6fz+fz+Tw+hMHnw3lcIIgABLA4BB6Nz+fwOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fBwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CNT",
+      "barCount": 200,
+      "minDate": "2025-08-08",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "20a5ddc9f21cfab609b4087b5ed36676",
+        "2026": "ec5c308296208440dfe8e934c5f6d3cb"
+      },
+      "yearBarCounts": {
+        "2025": 96,
+        "2026": 104
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAkM/nw/l4Pp/P5/O5eD6bzafzOQ==",
+        "2026": "4NP5PD4fwGbz+XwuDkcA4DlcHgPAgKD5ED6NRwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 25
+    },
+    {
+      "symbol": "COM",
+      "barCount": 170,
+      "minDate": "2025-08-15",
+      "maxDate": "2026-07-28",
+      "yearChecksums": {
+        "2025": "c3c5eb774810a9668ed6655ec3b17e2f",
+        "2026": "65f4247d77d7b47774d4386cda277b2b"
+      },
+      "yearBarCounts": {
+        "2025": 97,
+        "2026": 73
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjnw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+XwCA8VAACAACgpAAAAJAAQCAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CPC",
+      "barCount": 262,
+      "minDate": "2025-06-12",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2b03a3cb3cf5167e0609c3fb700bf53c",
+        "2026": "17a2e002c58602df057286677266dacd"
+      },
+      "yearBarCounts": {
+        "2025": 129,
+        "2026": 133
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAACYz+fx+Xwen8nmw7F0PpHP5pP5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5+DYACieTgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "CQN",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6331f073c225c146eed9a65691bc09af",
+        "2026": "dada89d278927eda14ede3d8ffd4ee4a"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CQT",
+      "barCount": 285,
+      "minDate": "2025-03-04",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "658aefd7e491013ef50eea46b04f3b6f",
+        "2026": "dbc9d4c4281951bf838670bc120e00fc"
+      },
+      "yearBarCounts": {
+        "2025": 137,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAIDn8/l8PJ/P4PP5fD6fz+fzeXgWBsNBg6AIHgMCwAHgBAgARAQQOA==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "CRC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d15dd3f13f4a1b1ce2680ce4d55c7a70",
+        "2026": "c85f3bdac9e42976e853806f91c2b4b9"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CRE",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0f78fac337af516cfa5b16a2145c7841",
+        "2026": "632054aaa4fa82b5292ee59361c34395"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CRV",
+      "barCount": 154,
+      "minDate": "2025-10-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "507999fdb0ede550135aefe6d62d48a1",
+        "2026": "ed111397cbd1d7e9a896466d5b46b044"
+      },
+      "yearBarCounts": {
+        "2025": 58,
+        "2026": 96
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADI5/P5fD6fz+ezOQ==",
+        "2026": "4PNZfD4ewOfz8HwuFcwHgLEEKAyAZ7PJRACITAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 0
+    },
+    {
+      "symbol": "CSC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9bc7d809ae862070195a647532a860f6",
+        "2026": "ba5551b224ae92bff8e49d0561cbed9e"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CSI",
+      "barCount": 204,
+      "minDate": "2025-08-28",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "8f2fb156b3e97859b1f8046e54e1a38f",
+        "2026": "e8ababf51b6995de8e0bd55feda0787e"
+      },
+      "yearBarCounts": {
+        "2025": 88,
+        "2026": 116
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwMfz+Xw+H8cDwPlcPJsEw8LZcAKXSAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "CSM",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9d820ce3e3f27363cf5893141e1ed915",
+        "2026": "a650ae1222e41e8f16fd97794536bf30"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CST",
+      "barCount": 229,
+      "minDate": "2025-09-10",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "faa914865955cffa61205a33231fecf8",
+        "2026": "dc3471e447bd7379bb365e843b5708ad"
+      },
+      "yearBarCounts": {
+        "2025": 81,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CSV",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3644c58aca1256f9ac20cfceb19d992d",
+        "2026": "3adb58839b86978732ce779b284ca446"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CT3",
+      "barCount": 174,
+      "minDate": "2024-02-23",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "d53d938a1526a96dc24cbd34c664abcd",
+        "2025": "860c6cbe8c92149f35f32da2edd74dd5",
+        "2026": "2a2d2a0e8dd5afe7726cedd279a86b86"
+      },
+      "yearBarCounts": {
+        "2024": 112,
+        "2025": 33,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAQD6fz+fz+Vw+mM/n8/l8Pp/P5/MAAAAAAAAAAAAAAAAAAAAgAASARQ==",
+        "2025": "AECAACAGBAIAAJAQIAAAAAAAAAAAAAAAAAAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CTB",
+      "barCount": 247,
+      "minDate": "2025-08-01",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "4909d9ba185e3bc14f1dce82d69b14d7",
+        "2026": "bb12dfdc6d85ee584383860da3e60ceb"
+      },
+      "yearBarCounts": {
+        "2025": 100,
+        "2026": 147
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgn8/nw/l8Pp/P5/P5fD6fy8CzGQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fDwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "CTD",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9376509e1c4a99dc613d99c5e78e9c13",
+        "2026": "ba981eee7bedea24db3055062008e78b"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTF",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "784d9519f66a045463fc05e5e844f73b",
+        "2026": "a05fa368c344bda7f43db47faddba40c"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "dd6f8d42d271e6a2bf9885b988a4bf55",
+        "2026": "75467e5f9ee2ea002a6c7441c671622e"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTI",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0d953d1cfdccd5f508e169ead912c099",
+        "2026": "09d9b398f8fae7c2391b6ef796906022"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTP",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "20fc5fd60e981cd64c58869e3e32818e",
+        "2026": "fc9d021a7d0d1e27f25dea899beeac09"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTR",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d9ec9d00855ee8a3218dd59dcb4db295",
+        "2026": "d66d1be42acd4f6e485518577f6dfb7d"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTS",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "34d6962f4d2ea0e0bca12e2b120e4462",
+        "2026": "2ef09e7def00eec921ada705449b22d6"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CTT",
+      "barCount": 278,
+      "minDate": "2025-02-12",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "b7c88732f6a603673b8ecad3e5db5885",
+        "2026": "fea473b3a6daa85c71f93de8d6943d44"
+      },
+      "yearBarCounts": {
+        "2025": 157,
+        "2026": 121
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAA4n8/n8/l8PJ/P4PP5fD6fz2cAgAAEAgACAEA4OokHIwBgfD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5wMAAAAQCwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "CTX",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b09bd31214fa8d42cb34ed6aacbc7710",
+        "2026": "36d19c5f6359b8156a8c72eb456a8966"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "CVN",
+      "barCount": 199,
+      "minDate": "2024-02-21",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2024": "465ce8b3f615079ef66aed43b988c9b0",
+        "2025": "dcfeb83383446cfc3944d0dac02ca38b",
+        "2026": "ea8bd809f601cb9f12fde741085f7627"
+      },
+      "yearBarCounts": {
+        "2024": 116,
+        "2025": 29,
+        "2026": 54
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAcD6fz+fz+Vw+mM/n8/l8Pp/P5/OBQCAQCAQCAAAAAAAAAAAAAAAAAA==",
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBPL5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "CVT",
+      "barCount": 188,
+      "minDate": "2025-04-01",
+      "maxDate": "2026-08-06",
+      "yearChecksums": {
+        "2025": "cfa3160abb4300a852ed1ddaf9a83fdb",
+        "2026": "e82caa62ac104d6a0e08f5d1bfe63a9a"
+      },
+      "yearBarCounts": {
+        "2025": 108,
+        "2026": 80
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAABoEJ6A4BPYRC4JAmCx+TwmlI/jw/gsIgQBZsFIfB4fAKThIA==",
+        "2026": "AOMBYDgFQMaD+Xw+ns+EMAEIJgSG5/MBQBIBBgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "D11",
+      "barCount": 199,
+      "minDate": "2025-07-15",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "db66abd263180512aed0e21758e435d2",
+        "2026": "8be52bc80575fdf4a324e43e2f0d8793"
+      },
+      "yearBarCounts": {
+        "2025": 110,
+        "2026": 89
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8Hw+n8/nw/l8PJ3NR3L5bD6fz+fyKQ==",
+        "2026": "gFPYVCAAwOfTIDwki8/G8Ok8Hg/FBUFoLCYKRAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "D2D",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "e39c96a7bdd935f802746bebe2533cd8",
+        "2026": "55a054ea2b78669d460cc05026ad830c"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DAD",
+      "barCount": 206,
+      "minDate": "2025-08-29",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "a03d1e41462b14e4e98d29fd5d47216e",
+        "2026": "6ea843aa5cc70495f7388948fb813433"
+      },
+      "yearBarCounts": {
+        "2025": 87,
+        "2026": 119
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwvl8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+VQ+n8nC0HkEBofL59O5MA6PQQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "DAE",
+      "barCount": 217,
+      "minDate": "2025-07-22",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "29e0dad6951101ced497892e346a0fb1",
+        "2026": "8a7768f975610b3268b630bbf2357c0c"
+      },
+      "yearBarCounts": {
+        "2025": 115,
+        "2026": 102
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHg+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8PgMEAQAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 62
+    },
+    {
+      "symbol": "DAH",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "81ea19c5d05db54a44f0c1978b88a2ae",
+        "2026": "3bc2256fab5a5b9e932150642924bd19"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DAT",
+      "barCount": 210,
+      "minDate": "2025-08-26",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "42c029fc9e256e8f0f36b37c3c14f396",
+        "2026": "48609d0260304f4c5c45eb4a35c7c0e8"
+      },
+      "yearBarCounts": {
+        "2025": 88,
+        "2026": 122
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAw/h8Pp/P5/P5fD6fz6fzOQ==",
+        "2026": "4PP5fD4fwOfzeWw+nY2D4Pl4OpPPpwN4QDobTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 26
+    },
+    {
+      "symbol": "DBC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4ca726e8ef1094b770278f84a7155ae5",
+        "2026": "8fc51dd1471431ec69445f364eedb02d"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DBD",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "867aaf59b8ad54a5fcc7ed78d876ddb3",
+        "2026": "f1729977ba7128425a3ad6b9c5a6287f"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DBM",
+      "barCount": 285,
+      "minDate": "2025-04-14",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "148520b2d2fe1abfedab1e6f9925d5c6",
+        "2026": "5bd2260744005e756e843f20f2ca9d24"
+      },
+      "yearBarCounts": {
+        "2025": 141,
+        "2026": 144
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAJ/P4PP5fD6fz+fz+Xw+n8/nwwEANg9PAOMBeCiQBYLzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD4fDAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 18
+    },
+    {
+      "symbol": "DBT",
+      "barCount": 226,
+      "minDate": "2025-08-18",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7f991988dc7fd7a09a48d476778d38bc",
+        "2026": "5ce3bdd15dbfe08c0b6e08b73b2f9b51"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 140
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDnw/l8PpfP53HZVB6bzefyOQ==",
+        "2026": "oPPZfD4fwOfzOXwOn8/H8Pl8Pp/D5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DC1",
+      "barCount": 252,
+      "minDate": "2025-06-25",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "8ac70a35764e9fdbe589f03b02e8e4ef",
+        "2026": "09f043b14575a4ee10381b7d46c9d07a"
+      },
+      "yearBarCounts": {
+        "2025": 107,
+        "2026": 145
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAIfy+HwaDs5kgvl8NJfP4/PxeDifS8XzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/O5eD6fTQAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "DC4",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "cd71506ef475bfdcbb46f28d5d61b8b3",
+        "2026": "90b0640fd908fe57378f4f7852f687fb"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DCF",
+      "barCount": 241,
+      "minDate": "2025-05-05",
+      "maxDate": "2026-07-30",
+      "yearChecksums": {
+        "2025": "9d69c67f9ef5a6a77caad869fe6182b4",
+        "2026": "948e17378f4b509db872ba3dfb24df39"
+      },
+      "yearBarCounts": {
+        "2025": 129,
+        "2026": 112
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAA4PP5fD4PD4ABIAAwjsfkQ/EkLo9F5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8PgPIAjMIJAIIAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 76
+    },
+    {
+      "symbol": "DCL",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "93a9a6a95ce01019a17b43bfe12f71f3",
+        "2026": "ec244a881f943c202596cb662d8f8d82"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DCM",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "896603b26291c3500bd082cd9521cf50",
+        "2026": "2bbf0f019ad74102266154eed7f78a05"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DCR",
+      "barCount": 182,
+      "minDate": "2024-07-10",
+      "maxDate": "2026-08-06",
+      "yearChecksums": {
+        "2024": "857f7eab3d4f5607aba51ee1f30f824e",
+        "2025": "5ea3a5ea1327e5f03408f18c258ea345",
+        "2026": "54b1f6b5e062f4ebe1d4ddccde95465d"
+      },
+      "yearBarCounts": {
+        "2024": 30,
+        "2025": 97,
+        "2026": 55
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA5/MABAAAAAACAAQCAACEU3kQIAEAAA==",
+        "2025": "AAbjAUA6AgBF84F8HB8NwAFRAACTSQAAgGQ6EkDAgIAcIBMApBKQQDAPQYACOA==",
+        "2026": "IAAAMBoJQMAAAHg+nE+AcHFcHosAAEBAAAAEBwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 24
+    },
+    {
+      "symbol": "DCS",
+      "barCount": 174,
+      "minDate": "2024-04-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "b3f810ad11113d07eca9a8c40f2b0c35",
+        "2025": "7c638418bc9b57c827f4547633fd8aa8",
+        "2026": "b954af0f556f65837a1077333feff2de"
+      },
+      "yearBarCounts": {
+        "2024": 95,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAwFw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "DCT",
+      "barCount": 174,
+      "minDate": "2024-04-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "9ac253d7cbc95625f0c60ab6c68fb2e8",
+        "2025": "f2c03532de78c12f3ddb638f559b78d9",
+        "2026": "9cf6c490a46e0cfa7c19996560da06d7"
+      },
+      "yearBarCounts": {
+        "2024": 95,
+        "2025": 50,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAAAAwFw+mM/n8/l8Pp/P5/OBQCAQCAQCgUAgEAgEAoFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoFAIBAIAAKBQCAQCAQCgUAgEAgEAoFAIBAIBAKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "DDB",
+      "barCount": 221,
+      "minDate": "2025-08-20",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "aa3fba0b257605fc49c08c725ea68255",
+        "2026": "10d421a37e06aec1134d31a50958fb75"
+      },
+      "yearBarCounts": {
+        "2025": 94,
+        "2026": 127
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADnw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fDIHwOfxeWwGks7H8PlQJpfP5/P5fD4fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 24
+    },
+    {
+      "symbol": "DDG",
+      "barCount": 194,
+      "minDate": "2025-04-16",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0490d97a9172088989dfd51c6c7c02ba",
+        "2026": "ceddd4d891aa5f066fc25ef3f732c4b0"
+      },
+      "yearBarCounts": {
+        "2025": 145,
+        "2026": 49
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAJzP4PP5fD6fz+fz+Xw+n8/nw/l8Pp/P53OBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAD5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "DDM",
+      "barCount": 169,
+      "minDate": "2024-03-26",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2024": "52200ee969e0c72dddf0c07fbdc4db09",
+        "2025": "b5a02a636c3c12aab09620b99f39f3ab",
+        "2026": "96ec58dc32e85df9199c243ee79cf1b0"
+      },
+      "yearBarCounts": {
+        "2024": 103,
+        "2025": 44,
+        "2026": 22
+      },
+      "yearDayBitmaps": {
+        "2024": "AAAAAAAAAAAAAMDz+Vw+mM/n8/l8Pp/P5/OAQCAQCAAAgUAgEAgEAIFAIBAIBA==",
+        "2025": "CAQCAUAgEAgEAoBAIBAIAAKBACAQCAACgEAgEAgEAoFAIBAIBAKBQCAQCAACAA==",
+        "2026": "AAIBQCAQAAQCgUAgEAgAAAEAIBAIAACBQAAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 16
+    },
+    {
+      "symbol": "DDN",
+      "barCount": 209,
+      "minDate": "2025-08-22",
+      "maxDate": "2026-08-03",
+      "yearChecksums": {
+        "2025": "38c04c61510827a10718bcbf77f7055e",
+        "2026": "bfbcec7ce58faaa1d8ff3794b26a172c"
+      },
+      "yearBarCounts": {
+        "2025": 87,
+        "2026": 122
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADkw/l8OpvP5/P5fDyfz+fxGQ==",
+        "2026": "4PP5fD4XwOfz+Xg+nctD0OkIOJ+H47PxfD6HAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 22
+    },
+    {
+      "symbol": "DDV",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0a7a0a6042a636530b42c795e0a98002",
+        "2026": "b0fa58a4b8cf9fc7fbfb490cf89dfb73"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DFC",
+      "barCount": 277,
+      "minDate": "2025-05-15",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "faf51df7c3c91b316cc5464dc722d4f7",
+        "2026": "e45f8f770e44252eaa884cf362a883a0"
+      },
+      "yearBarCounts": {
+        "2025": 136,
+        "2026": 141
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAID5fD6fz+fz+Xw+n8znA6ksAAyJ5fPAcD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5PB6XAgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DFF",
+      "barCount": 174,
+      "minDate": "2025-04-10",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "d31fbe2e9c24b6edb16fd7f718c5b840",
+        "2026": "aa57e8375d4a94415a36e14661aee698"
+      },
+      "yearBarCounts": {
+        "2025": 145,
+        "2026": 29
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAMJ/P4PP5fD6fz+fz+Xw+n8/nw/l8Pp/P5wKBQCAQCAQCAQ==",
+        "2026": "AAKBQCAQAAQCgUAgEAgEAIFAIBAIBAKBQCAQCAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 19
+    },
+    {
+      "symbol": "DGC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "06a52465658e0eca77ef1d860dbf4dca",
+        "2026": "4d36d7909b99e41e8ca99eb27155ce51"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DGT",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "aed1b8929e6997d379588ac77bb3cc7d",
+        "2026": "03cec1b8cd5c8e3e2d9573227fee91ca"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DGW",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "07eb1ef294f0062839f00070ae67ce8b",
+        "2026": "3bc6c136afafca08abda7b41344963c2"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DHA",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2881b024978b7a61c4704f0ea79f4d75",
+        "2026": "d3c7cbcce04369f46b2681f613c49cf1"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DHB",
+      "barCount": 227,
+      "minDate": "2025-08-25",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3a49f1d31cce2caa698f57ceb599142f",
+        "2026": "63a5b1be9da3f1216fa52a24a26b5a91"
+      },
+      "yearBarCounts": {
+        "2025": 86,
+        "2026": 141
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgw/l8Pp/P5/PZHDafT+fzOQ==",
+        "2026": "YPP5dDIcwOfz+Xw+n8/H8Pl8Pp/P5/PpfD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DHC",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7854950f968a30e08e0fe63c985a2daf",
+        "2026": "bf8a2448f6a27031281dce016e21ac34"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DHD",
+      "barCount": 225,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-07",
+      "yearChecksums": {
+        "2025": "e46f41724cb663cf8fb97506ad1fc6c3",
+        "2026": "b12fd9168fabea178276987b536480ed"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 145
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/PxfD6bDwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DHG",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "381c83f881f7345acbc0f8e1be6e3296",
+        "2026": "9ea9b940fdeb557a94ab75dbd07eb1f8"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 28
+    },
+    {
+      "symbol": "DHM",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "54b14fdd1f35d5539130a2036063fae5",
+        "2026": "670255b04c79d9b4b0e5674554d874ca"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 27
+    },
+    {
+      "symbol": "DHN",
+      "barCount": 176,
+      "minDate": "2025-07-31",
+      "maxDate": "2026-07-30",
+      "yearChecksums": {
+        "2025": "546a7e72b9cbcd65e1e1a552a571bbf8",
+        "2026": "5ff855c59ddb25bab3dc843fb1cec2aa"
+      },
+      "yearBarCounts": {
+        "2025": 108,
+        "2026": 68
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwn8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwCdiIVAUDgkEIEhQCARCRDBAQCAIAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 20
+    },
+    {
+      "symbol": "DHP",
+      "barCount": 248,
+      "minDate": "2025-07-09",
+      "maxDate": "2026-08-05",
+      "yearChecksums": {
+        "2025": "d0eb1243c628eb981f430fd2293416d5",
+        "2026": "cfcbb4efd355ccc9b8f23fd7e753114e"
+      },
+      "yearBarCounts": {
+        "2025": 124,
+        "2026": 124
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA+Xw+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp9PAHKxLCiCAgAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 21
+    },
+    {
+      "symbol": "FPT",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9c675ada19228ab0e5705a842dc959e9",
+        "2026": "5d4d038bf992821d4c9aeacc1804b674"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "GAS",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "114bde54aff45e8d8cfd357a09d9d39e",
+        "2026": "c74486f769169663f0947f70c4b86882"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "GEE",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "f190dcb8e6ddd2b1ba9c016c96cf3fac",
+        "2026": "b03f4e43411e5ee9772a5a407cfd8db1"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "GEX",
+      "barCount": 228,
+      "minDate": "2025-09-11",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "cf7f76fd80fac9e0fdc46d96369a2c63",
+        "2026": "e4422f61d82176df1441edd1da65c7eb"
+      },
+      "yearBarCounts": {
+        "2025": 80,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMB8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 36
+    },
+    {
+      "symbol": "GMD",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "51de92012570f32fffc929f228c94825",
+        "2026": "e970aa02d46335128522934313642ac2"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "HDB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "ae534c14eeac4288ce5ffd97c3c5423b",
+        "2026": "9125e4b9e3eb511081f4dfd05b41c1f7"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "HPG",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d8f18e5338af65e05499b36869e47235",
+        "2026": "bcea7236dad8bc5bb16e3cc2ddebb672"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "MBB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6039030bc1d906f01147c1d070dee2b9",
+        "2026": "09388f5b78019132ff7f95ad6ac43d5e"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "MSN",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "66a786b56ab28212751b49f099bf3830",
+        "2026": "9c994cc70846b021a02d746b79c8ae54"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "MWG",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "baac4ecf5a8844a32c678abd69a1bdf6",
+        "2026": "0e984f208d0cf34d80f7545086f4ea3c"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "NVL",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "1cac54cf423dbfb25f1ef241df86c182",
+        "2026": "7f52aac7b156a13aa7f9f2eaf3278c31"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "PDR",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "0f65872b9772f7fffbf9b0ed4274021c",
+        "2026": "add5bdc67a5d10c9f43ca83e3123eaf0"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "PLX",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9241d17a29d1cb0c0ef8fe14b32fe97d",
+        "2026": "acfa25add22ff5be2748646b23b35731"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "PNJ",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "a2d3d37816a702c9ca56173bbe0186ac",
+        "2026": "9c30810d58d5b606139e4d8b279a8672"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "POW",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "07e9ddb111f293019f963153dfc4e9eb",
+        "2026": "a917a3294060d8766802c5462e971a18"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "REE",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9e6caa067f1a7334abfcc5559fa6d15a",
+        "2026": "a32f1aa083c684efb5e1df76e9bc7dea"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "SAB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c4f584c65dfb2046f4de2906a0c25b30",
+        "2026": "8035efb591769c1b394bf31cfc931dd4"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "SHB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "ab9dfb2fcd9c4815b38dc30190981bb5",
+        "2026": "b4214bd3870acd2eb8bcc4a8d4e38dd7"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "SSB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "7a5e9a71e76536741da8ba277cc1231d",
+        "2026": "5302ce7956221aa655f67bb15af36bbe"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "SSI",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "cea70530725483fccff7c2d2d5361b69",
+        "2026": "aef64a160548da7e0f7d02d4977ff193"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "STB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "89e5af8a4b494bec91d6e3b3123c5659",
+        "2026": "0370954894cc29b5098b1451bd02edba"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "TCB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "6feaa95a36daeddb4f63d4fb666709f0",
+        "2026": "78baaaa3fd18ae0a1944e157641fe1de"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "TPB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "ef194945878fa8b13b27d9a4142547f5",
+        "2026": "7a42b40f8c65f9f33037972dc96c028d"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "VCB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "cbfc2387977860862033aa5da38c8354",
+        "2026": "50f0e01dea406c5c6766f8aa64c7c6e6"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "VCG",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "2bc17452cf972d7da2cf2ca01a7548e4",
+        "2026": "d902c1cc67732ee26e9cb4416028edfc"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "VGC",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "d882980b12ed131ed6a4312a8b2d4624",
+        "2026": "7bd45ce8acfa3681b1f604cc2b3a6f4f"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "VHM",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "b5d4aa072d39ef7f372351b34d8a3ac1",
+        "2026": "c6eb65dce0e81709e7f615cf89bf637f"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "VIB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "4ccb8a7b360cb8b6411aefcfaee61fb1",
+        "2026": "92a3a4d15188b3565af8680ef631b6de"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "VIC",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "48909465a1b9ac52cd11d6f936d3065c",
+        "2026": "4ed8c3611444aefc39043c6005506de5"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "VJC",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "a4c982444f78114503aa3eb78ece982c",
+        "2026": "3dbb994937603bb221b0e6d27ae5ba55"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "VND",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "3a79cee114be35a7a2a4dee0a90950fb",
+        "2026": "011cde907db96a3c5ce2385496a6b8cc"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "VNM",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c958f7421f3dde57d5218a3264f7aa0b",
+        "2026": "6fe4d1dbc95b774d646d4d5c9a4b0884"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    },
+    {
+      "symbol": "VPB",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "df13cb9c25257fd33cbdbaac468ff4d5",
+        "2026": "343d9d0fb61761293438b3b0227ee0af"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "VRE",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "18c79bda5d26c40aaf5496ad886a9405",
+        "2026": "9eaf9841974523971128803bea5840d4"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 17
+    },
+    {
+      "symbol": "VTP",
+      "barCount": 215,
+      "minDate": "2025-09-30",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "c9d8d6779677ff931bdec1dd767b4c28",
+        "2026": "4ad784c9455dee39647f364d60ce3b4a"
+      },
+      "yearBarCounts": {
+        "2025": 67,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ7P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      },
+      "staleBars90d": 23
+    }
+  ],
+  "indexes": [
+    {
+      "symbol": "VNINDEX",
+      "barCount": 373,
+      "minDate": "2025-02-12",
+      "maxDate": "2026-08-10",
+      "yearChecksums": {
+        "2025": "9d7126ac57e815d1e6064aa475b10236",
+        "2026": "e06bdddb73fe495c07ac3aae3a4f92bd"
+      },
+      "yearBarCounts": {
+        "2025": 225,
+        "2026": 148
+      },
+      "yearDayBitmaps": {
+        "2025": "AAAAAAA4n8/n8/l8PJ/P4PP5fD6fz+fz+Xw+n8/nw/l8Pp/P5/P5fD6fz+fzOQ==",
+        "2026": "4PP5fD4fwOfz+Xw+n8/H8Pl8Pp/P5/P5fD6fTwAAAAAAAAAAAAAAAAAAAAAAAA=="
+      }
+    }
+  ]
+}
