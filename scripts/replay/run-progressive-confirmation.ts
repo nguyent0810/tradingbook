@@ -63,7 +63,7 @@ const isLeader = (o: Obs) =>
   Boolean(o.earlyRsImproving && o.rsSlopeTopQuintile && (o.urPresent || o.freshMa10Reclaim) && o.aboveMa10);
 
 /** Sessions after T0 at which evidence is snapshotted. Declared up front. */
-const CHECKPOINTS = [0, 2, 3, 5, 10] as const;
+const CHECKPOINTS = [0, 1, 2, 3, 5, 8, 10] as const;
 
 /** Universe floor below which breadth is meaningless — see the previous phase. */
 const MIN_UNIVERSE = 100;
@@ -190,6 +190,10 @@ function main(): void {
     }
 
     return {
+      // Identity is the DECLINE, not the attempt: it is invariant to every
+      // resolution parameter, so the same episode can be tracked across the
+      // whole sensitivity grid and T0-freezing can be asserted.
+      episodeId: internals[ep.downtrendStart]!.sessionDate,
       t0Date: t0.sessionDate, era,
       downtrendStartDate: internals[ep.downtrendStart]!.sessionDate,
       declineSessions: ep.t0 - ep.downtrendStart,

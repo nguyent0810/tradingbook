@@ -16,7 +16,15 @@
 > one, and one finding below (the circularity stratification) is exactly the kind
 > of thing an independent reviewer should re-examine.
 
-## Verdict: `LABEL-SENSITIVE` (provisional)
+> **SUPERSEDED on the label-sensitivity point.** The `stab=8` collapse that
+> produced this verdict was isolated in
+> [`T0-FROZEN-VERIFICATION.md`](T0-FROZEN-VERIFICATION.md): on the identical 26
+> declines, moving only T0 reproduces the collapse, so it was a measurement-origin
+> effect rather than label sensitivity. That study supersedes this verdict with
+> `ROBUST EARLY PROGRESSION SIGNAL`, narrowly scoped to `dMa10` and
+> `dNewHighRate` at T+1/T+2. The rest of this document stands.
+
+## Verdict: `LABEL-SENSITIVE` (provisional — superseded, see banner)
 
 The evidence is the strongest this project has produced — and it depends on one
 definitional choice in a way that disqualifies a stronger verdict.

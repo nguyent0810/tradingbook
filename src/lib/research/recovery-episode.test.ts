@@ -109,6 +109,40 @@ describe("point-in-time — T0 detection must not see the future", () => {
   });
 });
 
+describe("T0 is frozen against every resolution parameter", () => {
+  // The whole sensitivity design rests on this: `holdSessions` and
+  // `horizonSessions` describe how an episode RESOLVES and must not move where
+  // it BEGINS. Only `stabilizationSessions` and `newLowLookback` — the
+  // initiation rules — may. Without this separation a "label sensitivity" test
+  // silently varies the measurement origin too, which is the ambiguity this
+  // phase exists to remove.
+  const closes = buildDeclineThenRecovery(0.9);
+
+  it("gives identical t0 and pre-T0 structure across the whole resolution grid", () => {
+    const base = segmentEpisodes(closes, P);
+    for (const holdSessions of [3, 5, 8, 10, 15]) {
+      for (const horizonSessions of [20, 30, 40, 60]) {
+        const v = segmentEpisodes(closes, { ...P, holdSessions, horizonSessions });
+        expect(v.map((e) => e.t0)).toEqual(base.map((e) => e.t0));
+        expect(v.map((e) => e.downtrendStart)).toEqual(base.map((e) => e.downtrendStart));
+        expect(v.map((e) => e.episodeLow)).toEqual(base.map((e) => e.episodeLow));
+        expect(v.map((e) => e.drawdownAtT0)).toEqual(base.map((e) => e.drawdownAtT0));
+      }
+    }
+  });
+
+  it("does move t0 when an INITIATION rule changes — the case being isolated", () => {
+    const strict = segmentEpisodes(closes, { ...P, stabilizationSessions: 8 });
+    const base = segmentEpisodes(closes, P);
+    // Later or fewer, never earlier: a longer stabilisation requirement can only
+    // delay or suppress an attempt.
+    for (let i = 0; i < strict.length; i++) {
+      const match = base.find((b) => b.downtrendStart === strict[i]!.downtrendStart);
+      if (match) expect(strict[i]!.t0).toBeGreaterThanOrEqual(match.t0);
+    }
+  });
+});
+
 describe("segmentEpisodes — parameters change the count, not the point-in-time property", () => {
   it("a longer stabilisation requirement yields no more episodes", () => {
     const closes = buildDeclineThenRecovery(0.9);
