@@ -41,6 +41,40 @@ export type SymbolSeries = {
 
 export type ReplayProgress = (done: number, total: number, signals: number) => void;
 
+/**
+ * Per-session diagnostic record. Emitted for every evaluated session, whether or
+ * not anything surfaced.
+ *
+ * Exists because the signals dump can only describe setups that SURVIVED Gate 1
+ * and Gate 2. "Did setups stop forming, or stop being surfaced, or stop working?"
+ * are three different questions, and the signals alone cannot tell them apart.
+ */
+export type SessionDiagnostic = {
+  sessionDate: string;
+  gate1Level: "PASS" | "WARNING" | "FAIL";
+  trend: string | null;
+  momentum: string | null;
+  indexExtensionPct: number | null;
+  indexUpStreak: number;
+  indexAtrPct: number | null;
+  universe: number;
+  tradable: number;
+  /** Counts of Gate 2 terminal rejection codes across the tradable universe. */
+  rejections: Record<string, number>;
+  /** Every VALID Gate 2 candidate, before Gate 1 surfacing filters any of them. */
+  candidates: Array<{
+    symbol: string;
+    quality: "A" | "B";
+    rankScore: number;
+    close: number;
+    breakoutLevel: number;
+    pullbackZoneLow: number;
+    pullbackZoneHigh: number;
+    stopLevel: number;
+    atr: number | null;
+  }>;
+};
+
 export type ReplayOptions = {
   /** Skip sessions before this date (warm-up for MA50 etc.). */
   minSessionDate?: string;
@@ -120,6 +154,8 @@ export function runReplay(params: {
   tactical: readonly TacticalWindowRow[];
   options?: ReplayOptions;
   onProgress?: ReplayProgress;
+  /** Diagnostics sink. Never consulted by any decision. */
+  onSession?: (d: SessionDiagnostic) => void;
 }): ReplayRunResult {
   const opts = params.options ?? {};
 
@@ -248,6 +284,8 @@ export function runReplay(params: {
       atrAtDecision: number | null;
     }> = [];
     let tradableCount = 0;
+    const rejections: Record<string, number> = {};
+    const candidateDiagnostics: SessionDiagnostic["candidates"] = [];
 
     for (const member of universe.members) {
       const window = slices.get(member.symbol);
@@ -259,7 +297,26 @@ export function runReplay(params: {
       tradableCount++;
 
       const ev = evaluateBreakoutPullbackCandidate(toGate2Bars(bounded), session);
-      if (ev.quality === "INVALID") continue;
+      if (ev.quality === "INVALID") {
+        if (params.onSession) {
+          const code = ev.terminalCode ?? "unspecified";
+          rejections[code] = (rejections[code] ?? 0) + 1;
+        }
+        continue;
+      }
+      if (params.onSession) {
+        candidateDiagnostics.push({
+          symbol: member.symbol,
+          quality: ev.quality,
+          rankScore: ev.rankScore,
+          close: ev.close,
+          breakoutLevel: ev.breakoutLevel,
+          pullbackZoneLow: ev.pullbackZoneLow,
+          pullbackZoneHigh: ev.pullbackZoneHigh,
+          stopLevel: ev.stopLevel,
+          atr: computeAtr(bounded),
+        });
+      }
 
       let atrAtDecision: number | null = null;
       if (applyStopFloor) {
@@ -294,6 +351,23 @@ export function runReplay(params: {
       sessionDate: sessionKey,
       universe: universe.members.length,
       tradable: tradableCount,
+    });
+
+    params.onSession?.({
+      sessionDate: sessionKey,
+      gate1Level,
+      trend: gate1Diagnostics.trend,
+      momentum: gate1Diagnostics.momentum,
+      indexExtensionPct: gate1Diagnostics.indexExtensionPct,
+      indexUpStreak: gate1Diagnostics.indexUpStreak,
+      indexAtrPct: (() => {
+        const a = computeAtr(regimeBars);
+        return a != null && lastIdxClose > 0 ? (a / lastIdxClose) * 100 : null;
+      })(),
+      universe: universe.members.length,
+      tradable: tradableCount,
+      rejections,
+      candidates: candidateDiagnostics,
     });
 
     // ---- Gate 1 surfacing rule, from production's single source of truth ----
