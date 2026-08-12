@@ -149,6 +149,31 @@ export function runReplay(params: {
     );
     const gate1Level = regime.level as "PASS" | "WARNING" | "FAIL";
 
+    // Gate 1 diagnostics. Derived from the SAME bars the gate saw, so they
+    // describe the decision rather than a reconstruction of it.
+    const idxCloses = regimeBars.map((b) => b.close);
+    const lastIdxClose = idxCloses[idxCloses.length - 1]!;
+    const ma50 =
+      idxCloses.slice(-50).reduce((a, x) => a + x, 0) / Math.min(50, idxCloses.length);
+    let indexUpStreak = 0;
+    for (let k = idxCloses.length - 1; k > 0; k--) {
+      if (idxCloses[k]! > idxCloses[k - 1]!) indexUpStreak++;
+      else break;
+    }
+    // Outcome channel: the index's own forward move, over the trade horizon.
+    const idxFuture = guard.outcomeRows(
+      "forward:VNINDEX",
+      params.indexBars.slice(idxEnd + 1)
+    );
+    const idxFwdBar = idxFuture[REPLAY_EXIT_HORIZON_SESSIONS - 1];
+    const gate1Diagnostics = {
+      trend: regime.trend ?? null,
+      momentum: regime.momentum ?? null,
+      indexExtensionPct: ma50 > 0 ? ((lastIdxClose - ma50) / ma50) * 100 : null,
+      indexUpStreak,
+      indexFwdPct: idxFwdBar ? ((idxFwdBar.close - lastIdxClose) / lastIdxClose) * 100 : null,
+    };
+
     // ---- Universe as of T ----
     const lookbackFrom = sessionMs - TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS * 86_400_000;
     const activity: SymbolActivityRow[] = [];
@@ -251,6 +276,7 @@ export function runReplay(params: {
         rankScore: c.rankScore,
         trade: sim.ok ? sim.trade : null,
         unscoredReason: sim.ok ? null : sim.reason,
+        gate1: gate1Diagnostics,
       });
     }
 

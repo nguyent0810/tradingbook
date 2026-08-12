@@ -21,6 +21,30 @@ export type ReplaySignal = {
   trade: SimulatedTrade | null;
   /** Why a surfaced signal produced no trade. */
   unscoredReason: string | null;
+  /**
+   * Gate 1's inputs, recorded rather than re-derived.
+   *
+   * `gate1Level` is a three-way collapse of two independent conditions, so the
+   * level alone cannot say which condition drives an outcome. Keeping the raw
+   * inputs lets PASS be decomposed into (trend, momentum) without re-running the
+   * replay or reimplementing the rule — reimplementing it in an analysis script
+   * is how a decomposition ends up measuring the analysis instead of the gate.
+   */
+  gate1?: {
+    trend: "bullish" | "bearish" | "neutral" | null;
+    momentum: "up" | "down" | "neutral" | null;
+    /** Index close vs its MA50, in percent. Signed: negative means below. */
+    indexExtensionPct: number | null;
+    /** Consecutive strictly-rising index closes ending at T. */
+    indexUpStreak: number;
+    /**
+     * Index return over the same forward horizon as the trade. Read through the
+     * outcome channel, never the decision channel. Present so "did the market
+     * itself go up after this regime?" can be answered without conflating it
+     * with the stock's own move.
+     */
+    indexFwdPct: number | null;
+  };
 };
 
 export type PerformanceStats = {

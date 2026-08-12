@@ -1,17 +1,17 @@
 {
-  "capturedAt": "2026-08-11T10:12:59.807Z",
+  "capturedAt": "2026-08-12T00:36:26.537Z",
   "database": "ep-tiny-meadow-ana0vrxq-pooler.c-6.us-east-1.aws.neon.tech/neondb",
   "inputs": {
     "symbols": 1537,
-    "totalBars": 705261,
-    "indexBars": 4073,
+    "totalBars": 705466,
+    "indexBars": 4074,
     "minSession": null,
     "maxSession": null
   },
   "integrity": {
     "guardViolations": 0,
-    "sessionsEvaluated": 4024,
-    "avgUniversePerSession": 166.1,
+    "sessionsEvaluated": 4025,
+    "avgUniversePerSession": 166.2,
     "avgTradablePerSession": 36.5
   },
   "survivorship": {
@@ -2973,5 +2973,5 @@
     "Entry is the next session's open, because the decision consumed the signal bar's close.",
     "Universe membership is inferred from bar evidence. Symbols with no stored bars cannot be replayed, so results are survivor-conditional."
   ],
-  "elapsedSeconds": 598
+  "elapsedSeconds": 618
 }

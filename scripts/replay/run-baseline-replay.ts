@@ -173,6 +173,7 @@ async function main(): Promise<void> {
             gate1Level: s.gate1Level,
             rankScore: s.rankScore,
             unscoredReason: s.unscoredReason,
+            ...(s.gate1 ?? {}),
             ...(s.trade ?? {}),
           })
         )
