@@ -89,7 +89,13 @@ async function main(): Promise<void> {
     series,
     indexBars: indexRows as TradeBar[],
     tactical,
-    options: { minSessionDate: minSession, maxSessionDate: maxSession, progressEvery: 200 },
+    options: {
+      minSessionDate: minSession,
+      maxSessionDate: maxSession,
+      progressEvery: 200,
+      applyExecutableStopFloor: process.argv.includes("--stop-floor"),
+      stopFloorAtrMultiple: arg("atr-multiple") ? Number(arg("atr-multiple")) : undefined,
+    },
     onProgress: (done, total, sig) =>
       console.error(`  session ${done}/${total} · signals ${sig} · ${((Date.now() - runStart) / 1000).toFixed(0)}s`),
   });
@@ -118,6 +124,13 @@ async function main(): Promise<void> {
       indexBars: indexRows.length,
       minSession: minSession ?? null,
       maxSession: maxSession ?? null,
+    },
+    variant: process.argv.includes("--stop-floor") ? "v2-executable-stop-floor" : "v1-baseline",
+    stopFloor: {
+      applied: process.argv.includes("--stop-floor"),
+      atrMultiple: arg("atr-multiple") ? Number(arg("atr-multiple")) : 1.0,
+      rejections: result.stopFloorRejections,
+      byBinding: result.stopFloorRejectionsByBinding,
     },
     integrity: {
       guardViolations: result.guardViolations,

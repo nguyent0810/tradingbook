@@ -20,6 +20,7 @@ import { evaluateMarketRegime } from "@/lib/playbook/gate1-market";
 import { evaluateBreakoutPullbackCandidate } from "@/lib/scanner/gate2";
 import { deriveGate1SurfacingRule } from "@/lib/scanner/gate2/collect-candidates";
 import { evaluateTradability } from "@/lib/scanner/tradability";
+import { computeAtr, computeMinStopFrac } from "@/lib/scanner/stop-feasibility";
 import { TRADABILITY_BATCH_LOOKBACK_CALENDAR_DAYS } from "@/lib/scanner/tradability-constants";
 import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
 import { createPointInTimeGuard, isoDay } from "./point-in-time-guard";
@@ -46,6 +47,24 @@ export type ReplayOptions = {
   maxSessionDate?: string;
   /** Emit progress every N sessions. */
   progressEvery?: number;
+  /**
+   * Apply the executable stop floor (tick / fee / volatility) on top of Gate 2's
+   * own `GATE2_MIN_RISK_TO_STOP_FRAC`.
+   *
+   * Off by default so the baseline stays reproducible. Enabling it does not
+   * change any scanner constant or move any stop — it only drops candidates
+   * whose entry-to-stop distance is too small to be executed as stated, which is
+   * the v1-vs-v2 comparison. Rejections are counted rather than discarded, so
+   * "how many setups does this remove" is answerable from the result.
+   */
+  applyExecutableStopFloor?: boolean;
+  /**
+   * Override the ATR multiple in the stop floor. For predeclared sensitivity
+   * runs only — the shipped constant is 1.0 and is pinned by a test. Exposing it
+   * here keeps a sensitivity sweep from being done by editing the constant,
+   * which is how a "sensitivity check" quietly becomes a fit.
+   */
+  stopFloorAtrMultiple?: number;
 };
 
 export type ReplayRunResult = {
@@ -53,6 +72,13 @@ export type ReplayRunResult = {
   sessionsEvaluated: number;
   universeSizeBySession: Array<{ sessionDate: string; universe: number; tradable: number }>;
   guardViolations: number;
+  /**
+   * Valid Gate 2 setups dropped because their stop was too tight to execute.
+   * Always present; zero when the floor is off. Counting rather than silently
+   * filtering is what makes "what did v2 cost" answerable.
+   */
+  stopFloorRejections: number;
+  stopFloorRejectionsByBinding: { tick: number; fee: number; volatility: number };
 };
 
 function assertAscending(bars: readonly { date: Date }[], label: string): void {
@@ -125,6 +151,9 @@ export function runReplay(params: {
     });
 
   const progressEvery = opts.progressEvery ?? 100;
+  const applyStopFloor = opts.applyExecutableStopFloor ?? false;
+  let stopFloorRejections = 0;
+  const stopFloorRejectionsByBinding = { tick: 0, fee: 0, volatility: 0 };
 
   for (let si = 0; si < sessions.length; si++) {
     const session = sessions[si]!;
@@ -215,6 +244,8 @@ export function runReplay(params: {
       quality: "A" | "B";
       rankScore: number;
       stopLevel: number;
+      /** ATR as of T, so the floor can be recomputed against the entry price. */
+      atrAtDecision: number | null;
     }> = [];
     let tradableCount = 0;
 
@@ -229,11 +260,33 @@ export function runReplay(params: {
 
       const ev = evaluateBreakoutPullbackCandidate(toGate2Bars(bounded), session);
       if (ev.quality === "INVALID") continue;
+
+      let atrAtDecision: number | null = null;
+      if (applyStopFloor) {
+        // ATR from the SAME decision-channel window Gate 2 just used, so the
+        // floor cannot see anything the setup could not.
+        const entryRef = bounded[bounded.length - 1]!.close;
+        const atr = computeAtr(bounded);
+        const floor = computeMinStopFrac({
+          entryPrice: entryRef,
+          atr,
+          atrMultiple: opts.stopFloorAtrMultiple,
+        });
+        const riskFrac = (entryRef - ev.stopLevel) / entryRef;
+        if (riskFrac < floor.minStopFrac) {
+          stopFloorRejections++;
+          stopFloorRejectionsByBinding[floor.binding]++;
+          continue;
+        }
+        atrAtDecision = atr;
+      }
+
       candidates.push({
         symbol: member.symbol,
         quality: ev.quality,
         rankScore: ev.rankScore,
         stopLevel: ev.stopLevel,
+        atrAtDecision,
       });
     }
 
@@ -262,10 +315,25 @@ export function runReplay(params: {
       const end = lastIndexAtOrBefore(s.bars, sessionMs);
       const future = guard.outcomeRows(`forward:${c.symbol}`, s.bars.slice(end + 1));
 
+      // Re-derive the floor against the price actually paid. ATR is fixed as of
+      // T (tomorrow's range is unknowable), but the entry price is not the close
+      // the floor was first measured against, and a gap moves every ratio that
+      // depends on it.
+      const entryOpen = future[0]?.open;
+      const minRiskFrac =
+        applyStopFloor && entryOpen != null && entryOpen > 0
+          ? computeMinStopFrac({
+              entryPrice: entryOpen,
+              atr: c.atrAtDecision,
+              atrMultiple: opts.stopFloorAtrMultiple,
+            }).minStopFrac
+          : undefined;
+
       const sim = simulateTrade({
         futureBars: future as readonly TradeBar[],
         stopPrice: c.stopLevel,
         horizonSessions: REPLAY_EXIT_HORIZON_SESSIONS,
+        minRiskFrac,
       });
 
       signals.push({
@@ -291,5 +359,7 @@ export function runReplay(params: {
     sessionsEvaluated: universeSizeBySession.length,
     universeSizeBySession,
     guardViolations,
+    stopFloorRejections,
+    stopFloorRejectionsByBinding,
   };
 }

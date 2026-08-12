@@ -46,11 +46,22 @@ function parseLimit(argv: string[]): number | null {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+/**
+ * Walk-forward window, in sessions.
+ *
+ * This was hard-capped at 120, which made the diagnostic structurally unable to
+ * answer its own question: 120 sessions yield ~20 A/B candidates and a handful
+ * of rank changes, so every forward-outcome bucket came back at n≈1-4. A cap
+ * that silently bounds evidence below the level needed for a verdict is worse
+ * than no diagnostic, because the output still looks like a result.
+ *
+ * Uncapped now. The cost is linear in the window and the query is read-only.
+ */
 function parseLookback(argv: string[]): number {
   const raw = argv.find((a) => a.startsWith("--lookbackSessions="));
   if (!raw) return 40;
   const n = Number.parseInt(raw.slice("--lookbackSessions=".length), 10);
-  return Number.isFinite(n) && n > 0 ? Math.min(n, 120) : 40;
+  return Number.isFinite(n) && n > 0 ? n : 40;
 }
 
 function underlying(symbol: string): string {

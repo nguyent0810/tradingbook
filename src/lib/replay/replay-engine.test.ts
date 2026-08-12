@@ -166,6 +166,40 @@ describe("runReplay — the future cannot reach a decision", () => {
     }
   });
 
+  it("leaves v1 byte-identical when the executable stop floor is off", () => {
+    // The floor is opt-in. If merely adding the option moved the baseline, every
+    // v1-vs-v2 comparison would be measuring the plumbing.
+    const base = { series, indexBars, tactical: [], options: { progressEvery: 1e9 } };
+    const a = runReplay(base);
+    const b = runReplay({ ...base, options: { progressEvery: 1e9, applyExecutableStopFloor: false } });
+    expect(b.signals.map((s) => `${s.sessionDate}|${s.symbol}`)).toEqual(
+      a.signals.map((s) => `${s.sessionDate}|${s.symbol}`)
+    );
+    expect(a.stopFloorRejections).toBe(0);
+  });
+
+  it("computes the stop floor without reading past the decision session", () => {
+    // The floor needs ATR, which is the one new decision-time input. If it were
+    // taken from the full series instead of the bounded window, the poisoned run
+    // would reject a different set of candidates and the counts would diverge.
+    const withFloor = { tactical: [], options: { maxSessionDate: cutoff, progressEvery: 1e9, applyExecutableStopFloor: true } };
+    const truncated = runReplay({
+      ...withFloor,
+      series: series.map((s) => ({ ...s, bars: truncateAt(s.bars, cutoffMs) })),
+      indexBars: truncateAt(indexBars, cutoffMs),
+    });
+    const poisoned = runReplay({
+      ...withFloor,
+      series: series.map((s) => ({ ...s, bars: poisonAfter(s.bars, cutoffMs) })),
+      indexBars: poisonAfter(indexBars, cutoffMs),
+    });
+    expect(poisoned.guardViolations).toBe(0);
+    expect(poisoned.stopFloorRejections).toBe(truncated.stopFloorRejections);
+    expect(poisoned.signals.map((s) => `${s.sessionDate}|${s.symbol}`)).toEqual(
+      truncated.signals.map((s) => `${s.sessionDate}|${s.symbol}`)
+    );
+  });
+
   it("refuses unsorted input rather than silently mis-slicing it", () => {
     // The binary search would return an arbitrary index on unsorted bars, and the
     // "through T" window could then contain future rows.

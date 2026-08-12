@@ -60,7 +60,14 @@ export type SimulatedTrade = {
 
 export type TradeSimulationOutcome =
   | { ok: true; trade: SimulatedTrade }
-  | { ok: false; reason: "no_entry_bar" | "insufficient_forward_bars" | "non_positive_risk" };
+  | {
+      ok: false;
+      reason:
+        | "no_entry_bar"
+        | "insufficient_forward_bars"
+        | "non_positive_risk"
+        | "stop_not_executable_at_entry";
+    };
 
 /**
  * Simulate one signal.
@@ -73,6 +80,20 @@ export function simulateTrade(params: {
   futureBars: readonly TradeBar[];
   stopPrice: number;
   horizonSessions?: number;
+  /**
+   * Minimum executable (entry − stop)/entry, re-checked at the ENTRY price.
+   *
+   * A floor applied only at the signal's close does not guarantee an executable
+   * stop: the trade fills at the next open, and a gap toward the stop collapses
+   * the distance without the decision-time check ever seeing it. REE 2020-07-24
+   * is the case in point — 3.11% of room at the close, then a 3.1% gap down to
+   * the open left 0.049%, which is what produced the 286R artefact.
+   *
+   * Re-checking here is not look-ahead: the opening price is observable at the
+   * moment the entry would be placed, so declining the fill is a decision a
+   * trader could actually make. Omit to score every entry regardless.
+   */
+  minRiskFrac?: number;
 }): TradeSimulationOutcome {
   const horizon = params.horizonSessions ?? REPLAY_EXIT_HORIZON_SESSIONS;
   const bars = params.futureBars;
@@ -85,14 +106,23 @@ export function simulateTrade(params: {
   const entryPrice = entryBar.open;
   const riskPerShare = entryPrice - params.stopPrice;
   if (!(riskPerShare > 0)) return { ok: false, reason: "non_positive_risk" };
+  if (params.minRiskFrac != null && riskPerShare / entryPrice < params.minRiskFrac) {
+    return { ok: false, reason: "stop_not_executable_at_entry" };
+  }
 
-  const held = bars.slice(1, horizon + 1);
+  // The position exists from the entry bar's OPEN, so the entry bar itself can
+  // stop it out and its excursion counts. Scanning from bars[1] skipped the
+  // session most likely to gap through the stop, which flattered both stop rate
+  // and MAE. The horizon still means `horizon` sessions held after entry day.
+  const held = bars.slice(0, horizon + 1);
 
   let exitPrice = held[held.length - 1]!.close;
   let exitDate = held[held.length - 1]!.date;
   let exitReason: SimulatedTrade["exitReason"] = "TIME_EXIT";
   let sessionsToStop: number | null = null;
-  let sessionsHeld = held.length;
+  // `held` now starts at the entry bar, so the count of sessions held after
+  // entry is one less than its length.
+  let sessionsHeld = held.length - 1;
 
   let mfe = -Infinity;
   let mae = Infinity;
@@ -109,8 +139,9 @@ export function simulateTrade(params: {
       exitPrice = Math.min(params.stopPrice, b.open);
       exitDate = b.date;
       exitReason = "STOP_HIT";
-      sessionsToStop = i + 1;
-      sessionsHeld = i + 1;
+      // 0 means stopped on the entry session itself.
+      sessionsToStop = i;
+      sessionsHeld = i;
       break;
     }
   }

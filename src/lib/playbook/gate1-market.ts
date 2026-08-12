@@ -42,6 +42,26 @@ function trendFromCloseVsMa50(lastClose: number, ma50: number): Trend {
  * PASS:  bullish trend AND momentum up
  * FAIL:  bearish trend AND momentum down
  * WARNING: all other cases (including insufficient history)
+ *
+ * ---------------------------------------------------------------------------
+ * SUSPECT — INSUFFICIENT EVIDENCE (audited 2026-08-12, unchanged deliberately)
+ *
+ * Replay over 4,024 sessions found PASS performing WORSE than WARNING on the
+ * same tier. Holding `trend` at bullish and varying only `momentum`, the branch
+ * PASS requires is the weakest of the three (−0.38% mean forward return, n=103,
+ * vs +1.41%, n=231). Close-to-close index timing and index extension were both
+ * tested as explanations and neither held.
+ *
+ * The rule is NOT changed, because the evidence does not support changing it:
+ * the confidence interval crosses zero and removing 11 of 270 trades moves the
+ * headline interval across zero too. n=103 is the binding limit.
+ *
+ * The `momentum` clause is the prime suspect — it demands the index be extended
+ * (an up-streak of >=2 sessions) at the moment a breakout-PULLBACK setup demands
+ * the stock be pulled back. Do not act on that reading until it is demonstrated.
+ *
+ * Full analysis: docs/trading/replay/GATE1-AND-STOP-AUDIT.md
+ * ---------------------------------------------------------------------------
  */
 export function evaluateMarketRegime(bars: Bar[]): MarketRegime {
   const reasons: string[] = [];
