@@ -169,14 +169,49 @@ describe("judgeEdge", () => {
     expect(j.failureConcentration.join(" ")).toContain("adverse excursion");
   });
 
-  it("flags a result carried by a few symbols even when expectancy is positive", () => {
+  it("downgrades to INCONCLUSIVE when a few symbols carry the whole result", () => {
+    // Positive expectancy that comes almost entirely from one trade has not been
+    // observed enough times to be an edge. Reporting EDGE with the concentration
+    // as a footnote invites exactly the wrong decision, so it blocks the verdict.
     const signals = [
       ...Array.from({ length: 149 }, () => sig({ symbol: "SPREAD", trade: trade({ rMultiple: 0.01 }) })),
       sig({ symbol: "ONE", trade: trade({ rMultiple: 200 }) }),
     ];
     const j = judgeEdge(buildReplayReport(signals));
-    expect(j.verdict).toBe("EDGE");
+    expect(j.verdict).toBe("INCONCLUSIVE");
     expect(j.failureConcentration.join(" ")).toContain("not broad-based");
+  });
+});
+
+describe("verdict precedence — disproof outranks 'not yet proven'", () => {
+  const many = (r: number, n: number, over: Partial<SimulatedTrade> = {}) =>
+    Array.from({ length: n }, (_, i) =>
+      sig({ symbol: `S${i % 40}`, trade: trade({ rMultiple: r, ...over }) })
+    );
+
+  it("says NO_EDGE, not INCONCLUSIVE, when a large sample loses and the losses are concentrated", () => {
+    // Losing 0.5R per trade over 150 trades is a measured negative. Hedging it to
+    // INCONCLUSIVE because the damage clusters would bury a definitive answer.
+    const signals = [
+      ...Array.from({ length: 100 }, () => sig({ sessionDate: "2020-06-01", trade: trade({ rMultiple: -1.2, exitReason: "STOP_HIT" }) })),
+      ...Array.from({ length: 50 }, (_, i) =>
+        sig({ symbol: `S${i % 25}`, sessionDate: "2023-06-01", trade: trade({ rMultiple: 0.9 }) })
+      ),
+    ];
+    const j = judgeEdge(buildReplayReport(signals));
+    expect(j.verdict).toBe("NO_EDGE");
+  });
+
+  it("still refuses NO_EDGE on a small losing sample", () => {
+    // Too few trades to disprove anything either.
+    expect(judgeEdge(buildReplayReport(many(-0.5, 30))).verdict).toBe("INCONCLUSIVE");
+  });
+
+  it("does not raise year concentration on a single-year sample", () => {
+    // The best year holds 100% of gross R by construction when there is only one.
+    const j = judgeEdge(buildReplayReport(many(0.4, 150)));
+    expect(j.failureConcentration.join(" ")).not.toContain("one market regime");
+    expect(j.verdict).toBe("EDGE");
   });
 });
 

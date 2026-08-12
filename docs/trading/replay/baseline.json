@@ -1,9 +1,9 @@
 {
-  "capturedAt": "2026-08-11T09:39:10.528Z",
+  "capturedAt": "2026-08-11T10:12:59.807Z",
   "database": "ep-tiny-meadow-ana0vrxq-pooler.c-6.us-east-1.aws.neon.tech/neondb",
   "inputs": {
-    "symbols": 281,
-    "totalBars": 693318,
+    "symbols": 1537,
+    "totalBars": 705261,
     "indexBars": 4073,
     "minSession": null,
     "maxSession": null
@@ -11,18 +11,20 @@
   "integrity": {
     "guardViolations": 0,
     "sessionsEvaluated": 4024,
-    "avgUniversePerSession": 165,
+    "avgUniversePerSession": 166.1,
     "avgTradablePerSession": 36.5
   },
   "survivorship": {
-    "unreplayableSymbols": 1256,
-    "unreplayablePct": 81.7,
+    "unreplayableSymbols": 1182,
+    "unreplayablePct": 76.9,
     "verdict": "material",
-    "note": "1256 of 1537 known symbols have no bars and cannot be replayed. Results are survivor-conditional: they describe names that survived to today, not the universe as it was."
+    "note": "1182 of 1537 known symbols have no bars and cannot be replayed. Results are survivor-conditional: they describe names that survived to today, not the universe as it was."
   },
   "verdict": {
-    "verdict": "EDGE",
-    "reasons": [],
+    "verdict": "INCONCLUSIVE",
+    "reasons": [
+      "Result is too concentrated to support an edge claim: see failure concentration. More independent events are needed before this can be judged."
+    ],
     "failureConcentration": [
       "6 trade(s) (1.2%) have a stop under 1% of entry (min 0.049%). R divides by that distance, so these inflate expectancy without earning more. Judge them on percent return, not R.",
       "56.2% of gross R comes from 2020 alone. Excluding it, expectancy falls to 0.4R over 452 trades — the result reflects one market regime, not an edge.",
@@ -2971,5 +2973,5 @@
     "Entry is the next session's open, because the decision consumed the signal bar's close.",
     "Universe membership is inferred from bar evidence. Symbols with no stored bars cannot be replayed, so results are survivor-conditional."
   ],
-  "elapsedSeconds": 345
+  "elapsedSeconds": 598
 }

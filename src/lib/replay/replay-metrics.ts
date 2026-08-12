@@ -268,7 +268,12 @@ export function judgeEdge(report: ReplayReport): {
         `(${o.avgReturnPct}%) — the R figure is an artefact of stop distance, not profit.`
     );
   }
-  const yearShare = report.concentration.bestYearShareOfGrossR;
+  // Only meaningful across two or more years. With a single year the best year
+  // holds 100% of gross R by construction, and the message would read "excluding
+  // it, expectancy falls to nullR over 0 trades" — a vacuous flag that would
+  // block every verdict computed on a one-year sample.
+  const yearsCovered = Object.keys(report.byYear).length;
+  const yearShare = yearsCovered >= 2 ? report.concentration.bestYearShareOfGrossR : null;
   if (yearShare != null && yearShare >= 40) {
     failure.push(
       `${yearShare}% of gross R comes from ${report.concentration.bestYear} alone. Excluding it, ` +
@@ -289,8 +294,36 @@ export function judgeEdge(report: ReplayReport): {
   // The verdict must follow the reasons, not be computed alongside them. Deriving
   // it independently let a blocking reason be recorded while the headline still
   // read EDGE — the failure mode this whole function exists to prevent.
-  const verdict =
-    o.n < 100 ? "INCONCLUSIVE" : reasons.length > 0 ? "NO_EDGE" : "EDGE";
+  // Concentration does not prove the strategy loses, so it is not NO_EDGE — but
+  // a result carried by one regime or a handful of names has not been measured
+  // enough times to be called an edge either. That is exactly INCONCLUSIVE, and
+  // leaving it as a footnote under an EDGE headline invites the wrong decision.
+  const concentrated =
+    (yearShare != null && yearShare >= 40) || (share != null && share >= 50);
+  if (concentrated) {
+    reasons.push(
+      "Result is too concentrated to support an edge claim: see failure concentration. " +
+        "More independent events are needed before this can be judged."
+    );
+  }
+
+  // Precedence matters. A strategy that loses on average over a large sample has
+  // been measured and found wanting — calling that INCONCLUSIVE because the
+  // losses are concentrated would hide a definitive negative behind a hedge.
+  // Disproof outranks "not yet proven"; INCONCLUSIVE is only for the cases where
+  // the evidence genuinely does not settle the question.
+  const disproved =
+    o.n >= 100 &&
+    ((o.expectancyR != null && o.expectancyR <= 0) ||
+      (o.avgReturnPct != null && o.expectancyR != null && o.expectancyR > 0 && o.avgReturnPct <= 0));
+
+  const verdict = disproved
+    ? "NO_EDGE"
+    : o.n < 100 || concentrated
+      ? "INCONCLUSIVE"
+      : reasons.length > 0
+        ? "NO_EDGE"
+        : "EDGE";
 
   return { verdict, reasons, failureConcentration: failure };
 }

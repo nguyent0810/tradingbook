@@ -55,6 +55,17 @@ export type ReplayRunResult = {
   guardViolations: number;
 };
 
+function assertAscending(bars: readonly { date: Date }[], label: string): void {
+  for (let i = 1; i < bars.length; i++) {
+    if (bars[i - 1]!.date.getTime() > bars[i]!.date.getTime()) {
+      throw new Error(
+        `${label} is not ascending at index ${i} (${bars[i - 1]!.date.toISOString()} > ` +
+          `${bars[i]!.date.toISOString()}). The replay's point-in-time slicing depends on order.`
+      );
+    }
+  }
+}
+
 /** Binary search for the last index with date <= target. -1 when none. */
 function lastIndexAtOrBefore(bars: readonly { date: Date }[], targetMs: number): number {
   let lo = 0;
@@ -85,6 +96,14 @@ export function runReplay(params: {
   onProgress?: ReplayProgress;
 }): ReplayRunResult {
   const opts = params.options ?? {};
+
+  // The binary search below is silently wrong on unsorted input — it would
+  // return an arbitrary index and the "bars through T" slice would contain
+  // future bars without the guard necessarily catching every one. Checked once
+  // here rather than trusted.
+  assertAscending(params.indexBars, "indexBars");
+  for (const s of params.series) assertAscending(s.bars, `series:${s.symbol}`);
+
   const signals: ReplaySignal[] = [];
   const universeSizeBySession: ReplayRunResult["universeSizeBySession"] = [];
   let guardViolations = 0;

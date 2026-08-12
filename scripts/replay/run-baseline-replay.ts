@@ -37,7 +37,12 @@ async function main(): Promise<void> {
   const started = Date.now();
 
   const [symbolRows, indexRows, tacticalRows, totalKnown] = await Promise.all([
-    prisma.stockSymbol.findMany({ where: { active: true }, select: { id: true, symbol: true }, orderBy: { symbol: "asc" } }),
+    // Deliberately NOT filtered by `active`. That flag is today's curation state,
+    // and filtering on it here would re-introduce the survivorship bias the
+    // point-in-time resolver exists to remove — the resolver would never see a
+    // symbol that traded in 2019 but was curated out since. Exclusion must be
+    // decided from bar evidence at T, not from a flag edited afterwards.
+    prisma.stockSymbol.findMany({ select: { id: true, symbol: true }, orderBy: { symbol: "asc" } }),
     prisma.indexDailyBar.findMany({
       where: { symbol: "VNINDEX" },
       select: { date: true, open: true, high: true, low: true, close: true, volume: true },
@@ -149,6 +154,32 @@ async function main(): Promise<void> {
     mkdirSync(dirname(outPath), { recursive: true });
     writeFileSync(outPath, JSON.stringify(artifact, null, 2), "utf8");
     console.error(`\nWrote replay artifact to ${outPath}`);
+
+    // Per-signal rows alongside the aggregates. The report's breakdowns are
+    // one-dimensional, and single dimensions confound: Gate 1 PASS surfaces
+    // Tier A and B while WARNING surfaces Tier A only, so comparing the two
+    // buckets as reported compares different candidate mixes. Cross-tabs and
+    // outlier-excluded cuts need the raw rows, and re-running the replay to
+    // get them costs minutes each time.
+    const signalsPath = outPath.replace(/\.json$/, "") + ".signals.ndjson";
+    writeFileSync(
+      signalsPath,
+      result.signals
+        .map((s) =>
+          JSON.stringify({
+            symbol: s.symbol,
+            sessionDate: s.sessionDate,
+            quality: s.quality,
+            gate1Level: s.gate1Level,
+            rankScore: s.rankScore,
+            unscoredReason: s.unscoredReason,
+            ...(s.trade ?? {}),
+          })
+        )
+        .join("\n") + "\n",
+      "utf8"
+    );
+    console.error(`Wrote ${result.signals.length} signal rows to ${signalsPath}`);
   }
 
   // A run that read the future is not a baseline; make that fatal.
