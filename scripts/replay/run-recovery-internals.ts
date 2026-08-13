@@ -64,6 +64,7 @@ async function main(): Promise<void> {
     ma10: (number | null)[]; ma20: (number | null)[]; ma50: (number | null)[];
     volMed20: (number | null)[];
   };
+  const idxTimesEarly = indexRows.map((b) => b.date.getTime());
   const syms: S[] = [];
   for (const s of symbolRows) {
     const bars = await prisma.stockDailyBar.findMany({
@@ -89,7 +90,19 @@ async function main(): Promise<void> {
   }
   console.error(`loaded ${syms.length} symbols with >=60 bars`);
 
-  const idxTimes = indexRows.map((b) => b.date.getTime());
+  // Fixed cohort: symbols whose stored history spans the whole study window.
+  // Equal-weight statistics over a growing universe confound composition drift
+  // with market change; this cohort is constant by construction, so the two can
+  // be told apart.
+  const studyStart = Date.parse("2015-01-01");
+  const studyEnd = idxTimesEarly[idxTimesEarly.length - 1]!;
+  const cohort = new Set(
+    syms.filter((s) => s.times[0]! <= studyStart && s.times[s.times.length - 1]! >= studyEnd - 30 * 86_400_000)
+      .map((s) => s.symbol)
+  );
+  console.error(`fixed cohort (full-window history): ${cohort.size} symbols`);
+
+  const idxTimes = idxTimesEarly;
   const idxCloses = indexRows.map((b) => Number(b.close));
   const idxMa10 = rollingMean(idxCloses, 10);
   const idxMa20 = rollingMean(idxCloses, 20);
@@ -123,6 +136,8 @@ async function main(): Promise<void> {
     if (!state) continue;
 
     let n = 0, a10 = 0, a20 = 0, a50 = 0, up20 = 0, adv = 0, dec = 0;
+    const dayRets: number[] = [];
+    const cohortRets: number[] = [];
     let nh = 0, nl = 0, nYear = 0, volExp = 0, nVol = 0;
     let upVol = 0, totVol = 0;
     const r20: number[] = [];
@@ -146,9 +161,17 @@ async function main(): Promise<void> {
         r20.push(((px - prev) / prev) * 100);
       }
       if (e >= 1) {
-        const d = px - s.closes[e - 1]!;
+        const prev = s.closes[e - 1]!;
+        const d = px - prev;
         if (d > 0) { adv++; upVol += s.vols[e]!; } else if (d < 0) dec++;
         totVol += s.vols[e]!;
+        // Equal-weight daily return: every eligible name counts once, however
+        // large. This is the axis the cap-weighted index cannot express.
+        if (prev > 0) {
+          const r = ((px - prev) / prev) * 100;
+          dayRets.push(r);
+          if (cohort.has(s.symbol)) cohortRets.push(r);
+        }
       }
       if (e >= 250) {
         nYear++;
@@ -180,6 +203,11 @@ async function main(): Promise<void> {
       upVolumeShare: totVol > 0 ? Number(((upVol / totVol) * 100).toFixed(2)) : null,
       // Dispersion of 20-session returns: a broad advance and a narrow one look
       // identical in a median but not in a spread.
+      // Equal-weight daily return, all eligible names and the fixed cohort.
+      ewDailyMeanPct: dayRets.length ? Number((dayRets.reduce((a2, x) => a2 + x, 0) / dayRets.length).toFixed(4)) : null,
+      ewDailyMedianPct: dayRets.length ? Number(median(dayRets).toFixed(4)) : null,
+      ewCohortMeanPct: cohortRets.length ? Number((cohortRets.reduce((a2, x) => a2 + x, 0) / cohortRets.length).toFixed(4)) : null,
+      cohortEligible: cohortRets.length,
       r20Median: sorted.length ? Number(median(r20).toFixed(3)) : null,
       r20P90: q(0.9) != null ? Number(q(0.9)!.toFixed(3)) : null,
       r20P10: q(0.1) != null ? Number(q(0.1)!.toFixed(3)) : null,

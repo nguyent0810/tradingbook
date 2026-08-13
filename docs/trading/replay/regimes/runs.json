@@ -1,0 +1,3035 @@
+[
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 842,
+  "endIdx": 853,
+  "length": 12,
+  "startDate": "2014-09-05",
+  "endDate": "2014-09-22",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 854,
+  "endIdx": 862,
+  "length": 9,
+  "startDate": "2014-09-23",
+  "endDate": "2014-10-03",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 863,
+  "endIdx": 867,
+  "length": 5,
+  "startDate": "2014-10-06",
+  "endDate": "2014-10-10",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 868,
+  "endIdx": 870,
+  "length": 3,
+  "startDate": "2014-10-13",
+  "endDate": "2014-10-15",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 871,
+  "endIdx": 871,
+  "length": 1,
+  "startDate": "2014-10-16",
+  "endDate": "2014-10-16",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 872,
+  "endIdx": 873,
+  "length": 2,
+  "startDate": "2014-10-17",
+  "endDate": "2014-10-20",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 874,
+  "endIdx": 874,
+  "length": 1,
+  "startDate": "2014-10-21",
+  "endDate": "2014-10-21",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 875,
+  "endIdx": 875,
+  "length": 1,
+  "startDate": "2014-10-22",
+  "endDate": "2014-10-22",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 876,
+  "endIdx": 881,
+  "length": 6,
+  "startDate": "2014-10-23",
+  "endDate": "2014-10-30",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 882,
+  "endIdx": 893,
+  "length": 12,
+  "startDate": "2014-10-31",
+  "endDate": "2014-11-17",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 894,
+  "endIdx": 904,
+  "length": 11,
+  "startDate": "2014-11-18",
+  "endDate": "2014-12-02",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 905,
+  "endIdx": 908,
+  "length": 4,
+  "startDate": "2014-12-03",
+  "endDate": "2014-12-08",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 909,
+  "endIdx": 929,
+  "length": 21,
+  "startDate": "2014-12-09",
+  "endDate": "2015-01-08",
+  "era": "pre-2015"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 930,
+  "endIdx": 938,
+  "length": 9,
+  "startDate": "2015-01-09",
+  "endDate": "2015-01-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 939,
+  "endIdx": 941,
+  "length": 3,
+  "startDate": "2015-01-22",
+  "endDate": "2015-01-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 942,
+  "endIdx": 946,
+  "length": 5,
+  "startDate": "2015-01-27",
+  "endDate": "2015-02-02",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 947,
+  "endIdx": 947,
+  "length": 1,
+  "startDate": "2015-02-03",
+  "endDate": "2015-02-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 948,
+  "endIdx": 953,
+  "length": 6,
+  "startDate": "2015-02-04",
+  "endDate": "2015-02-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 954,
+  "endIdx": 972,
+  "length": 19,
+  "startDate": "2015-02-12",
+  "endDate": "2015-03-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 973,
+  "endIdx": 975,
+  "length": 3,
+  "startDate": "2015-03-19",
+  "endDate": "2015-03-23",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 976,
+  "endIdx": 1014,
+  "length": 39,
+  "startDate": "2015-03-24",
+  "endDate": "2015-05-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1015,
+  "endIdx": 1018,
+  "length": 4,
+  "startDate": "2015-05-22",
+  "endDate": "2015-05-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1019,
+  "endIdx": 1019,
+  "length": 1,
+  "startDate": "2015-05-28",
+  "endDate": "2015-05-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1020,
+  "endIdx": 1020,
+  "length": 1,
+  "startDate": "2015-05-29",
+  "endDate": "2015-05-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1021,
+  "endIdx": 1021,
+  "length": 1,
+  "startDate": "2015-06-01",
+  "endDate": "2015-06-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1022,
+  "endIdx": 1022,
+  "length": 1,
+  "startDate": "2015-06-02",
+  "endDate": "2015-06-02",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1023,
+  "endIdx": 1065,
+  "length": 43,
+  "startDate": "2015-06-03",
+  "endDate": "2015-07-31",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1066,
+  "endIdx": 1066,
+  "length": 1,
+  "startDate": "2015-08-03",
+  "endDate": "2015-08-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1067,
+  "endIdx": 1067,
+  "length": 1,
+  "startDate": "2015-08-04",
+  "endDate": "2015-08-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1068,
+  "endIdx": 1068,
+  "length": 1,
+  "startDate": "2015-08-05",
+  "endDate": "2015-08-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1069,
+  "endIdx": 1069,
+  "length": 1,
+  "startDate": "2015-08-06",
+  "endDate": "2015-08-06",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1070,
+  "endIdx": 1072,
+  "length": 3,
+  "startDate": "2015-08-07",
+  "endDate": "2015-08-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1073,
+  "endIdx": 1110,
+  "length": 38,
+  "startDate": "2015-08-12",
+  "endDate": "2015-10-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1111,
+  "endIdx": 1147,
+  "length": 37,
+  "startDate": "2015-10-06",
+  "endDate": "2015-11-25",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1148,
+  "endIdx": 1148,
+  "length": 1,
+  "startDate": "2015-11-26",
+  "endDate": "2015-11-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1149,
+  "endIdx": 1172,
+  "length": 24,
+  "startDate": "2015-11-27",
+  "endDate": "2015-12-30",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1173,
+  "endIdx": 1173,
+  "length": 1,
+  "startDate": "2015-12-31",
+  "endDate": "2015-12-31",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1174,
+  "endIdx": 1196,
+  "length": 23,
+  "startDate": "2016-01-04",
+  "endDate": "2016-02-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1197,
+  "endIdx": 1203,
+  "length": 7,
+  "startDate": "2016-02-04",
+  "endDate": "2016-02-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1204,
+  "endIdx": 1233,
+  "length": 30,
+  "startDate": "2016-02-22",
+  "endDate": "2016-04-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1234,
+  "endIdx": 1234,
+  "length": 1,
+  "startDate": "2016-04-04",
+  "endDate": "2016-04-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1235,
+  "endIdx": 1244,
+  "length": 10,
+  "startDate": "2016-04-05",
+  "endDate": "2016-04-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1245,
+  "endIdx": 1245,
+  "length": 1,
+  "startDate": "2016-04-20",
+  "endDate": "2016-04-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1246,
+  "endIdx": 1249,
+  "length": 4,
+  "startDate": "2016-04-21",
+  "endDate": "2016-04-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1250,
+  "endIdx": 1251,
+  "length": 2,
+  "startDate": "2016-04-27",
+  "endDate": "2016-04-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1252,
+  "endIdx": 1268,
+  "length": 17,
+  "startDate": "2016-04-29",
+  "endDate": "2016-05-25",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1269,
+  "endIdx": 1270,
+  "length": 2,
+  "startDate": "2016-05-26",
+  "endDate": "2016-05-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1271,
+  "endIdx": 1308,
+  "length": 38,
+  "startDate": "2016-05-30",
+  "endDate": "2016-07-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1309,
+  "endIdx": 1314,
+  "length": 6,
+  "startDate": "2016-07-21",
+  "endDate": "2016-07-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1315,
+  "endIdx": 1315,
+  "length": 1,
+  "startDate": "2016-07-29",
+  "endDate": "2016-07-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1316,
+  "endIdx": 1316,
+  "length": 1,
+  "startDate": "2016-08-01",
+  "endDate": "2016-08-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1317,
+  "endIdx": 1322,
+  "length": 6,
+  "startDate": "2016-08-02",
+  "endDate": "2016-08-09",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1323,
+  "endIdx": 1330,
+  "length": 8,
+  "startDate": "2016-08-10",
+  "endDate": "2016-08-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1331,
+  "endIdx": 1331,
+  "length": 1,
+  "startDate": "2016-08-22",
+  "endDate": "2016-08-22",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1332,
+  "endIdx": 1332,
+  "length": 1,
+  "startDate": "2016-08-23",
+  "endDate": "2016-08-23",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1333,
+  "endIdx": 1333,
+  "length": 1,
+  "startDate": "2016-08-24",
+  "endDate": "2016-08-24",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1334,
+  "endIdx": 1335,
+  "length": 2,
+  "startDate": "2016-08-25",
+  "endDate": "2016-08-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1336,
+  "endIdx": 1336,
+  "length": 1,
+  "startDate": "2016-08-29",
+  "endDate": "2016-08-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1337,
+  "endIdx": 1346,
+  "length": 10,
+  "startDate": "2016-08-30",
+  "endDate": "2016-09-13",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1347,
+  "endIdx": 1348,
+  "length": 2,
+  "startDate": "2016-09-14",
+  "endDate": "2016-09-15",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1349,
+  "endIdx": 1349,
+  "length": 1,
+  "startDate": "2016-09-16",
+  "endDate": "2016-09-16",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1350,
+  "endIdx": 1366,
+  "length": 17,
+  "startDate": "2016-09-19",
+  "endDate": "2016-10-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1367,
+  "endIdx": 1367,
+  "length": 1,
+  "startDate": "2016-10-12",
+  "endDate": "2016-10-12",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1368,
+  "endIdx": 1372,
+  "length": 5,
+  "startDate": "2016-10-13",
+  "endDate": "2016-10-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1373,
+  "endIdx": 1381,
+  "length": 9,
+  "startDate": "2016-10-20",
+  "endDate": "2016-11-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1382,
+  "endIdx": 1385,
+  "length": 4,
+  "startDate": "2016-11-02",
+  "endDate": "2016-11-07",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1386,
+  "endIdx": 1386,
+  "length": 1,
+  "startDate": "2016-11-08",
+  "endDate": "2016-11-08",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1387,
+  "endIdx": 1387,
+  "length": 1,
+  "startDate": "2016-11-09",
+  "endDate": "2016-11-09",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1388,
+  "endIdx": 1389,
+  "length": 2,
+  "startDate": "2016-11-10",
+  "endDate": "2016-11-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1390,
+  "endIdx": 1395,
+  "length": 6,
+  "startDate": "2016-11-14",
+  "endDate": "2016-11-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1396,
+  "endIdx": 1398,
+  "length": 3,
+  "startDate": "2016-11-22",
+  "endDate": "2016-11-24",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1399,
+  "endIdx": 1413,
+  "length": 15,
+  "startDate": "2016-11-25",
+  "endDate": "2016-12-15",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1414,
+  "endIdx": 1415,
+  "length": 2,
+  "startDate": "2016-12-16",
+  "endDate": "2016-12-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1416,
+  "endIdx": 1424,
+  "length": 9,
+  "startDate": "2016-12-20",
+  "endDate": "2016-12-30",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1425,
+  "endIdx": 1434,
+  "length": 10,
+  "startDate": "2017-01-03",
+  "endDate": "2017-01-16",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1435,
+  "endIdx": 1437,
+  "length": 3,
+  "startDate": "2017-01-17",
+  "endDate": "2017-01-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1438,
+  "endIdx": 1489,
+  "length": 52,
+  "startDate": "2017-01-20",
+  "endDate": "2017-04-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1490,
+  "endIdx": 1492,
+  "length": 3,
+  "startDate": "2017-04-12",
+  "endDate": "2017-04-14",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1493,
+  "endIdx": 1494,
+  "length": 2,
+  "startDate": "2017-04-17",
+  "endDate": "2017-04-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1495,
+  "endIdx": 1495,
+  "length": 1,
+  "startDate": "2017-04-19",
+  "endDate": "2017-04-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1496,
+  "endIdx": 1500,
+  "length": 5,
+  "startDate": "2017-04-20",
+  "endDate": "2017-04-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1501,
+  "endIdx": 1502,
+  "length": 2,
+  "startDate": "2017-04-27",
+  "endDate": "2017-04-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1503,
+  "endIdx": 1503,
+  "length": 1,
+  "startDate": "2017-05-03",
+  "endDate": "2017-05-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1504,
+  "endIdx": 1504,
+  "length": 1,
+  "startDate": "2017-05-04",
+  "endDate": "2017-05-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1505,
+  "endIdx": 1505,
+  "length": 1,
+  "startDate": "2017-05-05",
+  "endDate": "2017-05-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1506,
+  "endIdx": 1506,
+  "length": 1,
+  "startDate": "2017-05-08",
+  "endDate": "2017-05-08",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1507,
+  "endIdx": 1576,
+  "length": 70,
+  "startDate": "2017-05-09",
+  "endDate": "2017-08-14",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1577,
+  "endIdx": 1577,
+  "length": 1,
+  "startDate": "2017-08-15",
+  "endDate": "2017-08-15",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1578,
+  "endIdx": 1578,
+  "length": 1,
+  "startDate": "2017-08-16",
+  "endDate": "2017-08-16",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1579,
+  "endIdx": 1580,
+  "length": 2,
+  "startDate": "2017-08-17",
+  "endDate": "2017-08-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1581,
+  "endIdx": 1585,
+  "length": 5,
+  "startDate": "2017-08-21",
+  "endDate": "2017-08-25",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1586,
+  "endIdx": 1598,
+  "length": 13,
+  "startDate": "2017-08-28",
+  "endDate": "2017-09-14",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1599,
+  "endIdx": 1602,
+  "length": 4,
+  "startDate": "2017-09-15",
+  "endDate": "2017-09-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1603,
+  "endIdx": 1603,
+  "length": 1,
+  "startDate": "2017-09-21",
+  "endDate": "2017-09-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1604,
+  "endIdx": 1604,
+  "length": 1,
+  "startDate": "2017-09-22",
+  "endDate": "2017-09-22",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1605,
+  "endIdx": 1608,
+  "length": 4,
+  "startDate": "2017-09-25",
+  "endDate": "2017-09-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1609,
+  "endIdx": 1609,
+  "length": 1,
+  "startDate": "2017-09-29",
+  "endDate": "2017-09-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1610,
+  "endIdx": 1619,
+  "length": 10,
+  "startDate": "2017-10-02",
+  "endDate": "2017-10-13",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1620,
+  "endIdx": 1620,
+  "length": 1,
+  "startDate": "2017-10-16",
+  "endDate": "2017-10-16",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1621,
+  "endIdx": 1621,
+  "length": 1,
+  "startDate": "2017-10-17",
+  "endDate": "2017-10-17",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1622,
+  "endIdx": 1624,
+  "length": 3,
+  "startDate": "2017-10-18",
+  "endDate": "2017-10-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1625,
+  "endIdx": 1648,
+  "length": 24,
+  "startDate": "2017-10-23",
+  "endDate": "2017-11-23",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1649,
+  "endIdx": 1698,
+  "length": 50,
+  "startDate": "2017-11-24",
+  "endDate": "2018-02-02",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1699,
+  "endIdx": 1702,
+  "length": 4,
+  "startDate": "2018-02-05",
+  "endDate": "2018-02-08",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1703,
+  "endIdx": 1703,
+  "length": 1,
+  "startDate": "2018-02-09",
+  "endDate": "2018-02-09",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1704,
+  "endIdx": 1705,
+  "length": 2,
+  "startDate": "2018-02-12",
+  "endDate": "2018-02-13",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1706,
+  "endIdx": 1710,
+  "length": 5,
+  "startDate": "2018-02-21",
+  "endDate": "2018-02-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1711,
+  "endIdx": 1711,
+  "length": 1,
+  "startDate": "2018-02-28",
+  "endDate": "2018-02-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1712,
+  "endIdx": 1727,
+  "length": 16,
+  "startDate": "2018-03-01",
+  "endDate": "2018-03-22",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1728,
+  "endIdx": 1728,
+  "length": 1,
+  "startDate": "2018-03-23",
+  "endDate": "2018-03-23",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1729,
+  "endIdx": 1742,
+  "length": 14,
+  "startDate": "2018-03-26",
+  "endDate": "2018-04-12",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1743,
+  "endIdx": 1744,
+  "length": 2,
+  "startDate": "2018-04-13",
+  "endDate": "2018-04-16",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1745,
+  "endIdx": 1745,
+  "length": 1,
+  "startDate": "2018-04-17",
+  "endDate": "2018-04-17",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1746,
+  "endIdx": 1746,
+  "length": 1,
+  "startDate": "2018-04-18",
+  "endDate": "2018-04-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1747,
+  "endIdx": 1822,
+  "length": 76,
+  "startDate": "2018-04-19",
+  "endDate": "2018-08-07",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1823,
+  "endIdx": 1824,
+  "length": 2,
+  "startDate": "2018-08-08",
+  "endDate": "2018-08-09",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1825,
+  "endIdx": 1867,
+  "length": 43,
+  "startDate": "2018-08-10",
+  "endDate": "2018-10-10",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1868,
+  "endIdx": 1868,
+  "length": 1,
+  "startDate": "2018-10-11",
+  "endDate": "2018-10-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1869,
+  "endIdx": 1874,
+  "length": 6,
+  "startDate": "2018-10-12",
+  "endDate": "2018-10-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1875,
+  "endIdx": 1904,
+  "length": 30,
+  "startDate": "2018-10-22",
+  "endDate": "2018-11-30",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1905,
+  "endIdx": 1905,
+  "length": 1,
+  "startDate": "2018-12-03",
+  "endDate": "2018-12-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1906,
+  "endIdx": 1914,
+  "length": 9,
+  "startDate": "2018-12-04",
+  "endDate": "2018-12-14",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1915,
+  "endIdx": 1946,
+  "length": 32,
+  "startDate": "2018-12-17",
+  "endDate": "2019-01-31",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 1947,
+  "endIdx": 1947,
+  "length": 1,
+  "startDate": "2019-02-01",
+  "endDate": "2019-02-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 1948,
+  "endIdx": 1992,
+  "length": 45,
+  "startDate": "2019-02-11",
+  "endDate": "2019-04-12",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 1993,
+  "endIdx": 1993,
+  "length": 1,
+  "startDate": "2019-04-16",
+  "endDate": "2019-04-16",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 1994,
+  "endIdx": 2000,
+  "length": 7,
+  "startDate": "2019-04-17",
+  "endDate": "2019-04-25",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2001,
+  "endIdx": 2001,
+  "length": 1,
+  "startDate": "2019-04-26",
+  "endDate": "2019-04-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2002,
+  "endIdx": 2002,
+  "length": 1,
+  "startDate": "2019-05-02",
+  "endDate": "2019-05-02",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2003,
+  "endIdx": 2003,
+  "length": 1,
+  "startDate": "2019-05-03",
+  "endDate": "2019-05-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2004,
+  "endIdx": 2013,
+  "length": 10,
+  "startDate": "2019-05-06",
+  "endDate": "2019-05-17",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2014,
+  "endIdx": 2017,
+  "length": 4,
+  "startDate": "2019-05-20",
+  "endDate": "2019-05-23",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2018,
+  "endIdx": 2042,
+  "length": 25,
+  "startDate": "2019-05-24",
+  "endDate": "2019-06-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2043,
+  "endIdx": 2043,
+  "length": 1,
+  "startDate": "2019-06-28",
+  "endDate": "2019-06-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2044,
+  "endIdx": 2044,
+  "length": 1,
+  "startDate": "2019-07-01",
+  "endDate": "2019-07-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2045,
+  "endIdx": 2046,
+  "length": 2,
+  "startDate": "2019-07-02",
+  "endDate": "2019-07-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2047,
+  "endIdx": 2059,
+  "length": 13,
+  "startDate": "2019-07-04",
+  "endDate": "2019-07-22",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2060,
+  "endIdx": 2062,
+  "length": 3,
+  "startDate": "2019-07-23",
+  "endDate": "2019-07-25",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2063,
+  "endIdx": 2064,
+  "length": 2,
+  "startDate": "2019-07-26",
+  "endDate": "2019-07-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2065,
+  "endIdx": 2067,
+  "length": 3,
+  "startDate": "2019-07-30",
+  "endDate": "2019-08-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2068,
+  "endIdx": 2068,
+  "length": 1,
+  "startDate": "2019-08-02",
+  "endDate": "2019-08-02",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2069,
+  "endIdx": 2069,
+  "length": 1,
+  "startDate": "2019-08-05",
+  "endDate": "2019-08-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2070,
+  "endIdx": 2071,
+  "length": 2,
+  "startDate": "2019-08-06",
+  "endDate": "2019-08-07",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2072,
+  "endIdx": 2074,
+  "length": 3,
+  "startDate": "2019-08-08",
+  "endDate": "2019-08-12",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2075,
+  "endIdx": 2075,
+  "length": 1,
+  "startDate": "2019-08-13",
+  "endDate": "2019-08-13",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2076,
+  "endIdx": 2076,
+  "length": 1,
+  "startDate": "2019-08-14",
+  "endDate": "2019-08-14",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2077,
+  "endIdx": 2079,
+  "length": 3,
+  "startDate": "2019-08-15",
+  "endDate": "2019-08-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2080,
+  "endIdx": 2080,
+  "length": 1,
+  "startDate": "2019-08-20",
+  "endDate": "2019-08-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2081,
+  "endIdx": 2085,
+  "length": 5,
+  "startDate": "2019-08-21",
+  "endDate": "2019-08-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2086,
+  "endIdx": 2087,
+  "length": 2,
+  "startDate": "2019-08-28",
+  "endDate": "2019-08-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2088,
+  "endIdx": 2088,
+  "length": 1,
+  "startDate": "2019-08-30",
+  "endDate": "2019-08-30",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2089,
+  "endIdx": 2089,
+  "length": 1,
+  "startDate": "2019-09-03",
+  "endDate": "2019-09-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2090,
+  "endIdx": 2096,
+  "length": 7,
+  "startDate": "2019-09-04",
+  "endDate": "2019-09-12",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2097,
+  "endIdx": 2100,
+  "length": 4,
+  "startDate": "2019-09-13",
+  "endDate": "2019-09-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2101,
+  "endIdx": 2101,
+  "length": 1,
+  "startDate": "2019-09-19",
+  "endDate": "2019-09-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2102,
+  "endIdx": 2107,
+  "length": 6,
+  "startDate": "2019-09-20",
+  "endDate": "2019-09-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2108,
+  "endIdx": 2109,
+  "length": 2,
+  "startDate": "2019-09-30",
+  "endDate": "2019-10-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2110,
+  "endIdx": 2112,
+  "length": 3,
+  "startDate": "2019-10-02",
+  "endDate": "2019-10-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2113,
+  "endIdx": 2113,
+  "length": 1,
+  "startDate": "2019-10-07",
+  "endDate": "2019-10-07",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2114,
+  "endIdx": 2122,
+  "length": 9,
+  "startDate": "2019-10-08",
+  "endDate": "2019-10-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2123,
+  "endIdx": 2123,
+  "length": 1,
+  "startDate": "2019-10-21",
+  "endDate": "2019-10-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2124,
+  "endIdx": 2135,
+  "length": 12,
+  "startDate": "2019-10-22",
+  "endDate": "2019-11-06",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2136,
+  "endIdx": 2137,
+  "length": 2,
+  "startDate": "2019-11-07",
+  "endDate": "2019-11-08",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2138,
+  "endIdx": 2145,
+  "length": 8,
+  "startDate": "2019-11-11",
+  "endDate": "2019-11-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2146,
+  "endIdx": 2184,
+  "length": 39,
+  "startDate": "2019-11-21",
+  "endDate": "2020-01-15",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2185,
+  "endIdx": 2188,
+  "length": 4,
+  "startDate": "2020-01-16",
+  "endDate": "2020-01-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2189,
+  "endIdx": 2189,
+  "length": 1,
+  "startDate": "2020-01-22",
+  "endDate": "2020-01-22",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2190,
+  "endIdx": 2254,
+  "length": 65,
+  "startDate": "2020-01-30",
+  "endDate": "2020-05-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2255,
+  "endIdx": 2255,
+  "length": 1,
+  "startDate": "2020-05-05",
+  "endDate": "2020-05-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2256,
+  "endIdx": 2293,
+  "length": 38,
+  "startDate": "2020-05-06",
+  "endDate": "2020-06-26",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2294,
+  "endIdx": 2295,
+  "length": 2,
+  "startDate": "2020-06-29",
+  "endDate": "2020-06-30",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2296,
+  "endIdx": 2298,
+  "length": 3,
+  "startDate": "2020-07-01",
+  "endDate": "2020-07-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2299,
+  "endIdx": 2309,
+  "length": 11,
+  "startDate": "2020-07-06",
+  "endDate": "2020-07-20",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2310,
+  "endIdx": 2310,
+  "length": 1,
+  "startDate": "2020-07-21",
+  "endDate": "2020-07-21",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2311,
+  "endIdx": 2323,
+  "length": 13,
+  "startDate": "2020-07-22",
+  "endDate": "2020-08-07",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2324,
+  "endIdx": 2326,
+  "length": 3,
+  "startDate": "2020-08-10",
+  "endDate": "2020-08-12",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2327,
+  "endIdx": 2329,
+  "length": 3,
+  "startDate": "2020-08-13",
+  "endDate": "2020-08-17",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2330,
+  "endIdx": 2330,
+  "length": 1,
+  "startDate": "2020-08-18",
+  "endDate": "2020-08-18",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2331,
+  "endIdx": 2379,
+  "length": 49,
+  "startDate": "2020-08-19",
+  "endDate": "2020-10-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2380,
+  "endIdx": 2384,
+  "length": 5,
+  "startDate": "2020-10-28",
+  "endDate": "2020-11-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2385,
+  "endIdx": 2389,
+  "length": 5,
+  "startDate": "2020-11-04",
+  "endDate": "2020-11-10",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2390,
+  "endIdx": 2390,
+  "length": 1,
+  "startDate": "2020-11-11",
+  "endDate": "2020-11-11",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2391,
+  "endIdx": 2444,
+  "length": 54,
+  "startDate": "2020-11-12",
+  "endDate": "2021-01-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2445,
+  "endIdx": 2448,
+  "length": 4,
+  "startDate": "2021-01-28",
+  "endDate": "2021-02-02",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2449,
+  "endIdx": 2451,
+  "length": 3,
+  "startDate": "2021-02-03",
+  "endDate": "2021-02-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2452,
+  "endIdx": 2452,
+  "length": 1,
+  "startDate": "2021-02-08",
+  "endDate": "2021-02-08",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2453,
+  "endIdx": 2504,
+  "length": 52,
+  "startDate": "2021-02-09",
+  "endDate": "2021-04-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2505,
+  "endIdx": 2505,
+  "length": 1,
+  "startDate": "2021-05-04",
+  "endDate": "2021-05-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2506,
+  "endIdx": 2506,
+  "length": 1,
+  "startDate": "2021-05-05",
+  "endDate": "2021-05-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2507,
+  "endIdx": 2525,
+  "length": 19,
+  "startDate": "2021-05-06",
+  "endDate": "2021-06-01",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2526,
+  "endIdx": 2531,
+  "length": 6,
+  "startDate": "2021-06-02",
+  "endDate": "2021-06-09",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2532,
+  "endIdx": 2532,
+  "length": 1,
+  "startDate": "2021-06-10",
+  "endDate": "2021-06-10",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2533,
+  "endIdx": 2552,
+  "length": 20,
+  "startDate": "2021-06-11",
+  "endDate": "2021-07-08",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2553,
+  "endIdx": 2553,
+  "length": 1,
+  "startDate": "2021-07-09",
+  "endDate": "2021-07-09",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2554,
+  "endIdx": 2571,
+  "length": 18,
+  "startDate": "2021-07-12",
+  "endDate": "2021-08-04",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2572,
+  "endIdx": 2573,
+  "length": 2,
+  "startDate": "2021-08-05",
+  "endDate": "2021-08-06",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2574,
+  "endIdx": 2582,
+  "length": 9,
+  "startDate": "2021-08-09",
+  "endDate": "2021-08-19",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2583,
+  "endIdx": 2590,
+  "length": 8,
+  "startDate": "2021-08-20",
+  "endDate": "2021-08-31",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2591,
+  "endIdx": 2606,
+  "length": 16,
+  "startDate": "2021-09-01",
+  "endDate": "2021-09-24",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2607,
+  "endIdx": 2607,
+  "length": 1,
+  "startDate": "2021-09-27",
+  "endDate": "2021-09-27",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2608,
+  "endIdx": 2656,
+  "length": 49,
+  "startDate": "2021-09-28",
+  "endDate": "2021-12-03",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2657,
+  "endIdx": 2657,
+  "length": 1,
+  "startDate": "2021-12-06",
+  "endDate": "2021-12-06",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2658,
+  "endIdx": 2673,
+  "length": 16,
+  "startDate": "2021-12-07",
+  "endDate": "2021-12-28",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2674,
+  "endIdx": 2674,
+  "length": 1,
+  "startDate": "2021-12-29",
+  "endDate": "2021-12-29",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2675,
+  "endIdx": 2678,
+  "length": 4,
+  "startDate": "2021-12-30",
+  "endDate": "2022-01-05",
+  "era": "2015-2021"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2679,
+  "endIdx": 2679,
+  "length": 1,
+  "startDate": "2022-01-06",
+  "endDate": "2022-01-06",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2680,
+  "endIdx": 2680,
+  "length": 1,
+  "startDate": "2022-01-07",
+  "endDate": "2022-01-07",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2681,
+  "endIdx": 2685,
+  "length": 5,
+  "startDate": "2022-01-10",
+  "endDate": "2022-01-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2686,
+  "endIdx": 2691,
+  "length": 6,
+  "startDate": "2022-01-17",
+  "endDate": "2022-01-24",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2692,
+  "endIdx": 2693,
+  "length": 2,
+  "startDate": "2022-01-25",
+  "endDate": "2022-01-26",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2694,
+  "endIdx": 2694,
+  "length": 1,
+  "startDate": "2022-01-27",
+  "endDate": "2022-01-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2695,
+  "endIdx": 2700,
+  "length": 6,
+  "startDate": "2022-01-28",
+  "endDate": "2022-02-11",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2701,
+  "endIdx": 2701,
+  "length": 1,
+  "startDate": "2022-02-14",
+  "endDate": "2022-02-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2702,
+  "endIdx": 2703,
+  "length": 2,
+  "startDate": "2022-02-15",
+  "endDate": "2022-02-16",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2704,
+  "endIdx": 2704,
+  "length": 1,
+  "startDate": "2022-02-17",
+  "endDate": "2022-02-17",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2705,
+  "endIdx": 2705,
+  "length": 1,
+  "startDate": "2022-02-18",
+  "endDate": "2022-02-18",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2706,
+  "endIdx": 2712,
+  "length": 7,
+  "startDate": "2022-02-21",
+  "endDate": "2022-03-01",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2713,
+  "endIdx": 2713,
+  "length": 1,
+  "startDate": "2022-03-02",
+  "endDate": "2022-03-02",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2714,
+  "endIdx": 2716,
+  "length": 3,
+  "startDate": "2022-03-03",
+  "endDate": "2022-03-07",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2717,
+  "endIdx": 2717,
+  "length": 1,
+  "startDate": "2022-03-08",
+  "endDate": "2022-03-08",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2718,
+  "endIdx": 2718,
+  "length": 1,
+  "startDate": "2022-03-09",
+  "endDate": "2022-03-09",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2719,
+  "endIdx": 2720,
+  "length": 2,
+  "startDate": "2022-03-10",
+  "endDate": "2022-03-11",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2721,
+  "endIdx": 2721,
+  "length": 1,
+  "startDate": "2022-03-14",
+  "endDate": "2022-03-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2722,
+  "endIdx": 2725,
+  "length": 4,
+  "startDate": "2022-03-15",
+  "endDate": "2022-03-18",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2726,
+  "endIdx": 2730,
+  "length": 5,
+  "startDate": "2022-03-21",
+  "endDate": "2022-03-25",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2731,
+  "endIdx": 2731,
+  "length": 1,
+  "startDate": "2022-03-28",
+  "endDate": "2022-03-28",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2732,
+  "endIdx": 2739,
+  "length": 8,
+  "startDate": "2022-03-29",
+  "endDate": "2022-04-07",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2740,
+  "endIdx": 2740,
+  "length": 1,
+  "startDate": "2022-04-08",
+  "endDate": "2022-04-08",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2741,
+  "endIdx": 2817,
+  "length": 77,
+  "startDate": "2022-04-12",
+  "endDate": "2022-07-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2818,
+  "endIdx": 2818,
+  "length": 1,
+  "startDate": "2022-08-01",
+  "endDate": "2022-08-01",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2819,
+  "endIdx": 2842,
+  "length": 24,
+  "startDate": "2022-08-02",
+  "endDate": "2022-09-06",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2843,
+  "endIdx": 2846,
+  "length": 4,
+  "startDate": "2022-09-07",
+  "endDate": "2022-09-12",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2847,
+  "endIdx": 2847,
+  "length": 1,
+  "startDate": "2022-09-13",
+  "endDate": "2022-09-13",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2848,
+  "endIdx": 2849,
+  "length": 2,
+  "startDate": "2022-09-14",
+  "endDate": "2022-09-15",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2850,
+  "endIdx": 2902,
+  "length": 53,
+  "startDate": "2022-09-16",
+  "endDate": "2022-11-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2903,
+  "endIdx": 2912,
+  "length": 10,
+  "startDate": "2022-11-30",
+  "endDate": "2022-12-13",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2913,
+  "endIdx": 2916,
+  "length": 4,
+  "startDate": "2022-12-14",
+  "endDate": "2022-12-19",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2917,
+  "endIdx": 2920,
+  "length": 4,
+  "startDate": "2022-12-20",
+  "endDate": "2022-12-23",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2921,
+  "endIdx": 2922,
+  "length": 2,
+  "startDate": "2022-12-26",
+  "endDate": "2022-12-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2923,
+  "endIdx": 2924,
+  "length": 2,
+  "startDate": "2022-12-28",
+  "endDate": "2022-12-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2925,
+  "endIdx": 2925,
+  "length": 1,
+  "startDate": "2022-12-30",
+  "endDate": "2022-12-30",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2926,
+  "endIdx": 2948,
+  "length": 23,
+  "startDate": "2023-01-03",
+  "endDate": "2023-02-09",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2949,
+  "endIdx": 2949,
+  "length": 1,
+  "startDate": "2023-02-10",
+  "endDate": "2023-02-10",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2950,
+  "endIdx": 2952,
+  "length": 3,
+  "startDate": "2023-02-13",
+  "endDate": "2023-02-15",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2953,
+  "endIdx": 2953,
+  "length": 1,
+  "startDate": "2023-02-16",
+  "endDate": "2023-02-16",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2954,
+  "endIdx": 2954,
+  "length": 1,
+  "startDate": "2023-02-17",
+  "endDate": "2023-02-17",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2955,
+  "endIdx": 2956,
+  "length": 2,
+  "startDate": "2023-02-20",
+  "endDate": "2023-02-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2957,
+  "endIdx": 2958,
+  "length": 2,
+  "startDate": "2023-02-22",
+  "endDate": "2023-02-23",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2959,
+  "endIdx": 2967,
+  "length": 9,
+  "startDate": "2023-02-24",
+  "endDate": "2023-03-08",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2968,
+  "endIdx": 2968,
+  "length": 1,
+  "startDate": "2023-03-09",
+  "endDate": "2023-03-09",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2969,
+  "endIdx": 2971,
+  "length": 3,
+  "startDate": "2023-03-10",
+  "endDate": "2023-03-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2972,
+  "endIdx": 2972,
+  "length": 1,
+  "startDate": "2023-03-15",
+  "endDate": "2023-03-15",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2973,
+  "endIdx": 2982,
+  "length": 10,
+  "startDate": "2023-03-16",
+  "endDate": "2023-03-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2983,
+  "endIdx": 2985,
+  "length": 3,
+  "startDate": "2023-03-30",
+  "endDate": "2023-04-03",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2986,
+  "endIdx": 2993,
+  "length": 8,
+  "startDate": "2023-04-04",
+  "endDate": "2023-04-13",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2994,
+  "endIdx": 2994,
+  "length": 1,
+  "startDate": "2023-04-14",
+  "endDate": "2023-04-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 2995,
+  "endIdx": 2995,
+  "length": 1,
+  "startDate": "2023-04-17",
+  "endDate": "2023-04-17",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 2996,
+  "endIdx": 2996,
+  "length": 1,
+  "startDate": "2023-04-18",
+  "endDate": "2023-04-18",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 2997,
+  "endIdx": 2997,
+  "length": 1,
+  "startDate": "2023-04-19",
+  "endDate": "2023-04-19",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 2998,
+  "endIdx": 2999,
+  "length": 2,
+  "startDate": "2023-04-20",
+  "endDate": "2023-04-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3000,
+  "endIdx": 3003,
+  "length": 4,
+  "startDate": "2023-04-24",
+  "endDate": "2023-04-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 3004,
+  "endIdx": 3004,
+  "length": 1,
+  "startDate": "2023-04-28",
+  "endDate": "2023-04-28",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3005,
+  "endIdx": 3005,
+  "length": 1,
+  "startDate": "2023-05-04",
+  "endDate": "2023-05-04",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 3006,
+  "endIdx": 3006,
+  "length": 1,
+  "startDate": "2023-05-05",
+  "endDate": "2023-05-05",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3007,
+  "endIdx": 3080,
+  "length": 74,
+  "startDate": "2023-05-08",
+  "endDate": "2023-08-17",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3081,
+  "endIdx": 3083,
+  "length": 3,
+  "startDate": "2023-08-18",
+  "endDate": "2023-08-22",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3084,
+  "endIdx": 3084,
+  "length": 1,
+  "startDate": "2023-08-23",
+  "endDate": "2023-08-23",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3085,
+  "endIdx": 3088,
+  "length": 4,
+  "startDate": "2023-08-24",
+  "endDate": "2023-08-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3089,
+  "endIdx": 3099,
+  "length": 11,
+  "startDate": "2023-08-30",
+  "endDate": "2023-09-15",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3100,
+  "endIdx": 3101,
+  "length": 2,
+  "startDate": "2023-09-18",
+  "endDate": "2023-09-19",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3102,
+  "endIdx": 3103,
+  "length": 2,
+  "startDate": "2023-09-20",
+  "endDate": "2023-09-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3104,
+  "endIdx": 3154,
+  "length": 51,
+  "startDate": "2023-09-22",
+  "endDate": "2023-12-01",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3155,
+  "endIdx": 3156,
+  "length": 2,
+  "startDate": "2023-12-04",
+  "endDate": "2023-12-05",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3157,
+  "endIdx": 3161,
+  "length": 5,
+  "startDate": "2023-12-06",
+  "endDate": "2023-12-12",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3162,
+  "endIdx": 3163,
+  "length": 2,
+  "startDate": "2023-12-13",
+  "endDate": "2023-12-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3164,
+  "endIdx": 3167,
+  "length": 4,
+  "startDate": "2023-12-15",
+  "endDate": "2023-12-20",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3168,
+  "endIdx": 3243,
+  "length": 76,
+  "startDate": "2023-12-21",
+  "endDate": "2024-04-12",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3244,
+  "endIdx": 3255,
+  "length": 12,
+  "startDate": "2024-04-15",
+  "endDate": "2024-05-06",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3256,
+  "endIdx": 3258,
+  "length": 3,
+  "startDate": "2024-05-07",
+  "endDate": "2024-05-09",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3259,
+  "endIdx": 3261,
+  "length": 3,
+  "startDate": "2024-05-10",
+  "endDate": "2024-05-14",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3262,
+  "endIdx": 3263,
+  "length": 2,
+  "startDate": "2024-05-15",
+  "endDate": "2024-05-16",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3264,
+  "endIdx": 3268,
+  "length": 5,
+  "startDate": "2024-05-17",
+  "endDate": "2024-05-23",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3269,
+  "endIdx": 3269,
+  "length": 1,
+  "startDate": "2024-05-24",
+  "endDate": "2024-05-24",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3270,
+  "endIdx": 3289,
+  "length": 20,
+  "startDate": "2024-05-27",
+  "endDate": "2024-06-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 3290,
+  "endIdx": 3290,
+  "length": 1,
+  "startDate": "2024-06-24",
+  "endDate": "2024-06-24",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3291,
+  "endIdx": 3293,
+  "length": 3,
+  "startDate": "2024-06-25",
+  "endDate": "2024-06-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 3294,
+  "endIdx": 3295,
+  "length": 2,
+  "startDate": "2024-06-28",
+  "endDate": "2024-07-01",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3296,
+  "endIdx": 3306,
+  "length": 11,
+  "startDate": "2024-07-02",
+  "endDate": "2024-07-16",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 3307,
+  "endIdx": 3307,
+  "length": 1,
+  "startDate": "2024-07-17",
+  "endDate": "2024-07-17",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3308,
+  "endIdx": 3308,
+  "length": 1,
+  "startDate": "2024-07-18",
+  "endDate": "2024-07-18",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3309,
+  "endIdx": 3329,
+  "length": 21,
+  "startDate": "2024-07-19",
+  "endDate": "2024-08-16",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3330,
+  "endIdx": 3343,
+  "length": 14,
+  "startDate": "2024-08-19",
+  "endDate": "2024-09-09",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3344,
+  "endIdx": 3348,
+  "length": 5,
+  "startDate": "2024-09-10",
+  "endDate": "2024-09-16",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3349,
+  "endIdx": 3355,
+  "length": 7,
+  "startDate": "2024-09-17",
+  "endDate": "2024-09-25",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3356,
+  "endIdx": 3357,
+  "length": 2,
+  "startDate": "2024-09-26",
+  "endDate": "2024-09-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3358,
+  "endIdx": 3373,
+  "length": 16,
+  "startDate": "2024-09-30",
+  "endDate": "2024-10-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3374,
+  "endIdx": 3405,
+  "length": 32,
+  "startDate": "2024-10-22",
+  "endDate": "2024-12-04",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3406,
+  "endIdx": 3407,
+  "length": 2,
+  "startDate": "2024-12-05",
+  "endDate": "2024-12-06",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3408,
+  "endIdx": 3415,
+  "length": 8,
+  "startDate": "2024-12-09",
+  "endDate": "2024-12-18",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3416,
+  "endIdx": 3416,
+  "length": 1,
+  "startDate": "2024-12-19",
+  "endDate": "2024-12-19",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3417,
+  "endIdx": 3426,
+  "length": 10,
+  "startDate": "2024-12-20",
+  "endDate": "2025-01-03",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "RECOVERY_UNDERNEATH",
+  "startIdx": 3427,
+  "endIdx": 3427,
+  "length": 1,
+  "startDate": "2025-01-06",
+  "endDate": "2025-01-06",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3428,
+  "endIdx": 3439,
+  "length": 12,
+  "startDate": "2025-01-07",
+  "endDate": "2025-01-22",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3440,
+  "endIdx": 3440,
+  "length": 1,
+  "startDate": "2025-01-23",
+  "endDate": "2025-01-23",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3441,
+  "endIdx": 3480,
+  "length": 40,
+  "startDate": "2025-01-24",
+  "endDate": "2025-03-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3481,
+  "endIdx": 3484,
+  "length": 4,
+  "startDate": "2025-03-28",
+  "endDate": "2025-04-02",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3485,
+  "endIdx": 3507,
+  "length": 23,
+  "startDate": "2025-04-03",
+  "endDate": "2025-05-09",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3508,
+  "endIdx": 3517,
+  "length": 10,
+  "startDate": "2025-05-12",
+  "endDate": "2025-05-23",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3518,
+  "endIdx": 3581,
+  "length": 64,
+  "startDate": "2025-05-26",
+  "endDate": "2025-08-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3582,
+  "endIdx": 3582,
+  "length": 1,
+  "startDate": "2025-08-22",
+  "endDate": "2025-08-22",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3583,
+  "endIdx": 3600,
+  "length": 18,
+  "startDate": "2025-08-25",
+  "endDate": "2025-09-19",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3601,
+  "endIdx": 3620,
+  "length": 20,
+  "startDate": "2025-09-22",
+  "endDate": "2025-10-17",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3621,
+  "endIdx": 3622,
+  "length": 2,
+  "startDate": "2025-10-20",
+  "endDate": "2025-10-21",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3623,
+  "endIdx": 3625,
+  "length": 3,
+  "startDate": "2025-10-22",
+  "endDate": "2025-10-24",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3626,
+  "endIdx": 3626,
+  "length": 1,
+  "startDate": "2025-10-27",
+  "endDate": "2025-10-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3627,
+  "endIdx": 3628,
+  "length": 2,
+  "startDate": "2025-10-28",
+  "endDate": "2025-10-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3629,
+  "endIdx": 3647,
+  "length": 19,
+  "startDate": "2025-10-30",
+  "endDate": "2025-11-25",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3648,
+  "endIdx": 3659,
+  "length": 12,
+  "startDate": "2025-11-26",
+  "endDate": "2025-12-11",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3660,
+  "endIdx": 3664,
+  "length": 5,
+  "startDate": "2025-12-12",
+  "endDate": "2025-12-18",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3665,
+  "endIdx": 3679,
+  "length": 15,
+  "startDate": "2025-12-19",
+  "endDate": "2026-01-12",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3680,
+  "endIdx": 3687,
+  "length": 8,
+  "startDate": "2026-01-13",
+  "endDate": "2026-01-22",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3688,
+  "endIdx": 3694,
+  "length": 7,
+  "startDate": "2026-01-23",
+  "endDate": "2026-02-02",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3695,
+  "endIdx": 3695,
+  "length": 1,
+  "startDate": "2026-02-03",
+  "endDate": "2026-02-03",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3696,
+  "endIdx": 3697,
+  "length": 2,
+  "startDate": "2026-02-04",
+  "endDate": "2026-02-05",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3698,
+  "endIdx": 3700,
+  "length": 3,
+  "startDate": "2026-02-06",
+  "endDate": "2026-02-10",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3701,
+  "endIdx": 3703,
+  "length": 3,
+  "startDate": "2026-02-11",
+  "endDate": "2026-02-13",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "BROAD_ADVANCE",
+  "startIdx": 3704,
+  "endIdx": 3708,
+  "length": 5,
+  "startDate": "2026-02-23",
+  "endDate": "2026-02-27",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3709,
+  "endIdx": 3711,
+  "length": 3,
+  "startDate": "2026-03-02",
+  "endDate": "2026-03-04",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3712,
+  "endIdx": 3735,
+  "length": 24,
+  "startDate": "2026-03-05",
+  "endDate": "2026-04-07",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3736,
+  "endIdx": 3736,
+  "length": 1,
+  "startDate": "2026-04-08",
+  "endDate": "2026-04-08",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3737,
+  "endIdx": 3738,
+  "length": 2,
+  "startDate": "2026-04-09",
+  "endDate": "2026-04-10",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3739,
+  "endIdx": 3775,
+  "length": 37,
+  "startDate": "2026-04-13",
+  "endDate": "2026-06-05",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3776,
+  "endIdx": 3785,
+  "length": 10,
+  "startDate": "2026-06-08",
+  "endDate": "2026-06-19",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3786,
+  "endIdx": 3790,
+  "length": 5,
+  "startDate": "2026-06-22",
+  "endDate": "2026-06-26",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3791,
+  "endIdx": 3791,
+  "length": 1,
+  "startDate": "2026-06-29",
+  "endDate": "2026-06-29",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "NARROW_RALLY",
+  "startIdx": 3792,
+  "endIdx": 3795,
+  "length": 4,
+  "startDate": "2026-06-30",
+  "endDate": "2026-07-03",
+  "era": "2022-2026"
+ },
+ {
+  "regime": "SYSTEMIC_WEAKNESS",
+  "startIdx": 3796,
+  "endIdx": 3823,
+  "length": 28,
+  "startDate": "2026-07-06",
+  "endDate": "2026-08-12",
+  "era": "2022-2026"
+ }
+]
