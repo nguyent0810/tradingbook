@@ -221,3 +221,212 @@ the regime mix: fewer broad advances, more narrow rallies.
   precisely the decomposition that would sharpen a cap-versus-equal question.
 - **`RECOVERY_UNDERNEATH` is thin** (99 sessions, 43 runs, median length 1) and
   no conclusion should rest on it.
+
+---
+
+# PART II — Outcome overlay (added after the freeze above)
+
+Everything above was committed at `5699c69` before any strategy outcome was
+read. Nothing above was changed afterwards.
+
+**Preregistered before looking:** primary comparison is mean forward return
+between regimes, clustered on **regime runs** (not sessions, not trades, because
+trades inside one run are not independent). 12 planned tests → Bonferroni
+α = 0.00417. Both raw and corrected intervals are reported.
+
+## 9. Does the baseline strategy behave differently by regime?
+
+All 403 v2 executable-stop trades fall on classifiable sessions.
+
+| regime | n | runs | win% | stop% | mean ret | median ret | expR | MFE | MAE |
+|---|---|---|---|---|---|---|---|---|---|
+| `BROAD_ADVANCE` | 313 | 52 | 37.1 | 55.9 | **+0.82%** | −2.75% | 0.199 | 7.83 | −4.58 |
+| `NARROW_RALLY` | 55 | 35 | 40.0 | 50.9 | +2.20% | −1.74% | 0.738 | 10.15 | −4.53 |
+| `SYSTEMIC_WEAKNESS` | 30 | 19 | 36.7 | 53.3 | **+3.19%** | −2.79% | 0.529 | 9.45 | −4.92 |
+| `RECOVERY_UNDERNEATH` | 5 | 2 | 60.0 | 40.0 | +13.66% | +1.59% | 3.139 | 19.33 | −3.36 |
+
+| comparison | raw 95% | Bonferroni /12 |
+|---|---|---|
+| `BROAD_ADVANCE` − `SYSTEMIC_WEAKNESS` | −2.37pp [−7.28, +1.78] | [−10.21, +3.38] |
+| `BROAD_ADVANCE` − `NARROW_RALLY` | −1.37pp [−4.40, +1.57] | [−5.70, +2.92] |
+| `NARROW_RALLY` − `SYSTEMIC_WEAKNESS` | −1.00pp [−6.38, +4.02] | [−9.48, +5.85] |
+
+**Nothing separates.** No comparison excludes zero even before correction. The
+point estimates run *opposite* to intuition — the healthiest regime produced the
+lowest mean return — but that ordering is well inside noise and should not be
+read as a finding either.
+
+Two structural reasons the test is weak: 313 of 403 trades sit in
+`BROAD_ADVANCE` (Gate 1 surfaces most where the index is strong, so the sample is
+concentrated in one cell), and `RECOVERY_UNDERNEATH` has 5 trades across 2 runs.
+
+## 10. Leader flags × regime
+
+| regime | flags | runs | mean fwd20 | median | negative |
+|---|---|---|---|---|---|
+| `BROAD_ADVANCE` | 2,183 | 90 | −0.45% | −0.72% | 53% |
+| `NARROW_RALLY` | 1,036 | 94 | +0.68% | −0.57% | 52% |
+| `SYSTEMIC_WEAKNESS` | 1,269 | 60 | +0.41% | +0.41% | 48% |
+| `RECOVERY_UNDERNEATH` | 70 | 21 | −1.27% | −2.43% | 64% |
+
+| comparison | raw 95% | Bonferroni /12 |
+|---|---|---|
+| `BROAD_ADVANCE` − `SYSTEMIC_WEAKNESS` | −0.86pp [−3.81, +1.68] | [−5.23, +2.89] |
+| `BROAD_ADVANCE` − `NARROW_RALLY` | −1.13pp [−4.97, +2.51] | [−6.69, +3.79] |
+
+**Also null.** Once flags are clustered on regime runs rather than counted as
+independent stock-sessions, market regime does not differentiate leader outcomes.
+
+Note this does **not** contradict the earlier +11.25pp leader interaction across
+recovery *episodes* — that conditioned on episode outcome, which is a different
+and unknowable-at-the-time variable. Conditioning on a regime observable at T
+produces nothing.
+
+---
+
+## Verdict: `REGIME MODEL DESCRIPTIVE ONLY`
+
+| criterion | met? |
+|---|---|
+| point-in-time | **yes** |
+| structurally coherent | **yes** — 87.6% of sessions in runs ≥5, structured transition matrix |
+| stable to its own cutoff | **yes** — 40%–60% breadth boundary changes nothing material |
+| distinguishes index-vs-cross-section divergence | **yes** — and quantifies what Gate 1 conflates |
+| independent of outcome | **yes** — frozen and committed first |
+| related to strategy outcome | **no** — every comparison contains zero, before correction |
+
+The classification does the descriptive job it was built for: it demonstrates,
+without needing a forward return, that Gate 1's dominant label mixes the
+healthiest and worst market states in near-equal proportion, and that a quarter
+of its PASS sessions are narrow rallies. It does **not** earn a claim that acting
+on it would change results.
+
+**Not supported, and explicitly not proposed:** any change to Gate 1, any risk
+state, any sizing rule. The next phase's question is whether a better market
+representation *helps* — this phase only establishes that a better *description*
+exists.
+
+---
+
+# PART III — Independent review, and what it changed
+
+**Reviewer:** Gemini 3.1 Pro via `agy` 1.1.12, 2026-08-13. Deliberately a
+different tool and model family. Its verdict was `UNSTABLE AND INVALID`. I
+verified each claim rather than accepting or dismissing it; four are upheld, one
+is refuted by the data, and the headline finding is substantially narrowed.
+
+## Upheld — the Gate 1 cross-tab is largely definitional
+
+This is the serious one. Gate 1 `PASS` requires close > MA50; my INDEX axis *is*
+close ≥ MA50. So `PASS ⊂ INDEX_STRONG` is a tautology, and `FAIL ⊂ INDEX_WEAK`
+likewise. Quantified:
+
+| Gate 1 | index axis split | breadth axis split |
+|---|---|---|
+| PASS (697) | **100% strong** — definitional | 76.3% / 23.7% |
+| WARNING (1,962) | **60.9% / 39.1%** — definitional (WARNING spans both by construction) | 48.5% / 51.5% |
+| FAIL (313) | **100% weak** — definitional | 10.2% / 89.8% |
+
+And breadth turns out to track the index axis closely:
+
+| within WARNING | n | breadth strong |
+|---|---|---|
+| ∩ INDEX_STRONG | 1,194 | **74.2%** |
+| ∩ INDEX_WEAK | 768 | **8.6%** |
+
+**So the "WARNING mixes the best and worst regimes" headline was overstated.**
+Most of that mixture is the index axis — which Gate 1 already partly encodes —
+not breadth. The reviewer is right that plotting Gate 1 against a matrix
+containing Gate 1 and finding structure is close to circular.
+
+**What survives, narrower but not tautological:** within `PASS` alone — a single
+index state, so the index axis is held constant — **23.7% of sessions have the
+majority of stocks below their own MA50**. That is pure cross-sectional
+information Gate 1 does not have. It is a real finding about one label, not a
+general claim that Gate 1 conflates opposites.
+
+## Upheld — MA lookback was never sensitivity-tested
+
+The cutoff table varied the breadth boundary but fixed MA50 on both axes. Filling
+the gap, across nine lookback combinations:
+
+| index MA | breadth MA | runs | median run | one-session flips | divergent share |
+|---|---|---|---|---|---|
+| MA20 | %>MA10 | 612 | 2 | 32.2% | 23.6% |
+| MA20 | %>MA50 | 423 | 3 | 32.4% | 27.3% |
+| **MA50** | **%>MA50** | 328 | 3 | 34.1% | 18.7% |
+| MA50 | %>MA10 | 555 | 3 | 28.3% | 36.0% |
+| MA100 | %>MA10 | 518 | 3 | 26.4% | 41.4% |
+| MA100 | %>MA50 | 298 | 3 | 33.9% | 25.7% |
+
+Structure is stable — median run 2–3 and flip rate 26–36% everywhere — so no
+conclusion rests on MA50. But the **divergent share swings from 18.7% to 41.4%**
+depending on the pair, and matched lookbacks minimise it. The frequency of
+"the axes disagree" is therefore a property of the lookback pairing as much as of
+the market, and §5's divergence percentages should be read that way.
+
+## Upheld — the equal-weight construction, and the naming
+
+Compounding a daily cross-sectional median is not a portfolio return and carries
+a path-dependent drag, so the "20pp gap unchanged across eras" correction rests
+on a construction no investor experiences. The narrower claim stands — different
+constructions give wildly different levels, so `WHY-2022.md`'s figures are
+construction-specific — but "the gap was always ~20pp" should be treated as an
+artefact of that particular arithmetic, not as a fact about the market.
+
+On naming: `RECOVERY_UNDERNEATH` implies a leading indicator, while the data says
+43 runs, median length 1, and a 47/47 coin flip on what follows. The label
+imports a conclusion the data refuses. It is kept for continuity with earlier
+phases but should be read as "index weak, breadth strong" and nothing more.
+
+## Refuted — the era comparison is not confounded by universe growth
+
+The reviewer called this FATAL: a growing universe supposedly invalidates
+comparing regime frequency across eras. The data does not support the mechanism.
+
+> **corr(universe size, % above MA50) = −0.008** across 2,982 sessions.
+
+| era | median universe | median %>MA50 |
+|---|---|---|
+| 2015–2021 | 221 | 51.9% |
+| 2022–2026 | 271 | 44.6% |
+
+Breadth is a percentage and is essentially uncorrelated with how many symbols are
+in the denominator. Composition change — *which* symbols, not how many — remains
+possible and untested, but the stated mechanism is refuted.
+
+## Unresolved
+
+**Survivorship.** 1,182 of 1,537 symbols have no stored bars, and the specific
+mechanism the reviewer describes — weak names delisting out of the denominator
+and inflating breadth during drawdowns — is plausible and cannot be tested with
+this data. The 129-symbol fixed cohort is itself survivor-selected. This is the
+strongest outstanding objection to every breadth number here.
+
+**Post-selection.** Freezing the classification before the outcome overlay
+prevents one specific failure and not the general one: the axes were chosen by
+someone who had already spent seven phases on this dataset.
+
+---
+
+## Verdict after review: `REGIME MODEL DESCRIPTIVE ONLY` — retained, substantially narrowed
+
+Not upgraded, and not downgraded to `UNSTABLE`: the classification is stable
+across both the breadth cutoff and the MA lookback, and 60% of sessions sit in
+runs of 20+ sessions. Not `INSUFFICIENT DATA`: 2,982 sessions classify cleanly.
+
+But the descriptive claim is now much smaller than Part I asserted:
+
+| claim | status after review |
+|---|---|
+| Gate 1 WARNING mixes the best and worst regimes | **withdrawn as headline** — mostly definitional |
+| 23.7% of Gate 1 PASS sessions have majority-weak breadth | **stands** — pure cross-sectional information |
+| Regime frequency shifted 2015–21 → 2022–26 | **stands** — universe-size confound refuted |
+| Transition structure is coherent, not random | **stands** |
+| Divergence share (16.1% → 22.6%) | **weakened** — depends on the MA pairing |
+| Index-vs-median-stock gap unchanged at ~20pp | **weakened** — construction artefact |
+| Strategy behaves differently by regime | **no evidence**, as reported in Part II |
+
+The honest summary: a two-axis description of this market is **stable and
+coherent**, it exposes **one** specific thing Gate 1 cannot see, and there is
+**no evidence yet** that any of it would change a trading result.
