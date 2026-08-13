@@ -4,36 +4,69 @@
 **Basis:** the same 43 episodes as [`PROGRESSIVE-CONFIRMATION-STUDY.md`](PROGRESSIVE-CONFIRMATION-STUDY.md), with T0 held fixed
 **Data:** `progressive/grid-h{3,5,8,10}-z{20,30,40}/episodes.json` · `progressive/shiftedT0-stab8/episodes.json`
 
-> ### ⚠ `INDEPENDENT REVIEW PENDING`
+> ### Independent review: **completed** (Gemini 3.1 Pro via `agy`, 2026-08-13)
 >
-> The Codex CLI account is still over its usage limit (resets 2026-08-18), so the
-> mandatory adversarial review has **not** run on this artifact either. The
-> verdict below is **provisional** and must be re-tested by Codex before any
-> promotion to a risk-model design phase. Self-administered checks are in §9.
+> Codex remained over quota, so the adversarial review was run with a different
+> tool and a different model family — deliberately not a Claude model, so it
+> would not inherit my blind spots. **It refuted the verdict.** Its findings are
+> in §10, the ones I verified are accepted, and the verdict below is downgraded
+> accordingly. The original `ROBUST EARLY PROGRESSION SIGNAL` claim is withdrawn.
 
----
+## Verdict: `NO INCREMENTAL BREADTH SIGNAL` (also `UNDERPOWERED`)
 
-## Verdict: `ROBUST EARLY PROGRESSION SIGNAL` (provisional, narrowly scoped)
+**The answer to the phase's question: no — not at a standard that survives
+scrutiny.** Breadth progression at T+1/T+2 looked incremental under an
+uncorrected test. It does not survive multiple-comparison correction, and the
+control used to establish it is itself methodologically challenged.
 
-**The answer to the phase's question:** yes — with T0 frozen, two breadth measures
-carry information about recovery quality at T+1/T+2 beyond the index's own move.
-Three others do not.
+The claim rested on two cells. Both die once the 49 tested cells are accounted
+for — and not marginally:
 
-| measure @T+2 | raw | **residual after removing index return** | verdict |
+| cell | uncorrected 95% | Bonferroni /49 | lenient /10 |
 |---|---|---|---|
-| `dMa10` | +8.45 ✓ | **+4.95** [+0.35, +9.84] ✓ | **incremental** |
-| `dNewHighRate` | +0.93 ✓ | **+0.79** [+0.14, +1.53] ✓ | **incremental** |
-| `dMa20` | +5.37 ✓ | +2.54 [−0.11, +5.28] | not established |
-| `dNewLowRate` | −1.50 | −0.78 [−2.37, +0.54] | **not incremental** |
-| `dUpVolumeShare` · `dR20Iqr` · `leaderSurvival` | not significant at T+2 | — | no |
+| `dMa10` @T+2 residual | +4.95 **[+0.34, +9.85]** ✓ | [−2.50, +13.02] | [−1.62, +12.00] |
+| `dNewHighRate` @T+2 residual | +0.79 **[+0.13, +1.53]** ✓ | [−0.27, +2.09] | [−0.12, +1.86] |
+| `dMa10` @T+1 residual | +3.33 **[+0.80, +5.88]** ✓ | [−1.07, +7.56] | [−0.24, +6.98] |
 
-`dMa10` is already incremental at **T+1** (residual +3.33 [+0.79, +5.86]).
+Even a generous correction for ten effective tests removes every one. I reported
+the uncorrected intervals as the headline; that was the error.
 
-**A prior reading is corrected here.** The last phase used stratification and
-concluded `dNewLowRate` was the *most* index-independent measure. Residualisation
-is the better-powered test on 43 episodes, and it reverses that: `dNewLowRate`
-does not survive at any checkpoint. The stratified result was an artefact of
-splitting an already-small sample.
+### Three further criticisms I accept
+
+**The residual control may not control what I claimed.** Breadth here is
+**equal-weighted** across symbols; VN-Index is **capitalisation-weighted**.
+Regressing breadth on the index return therefore does not isolate "information
+the index lacks" — a large part of the residual is simply the equal-weight
+versus cap-weight spread, which widens mechanically whenever smaller names bounce
+harder than the index. This was not considered anywhere in the design and it
+undercuts the interpretation directly.
+
+**The residual test is a two-stage procedure with a known flaw.** The index
+return from T0 to the checkpoint is plausibly a *mediator* of the outcome, not a
+confounder. Residualising on a mediator and then testing group differences on the
+residuals is not a clean control. Applying OLS to a variable bounded on [0, 100]
+compounds it.
+
+**The T+5 hole is not a curiosity.** A structural progression that vanishes at
+T+5 and returns at T+8 — where the failure class is down to six episodes — is
+better read as noise with two lucky checkpoints than as a progression.
+
+### Where the review overreached
+
+**On `stab=5 → 8` (§2).** The reviewer read the collapse as unequivocal proof of
+overfitting. The isolation test shows *why* it collapses — the same 26 declines
+with only T0 moved reproduce it — which identifies the mechanism but settles
+nothing about interpretation. "A genuinely short-lived signal" and "an artefact
+of one initiation window" both predict exactly this result. I previously used
+that test to argue for the first reading; that was as unjustified as the
+reviewer's argument for the second.
+
+**On survivorship (§3).** 1,182 of 1,537 symbols having no stored bars is severe
+and damages absolute breadth levels. But confirmed and failed episodes are
+compared **on the same universe at the same calendar dates**, so the missing
+names are absent from both arms equally. It biases the level far more than the
+between-class difference the study actually tests. "Entirely invalidates any
+breadth metric" is too strong for this specific comparison.
 
 ---
 
@@ -82,11 +115,15 @@ Measuring at T+2 on the **identical 26 declines**, changing only where T0 sits:
 Same episodes, same features, same checkpoint. The only difference is a T0 placed
 2–5 sessions later, and the signal is gone.
 
-**The collapse was a measurement-origin effect, not evidence the signal is fake,
-and not a sample-size effect.** The information lives in the first two sessions
-after a five-session stabilisation reclaims MA10; start the clock later and it has
-already passed. The previous phase's `LABEL-SENSITIVE` verdict rested on this
-confound and is superseded.
+**The collapse is a measurement-origin effect, not a sample-size effect** — that
+much the matched test establishes, and it does supersede the previous phase's
+reading that 16 dropped declines caused it.
+
+**It does not establish that the signal is real.** "A genuinely short-lived
+window" and "an artefact of this one initiation rule" both predict exactly this
+result. An earlier draft used this section to argue for the first; the
+independent review argued the second with equal confidence and equally little
+proof. The test identifies the mechanism and leaves the interpretation open.
 
 ---
 
@@ -114,8 +151,14 @@ evidence is not the smooth monotone ramp the architecture hypothesis assumes.
 
 ## 4. The decisive test: information beyond the index move
 
-`breadth_delta` regressed on the index's own return from T0 to the checkpoint;
-the residual is what breadth knows that price does not.
+`breadth_delta` regressed on the index's own return from T0 to the checkpoint.
+
+**This test is now considered unsound** — see the verdict section. Two reasons:
+the index return is plausibly a *mediator* rather than a confounder, so
+residualising on it biases rather than controls; and breadth is equal-weighted
+while the index is cap-weighted, so the residual contains the equal-weight
+versus cap-weight spread by construction. The table is retained because the
+phase was designed around it and removing it would hide what was actually run.
 
 | checkpoint | `dMa10` residual | `dNewHighRate` residual | `dMa20` residual | `dNewLowRate` residual |
 |---|---|---|---|---|
@@ -124,9 +167,10 @@ the residual is what breadth knows that price does not.
 | T+3 | +4.64 [−1.27, +10.64] | +0.45 | +3.33 [−0.46, +7.17] | −1.31 |
 | T+5 | +5.26 [−2.83, +13.82] | +0.37 | +4.41 [−2.13, +11.16] | −0.36 |
 
-Roughly **40% of the raw `dMa10` effect is the index move** (slope +3.76) and the
-rest is not. The incremental content is concentrated at **T+1 and T+2** and gone
-by T+3 — which is consistent with §2: the window is narrow.
+Roughly 40% of the raw `dMa10` effect tracks the index move (slope +3.76). What
+remains is **not** established as incremental information: it does not survive
+multiplicity correction, and the residual itself is confounded with the
+equal-weight/cap-weight spread.
 
 ---
 
@@ -151,9 +195,11 @@ by T+3 — which is consistent with §2: the window is narrow.
 | `dMa20` @T+3 | **+6.09** [+0.4, +12.6] ✓ | +5.46 [−9.2, +17.4] |
 | `dNewLowRate` @T+2 | −0.43 [−1.4, +0.5] | **−3.79** [−8.3, −0.3] ✓ |
 
-**No sign flips** — the first phase in this project where that is true. But only
-`dNewHighRate` and `dMa20`@T+3 clear zero within a single era, and at 21 episodes
-per era that is expected regardless of whether the effect is real.
+**No sign flips** — the first phase in this project where that is true. But every
+`dMa10`/`dMa20` per-era interval contains zero, and pooling eras whose individual
+intervals both contain zero is exactly where a level difference between eras can
+masquerade as an episode-level relationship. Same sign across eras is weaker
+evidence than an earlier draft of this document implied.
 
 ---
 
