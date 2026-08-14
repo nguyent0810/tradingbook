@@ -1,0 +1,2495 @@
+{
+ "purpose": "frozen universe for the forward out-of-sample holdout",
+ "frozenAt": "2026-08-13",
+ "strategySha": "4762d10",
+ "rule": "A symbol is eligible for the forward holdout only from the day after `asOf`, and only if it appears in `symbols` below. Symbols added to the registry later are excluded for the whole holdout, and no backfilled prehistory of any symbol counts. Point-in-time universe resolution still applies within this set.",
+ "registryRows": 1537,
+ "symbolsWithBars": 355,
+ "symbols": [
+  {
+   "symbol": "A32",
+   "exchange": null,
+   "firstBar": "2018-10-24",
+   "lastBar": "2026-08-10",
+   "bars": 1941
+  },
+  {
+   "symbol": "AAA",
+   "exchange": "UPCOM",
+   "firstBar": "2014-06-18",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "AAH",
+   "exchange": null,
+   "firstBar": "2024-01-11",
+   "lastBar": "2026-08-13",
+   "bars": 643
+  },
+  {
+   "symbol": "AAM",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "AAS",
+   "exchange": null,
+   "firstBar": "2020-07-23",
+   "lastBar": "2026-08-13",
+   "bars": 1513
+  },
+  {
+   "symbol": "AAT",
+   "exchange": null,
+   "firstBar": "2021-03-24",
+   "lastBar": "2026-08-13",
+   "bars": 1346
+  },
+  {
+   "symbol": "AAV",
+   "exchange": null,
+   "firstBar": "2018-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 2027
+  },
+  {
+   "symbol": "ABB",
+   "exchange": null,
+   "firstBar": "2020-12-28",
+   "lastBar": "2026-08-13",
+   "bars": 1402
+  },
+  {
+   "symbol": "ABC",
+   "exchange": null,
+   "firstBar": "2016-08-18",
+   "lastBar": "2026-08-13",
+   "bars": 2494
+  },
+  {
+   "symbol": "ABI",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ABR",
+   "exchange": null,
+   "firstBar": "2018-06-13",
+   "lastBar": "2026-08-13",
+   "bars": 2026
+  },
+  {
+   "symbol": "ABS",
+   "exchange": null,
+   "firstBar": "2020-03-18",
+   "lastBar": "2026-08-13",
+   "bars": 1601
+  },
+  {
+   "symbol": "ABT",
+   "exchange": null,
+   "firstBar": "2014-06-16",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ABW",
+   "exchange": null,
+   "firstBar": "2023-05-30",
+   "lastBar": "2026-08-13",
+   "bars": 802
+  },
+  {
+   "symbol": "ACB",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-18",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ACC",
+   "exchange": null,
+   "firstBar": "2014-06-16",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ACE",
+   "exchange": null,
+   "firstBar": "2014-05-16",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ACG",
+   "exchange": null,
+   "firstBar": "2021-08-04",
+   "lastBar": "2026-08-13",
+   "bars": 1242
+  },
+  {
+   "symbol": "ACL",
+   "exchange": null,
+   "firstBar": "2014-05-30",
+   "lastBar": "2026-08-13",
+   "bars": 3032
+  },
+  {
+   "symbol": "ACM",
+   "exchange": null,
+   "firstBar": "2015-07-23",
+   "lastBar": "2026-08-07",
+   "bars": 2350
+  },
+  {
+   "symbol": "ACS",
+   "exchange": null,
+   "firstBar": "2024-08-23",
+   "lastBar": "2026-04-28",
+   "bars": 161
+  },
+  {
+   "symbol": "ACV",
+   "exchange": null,
+   "firstBar": "2016-11-21",
+   "lastBar": "2026-08-13",
+   "bars": 2430
+  },
+  {
+   "symbol": "ADC",
+   "exchange": null,
+   "firstBar": "2014-03-14",
+   "lastBar": "2026-08-12",
+   "bars": 3031
+  },
+  {
+   "symbol": "ADG",
+   "exchange": null,
+   "firstBar": "2019-12-26",
+   "lastBar": "2026-08-13",
+   "bars": 1614
+  },
+  {
+   "symbol": "ADP",
+   "exchange": null,
+   "firstBar": "2014-06-11",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ADS",
+   "exchange": null,
+   "firstBar": "2016-06-29",
+   "lastBar": "2026-08-13",
+   "bars": 2532
+  },
+  {
+   "symbol": "AFX",
+   "exchange": null,
+   "firstBar": "2016-12-02",
+   "lastBar": "2026-08-13",
+   "bars": 2414
+  },
+  {
+   "symbol": "AG1",
+   "exchange": null,
+   "firstBar": "2018-01-10",
+   "lastBar": "2026-08-12",
+   "bars": 2136
+  },
+  {
+   "symbol": "AGF",
+   "exchange": null,
+   "firstBar": "2024-03-25",
+   "lastBar": "2026-04-24",
+   "bars": 161
+  },
+  {
+   "symbol": "AGG",
+   "exchange": null,
+   "firstBar": "2020-01-09",
+   "lastBar": "2026-08-13",
+   "bars": 1645
+  },
+  {
+   "symbol": "AGM",
+   "exchange": null,
+   "firstBar": "2013-06-17",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "AGP",
+   "exchange": null,
+   "firstBar": "2015-10-20",
+   "lastBar": "2026-08-13",
+   "bars": 2704
+  },
+  {
+   "symbol": "AGR",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "AGX",
+   "exchange": null,
+   "firstBar": "2015-12-01",
+   "lastBar": "2026-08-11",
+   "bars": 2672
+  },
+  {
+   "symbol": "AIC",
+   "exchange": null,
+   "firstBar": "2021-01-08",
+   "lastBar": "2026-08-12",
+   "bars": 1177
+  },
+  {
+   "symbol": "AIG",
+   "exchange": null,
+   "firstBar": "2024-11-11",
+   "lastBar": "2026-08-13",
+   "bars": 437
+  },
+  {
+   "symbol": "ALC",
+   "exchange": null,
+   "firstBar": "2026-01-15",
+   "lastBar": "2026-05-06",
+   "bars": 72
+  },
+  {
+   "symbol": "ALT",
+   "exchange": null,
+   "firstBar": "2013-12-24",
+   "lastBar": "2026-08-12",
+   "bars": 3031
+  },
+  {
+   "symbol": "ALV",
+   "exchange": null,
+   "firstBar": "2014-06-18",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "AMC",
+   "exchange": null,
+   "firstBar": "2014-06-06",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "AME",
+   "exchange": null,
+   "firstBar": "2013-06-18",
+   "lastBar": "2026-08-12",
+   "bars": 3031
+  },
+  {
+   "symbol": "AMP",
+   "exchange": null,
+   "firstBar": "2017-01-12",
+   "lastBar": "2026-08-13",
+   "bars": 2265
+  },
+  {
+   "symbol": "AMS",
+   "exchange": null,
+   "firstBar": "2017-02-06",
+   "lastBar": "2026-08-13",
+   "bars": 2380
+  },
+  {
+   "symbol": "AMV",
+   "exchange": null,
+   "firstBar": "2013-04-04",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ANT",
+   "exchange": null,
+   "firstBar": "2016-12-22",
+   "lastBar": "2026-08-13",
+   "bars": 2402
+  },
+  {
+   "symbol": "ANV",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "APC",
+   "exchange": null,
+   "firstBar": "2025-06-24",
+   "lastBar": "2026-05-05",
+   "bars": 161
+  },
+  {
+   "symbol": "APF",
+   "exchange": null,
+   "firstBar": "2017-06-08",
+   "lastBar": "2026-08-13",
+   "bars": 2296
+  },
+  {
+   "symbol": "APG",
+   "exchange": null,
+   "firstBar": "2014-06-18",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "APH",
+   "exchange": null,
+   "firstBar": "2020-07-28",
+   "lastBar": "2026-08-13",
+   "bars": 1510
+  },
+  {
+   "symbol": "API",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "APL",
+   "exchange": null,
+   "firstBar": "2024-11-21",
+   "lastBar": "2026-04-13",
+   "bars": 161
+  },
+  {
+   "symbol": "APP",
+   "exchange": null,
+   "firstBar": "2014-04-18",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "APS",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "APT",
+   "exchange": null,
+   "firstBar": "2024-01-09",
+   "lastBar": "2026-04-17",
+   "bars": 161
+  },
+  {
+   "symbol": "ARM",
+   "exchange": null,
+   "firstBar": "2025-05-28",
+   "lastBar": "2026-07-06",
+   "bars": 277
+  },
+  {
+   "symbol": "ART",
+   "exchange": null,
+   "firstBar": "2023-11-30",
+   "lastBar": "2024-07-25",
+   "bars": 161
+  },
+  {
+   "symbol": "ASG",
+   "exchange": null,
+   "firstBar": "2020-09-24",
+   "lastBar": "2026-08-13",
+   "bars": 1352
+  },
+  {
+   "symbol": "ASM",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "ASP",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "AST",
+   "exchange": null,
+   "firstBar": "2018-01-04",
+   "lastBar": "2026-08-13",
+   "bars": 2147
+  },
+  {
+   "symbol": "ATA",
+   "exchange": null,
+   "firstBar": "2012-10-18",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "ATG",
+   "exchange": null,
+   "firstBar": "2024-04-08",
+   "lastBar": "2026-07-03",
+   "bars": 170
+  },
+  {
+   "symbol": "ATS",
+   "exchange": null,
+   "firstBar": "2024-09-25",
+   "lastBar": "2026-03-04",
+   "bars": 161
+  },
+  {
+   "symbol": "AVC",
+   "exchange": null,
+   "firstBar": "2018-01-08",
+   "lastBar": "2026-08-13",
+   "bars": 2114
+  },
+  {
+   "symbol": "AVF",
+   "exchange": null,
+   "firstBar": "2023-11-30",
+   "lastBar": "2024-07-25",
+   "bars": 161
+  },
+  {
+   "symbol": "AVG",
+   "exchange": null,
+   "firstBar": "2024-08-09",
+   "lastBar": "2026-08-13",
+   "bars": 501
+  },
+  {
+   "symbol": "BAB",
+   "exchange": null,
+   "firstBar": "2017-12-28",
+   "lastBar": "2026-08-13",
+   "bars": 2148
+  },
+  {
+   "symbol": "BAF",
+   "exchange": null,
+   "firstBar": "2021-12-03",
+   "lastBar": "2026-08-13",
+   "bars": 1169
+  },
+  {
+   "symbol": "BAL",
+   "exchange": null,
+   "firstBar": "2018-01-15",
+   "lastBar": "2026-08-13",
+   "bars": 1963
+  },
+  {
+   "symbol": "BAX",
+   "exchange": null,
+   "firstBar": "2017-03-24",
+   "lastBar": "2026-08-05",
+   "bars": 2318
+  },
+  {
+   "symbol": "BBH",
+   "exchange": null,
+   "firstBar": "2020-05-14",
+   "lastBar": "2026-08-07",
+   "bars": 1551
+  },
+  {
+   "symbol": "BBM",
+   "exchange": null,
+   "firstBar": "2024-12-11",
+   "lastBar": "2026-04-29",
+   "bars": 161
+  },
+  {
+   "symbol": "BBS",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-12",
+   "bars": 3032
+  },
+  {
+   "symbol": "BBT",
+   "exchange": null,
+   "firstBar": "2018-06-12",
+   "lastBar": "2026-08-13",
+   "bars": 2042
+  },
+  {
+   "symbol": "BCA",
+   "exchange": null,
+   "firstBar": "2021-09-08",
+   "lastBar": "2026-08-13",
+   "bars": 1231
+  },
+  {
+   "symbol": "BCB",
+   "exchange": null,
+   "firstBar": "2023-12-05",
+   "lastBar": "2025-11-27",
+   "bars": 161
+  },
+  {
+   "symbol": "BCC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BCE",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BCF",
+   "exchange": null,
+   "firstBar": "2020-03-16",
+   "lastBar": "2026-08-13",
+   "bars": 1600
+  },
+  {
+   "symbol": "BCG",
+   "exchange": null,
+   "firstBar": "2025-02-19",
+   "lastBar": "2025-10-08",
+   "bars": 160
+  },
+  {
+   "symbol": "BCM",
+   "exchange": "HOSE",
+   "firstBar": "2018-02-21",
+   "lastBar": "2026-08-13",
+   "bars": 2112
+  },
+  {
+   "symbol": "BCP",
+   "exchange": null,
+   "firstBar": "2015-09-15",
+   "lastBar": "2026-08-13",
+   "bars": 2341
+  },
+  {
+   "symbol": "BCR",
+   "exchange": null,
+   "firstBar": "2023-12-08",
+   "lastBar": "2026-06-19",
+   "bars": 415
+  },
+  {
+   "symbol": "BCV",
+   "exchange": null,
+   "firstBar": "2023-12-01",
+   "lastBar": "2024-07-25",
+   "bars": 160
+  },
+  {
+   "symbol": "BDG",
+   "exchange": null,
+   "firstBar": "2016-04-11",
+   "lastBar": "2026-08-12",
+   "bars": 2583
+  },
+  {
+   "symbol": "BDT",
+   "exchange": null,
+   "firstBar": "2017-09-06",
+   "lastBar": "2026-08-11",
+   "bars": 2216
+  },
+  {
+   "symbol": "BDW",
+   "exchange": null,
+   "firstBar": "2016-03-08",
+   "lastBar": "2026-08-06",
+   "bars": 2605
+  },
+  {
+   "symbol": "BED",
+   "exchange": null,
+   "firstBar": "2024-10-10",
+   "lastBar": "2026-02-06",
+   "bars": 160
+  },
+  {
+   "symbol": "BEL",
+   "exchange": null,
+   "firstBar": "2025-03-05",
+   "lastBar": "2026-04-15",
+   "bars": 160
+  },
+  {
+   "symbol": "BFC",
+   "exchange": null,
+   "firstBar": "2015-10-07",
+   "lastBar": "2026-08-13",
+   "bars": 2713
+  },
+  {
+   "symbol": "BGE",
+   "exchange": null,
+   "firstBar": "2024-07-31",
+   "lastBar": "2026-08-07",
+   "bars": 264
+  },
+  {
+   "symbol": "BGW",
+   "exchange": null,
+   "firstBar": "2024-11-06",
+   "lastBar": "2026-07-03",
+   "bars": 291
+  },
+  {
+   "symbol": "BHA",
+   "exchange": null,
+   "firstBar": "2017-08-03",
+   "lastBar": "2026-08-13",
+   "bars": 2171
+  },
+  {
+   "symbol": "BHC",
+   "exchange": null,
+   "firstBar": "2024-02-06",
+   "lastBar": "2026-04-24",
+   "bars": 160
+  },
+  {
+   "symbol": "BHG",
+   "exchange": null,
+   "firstBar": "2023-12-04",
+   "lastBar": "2024-10-24",
+   "bars": 160
+  },
+  {
+   "symbol": "BHH",
+   "exchange": null,
+   "firstBar": "2025-06-06",
+   "lastBar": "2026-04-24",
+   "bars": 104
+  },
+  {
+   "symbol": "BHI",
+   "exchange": null,
+   "firstBar": "2024-08-30",
+   "lastBar": "2026-04-23",
+   "bars": 160
+  },
+  {
+   "symbol": "BHK",
+   "exchange": null,
+   "firstBar": "2024-11-04",
+   "lastBar": "2026-02-24",
+   "bars": 160
+  },
+  {
+   "symbol": "BHN",
+   "exchange": null,
+   "firstBar": "2016-10-28",
+   "lastBar": "2026-08-13",
+   "bars": 2427
+  },
+  {
+   "symbol": "BHP",
+   "exchange": null,
+   "firstBar": "2025-03-17",
+   "lastBar": "2026-04-20",
+   "bars": 160
+  },
+  {
+   "symbol": "BIC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BID",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BIG",
+   "exchange": null,
+   "firstBar": "2022-01-10",
+   "lastBar": "2026-08-13",
+   "bars": 1144
+  },
+  {
+   "symbol": "BIO",
+   "exchange": null,
+   "firstBar": "2018-08-31",
+   "lastBar": "2026-08-12",
+   "bars": 1973
+  },
+  {
+   "symbol": "BKC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BKG",
+   "exchange": null,
+   "firstBar": "2020-12-31",
+   "lastBar": "2026-08-13",
+   "bars": 1399
+  },
+  {
+   "symbol": "BLF",
+   "exchange": null,
+   "firstBar": "2013-08-29",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BLI",
+   "exchange": null,
+   "firstBar": "2015-12-28",
+   "lastBar": "2026-08-11",
+   "bars": 2612
+  },
+  {
+   "symbol": "BLN",
+   "exchange": null,
+   "firstBar": "2025-02-07",
+   "lastBar": "2026-04-28",
+   "bars": 160
+  },
+  {
+   "symbol": "BLT",
+   "exchange": null,
+   "firstBar": "2017-07-10",
+   "lastBar": "2026-08-13",
+   "bars": 2253
+  },
+  {
+   "symbol": "BMC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BMD",
+   "exchange": null,
+   "firstBar": "2024-12-20",
+   "lastBar": "2026-05-05",
+   "bars": 160
+  },
+  {
+   "symbol": "BMF",
+   "exchange": null,
+   "firstBar": "2018-04-17",
+   "lastBar": "2026-08-12",
+   "bars": 1869
+  },
+  {
+   "symbol": "BMG",
+   "exchange": null,
+   "firstBar": "2024-11-13",
+   "lastBar": "2026-06-05",
+   "bars": 295
+  },
+  {
+   "symbol": "BMI",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BMJ",
+   "exchange": null,
+   "firstBar": "2025-04-25",
+   "lastBar": "2026-05-05",
+   "bars": 160
+  },
+  {
+   "symbol": "BMK",
+   "exchange": null,
+   "firstBar": "2025-06-03",
+   "lastBar": "2026-07-14",
+   "bars": 174
+  },
+  {
+   "symbol": "BMP",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BMS",
+   "exchange": null,
+   "firstBar": "2018-08-08",
+   "lastBar": "2026-08-13",
+   "bars": 2002
+  },
+  {
+   "symbol": "BMV",
+   "exchange": null,
+   "firstBar": "2017-06-06",
+   "lastBar": "2026-08-13",
+   "bars": 2139
+  },
+  {
+   "symbol": "BNA",
+   "exchange": null,
+   "firstBar": "2020-10-12",
+   "lastBar": "2026-08-07",
+   "bars": 1410
+  },
+  {
+   "symbol": "BNW",
+   "exchange": null,
+   "firstBar": "2018-12-28",
+   "lastBar": "2026-08-10",
+   "bars": 1893
+  },
+  {
+   "symbol": "BOT",
+   "exchange": null,
+   "firstBar": "2019-02-14",
+   "lastBar": "2026-08-07",
+   "bars": 1624
+  },
+  {
+   "symbol": "BPC",
+   "exchange": null,
+   "firstBar": "2025-03-13",
+   "lastBar": "2026-03-03",
+   "bars": 160
+  },
+  {
+   "symbol": "BQB",
+   "exchange": null,
+   "firstBar": "2018-01-10",
+   "lastBar": "2026-08-11",
+   "bars": 2024
+  },
+  {
+   "symbol": "BQP",
+   "exchange": null,
+   "firstBar": "2025-11-05",
+   "lastBar": "2026-05-06",
+   "bars": 109
+  },
+  {
+   "symbol": "BRC",
+   "exchange": null,
+   "firstBar": "2014-04-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BRR",
+   "exchange": null,
+   "firstBar": "2017-06-16",
+   "lastBar": "2026-08-12",
+   "bars": 2203
+  },
+  {
+   "symbol": "BRS",
+   "exchange": null,
+   "firstBar": "2017-03-21",
+   "lastBar": "2026-08-13",
+   "bars": 2350
+  },
+  {
+   "symbol": "BSA",
+   "exchange": null,
+   "firstBar": "2018-08-20",
+   "lastBar": "2026-08-13",
+   "bars": 1969
+  },
+  {
+   "symbol": "BSD",
+   "exchange": null,
+   "firstBar": "2024-11-15",
+   "lastBar": "2026-03-26",
+   "bars": 160
+  },
+  {
+   "symbol": "BSG",
+   "exchange": null,
+   "firstBar": "2024-10-10",
+   "lastBar": "2026-07-14",
+   "bars": 185
+  },
+  {
+   "symbol": "BSH",
+   "exchange": null,
+   "firstBar": "2018-07-04",
+   "lastBar": "2026-08-13",
+   "bars": 1981
+  },
+  {
+   "symbol": "BSI",
+   "exchange": null,
+   "firstBar": "2014-06-17",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BSL",
+   "exchange": null,
+   "firstBar": "2017-06-16",
+   "lastBar": "2026-08-13",
+   "bars": 2281
+  },
+  {
+   "symbol": "BSP",
+   "exchange": null,
+   "firstBar": "2016-08-15",
+   "lastBar": "2026-07-27",
+   "bars": 2458
+  },
+  {
+   "symbol": "BSQ",
+   "exchange": null,
+   "firstBar": "2017-02-28",
+   "lastBar": "2026-08-07",
+   "bars": 2328
+  },
+  {
+   "symbol": "BSR",
+   "exchange": null,
+   "firstBar": "2018-03-01",
+   "lastBar": "2026-08-13",
+   "bars": 2105
+  },
+  {
+   "symbol": "BT1",
+   "exchange": null,
+   "firstBar": "2016-11-09",
+   "lastBar": "2026-08-07",
+   "bars": 2326
+  },
+  {
+   "symbol": "BT6",
+   "exchange": null,
+   "firstBar": "2023-12-01",
+   "lastBar": "2024-07-25",
+   "bars": 160
+  },
+  {
+   "symbol": "BTB",
+   "exchange": null,
+   "firstBar": "2017-01-13",
+   "lastBar": "2026-08-04",
+   "bars": 2155
+  },
+  {
+   "symbol": "BTD",
+   "exchange": null,
+   "firstBar": "2017-03-02",
+   "lastBar": "2026-08-05",
+   "bars": 2248
+  },
+  {
+   "symbol": "BTG",
+   "exchange": null,
+   "firstBar": "2024-02-15",
+   "lastBar": "2026-01-19",
+   "bars": 160
+  },
+  {
+   "symbol": "BTH",
+   "exchange": null,
+   "firstBar": "2012-01-17",
+   "lastBar": "2026-08-13",
+   "bars": 3032
+  },
+  {
+   "symbol": "BTN",
+   "exchange": null,
+   "firstBar": "2018-01-05",
+   "lastBar": "2026-08-12",
+   "bars": 1977
+  },
+  {
+   "symbol": "BTP",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BTS",
+   "exchange": null,
+   "firstBar": "2014-05-16",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BTT",
+   "exchange": null,
+   "firstBar": "2014-06-05",
+   "lastBar": "2026-07-21",
+   "bars": 3030
+  },
+  {
+   "symbol": "BTU",
+   "exchange": null,
+   "firstBar": "2016-08-23",
+   "lastBar": "2026-08-04",
+   "bars": 2482
+  },
+  {
+   "symbol": "BTV",
+   "exchange": null,
+   "firstBar": "2024-05-22",
+   "lastBar": "2026-07-07",
+   "bars": 173
+  },
+  {
+   "symbol": "BTW",
+   "exchange": null,
+   "firstBar": "2014-04-22",
+   "lastBar": "2026-08-13",
+   "bars": 3031
+  },
+  {
+   "symbol": "BVB",
+   "exchange": null,
+   "firstBar": "2020-07-09",
+   "lastBar": "2026-08-13",
+   "bars": 1515
+  },
+  {
+   "symbol": "BVG",
+   "exchange": null,
+   "firstBar": "2012-04-27",
+   "lastBar": "2026-08-07",
+   "bars": 3029
+  },
+  {
+   "symbol": "BVH",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BVL",
+   "exchange": null,
+   "firstBar": "2021-06-11",
+   "lastBar": "2026-08-11",
+   "bars": 1260
+  },
+  {
+   "symbol": "BVN",
+   "exchange": null,
+   "firstBar": "2013-06-25",
+   "lastBar": "2026-08-03",
+   "bars": 3029
+  },
+  {
+   "symbol": "BVS",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "BWA",
+   "exchange": null,
+   "firstBar": "2014-03-26",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "BWE",
+   "exchange": null,
+   "firstBar": "2017-07-20",
+   "lastBar": "2026-08-13",
+   "bars": 2266
+  },
+  {
+   "symbol": "BWS",
+   "exchange": null,
+   "firstBar": "2017-11-28",
+   "lastBar": "2026-08-13",
+   "bars": 2174
+  },
+  {
+   "symbol": "BXH",
+   "exchange": null,
+   "firstBar": "2025-03-10",
+   "lastBar": "2026-07-09",
+   "bars": 171
+  },
+  {
+   "symbol": "C21",
+   "exchange": null,
+   "firstBar": "2024-08-16",
+   "lastBar": "2026-06-05",
+   "bars": 163
+  },
+  {
+   "symbol": "C22",
+   "exchange": null,
+   "firstBar": "2025-01-02",
+   "lastBar": "2026-07-14",
+   "bars": 164
+  },
+  {
+   "symbol": "C32",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "C47",
+   "exchange": null,
+   "firstBar": "2014-06-24",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "C4G",
+   "exchange": null,
+   "firstBar": "2018-12-10",
+   "lastBar": "2026-08-13",
+   "bars": 1915
+  },
+  {
+   "symbol": "C69",
+   "exchange": null,
+   "firstBar": "2017-04-21",
+   "lastBar": "2026-08-13",
+   "bars": 2328
+  },
+  {
+   "symbol": "C92",
+   "exchange": null,
+   "firstBar": "2014-01-21",
+   "lastBar": "2026-08-13",
+   "bars": 3032
+  },
+  {
+   "symbol": "CAD",
+   "exchange": null,
+   "firstBar": "2012-11-01",
+   "lastBar": "2026-08-07",
+   "bars": 3028
+  },
+  {
+   "symbol": "CAG",
+   "exchange": null,
+   "firstBar": "2017-12-04",
+   "lastBar": "2026-08-12",
+   "bars": 2123
+  },
+  {
+   "symbol": "CAN",
+   "exchange": null,
+   "firstBar": "2013-01-17",
+   "lastBar": "2026-07-20",
+   "bars": 3030
+  },
+  {
+   "symbol": "CAP",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CAR",
+   "exchange": null,
+   "firstBar": "2024-11-07",
+   "lastBar": "2026-06-05",
+   "bars": 166
+  },
+  {
+   "symbol": "CAT",
+   "exchange": null,
+   "firstBar": "2018-03-26",
+   "lastBar": "2026-08-13",
+   "bars": 2096
+  },
+  {
+   "symbol": "CBI",
+   "exchange": null,
+   "firstBar": "2025-01-03",
+   "lastBar": "2026-07-03",
+   "bars": 172
+  },
+  {
+   "symbol": "CBS",
+   "exchange": null,
+   "firstBar": "2017-06-21",
+   "lastBar": "2026-08-13",
+   "bars": 2278
+  },
+  {
+   "symbol": "CC1",
+   "exchange": null,
+   "firstBar": "2017-07-21",
+   "lastBar": "2026-08-13",
+   "bars": 2204
+  },
+  {
+   "symbol": "CCA",
+   "exchange": null,
+   "firstBar": "2019-12-26",
+   "lastBar": "2026-08-13",
+   "bars": 1648
+  },
+  {
+   "symbol": "CCC",
+   "exchange": null,
+   "firstBar": "2024-07-30",
+   "lastBar": "2026-08-13",
+   "bars": 484
+  },
+  {
+   "symbol": "CCI",
+   "exchange": null,
+   "firstBar": "2014-06-12",
+   "lastBar": "2026-08-12",
+   "bars": 3031
+  },
+  {
+   "symbol": "CCL",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CCM",
+   "exchange": null,
+   "firstBar": "2014-03-25",
+   "lastBar": "2026-07-20",
+   "bars": 3030
+  },
+  {
+   "symbol": "CCP",
+   "exchange": null,
+   "firstBar": "2023-12-28",
+   "lastBar": "2025-09-26",
+   "bars": 160
+  },
+  {
+   "symbol": "CCR",
+   "exchange": null,
+   "firstBar": "2015-09-24",
+   "lastBar": "2026-08-11",
+   "bars": 2701
+  },
+  {
+   "symbol": "CCS",
+   "exchange": null,
+   "firstBar": "2026-01-23",
+   "lastBar": "2026-05-06",
+   "bars": 64
+  },
+  {
+   "symbol": "CCT",
+   "exchange": null,
+   "firstBar": "2024-07-12",
+   "lastBar": "2026-04-29",
+   "bars": 160
+  },
+  {
+   "symbol": "CCV",
+   "exchange": null,
+   "firstBar": "2024-11-08",
+   "lastBar": "2026-04-08",
+   "bars": 160
+  },
+  {
+   "symbol": "CDC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CDG",
+   "exchange": null,
+   "firstBar": "2025-08-12",
+   "lastBar": "2026-04-03",
+   "bars": 160
+  },
+  {
+   "symbol": "CDN",
+   "exchange": null,
+   "firstBar": "2016-03-30",
+   "lastBar": "2026-08-13",
+   "bars": 2590
+  },
+  {
+   "symbol": "CDO",
+   "exchange": null,
+   "firstBar": "2015-03-09",
+   "lastBar": "2026-08-07",
+   "bars": 2408
+  },
+  {
+   "symbol": "CDP",
+   "exchange": null,
+   "firstBar": "2018-07-13",
+   "lastBar": "2026-08-05",
+   "bars": 2010
+  },
+  {
+   "symbol": "CDR",
+   "exchange": null,
+   "firstBar": "2017-06-27",
+   "lastBar": "2026-08-13",
+   "bars": 2267
+  },
+  {
+   "symbol": "CEN",
+   "exchange": null,
+   "firstBar": "2018-06-15",
+   "lastBar": "2026-08-07",
+   "bars": 1631
+  },
+  {
+   "symbol": "CEO",
+   "exchange": null,
+   "firstBar": "2014-09-29",
+   "lastBar": "2026-08-13",
+   "bars": 2967
+  },
+  {
+   "symbol": "CET",
+   "exchange": null,
+   "firstBar": "2017-07-28",
+   "lastBar": "2026-08-07",
+   "bars": 2068
+  },
+  {
+   "symbol": "CFM",
+   "exchange": null,
+   "firstBar": "2021-01-25",
+   "lastBar": "2026-07-27",
+   "bars": 1249
+  },
+  {
+   "symbol": "CFV",
+   "exchange": null,
+   "firstBar": "2024-11-01",
+   "lastBar": "2026-04-22",
+   "bars": 160
+  },
+  {
+   "symbol": "CGV",
+   "exchange": null,
+   "firstBar": "2017-06-21",
+   "lastBar": "2026-08-13",
+   "bars": 2167
+  },
+  {
+   "symbol": "CH5",
+   "exchange": null,
+   "firstBar": "2024-11-21",
+   "lastBar": "2026-04-09",
+   "bars": 160
+  },
+  {
+   "symbol": "CHC",
+   "exchange": null,
+   "firstBar": "2024-03-21",
+   "lastBar": "2026-07-09",
+   "bars": 289
+  },
+  {
+   "symbol": "CHP",
+   "exchange": null,
+   "firstBar": "2014-06-19",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CHS",
+   "exchange": null,
+   "firstBar": "2017-01-12",
+   "lastBar": "2026-08-13",
+   "bars": 2309
+  },
+  {
+   "symbol": "CI5",
+   "exchange": null,
+   "firstBar": "2013-07-17",
+   "lastBar": "2026-07-14",
+   "bars": 3030
+  },
+  {
+   "symbol": "CIA",
+   "exchange": null,
+   "firstBar": "2017-11-29",
+   "lastBar": "2026-08-13",
+   "bars": 2130
+  },
+  {
+   "symbol": "CID",
+   "exchange": null,
+   "firstBar": "2014-05-13",
+   "lastBar": "2026-08-12",
+   "bars": 3030
+  },
+  {
+   "symbol": "CIG",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CII",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CIP",
+   "exchange": null,
+   "firstBar": "2017-09-28",
+   "lastBar": "2026-08-13",
+   "bars": 2040
+  },
+  {
+   "symbol": "CJC",
+   "exchange": null,
+   "firstBar": "2023-12-07",
+   "lastBar": "2026-01-13",
+   "bars": 160
+  },
+  {
+   "symbol": "CK8",
+   "exchange": null,
+   "firstBar": "2023-12-04",
+   "lastBar": "2025-11-21",
+   "bars": 160
+  },
+  {
+   "symbol": "CKA",
+   "exchange": null,
+   "firstBar": "2018-10-17",
+   "lastBar": "2026-08-13",
+   "bars": 1952
+  },
+  {
+   "symbol": "CKD",
+   "exchange": null,
+   "firstBar": "2015-05-21",
+   "lastBar": "2026-08-13",
+   "bars": 2798
+  },
+  {
+   "symbol": "CKG",
+   "exchange": null,
+   "firstBar": "2020-03-25",
+   "lastBar": "2026-08-13",
+   "bars": 1596
+  },
+  {
+   "symbol": "CKV",
+   "exchange": null,
+   "firstBar": "2013-07-25",
+   "lastBar": "2026-08-05",
+   "bars": 3030
+  },
+  {
+   "symbol": "CLC",
+   "exchange": null,
+   "firstBar": "2014-06-19",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CLH",
+   "exchange": null,
+   "firstBar": "2016-06-07",
+   "lastBar": "2026-08-13",
+   "bars": 2543
+  },
+  {
+   "symbol": "CLI",
+   "exchange": null,
+   "firstBar": "2026-05-06",
+   "lastBar": "2026-05-06",
+   "bars": 1
+  },
+  {
+   "symbol": "CLL",
+   "exchange": null,
+   "firstBar": "2014-07-08",
+   "lastBar": "2026-08-13",
+   "bars": 3024
+  },
+  {
+   "symbol": "CLM",
+   "exchange": null,
+   "firstBar": "2016-04-15",
+   "lastBar": "2026-08-13",
+   "bars": 2582
+  },
+  {
+   "symbol": "CLW",
+   "exchange": null,
+   "firstBar": "2014-05-29",
+   "lastBar": "2026-08-11",
+   "bars": 3031
+  },
+  {
+   "symbol": "CLX",
+   "exchange": null,
+   "firstBar": "2017-03-01",
+   "lastBar": "2026-08-13",
+   "bars": 2364
+  },
+  {
+   "symbol": "CMC",
+   "exchange": null,
+   "firstBar": "2013-12-06",
+   "lastBar": "2026-07-29",
+   "bars": 3030
+  },
+  {
+   "symbol": "CMD",
+   "exchange": null,
+   "firstBar": "2019-07-05",
+   "lastBar": "2026-08-13",
+   "bars": 1775
+  },
+  {
+   "symbol": "CMF",
+   "exchange": null,
+   "firstBar": "2025-08-11",
+   "lastBar": "2026-07-10",
+   "bars": 173
+  },
+  {
+   "symbol": "CMG",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CMI",
+   "exchange": null,
+   "firstBar": "2012-10-04",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "CMK",
+   "exchange": null,
+   "firstBar": "2024-10-24",
+   "lastBar": "2025-06-18",
+   "bars": 160
+  },
+  {
+   "symbol": "CMM",
+   "exchange": null,
+   "firstBar": "2022-11-08",
+   "lastBar": "2026-07-27",
+   "bars": 797
+  },
+  {
+   "symbol": "CMN",
+   "exchange": null,
+   "firstBar": "2017-07-10",
+   "lastBar": "2026-08-13",
+   "bars": 2273
+  },
+  {
+   "symbol": "CMP",
+   "exchange": null,
+   "firstBar": "2025-04-15",
+   "lastBar": "2025-12-01",
+   "bars": 160
+  },
+  {
+   "symbol": "CMS",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CMT",
+   "exchange": null,
+   "firstBar": "2014-03-19",
+   "lastBar": "2026-08-13",
+   "bars": 3031
+  },
+  {
+   "symbol": "CMV",
+   "exchange": null,
+   "firstBar": "2013-09-05",
+   "lastBar": "2026-08-12",
+   "bars": 3031
+  },
+  {
+   "symbol": "CMW",
+   "exchange": null,
+   "firstBar": "2025-06-25",
+   "lastBar": "2026-04-29",
+   "bars": 160
+  },
+  {
+   "symbol": "CMX",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CNA",
+   "exchange": null,
+   "firstBar": "2023-12-01",
+   "lastBar": "2024-07-25",
+   "bars": 160
+  },
+  {
+   "symbol": "CNC",
+   "exchange": null,
+   "firstBar": "2014-07-01",
+   "lastBar": "2026-08-13",
+   "bars": 3024
+  },
+  {
+   "symbol": "CNG",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CNN",
+   "exchange": null,
+   "firstBar": "2016-06-01",
+   "lastBar": "2026-08-13",
+   "bars": 2549
+  },
+  {
+   "symbol": "CNT",
+   "exchange": null,
+   "firstBar": "2013-06-11",
+   "lastBar": "2026-08-13",
+   "bars": 3032
+  },
+  {
+   "symbol": "COM",
+   "exchange": null,
+   "firstBar": "2014-03-06",
+   "lastBar": "2026-07-28",
+   "bars": 3030
+  },
+  {
+   "symbol": "CPA",
+   "exchange": null,
+   "firstBar": "2024-05-24",
+   "lastBar": "2026-04-03",
+   "bars": 160
+  },
+  {
+   "symbol": "CPC",
+   "exchange": null,
+   "firstBar": "2014-06-04",
+   "lastBar": "2026-08-12",
+   "bars": 3032
+  },
+  {
+   "symbol": "CPH",
+   "exchange": null,
+   "firstBar": "2023-12-01",
+   "lastBar": "2024-07-25",
+   "bars": 160
+  },
+  {
+   "symbol": "CPI",
+   "exchange": null,
+   "firstBar": "2024-03-29",
+   "lastBar": "2026-07-03",
+   "bars": 164
+  },
+  {
+   "symbol": "CQN",
+   "exchange": null,
+   "firstBar": "2020-08-18",
+   "lastBar": "2026-08-13",
+   "bars": 1495
+  },
+  {
+   "symbol": "CQT",
+   "exchange": null,
+   "firstBar": "2016-11-16",
+   "lastBar": "2026-08-12",
+   "bars": 2431
+  },
+  {
+   "symbol": "CRC",
+   "exchange": null,
+   "firstBar": "2018-08-20",
+   "lastBar": "2026-08-13",
+   "bars": 1994
+  },
+  {
+   "symbol": "CRE",
+   "exchange": null,
+   "firstBar": "2018-09-05",
+   "lastBar": "2026-08-13",
+   "bars": 1983
+  },
+  {
+   "symbol": "CRV",
+   "exchange": null,
+   "firstBar": "2025-10-10",
+   "lastBar": "2026-08-13",
+   "bars": 156
+  },
+  {
+   "symbol": "CSC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CSI",
+   "exchange": null,
+   "firstBar": "2019-03-15",
+   "lastBar": "2026-08-13",
+   "bars": 1820
+  },
+  {
+   "symbol": "CSM",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CST",
+   "exchange": null,
+   "firstBar": "2021-04-26",
+   "lastBar": "2026-08-13",
+   "bars": 1318
+  },
+  {
+   "symbol": "CSV",
+   "exchange": null,
+   "firstBar": "2015-03-18",
+   "lastBar": "2026-08-13",
+   "bars": 2853
+  },
+  {
+   "symbol": "CT3",
+   "exchange": null,
+   "firstBar": "2012-09-13",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "CT6",
+   "exchange": null,
+   "firstBar": "2024-12-25",
+   "lastBar": "2026-04-28",
+   "bars": 160
+  },
+  {
+   "symbol": "CTA",
+   "exchange": null,
+   "firstBar": "2023-12-01",
+   "lastBar": "2024-07-25",
+   "bars": 160
+  },
+  {
+   "symbol": "CTB",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-12",
+   "bars": 3032
+  },
+  {
+   "symbol": "CTD",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CTF",
+   "exchange": null,
+   "firstBar": "2017-05-30",
+   "lastBar": "2026-08-13",
+   "bars": 2303
+  },
+  {
+   "symbol": "CTG",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CTI",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CTP",
+   "exchange": null,
+   "firstBar": "2016-07-28",
+   "lastBar": "2026-08-13",
+   "bars": 2511
+  },
+  {
+   "symbol": "CTR",
+   "exchange": null,
+   "firstBar": "2017-10-31",
+   "lastBar": "2026-08-13",
+   "bars": 2193
+  },
+  {
+   "symbol": "CTS",
+   "exchange": null,
+   "firstBar": "2014-06-20",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CTT",
+   "exchange": null,
+   "firstBar": "2015-07-17",
+   "lastBar": "2026-08-07",
+   "bars": 2740
+  },
+  {
+   "symbol": "CTW",
+   "exchange": null,
+   "firstBar": "2025-06-03",
+   "lastBar": "2026-05-05",
+   "bars": 160
+  },
+  {
+   "symbol": "CTX",
+   "exchange": null,
+   "firstBar": "2014-06-11",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CVN",
+   "exchange": null,
+   "firstBar": "2012-10-16",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CVT",
+   "exchange": null,
+   "firstBar": "2013-07-29",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "CX8",
+   "exchange": null,
+   "firstBar": "2025-06-20",
+   "lastBar": "2026-04-13",
+   "bars": 160
+  },
+  {
+   "symbol": "CYC",
+   "exchange": null,
+   "firstBar": "2023-12-29",
+   "lastBar": "2026-04-17",
+   "bars": 160
+  },
+  {
+   "symbol": "D11",
+   "exchange": null,
+   "firstBar": "2014-03-14",
+   "lastBar": "2026-08-10",
+   "bars": 3030
+  },
+  {
+   "symbol": "D2D",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DAC",
+   "exchange": null,
+   "firstBar": "2023-12-06",
+   "lastBar": "2025-10-03",
+   "bars": 160
+  },
+  {
+   "symbol": "DAD",
+   "exchange": null,
+   "firstBar": "2014-05-15",
+   "lastBar": "2026-08-12",
+   "bars": 3031
+  },
+  {
+   "symbol": "DAE",
+   "exchange": null,
+   "firstBar": "2014-04-17",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "DAG",
+   "exchange": null,
+   "firstBar": "2023-12-21",
+   "lastBar": "2024-08-14",
+   "bars": 160
+  },
+  {
+   "symbol": "DAH",
+   "exchange": null,
+   "firstBar": "2016-10-10",
+   "lastBar": "2026-08-13",
+   "bars": 2460
+  },
+  {
+   "symbol": "DAN",
+   "exchange": null,
+   "firstBar": "2024-06-20",
+   "lastBar": "2026-07-13",
+   "bars": 170
+  },
+  {
+   "symbol": "DAS",
+   "exchange": null,
+   "firstBar": "2025-06-27",
+   "lastBar": "2026-03-27",
+   "bars": 160
+  },
+  {
+   "symbol": "DAT",
+   "exchange": null,
+   "firstBar": "2015-11-05",
+   "lastBar": "2026-08-13",
+   "bars": 2591
+  },
+  {
+   "symbol": "DBC",
+   "exchange": null,
+   "firstBar": "2014-06-17",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DBD",
+   "exchange": null,
+   "firstBar": "2017-01-16",
+   "lastBar": "2026-08-13",
+   "bars": 2386
+  },
+  {
+   "symbol": "DBM",
+   "exchange": null,
+   "firstBar": "2014-06-19",
+   "lastBar": "2026-08-13",
+   "bars": 3032
+  },
+  {
+   "symbol": "DBT",
+   "exchange": null,
+   "firstBar": "2014-05-23",
+   "lastBar": "2026-08-13",
+   "bars": 3032
+  },
+  {
+   "symbol": "DC1",
+   "exchange": null,
+   "firstBar": "2016-08-18",
+   "lastBar": "2026-08-13",
+   "bars": 2493
+  },
+  {
+   "symbol": "DC2",
+   "exchange": null,
+   "firstBar": "2025-03-19",
+   "lastBar": "2026-05-05",
+   "bars": 160
+  },
+  {
+   "symbol": "DC4",
+   "exchange": null,
+   "firstBar": "2014-06-17",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DCF",
+   "exchange": null,
+   "firstBar": "2017-01-12",
+   "lastBar": "2026-07-30",
+   "bars": 2354
+  },
+  {
+   "symbol": "DCG",
+   "exchange": null,
+   "firstBar": "2025-03-07",
+   "lastBar": "2026-04-28",
+   "bars": 160
+  },
+  {
+   "symbol": "DCH",
+   "exchange": null,
+   "firstBar": "2025-05-13",
+   "lastBar": "2026-03-27",
+   "bars": 160
+  },
+  {
+   "symbol": "DCL",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DCM",
+   "exchange": null,
+   "firstBar": "2015-03-31",
+   "lastBar": "2026-08-13",
+   "bars": 2844
+  },
+  {
+   "symbol": "DCR",
+   "exchange": null,
+   "firstBar": "2018-10-09",
+   "lastBar": "2026-08-06",
+   "bars": 1618
+  },
+  {
+   "symbol": "DCS",
+   "exchange": null,
+   "firstBar": "2012-10-24",
+   "lastBar": "2026-08-07",
+   "bars": 3030
+  },
+  {
+   "symbol": "DCT",
+   "exchange": null,
+   "firstBar": "2011-11-28",
+   "lastBar": "2026-08-07",
+   "bars": 3029
+  },
+  {
+   "symbol": "DCV",
+   "exchange": null,
+   "firstBar": "2026-01-19",
+   "lastBar": "2026-05-05",
+   "bars": 63
+  },
+  {
+   "symbol": "DDB",
+   "exchange": null,
+   "firstBar": "2025-01-15",
+   "lastBar": "2026-08-12",
+   "bars": 369
+  },
+  {
+   "symbol": "DDG",
+   "exchange": null,
+   "firstBar": "2018-12-18",
+   "lastBar": "2026-08-13",
+   "bars": 1774
+  },
+  {
+   "symbol": "DDH",
+   "exchange": null,
+   "firstBar": "2025-01-14",
+   "lastBar": "2026-07-07",
+   "bars": 163
+  },
+  {
+   "symbol": "DDM",
+   "exchange": null,
+   "firstBar": "2011-02-08",
+   "lastBar": "2026-08-07",
+   "bars": 3028
+  },
+  {
+   "symbol": "DDN",
+   "exchange": null,
+   "firstBar": "2014-05-06",
+   "lastBar": "2026-08-12",
+   "bars": 3030
+  },
+  {
+   "symbol": "DDV",
+   "exchange": null,
+   "firstBar": "2015-06-10",
+   "lastBar": "2026-08-13",
+   "bars": 2796
+  },
+  {
+   "symbol": "DFC",
+   "exchange": null,
+   "firstBar": "2017-03-21",
+   "lastBar": "2026-08-13",
+   "bars": 2343
+  },
+  {
+   "symbol": "DFF",
+   "exchange": null,
+   "firstBar": "2021-07-08",
+   "lastBar": "2026-08-07",
+   "bars": 1111
+  },
+  {
+   "symbol": "DGC",
+   "exchange": null,
+   "firstBar": "2014-08-26",
+   "lastBar": "2026-08-13",
+   "bars": 2983
+  },
+  {
+   "symbol": "DGT",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DGW",
+   "exchange": null,
+   "firstBar": "2015-08-03",
+   "lastBar": "2026-08-13",
+   "bars": 2759
+  },
+  {
+   "symbol": "DHA",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DHB",
+   "exchange": null,
+   "firstBar": "2017-07-27",
+   "lastBar": "2026-08-13",
+   "bars": 2248
+  },
+  {
+   "symbol": "DHC",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DHD",
+   "exchange": null,
+   "firstBar": "2017-05-05",
+   "lastBar": "2026-08-13",
+   "bars": 2315
+  },
+  {
+   "symbol": "DHG",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DHM",
+   "exchange": null,
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "DHN",
+   "exchange": null,
+   "firstBar": "2018-04-20",
+   "lastBar": "2026-08-12",
+   "bars": 2076
+  },
+  {
+   "symbol": "DHP",
+   "exchange": null,
+   "firstBar": "2014-05-22",
+   "lastBar": "2026-08-13",
+   "bars": 3031
+  },
+  {
+   "symbol": "FPT",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "GAS",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "GEE",
+   "exchange": null,
+   "firstBar": "2022-03-08",
+   "lastBar": "2026-08-13",
+   "bars": 1090
+  },
+  {
+   "symbol": "GEX",
+   "exchange": null,
+   "firstBar": "2015-10-26",
+   "lastBar": "2026-08-13",
+   "bars": 2696
+  },
+  {
+   "symbol": "GMD",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "HDB",
+   "exchange": "HOSE",
+   "firstBar": "2018-01-05",
+   "lastBar": "2026-08-13",
+   "bars": 2147
+  },
+  {
+   "symbol": "HPG",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "MBB",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "MSN",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "MWG",
+   "exchange": "HOSE",
+   "firstBar": "2014-07-14",
+   "lastBar": "2026-08-13",
+   "bars": 3020
+  },
+  {
+   "symbol": "NVL",
+   "exchange": "HOSE",
+   "firstBar": "2016-12-28",
+   "lastBar": "2026-08-13",
+   "bars": 2403
+  },
+  {
+   "symbol": "PDR",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "PLX",
+   "exchange": "HOSE",
+   "firstBar": "2017-04-21",
+   "lastBar": "2026-08-13",
+   "bars": 2328
+  },
+  {
+   "symbol": "PNJ",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "POW",
+   "exchange": "HOSE",
+   "firstBar": "2018-03-06",
+   "lastBar": "2026-08-13",
+   "bars": 2101
+  },
+  {
+   "symbol": "REE",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "SAB",
+   "exchange": "HOSE",
+   "firstBar": "2016-12-06",
+   "lastBar": "2026-08-13",
+   "bars": 2419
+  },
+  {
+   "symbol": "SHB",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-20",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "SSB",
+   "exchange": "HOSE",
+   "firstBar": "2021-03-24",
+   "lastBar": "2026-08-13",
+   "bars": 1346
+  },
+  {
+   "symbol": "SSI",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "STB",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "TCB",
+   "exchange": "HOSE",
+   "firstBar": "2018-06-04",
+   "lastBar": "2026-08-13",
+   "bars": 2049
+  },
+  {
+   "symbol": "TPB",
+   "exchange": "HOSE",
+   "firstBar": "2018-04-19",
+   "lastBar": "2026-08-13",
+   "bars": 2078
+  },
+  {
+   "symbol": "VCB",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "VCG",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-18",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "VGC",
+   "exchange": "HOSE",
+   "firstBar": "2015-10-15",
+   "lastBar": "2026-08-13",
+   "bars": 2695
+  },
+  {
+   "symbol": "VHM",
+   "exchange": "HOSE",
+   "firstBar": "2013-08-19",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "VIB",
+   "exchange": "HOSE",
+   "firstBar": "2017-01-09",
+   "lastBar": "2026-08-13",
+   "bars": 2389
+  },
+  {
+   "symbol": "VIC",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "VJC",
+   "exchange": "HOSE",
+   "firstBar": "2017-02-28",
+   "lastBar": "2026-08-13",
+   "bars": 2365
+  },
+  {
+   "symbol": "VND",
+   "exchange": "HNX",
+   "firstBar": "2014-06-11",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "VNM",
+   "exchange": "HOSE",
+   "firstBar": "2014-06-25",
+   "lastBar": "2026-08-13",
+   "bars": 3033
+  },
+  {
+   "symbol": "VPB",
+   "exchange": "HOSE",
+   "firstBar": "2017-08-17",
+   "lastBar": "2026-08-13",
+   "bars": 2246
+  },
+  {
+   "symbol": "VRE",
+   "exchange": "HOSE",
+   "firstBar": "2017-11-06",
+   "lastBar": "2026-08-13",
+   "bars": 2190
+  },
+  {
+   "symbol": "VTP",
+   "exchange": "HOSE",
+   "firstBar": "2018-11-23",
+   "lastBar": "2026-08-13",
+   "bars": 1919
+  }
+ ]
+}
