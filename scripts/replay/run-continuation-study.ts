@@ -152,15 +152,29 @@ async function main(): Promise<void> {
       const fut = guard.outcomeRows(`fwd:${m.symbol}`, s.bars.slice(end + 1));
       let outcome: string | null = null, resolveSession: number | null = null;
       let mfePct: number | null = null, maePct: number | null = null, fwd20: number | null = null, entryPrice: number | null = null;
+      // Running trajectories, so the lifecycle can be examined session by session
+      // rather than only at its endpoint. Each element k is the running extreme
+      // THROUGH session k — no future information at any k.
+      const mfeAtrPath: number[] = [], maeAtrPath: number[] = [], closePath: number[] = [];
+      // First-passage sessions for each cause, independent of which came first.
+      let firstUpSession: number | null = null, firstDownSession: number | null = null;
+      let firstOwnStopSession: number | null = null;
       if (fut.length >= EXCURSION_HORIZON_SESSIONS + 1 && atr) {
         const entry = fut[0]!.open;
         entryPrice = entry;
         const up = entry + 2.0 * atr, dn = entry - 1.0 * atr;
+        const ownStop = ev.stopLevel;
         let hi = -Infinity, lo = Infinity;
         for (let k = 1; k <= EXCURSION_HORIZON_SESSIONS; k++) {
           const b = fut[k]!;
           hi = Math.max(hi, ((b.high - entry) / entry) * 100);
           lo = Math.min(lo, ((b.low - entry) / entry) * 100);
+          mfeAtrPath.push(Number((((hi / 100) * entry) / atr).toFixed(4)));
+          maeAtrPath.push(Number((((lo / 100) * entry) / atr).toFixed(4)));
+          closePath.push(Number((((b.close - entry) / entry) * 100).toFixed(4)));
+          if (firstUpSession == null && b.high >= up) firstUpSession = k;
+          if (firstDownSession == null && b.low <= dn) firstDownSession = k;
+          if (firstOwnStopSession == null && b.low <= ownStop) firstOwnStopSession = k;
           if (outcome == null) {
             const hitUp = b.high >= up, hitDn = b.low <= dn;
             // Both in one bar: the conservative reading is failure, since intrabar
@@ -198,6 +212,8 @@ async function main(): Promise<void> {
         medTradedValue, realizedVol,
         // outcome
         outcome, resolveSession, mfePct, maePct, fwd20,
+        mfeAtrPath, maeAtrPath, closePath,
+        firstUpSession, firstDownSession, firstOwnStopSession,
         mfeAtr: mfePct != null && atr ? (mfePct / 100) * (entryPrice ?? close) / atr : null,
         maeAtr: maePct != null && atr ? (maePct / 100) * (entryPrice ?? close) / atr : null,
       });
