@@ -38,17 +38,21 @@ quality = (volRatio >= 1.5) && (close >= ma20)  ?  "A"  :  "B"
 | 5 | paper-lab opportunity score | **largest single term, weight 0.35** (A=1, B=0.6) | `rotation.ts:44` |
 | 6 | paper-lab confidence basis | `fGate2` A=1, B=0.6 | `confidence.ts:34` |
 
-`rankScore` is **not** a consumer — but it is built from `volRatio` too, and so is
-the confidence score's `fVol` term. So:
+`rankScore` is **not** a consumer — but it is built from `volRatio` too:
 
 ```
 volRatio ─┬─► quality A/B ──► six decisions above
-          ├─► rankScore volumeTerm
-          └─► confidence fVol
+          └─► rankScore volumeTerm
 ```
 
-**One primitive reaches a decision by three independent paths**, and that is true
-regardless of anything the outcome test says.
+> **Correction, from the phase-15 audit ([`DECISION-COUPLING-DECOMPOSITION.md`](DECISION-COUPLING-DECOMPOSITION.md)).**
+> This section originally listed the confidence score's `fVol` term as a third
+> path for Gate 2's `volRatio`. It is not: `fVol` reads `volRatioMa20`
+> (`compute-market-context.ts:88`), which divides by the **mean** of the prior 20
+> volumes where Gate 2 divides by the **median**. They are two different
+> statistics on the same window, differing in 94.9% of setups and disagreeing on
+> 22.5% at a shared cutoff. The corrected picture is worse, not milder: the paths
+> are not duplicated, they are **inconsistent**.
 
 ## 2. The component decomposition — behind a drift gate that passed
 
