@@ -206,3 +206,39 @@ it is evaluated only at the three frozen checkpoints.
 `PROSPECTIVE SHADOW READY` or `PROSPECTIVE SHADOW NO-GO`, concerning **registry
 safety and correctness only**. It will make no statement about whether feasibility
 has predictive value, because no prospective observation will exist yet.
+
+---
+
+## §14 Amendment — 2026-08-24, before any observation exists
+
+Adversarial review of the implementation found that the §1 classifier pin was
+**incomplete**: it named four files, but those files import the thresholds that
+actually decide verdicts — `GATE2_VOL_RATIO_A/B`, `GATE2_MIN_RISK_TO_STOP_FRAC`,
+`TRADABILITY_MIN_AVG_VALUE_VND_20`, the tick table. Changing any of them would have
+moved verdicts while all four pinned hashes still reported OK.
+
+The pin is therefore widened to the **transitive closure** of those four entry
+points — **13 files** — and a test recomputes the closure from
+`CLASSIFIER_PIN_ROOTS`, so a newly-added import must be pinned or CI fails.
+
+| file | blob SHA |
+|---|---|
+| `src/lib/decisions/contracts.ts` | `6b9a69d0add2aa081a97840e57e6e2bea634ba8f` |
+| `src/lib/decisions/d2-feasibility.ts` | `965d8ebe5dbf1b122e6d2d0ef14d09bc445ff998` |
+| `src/lib/playbook/indicators.ts` | `11c8cf3d2703c3ae0e2fdc1df9faf6ca2e01231c` |
+| `src/lib/scanner/gate2/breakout-pullback.ts` | `f1c87dd188e35760b2722b272dd09c4ef1d427cc` |
+| `src/lib/scanner/gate2/constants.ts` | `098ad6a2a14c47c53c0b81b4baa917669da1828e` |
+| `src/lib/scanner/gate2/gate2-eval-params.ts` | `6f0f9511d9d7018c219719b349f2924d5d1ab472` |
+| `src/lib/scanner/gate2/rank-components.ts` | `7112102351fffd263e8c748aa58a18dd908121ed` |
+| `src/lib/scanner/gate2/rejection-codes.ts` | `20c12514b4989e87af452a7c33f689052464a412` |
+| `src/lib/scanner/gate2/types.ts` | `4c8f3a5c5f52f9a9cc1ebe0cdda151fbc8aac903` |
+| `src/lib/scanner/stop-feasibility.ts` | `cfc8adb4a6be756dabccf6350e42a50edfe3d83b` |
+| `src/lib/scanner/tradability-constants.ts` | `e03f95090b74b5125baebcfaaf35ce81ffb02db6` |
+| `src/lib/setup-health/evaluate-watch-health.ts` | `95ac7c221cdd302ce8672e6dd8fd2b0615766abf` |
+| `src/lib/setup-health/types.ts` | `186891d8dd07177cdc09b0359e8882c65ff91bf5` |
+
+**Nothing else in this plan changes.** The hypothesis, the boundary, the schema
+version, the outcome definitions, the eligibility rule, the checkpoints and the
+primary metric are all as frozen above. This amendment only makes the existing
+anti-drift mechanism cover what it always claimed to cover, and it is recorded
+here — dated, before a single observation exists — rather than applied silently.
