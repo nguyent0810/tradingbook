@@ -299,3 +299,45 @@ describe("D5 composes and cannot gate", () => {
     expect(decideStance(i)).toEqual(decideStance(i));
   });
 });
+
+describe("feasibility gate — visibility invariant (§6)", () => {
+  // The feasibility label is observational. No setup may become shown or hidden
+  // because a feasibility verdict changed. V1 visibility must remain a pure
+  // function of (gate1Level, quality).
+  it("V1 visibility is independent of the feasibility verdict", () => {
+    const verdicts = [
+      "FEASIBLE", "NOT_FEASIBLE_NOISE", "NOT_FEASIBLE_LIQUIDITY", "UNKNOWN_INPUT",
+    ] as const;
+    for (const gate1 of ["PASS", "WARNING", "FAIL"] as const) {
+      for (const quality of ["A", "B"] as const) {
+        const seen = new Set<string>();
+        for (const v of verdicts) {
+          // drive the whole pipeline with inputs that produce each verdict
+          const c = candidate({
+            gate1Level: gate1,
+            quality,
+            structuralStopKVnd: v === "NOT_FEASIBLE_NOISE" ? 19.99 : 18.6,
+            avgDailyValueVnd: v === "NOT_FEASIBLE_LIQUIDITY" ? 1_000 : 5_000_000_000,
+            entryPriceKVnd: v === "UNKNOWN_INPUT" ? 0 : 20,
+          });
+          seen.add(runShadowDecisions(c).legacy.visibility);
+        }
+        expect(seen.size, `V1 visibility moved for ${gate1}/${quality}`).toBe(1);
+      }
+    }
+  });
+
+  it("V1 visibility is reproduced by (gate1Level, quality) alone", () => {
+    const expected: Record<string, "SHOWN" | "HIDDEN"> = {
+      "PASS/A": "SHOWN", "PASS/B": "SHOWN",
+      "WARNING/A": "SHOWN", "WARNING/B": "HIDDEN",
+      "FAIL/A": "HIDDEN", "FAIL/B": "HIDDEN",
+    };
+    for (const gate1 of ["PASS", "WARNING", "FAIL"] as const) {
+      for (const quality of ["A", "B"] as const) {
+        const r = runShadowDecisions(candidate({ gate1Level: gate1, quality }));
+        expect(r.legacy.visibility, `${gate1}/${quality}`).toBe(expected[`${gate1}/${quality}`]);
+      }
+    }
+  });
+});
