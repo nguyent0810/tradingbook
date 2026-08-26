@@ -92,3 +92,10 @@ local.env
 /scripts/debug-cyber-opacity.mjs
 /scripts/debug-motion.mjs
 /scripts/capture-tall.mjs
+
+# --- Kết quả nghiên cứu quá khổ (sinh lại được, không đưa vào git) ---
+# `observations.ndjson` của nghiên cứu leadership nặng 141 MB — vượt trần 100 MB
+# của GitHub và đã chặn toàn bộ nhánh main. Nó là ĐẦU RA của
+# `scripts/replay/run-early-leadership-study.ts`, chạy lại là có, nên không cần
+# version. Đã gỡ khỏi lịch sử ngày 2026-08-26.
+/docs/trading/replay/leadership/observations.ndjson
