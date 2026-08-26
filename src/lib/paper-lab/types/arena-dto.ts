@@ -25,8 +25,18 @@ export type RecentBattleSummaryDto = {
 export type ArenaOverviewDto = {
   totalAgents: number;
   totalVirtualCapitalVnd: number;
-  bestAgent: { id: string; name: string; returnPct: number };
-  worstAgent: { id: string; name: string; returnPct: number };
+  /**
+   * Phiên của hàng `agentPerformanceDaily` mới nhất (ISO `YYYY-MM-DD`) — tức
+   * phiên mà MỌI chỉ số bảng xếp hạng bên dưới được đo. `null` = chưa có phiên
+   * nào được chốt.
+   *
+   * Bắt buộc lộ ra: nếu phiên này cũ hơn phiên thị trường gần nhất thì bảng xếp
+   * hạng là dữ liệu cũ, và bàn giao §6 yêu cầu nói rõ đang xem phiên nào.
+   */
+  performanceSessionDate: string | null;
+  /** `returnPct: null` = chưa có tác tử nào được đo, KHÔNG phải "hoà vốn". */
+  bestAgent: { id: string; name: string; returnPct: number | null };
+  worstAgent: { id: string; name: string; returnPct: number | null };
   totalOpenPositions: number;
   marketRegime: {
     level: "PASS" | "WARNING" | "FAIL";
@@ -55,19 +65,28 @@ export type ArenaOverviewDto = {
   stale?: boolean;
 };
 
+/**
+ * Một hàng bảng xếp hạng.
+ *
+ * Mọi chỉ số đo được đều `| null`: một tác tử đã có thứ hạng nhưng CHƯA có hàng
+ * `agentPerformanceDaily` là chuyện bình thường (mới tạo, chưa chốt phiên nào).
+ * Trước đây các trường này rơi về `0` — và `navVnd` rơi về nguyên vốn ban đầu
+ * 500 triệu — nên bảng hiện một tác tử "có 500 triệu, thắng 0%, sụt 0%" y như số
+ * đo thật. `null` để tầng trình bày in "—" đúng như quy ước gap của bản thiết kế.
+ */
 export type LeaderboardRowDto = {
   agentId: string;
   agentName: string;
   style: string;
-  navVnd: number;
-  pnlPct: number;
-  realizedPnlVnd: number;
-  unrealizedPnlVnd: number;
-  winRate: number;
-  maxDrawdownPct: number;
-  sharpeLike: number;
-  tradeCount: number;
-  openPositions: number;
+  navVnd: number | null;
+  pnlPct: number | null;
+  realizedPnlVnd: number | null;
+  unrealizedPnlVnd: number | null;
+  winRate: number | null;
+  maxDrawdownPct: number | null;
+  sharpeLike: number | null;
+  tradeCount: number | null;
+  openPositions: number | null;
   rank: number;
   rankChange: number;
 };

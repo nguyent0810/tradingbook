@@ -1,0 +1,436 @@
+/* ============================================================================
+ * TradeLog VN Terminal v4 — shell
+ * thanh trên · băng giá · nav phím F · dòng lệnh · thanh trạng thái · trợ giúp
+ *
+ * Đọc token từ `terminal.css`. Không đổ bóng, không gradient, bo góc ≤ 3px.
+ * ========================================================================== */
+
+/* ── Thanh trên (34px) ───────────────────────────────────────────────────── */
+
+.tm-topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: var(--tm-h-topbar);
+  background: var(--tm-bg-chrome);
+  border-bottom: 1px solid var(--tm-line-chrome);
+}
+
+.tm-topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 100%;
+  padding: 0 11px;
+  background: var(--tm-accent);
+  color: var(--tm-bg-base);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+}
+.tm-topbar__brand:hover {
+  color: var(--tm-bg-base);
+  text-decoration: none;
+}
+
+.tm-topbar__cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 0 10px;
+  border-right: 1px solid var(--tm-line-chrome);
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  color: var(--tm-text-faint);
+  white-space: nowrap;
+}
+.tm-topbar__cell--tight {
+  letter-spacing: 0.1em;
+  font-size: 10px;
+}
+.tm-topbar__cell--data {
+  gap: 14px;
+  color: var(--tm-text-soft);
+}
+
+.tm-topbar__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.tm-topbar__end {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 100%;
+  padding: 0 8px 0 12px;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  color: var(--tm-text-soft);
+  min-width: 0;
+}
+.tm-topbar__user {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 24ch;
+}
+.tm-topbar__divider {
+  flex: none;
+  width: 1px;
+  height: 14px;
+  background: var(--tm-line-chrome);
+}
+
+.tm-lookup {
+  width: 96px;
+  background: transparent;
+  border: none;
+  color: var(--tm-text-base);
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tm-lookup::placeholder {
+  color: var(--tm-text-faint);
+}
+
+/* Đèn báo dữ liệu trực tiếp — nhấp theo bước, không mượt (dấu hiệu máy) */
+@keyframes tm-led {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  61%,
+  100% {
+    opacity: 0.18;
+  }
+}
+.tm-led {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--tm-up);
+  animation: tm-led 1.6s steps(1, end) infinite;
+}
+
+/* ── Băng giá (25px) ─────────────────────────────────────────────────────── */
+
+@keyframes tm-tape {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.tm-tape {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: var(--tm-h-ticker);
+  background: var(--tm-bg-chrome-sunken);
+  border-bottom: 1px solid var(--tm-line-chrome);
+  overflow: hidden;
+}
+.tm-tape__label {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 9px;
+  background: var(--tm-bg-head);
+  border-right: 1px solid var(--tm-line-chrome);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--tm-accent);
+}
+.tm-tape__viewport {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.tm-tape__run {
+  display: flex;
+  width: max-content;
+  animation: tm-tape 72s linear infinite;
+}
+.tm-tape__item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 0 13px;
+  border-right: 1px solid #151c22;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tm-tape__sym {
+  color: #9aa7b2;
+  font-weight: 600;
+}
+.tm-tape__px {
+  color: var(--tm-text-value);
+}
+.tm-tape__empty {
+  padding: 0 12px;
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tm-tape__run,
+  .tm-led {
+    animation: none;
+  }
+}
+
+/* ── Nav phím F (29px) ───────────────────────────────────────────────────── */
+
+.tm-fnav {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  height: var(--tm-h-nav);
+  overflow: hidden;
+  background: var(--tm-bg-chrome);
+  border-bottom: 1px solid var(--tm-line-chrome);
+}
+.tm-fnav__item {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 100%;
+  padding: 0 11px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--tm-line-navcell);
+  border-bottom: 2px solid var(--tm-line-chrome);
+  color: var(--tm-text-soft);
+  font-family: var(--tm-font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+}
+.tm-fnav__item:hover {
+  color: #fff;
+  text-decoration: none;
+}
+.tm-fnav__item[aria-current="page"] {
+  background: var(--tm-bg-chrome-active);
+  border-bottom-color: var(--tm-accent);
+  color: #fff;
+}
+.tm-fnav__key {
+  flex: none;
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--tm-text-faint);
+}
+.tm-fnav__item[aria-current="page"] .tm-fnav__key {
+  color: var(--tm-accent);
+}
+.tm-fnav__fill {
+  flex: 1;
+  border-bottom: 2px solid var(--tm-line-chrome);
+}
+.tm-fnav__item--help {
+  border-left: 1px solid var(--tm-line-navcell);
+  border-right: none;
+}
+.tm-fnav__item--help .tm-fnav__key {
+  color: var(--tm-accent);
+}
+
+/* ── Vùng nội dung ───────────────────────────────────────────────────────── */
+
+.tm-main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+  /* Tám màn F1–F8 tự lo cuộn dọc bên trong panel nên không tràn dọc ở đây.
+     Giữ `overflow-y: auto` (không siết thành `hidden` như dự tính ở Gate 8) vì
+     chín route con của Arena — battles, experiments, hof, agents/[slug], human,
+     ops, timeline — vẫn chạy bố cục dài theo chiều dọc trong `legacy-arena-shell`
+     và sẽ bị cắt mất phần dưới nếu chặn cuộn ở đây. */
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+/* Màn chiếm trọn bề ngang; `min-width: 0` chặn lỗi flex-item tự nở theo nội dung. */
+.tm-main > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Dòng lệnh (29px) ────────────────────────────────────────────────────── */
+
+.tm-cmdline {
+  flex: none;
+  display: flex;
+  align-items: center;
+  height: var(--tm-h-cmdline);
+  background: var(--tm-bg-chrome-sunken);
+  border-top: 1px solid var(--tm-line-chrome);
+}
+.tm-cmdline__prompt {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 9px;
+  background: var(--tm-bg-head);
+  border-right: 1px solid var(--tm-line-chrome);
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--tm-accent);
+}
+.tm-cmdline__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  color: var(--tm-text-value);
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+.tm-cmdline__input::placeholder {
+  color: var(--tm-text-faint);
+}
+.tm-cmdline__echo {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 11px;
+  border-left: 1px solid var(--tm-line-chrome);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-faint);
+  white-space: nowrap;
+  max-width: 44ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tm-cmdline__echo[data-kind="error"] {
+  color: var(--tm-down);
+}
+.tm-cmdline__echo[data-kind="ok"] {
+  color: var(--tm-up);
+}
+
+/* ── Thanh trạng thái (21px) ─────────────────────────────────────────────── */
+
+.tm-statusbar {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  height: var(--tm-h-status);
+  overflow: hidden;
+  background: var(--tm-bg-head);
+  border-top: 1px solid var(--tm-line-chrome);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-quiet);
+  white-space: nowrap;
+}
+.tm-statusbar__cell {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  padding: 0 10px;
+  border-right: 1px solid var(--tm-line-chrome);
+}
+.tm-statusbar__k {
+  color: var(--tm-text-faint);
+}
+.tm-statusbar__v {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tm-statusbar__fill {
+  flex: 1;
+  min-width: 8px;
+}
+.tm-statusbar__hint {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 11px;
+  color: var(--tm-text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Bảng trợ giúp F9 ────────────────────────────────────────────────────── */
+
+.tm-help {
+  width: 620px;
+  max-width: 100%;
+}
+.tm-help__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 22px;
+  padding: 14px 16px 16px;
+}
+.tm-help__row {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  height: 24px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.tm-help__k {
+  flex: none;
+  min-width: 74px;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--tm-accent);
+}
+.tm-help__v {
+  font-size: 11px;
+  color: var(--tm-text-mute);
+}
+
+/* Bỏ qua để tới nội dung — chỉ hiện khi focus bàn phím */
+.tm-skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 80;
+}
+.tm-skip:focus {
+  left: 8px;
+  top: 8px;
+  padding: 6px 10px;
+  background: var(--tm-accent);
+  color: var(--tm-bg-base);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--tm-radius-ctl);
+}

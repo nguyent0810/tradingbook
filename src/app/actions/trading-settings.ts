@@ -86,8 +86,15 @@ export async function updateTradingSettings(
     create: { userId: session.userId, ...values },
   });
 
+  // Vốn, rủi ro mỗi lệnh và trần thanh khoản là ĐẦU VÀO của định cỡ vị thế —
+  // F2 và F7 đều tính khối lượng từ chúng, và server action ghi lệnh cũng vậy.
+  // Bỏ sót hai màn kia sẽ để chúng hiện khối lượng tính trên tham số cũ trong
+  // khi server đã dùng tham số mới: đúng lớp lỗi "màn và server lệch nhau".
   revalidatePath("/dashboard");
   revalidatePath("/settings");
+  revalidatePath("/setups");
+  revalidatePath("/book");
+  revalidatePath("/symbol/[symbol]", "page");
 
   return { success: true, message: "Đã cập nhật vốn tài khoản." };
 }

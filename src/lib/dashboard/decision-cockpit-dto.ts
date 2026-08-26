@@ -522,7 +522,7 @@ export function computeConfidenceBand(params: {
  * instead of trusting the persisted (now-stale-optimistic) decision. We only
  * ever override toward a MORE conservative outcome — see `resolveCanonicalGate1`.
  */
-function resolveDecision(
+export function resolveDecision(
   scanNotes: DailyScanGate2Notes | null,
   gate1: Gate1Resolution,
   latestScan: DecisionCockpitScanSnapshot | null

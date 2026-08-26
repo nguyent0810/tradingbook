@@ -10,7 +10,12 @@ export type LoadingSkeletonProps = {
 };
 
 /**
- * Shimmer placeholder — uses existing `.skeleton` token styles from globals.css.
+ * Ô giữ chỗ lúc tải.
+ *
+ * Trước đây dùng class `.skeleton` của `dashboard-shell.css` (nền linear-gradient
+ * chạy shimmer). File đó đã bị gỡ ở Gate 8, và gradient cũng nằm trong danh mục
+ * CẤM của bản thiết kế (QA §12) — nên chuyển sang `.tm-skel-bar` của terminal,
+ * vốn đã được `(dashboard)/layout.tsx` nạp sẵn cho mọi route con.
  */
 export function LoadingSkeleton({
   className = "",
@@ -21,7 +26,7 @@ export function LoadingSkeleton({
 }: LoadingSkeletonProps) {
   return (
     <div
-      className={`skeleton ${className}`.trim()}
+      className={`tm-skel-bar ${className}`.trim()}
       role="status"
       aria-busy="true"
       aria-label={ariaLabel}

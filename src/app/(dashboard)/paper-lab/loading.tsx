@@ -1,11 +1,6 @@
-import { LoadingSkeleton, LoadingSkeletonGroup } from "@/components/ui/loading-skeleton";
+import { F3Skeleton } from "@/components/paper-lab/terminal/f3-skeleton";
+import "@/styles/terminal-f3.css";
 
 export default function PaperLabLoading() {
-  return (
-    <>
-      <LoadingSkeleton className="mb-4 h-14 w-full rounded-lg" />
-      <LoadingSkeletonGroup rows={4} className="mb-4" />
-      <LoadingSkeletonGroup rows={6} />
-    </>
-  );
+  return <F3Skeleton />;
 }

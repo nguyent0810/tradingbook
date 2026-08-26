@@ -1,0 +1,361 @@
+/* ============================================================================
+ * F1 · Bảng điều khiển
+ *
+ * Ba cột ngăn nhau bằng khe 1px (nền lưới lộ ra làm đường chia) — không viền
+ * riêng, không bóng. Cột trái cố định, cột giữa co giãn, cột phải kéo được.
+ * ========================================================================== */
+
+.f1 {
+  display: flex;
+  min-width: var(--tm-minw-dash);
+  min-height: 0;
+  gap: 1px;
+  background: var(--tm-bg-head);
+}
+
+/* Cột trái — phán quyết dẫn dắt, luôn ở góc trên-trái (bàn giao §1). */
+.f1__rail-left {
+  flex: none;
+  width: 296px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--tm-bg-base);
+}
+
+.f1__center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 1px;
+  background: var(--tm-bg-base);
+}
+
+.f1__rail-right {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--tm-bg-base);
+}
+
+/* Vạch kéo đổi bề rộng cột phải (240–520px). */
+.f1__grip {
+  flex: none;
+  width: 4px;
+  padding: 0;
+  border: none;
+  background: var(--tm-bg-head);
+  cursor: col-resize;
+  touch-action: none;
+}
+.f1__grip:hover,
+.f1__grip:focus-visible {
+  background: var(--tm-accent);
+}
+
+/* ── Panel phán quyết ────────────────────────────────────────────────────── */
+
+.f1-verdict__lead {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 9px;
+}
+.f1-verdict__code {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-bg-base);
+  font-family: var(--tm-font-mono);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.f1-verdict__headline {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--tm-text-hi);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-wrap: pretty;
+}
+.f1-verdict__book {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-quiet);
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.f1-verdict__conf {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 11px;
+}
+.f1-verdict__bars {
+  display: flex;
+  gap: 2px;
+}
+.f1-verdict__bar {
+  width: 13px;
+  height: 7px;
+  background: var(--tm-line-panel);
+}
+
+/* ── Yếu tố chặn ─────────────────────────────────────────────────────────── */
+
+.f1-blocker {
+  display: flex;
+  gap: 8px;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f1-blocker__rule {
+  flex: none;
+  width: 3px;
+  border-radius: 1px;
+}
+.f1-blocker__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.f1-blocker__tag {
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.f1-blocker__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tm-text-base);
+}
+.f1-blocker__note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--tm-text-quiet);
+  margin-top: 2px;
+  text-wrap: pretty;
+}
+
+/* ── Cổng 1 ──────────────────────────────────────────────────────────────── */
+
+.f1-gate1__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 23px;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+}
+.f1-gate1__k {
+  flex: 1;
+  min-width: 0;
+  color: var(--tm-text-quiet);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.f1-gate1__v {
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* ── Bảng giữa ───────────────────────────────────────────────────────────── */
+
+.f1__setups {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 46%;
+}
+.f1__near-miss {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.f1-health {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.f1-health__label {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ── VNINDEX ─────────────────────────────────────────────────────────────── */
+
+.f1-index__lead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.f1-index__px {
+  font-family: var(--tm-font-mono);
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tm-text-hi);
+  letter-spacing: -0.01em;
+}
+.f1-index__axis {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  color: var(--tm-text-faint);
+  margin-top: 3px;
+}
+
+/* ── Phễu bộ quét ────────────────────────────────────────────────────────── */
+
+.f1-funnel__row {
+  margin-bottom: 6px;
+}
+.f1-funnel__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.f1-funnel__k {
+  flex: 1;
+  min-width: 0;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--tm-text-quiet);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.f1-funnel__v {
+  font-family: var(--tm-font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.f1-funnel__pct {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-faint);
+  width: 44px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.f1-funnel__bar {
+  height: 4px;
+  background: #151d24;
+  border-radius: 1px;
+  overflow: hidden;
+}
+.f1-funnel__bar > span {
+  display: block;
+  height: 100%;
+}
+
+/* ── Kế hoạch phiên mai ──────────────────────────────────────────────────── */
+
+.f1-plan__row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 7px 9px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f1-plan__n {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  background: var(--tm-line-panel);
+  color: var(--tm-accent);
+  border-radius: var(--tm-radius-ctl);
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+}
+.f1-plan__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tm-text-base);
+}
+.f1-plan__note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--tm-text-quiet);
+  margin-top: 1px;
+  text-wrap: pretty;
+}
+
+/* ── Drawer bằng chứng ───────────────────────────────────────────────────── */
+
+.f1-evidence__row {
+  display: flex;
+  gap: 9px;
+  padding: 8px 11px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f1-evidence__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--tm-text-base);
+  text-wrap: pretty;
+}
+.f1-evidence__hint {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--tm-text-quiet);
+  margin-top: 2px;
+  text-wrap: pretty;
+}
+.f1-evidence__value {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 96px;
+}
+.f1-evidence__display {
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tm-text-value);
+  text-align: right;
+}
+.f1-evidence__foot {
+  padding: 9px 11px;
+  border-top: 1px solid var(--tm-line-panel);
+  background: var(--tm-bg-head);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--tm-text-faint);
+}

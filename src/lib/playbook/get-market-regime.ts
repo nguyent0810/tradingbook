@@ -5,14 +5,18 @@ import {
   evaluateMarketRegime,
   type MarketRegime,
 } from "./gate1-market";
+import {
+  INSUFFICIENT_STORED_BARS_REASON,
+  MARKET_DATA_UNAVAILABLE_REASON,
+} from "./market-regime-reasons";
 
 const DEFAULT_INDEX_SYMBOL = "VNINDEX";
 const DEFAULT_BAR_LIMIT = 60;
 
-export const INSUFFICIENT_STORED_BARS_REASON =
-  "Need at least 50 daily bars to evaluate regime.";
-
-export const MARKET_DATA_UNAVAILABLE_REASON = "Market data unavailable.";
+export {
+  INSUFFICIENT_STORED_BARS_REASON,
+  MARKET_DATA_UNAVAILABLE_REASON,
+} from "./market-regime-reasons";
 
 function rowToBar(row: {
   date: Date;
@@ -46,6 +50,15 @@ export type MarketRegimeFromDbResult = MarketRegime & {
   evaluatedBarsCount: number;
   latestBar: MarketRegimeLatestBar | null;
   checkedAt: Date;
+  /**
+   * Nguyên văn lỗi khi truy vấn ném — `null` khi đọc được.
+   *
+   * Hàm này CỐ Ý không bao giờ ném (nhiều nơi gọi phụ thuộc điều đó), nhưng nếu
+   * chỉ trả `WARNING` với `evaluatedBarsCount = 0` thì phía gọi không phân biệt
+   * được "DB hỏng" với "chưa đủ bar" — hai thứ cần hai câu trả lời khác nhau.
+   * Trường này mang bằng chứng thật vượt qua ranh giới hàm.
+   */
+  loadError: string | null;
 };
 
 /**
@@ -79,6 +92,8 @@ export async function getMarketRegimeFromDb(
 
     if (rowsDesc.length < 50) {
       return {
+        // Thiếu bar là một sự thật đọc được, KHÔNG phải lỗi ⇒ `loadError: null`.
+        loadError: null,
         level: "WARNING",
         reasons: [INSUFFICIENT_STORED_BARS_REASON],
         symbol,
@@ -102,6 +117,7 @@ export async function getMarketRegimeFromDb(
       evaluatedBarsCount: chronological.length,
       latestBar,
       checkedAt: new Date(),
+      loadError: null,
     };
   } catch (err) {
     if (process.env.NODE_ENV === "development") {
@@ -115,6 +131,7 @@ export async function getMarketRegimeFromDb(
       evaluatedBarsCount: 0,
       latestBar: null,
       checkedAt: new Date(),
+      loadError: `getMarketRegimeFromDb(${symbol}) → prisma.indexDailyBar thất bại: ${String(err)}`,
     };
   }
 }

@@ -46,7 +46,7 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
         console.error("[setups] getLatestDailyScanRun failed:", e);
         return {
           latest: null,
-          error: "Cơ sở dữ liệu tạm thời không khả dụng (dữ liệu quét).",
+          error: "getLatestDailyScanRun() thất bại: " + String(e),
         };
       }),
     getExpectedLatestSessionFromIndexBars(prisma)
@@ -55,7 +55,7 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
         console.error("[setups] expectedLatestSession lookup failed:", e);
         return {
           session: null,
-          error: "Cơ sở dữ liệu tạm thời không khả dụng (phiên chuẩn).",
+          error: "getExpectedLatestSessionFromIndexBars() thất bại: " + String(e),
         };
       }),
     prisma.stockDailyBar
@@ -65,7 +65,7 @@ export async function loadSetupsBaseData(): Promise<SetupsBaseData> {
         console.error("[setups] equity max bar date failed:", e);
         return {
           maxDate: null as Date | null,
-          error: "Cơ sở dữ liệu tạm thời không khả dụng (ngày nến vốn chủ).",
+          error: "prisma.stockDailyBar.aggregate({ _max: { date } }) thất bại: " + String(e),
         };
       }),
   ]);
@@ -113,7 +113,7 @@ export const loadGate2BreakdownCached = cache(
       console.error("[setups] fetchGate2InvalidBreakdown failed:", e);
       return {
         breakdown: [],
-        error: "Cơ sở dữ liệu tạm thời không khả dụng (chẩn đoán thiết lập).",
+        error: "fetchGate2InvalidBreakdown() thất bại: " + String(e),
       };
     }
   }
@@ -145,7 +145,7 @@ export const loadSetupPerfRowsCached = cache(
       console.error("[setups] setupPerfRows query failed:", e);
       return {
         rows: [],
-        error: "Cơ sở dữ liệu tạm thời không khả dụng (thống kê hiệu suất thiết lập).",
+        error: "SELECT … FROM setup_outcomes GROUP BY setup_type, setup_tier_at_entry thất bại: " + String(e),
       };
     }
   }
@@ -153,17 +153,24 @@ export const loadSetupPerfRowsCached = cache(
 
 /** Batch D1 — RS vs VNINDEX on demand; does not affect Gate 2 or persistence. */
 export const loadRsDiagnosticsForSetupsCached = cache(
-  async (symbols: string[]): Promise<Map<string, RsDiagnosticUi | null>> => {
+  async (
+    symbols: string[]
+  ): Promise<{ map: Map<string, RsDiagnosticUi | null>; error: string | null }> => {
     const base = await loadSetupsBaseData();
     const session = base.expectedSession;
     if (!session || symbols.length === 0) {
-      return new Map();
+      return { map: new Map(), error: null };
     }
     try {
-      return await loadRsDiagnosticUiForSymbols(prisma, symbols, session);
+      return { map: await loadRsDiagnosticUiForSymbols(prisma, symbols, session), error: null };
     } catch (e) {
+      // Nuốt lỗi ở đây sẽ khiến RS20 hiện gap "—" y như khi mã thật sự chưa đủ
+      // dữ liệu; người dùng không phân biệt được thiếu dữ liệu với hỏng truy vấn.
       console.error("[setups] loadRsDiagnosticUiForSymbols failed:", e);
-      return new Map();
+      return {
+        map: new Map(),
+        error: "loadRsDiagnosticUiForSymbols() thất bại: " + String(e),
+      };
     }
   }
 );
@@ -200,7 +207,7 @@ export const loadRsNearMissWatchlistForSetupsCached = cache(
       console.error("[setups] computeRsNearMissWatchlistFromDb failed:", e);
       return {
         panel: buildRsNearMissWatchlistPanel([]),
-        error: "Cơ sở dữ liệu tạm thời không khả dụng (danh sách theo dõi RS).",
+        error: "computeRsNearMissWatchlistFromDb() thất bại: " + String(e),
       };
     }
   }
@@ -240,7 +247,7 @@ export const loadSurfacedCandidatesHealthCached = cache(async () => {
     console.error("[setups] prepareSurfacedCandidatesHealthView failed:", e);
     return {
       candidatesWithHealth: [],
-      healthError: "Cơ sở dữ liệu tạm thời không khả dụng (sức khỏe ứng viên).",
+      healthError: "prepareSurfacedCandidatesHealthView() thất bại: " + String(e),
     };
   }
 });

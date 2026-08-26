@@ -8,6 +8,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 10, 8, 0, 0)),
+        error: null,
       },
     });
     expect(dto.benchmarkDate).toBe("2026-05-10");
@@ -23,6 +24,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 10, 8, 0, 0)),
+        error: null,
       },
     });
     expect(dto.dataTimingMode).toBe("eod");
@@ -34,6 +36,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: null,
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestScanRunAt: null,
+        error: null,
       },
     });
     expect(dto.benchmarkDate).toBeNull();
@@ -49,6 +52,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 6)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 11)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 11, 12, 0, 0)),
+        error: null,
       },
     });
     expect(dto.delayedBackdrop).toBe(true);
@@ -61,6 +65,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 10, 8, 0, 0)),
+        error: null,
       },
       delayedBackdropFromScanNotes: true,
     });
@@ -73,6 +78,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 25, 8, 0, 0)),
+        error: null,
       },
       scanSessionCoverage: {
         expectedSessionDate: "2026-05-25",
@@ -104,6 +110,7 @@ describe("buildMarketFreshnessDto", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
         latestScanRunAt: null,
+        error: null,
       },
     });
     expect(dto.scanRunAt).toBeNull();

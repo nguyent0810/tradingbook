@@ -6,6 +6,7 @@ import { BreadcrumbLabelSetter } from "@/components/breadcrumb-label-setter";
 import { prisma } from "@/lib/prisma";
 import type { AgentDnaProfile } from "@/lib/lab/types/regime";
 import "@/components/paper-lab/paper-lab-workstation.css";
+import { LegacyArenaShell } from "@/components/paper-lab/legacy-arena-shell";
 
 export const metadata: Metadata = {
   title: "Hồ sơ Agent | Arena",
@@ -34,7 +35,7 @@ export default async function AgentProfilePage({
   const dna = agent.dnaProfiles[0]?.profileJson as AgentDnaProfile | undefined;
 
   return (
-    <>
+    <LegacyArenaShell>
       <BreadcrumbLabelSetter label={agent.displayName} />
       <PaperLabPanel title={agent.displayName} className="mb-4">
         <p className="text-sm text-[var(--text-tertiary)]">{agent.style} · {agent.slug}</p>
@@ -69,6 +70,6 @@ export default async function AgentProfilePage({
           </p>
         </PaperLabPanel>
       </div>
-    </>
+    </LegacyArenaShell>
   );
 }

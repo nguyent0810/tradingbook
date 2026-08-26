@@ -1,0 +1,205 @@
+/* ============================================================================
+ * F5 · Cài đặt tài khoản & rủi ro
+ *
+ * Hai cột: form dạng hàng key–value (trái) · tình trạng hệ thống + phiên (phải).
+ * ========================================================================== */
+
+.f5 {
+  display: flex;
+  min-width: 1000px;
+  min-height: 0;
+  gap: 1px;
+  background: var(--tm-bg-head);
+  overflow-y: auto;
+}
+.f5__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--tm-bg-head);
+}
+.f5__rail {
+  flex: none;
+  width: 308px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--tm-bg-head);
+}
+
+/* ── Hàng tham số ────────────────────────────────────────────────────────── */
+
+.f5-param {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f5-param__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tm-text-base);
+}
+.f5-param__note {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--tm-text-quiet);
+  text-wrap: pretty;
+}
+.f5-param__control {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.f5-param__input {
+  width: 132px;
+  height: 27px;
+  padding: 0 9px;
+  background: var(--tm-bg-base);
+  border: 1px solid var(--tm-line-input);
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-text-value);
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.f5-param__unit {
+  width: 46px;
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-dim);
+}
+
+.f5-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Xem trước định cỡ ───────────────────────────────────────────────────── */
+
+.f5-preview {
+  margin-top: 12px;
+  padding: 9px 10px;
+  background: var(--tm-bg-cell);
+  border: 1px solid var(--tm-line-panel);
+  border-radius: var(--tm-radius-ctl);
+}
+.f5-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+.f5-preview__k {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  color: var(--tm-text-dim);
+  white-space: nowrap;
+}
+.f5-preview__v {
+  font-family: var(--tm-font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Hồ sơ & bảo mật ─────────────────────────────────────────────────────── */
+
+.f5-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 22px;
+}
+.f5-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tm-text-dim);
+  margin-bottom: 4px;
+}
+.f5-input {
+  width: 100%;
+  height: 27px;
+  padding: 0 9px;
+  margin-bottom: 9px;
+  background: var(--tm-bg-base);
+  border: 1px solid var(--tm-line-input);
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-text-value);
+  font-size: 12px;
+}
+.f5-input--mono {
+  font-family: var(--tm-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.f5-input:disabled {
+  background: var(--tm-bg-chrome-sunken);
+  border-color: var(--tm-line-panel);
+  color: var(--tm-text-quiet);
+}
+
+/* ── Vùng nguy hiểm ──────────────────────────────────────────────────────── */
+
+.f5-danger {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 13px;
+}
+.f5-danger__title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--tm-text-base);
+}
+.f5-danger__note {
+  font-size: 11px;
+  color: var(--tm-text-quiet);
+  text-wrap: pretty;
+}
+
+/* ── Tình trạng hệ thống ─────────────────────────────────────────────────── */
+
+.f5-status__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 25px;
+  padding: 4px 9px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f5-status__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.f5-status__k {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--tm-text-mute);
+}
+.f5-status__v {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.f5-session {
+  padding: 8px 9px;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--tm-text-soft);
+}

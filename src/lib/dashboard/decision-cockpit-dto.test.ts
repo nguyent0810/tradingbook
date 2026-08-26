@@ -18,6 +18,7 @@ const alignedFreshness = buildMarketFreshnessDto({
     benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
     latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
     latestScanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+    error: null,
   },
 });
 
@@ -700,6 +701,7 @@ describe("computeConfidenceBand", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 0, 0)),
+        error: null,
       },
       scanSessionCoverage: {
         expectedSessionDate: "2026-05-25",
@@ -733,6 +735,7 @@ describe("computeConfidenceBand", () => {
         benchmarkSessionDate: null,
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestScanRunAt: null,
+        error: null,
       },
     });
     expect(
@@ -755,6 +758,7 @@ describe("computeConfidenceBand", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 22)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 22)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 22, 12, 30, 0)),
+        error: null,
       },
     });
     const band = computeConfidenceBand({
@@ -777,6 +781,7 @@ describe("computeConfidenceBand", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 22, 12, 30, 0)),
+        error: null,
       },
     });
     const band = computeConfidenceBand({
@@ -796,6 +801,7 @@ describe("computeConfidenceBand", () => {
         benchmarkSessionDate: new Date(Date.UTC(2026, 4, 1)),
         latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 1)),
         latestScanRunAt: new Date(Date.UTC(2026, 4, 1, 12, 30, 0)),
+        error: null,
       },
     });
     const band = computeConfidenceBand({

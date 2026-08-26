@@ -9,6 +9,7 @@ import { buildDecisionExplanation } from "@/lib/paper-lab/ui/arena-copy";
 import type { AgentDecisionOutput } from "@/lib/paper-lab/types/agent-decision.schema";
 import type { AgentAction } from "@/lib/paper-lab/types/agent-decision.schema";
 import "@/components/paper-lab/paper-lab-workstation.css";
+import { LegacyArenaShell } from "@/components/paper-lab/legacy-arena-shell";
 
 export const metadata: Metadata = {
   title: "Xem lại trận đấu | Arena",
@@ -35,7 +36,7 @@ export default async function BattleDetailPage({
   const battleLabel = `${battle.sessionDate.toISOString().slice(0, 10)} — ${battle.symbol}`;
 
   return (
-    <>
+    <LegacyArenaShell>
       <BreadcrumbLabelSetter label={battleLabel} />
       <PaperLabPanel title={battleLabel} testId="battle-replay-detail">
       <div className="safe-table-wrap paper-lab-table-wrap">
@@ -84,6 +85,6 @@ export default async function BattleDetailPage({
         </table>
       </div>
       </PaperLabPanel>
-    </>
+    </LegacyArenaShell>
   );
 }

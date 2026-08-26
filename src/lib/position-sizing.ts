@@ -1,4 +1,21 @@
 /** Tier from surfaced Gate 2 candidate (presentation-only sizing). */
+/**
+ * Mặc định hệ thống cho định cỡ vị thế, dùng khi người dùng chưa đặt tham số riêng.
+ *
+ * MỘT nơi định nghĩa duy nhất. Trước đây bốn hằng này được chép ra ba chỗ —
+ * `app/actions/trades.ts`, `lib/setups/terminal/f2-view-model.ts` và
+ * `app/(dashboard)/symbol/[symbol]/page.tsx`. Chúng trùng giá trị ở thời điểm
+ * viết, nhưng không có gì giữ cho chúng trùng mãi: sửa một chỗ là màn hình và
+ * server lặng lẽ tính ra hai khối lượng khác nhau, và người dùng chỉ biết khi
+ * phiếu bị từ chối.
+ */
+export const POSITION_SIZING_DEFAULTS = {
+  maxPortfolioExposurePct: 0.7,
+  maxPerTradeExposurePct: 0.2,
+  baseRiskPerTradePct: 0.01,
+  liquidityCapPct: 0.1,
+} as const;
+
 export type PositionSizingQuality = "A" | "B";
 
 export type PositionSizingComputed = {

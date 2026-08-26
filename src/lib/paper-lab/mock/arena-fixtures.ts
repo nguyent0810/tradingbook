@@ -273,6 +273,7 @@ export function buildMockPaperLabPageDto(): PaperLabPageDto {
     overview: {
       totalAgents: PAPER_AGENT_SEEDS.length,
       totalVirtualCapitalVnd: PAPER_INITIAL_CAPITAL_VND * PAPER_AGENT_SEEDS.length,
+      performanceSessionDate: SESSION,
       bestAgent: { id: best.agentId, name: best.agentName, returnPct: best.pnlPct },
       worstAgent: { id: worst.agentId, name: worst.agentName, returnPct: worst.pnlPct },
       totalOpenPositions: positions.length,

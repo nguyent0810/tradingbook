@@ -99,15 +99,61 @@ function countBattleVotes(decisions: Array<{ action: string }>) {
   return { buy, hold, sell, reduce };
 }
 
-export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> {
+/**
+ * Kết quả nạp có phân biệt ba trạng thái.
+ *
+ * `loadPaperLabPageFromDb()` gộp "chưa có tác tử nào" và "bảng chưa được migrate"
+ * thành cùng một `null`, nhưng hai thứ đó khác hẳn nhau: một cái là dữ liệu rỗng
+ * hợp lệ, một cái là sự cố hạ tầng cần hiện bằng chứng chứ không được im lặng
+ * trở thành ô rỗng.
+ */
+export type PaperLabDbLoad =
+  | { kind: "ok"; dto: PaperLabPageDto }
+  | { kind: "empty" }
+  | { kind: "error"; error: string };
+
+export async function loadPaperLabPageDbLoad(): Promise<PaperLabDbLoad> {
   try {
+    const dto = await queryPaperLabPage();
+    return dto ? { kind: "ok", dto } : { kind: "empty" };
+  } catch (err) {
+    if (tableExistsError(err)) {
+      return {
+        kind: "error",
+        error: `Bảng Đấu trường chưa tồn tại trong cơ sở dữ liệu — chạy migration. Chi tiết: ${String(err)}`,
+      };
+    }
+    return { kind: "error", error: `loadPaperLabPageFromDb() → ${String(err)}` };
+  }
+}
+
+/**
+ * Bản tương thích ngược cho các route API: `null` cho cả rỗng lẫn thiếu bảng.
+ * Màn F3 dùng `loadPaperLabPageDbLoad()` để phân biệt được hai trạng thái đó.
+ */
+export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> {
+  const result = await loadPaperLabPageDbLoad();
+  if (result.kind === "ok") return result.dto;
+  if (result.kind === "empty") return null;
+  if (result.error.startsWith("Bảng Đấu trường chưa tồn tại")) return null;
+  throw new Error(result.error);
+}
+
+async function queryPaperLabPage(): Promise<PaperLabPageDto | null> {
+  // Khối lồng giữ nguyên thụt lề của thân hàm cũ (trước đây là `try`), để diff
+  // của lần tách này chỉ gồm phần xử lý lỗi chứ không phải 460 dòng đổi thụt lề.
+  {
     const [agentCount, latestPerf] = await Promise.all([
       prisma.paperAgent.count(),
       prisma.agentPerformanceDaily.findFirst({ orderBy: { sessionDate: "desc" } }),
     ]);
     if (agentCount === 0) return null;
 
-    const sessionDate = latestPerf?.sessionDate ?? new Date();
+    // Chưa có hàng hiệu suất nào ⇒ không có phiên nào để đo. Vẫn cần MỘT mốc để
+    // truy vấn xếp hạng/vị thế, nhưng phải nhớ rằng mốc đó là do ta tự đặt chứ
+    // không phải phiên có thật — `performanceSessionDate` bên dưới nói ra điều đó.
+    const perfSessionDate = latestPerf?.sessionDate ?? null;
+    const sessionDate = perfSessionDate ?? new Date();
 
     const [
       agents,
@@ -188,15 +234,17 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
         agentId: r.agent.slug,
         agentName: r.agent.displayName,
         style: r.agent.style,
-        navVnd: perf ? Number(perf.navVnd) : PAPER_INITIAL_CAPITAL_VND,
-        pnlPct: perf?.totalReturnPct ?? 0,
-        realizedPnlVnd: perf ? Number(perf.realizedPnlVnd) : 0,
-        unrealizedPnlVnd: perf ? Number(perf.unrealizedPnlVnd) : 0,
-        winRate: perf?.winRate ?? 0,
-        maxDrawdownPct: perf?.maxDrawdownPct ?? 0,
-        sharpeLike: perf?.sharpeLike ?? 0,
-        tradeCount: perf?.tradeCount ?? 0,
-        openPositions: perf?.openPositions ?? 0,
+        // KHÔNG bịa khi thiếu `agentPerformanceDaily`. Rơi về 0 / vốn ban đầu sẽ
+        // dựng một tác tử trông như đã đo: "500 triệu, +0,0%, thắng 0%".
+        navVnd: perf ? Number(perf.navVnd) : null,
+        pnlPct: perf?.totalReturnPct ?? null,
+        realizedPnlVnd: perf ? Number(perf.realizedPnlVnd) : null,
+        unrealizedPnlVnd: perf ? Number(perf.unrealizedPnlVnd) : null,
+        winRate: perf?.winRate ?? null,
+        maxDrawdownPct: perf?.maxDrawdownPct ?? null,
+        sharpeLike: perf?.sharpeLike ?? null,
+        tradeCount: perf?.tradeCount ?? null,
+        openPositions: perf?.openPositions ?? null,
         rank: r.rank,
         rankChange: r.rankChange,
       };
@@ -271,10 +319,10 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
         pnlPct: lb?.pnlPct ?? perf?.totalReturnPct ?? 0,
         winRate: lb?.winRate ?? perf?.winRate ?? 0,
         maxDrawdownPct: lb?.maxDrawdownPct ?? perf?.maxDrawdownPct ?? 0,
-        navSparkline:
-          navSparkline.length >= 2
-            ? navSparkline
-            : [PAPER_INITIAL_CAPITAL_VND, snap ? Number(snap.navVnd) : PAPER_INITIAL_CAPITAL_VND],
+        // Dưới hai điểm ảnh chụp thì KHÔNG có đường NAV để vẽ. Chèn nguyên vốn
+        // ban đầu vào cho đủ hai điểm sẽ vẽ ra một đường phẳng ở 500 triệu —
+        // một lịch sử không hề tồn tại. Để rỗng cho `Sparkline` hiện gap.
+        navSparkline: navSparkline.length >= 2 ? navSparkline : [],
       };
     });
 
@@ -356,7 +404,11 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       ? [dimensions.trendRegime, dimensions.volatilityRegime, dimensions.breadthRegime]
       : [];
 
-    const sorted = [...leaderboard].sort((a, b) => b.pnlPct - a.pnlPct);
+    // Tác tử chưa có số đo xếp cuối thay vì được coi như 0% — 0% là một kết quả,
+    // "chưa đo" thì không.
+    const sorted = [...leaderboard]
+      .filter((r) => r.pnlPct != null)
+      .sort((a, b) => (b.pnlPct as number) - (a.pnlPct as number));
     const best = sorted[0];
     const worst = sorted[sorted.length - 1];
 
@@ -469,12 +521,15 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
       overview: {
         totalAgents: agentCount,
         totalVirtualCapitalVnd: agentCount * PAPER_INITIAL_CAPITAL_VND,
+        performanceSessionDate: perfSessionDate
+          ? perfSessionDate.toISOString().slice(0, 10)
+          : null,
         bestAgent: best
           ? { id: best.agentId, name: best.agentName, returnPct: best.pnlPct }
-          : { id: "-", name: "—", returnPct: 0 },
+          : { id: "-", name: "—", returnPct: null },
         worstAgent: worst
           ? { id: worst.agentId, name: worst.agentName, returnPct: worst.pnlPct }
-          : { id: "-", name: "—", returnPct: 0 },
+          : { id: "-", name: "—", returnPct: null },
         totalOpenPositions: positions.length,
         marketRegime: {
           level: (regimeCtx?.gate1Level ?? regimeSnapshot?.gate1Level ?? "WARNING") as
@@ -522,8 +577,5 @@ export async function loadPaperLabPageFromDb(): Promise<PaperLabPageDto | null> 
         rows: battleRowsRaw,
       },
     };
-  } catch (err) {
-    if (tableExistsError(err)) return null;
-    throw err;
   }
 }

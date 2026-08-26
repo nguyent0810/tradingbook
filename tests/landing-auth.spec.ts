@@ -7,18 +7,21 @@ test.describe("Landing and auth — production route smoke", () => {
     await expect(page.getByRole("link", { name: "Đăng nhập" }).first()).toBeVisible();
   });
 
-  test("login page renders the auth form with the approved indigo accent", async ({ page }) => {
+  test("login page renders the auth form with the terminal amber accent", async ({ page }) => {
     await page.goto("/login");
     await expect(page.getByTestId("login-form")).toBeVisible();
-    await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
+    // Nhãn tiếng Việt của F6 — bản trước dùng "Email"/"Password" tiếng Anh.
+    await expect(page.getByLabel("TÀI KHOẢN")).toBeVisible();
+    await expect(page.getByLabel("MẬT KHẨU")).toBeVisible();
 
+    // Điểm nhấn thương hiệu đổi từ chàm `--cd-cyan #818cf8` (ClayMorphism, đã gỡ)
+    // sang hổ phách `--tm-accent #FFA62B` (bàn giao §2, token accent/amber).
     const accent = await page.evaluate(() =>
-      getComputedStyle(document.querySelector(".cd-auth") ?? document.body).getPropertyValue(
-        "--cd-cyan"
+      getComputedStyle(document.querySelector(".f6") ?? document.body).getPropertyValue(
+        "--tm-accent"
       )
     );
-    expect(accent.trim().toLowerCase()).toBe("#818cf8");
+    expect(accent.trim().toLowerCase()).toBe("#ffa62b");
   });
 
   test("register page renders the registration form", async ({ page }) => {

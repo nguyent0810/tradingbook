@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
+import { LegacyArenaShell } from "@/components/paper-lab/legacy-arena-shell";
 
 export const metadata: Metadata = {
   title: "Session Theatre | Arena",
@@ -31,7 +32,7 @@ export default async function TimelineSessionPage({
   };
 
   return (
-    <>
+    <LegacyArenaShell>
       <PaperLabPanel title={`Session ${raw}`} className="mb-4">
         {data.regime && (
           <p className="text-sm text-[var(--text-tertiary)]">
@@ -88,6 +89,6 @@ export default async function TimelineSessionPage({
           </div>
         </PaperLabPanel>
       </div>
-    </>
+    </LegacyArenaShell>
   );
 }

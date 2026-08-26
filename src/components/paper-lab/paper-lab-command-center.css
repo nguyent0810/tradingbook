@@ -111,9 +111,12 @@
   margin-bottom: 20px;
 }
 
-/* Breakpoints offset by the app shell's left sidebar (~240px, see
-   .app-shell-sidebar in dashboard-shell.css) — these fixed-column layouts
-   need that much *content* width, not viewport width, to actually fit. */
+/* Breakpoints were offset by the old app shell's ~240px left sidebar: these
+   fixed-column layouts need that much *content* width, not viewport width.
+   The Terminal v4 shell has no left rail, so the offset is now slack — each
+   column set simply engages ~240px later than it strictly needs to. Kept as-is
+   because the Arena sub-routes still run the legacy skin (see
+   legacy-arena-shell.tsx) and were never part of the redesign scope. */
 @media (min-width: 1520px) {
   .paper-lab-header-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

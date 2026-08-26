@@ -4,6 +4,7 @@ import { PaperLabPanel } from "@/components/paper-lab/ui/PaperLabPanel";
 import { getTelemetrySummary } from "@/lib/lab/observability/telemetry";
 import { prisma } from "@/lib/prisma";
 import "@/components/paper-lab/paper-lab-workstation.css";
+import { LegacyArenaShell } from "@/components/paper-lab/legacy-arena-shell";
 
 export const metadata: Metadata = {
   title: "Vận hành | Arena",
@@ -14,7 +15,7 @@ export default async function LabOpsPage() {
   const summary = await getTelemetrySummary(prisma);
 
   return (
-    <>
+    <LegacyArenaShell>
       <PaperLabPanel title="Giám sát vận hành" className="mb-4">
         <div className="paper-lab-kpi-grid mb-4">
           <div className="paper-lab-kpi">
@@ -59,6 +60,6 @@ export default async function LabOpsPage() {
           </table>
         </div>
       </PaperLabPanel>
-    </>
+    </LegacyArenaShell>
   );
 }

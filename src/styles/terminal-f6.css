@@ -1,0 +1,190 @@
+/* ============================================================================
+ * F6 · Phiên làm việc (đăng nhập / đăng ký)
+ *
+ * Một panel, hai tab. Nền phẳng và viền 1px — bản thiết kế nguồn có đổ bóng và
+ * nền lưới bằng gradient, nhưng nguyên tắc bàn giao §1 ("viền thay vì bóng",
+ * không gradient) là quy chuẩn cho bản triển khai nên hai thứ đó bị bỏ.
+ * ========================================================================== */
+
+.f6 {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 26px 16px;
+  background: var(--tm-bg-base);
+  color: var(--tm-text-base);
+  font-family: var(--tm-font-sans);
+  font-size: 12px;
+}
+
+.f6__panel {
+  width: 430px;
+  max-width: 100%;
+  background: var(--tm-bg-panel);
+  border: 1px solid var(--tm-line-chrome);
+  border-radius: var(--tm-radius-panel);
+}
+
+.f6__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 9px;
+  background: var(--tm-bg-head);
+  border-bottom: 1px solid var(--tm-line-chrome);
+}
+
+.f6__tabs {
+  display: flex;
+  height: 27px;
+  background: var(--tm-bg-chrome-sunken);
+  border-bottom: 1px solid var(--tm-line-chrome);
+}
+.f6__tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--tm-line-chrome);
+  color: var(--tm-text-dim);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  cursor: pointer;
+  text-decoration: none;
+}
+.f6__tab:hover {
+  color: var(--tm-text-base);
+  text-decoration: none;
+}
+.f6__tab[aria-current="page"] {
+  background: var(--tm-bg-chrome-active);
+  border-bottom-color: var(--tm-accent);
+  color: #fff;
+}
+
+.f6__body {
+  padding: 20px 22px 22px;
+}
+
+.f6__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.f6__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: var(--tm-accent);
+  color: var(--tm-bg-base);
+  border-radius: var(--tm-radius-ctl);
+}
+.f6__wordmark {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--tm-text-hi);
+}
+.f6__tagline {
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--tm-text-dim);
+}
+
+.f6__field {
+  margin-bottom: 11px;
+}
+.f6__label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tm-text-dim);
+  margin-bottom: 4px;
+}
+.f6__input {
+  width: 100%;
+  height: 30px;
+  padding: 0 9px;
+  background: var(--tm-bg-base);
+  border: 1px solid var(--tm-line-input);
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-text-value);
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+}
+.f6__input::placeholder {
+  color: var(--tm-text-faint);
+}
+
+.f6__submit {
+  width: 100%;
+  height: 32px;
+  margin-top: 3px;
+  background: var(--tm-accent);
+  border: none;
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-bg-base);
+  font-family: var(--tm-font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  cursor: pointer;
+}
+.f6__submit:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+.f6__submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.f6__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-faint);
+}
+
+.f6__status {
+  margin-top: 15px;
+  padding-top: 12px;
+  border-top: 1px solid var(--tm-line-panel);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  line-height: 1.75;
+  color: var(--tm-text-faint);
+}
+.f6__status-dot {
+  margin-right: 5px;
+}
+
+.f6__alert {
+  margin-bottom: 12px;
+  padding: 7px 8px;
+  background: #120e10;
+  border: 1px solid #2a1a1e;
+  border-radius: var(--tm-radius-ctl);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--tm-down-soft);
+  white-space: pre-wrap;
+}

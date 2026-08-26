@@ -1,0 +1,848 @@
+/* ============================================================================
+ * TradeLog VN Terminal v4 — design tokens + primitives
+ * Nguồn: "Redesign Project Bloomberg Style" / TradeLog Terminal.dc.html
+ *
+ * Nguyên tắc: viền thay vì bóng · mật độ trước hết · không trang trí.
+ * KHÔNG thêm box-shadow trang trí, gradient, hay border-radius > 3px vào file này.
+ * ========================================================================== */
+
+:root {
+  /* ── Nền ─────────────────────────────────────────────────────────────── */
+  --tm-bg-base: #0a0e11; /* nền ứng dụng, cột chứa panel */
+  --tm-bg-panel: #0e1216; /* thân panel, thân bảng */
+  --tm-bg-head: #141b21; /* tiêu đề panel, footer trạng thái */
+  --tm-bg-cell: #111720; /* ô KPI, thead sticky */
+  --tm-bg-sel: #16212a; /* hàng đang chọn */
+  --tm-bg-btn: #1a222a; /* nút phụ, input group */
+  --tm-bg-btn-hover: #242e38;
+  --tm-bg-chrome: #0e1317; /* thanh trên, nav F */
+  --tm-bg-chrome-sunken: #0c1014; /* ticker tape, dòng lệnh */
+  --tm-bg-chrome-active: #161f27; /* tab/nav đang chọn */
+  --tm-bg-scrim: rgba(4, 7, 9, 0.72); /* nền mờ sau modal */
+
+  /* ── Viền ────────────────────────────────────────────────────────────── */
+  --tm-line-panel: #1c242b; /* viền panel và khe chia 1px */
+  --tm-line-row: #161d23; /* viền dưới hàng bảng */
+  --tm-line-input: #29333c; /* viền input, nút phụ */
+  --tm-line-chrome: #1e272f; /* viền thanh trên / nav / trạng thái */
+  --tm-line-navcell: #1a2229;
+
+  /* ── Chữ ─────────────────────────────────────────────────────────────── */
+  --tm-text-hi: #f2f7fa; /* mã cổ phiếu, số chính */
+  --tm-text-base: #dbe4ea; /* nội dung, nhãn nút */
+  --tm-text-mute: #9dabb6; /* diễn giải, ghi chú */
+  --tm-text-dim: #69757f; /* nhãn 9–10px, thead */
+  --tm-text-faint: #5f6d78; /* nhãn kỹ thuật mờ nhất */
+  --tm-text-soft: #8492a0; /* log, phụ đề */
+  --tm-text-strong: #c4d0da; /* tiêu đề panel */
+  --tm-text-quiet: #7d8b95; /* ghi chú trong hàng */
+  --tm-text-value: #e7eef4; /* giá trị số trong bảng */
+
+  /* ── Trạng thái / quy ước bảng giá VN (KHÔNG đảo ngược) ──────────────── */
+  --tm-accent: #ffa62b; /* thương hiệu, PROBE, nhấn, focus */
+  --tm-accent-hi: #ffc46b;
+  --tm-up: #2bd47d; /* tăng giá, ĐẠT, TRADE */
+  --tm-up-hi: #4fe098;
+  --tm-up-soft: #7fd8a8;
+  --tm-down: #ff4d5e; /* giảm giá, FAIL, NO_TRADE */
+  --tm-down-soft: #ff8d7a;
+  --tm-ref: #f5d90a; /* giá tham chiếu, cảnh báo nhẹ */
+  --tm-ceil: #b95cff; /* giá trần, nhóm chẩn đoán */
+  --tm-floor: #4cc2ff; /* giá sàn, thông tin, liên kết */
+
+  /* Nền tiêu đề panel phán quyết theo mức */
+  --tm-head-no-trade: #22141a;
+  /* Chưa đo được — KHÁC với NO_TRADE. NO_TRADE là một kết luận đã đo; chưa đo
+     được thì không có kết luận nào, nên nền phải trung tính chứ không mượn nền
+     đỏ của NO_TRADE. Lấy sắc nền panel tối hơn một bậc để vẫn tách khỏi thân. */
+  --tm-head-unknown: #171c21;
+  --tm-head-probe: #221a10;
+  --tm-head-trade: #0f2118;
+
+  /* ── Chữ (họ + cỡ) ───────────────────────────────────────────────────── */
+  /* Bản dự phòng, KHÔNG tham chiếu biến của next/font.
+   *
+   * Biến `--font-plex-*` do next/font sinh ra nằm trên phần tử bao sâu hơn
+   * `:root`. Nếu viết `var(--font-plex-sans)` ngay tại đây thì lúc tính giá trị
+   * ở `:root` biến đó chưa tồn tại ⇒ cả khai báo thành "invalid at computed-value
+   * time" ⇒ `--tm-font-sans` rỗng, và giá trị rỗng đó **kế thừa xuống**, khai báo
+   * sâu hơn không cứu được. Bản dùng font đã subset nằm ở `.tm-fonts` bên dưới. */
+  --tm-font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --tm-font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  /* ── Kích thước (bàn giao §3) ────────────────────────────────────────── */
+  --tm-h-topbar: 34px;
+  --tm-h-ticker: 25px;
+  --tm-h-nav: 29px;
+  --tm-h-cmdline: 29px;
+  --tm-h-status: 21px;
+  --tm-h-panel-head: 24px;
+  --tm-h-row: 26px; /* hàng bảng chính */
+  --tm-h-row-sm: 23px; /* hàng bảng phụ / danh sách */
+  --tm-h-thead: 22px;
+  --tm-h-thead-sm: 21px;
+  --tm-h-btn: 26px;
+
+  --tm-pad-cell: 6px;
+  --tm-pad-cell-edge: 8px;
+  --tm-pad-panel: 9px;
+
+  --tm-radius-ctl: 2px; /* nút & ô */
+  --tm-radius-panel: 3px; /* panel & modal */
+
+  --tm-minw-dash: 1160px;
+  --tm-minw-symbol: 1020px;
+}
+
+/*
+ * Gắn cùng chỗ với class biến font của next/font (xem `terminalFontClass`).
+ * Ở đây `--font-plex-*` đã có trên chính phần tử này nên `var()` giải được.
+ */
+.tm-fonts {
+  /* `var(--font-plex-sans, …)` PHẢI có giá trị dự phòng ngay trong var(): nếu
+     next/font không nạp được (offline, CSP chặn), biến đó không tồn tại và cả
+     khai báo lại thành "invalid at computed-value time" — toàn bộ terminal rơi
+     về font mặc định của trình duyệt (Times New Roman) chứ không về IBM Plex /
+     system-ui như bản dự phòng ở `:root` định làm. */
+  --tm-font-sans: var(--font-plex-sans, "IBM Plex Sans"), "IBM Plex Sans", system-ui,
+    sans-serif;
+  --tm-font-mono: var(--font-plex-mono, "IBM Plex Mono"), "IBM Plex Mono", ui-monospace,
+    monospace;
+}
+
+/* ============================================================================
+ * Nền chung
+ * ========================================================================== */
+
+.tm-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--tm-bg-base);
+  color: var(--tm-text-base);
+  font-family: var(--tm-font-sans);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.tm-root *,
+.tm-root *::before,
+.tm-root *::after {
+  box-sizing: border-box;
+}
+
+.tm-root ::selection {
+  background: var(--tm-accent);
+  color: var(--tm-bg-base);
+}
+
+/* Focus bàn phím — viền amber 1px + shadow 1px cùng màu (bàn giao §6).
+ * Đây là focus ring, không phải bóng trang trí. Không được tắt outline. */
+.tm-root :focus-visible {
+  outline: 1px solid var(--tm-accent);
+  outline-offset: 0;
+  box-shadow: 0 0 0 1px var(--tm-accent);
+}
+
+.tm-root ::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+.tm-root ::-webkit-scrollbar-track {
+  background: #0b0f13;
+}
+.tm-root ::-webkit-scrollbar-thumb {
+  background: #232d36;
+  border: 2px solid #0b0f13;
+}
+.tm-root ::-webkit-scrollbar-thumb:hover {
+  background: #37444f;
+}
+
+/* ============================================================================
+ * Chữ
+ * ========================================================================== */
+
+/* ui/eyebrow — Sans 700 · 9–10px · +0,1em · UPPER */
+.tm-eyebrow {
+  font-family: var(--tm-font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--tm-text-strong);
+}
+
+.tm-eyebrow--dim {
+  font-size: 9px;
+  letter-spacing: 0.09em;
+  color: var(--tm-text-dim);
+  font-weight: 600;
+}
+
+/* Mọi con số: mono + tabular-nums + căn phải */
+.tm-num {
+  font-family: var(--tm-font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tm-mono {
+  font-family: var(--tm-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.tm-body {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--tm-text-mute);
+  text-wrap: pretty;
+  margin: 0;
+}
+
+/* Màu theo hướng giá — dùng chung cho mọi màn */
+.tm-up {
+  color: var(--tm-up);
+}
+.tm-down {
+  color: var(--tm-down);
+}
+.tm-ref {
+  color: var(--tm-ref);
+}
+.tm-ceil {
+  color: var(--tm-ceil);
+}
+.tm-floor {
+  color: var(--tm-floor);
+}
+.tm-flat {
+  color: var(--tm-text-value);
+}
+/* Ô thiếu dữ liệu (gap) — hiện "—", không hiện 0 */
+.tm-gap {
+  color: var(--tm-text-faint);
+}
+
+/* ============================================================================
+ * Panel
+ * ========================================================================== */
+
+.tm-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--tm-bg-panel);
+  border: 1px solid var(--tm-line-panel);
+  border-radius: var(--tm-radius-panel);
+}
+
+/* Panel nằm trong lưới 1px-gap: bỏ viền, dùng nền lưới làm khe chia */
+.tm-panel--flush {
+  border: none;
+  border-radius: 0;
+}
+
+.tm-panel__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--tm-h-panel-head);
+  padding: 0 8px;
+  background: var(--tm-bg-head);
+  border-bottom: 1px solid var(--tm-line-panel);
+}
+
+.tm-panel__rule {
+  flex: none;
+  width: 3px;
+  height: 12px;
+  background: var(--tm-line-input);
+}
+
+.tm-panel__title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--tm-text-strong);
+  white-space: nowrap;
+}
+
+.tm-panel__meta {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-dim);
+  white-space: nowrap;
+}
+
+.tm-panel__spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.tm-panel__body {
+  padding: var(--tm-pad-panel);
+  min-height: 0;
+}
+
+.tm-panel__body--scroll {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  padding: 0;
+}
+
+/* Ghi chú nhấn trong thân panel — vạch trái 2px thay cho ô bo góc */
+.tm-note {
+  padding: 7px 8px;
+  background: var(--tm-bg-head);
+  border-left: 2px solid var(--tm-accent);
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--tm-text-mute);
+  text-wrap: pretty;
+}
+
+/* ============================================================================
+ * Ô KPI
+ * ========================================================================== */
+
+.tm-kpis {
+  display: grid;
+  gap: 1px;
+  background: var(--tm-line-panel);
+  border: 1px solid var(--tm-line-panel);
+  border-radius: var(--tm-radius-ctl);
+}
+
+.tm-kpi {
+  padding: 6px 8px;
+  background: var(--tm-bg-cell);
+  min-width: 0;
+}
+
+.tm-kpi__k {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tm-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tm-kpi__v {
+  font-family: var(--tm-font-mono);
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tm-text-value);
+  line-height: 1.2;
+}
+
+.tm-kpi__v--sm {
+  font-size: 12px;
+}
+
+.tm-kpi__sub {
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  color: var(--tm-text-faint);
+}
+
+/* ============================================================================
+ * Bảng
+ * ========================================================================== */
+
+.tm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tm-table th {
+  height: var(--tm-h-thead);
+  padding: 0 var(--tm-pad-cell);
+  background: var(--tm-bg-cell);
+  border-bottom: 1px solid var(--tm-line-panel);
+  font-family: var(--tm-font-sans);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--tm-text-dim);
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.tm-table th:first-child,
+.tm-table td:first-child {
+  padding-left: var(--tm-pad-cell-edge);
+}
+.tm-table th:last-child,
+.tm-table td:last-child {
+  padding-right: var(--tm-pad-cell-edge);
+}
+
+.tm-table td {
+  height: var(--tm-h-row);
+  padding: 0 var(--tm-pad-cell);
+  border-bottom: 1px solid var(--tm-line-row);
+  color: var(--tm-text-base);
+}
+
+.tm-table--sm th {
+  height: var(--tm-h-thead-sm);
+}
+.tm-table--sm td {
+  height: var(--tm-h-row-sm);
+}
+
+/* Cột số — mono, tabular, căn phải */
+.tm-table th.tm-t-num,
+.tm-table td.tm-t-num {
+  text-align: right;
+  font-family: var(--tm-font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Chỉ sparkline mới được căn giữa (QA §2) */
+.tm-table th.tm-t-spark,
+.tm-table td.tm-t-spark {
+  text-align: center;
+}
+
+.tm-table td.tm-t-sym {
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--tm-text-hi);
+  white-space: nowrap;
+}
+
+/* Tiêu đề sắp xếp được */
+.tm-th-sort {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tm-th-sort:hover {
+  color: var(--tm-text-strong);
+}
+.tm-th-sort__ind {
+  font-family: var(--tm-font-mono);
+  font-size: 8px;
+  color: var(--tm-accent);
+  width: 7px;
+  display: inline-block;
+}
+.tm-table th.tm-t-num .tm-th-sort {
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* Hàng chọn được */
+.tm-row-pick {
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.tm-row-pick:hover {
+  background: #131b22;
+}
+.tm-row-pick[data-selected="true"] {
+  background: var(--tm-bg-sel);
+  border-left-color: var(--tm-accent);
+}
+
+/* ============================================================================
+ * Nút
+ * ========================================================================== */
+
+.tm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--tm-h-btn);
+  padding: 0 11px;
+  background: var(--tm-bg-btn);
+  border: 1px solid var(--tm-line-input);
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-text-base);
+  font-family: var(--tm-font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tm-btn:hover:not(:disabled) {
+  background: var(--tm-bg-btn-hover);
+  border-color: #3b4652;
+  color: #fff;
+}
+.tm-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Nút chính — nền màu đặc theo ngữ cảnh (mặc định amber) */
+.tm-btn--primary {
+  background: var(--tm-btn-tone, var(--tm-accent));
+  border-color: transparent;
+  color: var(--tm-bg-base);
+  font-weight: 700;
+}
+.tm-btn--primary:hover:not(:disabled) {
+  background: var(--tm-btn-tone, var(--tm-accent));
+  border-color: transparent;
+  color: var(--tm-bg-base);
+  filter: brightness(1.12);
+}
+
+/* Hành động phá vỡ — viền đỏ, không phải nút mặc định (bàn giao §5) */
+.tm-btn--danger {
+  background: transparent;
+  border-color: var(--tm-down);
+  color: var(--tm-down);
+}
+.tm-btn--danger:hover:not(:disabled) {
+  background: #24141a;
+  border-color: var(--tm-down);
+  color: var(--tm-down);
+}
+
+.tm-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--tm-text-quiet);
+}
+.tm-btn--ghost:hover:not(:disabled) {
+  background: var(--tm-bg-btn);
+  border-color: transparent;
+  color: #fff;
+}
+
+.tm-btn--sm {
+  height: 22px;
+  padding: 0 9px;
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+/* Nhóm nút liền khe 1px */
+.tm-btn-group {
+  display: flex;
+  gap: 1px;
+}
+.tm-btn-group > .tm-btn {
+  border-radius: 0;
+  /* Nút mặc định là `white-space: nowrap`, và flex item mặc định
+     `min-width: auto` nên KHÔNG co được dưới bề rộng chữ. Trong cột 296px của
+     F1, ba nút cộng lại tràn ra ngoài viền panel. `min-width: 0` trả quyền co
+     lại cho flexbox; đệm 10px khớp đúng bản thiết kế (nguồn dòng 140–142). */
+  min-width: 0;
+  padding: 0 10px;
+  overflow: hidden;
+}
+/* Nút chính giãn lấp phần còn lại — hai nút phụ giữ nguyên bề rộng chữ. */
+.tm-btn-group > .tm-btn--primary {
+  flex: 1;
+  padding: 0 4px;
+}
+.tm-btn-group > .tm-btn:first-child {
+  border-radius: var(--tm-radius-ctl) 0 0 var(--tm-radius-ctl);
+}
+.tm-btn-group > .tm-btn:last-child {
+  border-radius: 0 var(--tm-radius-ctl) var(--tm-radius-ctl) 0;
+}
+/* Nhóm một nút: `:first-child` và `:last-child` cùng khớp, luật sau đè luật
+   trước nên hai góc trái thành vuông. Bo cả bốn góc như một nút đứng riêng. */
+.tm-btn-group > .tm-btn:only-child {
+  border-radius: var(--tm-radius-ctl);
+}
+
+/* ============================================================================
+ * Input
+ * ========================================================================== */
+
+.tm-input {
+  height: var(--tm-h-btn);
+  padding: 0 8px;
+  width: 100%;
+  background: var(--tm-bg-btn);
+  border: 1px solid var(--tm-line-input);
+  border-radius: var(--tm-radius-ctl);
+  color: var(--tm-text-hi);
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.tm-input::placeholder {
+  color: var(--tm-text-faint);
+}
+
+/* Hàng key–value cho form dạng bảng (F5) */
+.tm-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px var(--tm-pad-cell-edge);
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.tm-field__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tm-text-base);
+}
+.tm-field__note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--tm-text-quiet);
+  margin-top: 1px;
+  text-wrap: pretty;
+}
+.tm-field__unit {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-dim);
+}
+
+/* ============================================================================
+ * Nhãn / chip
+ * ========================================================================== */
+
+.tm-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 15px;
+  padding: 0 5px;
+  border-radius: var(--tm-radius-ctl);
+  background: var(--tm-line-panel);
+  color: var(--tm-text-mute);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.tm-tag--solid {
+  background: var(--tm-tag-tone, var(--tm-accent));
+  color: var(--tm-bg-base);
+}
+
+/* Nhãn nguồn dữ liệu: real / derived / static / gap (QA §5) */
+.tm-src {
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tm-text-faint);
+}
+.tm-src[data-src="derived"] {
+  color: var(--tm-ceil);
+}
+/* `gap` = KHÔNG CÓ DỮ LIỆU, không phải lỗi. Tô đỏ khiến nó đọc như một sự cố
+   hoặc như NO_TRADE; giữ màu mờ trung tính của `.tm-src` — bản thân ô đã hiện
+   "—" rồi. (Bản thiết kế chỉ dùng nhãn `derived`; `gap` là phần mở rộng của
+   bản triển khai, nên màu đỏ là lựa chọn của tôi chứ không phải của thiết kế.) */
+.tm-src[data-src="gap"] {
+  color: var(--tm-text-faint);
+}
+
+/* Thanh tiến trình mảnh (sức khoẻ, phễu) */
+.tm-meter {
+  display: block;
+  height: 5px;
+  background: var(--tm-line-panel);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.tm-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--tm-meter-tone, var(--tm-accent));
+}
+
+/* ============================================================================
+ * Trạng thái bắt buộc: đang tải · rỗng · lỗi · dữ liệu cũ (bàn giao §6)
+ * ========================================================================== */
+
+/* Skeleton giữ đúng chiều cao hàng thật để layout không nhảy. Không spinner. */
+@keyframes tm-pulse {
+  0%,
+  100% {
+    opacity: 0.34;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.tm-skel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--tm-h-row);
+  padding: 0 var(--tm-pad-cell-edge);
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.tm-skel-row--sm {
+  height: var(--tm-h-row-sm);
+}
+.tm-skel-bar {
+  height: 8px;
+  background: var(--tm-line-panel);
+  border-radius: 1px;
+  animation: tm-pulse 1.4s ease-in-out infinite;
+}
+
+.tm-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 18px var(--tm-pad-cell-edge);
+}
+.tm-state__icon {
+  font-family: var(--tm-font-mono);
+  font-size: 20px;
+  line-height: 1;
+  color: var(--tm-state-tone, var(--tm-text-dim));
+}
+.tm-state__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--tm-text-base);
+}
+.tm-state__note {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--tm-text-quiet);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+/* Lỗi luôn kèm bằng chứng trong khối mono */
+.tm-evidence {
+  width: 100%;
+  padding: 7px 8px;
+  background: #120e10;
+  border: 1px solid #2a1a1e;
+  border-radius: var(--tm-radius-ctl);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--tm-down-soft);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Banner dữ liệu cũ */
+.tm-stale {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px var(--tm-pad-cell-edge);
+  background: #221a10;
+  border-bottom: 1px solid #3a2c14;
+  font-size: 11px;
+  line-height: 1.45;
+  color: #f4d9a6;
+}
+.tm-stale__tag {
+  flex: none;
+  font-family: var(--tm-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--tm-accent);
+}
+
+/* ============================================================================
+ * Lớp phủ / modal
+ * ========================================================================== */
+
+.tm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  background: var(--tm-bg-scrim);
+}
+.tm-overlay--center {
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.tm-overlay--right {
+  justify-content: flex-end;
+}
+
+.tm-modal {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
+  background: var(--tm-bg-panel);
+  border: 1px solid var(--tm-line-input);
+  border-radius: var(--tm-radius-panel);
+}
+.tm-modal__head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--tm-bg-head);
+  border-bottom: 1px solid var(--tm-line-panel);
+}
+.tm-modal__body {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+.tm-modal__foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  background: var(--tm-bg-head);
+  border-top: 1px solid var(--tm-line-panel);
+}
+
+/* Drawer phải (bằng chứng phán quyết) */
+.tm-drawer {
+  width: 440px;
+  max-width: 100%;
+  height: 100%;
+  border-radius: 0;
+  border-right: none;
+  border-top: none;
+  border-bottom: none;
+}

@@ -20,10 +20,10 @@ test.describe("Accessibility audit (axe-core) — public routes", () => {
     page,
   }) => {
     await page.goto("/login");
-    await page.getByLabel("Email").focus();
-    await expect(page.getByLabel("Email")).toBeFocused();
+    await page.getByLabel("TÀI KHOẢN").focus();
+    await expect(page.getByLabel("TÀI KHOẢN")).toBeFocused();
     await page.keyboard.press("Tab");
-    await expect(page.getByLabel("Password")).toBeFocused();
+    await expect(page.getByLabel("MẬT KHẨU")).toBeFocused();
     await page.keyboard.press("Tab");
     await expect(page.getByTestId("login-submit")).toBeFocused();
   });

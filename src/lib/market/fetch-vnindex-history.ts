@@ -38,8 +38,14 @@ export async function fetchVnindexHistory(
 
 export type VnindexHistoryResult = {
   points: VnindexHistoryPoint[];
-  /** Set when the underlying query threw — distinct from a genuinely empty result. */
-  error: boolean;
+  /**
+   * Nguyên văn lỗi khi truy vấn ném — khác hẳn một kết quả rỗng thật.
+   *
+   * Trước đây đây là `boolean`: UI biết "có lỗi" nhưng không biết lỗi gì, nên chỉ
+   * in được tên truy vấn viết cứng. Bàn giao §6 đòi bằng chứng THẬT, và một cờ
+   * `true` thì không mang bằng chứng nào qua được ranh giới hàm.
+   */
+  error: string | null;
 };
 
 /** Cached wrapper using the shared prisma singleton — surfaces query failures instead of swallowing them. */
@@ -51,9 +57,16 @@ export async function fetchVnindexHistoryCached(
   cacheTag("daily-scan");
   const { prisma } = await import("@/lib/prisma");
   try {
-    return { points: await queryVnindexHistory(prisma, sessions), error: false };
+    return { points: await queryVnindexHistory(prisma, sessions), error: null };
   } catch (e) {
     console.error("[fetch-vnindex-history] failed:", e);
-    return { points: [], error: true };
+    return {
+      points: [],
+      error:
+        "fetchVnindexHistoryCached(" +
+        String(sessions) +
+        ") thất bại (prisma.indexDailyBar.findMany symbol=VNINDEX): " +
+        String(e),
+    };
   }
 }

@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
-import { V3PageShell, V3Panel } from "@/components/trading-os-v3/layout";
+import { TerminalRouteError } from "@/components/terminal/route-error";
 
 export default function SetupsError({
   error,
@@ -16,30 +15,12 @@ export default function SetupsError({
   }, [error]);
 
   return (
-    <V3PageShell pageClassName="tosv3-setups-page">
-      <V3Panel className="tosv3-route-error" glass={false}>
-        <div className="ui-state-panel" role="alert">
-          <p className="ui-state-panel__eyebrow">Thiết lập không khả dụng</p>
-          <h1 className="ui-state-panel__title">Không tải được Thiết lập</h1>
-          <p className="ui-state-panel__body">
-            Dữ liệu bộ quét và ứng viên không đổi — thử lại hoặc quay về bảng điều khiển.
-          </p>
-          {error.digest ? (
-            <p className="ui-state-panel__evidence">{error.digest}</p>
-          ) : null}
-          <div className="ui-state-actions mt-4 flex flex-wrap gap-3">
-            <button type="button" className="tosv3-btn tosv3-btn--primary" onClick={() => reset()}>
-              Thử lại
-            </button>
-            <Link href="/setups" className="tosv3-btn tosv3-btn--secondary">
-              Tải lại Thiết lập
-            </Link>
-            <Link href="/dashboard" className="tosv3-btn tosv3-btn--ghost">
-              Bảng điều khiển
-            </Link>
-          </div>
-        </div>
-      </V3Panel>
-    </V3PageShell>
+    <TerminalRouteError
+      error={error}
+      reset={reset}
+      title="Không dựng được màn F2 Thiết lập"
+      note="Dữ liệu bộ quét và ứng viên không đổi. Thử tải lại; nếu vẫn lỗi, dùng mã bằng chứng bên dưới để tra log."
+      boundary="src/app/(dashboard)/setups/error.tsx"
+    />
   );
 }

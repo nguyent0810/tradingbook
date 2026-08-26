@@ -32,6 +32,7 @@ describe("buildDashboardCockpitInput", () => {
         latestBar: { date: new Date(Date.UTC(2026, 4, 25)), close: 100 },
         storedBarsCount: 60,
         evaluatedBarsCount: 60,
+        loadError: null,
         checkedAt: new Date(),
       },
       freshness: buildMarketFreshnessDto({
@@ -39,6 +40,7 @@ describe("buildDashboardCockpitInput", () => {
           benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
           latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
           latestScanRunAt: new Date(Date.UTC(2026, 4, 25)),
+          error: null,
         },
       }),
       candidatesWithHealth: [],
@@ -101,6 +103,7 @@ describe("buildDashboardCockpitInput", () => {
         latestBar: null,
         storedBarsCount: 0,
         evaluatedBarsCount: 0,
+        loadError: null,
         checkedAt: new Date(),
       },
       freshness: buildMarketFreshnessDto({
@@ -108,6 +111,7 @@ describe("buildDashboardCockpitInput", () => {
           benchmarkSessionDate: null,
           latestEquityBarSessionDate: null,
           latestScanRunAt: null,
+          error: null,
         },
       }),
       candidatesWithHealth: [],

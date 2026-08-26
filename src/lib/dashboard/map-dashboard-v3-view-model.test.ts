@@ -40,6 +40,7 @@ const alignedFreshness = buildMarketFreshnessDto({
     benchmarkSessionDate: new Date(Date.UTC(2026, 4, 25)),
     latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 25)),
     latestScanRunAt: new Date(Date.UTC(2026, 4, 25, 6, 45, 0)),
+    error: null,
   },
 });
 
@@ -104,6 +105,7 @@ function mapFromInput(
       ...input.liveRegime,
       storedBarsCount: 60,
       evaluatedBarsCount: 60,
+      loadError: null,
       checkedAt: input.now ?? new Date(),
       reasons: [],
       trend: "bullish",

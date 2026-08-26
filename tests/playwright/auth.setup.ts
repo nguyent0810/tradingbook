@@ -15,9 +15,11 @@ setup("authenticate layout user", async ({ page }) => {
   fs.mkdirSync(authDir, { recursive: true });
 
   await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign In" }).click();
+  // Nhãn của màn F6 là tiếng Việt; nút gửi mang `data-testid` ổn định nên bám vào
+  // testid thay vì chữ trên nút (chữ đổi theo trạng thái: "ĐANG ĐĂNG NHẬP…").
+  await page.getByLabel("TÀI KHOẢN").fill(email);
+  await page.getByLabel("MẬT KHẨU").fill(password);
+  await page.getByTestId("login-submit").click();
   await page.waitForURL("**/dashboard");
   await page.context().storageState({ path: authFile });
 });

@@ -121,8 +121,16 @@ export function computeOpenPhase2Metrics(params: {
 export type PositionMarksContext = {
   latestCloseBySymbol: Map<string, LatestCloseBar>;
   expectedSessionDate: Date | null;
-  benchmarkLoadFailed: boolean;
-  barsLoadFailed: boolean;
+  /**
+   * Nguyên văn lỗi của TỪNG truy vấn — `null` khi đọc được.
+   *
+   * Trước đây là hai cờ `boolean`: màn biết "có lỗi" nhưng phải tự bịa ra câu mô
+   * tả, nên mọi loại hỏng (mất kết nối, sai quyền, thiếu bảng) đều hiện giống
+   * hệt nhau. Bàn giao §6 đòi bằng chứng THẬT, mà một cờ `true` thì không mang
+   * được bằng chứng nào qua ranh giới hàm.
+   */
+  benchmarkLoadError: string | null;
+  barsLoadError: string | null;
 };
 
 /**
@@ -133,30 +141,36 @@ export async function loadOpenPositionMarks(
   openSymbolKeys: readonly string[]
 ): Promise<PositionMarksContext> {
   let expectedSessionDate: Date | null = null;
-  let benchmarkLoadFailed = false;
+  let benchmarkLoadError: string | null = null;
   try {
     expectedSessionDate = await getExpectedLatestSessionFromIndexBars(prisma);
   } catch (e) {
-    benchmarkLoadFailed = true;
+    benchmarkLoadError =
+      "getExpectedLatestSessionFromIndexBars() thất bại: " +
+      String(e) +
+      " — không đánh dấu được hàng nào đang dùng giá cũ.";
     console.error("[trades] VNINDEX expected session lookup failed:", e);
   }
 
   let latestCloseBySymbol = new Map<string, LatestCloseBar>();
-  let barsLoadFailed = false;
+  let barsLoadError: string | null = null;
   try {
     latestCloseBySymbol = await fetchLatestCloseByTradeSymbols(
       prisma,
       openSymbolKeys
     );
   } catch (e) {
-    barsLoadFailed = true;
+    barsLoadError =
+      "fetchLatestCloseByTradeSymbols() thất bại: " +
+      String(e) +
+      " — cột giá hiện tại và lãi/lỗ chưa thực hiện để trống.";
     console.error("[trades] batch latest StockDailyBar failed:", e);
   }
 
   return {
     latestCloseBySymbol,
-    expectedSessionDate: benchmarkLoadFailed ? null : expectedSessionDate,
-    benchmarkLoadFailed,
-    barsLoadFailed,
+    expectedSessionDate: benchmarkLoadError != null ? null : expectedSessionDate,
+    benchmarkLoadError,
+    barsLoadError,
   };
 }

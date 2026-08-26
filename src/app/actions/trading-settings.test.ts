@@ -78,7 +78,12 @@ describe("updateTradingSettings", () => {
       update: values,
       create: { userId: "u1", ...values },
     });
-    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
+    // Mọi màn định cỡ vị thế từ các tham số này đều phải được làm mới, nếu
+    // không màn sẽ hiện khối lượng cũ trong khi server đã dùng tham số mới.
+    for (const p of ["/dashboard", "/settings", "/setups", "/book"]) {
+      expect(revalidatePathMock, p).toHaveBeenCalledWith(p);
+    }
+    expect(revalidatePathMock).toHaveBeenCalledWith("/symbol/[symbol]", "page");
     expect(result?.success).toBe(true);
   });
 

@@ -1,0 +1,358 @@
+/* ============================================================================
+ * F2 · Thiết lập & đường ống bộ quét
+ *
+ * Dải phễu trên cùng, rồi ba cột: danh sách ứng viên (trái) · hồ sơ thiết lập
+ * (giữa) · nhật ký bộ quét (phải).
+ * ========================================================================== */
+
+.f2 {
+  display: flex;
+  flex-direction: column;
+  min-width: 1140px;
+  min-height: 0;
+  background: var(--tm-bg-base);
+}
+
+/* ── Dải phễu ────────────────────────────────────────────────────────────── */
+
+.f2__funnel {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  background: var(--tm-bg-panel);
+  border-bottom: 1px solid var(--tm-line-panel);
+}
+.f2-funnel__cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border-right: 1px solid var(--tm-line-panel);
+  min-width: 0;
+}
+.f2-funnel__rule {
+  flex: none;
+  width: 3px;
+  height: 26px;
+}
+.f2-funnel__k {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--tm-text-dim);
+  white-space: nowrap;
+}
+.f2-funnel__v {
+  font-family: var(--tm-font-mono);
+  font-size: 19px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+.f2-funnel__sub {
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  color: var(--tm-text-faint);
+}
+.f2-funnel__meta {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 12px;
+  background: var(--tm-bg-cell);
+}
+.f2-funnel__meta-v {
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  color: var(--tm-text-value);
+  white-space: nowrap;
+}
+
+/* ── Thân ba cột ─────────────────────────────────────────────────────────── */
+
+.f2__body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  gap: 1px;
+  background: var(--tm-bg-head);
+}
+.f2__list {
+  flex: none;
+  width: 236px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--tm-bg-panel);
+}
+.f2__center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 1px;
+  background: var(--tm-bg-head);
+  overflow-y: auto;
+}
+.f2__log {
+  flex: none;
+  width: 302px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--tm-bg-panel);
+}
+
+/* ── Hàng ứng viên (cột trái) ────────────────────────────────────────────── */
+
+.f2-cand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 9px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--tm-line-row);
+  border-left: 2px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+.f2-cand:hover {
+  background: #131b22;
+}
+.f2-cand[aria-pressed="true"] {
+  background: var(--tm-bg-sel);
+  border-left-color: var(--tm-accent);
+}
+.f2-cand__body {
+  flex: 1;
+  min-width: 0;
+}
+.f2-cand__head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.f2-cand__sym {
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--tm-text-hi);
+}
+.f2-cand__hint {
+  font-size: 10px;
+  color: var(--tm-text-quiet);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.f2-cand__rank {
+  flex: none;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tm-text-mute);
+}
+
+/* Khối phụ trong cột trái (suýt đạt · RS dẫn dắt) */
+.f2-sublist {
+  padding: 8px 9px;
+  border-bottom: 1px solid var(--tm-line-row);
+  background: var(--tm-bg-chrome-sunken);
+}
+.f2-sublist__k {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--tm-text-dim);
+  margin-bottom: 5px;
+}
+.f2-sublist__row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  height: 20px;
+  font-family: var(--tm-font-mono);
+}
+.f2-sublist__sym {
+  flex: none;
+  width: 36px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--tm-text-soft);
+}
+.f2-sublist__status {
+  flex: 1;
+  min-width: 0;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.f2-sublist__rs {
+  flex: none;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.f2-sublist__note {
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--tm-text-quiet);
+  text-wrap: pretty;
+}
+
+/* ── Hồ sơ thiết lập (cột giữa) ──────────────────────────────────────────── */
+
+.f2-profile {
+  display: flex;
+  gap: 1px;
+  background: var(--tm-line-panel);
+}
+.f2-profile__main {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 13px;
+  background: var(--tm-bg-panel);
+}
+.f2-profile__side {
+  flex: none;
+  width: 284px;
+  padding: 12px 13px;
+  background: var(--tm-bg-panel);
+}
+.f2-profile__lead {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 11px;
+}
+.f2-profile__sym {
+  font-family: var(--tm-font-mono);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--tm-text-hi);
+}
+.f2-profile__px {
+  font-family: var(--tm-font-mono);
+  font-size: 19px;
+  font-variant-numeric: tabular-nums;
+  color: var(--tm-text-value);
+}
+.f2-profile__tier {
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: var(--tm-radius-ctl);
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.f2-sizing__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f2-sizing__k {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--tm-text-quiet);
+}
+.f2-sizing__v {
+  font-family: var(--tm-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Tiêu chí Cổng 2 ─────────────────────────────────────────────────────── */
+
+.f2-gate2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 20px;
+  padding: 9px 12px 11px;
+}
+.f2-gate2__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 23px;
+  border-bottom: 1px solid var(--tm-line-row);
+}
+.f2-gate2__mark {
+  flex: none;
+  width: 14px;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.f2-gate2__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--tm-text-mute);
+  padding: 3px 0;
+  text-wrap: pretty;
+}
+.f2-gate2__value {
+  flex: none;
+  font-family: var(--tm-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Nhật ký bộ quét (cột phải) ──────────────────────────────────────────── */
+
+.f2-log {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 7px 9px;
+  font-family: var(--tm-font-mono);
+  font-size: 11px;
+  line-height: 1.75;
+}
+.f2-log__row {
+  display: flex;
+  gap: 8px;
+}
+.f2-log__t {
+  flex: none;
+  color: #4a5761;
+  font-variant-numeric: tabular-nums;
+}
+.f2-log__m {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.f2-log__m[data-tone="info"] {
+  color: var(--tm-text-mute);
+}
+.f2-log__m[data-tone="muted"] {
+  color: var(--tm-text-faint);
+}
+.f2-log__m[data-tone="good"] {
+  color: var(--tm-up);
+}
+.f2-log__m[data-tone="warn"] {
+  color: var(--tm-accent);
+}
+.f2-log__m[data-tone="bad"] {
+  color: var(--tm-down);
+}

@@ -27,28 +27,11 @@ export default defineConfig({
       },
     },
     {
-      name: "chromium-dashboard-smoke",
-      testMatch: /dashboard-command-deck\.spec\.ts$/,
-      dependencies: ["setup"],
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1280, height: 900 },
-        storageState: authState,
-      },
-    },
-    {
-      name: "chromium-setups-smoke",
-      testMatch: /setups-workstation\.spec\.ts$/,
-      dependencies: ["setup"],
-      use: {
-        ...devices["Desktop Chrome"],
-        viewport: { width: 1280, height: 900 },
-        storageState: authState,
-      },
-    },
-    {
-      name: "chromium-paper-lab-arena",
-      testMatch: /paper-lab-arena\.spec\.ts$/,
+      // Gộp ba project cũ (dashboard-command-deck · setups-workstation ·
+      // paper-lab-arena) — cả ba spec đó kiểm chứng giao diện đã bị thay hoàn
+      // toàn ở bản redesign Terminal v4 và đã bị xoá ở Gate 8.
+      name: "chromium-terminal-screens",
+      testMatch: /terminal-screens\.spec\.ts$/,
       dependencies: ["setup"],
       use: {
         ...devices["Desktop Chrome"],

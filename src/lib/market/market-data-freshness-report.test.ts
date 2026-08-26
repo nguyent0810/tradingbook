@@ -30,6 +30,7 @@ describe("analyzeMarketDataAlignment", () => {
       benchmarkSessionDate: new Date(Date.UTC(2026, 4, 6)),
       latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 10)),
       latestScanRunAt: new Date(Date.UTC(2026, 4, 6, 8, 0, 0)),
+      error: null,
     });
     expect(a.showBanner).toBe(true);
     expect(a.issues).toContain("benchmark_behind_equity");
@@ -42,6 +43,7 @@ describe("buildMarketDataFreshnessReport", () => {
       benchmarkSessionDate: new Date(Date.UTC(2026, 4, 6)),
       latestEquityBarSessionDate: new Date(Date.UTC(2026, 4, 11)),
       latestScanRunAt: new Date(Date.UTC(2026, 4, 11, 12, 0, 0)),
+      error: null,
     };
     const alignment = analyzeMarketDataAlignment(snapshot);
     const { lines, recommendedActions } = buildMarketDataFreshnessReport(snapshot, alignment);

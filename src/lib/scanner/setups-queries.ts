@@ -1,11 +1,7 @@
 import type { Gate1ScanLevel, Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import {
-  isSmokeDailyScanRunNotes,
-  isSmokeSetupCandidateRow,
-} from "@/lib/scanner/production-smoke-markers";
-
-const LATEST_SCAN_LOOKBACK = 30;
+import { isSmokeSetupCandidateRow } from "@/lib/scanner/production-smoke-markers";
+import { findLatestNonSmokeScanRunId } from "@/lib/scanner/latest-scan-run";
 
 const scanRunInclude = {
   candidates: {
@@ -19,19 +15,14 @@ export type LatestScanWithCandidates = Prisma.DailyScanRunGetPayload<{
 }>;
 
 async function fetchLatestDailyScanRun(): Promise<LatestScanWithCandidates | null> {
-  // Cheap metadata-only scan (no candidates join) to find the latest non-smoke run id,
-  // then one targeted fetch with the full candidates include for just that run —
-  // avoids joining candidates for up to LATEST_SCAN_LOOKBACK - 1 runs that get discarded.
-  const recentRuns = await prisma.dailyScanRun.findMany({
-    orderBy: { runAt: "desc" },
-    take: LATEST_SCAN_LOOKBACK,
-    select: { id: true, notes: true },
-  });
-  const latest = recentRuns.find((r) => !isSmokeDailyScanRunNotes(r.notes));
-  if (!latest) return null;
+  // Tìm id lần quét thật bằng truy vấn metadata (không join ứng viên), rồi mới
+  // nạp đầy đủ đúng lần quét đó — tránh join ứng viên cho hàng chục lần quét sẽ
+  // bị loại. Bộ lọc smoke dùng chung với mọi nơi khác, xem `latest-scan-run.ts`.
+  const latestId = await findLatestNonSmokeScanRunId(prisma);
+  if (!latestId) return null;
 
   return prisma.dailyScanRun.findUnique({
-    where: { id: latest.id },
+    where: { id: latestId },
     include: scanRunInclude,
   });
 }

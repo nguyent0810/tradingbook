@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  POSITION_SIZING_DEFAULTS,
   computePositionSizing,
   kVndToPerShareVnd,
   qualityRiskMultiplier,
@@ -131,5 +132,17 @@ describe("computePositionSizing", () => {
     expect(r.ok).toBe(false);
     if (r.ok) return;
     expect(r.code).toBe("ENTRY_NOT_ABOVE_STOP");
+  });
+});
+
+describe("mặc định định cỡ dùng chung", () => {
+  it("màn hình và server phải đọc CÙNG một bộ hằng", () => {
+    // Chốt giá trị để một lần sửa nhầm không lặng lẽ làm hai phía tính khác nhau.
+    expect(POSITION_SIZING_DEFAULTS).toEqual({
+      maxPortfolioExposurePct: 0.7,
+      maxPerTradeExposurePct: 0.2,
+      baseRiskPerTradePct: 0.01,
+      liquidityCapPct: 0.1,
+    });
   });
 });
