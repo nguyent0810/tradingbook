@@ -1,0 +1,92 @@
+# Prospective shadow registry: record one settled session per trading day.
+#
+# Why a separate workflow instead of a step in production-bar-import.yml:
+# PROSPECTIVE-REGISTRY-PLAN.md §6 requires that a registry failure can never fail
+# the import or the scan. A workflow_run trigger keeps the two isolated while
+# still starting the moment bars for session T have landed and before T+1 exists,
+# which is the only window the late-run guard (§7) accepts.
+#
+# Storage: the registry is append-only NDJSON with a hash chain. It lives on the
+# `prospective-registry` branch, not main, so each day's commit is timestamped
+# evidence of what was recorded before its outcome existed, and so a daily commit
+# does not redeploy production (vercel.json disables deploys for that branch).
+#
+# A failed run shows red and GitHub emails the owner. A missed session cannot be
+# recorded later: the guard refuses, and §6 forbids fabricating it.
+
+name: Prospective recorder
+
+on:
+  workflow_run:
+    workflows: ["Production bar import"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: prospective-recorder
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  record:
+    # Only after a successful import: a failed import means session T is not
+    # settled in the database, and the recorder would refuse anyway.
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REGISTRY_DIR: ${{ runner.temp }}/registry
+
+    steps:
+      - name: Checkout main (code whose classifier blobs are verified)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate required secrets
+        run: test -n "$DATABASE_URL" || (echo "Missing secret DATABASE_URL" && exit 1)
+
+      - name: Check out registry branch as a separate worktree
+        run: |
+          set -euo pipefail
+          git fetch origin prospective-registry
+          git worktree add "$REGISTRY_DIR" origin/prospective-registry
+          cd "$REGISTRY_DIR"
+          git switch -C prospective-registry
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      # Outcomes first: they only read bars strictly after each earlier decision.
+      - name: Append outcomes for earlier decisions
+        run: npx tsx scripts/replay/append-prospective-outcomes.ts --dir "$REGISTRY_DIR"
+
+      - name: Record the newest settled session
+        run: npx tsx scripts/replay/record-prospective-session.ts --out "$REGISTRY_DIR"
+
+      - name: Commit and push registry
+        run: |
+          set -euo pipefail
+          cd "$REGISTRY_DIR"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The branch's .gitignore excludes .registry.lock.
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Registry unchanged."
+            exit 0
+          fi
+          git commit -m "registry: record session (run ${{ github.run_id }}, main ${{ github.sha }})"
+          git push origin prospective-registry

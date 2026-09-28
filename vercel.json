@@ -1,4 +1,9 @@
 {
+  "git": {
+    "deploymentEnabled": {
+      "prospective-registry": false
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/daily-scan",
