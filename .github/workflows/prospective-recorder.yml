@@ -52,7 +52,10 @@ jobs:
       - name: Check out registry branch as a separate worktree
         run: |
           set -euo pipefail
-          git fetch origin prospective-registry
+          # Explicit refspec: actions/checkout fetches only main, so a bare
+          # `git fetch origin <branch>` is not guaranteed to create the
+          # remote-tracking ref the next line needs.
+          git fetch origin prospective-registry:refs/remotes/origin/prospective-registry
           git worktree add "$REGISTRY_DIR" origin/prospective-registry
           cd "$REGISTRY_DIR"
           git switch -C prospective-registry
@@ -73,8 +76,43 @@ jobs:
       - name: Append outcomes for earlier decisions
         run: npx tsx scripts/replay/append-prospective-outcomes.ts --dir "$REGISTRY_DIR"
 
-      - name: Record the newest settled session
-        run: npx tsx scripts/replay/record-prospective-session.ts --out "$REGISTRY_DIR"
+      # The recorder's own guard (src/lib/prospective/recorder.ts) only compares
+      # against the DATABASE: it refuses T if bars after T exist there. If the DB
+      # lags reality (a failed import, a late manual dispatch), T+1 may already
+      # have traded while the DB still ends at T, and T would be recorded late.
+      # This step closes that gap by wall clock, without touching the frozen code:
+      # S is the latest weekday whose 15:00 ICT close has passed, and the run is
+      # refused unless the next weekday's 09:00 ICT open is still in the future.
+      # The recorder is then pinned to S, so its guard also requires the DB to
+      # hold S and nothing after it. A weekday holiday makes S a day with no bars:
+      # the recorder refuses (STALE_INPUT_BARS), which fails safe.
+      - name: Resolve session by wall clock (Asia/Ho_Chi_Minh)
+        id: wallclock
+        run: |
+          set -euo pipefail
+          export TZ=Asia/Ho_Chi_Minh
+          now=$(date +%s)
+          d=$(date +%F)
+          # Walk back to the latest weekday whose 15:00 close is <= now.
+          while :; do
+            dow=$(date -d "$d" +%u)
+            close=$(date -d "$d 15:00" +%s)
+            if [ "$dow" -le 5 ] && [ "$close" -le "$now" ]; then break; fi
+            d=$(date -d "$d -1 day" +%F)
+          done
+          # Next weekday after S, at 09:00.
+          n=$(date -d "$d +1 day" +%F)
+          while [ "$(date -d "$n" +%u)" -gt 5 ]; do n=$(date -d "$n +1 day" +%F); done
+          open=$(date -d "$n 09:00" +%s)
+          if [ "$open" -le "$now" ]; then
+            echo "REFUSED: session after $d ($n) has already opened; recording $d now would be late." >&2
+            exit 3
+          fi
+          echo "session=$d" >> "$GITHUB_OUTPUT"
+          echo "Recording session $d (next open $n 09:00 ICT)"
+
+      - name: Record the settled session
+        run: npx tsx scripts/replay/record-prospective-session.ts --session "${{ steps.wallclock.outputs.session }}" --out "$REGISTRY_DIR"
 
       - name: Commit and push registry
         run: |

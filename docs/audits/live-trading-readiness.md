@@ -65,6 +65,8 @@ Repo đang tự định vị mình là **công cụ watchlist/lập kế hoạch
 
 Nếu registry không được chạy ở nơi nào ngoài repo, thì khoảng **20 phiên đủ điều kiện từ 2026-08-25 đến nay (ước tính, đã trừ nghỉ lễ 2/9) đã mất vĩnh viễn**. Đồng hồ 1,2–1,7 năm cũng chưa thực sự bắt đầu chạy.
 
+> **Cập nhật 2026-09-28.** Audit ngày 28/9 xác nhận recorder **chưa từng chạy**. Đã kiểm tra: không có file registry trên ổ `D:\Tools` hay thư mục user ổ C; không có commit dữ liệu nào trong lịch sử git; Task Scheduler của Windows và scheduled task của Claude đều không có tác vụ nào; GitHub Actions chỉ chạy `ci` và `production-bar-import`. Kể từ commit `ec357e7`, recorder được lên lịch bằng `.github/workflows/prospective-recorder.yml`: chạy sau mỗi lần "Production bar import" thành công và ghi vào nhánh `prospective-registry`. Workflow chặn thêm theo giờ thực: nó từ chối ghi nếu phiên kế tiếp đã mở cửa. Lớp chặn này cần vì guard trong code chỉ so với DB. Đồng hồ checkpoint bắt đầu tính từ quan sát đầu tiên mà workflow ghi thành công.
+
 ### 2.4 Độ tin cậy dữ liệu
 
 | Vấn đề | Trạng thái | Nguồn |
