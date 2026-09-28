@@ -60,7 +60,7 @@ Interpret:
 
 [`scripts/curate-active-symbols.ts`](../../scripts/curate-active-symbols.ts) aborts if there is **no VNINDEX row** in **`IndexDailyBar`** (“cannot align session”).
 
-With **`DATABASE_URL`** → production **and** working Python deps (`pip install -r requirements.txt`):
+With **`DATABASE_URL`** → production **and** working Python deps (`pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt`):
 
 ```bash
 npm run fetch:vnindex

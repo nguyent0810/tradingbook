@@ -6,7 +6,7 @@ Usage:
   python scripts/fetch_vnindex.py
   python scripts/fetch_vnindex.py --output data/vnindex.json
 
-Requires: pip install -r requirements.txt
+Requires: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from pathlib import Path
 try:
     from vnstock import Quote
 except ImportError:
-    print("Install dependencies: pip install -r requirements.txt", file=sys.stderr)
+    print("Install dependencies: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt", file=sys.stderr)
     raise
 
 

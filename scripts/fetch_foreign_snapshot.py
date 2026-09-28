@@ -13,7 +13,7 @@ Usage:
     --batch-size 10 \
     --sleep 3.2
 
-Requires: pip install -r requirements.txt
+Requires: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ for _stream in (sys.stdout, sys.stderr):
 try:
     from vnstock import Trading
 except ImportError:
-    print("Install dependencies: pip install -r requirements.txt", file=sys.stderr)
+    print("Install dependencies: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt", file=sys.stderr)
     raise
 
 ROOT = Path(__file__).resolve().parents[1]

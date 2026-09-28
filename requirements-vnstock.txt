@@ -1,0 +1,28 @@
+# vnstock and vnai, from the vendor's index ONLY. Install BEFORE requirements.txt:
+#
+#   pip install --no-deps --require-hashes -r requirements-vnstock.txt
+#   pip install -r requirements.txt
+#   pip check
+#
+# Why a separate file: both packages left PyPI in September 2026. Adding the
+# vendor index as an EXTRA index would let pip take a same-named package squatted
+# onto PyPI, in a job that holds the production DATABASE_URL. --index-url (not
+# --extra-index-url) means pip never looks at PyPI for these two, and the hashes
+# reject any file other than the exact wheel that was verified. --no-deps keeps
+# every transitive dependency on PyPI via requirements.txt.
+#
+# 4.0.4 -> 4.0.9 (4.0.4 is not on the vendor index; the oldest there is 4.0.8):
+# identical OHLCV to 4.0.4 for VNINDEX, REE, FPT, HPG, VNM, MWG and SSI over
+# 2025-01-01..2026-09-25 (3178/3178 rows); fetch_vnindex.py and
+# fetch_foreign_snapshot.py ran clean. Hashes were recomputed from the
+# downloaded wheels and match the index. License: Custom (Personal Use).
+#
+# To upgrade: take the new wheel hash from https://vnstocks.com/api/simple/<pkg>,
+# verify it with `pip hash`, and redo the diff described in requirements.txt.
+
+--index-url https://vnstocks.com/api/simple
+
+vnstock==4.0.9 \
+    --hash=sha256:b51358c58c1fd9a299379f2d49b5c29e692fbae49e75f2ebc7cbfcc1cb996e64
+vnai==2.6.2 \
+    --hash=sha256:5b2852157031322f817ac9a306d67fbf138ec824292eaeb0b75e4e884f093081

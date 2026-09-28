@@ -25,8 +25,33 @@
 # To upgrade: bump the version here in its own commit, run
 # `python scripts/fetch_vnindex.py` plus `npx tsx scripts/verify-bar-import-health.ts`,
 # and diff a known symbol against the previous basis before merging.
+#
+# vnstock and vnai are NOT in this file. In September 2026 both left PyPI and are
+# now published only on the vendor's index, so they live in
+# requirements-vnstock.txt: hash-pinned, installed from that index alone with
+# --no-deps. Install that file FIRST, then this one (vnstock_ezchart on PyPI
+# declares vnstock>=4.0.3, which PyPI can no longer satisfy):
+#
+#   pip install --no-deps --require-hashes -r requirements-vnstock.txt
+#   pip install -r requirements.txt
+#   pip check
+#
+# Because --no-deps skips their dependency resolution, their runtime deps are
+# listed below, from PyPI. These float, as they did when they arrived
+# transitively; `pip check` fails the install if one no longer satisfies them.
 
-vnstock==4.0.4
-vnai==2.4.8
 vnstock_ezchart==1.0.2
 pandas==2.3.0
+
+# runtime deps of vnstock 4.0.9 / vnai 2.6.2 (from their package metadata)
+beautifulsoup4
+cffi
+importlib-metadata
+openpyxl
+packaging
+psutil
+pydantic
+pytz
+requests
+seaborn
+tenacity

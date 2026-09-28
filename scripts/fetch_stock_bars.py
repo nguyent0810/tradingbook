@@ -13,7 +13,7 @@ Usage:
   python scripts/fetch_stock_bars.py
   python scripts/fetch_stock_bars.py --output data/stock-bars.json --calendar-days 200
 
-Requires: pip install -r requirements.txt
+Requires: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ for _stream in (sys.stdout, sys.stderr):
 try:
     from vnstock import Quote
 except ImportError:
-    print("Install dependencies: pip install -r requirements.txt", file=sys.stderr)
+    print("Install dependencies: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt", file=sys.stderr)
     raise
 
 

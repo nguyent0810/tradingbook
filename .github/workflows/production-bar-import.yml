@@ -80,7 +80,14 @@ jobs:
           python-version: "3.12"
 
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+          set -euo pipefail
+          # vnstock/vnai first: vendor index only, hash-pinned (see
+          # requirements-vnstock.txt). They must be present before requirements.txt,
+          # because vnstock_ezchart on PyPI declares vnstock>=4.0.3.
+          pip install --no-deps --require-hashes -r requirements-vnstock.txt
+          pip install -r requirements.txt
+          pip check
 
       - name: Set up Node
         uses: actions/setup-node@v4

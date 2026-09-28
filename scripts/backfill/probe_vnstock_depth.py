@@ -33,7 +33,7 @@ for _s in (sys.stdout, sys.stderr):
 try:
     from vnstock import Quote
 except ImportError:
-    print("Install dependencies: pip install -r requirements.txt", file=sys.stderr)
+    print("Install dependencies: pip install --no-deps --require-hashes -r requirements-vnstock.txt && pip install -r requirements.txt", file=sys.stderr)
     raise
 
 ROOT = Path(__file__).resolve().parents[2]
