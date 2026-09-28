@@ -38,9 +38,13 @@ jobs:
     timeout-minutes: 30
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      REGISTRY_DIR: ${{ runner.temp }}/registry
+      # REGISTRY_DIR is set in the first step: the `runner` context is not
+      # available in job-level env, so referencing it there invalidates the file.
 
     steps:
+      - name: Set registry path
+        run: echo "REGISTRY_DIR=${RUNNER_TEMP}/registry" >> "$GITHUB_ENV"
+
       - name: Checkout main (code whose classifier blobs are verified)
         uses: actions/checkout@v4
         with:
