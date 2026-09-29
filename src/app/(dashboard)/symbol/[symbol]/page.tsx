@@ -7,13 +7,14 @@ import { Panel, PanelSkeleton } from "@/components/terminal";
 import { F7Screen } from "@/components/symbol/terminal/f7-screen";
 import { buildF7ViewModel, type Bar } from "@/lib/symbol/terminal/f7-view-model";
 import { loadTerminalVerdict } from "@/lib/terminal/load-terminal-verdict";
-import { getTradingAccountEquityVnd } from "@/lib/trading-account-risk-config";
+import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
+import { readLiveGate1 } from "@/lib/terminal/gate1-live";
+import { loadScreenTradeSuggestions } from "@/app/(dashboard)/setups/setups-trade-suggestions";
 import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagnostics";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
 import { fmtSessionDate } from "@/lib/format/vn";
 import { getLatestDailyScanRun, toCandidateRows } from "@/lib/scanner/setups-queries";
 import { isSmokeSetupCandidateRow } from "@/lib/scanner/production-smoke-markers";
-import { loadSymbolAdvVnd } from "@/lib/trades/symbol-adv";
 import { scanBehindMarketNotice } from "@/lib/terminal/scan-session-staleness";
 import "@/styles/terminal-f7.css";
 
@@ -91,7 +92,7 @@ async function SymbolContent({ symbolKey }: { symbolKey: string }) {
     context,
     foreign,
     verdict,
-    equityVnd,
+    regime,
     scanHistory,
     marketSession,
   ] = await Promise.all([
@@ -125,9 +126,8 @@ async function SymbolContent({ symbolKey }: { symbolKey: string }) {
         })
         .catch(optional("prisma.foreignTradeDaily.findFirst()", null)),
       loadTerminalVerdict(),
-      getTradingAccountEquityVnd(session.userId).catch(
-        optional("getTradingAccountEquityVnd()", null)
-      ),
+      // Cùng lời gọi (đã cache) F1/F2 dùng cho Cổng 1 của gợi ý lệnh.
+      getMarketRegimeFromDb("VNINDEX"),
       // Lấy dư rồi lọc smoke trong bộ nhớ: marker nằm trong `reasons` (JSON) nên
       // không lọc được bằng `where`. Không lọc thì một hàng do lần quét kiểm thử
       // sinh ra sẽ hiện trong "LỊCH SỬ BỘ QUÉT" y như một lần đạt Cổng 2 thật.
@@ -157,13 +157,21 @@ async function SymbolContent({ symbolKey }: { symbolKey: string }) {
 
   const candidateRow = latestScan.candidate;
 
-  // ADV cho ĐỊNH CỠ phải dùng ĐÚNG hàm và ĐÚNG mốc phiên mà server action dùng
-  // khi ghi lệnh (`loadSymbolAdvVnd(prisma, symbolId, setup.barDate)`). Lấy ADV
-  // của phiên mới nhất ở đây sẽ cho một trần thanh khoản khác với trần server áp.
-  const sizingAdv = candidateRow
-    ? await loadSymbolAdvVnd(prisma, stockSymbol.id, candidateRow.barDate)
-    : ({ ok: true, value: null } as const);
-  if (!sizingAdv.ok) errors.push(sizingAdv.error);
+  // Gợi ý lệnh (#16) từ CÙNG bộ nạp với F1 và F2: ADV tại phiên của thiết lập
+  // (đúng mốc server action dùng khi ghi lệnh), cài đặt size, lệnh đang mở và
+  // phán quyết phiên. Nến được nạp tới phiên mới nhất của chính mã này — không
+  // mã nào có nến mới hơn nến của chính nó, nên bộ nến giống hệt F2 nạp.
+  // Vốn tài khoản cho phiếu ghi lệnh cũng lấy từ đây (cùng hàm, một lần đọc).
+  const suggestions = await loadScreenTradeSuggestions({
+    userId: session.userId,
+    candidates: candidateRow ? [candidateRow] : [],
+    latestSession: bars.length > 0 ? bars[bars.length - 1].date : null,
+    expectedSession: marketSession,
+    gate1Level: readLiveGate1(regime).level,
+    verdictLevel: verdict.level,
+  });
+  errors.push(...suggestions.errors);
+  const equityVnd = suggestions.sizingDefaults.equityVnd;
 
   // Còn ô "GTGD 20N" trên bảng giá là một thống kê thị trường — ở đó phiên MỚI
   // NHẤT mới đúng. Hai con số này trả lời hai câu hỏi khác nhau.
@@ -197,9 +205,6 @@ async function SymbolContent({ symbolKey }: { symbolKey: string }) {
           id: candidateRow.id,
           quality: candidateRow.quality,
           rankScore: candidateRow.rankScore,
-          pullbackZoneLow: candidateRow.pullbackZoneLow,
-          pullbackZoneHigh: candidateRow.pullbackZoneHigh,
-          stopLevel: candidateRow.stopLevel,
           healthLevel: watch?.healthLevel ?? null,
           healthScore: watch?.healthScore ?? null,
           // Số phiên nền chỉ nằm trong JSON `reasons` dạng chữ, không có cột
@@ -207,6 +212,8 @@ async function SymbolContent({ symbolKey }: { symbolKey: string }) {
           baseSessions: null,
         }
       : null,
+    suggestion: candidateRow ? (suggestions.bySetupId.get(candidateRow.id) ?? null) : null,
+    prospectiveN: suggestions.prospectiveN,
     avgValue20Vnd,
     volumeRatioMa20: context?.volRatioMa20 ?? null,
     foreignNetVnd: foreign?.netValueVnd ?? context?.foreignNetValue1d ?? null,

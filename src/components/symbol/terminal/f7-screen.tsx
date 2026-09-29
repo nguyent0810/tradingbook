@@ -48,8 +48,18 @@ function CandleChart({ model }: { model: F7ViewModel }) {
       fill="none"
       className="f7__chart"
       role="img"
-      aria-label={`${model.symbol}: nến ngày ${model.candles.length} phiên, MA20, vùng mua và cắt lỗ`}
+      aria-label={`${model.symbol}: nến ngày ${model.candles.length} phiên, MA20, vùng vào, vùng SL và mốc 1R/2R/3R tham khảo`}
     >
+      {model.stopZoneBand ? (
+        <rect
+          x="0"
+          y={model.stopZoneBand.topY * H}
+          width={W}
+          height={model.stopZoneBand.height * H}
+          fill="var(--tm-down)"
+          fillOpacity="0.08"
+        />
+      ) : null}
       {model.zoneBand ? (
         <rect
           x="0"
@@ -71,6 +81,30 @@ function CandleChart({ model }: { model: F7ViewModel }) {
           strokeDasharray="5 4"
         />
       ) : null}
+      {model.rLines.map((line) => (
+        <g key={line.r}>
+          <line
+            x1="0"
+            y1={line.y * H}
+            x2={W}
+            y2={line.y * H}
+            stroke="var(--tm-up-soft)"
+            strokeWidth="1"
+            strokeDasharray="2 4"
+            opacity="0.8"
+          />
+          <text
+            x={W - 4}
+            y={line.y * H + (line.y < 0.05 ? 10 : -3)}
+            textAnchor="end"
+            fontSize="9"
+            fill="var(--tm-up-soft)"
+            className="tm-mono"
+          >
+            {line.r}R {fmtNum(line.price, 2)}
+          </text>
+        </g>
+      ))}
 
       {model.candles.map((c, i) => {
         const tone = c.rising ? "var(--tm-up)" : "var(--tm-down)";
@@ -179,9 +213,25 @@ export function F7Screen({
           <div className="f7__chart-head">
             <span className="tm-eyebrow">NẾN NGÀY · {fmtNum(model.candles.length, 0)} PHIÊN</span>
             <span className="tm-mono" style={{ fontSize: 10, color: "var(--tm-text-dim)" }}>
-              MA20 amber · vùng mua xanh · cắt lỗ đỏ · dải dưới là khối lượng
+              MA20 amber · vùng vào xanh · vùng SL đỏ · mốc 1R/2R/3R chấm · dải dưới là khối lượng
             </span>
           </div>
+          {model.evidence ? (
+            <div className="tm-mono" style={{ fontSize: 10, color: "var(--tm-text-dim)", padding: "2px 0" }}>
+              GỢI Ý THAM KHẢO ·{" "}
+              <a
+                href={model.evidence.href}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--tm-accent)" }}
+              >
+                {model.evidence.label}
+              </a>
+              {model.suggestionUnavailable ? (
+                <span style={{ color: "var(--tm-text-faint)" }}> · {model.suggestionUnavailable}</span>
+              ) : null}
+            </div>
+          ) : null}
           <CandleChart model={model} />
         </div>
       </div>
