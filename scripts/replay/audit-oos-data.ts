@@ -11,25 +11,28 @@ import "../load-env";
 import { prisma } from "../../src/lib/prisma";
 import { describeDatabaseUrl } from "../load-env";
 
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
+
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 async function main(): Promise<void> {
   console.error(`audit-oos-data → ${describeDatabaseUrl()} (read-only)`);
 
-  const overall = await prisma.$queryRawUnsafe<any[]>(
+  const overall = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select min(date) as mn, max(date) as mx, count(*)::int as bars,
             count(distinct symbol_id)::int as syms
      from stock_daily_bars`,
   );
   console.log("STOCK BARS", overall[0]);
 
-  const idx = await prisma.$queryRawUnsafe<any[]>(
+  const idx = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select symbol, min(date) as mn, max(date) as mx, count(*)::int as bars
      from index_daily_bars group by symbol order by symbol`,
   );
   console.log("INDEX BARS", idx);
 
-  const byYear = await prisma.$queryRawUnsafe<any[]>(
+  const byYear = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select extract(year from date)::int as y, count(*)::int as bars,
             count(distinct symbol_id)::int as syms
      from stock_daily_bars group by 1 order by 1`,
@@ -37,7 +40,7 @@ async function main(): Promise<void> {
   console.log("STOCK BARS BY YEAR");
   for (const r of byYear) console.log(`  ${r.y}  bars=${r.bars}  syms=${r.syms}`);
 
-  const idxByYear = await prisma.$queryRawUnsafe<any[]>(
+  const idxByYear = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select extract(year from date)::int as y, count(*)::int as bars
      from index_daily_bars where symbol = 'VNINDEX' group by 1 order by 1`,
   );
@@ -46,7 +49,7 @@ async function main(): Promise<void> {
 
   // Distribution of first-bar dates: how many symbols have history starting before
   // the research window, i.e. is there any genuinely earlier data at all.
-  const firsts = await prisma.$queryRawUnsafe<any[]>(
+  const firsts = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select extract(year from mn)::int as y, count(*)::int as syms from (
        select symbol_id, min(date) as mn from stock_daily_bars group by symbol_id
      ) t group by 1 order by 1`,
@@ -54,7 +57,7 @@ async function main(): Promise<void> {
   console.log("SYMBOLS BY FIRST-BAR YEAR");
   for (const r of firsts) console.log(`  ${r.y}  syms=${r.syms}`);
 
-  const lasts = await prisma.$queryRawUnsafe<any[]>(
+  const lasts = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select extract(year from mx)::int as y, count(*)::int as syms from (
        select symbol_id, max(date) as mx from stock_daily_bars group by symbol_id
      ) t group by 1 order by 1`,
@@ -63,25 +66,25 @@ async function main(): Promise<void> {
   for (const r of lasts) console.log(`  ${r.y}  syms=${r.syms}`);
 
   const symTotal = await prisma.stockSymbol.count();
-  const symWithBars = await prisma.$queryRawUnsafe<any[]>(
+  const symWithBars = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select count(distinct symbol_id)::int as n from stock_daily_bars`,
   );
   console.log(`SYMBOL REGISTRY total=${symTotal} withBars=${symWithBars[0].n}`);
 
-  const exch = await prisma.$queryRawUnsafe<any[]>(
+  const exch = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select coalesce(exchange,'(null)') as exchange, count(*)::int as n,
             sum(case when active then 1 else 0 end)::int as active
      from stock_symbols group by 1 order by 2 desc`,
   );
   console.log("EXCHANGES", exch);
 
-  const sources = await prisma.$queryRawUnsafe<any[]>(
+  const sources = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select source, count(*)::int as bars, min(date) as mn, max(date) as mx
      from stock_daily_bars group by 1 order by 2 desc`,
   );
   console.log("BAR SOURCES", sources);
 
-  const idxSources = await prisma.$queryRawUnsafe<any[]>(
+  const idxSources = await prisma.$queryRawUnsafe<SqlRow[]>(
     `select symbol, source, count(*)::int as bars from index_daily_bars group by 1,2 order by 3 desc`,
   );
   console.log("INDEX SOURCES", idxSources);

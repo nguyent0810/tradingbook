@@ -14,6 +14,9 @@ import "../load-env";
 import { prisma } from "../../src/lib/prisma";
 import { describeDatabaseUrl } from "../load-env";
 
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
+
 async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 6): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
@@ -32,7 +35,7 @@ async function main(): Promise<void> {
   console.error(`audit-oos-market-scale → ${describeDatabaseUrl()} (read-only)`);
 
   const rows = await withRetry("index-volume", () =>
-    prisma.$queryRawUnsafe<any[]>(
+    prisma.$queryRawUnsafe<SqlRow[]>(
       `select extract(year from date)::int as y, count(*)::int as sessions,
               round(avg(volume))::bigint as avg_daily_shares,
               round(avg(close))::int as avg_close

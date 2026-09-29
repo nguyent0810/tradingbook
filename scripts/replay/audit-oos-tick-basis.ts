@@ -42,7 +42,8 @@ async function main(): Promise<void> {
   ).join(", ");
 
   const rows = await withRetry("tick-grid", () =>
-    prisma.$queryRawUnsafe<any[]>(
+    // Every column is `::int` (y, n and one g<grid> count per grid).
+    prisma.$queryRawUnsafe<Record<string, number>[]>(
       `select extract(year from date)::int as y, count(*)::int as n, ${cols}
        from stock_daily_bars where close > 0 group by 1 order by 1`,
     ),

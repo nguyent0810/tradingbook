@@ -2,6 +2,9 @@ import "../load-env";
 import { prisma } from "../../src/lib/prisma";
 import { describeDatabaseUrl } from "../load-env";
 
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
+
 async function withRetry<T>(l: string, fn: () => Promise<T>, tries = 6): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
@@ -9,7 +12,7 @@ async function withRetry<T>(l: string, fn: () => Promise<T>, tries = 6): Promise
   }
   throw last;
 }
-const q = <T = any>(sql: string) => withRetry(sql.slice(0, 40), () => prisma.$queryRawUnsafe<T[]>(sql));
+const q = <T = SqlRow>(sql: string) => withRetry(sql.slice(0, 40), () => prisma.$queryRawUnsafe<T[]>(sql));
 
 async function main() {
   console.log(`DB: ${describeDatabaseUrl()}`);

@@ -24,6 +24,12 @@ import {
   TRADABILITY_ROLLING_DAYS,
 } from "../../src/lib/scanner/tradability-constants";
 
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
+
+/** Per-year row; the two counts are `::int` in the query. */
+type LiquidityRow = SqlRow & { syms_any: number; syms_pass: number };
+
 async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 6): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
@@ -48,7 +54,7 @@ async function main(): Promise<void> {
 
   // close is kVND, volume is shares → traded value in VND = close * 1000 * volume.
   const rows = await withRetry("liquidity", () =>
-    prisma.$queryRawUnsafe<any[]>(
+    prisma.$queryRawUnsafe<LiquidityRow[]>(
       `with v as (
          select symbol_id, date,
                 avg(close * 1000 * volume) over (

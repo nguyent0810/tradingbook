@@ -1,11 +1,14 @@
 import "../load-env";
 import { prisma } from "../../src/lib/prisma";
+
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
 async function wr<T>(fn: () => Promise<T>, t = 8): Promise<T> {
   let e: unknown;
   for (let i = 0; i < t; i++) { try { return await fn(); } catch (x) { e = x; await new Promise(r => setTimeout(r, 1500 * (i + 1))); } }
   throw e;
 }
-const q = <T = any>(sql: string) => wr(() => prisma.$queryRawUnsafe<T[]>(sql));
+const q = <T = SqlRow>(sql: string) => wr(() => prisma.$queryRawUnsafe<T[]>(sql));
 async function main() {
   console.log("== 8 DATA INTEGRITY, RE-RUN AT GATE TIME ==");
   const dup = await q(`select count(*)::int n from (select symbol_id,date from stock_daily_bars group by 1,2 having count(*)>1) t`);

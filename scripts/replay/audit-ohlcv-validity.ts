@@ -1,11 +1,14 @@
 import "../load-env";
 import { prisma } from "../../src/lib/prisma";
+
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
 async function withRetry<T>(l: string, fn: () => Promise<T>, tries = 6): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) { try { return await fn(); } catch (e) { last = e; await new Promise(r => setTimeout(r, 1500 * (i + 1))); } }
   throw last;
 }
-const q = <T = any>(sql: string) => withRetry("q", () => prisma.$queryRawUnsafe<T[]>(sql));
+const q = <T = SqlRow>(sql: string) => withRetry("q", () => prisma.$queryRawUnsafe<T[]>(sql));
 async function main() {
   console.log("== WHICH RULE FAILS ==");
   for (const [name, cond] of [
@@ -14,7 +17,7 @@ async function main() {
     ["high<open", "high<open"], ["high<close", "high<close"],
     ["low>open", "low>open"], ["low>close", "low>close"],
   ] as const) {
-    const r = await q(`select count(*)::int n, min(date) mn, max(date) mx from stock_daily_bars where ${cond}`);
+    const r = await q<{ n: number; mn: Date | null; mx: Date | null }>(`select count(*)::int n, min(date) mn, max(date) mx from stock_daily_bars where ${cond}`);
     if (r[0].n > 0) console.log(`  ${name.padEnd(12)} ${String(r[0].n).padStart(6)}   ${String(r[0].mn).slice(0,10)} .. ${String(r[0].mx).slice(0,10)}`);
     else console.log(`  ${name.padEnd(12)} ${String(0).padStart(6)}`);
   }
@@ -27,7 +30,7 @@ async function main() {
     join stock_symbols s on s.id=b.symbol_id
     where not (b.high>=b.open and b.high>=b.close and b.low<=b.open and b.low<=b.close)
     order by b.date desc limit 8`);
-  console.table(s.map((r:any)=>({symbol:r.symbol,date:String(r.date).slice(0,10),o:r.open,h:r.high,l:r.low,c:r.close,v:r.volume})));
+  console.table(s.map((r: SqlRow)=>({symbol:r.symbol,date:String(r.date).slice(0,10),o:r.open,h:r.high,l:r.low,c:r.close,v:r.volume})));
   console.log("\n== magnitude: how far outside the range? ==");
   const mag = await q(`select
       round(max(greatest(open-high, close-high, low-open, low-close))::numeric, 6) worst_abs,

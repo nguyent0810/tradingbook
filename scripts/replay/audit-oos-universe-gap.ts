@@ -14,6 +14,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { prisma } from "../../src/lib/prisma";
 import { describeDatabaseUrl } from "../load-env";
 
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
+
 function arg(name: string): string | undefined {
   const hit = process.argv.find((a) => a.startsWith(`--${name}=`));
   if (hit) return hit.slice(name.length + 3);
@@ -50,7 +53,7 @@ async function main(): Promise<void> {
   });
 
   const withBars = await withRetry("withBars", () =>
-    prisma.$queryRawUnsafe<any[]>(
+    prisma.$queryRawUnsafe<SqlRow[]>(
       `select s.symbol, min(b.date) as mn, max(b.date) as mx, count(*)::int as bars
        from stock_symbols s join stock_daily_bars b on b.symbol_id = s.id
        group by s.symbol order by s.symbol`,

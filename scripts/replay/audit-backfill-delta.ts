@@ -1,11 +1,14 @@
 import "../load-env";
 import { prisma } from "../../src/lib/prisma";
+
+/** A raw SQL row; fields are read and coerced where used. */
+type SqlRow = Record<string, unknown>;
 async function withRetry<T>(l: string, fn: () => Promise<T>, tries = 8): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) { try { return await fn(); } catch (e) { last = e; await new Promise(r => setTimeout(r, 1500 * (i + 1))); } }
   throw last;
 }
-const q = <T = any>(sql: string) => withRetry("q", () => prisma.$queryRawUnsafe<T[]>(sql));
+const q = <T = SqlRow>(sql: string) => withRetry("q", () => prisma.$queryRawUnsafe<T[]>(sql));
 async function main() {
   console.log("== BARS BY SESSION SINCE 2026-08-12 (prior max was 2026-08-13) ==");
   console.table(await q(`select date, count(*)::int bars, count(distinct symbol_id)::int syms,
@@ -21,7 +24,7 @@ async function main() {
   console.log("\n== VNINDEX new sessions ==");
   console.table((await q(`select date, open, high, low, close, volume from index_daily_bars
     where symbol='VNINDEX' and date >= '2026-08-12' order by date`))
-    .map((r:any)=>({date:String(r.date).slice(0,10),o:r.open,h:r.high,l:r.low,c:r.close,vol:Number(r.volume)})));
+    .map((r: SqlRow)=>({date:String(r.date).slice(0,10),o:r.open,h:r.high,l:r.low,c:r.close,vol:Number(r.volume)})));
 
   console.log("\n== ACTIVE FLAG: does the replay depend on it? symbols with bars vs active ==");
   console.table(await q(`select

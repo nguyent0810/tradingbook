@@ -21,6 +21,16 @@ import { prisma } from "../../src/lib/prisma";
 import { describeDatabaseUrl } from "../load-env";
 import { isoDay } from "../../src/lib/replay/point-in-time-guard";
 
+/** One stock_symbols row with its bar span; `bars` is `::int` in the query. */
+type RegistryRow = {
+  symbol: string;
+  exchange: string | null;
+  active: boolean;
+  first_bar: Date;
+  last_bar: Date;
+  bars: number;
+};
+
 async function withRetry<T>(label: string, fn: () => Promise<T>, tries = 6): Promise<T> {
   let last: unknown;
   for (let i = 0; i < tries; i++) {
@@ -39,7 +49,7 @@ async function main(): Promise<void> {
   console.error(`snapshot-forward-oos-universe → ${describeDatabaseUrl()} (read-only)`);
 
   const rows = await withRetry("registry", () =>
-    prisma.$queryRawUnsafe<any[]>(
+    prisma.$queryRawUnsafe<RegistryRow[]>(
       `select s.symbol, s.exchange, s.active,
               min(b.date) as first_bar, max(b.date) as last_bar, count(b.id)::int as bars
        from stock_symbols s left join stock_daily_bars b on b.symbol_id = s.id
