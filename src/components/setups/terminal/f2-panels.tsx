@@ -293,6 +293,12 @@ export function SetupProfile({
             ))
           )}
 
+          {detail.sizingWarnings.map((warning) => (
+            <div key={warning} className="tm-note" style={{ marginTop: 7, color: "var(--tm-accent)" }}>
+              {warning}
+            </div>
+          ))}
+
           <div className="tm-btn-group" style={{ marginTop: 11 }}>
             <button
               type="button"

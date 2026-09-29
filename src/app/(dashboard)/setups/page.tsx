@@ -14,7 +14,11 @@ import { F2Skeleton } from "@/components/setups/terminal/f2-skeleton";
 import { fmtSessionDate, fmtSessionStamp } from "@/lib/format/vn";
 import { scanBehindMarketNotice } from "@/lib/terminal/scan-session-staleness";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
-import { safeLoadPositionSizingDefaults } from "./setups-position-sizing-defaults";
+import {
+  safeLoadPositionSizingDefaults,
+  suggestionSizingInput,
+  type OpenTradeRisk,
+} from "./setups-position-sizing-defaults";
 import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
 import { loadTradeSuggestions } from "./setups-trade-suggestions";
 import {
@@ -46,7 +50,7 @@ async function SetupsContent() {
     sessionDate: c.barDate,
   }));
 
-  const [{ candidatesWithHealth, healthError }, rsMap, rsWatch, sizingDefaults, regime] =
+  const [{ candidatesWithHealth, healthError }, rsMap, rsWatch, sizingDefaults, regime, openTrades] =
     await Promise.all([
       loadSurfacedCandidatesHealthCached(),
       loadRsDiagnosticsForSetupsCached([
@@ -56,16 +60,18 @@ async function SetupsContent() {
       loadRsNearMissWatchlistForSetupsCached(),
       safeLoadPositionSizingDefaults(prisma, session.userId, advTargets),
       getMarketRegimeFromDb("VNINDEX"),
+      loadOpenTrades(session.userId),
     ]);
+  const suggestionSizing = suggestionSizingInput(sizingDefaults, openTrades.value);
 
-  const [exposure, spark, suggestions] = await Promise.all([
-    loadOpenExposureVnd(session.userId),
+  const [spark, suggestions] = await Promise.all([
     loadSparkHistory(candidatesWithHealth, base.expectedSession),
     loadTradeSuggestions(candidatesWithHealth, {
       latestSession: base.latestEquityBarSession,
       expectedSession: base.expectedSession,
       gate1Level: readLiveGate1(regime).level,
       advBySymbolId: sizingDefaults.advBySymbolId,
+      sizing: suggestionSizing,
     }),
   ]);
   const closesBySymbolId = spark.data;
@@ -129,7 +135,8 @@ async function SetupsContent() {
       baseRiskPct: sizingDefaults.positionSizingConfig.riskPerTradePct,
       maxTradePct: sizingDefaults.positionSizingConfig.maxPositionPct,
       liquidityCapPct: sizingDefaults.positionSizingConfig.liquidityCapPct,
-      currentExposureVnd: exposure.value,
+      // Null when equity is unset (F2 then says so first) or open trades failed to load.
+      currentExposureVnd: suggestionSizing?.currentExposureVnd ?? null,
     },
     closest: base.notes?.closestToValidSymbols ?? [],
     rsWatchRows: rsWatch.panel.rows.map((r) => ({
@@ -168,7 +175,7 @@ async function SetupsContent() {
       base.equityMaxLoadError,
       healthError,
       sizingDefaults.error,
-      exposure.error,
+      openTrades.error,
       rsMap.error,
       rsWatch.error,
       spark.error,
@@ -216,19 +223,20 @@ async function SetupsContent() {
 }
 
 /**
- * Giá trị các vị thế đang mở. Cùng công thức mà server action dùng khi ghi lệnh,
- * nên khối lượng đề xuất trên màn khớp trần mà server sẽ áp.
+ * Các lệnh đang mở trong sổ: giá vào, stop và khối lượng. Size tham khảo lấy
+ * exposure (cùng công thức server dùng khi ghi lệnh) và Tổng rủi ro mở từ đây.
+ * `value: null` = không đọc được, KHÔNG phải "không có lệnh nào".
  */
-async function loadOpenExposureVnd(
+async function loadOpenTrades(
   userId: string
-): Promise<{ value: number | null; error: string | null }> {
+): Promise<{ value: OpenTradeRisk[] | null; error: string | null }> {
   try {
     const open = await prisma.trade.findMany({
       where: { userId, status: "OPEN" },
-      select: { entryPrice: true, quantity: true },
+      select: { entryPrice: true, stopLoss: true, quantity: true },
     });
     return {
-      value: open.reduce((sum, t) => sum + t.entryPrice * 1000 * t.quantity, 0),
+      value: open.map((t) => ({ entryKvnd: t.entryPrice, stopKvnd: t.stopLoss, quantity: t.quantity })),
       error: null,
     };
   } catch (e) {

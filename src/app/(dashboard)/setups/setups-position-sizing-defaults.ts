@@ -5,6 +5,8 @@ import {
   type PositionSizingConfigOverrides,
 } from "@/lib/trading-account-risk-config";
 import { loadSymbolAdvVndBatch } from "@/lib/trades/symbol-adv";
+import { POSITION_SIZING_DEFAULTS } from "@/lib/position-sizing";
+import type { TradeSuggestionSizingInput } from "@/lib/trades/trade-suggestion";
 
 export type PositionSizingDefaultsResult = {
   equityVnd: number | null;
@@ -18,6 +20,35 @@ export const EMPTY_POSITION_SIZING_CONFIG: PositionSizingConfigOverrides = {
   maxPositionPct: null,
   liquidityCapPct: null,
 };
+
+export type OpenTradeRisk = TradeSuggestionSizingInput["openTrades"][number];
+
+/**
+ * Sizing inputs of the trade suggestion (#15): the user's settings with the same
+ * defaults the server applies when a trade is logged, plus the open journal
+ * trades. `null` when equity is not set or the open trades could not be read:
+ * the suggestion then carries no size rather than one built on guesses.
+ */
+export function suggestionSizingInput(
+  defaults: Pick<PositionSizingDefaultsResult, "equityVnd" | "positionSizingConfig">,
+  openTrades: readonly OpenTradeRisk[] | null
+): TradeSuggestionSizingInput | null {
+  const equityVnd = defaults.equityVnd;
+  if (equityVnd == null || !Number.isFinite(equityVnd) || equityVnd <= 0 || openTrades == null) {
+    return null;
+  }
+  const config = defaults.positionSizingConfig;
+  return {
+    equityVnd,
+    riskPerTradePct: config.riskPerTradePct ?? POSITION_SIZING_DEFAULTS.baseRiskPerTradePct,
+    maxPerTradeExposurePct: config.maxPositionPct ?? POSITION_SIZING_DEFAULTS.maxPerTradeExposurePct,
+    maxPortfolioExposurePct: POSITION_SIZING_DEFAULTS.maxPortfolioExposurePct,
+    liquidityCapPct: config.liquidityCapPct ?? POSITION_SIZING_DEFAULTS.liquidityCapPct,
+    // Exposure: same formula as the server action that logs a trade.
+    currentExposureVnd: openTrades.reduce((sum, t) => sum + t.entryKvnd * 1000 * t.quantity, 0),
+    openTrades,
+  };
+}
 
 /**
  * Risk-config + ADV lookups are DB reads like every other loader on the Setups

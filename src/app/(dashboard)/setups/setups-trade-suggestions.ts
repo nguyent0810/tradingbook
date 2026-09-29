@@ -8,6 +8,7 @@ import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import {
   buildTradeSuggestion,
   type TradeSuggestionResult,
+  type TradeSuggestionSizingInput,
 } from "@/lib/trades/trade-suggestion";
 
 /**
@@ -41,6 +42,8 @@ export type TradeSuggestionMarketFacts = {
    * Reused rather than read again; a missing entry reads as "chưa đánh giá được".
    */
   advBySymbolId: ReadonlyMap<string, number | null>;
+  /** Settings and open trades for the size (#15); null = no size ("chưa tính được"). */
+  sizing: TradeSuggestionSizingInput | null;
 };
 
 export type LoadedTradeSuggestions = {
@@ -124,6 +127,7 @@ export async function loadTradeSuggestions(
           gate1Level: market.gate1Level,
           expectedSession: market.expectedSession,
           advVnd: market.advBySymbolId.get(c.symbolId) ?? null,
+          sizing: market.sizing,
         })
       );
     }

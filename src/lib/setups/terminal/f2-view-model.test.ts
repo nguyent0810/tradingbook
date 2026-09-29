@@ -9,6 +9,32 @@ import { buildF2ViewModel, type F2ViewModelInput } from "./f2-view-model";
  * zone high), so every assertion below proves F2 shows the suggestion rather
  * than computing its own.
  */
+/**
+ * Size as the builder would hand it over (#15). Hand-worked on the fixture:
+ * HOSE gap buffer 129.40 × 7% = 9.058; worst case 7.93 + 9.058 = 16.988 kVND/cp.
+ * 1.2 tỷ × 1% = 12,000,000 / 16,988 = 706.4 → 700 cp; loss 700 × 16,988 =
+ * 11,891,600 đ = 0.99% of equity. F2's old raw-price basis (136.80 − 129.40 =
+ * 7,400 đ/cp) would give 1,600 cp, so "700" proves F2 shows the suggestion's size.
+ */
+const SIZE: NonNullable<TradeSuggestion["size"]> = {
+  shares: 700,
+  bindingCap: null,
+  gapBufferKvnd: 9.058,
+  worstCasePerShareKvnd: 16.988,
+  worstCaseLossVnd: 11_891_600,
+  tradeRiskPct: 0.99097,
+  positionValueVnd: 95_760_000,
+  zeroShareReason: null,
+  openRisk: {
+    openTradesRiskVnd: 0,
+    tradesWithoutStop: 0,
+    totalVnd: 11_891_600,
+    totalPct: 0.99097,
+    limitPct: 3,
+    aboveLimit: false,
+  },
+};
+
 function suggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestion {
   return {
     asOfSession: "2026-08-25",
@@ -24,7 +50,7 @@ function suggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestion {
       { r: 2, price: 152.9, nearestResistance: 150.2, resistanceBelow: true },
       { r: 3, price: 160.8, nearestResistance: 150.2, resistanceBelow: true },
     ],
-    size: null,
+    size: SIZE,
     reasons: [],
     risks: [],
     evidence: { status: "UNVALIDATED", prospectiveN: 7, checkpointN: 100 },
@@ -308,7 +334,7 @@ describe("định cỡ vị thế theo phán quyết", () => {
   it("PROBE cắt khối lượng còn 30% và nói rõ đã bớt bao nhiêu", () => {
     const detail = buildF2ViewModel(input()).details.FPT;
     const rows = new Map(detail.sizing.map((r) => [r.key, r.value]));
-    expect(rows.has("Khối lượng chuẩn")).toBe(true);
+    expect(rows.has("Size tham khảo")).toBe(true);
     expect(rows.has("Khối lượng 30%")).toBe(true);
     expect(detail.sizingNote).toContain("PROBE");
     expect(detail.sizingNote).toContain("30%");
@@ -322,17 +348,75 @@ describe("định cỡ vị thế theo phán quyết", () => {
 
   it("TRADE giữ nguyên khối lượng chuẩn", () => {
     const detail = buildF2ViewModel(input({ verdictLevel: "TRADE" })).details.FPT;
-    const standard = detail.sizing.find((r) => r.key === "Khối lượng chuẩn")?.value;
+    const standard = detail.sizing.find((r) => r.key === "Size tham khảo")?.value;
     const applied = detail.sizing.find((r) => r.key === "Khối lượng 100%")?.value;
     expect(applied).toBe(standard);
   });
 
-  it("khối lượng chuẩn đã làm tròn xuống lô chẵn 100 cp", () => {
+  it("hiện size của gợi ý lệnh, không tự tính lại từ giá thô của ứng viên", () => {
     const detail = buildF2ViewModel(input()).details.FPT;
-    const standard = detail.sizing.find((r) => r.key === "Khối lượng chuẩn")?.value ?? "";
-    const shares = Number.parseInt(standard.replace(/\D/g, ""), 10);
-    expect(shares % 100).toBe(0);
-    expect(detail.systemShares).toBe(shares);
+    const rows = new Map(detail.sizing.map((r) => [r.key, r.value]));
+    expect(rows.get("Size tham khảo")).toBe("700 cp");
+    expect(detail.systemShares).toBe(700);
+    // 7.93 + 9.058 = 16.988 kVND = 16.988 đ/cp
+    expect(rows.get("Rủi ro / cp")).toBe("16.988 ₫ · R sau phí 7,93 + đệm gap 9,06");
+    expect(rows.get("Lỗ xấu nhất")).toBe("11,9 tr ₫");
+    expect(rows.get("Rủi ro lệnh")).toBe("0,99% vốn");
+    expect(rows.get("Ràng buộc")).toBe("Ngân sách rủi ro");
+    expect(rows.get("Tổng rủi ro mở")).toBe("11,9 tr ₫ · 0,99% vốn");
+    expect(detail.sizingWarnings).toEqual([]);
+  });
+
+  it("nêu tên trần đang chặn size", () => {
+    const detail = buildF2ViewModel(
+      input({
+        suggestionBySetupId: suggestions({
+          ok: true,
+          suggestion: suggestion({ size: { ...SIZE, bindingCap: "liquidity" } }),
+        }),
+      })
+    ).details.FPT;
+    expect(detail.sizing.find((r) => r.key === "Ràng buộc")?.value).toBe("Trần thanh khoản");
+  });
+
+  it("size 0 cp thì hiện lý do, không giấu", () => {
+    const reason = "Khối lượng tính được 67 cp, chưa tới 1 lô 100 cp: …";
+    const detail = buildF2ViewModel(
+      input({
+        suggestionBySetupId: suggestions({
+          ok: true,
+          suggestion: suggestion({ size: { ...SIZE, shares: 0, zeroShareReason: reason } }),
+        }),
+      })
+    ).details.FPT;
+    expect(detail.sizing.find((r) => r.key === "Size tham khảo")?.value).toBe("0 cp");
+    expect(detail.sizingWarnings).toEqual([reason]);
+  });
+
+  it("tổng rủi ro mở vượt 3% thì cảnh báo trong khối size, nhưng không chặn", () => {
+    const warning = "Tổng rủi ro mở 40,0 tr ₫ bằng 3,33% vốn, trên mốc 3%: …";
+    const unknown = "1 lệnh đang mở chưa có stop, vì thế rủi ro của chúng chưa biết: …";
+    const detail = buildF2ViewModel(
+      input({
+        suggestionBySetupId: suggestions({
+          ok: true,
+          suggestion: suggestion({
+            size: {
+              ...SIZE,
+              openRisk: { ...SIZE.openRisk, totalVnd: 40_000_000, totalPct: 3.333, tradesWithoutStop: 1, aboveLimit: true },
+            },
+            risks: [
+              { code: "open_risk_high", severity: "warn", text: warning },
+              { code: "open_risk_unknown", severity: "warn", text: unknown },
+            ],
+          }),
+        }),
+      })
+    ).details.FPT;
+    expect(detail.sizingWarnings).toEqual([warning, unknown]);
+    expect(detail.sizing.find((r) => r.key === "Tổng rủi ro mở")?.value).toBe("≥ 40,0 tr ₫ · 3,33% vốn");
+    expect(detail.sizingBlocked).toBeNull();
+    expect(detail.systemShares).toBe(700);
   });
 
   it("chưa có vốn tài khoản thì CHẶN tính, không rơi về giá trị mặc định", () => {
@@ -371,19 +455,28 @@ describe("định cỡ vị thế theo phán quyết", () => {
     expect(detail.sizingBlocked).toContain("vị thế đang mở");
   });
 
-  it("cắt lỗ cao hơn giá vào thì báo mã lỗi thay vì ra số vô nghĩa", () => {
+  it("gợi ý không tính được thì không có size, và nói lý do", () => {
     const detail = buildF2ViewModel(
-      input({ candidates: [candidate({ stopLevel: 200 })] })
+      input({
+        suggestionBySetupId: suggestions({
+          ok: false,
+          reason: "STOP_NOT_BELOW_ENTRY",
+          detail: "mức vô hiệu 200 không nằm dưới vùng vào 133,5–136,8",
+        }),
+      })
     ).details.FPT;
-    expect(detail.sizingBlocked).toContain("ENTRY_NOT_ABOVE_STOP");
+    expect(detail.sizing).toEqual([]);
     expect(detail.systemShares).toBeNull();
+    expect(detail.sizingWarnings).toEqual([
+      "Không đủ dữ liệu để tính size tham khảo — mức vô hiệu 200 không nằm dưới vùng vào 133,5–136,8",
+    ]);
   });
 
   it("không có phán quyết thì không thêm hàng khối lượng theo phán quyết", () => {
     const detail = buildF2ViewModel(
       input({ verdictLevel: null, verdictAllocation: null })
     ).details.FPT;
-    expect(detail.sizing.some((r) => r.key.startsWith("Khối lượng "))).toBe(true);
+    expect(detail.sizing.some((r) => r.key === "Size tham khảo")).toBe(true);
     expect(detail.sizing.some((r) => /Khối lượng \d+%/.test(r.key))).toBe(false);
     expect(detail.sizingNote).toBeNull();
   });

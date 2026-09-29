@@ -4,8 +4,7 @@ import type { Gate2ClosestSymbolRow } from "@/lib/scanner/gate2-scan-diagnostics
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
 import { computeClosestExecutionStatus } from "@/lib/scanner/closest-execution-metrics";
 import { displayNearMissDiagnosticStatus } from "@/lib/trading-display-labels";
-import { POSITION_SIZING_DEFAULTS, computePositionSizing } from "@/lib/position-sizing";
-import { roundDownToBoardLotShares } from "@/lib/paper-lab/engine/board-lot";
+import { POSITION_SIZING_DEFAULTS } from "@/lib/position-sizing";
 import { applyVerdictToShares, verdictTokens } from "@/lib/terminal/verdict-tokens";
 import { fmtSessionDate, semanticTone } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
@@ -15,7 +14,11 @@ import {
   describeSetupReasons,
   type TradeSuggestionResult,
 } from "@/lib/trades/trade-suggestion";
-import type { RiskCode, RiskSeverity } from "@/lib/trades/trade-suggestion-copy";
+import {
+  SIZE_BINDING_CAP_COPY,
+  type RiskCode,
+  type RiskSeverity,
+} from "@/lib/trades/trade-suggestion-copy";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -119,6 +122,11 @@ export type F2Detail = {
   sizingNote: string | null;
   /** `true` khi không đủ dữ liệu để tính khối lượng — không được đoán. */
   sizingBlocked: string | null;
+  /**
+   * Cảnh báo của khối size (#15): lý do size 0 cp, tổng rủi ro mở vượt mốc,
+   * lệnh mở chưa có stop, hoặc gợi ý không tính được. Chỉ cảnh báo, không chặn.
+   */
+  sizingWarnings: string[];
   /** Khối lượng hệ thống tính TRƯỚC ràng buộc phán quyết; `null` khi không tính được. */
   systemShares: number | null;
   gate2: F2Gate2Row[];
@@ -331,20 +339,27 @@ export type SizingInput = {
    * này cho ra khối lượng khác nhau nên không được gộp: đọc lỗi thì chặn định cỡ.
    */
   currentExposureVnd: number | null;
-  advVnd: number | null;
 };
 
+/** Rủi ro của gợi ý lệnh cũng thuộc về khối size: F2 nhắc lại chúng ở đó. */
+const SIZING_RISK_CODES: readonly RiskCode[] = ["open_risk_high", "open_risk_unknown"];
+
+/**
+ * Khối size của F2: hiện size tham khảo của gợi ý lệnh (#15), cùng một cơ sở
+ * rủi ro với vùng vào và vùng SL phía trên (R xấu nhất sau phí cộng đệm gap).
+ * Không tự tính lại từ giá thô của ứng viên.
+ */
 function buildSizing(
-  candidate: SurfacedCandidateHealthView,
+  suggestion: TradeSuggestionResult | undefined,
   sizingInput: SizingInput,
   verdictLevel: VerdictUxLevel | null
-): Pick<F2Detail, "sizing" | "sizingNote" | "sizingBlocked" | "systemShares"> {
+): Pick<F2Detail, "sizing" | "sizingNote" | "sizingBlocked" | "sizingWarnings" | "systemShares"> {
+  const none = { sizing: [], sizingNote: null, systemShares: null };
   const equity = finite(sizingInput.equityVnd);
   if (equity == null || equity <= 0) {
     return {
-      sizing: [],
-      sizingNote: null,
-      systemShares: null,
+      ...none,
+      sizingWarnings: [],
       sizingBlocked:
         "Chưa đặt vốn tài khoản trong Cài đặt (F5) nên không tính được khối lượng. Không suy đoán từ giá trị mặc định.",
     };
@@ -352,69 +367,57 @@ function buildSizing(
 
   if (sizingInput.currentExposureVnd == null) {
     return {
-      sizing: [],
-      sizingNote: null,
-      systemShares: null,
+      ...none,
+      sizingWarnings: [],
       sizingBlocked:
         "Không đọc được giá trị các vị thế đang mở nên không tính được khối lượng. " +
         "Coi như 0 sẽ cho ra khối lượng CAO HƠN trần mà server áp khi ghi lệnh.",
     };
   }
 
-  const baseRiskPct = sizingInput.baseRiskPct ?? SIZING_FALLBACK.baseRiskPerTradePct;
-  const result = computePositionSizing({
-    accountEquityVnd: equity,
-    maxPortfolioExposurePct: SIZING_FALLBACK.maxPortfolioExposurePct,
-    currentPortfolioExposureVnd: sizingInput.currentExposureVnd,
-    maxPerTradeExposurePct: sizingInput.maxTradePct ?? SIZING_FALLBACK.maxPerTradeExposurePct,
-    baseRiskPerTradePct: baseRiskPct,
-    quality: candidate.quality === "A" ? "A" : "B",
-    entryKVnd: candidate.pullbackZoneHigh,
-    stopKVnd: candidate.stopLevel,
-    liquidityCapPct: sizingInput.liquidityCapPct ?? SIZING_FALLBACK.liquidityCapPct,
-    symbolAvgDailyValueVnd: sizingInput.advVnd,
-  });
-
-  if (!result.ok) {
+  if (!suggestion || !suggestion.ok) {
     return {
-      sizing: [],
-      sizingNote: null,
-      systemShares: null,
-      sizingBlocked: `Không tính được khối lượng (mã lỗi ${result.code}) từ vùng mua ${num(
-        candidate.pullbackZoneHigh,
-        2
-      )} và cắt lỗ ${num(candidate.stopLevel, 2)}.`,
+      ...none,
+      sizingBlocked: null,
+      sizingWarnings: [
+        `Không đủ dữ liệu để tính size tham khảo — ${
+          suggestion ? suggestion.detail : "chưa nạp được nến giá của mã này"
+        }`,
+      ],
+    };
+  }
+  const s = suggestion.suggestion;
+  const size = s.size;
+  if (!size) {
+    return {
+      ...none,
+      sizingBlocked: null,
+      sizingWarnings: ["Chưa tính được size tham khảo cho gợi ý này."],
     };
   }
 
-  const value = result.value;
-  // Khối lượng chuẩn hiển thị đã làm tròn xuống lô chẵn 100 cp: số lẻ không đặt
-  // được lệnh, hiện nó sẽ khiến hàng "khối lượng chuẩn" và hàng theo phán quyết
-  // trông như lệch nhau vì lý do khác.
-  const standardLot = roundDownToBoardLotShares(value.qFinalShares);
-  const standardShares = standardLot.ok ? standardLot.quantity : 0;
-
+  const baseRiskPct = sizingInput.baseRiskPct ?? SIZING_FALLBACK.baseRiskPerTradePct;
   const tokens = verdictLevel ? verdictTokens(verdictLevel) : null;
-  const applied = verdictLevel ? applyVerdictToShares(standardShares, verdictLevel) : null;
-  const finalShares = applied ? applied.shares : standardShares;
-  const finalNotional = finalShares * value.entryVndPerShare;
+  const applied = verdictLevel ? applyVerdictToShares(size.shares, verdictLevel) : null;
+  const finalShares = applied ? applied.shares : size.shares;
+  const finalNotional = finalShares * s.entryZone.high * 1000;
+  const openRisk = size.openRisk;
 
   const rows: F2SizingRow[] = [
     { key: "Vốn tài khoản", value: fmtVndShort(equity), color: "var(--tm-text-value)" },
+    { key: "Rủi ro mỗi lệnh", value: pct(baseRiskPct * 100, 2), color: "var(--tm-accent)" },
     {
-      key: "Rủi ro mỗi lệnh",
-      value: `${pct(baseRiskPct * 100, 2)} · ${fmtVndShort(value.riskBudgetVnd)}`,
-      color: "var(--tm-accent)",
-    },
-    {
-      key: "Rủi ro / cổ phiếu",
-      value: fmtVndShort(value.perShareRiskVnd),
+      key: "Rủi ro / cp",
+      value: `${fmtVndShort(size.worstCasePerShareKvnd * 1000)} · R sau phí ${num(
+        s.r.perShareNet,
+        2
+      )} + đệm gap ${num(size.gapBufferKvnd, 2)}`,
       color: "var(--tm-down-soft)",
     },
     {
-      key: "Khối lượng chuẩn",
-      value: `${num(standardShares, 0)} cp`,
-      color: standardShares > 0 ? "var(--tm-text-value)" : "var(--tm-text-faint)",
+      key: "Size tham khảo",
+      value: `${num(size.shares, 0)} cp`,
+      color: size.shares > 0 ? "var(--tm-text-value)" : "var(--tm-text-faint)",
     },
   ];
 
@@ -427,6 +430,22 @@ function buildSizing(
   }
 
   rows.push(
+    {
+      key: "Ràng buộc",
+      value: size.bindingCap ? SIZE_BINDING_CAP_COPY[size.bindingCap] : "Ngân sách rủi ro",
+      color: size.bindingCap ? "var(--tm-ref)" : "var(--tm-text-value)",
+    },
+    { key: "Lỗ xấu nhất", value: fmtVndShort(size.worstCaseLossVnd), color: "var(--tm-down-soft)" },
+    { key: "Rủi ro lệnh", value: `${pct(size.tradeRiskPct, 2)} vốn`, color: "var(--tm-accent)" },
+    {
+      key: "Tổng rủi ro mở",
+      // Một lệnh mở chưa có stop: tổng chỉ là phần đã biết, con số thật từ đó trở lên.
+      value: `${openRisk.tradesWithoutStop > 0 ? "≥ " : ""}${fmtVndShort(openRisk.totalVnd)} · ${pct(
+        openRisk.totalPct,
+        2
+      )} vốn`,
+      color: openRisk.aboveLimit ? "var(--tm-accent)" : "var(--tm-text-value)",
+    },
     { key: "Giá trị vị thế", value: fmtVndShort(finalNotional), color: "var(--tm-text-value)" },
     {
       key: "% NAV",
@@ -435,24 +454,21 @@ function buildSizing(
     }
   );
 
-  if (value.liquidityCapBinding) {
-    rows.push({
-      key: "Ràng buộc",
-      value: "Trần thanh khoản",
-      color: "var(--tm-ref)",
-    });
-  }
+  const sizingWarnings = [
+    ...(size.zeroShareReason ? [size.zeroShareReason] : []),
+    ...s.risks.filter((r) => SIZING_RISK_CODES.includes(r.code)).map((r) => r.text),
+  ];
 
   const sizingNote = tokens
     ? applied && applied.removedShares > 0
-      ? `Phán quyết ${tokens.code} — khối lượng đề xuất còn ${tokens.sizeLabel} khối lượng chuẩn (giảm ${num(
+      ? `Phán quyết ${tokens.code} — khối lượng đề xuất còn ${tokens.sizeLabel} size tham khảo (giảm ${num(
           applied.removedShares,
           0
         )} cp). ${tokens.sizeReason}.`
-      : `Phán quyết ${tokens.code} — cho phép khối lượng chuẩn.`
+      : `Phán quyết ${tokens.code} — giữ nguyên size tham khảo.`
     : null;
 
-  return { sizing: rows, sizingNote, sizingBlocked: null, systemShares: standardShares };
+  return { sizing: rows, sizingNote, sizingBlocked: null, sizingWarnings, systemShares: size.shares };
 }
 
 /**
@@ -498,7 +514,7 @@ export type F2ViewModelInput = {
   suggestionBySetupId: Map<string, TradeSuggestionResult>;
   /** Số quan sát prospective hợp lệ; `null` = không đọc được registry. */
   prospectiveN: number | null;
-  sizing: Omit<SizingInput, "advVnd">;
+  sizing: SizingInput;
   closest: Gate2ClosestSymbolRow[];
   rsWatchRows: { symbol: string; rs20SpreadPct: number; topRejectionReason: string }[];
   rsWatchEmptyReason: string | null;
@@ -577,7 +593,7 @@ export function buildF2ViewModel(input: F2ViewModelInput): F2ViewModel {
       stop: suggested?.stopZone.low ?? candidate.stopLevel,
       kpis: buildKpis(candidate, suggestion, rs, advVnd),
       suggestion: buildSuggestion(suggestion, input.prospectiveN),
-      ...buildSizing(candidate, { ...input.sizing, advVnd }, input.verdictLevel),
+      ...buildSizing(suggestion, input.sizing, input.verdictLevel),
       gate2: buildGate2Rows(candidate, input.reasonLinesBySymbol[candidate.symbolKey] ?? []),
     };
   }
