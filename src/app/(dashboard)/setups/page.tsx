@@ -16,6 +16,7 @@ import { scanBehindMarketNotice } from "@/lib/terminal/scan-session-staleness";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { safeLoadPositionSizingDefaults } from "./setups-position-sizing-defaults";
 import { reasonsToStrings } from "./setups-shared-helpers";
+import { loadTradeSuggestions } from "./setups-trade-suggestions";
 import {
   loadRsDiagnosticsForSetupsCached,
   loadRsNearMissWatchlistForSetupsCached,
@@ -57,9 +58,11 @@ async function SetupsContent() {
       getMarketRegimeFromDb("VNINDEX"),
     ]);
 
-  const exposure = await loadOpenExposureVnd(session.userId);
-
-  const spark = await loadSparkHistory(candidatesWithHealth, base.expectedSession);
+  const [exposure, spark, suggestions] = await Promise.all([
+    loadOpenExposureVnd(session.userId),
+    loadSparkHistory(candidatesWithHealth, base.expectedSession),
+    loadTradeSuggestions(candidatesWithHealth),
+  ]);
   const closesBySymbolId = spark.data;
 
   const verdict = resolveTerminalVerdict({
@@ -114,6 +117,8 @@ async function SetupsContent() {
     rsBySymbol: rsMap.map,
     advBySymbolId: sizingDefaults.advBySymbolId,
     closesBySymbolId,
+    suggestionBySetupId: suggestions.bySetupId,
+    prospectiveN: suggestions.prospectiveN,
     sizing: {
       equityVnd: sizingDefaults.equityVnd,
       baseRiskPct: sizingDefaults.positionSizingConfig.riskPerTradePct,
@@ -162,6 +167,7 @@ async function SetupsContent() {
       rsMap.error,
       rsWatch.error,
       spark.error,
+      suggestions.error,
     ]
       .filter(Boolean)
       .join(String.fromCharCode(10)) || null;

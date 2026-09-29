@@ -5,6 +5,8 @@ import type {
   F2Detail,
   F2FunnelCell,
   F2NearMissRow,
+  F2Suggestion,
+  F2SuggestionRow,
 } from "@/lib/setups/terminal/f2-view-model";
 import type { ScanLogRow } from "@/lib/setups/terminal/scan-log";
 
@@ -122,7 +124,7 @@ function ProfileChart({ detail }: { detail: F2Detail }) {
       fill="none"
       style={{ display: "block", marginBottom: 9 }}
       role="img"
-      aria-label={`${detail.symbol}: giá ${fmtNum(closes.length, 0)} phiên, vùng mua và cắt lỗ`}
+      aria-label={`${detail.symbol}: giá ${fmtNum(closes.length, 0)} phiên, vùng vào và đáy vùng SL`}
     >
       <rect x="0" y={zoneTop} width={CHART_W} height={zoneHeight} fill="var(--tm-up)" fillOpacity="0.09" />
       <line
@@ -140,7 +142,63 @@ function ProfileChart({ detail }: { detail: F2Detail }) {
   );
 }
 
-/** Hồ sơ thiết lập của mã đang chọn: biểu đồ + KPI + định cỡ vị thế. */
+function SuggestionRow({ row }: { row: F2SuggestionRow }) {
+  return (
+    <div className="f2-sizing__row" style={{ height: "auto", minHeight: 24, padding: "3px 0" }}>
+      <span className="f2-sizing__k">
+        {row.key}
+        {row.note ? (
+          <span style={{ display: "block", fontSize: 9, color: "var(--tm-text-dim)" }}>{row.note}</span>
+        ) : null}
+      </span>
+      <span className="f2-sizing__v" style={{ color: row.color }}>
+        {row.value}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Gợi ý lệnh — vùng tham khảo, không phải lệnh (ADR 0003). Trạng thái kiểm
+ * chứng luôn hiện, kể cả khi không tính được.
+ */
+function SuggestionBlock({ suggestion }: { suggestion: F2Suggestion }) {
+  return (
+    <div style={{ marginTop: 11 }} aria-label="Gợi ý lệnh tham khảo">
+      <div className="tm-eyebrow--dim" style={{ marginBottom: 6, display: "flex", gap: 8 }}>
+        <span>GỢI Ý LỆNH · VÙNG THAM KHẢO</span>
+        <span className="tm-panel__spacer" />
+        <a
+          href={suggestion.evidence.href}
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "var(--tm-accent)" }}
+        >
+          {suggestion.evidence.label}
+        </a>
+      </div>
+      {suggestion.unavailable ? (
+        <div className="tm-evidence">{suggestion.unavailable}</div>
+      ) : (
+        <>
+          {suggestion.rows.map((row) => (
+            <SuggestionRow key={row.key} row={row} />
+          ))}
+          {suggestion.targets.map((row) => (
+            <SuggestionRow key={row.key} row={row} />
+          ))}
+          {suggestion.asOf ? (
+            <div className="tm-note" style={{ marginTop: 6 }}>
+              {suggestion.asOf}
+            </div>
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Hồ sơ thiết lập của mã đang chọn: biểu đồ + KPI + gợi ý lệnh + định cỡ vị thế. */
 export function SetupProfile({
   detail,
   verdictNote,
@@ -198,6 +256,8 @@ export function SetupProfile({
               </div>
             ))}
           </div>
+
+          <SuggestionBlock suggestion={detail.suggestion} />
         </div>
 
         <div className="f2-profile__side">

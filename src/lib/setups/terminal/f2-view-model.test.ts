@@ -1,6 +1,38 @@
 import { describe, expect, it } from "vitest";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health/prepare-surfaced-health-view";
+import type { TradeSuggestion, TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
 import { buildF2ViewModel, type F2ViewModelInput } from "./f2-view-model";
+
+/**
+ * A suggestion as the builder would hand it over. The numbers are deliberately
+ * NOT what the old F2 formula gives (zone high × 1.12 = 153,22; R:R from the
+ * zone high), so every assertion below proves F2 shows the suggestion rather
+ * than computing its own.
+ */
+function suggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestion {
+  return {
+    asOfSession: "2026-08-25",
+    exchange: "HOSE",
+    exchangeAssumed: false,
+    entryZone: { low: 133.5, high: 136.8 },
+    stopZone: { structural: 129.4, minFeasible: 130, low: 129.4, high: 130 },
+    r: { perShareGross: 7.4, perShareNet: 7.93 },
+    targets: [
+      { r: 1, price: 145, nearestResistance: 150.2, resistanceBelow: false },
+      { r: 2, price: 152.9, nearestResistance: 150.2, resistanceBelow: true },
+      { r: 3, price: 160.8, nearestResistance: 150.2, resistanceBelow: true },
+    ],
+    size: null,
+    reasons: [],
+    risks: [],
+    evidence: { status: "UNVALIDATED", prospectiveN: 7, checkpointN: 100 },
+    ...over,
+  };
+}
+
+function suggestions(result: TradeSuggestionResult = { ok: true, suggestion: suggestion() }) {
+  return new Map([["cand_fpt", result]]);
+}
 
 function candidate(over: Partial<SurfacedCandidateHealthView> = {}): SurfacedCandidateHealthView {
   return {
@@ -30,6 +62,8 @@ function input(over: Partial<F2ViewModelInput> = {}): F2ViewModelInput {
     rsBySymbol: new Map([["FPT", { rs20SpreadPct: 18.6 } as never]]),
     advBySymbolId: new Map([["sym_fpt", 184_000_000_000]]),
     closesBySymbolId: new Map([["sym_fpt", [130, 132, 136, 138.2]]]),
+    suggestionBySetupId: suggestions(),
+    prospectiveN: 7,
     sizing: {
       equityVnd: 1_200_000_000,
       baseRiskPct: 0.01,
@@ -108,11 +142,13 @@ describe("hồ sơ thiết lập", () => {
     expect(buildF2ViewModel(input()).details.FPT.setupId).toBe("cand_fpt");
   });
 
-  it("KPI lấy vùng mua, cắt lỗ, RS và sức khoẻ thật", () => {
+  it("KPI lấy vùng vào, vùng SL, R và mốc 2R từ gợi ý lệnh, cùng RS và sức khoẻ thật", () => {
     const kpis = buildF2ViewModel(input()).details.FPT.kpis;
     const byKey = new Map(kpis.map((k) => [k.key, k.value]));
-    expect(byKey.get("VÙNG MUA")).toBe("133,50–136,80");
-    expect(byKey.get("CẮT LỖ")).toBe("129,40");
+    expect(byKey.get("VÙNG VÀO")).toBe("133,50–136,80");
+    expect(byKey.get("VÙNG SL")).toBe("129,40–130,00");
+    expect(byKey.get("R / CP")).toBe("7,40");
+    expect(byKey.get("MỐC 2R")).toBe("152,90");
     expect(byKey.get("RS20 vs VNINDEX")).toBe("+18,6");
     expect(byKey.get("SỨC KHOẺ")).toBe("TỐT 88");
     expect(byKey.get("GTGD 20N")).toBe("184,00 tỷ ₫");
@@ -121,6 +157,101 @@ describe("hồ sơ thiết lập", () => {
   it("thiếu GTGD thì hiện — chứ không hiện 0", () => {
     const kpis = buildF2ViewModel(input({ advBySymbolId: new Map() })).details.FPT.kpis;
     expect(kpis.find((k) => k.key === "GTGD 20N")?.value).toBe("—");
+  });
+});
+
+describe("gợi ý lệnh trên F2", () => {
+  it("không còn tự tính mục tiêu ×1,12 hay R:R riêng", () => {
+    const kpis = buildF2ViewModel(input()).details.FPT.kpis;
+    expect(kpis.map((k) => k.key)).not.toContain("MỤC TIÊU 1");
+    expect(kpis.map((k) => k.key)).not.toContain("R:R");
+    // 136,80 × 1,12 = 153,216 — con số cũ không được xuất hiện ở đâu.
+    const all = JSON.stringify(buildF2ViewModel(input()).details.FPT);
+    expect(all).not.toContain("153,22");
+  });
+
+  it("hiện vùng vào, vùng SL, R gộp và sau phí, theo phiên", () => {
+    const s = buildF2ViewModel(input()).details.FPT.suggestion;
+    expect(s.unavailable).toBeNull();
+    expect(s.asOf).toBe("Theo phiên 25/08/2026 · HOSE");
+    const rows = new Map(s.rows.map((r) => [r.key, r]));
+    expect(rows.get("Vùng vào tham khảo")?.value).toBe("133,50–136,80");
+    expect(rows.get("Vùng SL")?.value).toBe("129,40–130,00");
+    expect(rows.get("Vùng SL")?.note).toBe("cấu trúc 129,40 · tối thiểu 130,00");
+    expect(rows.get("R / cổ phiếu")?.value).toBe("7,40 · sau phí 7,93");
+  });
+
+  it("ba mốc chốt kèm kháng cự gần nhất, cảnh báo khi kháng cự nằm dưới mốc", () => {
+    const targets = buildF2ViewModel(input()).details.FPT.suggestion.targets;
+    expect(targets.map((t) => [t.key, t.value])).toEqual([
+      ["Mốc 1R", "145,00"],
+      ["Mốc 2R", "152,90"],
+      ["Mốc 3R", "160,80"],
+    ]);
+    expect(targets[0].note).toBe("kháng cự gần nhất 150,20");
+    expect(targets[1].note).toBe("kháng cự gần nhất 150,20 · có kháng cự nằm dưới mốc");
+    expect(targets[1].color).not.toBe(targets[0].color);
+  });
+
+  it("không thấy kháng cự thì nói rõ, không để trống", () => {
+    const noRes = suggestion({
+      targets: [1, 2, 3].map((r) => ({
+        r: r as 1 | 2 | 3,
+        price: 140 + r,
+        nearestResistance: null,
+        resistanceBelow: false,
+      })),
+    });
+    const targets = buildF2ViewModel(input({ suggestionBySetupId: suggestions({ ok: true, suggestion: noRes }) }))
+      .details.FPT.suggestion.targets;
+    expect(targets[0].note).toBe("chưa thấy kháng cự phía trên vùng vào");
+  });
+
+  it("sàn chưa rõ thì ghi là giả định HOSE", () => {
+    const s = buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: suggestion({ exchangeAssumed: true }) }) })
+    ).details.FPT.suggestion;
+    expect(s.asOf).toBe("Theo phiên 25/08/2026 · giả định HOSE");
+  });
+
+  it("trạng thái kiểm chứng: Chưa kiểm chứng (N/100), dẫn tới ADR 0001", () => {
+    const evidence = buildF2ViewModel(input()).details.FPT.suggestion.evidence;
+    expect(evidence.label).toBe("Chưa kiểm chứng (7/100)");
+    expect(evidence.href).toContain("docs/adr/0001");
+  });
+
+  it("không đọc được registry thì hiện N không rõ, không hiện 0", () => {
+    const unknown = suggestion({ evidence: { status: "UNVALIDATED", prospectiveN: null, checkpointN: 100 } });
+    const evidence = buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: unknown }), prospectiveN: null })
+    ).details.FPT.suggestion.evidence;
+    expect(evidence.label).toBe("Chưa kiểm chứng (N không rõ/100)");
+  });
+
+  it("không tính được thì hiện 'không đủ dữ liệu' kèm lý do, không bao giờ 0 hay NaN", () => {
+    const detail = buildF2ViewModel(
+      input({
+        suggestionBySetupId: suggestions({
+          ok: false,
+          reason: "TOO_FEW_BARS",
+          detail: "mới có 40 phiên giá, cần ít nhất 65",
+        }),
+      })
+    ).details.FPT;
+    expect(detail.suggestion.unavailable).toBe("Không đủ dữ liệu — mới có 40 phiên giá, cần ít nhất 65");
+    expect(detail.suggestion.rows).toEqual([]);
+    expect(detail.suggestion.targets).toEqual([]);
+    expect(detail.suggestion.evidence.label).toBe("Chưa kiểm chứng (7/100)");
+    const byKey = new Map(detail.kpis.map((k) => [k.key, k.value]));
+    for (const key of ["VÙNG VÀO", "VÙNG SL", "R / CP", "MỐC 2R"]) {
+      expect(byKey.get(key), key).toBe("—");
+    }
+    expect(JSON.stringify(detail.kpis)).not.toMatch(/NaN|"0,00"/);
+  });
+
+  it("thiếu gợi ý cho ứng viên (nạp nến lỗi) cũng là không đủ dữ liệu", () => {
+    const s = buildF2ViewModel(input({ suggestionBySetupId: new Map() })).details.FPT.suggestion;
+    expect(s.unavailable).toBe("Không đủ dữ liệu — chưa nạp được nến giá của mã này");
   });
 });
 

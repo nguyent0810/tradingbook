@@ -10,6 +10,7 @@ import { applyVerdictToShares, verdictTokens } from "@/lib/terminal/verdict-toke
 import { semanticTone } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { sessionChangePct } from "@/lib/dashboard/candidate-spark-history";
+import type { TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -57,6 +58,27 @@ export type F2Gate2Row = {
   color: string;
 };
 
+export type F2SuggestionRow = {
+  key: string;
+  value: string;
+  note: string | null;
+  color: string;
+};
+
+/**
+ * Gợi ý lệnh của ứng viên, dựng sẵn thành chữ. Chỉ để tham khảo (ADR 0003):
+ * lời văn mô tả, không thúc giục.
+ */
+export type F2Suggestion = {
+  /** `null` khi tính được; ngược lại "Không đủ dữ liệu — <lý do>". */
+  unavailable: string | null;
+  /** "Theo phiên dd/mm/yyyy · <sàn>"; `null` khi không tính được. */
+  asOf: string | null;
+  rows: F2SuggestionRow[];
+  targets: F2SuggestionRow[];
+  evidence: { label: string; href: string };
+};
+
 export type F2Detail = {
   /** Id ứng viên Cổng 2 — phiếu ghi lệnh cần nó để gọi server action. */
   setupId: string;
@@ -67,10 +89,12 @@ export type F2Detail = {
   changePct: number | null;
   /** Giá đóng cửa theo phiên, cũ → mới, cho biểu đồ hồ sơ. */
   closes: number[];
+  /** Vùng vào và đáy vùng SL của gợi ý lệnh; vùng pullback thô khi không tính được. */
   zoneLow: number;
   zoneHigh: number;
   stop: number;
   kpis: F2Kpi[];
+  suggestion: F2Suggestion;
   sizing: F2SizingRow[];
   /** Ghi chú ràng buộc khối lượng theo phán quyết; `null` khi không có phán quyết. */
   sizingNote: string | null;
@@ -134,37 +158,109 @@ function num(value: number, digits = 0): string {
   });
 }
 
+const ADR_0001_HREF =
+  "https://github.com/nguyent0810/tradingbook/blob/main/docs/adr/0001-no-real-money-on-app-signals-before-checkpoint.md";
+
+const FAINT = "var(--tm-text-faint)";
+
+function sessionLabel(isoDay: string): string {
+  const [y, m, d] = isoDay.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function evidenceLabel(prospectiveN: number | null, checkpointN = 100): string {
+  return `Chưa kiểm chứng (${prospectiveN != null ? num(prospectiveN, 0) : "N không rõ"}/${num(
+    checkpointN,
+    0
+  )})`;
+}
+
+function buildSuggestion(
+  result: TradeSuggestionResult | undefined,
+  prospectiveN: number | null
+): F2Suggestion {
+  if (!result || !result.ok) {
+    return {
+      unavailable: `Không đủ dữ liệu — ${
+        result ? result.detail : "chưa nạp được nến giá của mã này"
+      }`,
+      asOf: null,
+      rows: [],
+      targets: [],
+      evidence: { label: evidenceLabel(prospectiveN), href: ADR_0001_HREF },
+    };
+  }
+  const s = result.suggestion;
+  return {
+    unavailable: null,
+    asOf: `Theo phiên ${sessionLabel(s.asOfSession)} · ${
+      s.exchangeAssumed ? `giả định ${s.exchange}` : s.exchange
+    }`,
+    rows: [
+      {
+        key: "Vùng vào tham khảo",
+        value: `${num(s.entryZone.low, 2)}–${num(s.entryZone.high, 2)}`,
+        note: "đã làm tròn bước giá, trong biên độ phiên kế tiếp",
+        color: "var(--tm-text-value)",
+      },
+      {
+        key: "Vùng SL",
+        value: `${num(s.stopZone.low, 2)}–${num(s.stopZone.high, 2)}`,
+        note: `cấu trúc ${num(s.stopZone.structural, 2)} · tối thiểu ${num(s.stopZone.minFeasible, 2)}`,
+        color: "var(--tm-down-soft)",
+      },
+      {
+        key: "R / cổ phiếu",
+        value: `${num(s.r.perShareGross, 2)} · sau phí ${num(s.r.perShareNet, 2)}`,
+        note: "từ đầu trên vùng vào tới đáy vùng SL",
+        color: "var(--tm-text-value)",
+      },
+    ],
+    targets: s.targets.map((t) => ({
+      key: `Mốc ${t.r}R`,
+      value: num(t.price, 2),
+      note:
+        t.nearestResistance == null
+          ? "chưa thấy kháng cự phía trên vùng vào"
+          : `kháng cự gần nhất ${num(t.nearestResistance, 2)}${
+              t.resistanceBelow ? " · có kháng cự nằm dưới mốc" : ""
+            }`,
+      color: t.resistanceBelow ? "var(--tm-accent)" : "var(--tm-up-soft)",
+    })),
+    evidence: { label: evidenceLabel(s.evidence.prospectiveN, s.evidence.checkpointN), href: ADR_0001_HREF },
+  };
+}
+
 function buildKpis(
   candidate: SurfacedCandidateHealthView,
+  suggestion: TradeSuggestionResult | undefined,
   rs: RsDiagnosticUi | null,
   advVnd: number | null
 ): F2Kpi[] {
-  const target = candidate.pullbackZoneHigh * 1.12;
-  const risk = candidate.pullbackZoneHigh - candidate.stopLevel;
-  const reward = target - candidate.pullbackZoneHigh;
-  const rr = risk > 0 ? reward / risk : null;
   const rs20 = finite(rs?.rs20SpreadPct);
-
-
-  const zoneReady =
-    Number.isFinite(candidate.pullbackZoneLow) && Number.isFinite(candidate.pullbackZoneHigh);
+  const s = suggestion?.ok ? suggestion.suggestion : null;
+  const twoR = s?.targets.find((t) => t.r === 2) ?? null;
 
   return [
     {
-      key: "VÙNG MUA",
-      value: `${num(candidate.pullbackZoneLow, 2)}–${num(candidate.pullbackZoneHigh, 2)}`,
-      color: zoneReady ? "var(--tm-up)" : "var(--tm-text-faint)",
+      key: "VÙNG VÀO",
+      value: s ? `${num(s.entryZone.low, 2)}–${num(s.entryZone.high, 2)}` : "—",
+      color: s ? "var(--tm-up)" : FAINT,
     },
     {
-      key: "CẮT LỖ",
-      value: num(candidate.stopLevel, 2),
-      color: semanticTone(candidate.stopLevel, "var(--tm-down-soft)"),
+      key: "VÙNG SL",
+      value: s ? `${num(s.stopZone.low, 2)}–${num(s.stopZone.high, 2)}` : "—",
+      color: s ? "var(--tm-down-soft)" : FAINT,
     },
-    { key: "MỤC TIÊU 1", value: num(target, 2), color: semanticTone(target, "var(--tm-up-soft)") },
     {
-      key: "R:R",
-      value: rr != null ? `1:${num(rr, 1)}` : "—",
-      color: rr != null ? "var(--tm-text-value)" : "var(--tm-text-faint)",
+      key: "MỐC 2R",
+      value: twoR ? num(twoR.price, 2) : "—",
+      color: twoR ? (twoR.resistanceBelow ? "var(--tm-accent)" : "var(--tm-up-soft)") : FAINT,
+    },
+    {
+      key: "R / CP",
+      value: s ? num(s.r.perShareGross, 2) : "—",
+      color: s ? "var(--tm-text-value)" : FAINT,
     },
     {
       key: "RS20 vs VNINDEX",
@@ -179,7 +275,7 @@ function buildKpis(
     {
       key: "GTGD 20N",
       value: advVnd != null ? fmtVndShort(advVnd) : "—",
-      color: advVnd != null ? "var(--tm-text-value)" : "var(--tm-text-faint)",
+      color: advVnd != null ? "var(--tm-text-value)" : FAINT,
     },
     {
       key: "GIÁ ĐÓNG",
@@ -364,6 +460,10 @@ export type F2ViewModelInput = {
   rsBySymbol: Map<string, RsDiagnosticUi | null>;
   advBySymbolId: Map<string, number | null>;
   closesBySymbolId: Map<string, number[]>;
+  /** Gợi ý lệnh theo id ứng viên; thiếu = không nạp được dữ liệu để tính. */
+  suggestionBySetupId: Map<string, TradeSuggestionResult>;
+  /** Số quan sát prospective hợp lệ; `null` = không đọc được registry. */
+  prospectiveN: number | null;
   sizing: Omit<SizingInput, "advVnd">;
   closest: Gate2ClosestSymbolRow[];
   rsWatchRows: { symbol: string; rs20SpreadPct: number; topRejectionReason: string }[];
@@ -427,6 +527,9 @@ export function buildF2ViewModel(input: F2ViewModelInput): F2ViewModel {
       hint: candidate.healthSummary ?? candidate.healthHint ?? "Đã đạt Cổng 2",
     });
 
+    const suggestion = input.suggestionBySetupId.get(candidate.id);
+    const suggested = suggestion?.ok ? suggestion.suggestion : null;
+
     details[candidate.symbolKey] = {
       setupId: candidate.id,
       symbol: candidate.symbolKey,
@@ -435,10 +538,11 @@ export function buildF2ViewModel(input: F2ViewModelInput): F2ViewModel {
       close: finite(candidate.close),
       changePct,
       closes,
-      zoneLow: candidate.pullbackZoneLow,
-      zoneHigh: candidate.pullbackZoneHigh,
-      stop: candidate.stopLevel,
-      kpis: buildKpis(candidate, rs, advVnd),
+      zoneLow: suggested?.entryZone.low ?? candidate.pullbackZoneLow,
+      zoneHigh: suggested?.entryZone.high ?? candidate.pullbackZoneHigh,
+      stop: suggested?.stopZone.low ?? candidate.stopLevel,
+      kpis: buildKpis(candidate, suggestion, rs, advVnd),
+      suggestion: buildSuggestion(suggestion, input.prospectiveN),
       ...buildSizing(candidate, { ...input.sizing, advVnd }, input.verdictLevel),
       gate2: buildGate2Rows(candidate, input.reasonLinesBySymbol[candidate.symbolKey] ?? []),
     };
