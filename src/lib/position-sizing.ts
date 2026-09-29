@@ -34,7 +34,10 @@ export type PositionSizingComputed = {
   stopDistancePctOfEntry: number;
   /** Planned loss at stop with qFinal shares */
   riskAtStopVnd: number;
-  /** True when the liquidity-cap constraint (vs. remaining exposure / per-trade cap) was the binding one. */
+  /**
+   * True when the liquidity-cap constraint (vs. remaining exposure / per-trade cap) was the binding one.
+   * Derived: the same fact as `bindingCap === "liquidity"`, kept for existing callers.
+   */
   liquidityCapBinding: boolean;
   /**
    * The cap that set `qFinalShares`, or null when the risk budget did. Ties go
@@ -56,6 +59,17 @@ export type PositionSizingErrorCode =
  */
 export function qualityRiskMultiplier(quality: PositionSizingQuality): number {
   return quality === "A" ? 1 : 0.5;
+}
+
+/**
+ * Exposure: the notional of open positions, VND. One formula for the server
+ * action that logs a trade and the screens that size one, so the exposure cap
+ * they apply cannot drift apart.
+ */
+export function openExposureVnd(
+  trades: readonly { entryKvnd: number; quantity: number }[]
+): number {
+  return trades.reduce((sum, t) => sum + kVndToPerShareVnd(t.entryKvnd) * t.quantity, 0);
 }
 
 /** Scanner/stored prices are k ₫ per share → VND per share. */

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { loadSymbolAdvVnd } from "@/lib/trades/symbol-adv";
 import { getSession } from "@/lib/session";
 import { loadAutoPopulatedTradeLevels } from "@/lib/trades/auto-populate-from-setup";
-import { POSITION_SIZING_DEFAULTS, computePositionSizing } from "@/lib/position-sizing";
+import { POSITION_SIZING_DEFAULTS, computePositionSizing, openExposureVnd } from "@/lib/position-sizing";
 import { applyVerdictToShares } from "@/lib/terminal/verdict-tokens";
 import { loadTerminalVerdict } from "@/lib/terminal/load-terminal-verdict";
 import { roundDownToBoardLotShares } from "@/lib/paper-lab/engine/board-lot";
@@ -63,7 +63,9 @@ async function loadPositionSizingInputs(userId: string): Promise<PositionSizingI
       select: { entryPrice: true, quantity: true },
     }),
   ]);
-  const currentPortfolioExposureVnd = openTrades.reduce((sum, t) => sum + t.entryPrice * 1000 * t.quantity, 0);
+  const currentPortfolioExposureVnd = openExposureVnd(
+    openTrades.map((t) => ({ entryKvnd: t.entryPrice, quantity: t.quantity }))
+  );
   return { equityVnd, sizingConfig, currentPortfolioExposureVnd };
 }
 

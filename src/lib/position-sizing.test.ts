@@ -3,6 +3,7 @@ import {
   POSITION_SIZING_DEFAULTS,
   computePositionSizing,
   kVndToPerShareVnd,
+  openExposureVnd,
   qualityRiskMultiplier,
 } from "./position-sizing";
 
@@ -16,6 +17,18 @@ describe("qualityRiskMultiplier", () => {
 describe("kVndToPerShareVnd", () => {
   it("multiplies by 1000", () => {
     expect(kVndToPerShareVnd(28.5)).toBe(28500);
+  });
+});
+
+describe("openExposureVnd", () => {
+  it("sums entry × quantity in VND: 25.5 × 1000 × 1,000 + 12 × 1000 × 500 = 31,500,000", () => {
+    expect(
+      openExposureVnd([
+        { entryKvnd: 25.5, quantity: 1000 },
+        { entryKvnd: 12, quantity: 500 },
+      ])
+    ).toBe(31_500_000);
+    expect(openExposureVnd([])).toBe(0);
   });
 });
 

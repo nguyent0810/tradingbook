@@ -172,6 +172,9 @@ export const SIZE_BINDING_CAP_COPY = {
 export const SIZE_ZERO_COPY =
   "Khối lượng tính được {shares} cp, chưa tới 1 lô 100 cp: {cause}. Size tham khảo vì thế là 0 cp.";
 
+/** A size the session verdict took to 0 cp (NO-TRADE). */
+export const SIZE_VERDICT_ZERO_COPY = "Phán quyết phiên {code} đưa size tham khảo từ {before} cp về 0 cp.";
+
 /** The constraint behind a 0 cp size: the risk budget, or the cap that bound. */
 export const SIZE_ZERO_CAUSE_COPY = {
   risk: "ngân sách rủi ro {budget} chia cho {perShare}/cp (R sau phí cộng đệm gap)",

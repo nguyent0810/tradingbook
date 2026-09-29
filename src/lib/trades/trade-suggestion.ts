@@ -24,7 +24,13 @@ import {
   computeAtr,
   computeMinStopFrac,
 } from "@/lib/scanner/stop-feasibility";
-import { computePositionSizing, type PositionSizingCap } from "@/lib/position-sizing";
+import {
+  computePositionSizing,
+  qualityRiskMultiplier,
+  type PositionSizingCap,
+} from "@/lib/position-sizing";
+import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
+import { applyVerdictToShares } from "@/lib/terminal/verdict-tokens";
 import {
   bandPct,
   clipToBand,
@@ -43,6 +49,7 @@ import {
   RISK_COPY,
   SETTLEMENT_BREACH_COPY,
   SETUP_REASON_CODES,
+  SIZE_VERDICT_ZERO_COPY,
   SIZE_ZERO_CAUSE_COPY,
   SIZE_ZERO_COPY,
   SETUP_REASON_COPY,
@@ -160,8 +167,18 @@ export type TradeSuggestion = {
 };
 
 export type TradeSuggestionSize = {
-  /** Rounded down to the 100-share lot; 0 is a result, explained by `zeroShareReason`. */
+  /**
+   * The size shown as the suggestion: rounded down to the 100-share lot, then
+   * limited by the session verdict. 0 is a result, explained by `zeroShareReason`.
+   * Every figure below (loss, risk, position value, open risk) uses this count.
+   */
   shares: number;
+  /** The lot-rounded size before the session verdict; equals `shares` without a verdict. */
+  sharesBeforeVerdict: number;
+  /** Risk per trade the size was built on, after the tier multiplier (decimal, 0.005 = 0.5%). */
+  riskPerTradePct: number;
+  /** `equity` × `riskPerTradePct`, VND. */
+  riskBudgetVnd: number;
   /** The cap that set the size; null when the risk budget did. */
   bindingCap: PositionSizingCap | null;
   /** Đệm gap: one full band of the exchange below the stop-zone low, kVND per share. */
@@ -178,7 +195,10 @@ export type TradeSuggestionSize = {
   zeroShareReason: string | null;
   /** Tổng rủi ro mở with this suggestion at `shares`. A warning only; it never cuts the size. */
   openRisk: {
-    /** Sum of (entry − stop) × quantity over open trades that have a stop, VND. */
+    /**
+     * Sum of Rủi ro lệnh over open trades that have a stop, VND: (entry − stop +
+     * one band of the trade's exchange × stop) × quantity, never below 0 per trade.
+     */
     openTradesRiskVnd: number;
     /** Open trades with no stop: their risk is unknown, not 0. */
     tradesWithoutStop: number;
@@ -256,9 +276,34 @@ export type TradeSuggestionSizingInput = {
   liquidityCapPct: number;
   /** Exposure: sum of entry × quantity of open trades, VND. */
   currentExposureVnd: number;
-  /** Open journal trades. Prices kVND; `stopKvnd` null when the trade has no stop. */
-  openTrades: readonly { entryKvnd: number; stopKvnd: number | null; quantity: number }[];
+  /** Open journal trades. */
+  openTrades: readonly OpenTradeRisk[];
+  /** Session verdict; it limits the size shown (PROBE 30%, NO-TRADE 0). Null = none. */
+  verdictLevel: VerdictUxLevel | null;
 };
+
+/** An open journal trade as Tổng rủi ro mở reads it. Prices kVND. */
+export type OpenTradeRisk = {
+  entryKvnd: number;
+  /** Null when the trade has no stop: its risk is unknown, never 0. */
+  stopKvnd: number | null;
+  quantity: number;
+  /** `StockSymbol.exchange` as stored; unknown values assume HOSE. */
+  exchange: string | null;
+};
+
+/**
+ * Rủi ro lệnh of one open trade, VND: the stop distance plus the Đệm gap of its
+ * exchange, the same basis as a suggestion's worst case (CONTEXT.md). Null when
+ * the trade has no stop. A stop so far above entry that even a full gap below it
+ * stays above entry has no risk left: 0, never negative, so it cannot offset others.
+ */
+function openTradeRiskVnd(t: OpenTradeRisk): number | null {
+  if (t.stopKvnd == null || !Number.isFinite(t.stopKvnd)) return null;
+  const band = bandPct(resolveExchange(t.exchange).exchange) / 100;
+  const lossKvndPerShare = Math.max(0, t.entryKvnd - t.stopKvnd * (1 - band));
+  return Math.round(lossKvndPerShare * 1000 * Math.max(0, t.quantity));
+}
 
 function fail(reason: TradeSuggestionFailure, detail: string): TradeSuggestionResult {
   return { ok: false, reason, detail };
@@ -355,14 +400,15 @@ function buildSize(params: {
   const { sizing, entryTopKvnd } = params;
   const gapBufferKvnd = params.stopLowKvnd * (bandPct(params.exchange) / 100);
   const worstCasePerShareKvnd = params.netRKvnd + gapBufferKvnd;
+  // A setup outside tiers A/B is never sized at full risk.
+  const quality = params.tier === "A" ? "A" : "B";
   const sized = computePositionSizing({
     accountEquityVnd: sizing.equityVnd,
     maxPortfolioExposurePct: sizing.maxPortfolioExposurePct,
     currentPortfolioExposureVnd: sizing.currentExposureVnd,
     maxPerTradeExposurePct: sizing.maxPerTradeExposurePct,
     baseRiskPerTradePct: sizing.riskPerTradePct,
-    // A setup outside tiers A/B is never sized at full risk.
-    quality: params.tier === "A" ? "A" : "B",
+    quality,
     entryKVnd: entryTopKvnd,
     stopKVnd: params.stopLowKvnd,
     liquidityCapPct: sizing.liquidityCapPct,
@@ -371,11 +417,18 @@ function buildSize(params: {
   });
   if (!sized.ok) return null;
   const v = sized.value;
-  const shares = roundDownToLot(v.qFinalShares);
+  const sharesBeforeVerdict = roundDownToLot(v.qFinalShares);
+  const verdict = sizing.verdictLevel ? applyVerdictToShares(sharesBeforeVerdict, sizing.verdictLevel) : null;
+  const shares = verdict ? verdict.shares : sharesBeforeVerdict;
   const worstCaseLossVnd = Math.round(shares * worstCasePerShareKvnd * 1000);
 
   let zeroShareReason: string | null = null;
-  if (shares === 0) {
+  if (sharesBeforeVerdict > 0 && shares === 0 && verdict) {
+    zeroShareReason = fill(SIZE_VERDICT_ZERO_COPY, {
+      code: verdict.tokens.code,
+      before: fmtNum(sharesBeforeVerdict, 0),
+    });
+  } else if (shares === 0) {
     const cause =
       v.bindingCap === "portfolio_exposure"
         ? fill(SIZE_ZERO_CAUSE_COPY.portfolio_exposure, {
@@ -402,18 +455,17 @@ function buildSize(params: {
   let openTradesRiskVnd = 0;
   let tradesWithoutStop = 0;
   for (const t of sizing.openTrades) {
-    if (t.stopKvnd == null || !Number.isFinite(t.stopKvnd)) {
-      tradesWithoutStop++;
-      continue;
-    }
-    // A stop at or above entry has no risk left; it must not offset other trades.
-    const riskKvndPerShare = Math.max(0, t.entryKvnd - t.stopKvnd);
-    openTradesRiskVnd += Math.round(riskKvndPerShare * 1000 * Math.max(0, t.quantity));
+    const riskVnd = openTradeRiskVnd(t);
+    if (riskVnd == null) tradesWithoutStop++;
+    else openTradesRiskVnd += riskVnd;
   }
   const totalVnd = openTradesRiskVnd + worstCaseLossVnd;
 
   return {
     shares,
+    sharesBeforeVerdict,
+    riskPerTradePct: sizing.riskPerTradePct * qualityRiskMultiplier(quality),
+    riskBudgetVnd: v.riskBudgetVnd,
     bindingCap: v.bindingCap,
     gapBufferKvnd,
     worstCasePerShareKvnd,

@@ -9,12 +9,14 @@ import {
   SETUP_REASON_COPY,
   SIZE_BINDING_CAP_COPY,
   SIZE_ZERO_CAUSE_COPY,
+  SIZE_VERDICT_ZERO_COPY,
   SIZE_ZERO_COPY,
   UNMAPPED_REASON_COPY,
   UNMAPPED_REASON_GENERIC_COPY,
 } from "./trade-suggestion-copy";
 import {
   buildTradeSuggestion,
+  type OpenTradeRisk,
   type TradeSuggestion,
   type TradeSuggestionInput,
   type TradeSuggestionResult,
@@ -482,6 +484,7 @@ describe("copy tables — descriptive, never imperative (ADR 0003)", () => {
     ...Object.entries(SIZE_ZERO_CAUSE_COPY),
     ...Object.entries(SIZE_BINDING_CAP_COPY),
     ["size zero", SIZE_ZERO_COPY],
+    ["size verdict zero", SIZE_VERDICT_ZERO_COPY],
   ];
 
   it("the banned list catches the wording audit F08 flagged", () => {
@@ -753,6 +756,7 @@ const SIZING: NonNullable<TradeSuggestionInput["sizing"]> = {
   liquidityCapPct: 0.1,
   currentExposureVnd: 0,
   openTrades: [],
+  verdictLevel: null,
 };
 
 function sized(
@@ -792,7 +796,17 @@ describe("buildTradeSuggestion — size with gap buffer (#15)", () => {
   });
 
   it("tier B sizes at half risk: 5,000,000 / 2,978.8 = 1,678.5 → 1,600 cp", () => {
-    expect(sized({}, {}, { tier: "B" }).size.shares).toBe(1600);
+    const { size } = sized({}, {}, { tier: "B" });
+    expect(size.shares).toBe(1600);
+    // The effective risk is what the size was built on: 1% × 0.5 = 0.5% → 5,000,000 đ.
+    expect(size.riskPerTradePct).toBeCloseTo(0.005, 12);
+    expect(size.riskBudgetVnd).toBe(5_000_000);
+  });
+
+  it("tier A carries the full setting: 1% → 10,000,000 đ", () => {
+    const { size } = sized();
+    expect(size.riskPerTradePct).toBeCloseTo(0.01, 12);
+    expect(size.riskBudgetVnd).toBe(10_000_000);
   });
 
   it("a setup with no A/B tier is sized like tier B, never at full risk", () => {
@@ -859,15 +873,21 @@ describe("buildTradeSuggestion — size with gap buffer (#15)", () => {
 
 describe("buildTradeSuggestion — Tổng rủi ro mở (#15)", () => {
   const risk = (s: TradeSuggestion, code: string) => s.risks.find((r) => r.code === code);
-  // This suggestion's worst case is 9,830,040 đ; the 3% line on 1 tỷ is 30,000,000 đ.
-  // (30 − 28) × 1000 × 10,000 = 20,000,000 đ; (12.01 − 12) × 1000 × 16,996 = 169,960 đ.
-  const twoTrades = [
-    { entryKvnd: 30, stopKvnd: 28, quantity: 10_000 },
-    { entryKvnd: 12.01, stopKvnd: 12, quantity: 16_996 },
-  ];
+  /*
+   * Tổng rủi ro mở is the sum of Rủi ro lệnh, and Rủi ro lệnh includes the Đệm
+   * gap, so each open trade counts (entry − stop + one band × stop) × quantity.
+   * This suggestion's worst case is 9,830,040 đ; the 3% line on 1 tỷ is 30,000,000 đ,
+   * leaving 20,169,960 đ for the open trades to sit exactly on it.
+   *   A (HOSE): 30 − 28 = 2 + 28 × 7% = 1.96 → 3.96 kVND × 1000 × 5,000 = 19,800,000 đ
+   *   B (HOSE): 21.683 − 20 = 1.683 + 20 × 7% = 1.40 → 3.083 kVND × 1000 × 120 = 369,960 đ
+   *   19,800,000 + 369,960 = 20,169,960 đ
+   */
+  const tradeA: OpenTradeRisk = { entryKvnd: 30, stopKvnd: 28, quantity: 5_000, exchange: "HOSE" };
+  const tradeB: OpenTradeRisk = { entryKvnd: 21.683, stopKvnd: 20, quantity: 120, exchange: "HOSE" };
+  const atLimit = [tradeA, tradeB];
 
-  it("sums (entry − stop) × quantity of open trades plus this worst case", () => {
-    const { size } = sized({ openTrades: twoTrades });
+  it("sums gap-buffered risk of open trades plus this worst case", () => {
+    const { size } = sized({ openTrades: atLimit });
     expect(size.openRisk).toEqual({
       openTradesRiskVnd: 20_169_960,
       tradesWithoutStop: 0,
@@ -878,24 +898,30 @@ describe("buildTradeSuggestion — Tổng rủi ro mở (#15)", () => {
     });
   });
 
-  it("at exactly 3% there is no warning", () => {
-    expect(risk(sized({ openTrades: twoTrades }).s, "open_risk_high")).toBeUndefined();
+  it("buffers each open trade by its own exchange's band; no exchange on record assumes HOSE", () => {
+    // entry = stop = 20, 1,000 cp: HOSE 20 × 7% = 1.4 → 1,400,000 đ; HNX 10% → 2,000,000 đ;
+    // UPCOM 15% → 3,000,000 đ; unknown → HOSE 1,400,000 đ. Sum 7,800,000 đ.
+    const flat = (exchange: string | null): OpenTradeRisk => ({ entryKvnd: 20, stopKvnd: 20, quantity: 1000, exchange });
+    const { size } = sized({ openTrades: [flat("HOSE"), flat("HNX"), flat("UPCOM"), flat(null)] });
+    expect(size.openRisk.openTradesRiskVnd).toBe(7_800_000);
   });
 
-  it("below 3% there is no warning: 10,000,000 + 9,830,040 = 19,830,040 đ = 1.98%", () => {
-    const { s, size } = sized({ openTrades: [{ entryKvnd: 25, stopKvnd: 24, quantity: 10_000 }] });
-    expect(size.openRisk.totalVnd).toBe(19_830_040);
+  it("at exactly 3% there is no warning", () => {
+    expect(risk(sized({ openTrades: atLimit }).s, "open_risk_high")).toBeUndefined();
+  });
+
+  it("below 3% there is no warning: (1 + 24 × 7%) = 2.68 × 1000 × 3,000 = 8,040,000 + 9,830,040 = 1.79%", () => {
+    const { s, size } = sized({
+      openTrades: [{ entryKvnd: 25, stopKvnd: 24, quantity: 3_000, exchange: "HOSE" }],
+    });
+    expect(size.openRisk.totalVnd).toBe(17_870_040);
     expect(size.openRisk.aboveLimit).toBe(false);
     expect(risk(s, "open_risk_high")).toBeUndefined();
   });
 
-  it("above 3% warns, and only warns: 20,170,000 + 9,830,040 = 30,000,040 đ", () => {
-    const { s, size } = sized({
-      openTrades: [
-        { entryKvnd: 30, stopKvnd: 28, quantity: 10_000 },
-        { entryKvnd: 12.01, stopKvnd: 12, quantity: 17_000 },
-      ],
-    });
+  it("above 3% warns, and only warns: B at 121 cp = 373,043 đ → 30,003,083 đ", () => {
+    const { s, size } = sized({ openTrades: [tradeA, { ...tradeB, quantity: 121 }] });
+    expect(size.openRisk.totalVnd).toBe(30_003_083);
     expect(size.openRisk.aboveLimit).toBe(true);
     expect(size.shares).toBe(3300); // the warning never cuts the size
     expect(risk(s, "open_risk_high")).toEqual({
@@ -907,7 +933,7 @@ describe("buildTradeSuggestion — Tổng rủi ro mở (#15)", () => {
 
   it("a trade with no stop is unknown risk, never zero", () => {
     const { s, size } = sized({
-      openTrades: [...twoTrades, { entryKvnd: 50, stopKvnd: null, quantity: 1000 }],
+      openTrades: [...atLimit, { entryKvnd: 50, stopKvnd: null, quantity: 1000, exchange: "HOSE" }],
     });
     expect(size.openRisk.tradesWithoutStop).toBe(1);
     expect(size.openRisk.openTradesRiskVnd).toBe(20_169_960);
@@ -918,18 +944,70 @@ describe("buildTradeSuggestion — Tổng rủi ro mở (#15)", () => {
     });
   });
 
-  it("a stop at or above entry adds no risk rather than offsetting other trades", () => {
+  it("a stop above entry still carries gap risk until the gap stays above entry, never negative", () => {
+    // 20 − 21 × 0.93 = 20 − 19.53 = 0.47 kVND × 1000 × 1,000 = 470,000 đ.
+    // 20 − 22 × 0.93 = 20 − 20.46 < 0 → 0, never offsetting the others.
     const { size } = sized({
-      openTrades: [...twoTrades, { entryKvnd: 20, stopKvnd: 22, quantity: 5000 }],
+      openTrades: [
+        ...atLimit,
+        { entryKvnd: 20, stopKvnd: 21, quantity: 1000, exchange: "HOSE" },
+        { entryKvnd: 20, stopKvnd: 22, quantity: 5000, exchange: "HOSE" },
+      ],
     });
-    expect(size.openRisk.openTradesRiskVnd).toBe(20_169_960);
+    expect(size.openRisk.openTradesRiskVnd).toBe(20_169_960 + 470_000);
   });
 
   it("a zero-share suggestion adds nothing to open risk", () => {
-    const { size } = sized({ equityVnd: 20_000_000, openTrades: [{ entryKvnd: 25, stopKvnd: 24, quantity: 100 }] });
-    // (25 − 24) × 1000 × 100 = 100,000 đ = 0.5% of 20,000,000.
-    expect(size.openRisk.totalVnd).toBe(100_000);
-    expect(size.openRisk.totalPct).toBeCloseTo(0.5, 9);
+    // (1 + 24 × 7%) = 2.68 kVND × 1000 × 100 = 268,000 đ = 1.34% of 20,000,000.
+    const { size } = sized({
+      equityVnd: 20_000_000,
+      openTrades: [{ entryKvnd: 25, stopKvnd: 24, quantity: 100, exchange: "HOSE" }],
+    });
+    expect(size.openRisk.totalVnd).toBe(268_000);
+    expect(size.openRisk.totalPct).toBeCloseTo(1.34, 9);
+  });
+});
+
+describe("buildTradeSuggestion — size under the session verdict (#15)", () => {
+  const risk = (s: TradeSuggestion, code: string) => s.risks.find((r) => r.code === code);
+
+  it("PROBE: 30% of 3,300 = 990 → 900 cp, and every figure uses the 900", () => {
+    // Loss 900 × 2,978.8 = 2,680,920 đ = 0.268092%; position 900 × 20,200 = 18,180,000 đ.
+    const { size } = sized({ verdictLevel: "PROBE" });
+    expect(size.sharesBeforeVerdict).toBe(3300);
+    expect(size.shares).toBe(900);
+    expect(size.worstCaseLossVnd).toBe(2_680_920);
+    expect(size.tradeRiskPct).toBeCloseTo(0.268092, 9);
+    expect(size.positionValueVnd).toBe(18_180_000);
+    expect(size.openRisk.totalVnd).toBe(2_680_920);
+  });
+
+  it("the 3% warning is judged on the reduced size", () => {
+    // Open 20,173,043 + 3,300 cp (9,830,040) = 30,003,083 is above the line; with PROBE's
+    // 900 cp (2,680,920) the total is 20,173,043 + 2,680,920 = 22,853,963 đ, below it.
+    const tradeA: OpenTradeRisk = { entryKvnd: 30, stopKvnd: 28, quantity: 5_000, exchange: "HOSE" };
+    const tradeB: OpenTradeRisk = { entryKvnd: 21.683, stopKvnd: 20, quantity: 121, exchange: "HOSE" };
+    const full = sized({ openTrades: [tradeA, tradeB] });
+    expect(risk(full.s, "open_risk_high")).toBeDefined();
+    const probe = sized({ openTrades: [tradeA, tradeB], verdictLevel: "PROBE" });
+    expect(probe.size.openRisk.totalVnd).toBe(20_173_043 + 2_680_920);
+    expect(risk(probe.s, "open_risk_high")).toBeUndefined();
+  });
+
+  it("the liquidity risk is judged on the reduced size: 900 × 20,200 / 4,2 tỷ = 0.43%", () => {
+    expect(risk(sized({ verdictLevel: "PROBE" }, { advVnd: 4_200_000_000 }).s, "liquidity_position")).toBeUndefined();
+  });
+
+  it("NO_TRADE takes the size to 0 cp and says why", () => {
+    const { size } = sized({ verdictLevel: "NO_TRADE" });
+    expect(size.sharesBeforeVerdict).toBe(3300);
+    expect(size.shares).toBe(0);
+    expect(size.worstCaseLossVnd).toBe(0);
+    expect(size.zeroShareReason).toBe("Phán quyết phiên NO-TRADE đưa size tham khảo từ 3.300 cp về 0 cp.");
+  });
+
+  it("TRADE keeps the full size", () => {
+    expect(sized({ verdictLevel: "TRADE" }).size.shares).toBe(3300);
   });
 });
 
