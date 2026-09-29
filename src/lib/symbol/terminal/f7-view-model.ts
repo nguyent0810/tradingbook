@@ -8,6 +8,7 @@ import {
   semanticTone,
 } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
+import { bandPct, resolveExchange } from "@/lib/market/exchange-rules";
 
 /**
  * View model cho màn F7 Chi tiết mã.
@@ -65,17 +66,9 @@ export type F7ViewModel = {
 
 /** Biên độ dao động trong phiên theo sàn — quy ước bảng giá Việt Nam. */
 export function priceBandPct(exchange: string | null): number | null {
-  switch ((exchange ?? "").toUpperCase()) {
-    case "HOSE":
-      return 7;
-    case "HNX":
-      return 10;
-    case "UPCOM":
-      return 15;
-    default:
-      // Không biết sàn thì không suy ra biên độ — trần/sàn để gap.
-      return null;
-  }
+  const resolved = resolveExchange(exchange);
+  // Không biết sàn thì không suy ra biên độ — trần/sàn để gap.
+  return resolved.assumed ? null : bandPct(resolved.exchange);
 }
 
 function finite(value: number | null | undefined): number | null {
