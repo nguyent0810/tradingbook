@@ -75,6 +75,11 @@ model Trade {
   takeProfit          Float?                    @map("take_profit")
   positionSize        Float?                    @map("position_size")
   setupSnapshot       Json?                     @map("setup_snapshot")
+  /// Gợi ý lệnh (#17) as it stood when the trade was logged from it; null for trades
+  /// logged without one (manual entries, trades before #17).
+  suggestionSnapshot   Json?                    @map("suggestion_snapshot")
+  /// When `suggestionSnapshot` was taken (server clock at log time).
+  suggestionSnapshotAt DateTime?                @map("suggestion_snapshot_at")
   exitReason          TradeExitReason?          @map("exit_reason")
   exitDiscipline      TradeExitDiscipline?      @map("exit_discipline")
   entryNote           String?                   @map("entry_note") @db.Text
