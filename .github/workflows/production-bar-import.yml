@@ -9,8 +9,13 @@ name: Production bar import
 
 on:
   schedule:
-    # Mon–Fri 12:30 UTC (~19:30 ICT) — after VN cash session; before Vercel backup scan
-    - cron: "30 12 * * 1-5"
+    # Mon–Fri 09:17 UTC (16:17 ICT): ~1.5 h after the 15:00 close, so the
+    # provider has settled the daily bar (there is no in-progress-bar guard, F04).
+    # Earlier than the old 12:30 UTC because GitHub delays scheduled runs (the
+    # 2026-09-28 run started 7 h 17 min late), and the Prospective recorder that
+    # follows this workflow must finish before the next 09:00 ICT open or the
+    # session is lost. Odd minute: GitHub queues pile up on the hour.
+    - cron: "17 9 * * 1-5"
   workflow_dispatch:
     inputs:
       trigger_scan:

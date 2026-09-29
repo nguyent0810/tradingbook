@@ -21,7 +21,7 @@
 
 | Trigger | When (UTC) | What |
 |---------|------------|------|
-| **GitHub Actions** `production-bar-import.yml` | **Mon–Fri 12:30** (`30 12 * * 1-5`) | VNINDEX + equities → Neon → **daily scan** |
+| **GitHub Actions** `production-bar-import.yml` | **Mon–Fri 09:17 UTC / 16:17 ICT** (`17 9 * * 1-5`; was 12:30 UTC until 2026-09-29) | VNINDEX + equities → Neon → **daily scan** |
 | **Vercel cron** `vercel.json` | **Mon–Fri 14:00** (`0 14 * * 1-5`) | **Backup** scan if GHA failed or was disabled |
 
 VN cash session alignment: import runs after the prior session close; backup scan is ~1.5h later.
