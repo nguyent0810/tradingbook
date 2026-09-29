@@ -48,6 +48,10 @@ export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbol
     );
   }
 
+  const twoR = preview?.ok
+    ? (preview.ticket.targets.find((t) => t.r === preview.ticket.defaultTargetR)?.priceKvnd ?? null)
+    : null;
+
   return (
     <div className="tosv3-log-trade-panel" data-testid={`log-trade-panel-${symbolKey}`}>
       <div className="tosv3-log-trade-panel__header">
@@ -82,31 +86,30 @@ export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbol
 
           <dl className="tosv3-setups-metric-strip">
             <div className="tosv3-setups-metric-card">
-              <dt>Khoảng vào lệnh gợi ý</dt>
+              <dt>Vùng vào tham khảo</dt>
               <dd className="tabular-nums">
-                {fmt(preview.entryRangeLow)} – {fmt(preview.entryRangeHigh)}
+                {fmt(preview.ticket.entryZone.low)} – {fmt(preview.ticket.entryZone.high)}
               </dd>
             </div>
             <div className="tosv3-setups-metric-card">
-              <dt>Cắt lỗ</dt>
-              <dd className="tabular-nums">{fmt(preview.stopLoss)}</dd>
+              <dt>Cắt lỗ (đáy vùng SL)</dt>
+              <dd className="tabular-nums">{fmt(preview.ticket.stopKvnd)}</dd>
             </div>
             <div className="tosv3-setups-metric-card">
-              <dt>Chốt lãi</dt>
-              <dd className="tabular-nums">{preview.takeProfit != null ? fmt(preview.takeProfit) : "—"}</dd>
+              <dt>Chốt lời {preview.ticket.defaultTargetR}R</dt>
+              <dd className="tabular-nums">{twoR != null ? fmt(twoR) : "—"}</dd>
             </div>
             <div className="tosv3-setups-metric-card">
-              <dt>R:R</dt>
+              <dt>Size tham khảo</dt>
               <dd className="tabular-nums">
-                {preview.riskRewardRatio != null ? `${preview.riskRewardRatio.toFixed(2)}R` : "—"}
+                {preview.ticket.shares != null ? `${preview.ticket.shares.toLocaleString("vi-VN")} cp` : "—"}
               </dd>
             </div>
           </dl>
 
           <p className="tosv3-log-trade-panel__hint">
-            Tính từ phiên {new Date(preview.asOfBarDate).toLocaleDateString("en-US")} — hệ thống quét qua đêm nên
-            đây là khoảng giá gợi ý cho phiên kế tiếp, không phải giá khớp lệnh thời gian thực. Khối lượng, cắt lỗ
-            và chốt lãi được tính tự động; chỉ cần xác nhận giá bạn thực sự khớp được.
+            Gợi ý lệnh tính đến phiên {preview.ticket.asOfSession}, cùng số với màn Setups. Cắt lỗ, chốt lời và khối
+            lượng lấy từ gợi ý; chỉ cần xác nhận giá thực khớp. App chỉ ghi vào sổ lệnh, không gửi lệnh.
           </p>
 
           <div className="cd-auth-field">
@@ -119,7 +122,7 @@ export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbol
               type="text"
               inputMode="decimal"
               required
-              defaultValue={fmt(preview.suggestedEntry)}
+              defaultValue={String(preview.ticket.entryKvnd)}
               className="cd-auth-input"
               aria-invalid={state?.errors?.confirmedEntryPrice ? "true" : undefined}
             />

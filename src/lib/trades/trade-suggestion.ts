@@ -26,7 +26,6 @@ import {
   bandPct,
   clipToBand,
   resolveExchange,
-  roundDownToLot,
   sessionBand,
   snapToTick,
   type Exchange,

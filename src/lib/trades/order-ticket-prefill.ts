@@ -30,6 +30,8 @@ export type OrderTicketPrefill = {
   defaultTargetR: TargetR;
   /** Size tham khảo; null when the suggestion carries no size. */
   shares: number | null;
+  /** The lot-rounded size before the session verdict; null without a size. */
+  sharesBeforeVerdict: number | null;
   /** Why there is no size, or why it is 0 cp; null otherwise. */
   sizeNote: string | null;
   /** Rủi ro lệnh at the pre-filled numbers (net R + Đệm gap), VND; null without a size. */
@@ -63,6 +65,7 @@ export function buildOrderTicketPrefill(
       targets: s.targets.map((t) => ({ r: t.r, priceKvnd: t.price })),
       defaultTargetR: DEFAULT_TARGET_R,
       shares: size ? size.shares : null,
+      sharesBeforeVerdict: size ? size.sharesBeforeVerdict : null,
       sizeNote: size
         ? size.zeroShareReason
         : SIZING_UNAVAILABLE_COPY[sizingUnavailable ?? "NO_EQUITY"],

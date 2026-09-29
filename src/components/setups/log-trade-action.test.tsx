@@ -35,13 +35,25 @@ afterEach(() => {
 async function renderOpenedWithForm() {
   previewTradeLevelsForSetup.mockResolvedValue({
     ok: true,
-    entryRangeLow: 70.0,
-    entryRangeHigh: 72.5,
-    suggestedEntry: 71.2,
-    stopLoss: 66.5,
-    takeProfit: 80.1,
-    riskRewardRatio: 1.9,
-    asOfBarDate: "2026-08-07",
+    ticket: {
+      asOfSession: "2026-08-07",
+      exchange: "HOSE",
+      entryZone: { low: 70.0, high: 72.5 },
+      entryKvnd: 72.5,
+      stopZone: { low: 66.5, high: 67.0 },
+      stopKvnd: 66.5,
+      targets: [
+        { r: 1, priceKvnd: 79 },
+        { r: 2, priceKvnd: 85.5 },
+        { r: 3, priceKvnd: 92 },
+      ],
+      defaultTargetR: 2,
+      shares: 1000,
+      sharesBeforeVerdict: 1000,
+      sizeNote: null,
+      worstCaseLossVnd: 10_000_000,
+      evidence: { prospectiveN: 7, checkpointN: 100 },
+    },
   });
   render(<LogTradeAction setupId="setup-1" symbolKey="FPT" />);
   fireEvent.click(screen.getByTestId("log-trade-open-FPT"));

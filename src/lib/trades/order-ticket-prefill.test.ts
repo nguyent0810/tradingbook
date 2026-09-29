@@ -1,67 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
 import {
   buildScreenTradeSuggestions,
   SIZING_UNAVAILABLE_COPY,
-  type SuggestionCandidate,
   type TradeSuggestionMarketFacts,
 } from "./screen-trade-suggestions";
 import { buildOrderTicketPrefill } from "./order-ticket-prefill";
 import { ticketWorstCaseLossVnd } from "./worst-case-risk";
+import { WORKED_CANDIDATE as CANDIDATE, workedBars as bars, workedMarket as market } from "./trade-suggestion.fixture";
 
 /**
- * The worked HOSE example (trade-suggestion.test.ts), built through the same
- * per-candidate loop the screen loader runs for F1/F2/F7:
+ * The worked HOSE example (see trade-suggestion.fixture.ts), built through the
+ * same per-candidate loop the screen loader runs for F1/F2/F7:
  *   entry zone 19.60–20.20, stop zone 18.60–18.90,
  *   1R 22.00 · 2R 23.65 · 3R 25.35,
  *   worst case per share 2.9788 kVND → 10,000,000 / 2,978.8 → 3,300 cp,
  *   worst-case loss 3,300 × 2,978.8 = 9,830,040 đ.
  */
-const SETUP_IDX = 69;
-const day = (i: number) => new Date(Date.UTC(2026, 5, 1) + i * 86_400_000);
-
-function bars(): Gate2BarInput[] {
-  return Array.from({ length: SETUP_IDX + 1 }, (_, i) => ({
-    date: day(i),
-    open: 20,
-    high: i === SETUP_IDX - 30 ? 23 : 20.2,
-    low: 19.2,
-    close: 20,
-    volume: 1_000_000,
-  }));
-}
-
-const CANDIDATE: SuggestionCandidate = {
-  id: "setup-1",
-  symbolId: "sym-1",
-  pullbackZoneLow: 19.6,
-  pullbackZoneHigh: 20.2,
-  stopLevel: 18.9,
-  barDate: day(SETUP_IDX),
-  quality: "A",
-  reasons: [],
-};
-
-function market(over: Partial<TradeSuggestionMarketFacts> = {}): TradeSuggestionMarketFacts {
-  return {
-    latestSession: day(SETUP_IDX),
-    expectedSession: day(SETUP_IDX),
-    gate1Level: "PASS",
-    advBySymbolId: new Map([["sym-1", 50_000_000_000]]),
-    sizing: {
-      equityVnd: 1_000_000_000,
-      riskPerTradePct: 0.01,
-      maxPerTradeExposurePct: 1,
-      maxPortfolioExposurePct: 1,
-      liquidityCapPct: 0.1,
-      currentExposureVnd: 0,
-      openTrades: [],
-      verdictLevel: "TRADE",
-    },
-    ...over,
-  };
-}
-
 function suggestionFor(over: Partial<TradeSuggestionMarketFacts> = {}, candidate = CANDIDATE) {
   return buildScreenTradeSuggestions({
     candidates: [candidate],
@@ -101,6 +55,7 @@ describe("buildOrderTicketPrefill — the ticket shows the suggestion's numbers 
   it("size = the suggestion's shares, and the risk readout = its worst-case loss", () => {
     expect(t.shares).toBe(s.size!.shares);
     expect(t.shares).toBe(3300);
+    expect(t.sharesBeforeVerdict).toBe(s.size!.sharesBeforeVerdict);
     expect(t.worstCaseLossVnd).toBe(s.size!.worstCaseLossVnd);
     expect(
       ticketWorstCaseLossVnd({ entryKvnd: t.entryKvnd, stopKvnd: t.stopKvnd, exchange: t.exchange, shares: t.shares! })

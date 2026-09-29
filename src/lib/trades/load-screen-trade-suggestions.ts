@@ -3,6 +3,9 @@ import "server-only";
 import { prisma } from "@/lib/prisma";
 import { fetchStockBarsGroupedAscThroughDate } from "@/lib/setup-health/load-bars";
 import { loadProspectiveCount } from "@/lib/evidence/prospective-count";
+import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
+import { readLiveGate1 } from "@/lib/terminal/gate1-live";
+import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
 import type { OhlcvBar } from "@/lib/setup-health/types";
@@ -99,6 +102,54 @@ export async function loadScreenTradeSuggestions(params: {
     errors: [sizingDefaults.error, openTrades.error, inputs.error].filter(
       (e): e is string => e != null
     ),
+  };
+}
+
+/**
+ * The suggestion of ONE setup, built exactly as F2/F7 build it (#17): the same
+ * loader, with the market facts a screen would pass. The order-ticket preview
+ * and the log-trade action use it, so the ticket and the snapshot saved with a
+ * trade are the numbers the screens show.
+ *
+ * Market facts, read the way F7 reads them: bars through the symbol's own
+ * newest bar (no bar of the symbol is newer, so the bars are the ones F2
+ * loads), the index's latest session, and the live Gate 1 level. The verdict
+ * comes from the caller, which already built it for its own checks. A failed
+ * fact is null (the builder then raises its "unknown" risk), never invented.
+ */
+export async function loadSetupTradeSuggestion(params: {
+  userId: string;
+  setup: SuggestionCandidate;
+  verdictLevel: VerdictUxLevel | null;
+}): Promise<{
+  result: TradeSuggestionResult | undefined;
+  sizingUnavailable: SizingUnavailable | null;
+  errors: string[];
+}> {
+  const { setup } = params;
+  const soft = <T,>(what: string) => (e: unknown): T | null => {
+    console.error(`[trade-suggestion] ${what} failed:`, e);
+    return null;
+  };
+  const [newestBar, expectedSession, regime] = await Promise.all([
+    prisma.stockDailyBar
+      .findFirst({ where: { symbolId: setup.symbolId }, orderBy: { date: "desc" }, select: { date: true } })
+      .catch(soft<{ date: Date }>("newest bar lookup")),
+    getExpectedLatestSessionFromIndexBars(prisma).catch(soft<Date>("expected session lookup")),
+    getMarketRegimeFromDb("VNINDEX").catch(soft<Awaited<ReturnType<typeof getMarketRegimeFromDb>>>("regime lookup")),
+  ]);
+  const loaded = await loadScreenTradeSuggestions({
+    userId: params.userId,
+    candidates: [setup],
+    latestSession: newestBar?.date ?? null,
+    expectedSession,
+    gate1Level: regime ? readLiveGate1(regime).level : null,
+    verdictLevel: params.verdictLevel,
+  });
+  return {
+    result: loaded.bySetupId.get(setup.id),
+    sizingUnavailable: loaded.sizingUnavailable,
+    errors: loaded.errors,
   };
 }
 

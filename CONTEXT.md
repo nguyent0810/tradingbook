@@ -70,7 +70,7 @@ _Avoid_: điểm cắt lỗ (khi ý là một vùng)
 
 **R**:
 Rủi ro trên mỗi cổ phiếu, tính từ đầu trên của vùng vào (mức khớp xấu nhất) tới đầu dưới của vùng SL; có bản gộp và bản sau phí môi giới hai chiều cộng thuế bán 0,1%. Các mốc chốt được biểu diễn bằng bội số của R.
-_Avoid_: R:R tính từ giữa vùng vào, là cách tính cũ mà modal đặt lệnh vẫn dùng tới #17 (F2 đã bỏ)
+_Avoid_: R:R tính từ giữa vùng vào — cách tính cũ, đã bỏ ở mọi nơi (F2 ở #13, phiếu ghi lệnh ở #17); phiếu ghi lệnh giờ điền sẵn đúng số của gợi ý lệnh
 
 **Mốc chốt** (Take-profit ladder):
 Các mức giá 1R, 2R, 3R tính từ vùng vào, kèm kháng cự gần nhất nếu có.
