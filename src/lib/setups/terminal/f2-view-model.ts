@@ -18,6 +18,11 @@ import {
   type RiskCode,
   type RiskSeverity,
 } from "@/lib/trades/trade-suggestion-copy";
+import {
+  ADR_0001_HREF,
+  RISK_SEVERITY_TOKENS,
+  evidenceStatusLabel,
+} from "@/lib/terminal/trade-suggestion-display";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -180,22 +185,12 @@ function num(value: number, digits = 0): string {
   });
 }
 
-const ADR_0001_HREF =
-  "https://github.com/nguyent0810/tradingbook/blob/main/docs/adr/0001-no-real-money-on-app-signals-before-checkpoint.md";
-
 const FAINT = "var(--tm-text-faint)";
 
-const RISK_TOKENS: Record<RiskSeverity, { rank: number; label: string; color: string }> = {
-  high: { rank: 0, label: "CAO", color: "var(--tm-down)" },
-  warn: { rank: 1, label: "CHÚ Ý", color: "var(--tm-accent)" },
-  info: { rank: 2, label: "THÔNG TIN", color: "var(--tm-text-dim)" },
-};
+const RISK_TOKENS = RISK_SEVERITY_TOKENS;
 
 function evidenceLabel(prospectiveN: number | null, checkpointN = CHECKPOINT_N): string {
-  return `Chưa kiểm chứng (${prospectiveN != null ? num(prospectiveN, 0) : "N không rõ"}/${num(
-    checkpointN,
-    0
-  )})`;
+  return evidenceStatusLabel(prospectiveN, checkpointN);
 }
 
 function buildSuggestion(
