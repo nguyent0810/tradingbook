@@ -12,6 +12,8 @@ import { buildF2ViewModel, type F2ViewModelInput } from "./f2-view-model";
 function suggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestion {
   return {
     asOfSession: "2026-08-25",
+    setupSession: "2026-08-25",
+    sessionsSinceSetup: 0,
     exchange: "HOSE",
     exchangeAssumed: false,
     entryZone: { low: 133.5, high: 136.8 },
@@ -212,6 +214,14 @@ describe("gợi ý lệnh trên F2", () => {
       input({ suggestionBySetupId: suggestions({ ok: true, suggestion: suggestion({ exchangeAssumed: true }) }) })
     ).details.FPT.suggestion;
     expect(s.asOf).toBe("Theo phiên 25/08/2026 · giả định HOSE");
+  });
+
+  it("thiết lập cũ hơn phiên dữ liệu mới nhất thì nói rõ phiên của thiết lập", () => {
+    const older = suggestion({ asOfSession: "2026-08-27", setupSession: "2026-08-25", sessionsSinceSetup: 2 });
+    const s = buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: older }) })
+    ).details.FPT.suggestion;
+    expect(s.asOf).toBe("Theo phiên 27/08/2026 · HOSE · thiết lập từ phiên 25/08/2026");
   });
 
   it("trạng thái kiểm chứng: Chưa kiểm chứng (N/100), dẫn tới ADR 0001", () => {

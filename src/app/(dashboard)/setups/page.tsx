@@ -61,7 +61,7 @@ async function SetupsContent() {
   const [exposure, spark, suggestions] = await Promise.all([
     loadOpenExposureVnd(session.userId),
     loadSparkHistory(candidatesWithHealth, base.expectedSession),
-    loadTradeSuggestions(candidatesWithHealth),
+    loadTradeSuggestions(candidatesWithHealth, base.latestEquityBarSession),
   ]);
   const closesBySymbolId = spark.data;
 

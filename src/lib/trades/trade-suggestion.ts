@@ -16,6 +16,7 @@
  */
 import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
 import { barsThroughSession, utcDayKey } from "@/lib/scanner/early-entry/bar-metrics";
+import { sortDedupeGate2Bars } from "@/lib/scanner/gate2/breakout-pullback";
 import { collectResistanceCandidates } from "@/lib/scanner/early-entry/risk-reward";
 import {
   ROUND_TRIP_FEE_FRAC,
@@ -41,7 +42,7 @@ const SELL_TAX_FRAC = 0.001;
 const BROKERAGE_PER_SIDE_FRAC = (ROUND_TRIP_FEE_FRAC - SELL_TAX_FRAC) / 2;
 
 /** First validation checkpoint of ADR 0001 / PROSPECTIVE-REGISTRY-PLAN.md. */
-const CHECKPOINT_N = 100;
+export const CHECKPOINT_N = 100;
 
 const R_MULTIPLES = [1, 2, 3] as const;
 
@@ -56,8 +57,15 @@ export type TradeSuggestionTarget = {
 };
 
 export type TradeSuggestion = {
-  /** YYYY-MM-DD of the session whose close the suggestion is built from. */
+  /**
+   * YYYY-MM-DD of the latest session in the bars: its close is the reference
+   * of the next-session band the entry zone is clipped to.
+   */
   asOfSession: string;
+  /** YYYY-MM-DD of the scan session the setup's structure comes from. */
+  setupSession: string;
+  /** Sessions between the setup and `asOfSession`; > 0 means the setup is older than the data. */
+  sessionsSinceSetup: number;
   exchange: Exchange;
   /** No exchange on record: HOSE ticks and band were assumed. */
   exchangeAssumed: boolean;
@@ -115,7 +123,11 @@ export type TradeSuggestionInput = {
     /** The scan session; bars after it are ignored. */
     barDate: Date;
   };
-  /** Daily bars of the symbol, any order; must include the setup session. */
+  /**
+   * Daily bars of the symbol, any order, through the LATEST stored session.
+   * Structure (zone, stop, ATR, resistance) uses bars through the setup
+   * session; the next-session band uses the latest close.
+   */
   bars: readonly Gate2BarInput[];
   /** `StockSymbol.exchange` as stored; unknown values assume HOSE. */
   exchange: string | null;
@@ -154,18 +166,22 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
   }
   const { sorted, idx } = through;
   const lastBar = sorted[idx]!;
+  const allBars = sortDedupeGate2Bars(input.bars);
+  const latestBar = allBars[allBars.length - 1]!;
   const { exchange, assumed } = resolveExchange(input.exchange);
 
-  // The as-of close is the most recent raw traded price, hence the next
-  // session's reference (see sessionBand).
+  // The next session's reference is the MOST RECENT close (sessionBand's
+  // contract): it is the raw traded price, whereas an older stored close may be
+  // back-adjusted, and a band built from it would belong to a session that has
+  // already passed.
   let band: SessionBand;
   try {
-    band = sessionBand(lastBar.close, exchange);
+    band = sessionBand(latestBar.close, exchange);
   } catch (e) {
     if (!(e instanceof RangeError)) throw e;
     return fail(
       "NO_REFERENCE_PRICE",
-      `giá đóng cửa ${fmt(lastBar.close)} không cho ra biên độ phiên kế tiếp trên ${exchange}`
+      `giá đóng cửa ${fmt(latestBar.close)} không cho ra biên độ phiên kế tiếp trên ${exchange}`
     );
   }
 
@@ -238,6 +254,7 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
     .filter((level) => level > entryTop)
     .sort((a, b) => a - b);
 
+  // Targets per #11 story 9: the gain after costs equals k × net R, rounded up.
   // Net gain at P = P(1 − sell costs) − entryTop(1 + buy brokerage) = k × net R.
   const buyCost = entryTop * (1 + BROKERAGE_PER_SIDE_FRAC);
   const sellKeep = 1 - BROKERAGE_PER_SIDE_FRAC - SELL_TAX_FRAC;
@@ -255,7 +272,9 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
   return {
     ok: true,
     suggestion: {
-      asOfSession: utcDayKey(lastBar.date),
+      asOfSession: utcDayKey(latestBar.date),
+      setupSession: utcDayKey(lastBar.date),
+      sessionsSinceSetup: allBars.length - 1 - idx,
       exchange,
       exchangeAssumed: assumed,
       entryZone,

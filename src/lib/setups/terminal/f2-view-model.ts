@@ -7,10 +7,10 @@ import { displayNearMissDiagnosticStatus } from "@/lib/trading-display-labels";
 import { POSITION_SIZING_DEFAULTS, computePositionSizing } from "@/lib/position-sizing";
 import { roundDownToBoardLotShares } from "@/lib/paper-lab/engine/board-lot";
 import { applyVerdictToShares, verdictTokens } from "@/lib/terminal/verdict-tokens";
-import { semanticTone } from "@/lib/format/vn";
+import { fmtSessionDate, semanticTone } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { sessionChangePct } from "@/lib/dashboard/candidate-spark-history";
-import type { TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
+import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -72,7 +72,10 @@ export type F2SuggestionRow = {
 export type F2Suggestion = {
   /** `null` khi tính được; ngược lại "Không đủ dữ liệu — <lý do>". */
   unavailable: string | null;
-  /** "Theo phiên dd/mm/yyyy · <sàn>"; `null` khi không tính được. */
+  /**
+   * "Theo phiên dd/mm/yyyy · <sàn>", thêm phiên của thiết lập khi nó cũ hơn;
+   * `null` khi không tính được.
+   */
   asOf: string | null;
   rows: F2SuggestionRow[];
   targets: F2SuggestionRow[];
@@ -163,12 +166,7 @@ const ADR_0001_HREF =
 
 const FAINT = "var(--tm-text-faint)";
 
-function sessionLabel(isoDay: string): string {
-  const [y, m, d] = isoDay.split("-");
-  return `${d}/${m}/${y}`;
-}
-
-function evidenceLabel(prospectiveN: number | null, checkpointN = 100): string {
+function evidenceLabel(prospectiveN: number | null, checkpointN = CHECKPOINT_N): string {
   return `Chưa kiểm chứng (${prospectiveN != null ? num(prospectiveN, 0) : "N không rõ"}/${num(
     checkpointN,
     0
@@ -193,9 +191,9 @@ function buildSuggestion(
   const s = result.suggestion;
   return {
     unavailable: null,
-    asOf: `Theo phiên ${sessionLabel(s.asOfSession)} · ${
+    asOf: `Theo phiên ${fmtSessionDate(s.asOfSession)} · ${
       s.exchangeAssumed ? `giả định ${s.exchange}` : s.exchange
-    }`,
+    }${s.sessionsSinceSetup > 0 ? ` · thiết lập từ phiên ${fmtSessionDate(s.setupSession)}` : ""}`,
     rows: [
       {
         key: "Vùng vào tham khảo",

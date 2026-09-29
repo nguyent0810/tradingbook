@@ -25,11 +25,14 @@ function day(i: number): Date {
   return new Date(Date.UTC(2026, 5, 1) + i * 86_400_000);
 }
 
-function bars(count = SETUP_IDX + 1): Gate2BarInput[] {
+type Level = { close: number; high: number; low: number; spike: number };
+const TWENTY: Level = { close: 20, high: 20.2, low: 19.2, spike: 23 };
+
+function bars(count = SETUP_IDX + 1, lvl: Level = TWENTY): Gate2BarInput[] {
   const out: Gate2BarInput[] = [];
   for (let i = 0; i < count; i++) {
-    const high = i === SETUP_IDX - 30 ? 23 : 20.2;
-    out.push({ date: day(i), open: 20, high, low: 19.2, close: 20, volume: 1_000_000 });
+    const high = i === SETUP_IDX - 30 ? lvl.spike : lvl.high;
+    out.push({ date: day(i), open: lvl.close, high, low: lvl.low, close: lvl.close, volume: 1_000_000 });
   }
   return out;
 }
@@ -105,6 +108,8 @@ describe("buildTradeSuggestion — worked HOSE example", () => {
 
   it("stamps the as-of session, the exchange and the evidence status", () => {
     expect(s.asOfSession).toBe("2026-08-09"); // 2026-06-01 + 69 days
+    expect(s.setupSession).toBe("2026-08-09");
+    expect(s.sessionsSinceSetup).toBe(0);
     expect(s.exchange).toBe("HOSE");
     expect(s.exchangeAssumed).toBe(false);
     expect(s.evidence).toEqual({ status: "UNVALIDATED", prospectiveN: 7, checkpointN: 100 });
@@ -131,6 +136,58 @@ describe("buildTradeSuggestion — tick snapping per exchange", () => {
   });
 });
 
+describe("buildTradeSuggestion — tick brackets through the entry point", () => {
+  it("HOSE below 10.000 đ quotes in 10 đ", () => {
+    // Close 8.00 (TR 0.40, zone width 0.24 → no tightening; band 7.44–8.56).
+    // 7.834 → 7.83, 8.076 → 8.08; stop 7.555 → down to 7.55.
+    const s = ok(
+      buildTradeSuggestion(
+        input(
+          { bars: bars(SETUP_IDX + 1, { close: 8, high: 8.08, low: 7.68, spike: 9.2 }) },
+          { pullbackZoneLow: 7.834, pullbackZoneHigh: 8.076, stopLevel: 7.555 }
+        )
+      )
+    );
+    expect(s.entryZone).toEqual({ low: 7.83, high: 8.08 });
+    expect(s.stopZone.structural).toBe(7.55);
+  });
+
+  it("HOSE at 50.000 đ and above quotes in 100 đ", () => {
+    // Close 60.00 (TR 3.00, zone width 1.72 → no tightening; band 55.80–64.20).
+    // 58.74 → 58.70, 60.46 → 60.50; stop 56.97 → down to 56.90.
+    const s = ok(
+      buildTradeSuggestion(
+        input(
+          { bars: bars(SETUP_IDX + 1, { close: 60, high: 60.6, low: 57.6, spike: 69 }) },
+          { pullbackZoneLow: 58.74, pullbackZoneHigh: 60.46, stopLevel: 56.97 }
+        )
+      )
+    );
+    expect(s.entryZone).toEqual({ low: 58.7, high: 60.5 });
+    expect(s.stopZone.structural).toBe(56.9);
+  });
+
+  it("UPCOM quotes in 100 đ at any price and has a ±15% band", () => {
+    // 19.62 → 19.60, 20.23 → 20.20; stop 18.97 → down to 18.90.
+    const s = ok(
+      buildTradeSuggestion(
+        input({ exchange: "UPCOM" }, { pullbackZoneLow: 19.62, pullbackZoneHigh: 20.23, stopLevel: 18.97 })
+      )
+    );
+    expect(s.entryZone).toEqual({ low: 19.6, high: 20.2 });
+    expect(s.stopZone.structural).toBe(18.9);
+    // Ceiling 20 × 1.15 = 23.00: 21.50–22.90 stands as-is on UPCOM, while on
+    // HOSE (ceiling 21.40) the same zone is outside the band.
+    const wide = { pullbackZoneLow: 21.5, pullbackZoneHigh: 22.9 };
+    expect(ok(buildTradeSuggestion(input({ exchange: "UPCOM" }, wide))).entryZone).toEqual({
+      low: 21.5,
+      high: 22.9,
+    });
+    const hose = buildTradeSuggestion(input({}, wide));
+    expect(hose.ok ? "ok" : hose.reason).toBe("ZONE_OUTSIDE_BAND");
+  });
+});
+
 describe("buildTradeSuggestion — next-session band", () => {
   const above = { pullbackZoneLow: 21.0, pullbackZoneHigh: 21.8 };
 
@@ -154,11 +211,37 @@ describe("buildTradeSuggestion — next-session band", () => {
     expect(s.entryZone).toEqual({ low: 18.6, high: 19.0 });
   });
 
-  it("builds the band from the setup session's close, ignoring later bars", () => {
-    const later = [...bars(), { date: day(SETUP_IDX + 1), open: 30, high: 31, low: 29, close: 30, volume: 1 }];
+  it("builds the band from the LATEST session's close when the setup is older", () => {
+    // One more session after the setup closes at 21.00. HOSE band from 21.00:
+    //   floor 21 × 0.93 = 19.53 → up to the 50 đ tick = 19.55
+    //   ceiling 21 × 1.07 = 22.47 → down to the tick = 22.45
+    // so 21.00–21.80 is no longer clipped at the setup-session ceiling 21.40.
+    // Structure (stop, ATR, resistance) still comes from bars through the setup:
+    // min feasible 21.00 − ATR 1.00 = 20.00, R = 21.80 − 18.90 = 2.90.
+    const later = [
+      ...bars(),
+      { date: day(SETUP_IDX + 1), open: 20.5, high: 21.2, low: 20.4, close: 21, volume: 1 },
+    ];
     const s = ok(buildTradeSuggestion(input({ bars: later }, above)));
-    expect(s.asOfSession).toBe("2026-08-09");
-    expect(s.entryZone).toEqual({ low: 21.0, high: 21.4 });
+    expect(s.entryZone).toEqual({ low: 21.0, high: 21.8 });
+    expect(s.stopZone).toEqual({ structural: 18.9, minFeasible: 20, low: 18.9, high: 20 });
+    expect(s.r.perShareGross).toBeCloseTo(2.9, 9);
+    expect(s.asOfSession).toBe("2026-08-10");
+    expect(s.setupSession).toBe("2026-08-09");
+    expect(s.sessionsSinceSetup).toBe(1);
+  });
+
+  it("uses the latest band for the outside-band check too", () => {
+    // Latest close 21.00: floor 19.55, so a 18.40–19.00 zone is outside it,
+    // though it overlapped the setup-session band (floor 18.60).
+    const later = [
+      ...bars(),
+      { date: day(SETUP_IDX + 1), open: 20.5, high: 21.2, low: 20.4, close: 21, volume: 1 },
+    ];
+    const r = buildTradeSuggestion(
+      input({ bars: later }, { pullbackZoneLow: 18.4, pullbackZoneHigh: 19.0, stopLevel: 18.0 })
+    );
+    expect(r.ok ? "ok" : r.reason).toBe("ZONE_OUTSIDE_BAND");
   });
 });
 

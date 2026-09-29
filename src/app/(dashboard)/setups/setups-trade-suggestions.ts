@@ -9,7 +9,7 @@ import {
 } from "@/lib/trades/trade-suggestion";
 
 /**
- * Calendar days of bars to load before the latest setup session. The builder
+ * Calendar days of bars to load before the oldest setup session. The builder
  * needs 65 sessions; 200 calendar days is ~135 sessions even across Tết.
  */
 const BAR_LOOKBACK_DAYS = 200;
@@ -35,20 +35,30 @@ export type LoadedTradeSuggestions = {
  * Edge of the trade suggestion: loads bars, exchange and the prospective count,
  * then hands them to the pure builder. A failed lookup leaves the map empty
  * rather than inventing inputs.
+ *
+ * Bars are loaded through `latestSession` (the newest stored bar), not just the
+ * setups' own session: the next-session band must come from the most recent
+ * close, and a setup can be older than the data.
  */
 export async function loadTradeSuggestions(
-  candidates: readonly SuggestionCandidate[]
+  candidates: readonly SuggestionCandidate[],
+  latestSession: Date | null
 ): Promise<LoadedTradeSuggestions> {
   const prospectiveNPromise = loadProspectiveCount();
   if (candidates.length === 0) {
     return { bySetupId: new Map(), prospectiveN: await prospectiveNPromise, error: null };
   }
 
-  const through = candidates.reduce(
+  const newestSetup = candidates.reduce(
     (latest, c) => (c.barDate > latest ? c.barDate : latest),
     candidates[0]!.barDate
   );
-  const from = new Date(through.getTime() - BAR_LOOKBACK_DAYS * 86_400_000);
+  const oldestSetup = candidates.reduce(
+    (oldest, c) => (c.barDate < oldest ? c.barDate : oldest),
+    candidates[0]!.barDate
+  );
+  const through = latestSession && latestSession > newestSetup ? latestSession : newestSetup;
+  const from = new Date(oldestSetup.getTime() - BAR_LOOKBACK_DAYS * 86_400_000);
   const symbolIds = [...new Set(candidates.map((c) => c.symbolId))];
 
   const [prospectiveN, loaded] = await Promise.all([
