@@ -11,4 +11,6 @@ export type { TableSort, SortDirection } from "./data-table";
 
 export { Sparkline } from "./sparkline";
 
+export { SuggestionEvidence } from "./suggestion-evidence";
+
 export { TerminalRouteError } from "./route-error";

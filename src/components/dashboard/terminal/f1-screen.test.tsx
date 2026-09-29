@@ -185,6 +185,35 @@ describe("trạng thái bắt buộc", () => {
     expect(html).toContain("run_4182");
   });
 
+  it("hàng không tính được gợi ý hiện 'Không đủ dữ liệu' kèm lý do, gộp bốn ô gợi ý", () => {
+    const reason = "Không đủ dữ liệu — mới có 40 phiên giá, cần ít nhất 65";
+    const html = render({
+      model: {
+        ...MODEL,
+        setups: [
+          {
+            ...MODEL.setups[0],
+            zoneLow: null,
+            zoneHigh: null,
+            stop: null,
+            target2R: null,
+            topRisk: null,
+            suggestionUnavailable: reason,
+          },
+        ],
+      },
+    });
+    // Một ô trải qua VÙNG VÀO · SL · 2R · RỦI RO CHÍNH, không phải bốn ô "—".
+    expect(html).toMatch(/<td colSpan="4"[^>]*>Không đủ dữ liệu — mới có 40 phiên giá/);
+    expect(html).toContain(reason);
+    // Không lọt số của hàng mẫu (vùng 133,50–136,80, SL 129,40, 2R 153,60).
+    expect(html).not.toContain("133,50–136,80");
+    expect(html).not.toContain("129,40");
+    expect(html).not.toContain("153,60");
+    // Trạng thái kiểm chứng vẫn ở đầu bảng.
+    expect(html).toContain("Chưa kiểm chứng (12/100)");
+  });
+
   it("phán quyết không có cơ sở thì chặn nút CHỐT KẾ HOẠCH và hiện bằng chứng", () => {
     const html = render({
       model: {

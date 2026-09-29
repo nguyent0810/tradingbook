@@ -19,10 +19,13 @@ import {
   type RiskSeverity,
 } from "@/lib/trades/trade-suggestion-copy";
 import {
-  ADR_0001_HREF,
   RISK_SEVERITY_TOKENS,
-  evidenceStatusLabel,
+  SUGGESTION_NOT_LOADED_REASON,
+  evidenceStatus,
+  suggestionUnavailableText,
+  type EvidenceStatus,
 } from "@/lib/terminal/trade-suggestion-display";
+import type { SizingUnavailable } from "@/lib/trades/screen-trade-suggestions";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -102,7 +105,7 @@ export type F2Suggestion = {
   targets: F2SuggestionRow[];
   /** Rủi ro, mức cao trước, rồi chú ý, rồi thông tin. */
   risks: F2SuggestionRisk[];
-  evidence: { label: string; href: string };
+  evidence: EvidenceStatus;
 };
 
 export type F2Detail = {
@@ -187,26 +190,18 @@ function num(value: number, digits = 0): string {
 
 const FAINT = "var(--tm-text-faint)";
 
-const RISK_TOKENS = RISK_SEVERITY_TOKENS;
-
-function evidenceLabel(prospectiveN: number | null, checkpointN = CHECKPOINT_N): string {
-  return evidenceStatusLabel(prospectiveN, checkpointN);
-}
-
 function buildSuggestion(
   result: TradeSuggestionResult | undefined,
   prospectiveN: number | null
 ): F2Suggestion {
   if (!result || !result.ok) {
     return {
-      unavailable: `Không đủ dữ liệu — ${
-        result ? result.detail : "chưa nạp được nến giá của mã này"
-      }`,
+      unavailable: suggestionUnavailableText(result ? result.detail : SUGGESTION_NOT_LOADED_REASON),
       asOf: null,
       rows: [],
       targets: [],
       risks: [],
-      evidence: { label: evidenceLabel(prospectiveN), href: ADR_0001_HREF },
+      evidence: evidenceStatus(prospectiveN, CHECKPOINT_N),
     };
   }
   const s = result.suggestion;
@@ -249,15 +244,15 @@ function buildSuggestion(
     // Sorted here as well as in the builder: the panel's order is F2's promise.
     // `sort` is stable, so equal severities keep the builder's order.
     risks: [...s.risks]
-      .sort((a, b) => RISK_TOKENS[a.severity].rank - RISK_TOKENS[b.severity].rank)
+      .sort((a, b) => RISK_SEVERITY_TOKENS[a.severity].rank - RISK_SEVERITY_TOKENS[b.severity].rank)
       .map((r) => ({
         code: r.code,
         severity: r.severity,
-        label: RISK_TOKENS[r.severity].label,
+        label: RISK_SEVERITY_TOKENS[r.severity].label,
         text: r.text,
-        color: RISK_TOKENS[r.severity].color,
+        color: RISK_SEVERITY_TOKENS[r.severity].color,
       })),
-    evidence: { label: evidenceLabel(s.evidence.prospectiveN, s.evidence.checkpointN), href: ADR_0001_HREF },
+    evidence: evidenceStatus(s.evidence.prospectiveN, s.evidence.checkpointN),
   };
 }
 
@@ -315,20 +310,8 @@ function buildKpis(
   ];
 }
 
-/**
- * Vì sao trang không có đầu vào định cỡ cho gợi ý lệnh. Mỗi trường hợp chặn
- * tính size thay vì đoán, và khớp với chỗ server từ chối ghi lệnh.
- */
-export type SizingUnavailable =
-  /** Chưa đặt vốn tài khoản. */
-  | "NO_EQUITY"
-  /**
-   * Không đọc được các lệnh đang mở. KHÔNG phải "không có vị thế nào": coi như 0
-   * sẽ cho khối lượng CAO HƠN trần mà server áp khi ghi lệnh.
-   */
-  | "OPEN_TRADES_UNREADABLE"
-  /** Không đọc được giá trị giao dịch bình quân 20 phiên: server cũng fail closed ở đây. */
-  | "LIQUIDITY_UNREADABLE";
+/** Vì sao trang không có đầu vào định cỡ cho gợi ý lệnh — định nghĩa cạnh bộ nạp dùng chung. */
+export type { SizingUnavailable };
 
 export type SizingInput = {
   equityVnd: number | null;
@@ -376,7 +359,7 @@ function buildSizing(
       sizingBlocked: null,
       sizingWarnings: [
         `Không đủ dữ liệu để tính size tham khảo — ${
-          suggestion ? suggestion.detail : "chưa nạp được nến giá của mã này"
+          suggestion ? suggestion.detail : SUGGESTION_NOT_LOADED_REASON
         }`,
       ],
     };

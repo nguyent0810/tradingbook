@@ -1,6 +1,15 @@
 "use client";
 
-import { EmptyState, Meter, Panel, SortTh, Sparkline, Tag, useTableSort } from "@/components/terminal";
+import {
+  EmptyState,
+  Meter,
+  Panel,
+  SortTh,
+  Sparkline,
+  SuggestionEvidence,
+  Tag,
+  useTableSort,
+} from "@/components/terminal";
 import {
   GAP,
   fmtNum,
@@ -10,6 +19,7 @@ import {
   semanticTone,
 } from "@/lib/format/vn";
 import type { F1SetupRow } from "@/lib/dashboard/terminal/f1-view-model";
+import type { EvidenceStatus } from "@/lib/terminal/trade-suggestion-display";
 
 type SortKey = "symbol" | "rankScore" | "close" | "rs20" | "healthScore";
 
@@ -35,8 +45,8 @@ export function SetupsTable({
   selected: string | null;
   onSelect: (symbol: string) => void;
   scanRunId: string | null;
-  /** Trạng thái kiểm chứng of the suggestions (ADR 0003). */
-  evidence: { label: string; href: string };
+  /** Trạng thái kiểm chứng của các gợi ý (ADR 0003). */
+  evidence: EvidenceStatus;
 }) {
   const sort = useTableSort<SortKey>("rankScore");
 
@@ -73,16 +83,7 @@ export function SetupsTable({
             className="tm-mono"
             style={{ fontSize: 9, letterSpacing: ".06em", color: "var(--tm-text-dim)" }}
           >
-            GỢI Ý THAM KHẢO ·{" "}
-            <a
-              href={evidence.href}
-              target="_blank"
-              rel="noreferrer"
-              style={{ color: "var(--tm-accent)" }}
-            >
-              {evidence.label}
-            </a>{" "}
-            · CLICK TIÊU ĐỀ ĐỂ SẮP XẾP
+            <SuggestionEvidence evidence={evidence} /> · CLICK TIÊU ĐỀ ĐỂ SẮP XẾP
           </span>
         ) : undefined
       }

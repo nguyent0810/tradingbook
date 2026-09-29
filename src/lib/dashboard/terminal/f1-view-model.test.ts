@@ -148,12 +148,11 @@ function candidate(over: Partial<SurfacedCandidateHealthView>): SurfacedCandidat
 }
 
 /**
- * A Gợi ý lệnh for FPT as the builder would return it. Its numbers differ on
- * purpose from the raw scanner row (zone 133,5–136,8, stop 129,4), so a row
- * that still read the raw setup would fail. By hand, HOSE tick 0,1 above 50k:
- * entry zone 134,0–136,5 (tightened, snapped); stop zone 128,1 (minimum
- * feasible) to 129,3 (structural 129,4 snapped down); gross R = 136,5 − 128,1
- * = 8,4; the 2R price, gain after costs = 2 × net R, is 153,6.
+ * Gợi ý lệnh của FPT đúng hình dạng bộ dựng trả về. Số CỐ Ý khác hàng thô của bộ
+ * quét (vùng 133,5–136,8, cắt lỗ 129,4), để một hàng còn đọc hàng thô sẽ trượt.
+ * Tính tay, bước giá HOSE 0,1 trên 50 nghìn: vùng vào 134,0–136,5 (đã siết, làm
+ * tròn); vùng SL 128,1 (tối thiểu khả thi) tới 129,3 (cấu trúc 129,4 làm tròn
+ * xuống); R gộp = 136,5 − 128,1 = 8,4; giá 2R (lãi sau phí = 2 × R ròng) là 153,6.
  */
 function fptSuggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestionResult {
   return {
@@ -174,7 +173,7 @@ function fptSuggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestionResu
       ],
       size: null,
       reasons: [],
-      // Sorted high → warn → info, as the builder returns them.
+      // Đã sắp cao → chú ý → thông tin, đúng như bộ dựng trả về.
       risks: [
         { code: "gap_through_stop", severity: "high", text: "Một phiên giảm sàn đi xuyên vùng SL." },
         { code: "regime_warning", severity: "warn", text: "Cổng 1 đang ở mức cảnh báo." },
@@ -335,9 +334,9 @@ describe("Cổng 1", () => {
 
 describe("bảng thiết lập A/B", () => {
   it("ghép giá / sức khoẻ từ ứng viên, vùng vào / SL từ gợi ý lệnh", () => {
-    // Changed in #16: zone and stop used to be the raw scanner row (133,5–136,8
-    // and 129,4). They now come from the Gợi ý lệnh, as on F2, so F1 shows the
-    // tick-snapped, band-clipped zone and the stop-zone bottom R is built on.
+    // Đổi ở #16: vùng và cắt lỗ trước đây là hàng thô của bộ quét (133,5–136,8 và
+    // 129,4). Nay lấy từ Gợi ý lệnh như F2, nên F1 hiện vùng đã làm tròn bước giá,
+    // đã cắt vào biên độ, và đáy vùng SL mà R dựa vào.
     const fpt = buildF1ViewModel(input()).setups.find((r) => r.symbol === "FPT");
     expect(fpt).toMatchObject({
       tier: "A",
@@ -375,6 +374,10 @@ describe("bảng thiết lập A/B", () => {
     expect(model.setups).toHaveLength(2);
     expect(model.setups[0].close).toBeNull();
     expect(model.setups[0].stop).toBeNull();
+    // Lý do riêng, trung thực: thiếu hàng ứng viên KHÁC với nạp nến thất bại.
+    expect(model.setups[0].suggestionUnavailable).toBe(
+      "Không đủ dữ liệu — không nạp được hàng thiết lập của mã này nên chưa dựng được gợi ý"
+    );
   });
 
   it("màu RS20 theo ngưỡng bộ quét (≥6 đạt)", () => {
@@ -394,11 +397,11 @@ describe("tóm tắt gợi ý lệnh trên bảng A/B (#16)", () => {
     expect(fpt?.suggestionUnavailable).toBeNull();
     expect(fpt?.zoneLow).toBe(s.entryZone.low); // 134,0
     expect(fpt?.zoneHigh).toBe(s.entryZone.high); // 136,5
-    // The stop is the BOTTOM of the stop zone: R runs to it (worst case).
+    // Cắt lỗ là ĐÁY vùng SL: R tính tới đó (kịch bản xấu nhất).
     expect(fpt?.stop).toBe(s.stopZone.low); // 128,1
     expect(fpt?.target2R).toBe(153.6);
     expect(fpt?.target2R).toBe(s.targets.find((t) => t.r === 2)?.price);
-    // risks[0] is the highest severity: the gap through the stop (CAO, red).
+    // risks[0] là mức nặng nhất: gap xuyên vùng SL (CAO, đỏ).
     expect(fpt?.topRisk).toEqual({
       label: "CAO",
       text: "Một phiên giảm sàn đi xuyên vùng SL.",
@@ -444,7 +447,7 @@ describe("tóm tắt gợi ý lệnh trên bảng A/B (#16)", () => {
     expect(fpt?.suggestionUnavailable).toBe(
       "Không đủ dữ liệu — mới có 40 phiên giá, cần ít nhất 65"
     );
-    // Never 0 and never the raw scanner zone in its place.
+    // Không bao giờ là 0, cũng không thay bằng vùng thô của bộ quét.
     expect(fpt?.zoneLow).toBeNull();
     expect(fpt?.zoneHigh).toBeNull();
     expect(fpt?.stop).toBeNull();
@@ -453,7 +456,7 @@ describe("tóm tắt gợi ý lệnh trên bảng A/B (#16)", () => {
   });
 
   it("chưa nạp được gợi ý cho mã thì cũng là 'Không đủ dữ liệu', không phải số thô", () => {
-    // VCB has no entry in the map (its bars could not be loaded).
+    // VCB không có mục trong map (không nạp được nến của nó).
     const vcb = buildF1ViewModel(input()).setups.find((r) => r.symbol === "VCB");
     expect(vcb?.suggestionUnavailable).toBe(
       "Không đủ dữ liệu — chưa nạp được nến giá của mã này"

@@ -10,7 +10,7 @@ vi.mock("@/lib/trading-account-risk-config", () => ({
   })),
 }));
 
-import { safeLoadPositionSizingDefaults, suggestionSizingInput } from "./setups-position-sizing-defaults";
+import { safeLoadPositionSizingDefaults, suggestionSizingInput } from "./position-sizing-defaults";
 import { getTradingAccountEquityVnd } from "@/lib/trading-account-risk-config";
 
 const SESSION = new Date(Date.UTC(2026, 6, 17));

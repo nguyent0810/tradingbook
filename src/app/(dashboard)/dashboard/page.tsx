@@ -41,7 +41,7 @@ import { buildF1ViewModel } from "@/lib/dashboard/terminal/f1-view-model";
 import { readLiveGate1 } from "@/lib/terminal/gate1-live";
 import { resolveTerminalVerdict } from "@/lib/terminal/verdict-resolve";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
-import { loadScreenTradeSuggestions } from "@/app/(dashboard)/setups/setups-trade-suggestions";
+import { loadScreenTradeSuggestions } from "@/lib/trades/load-screen-trade-suggestions";
 import { F1Screen } from "@/components/dashboard/terminal/f1-screen";
 import { fmtSessionDate } from "@/lib/format/vn";
 import "@/styles/terminal-f1.css";

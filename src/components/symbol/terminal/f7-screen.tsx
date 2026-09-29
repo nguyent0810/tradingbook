@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { EmptyState, ErrorState, Panel, StaleBanner } from "@/components/terminal";
+import {
+  EmptyState,
+  ErrorState,
+  Panel,
+  StaleBanner,
+  SuggestionEvidence,
+} from "@/components/terminal";
 import { GAP, fmtNum, fmtPctSigned, priceToneClass } from "@/lib/format/vn";
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
 import type { F7ViewModel } from "@/lib/symbol/terminal/f7-view-model";
@@ -218,15 +224,7 @@ export function F7Screen({
           </div>
           {model.evidence ? (
             <div className="tm-mono" style={{ fontSize: 10, color: "var(--tm-text-dim)", padding: "2px 0" }}>
-              GỢI Ý THAM KHẢO ·{" "}
-              <a
-                href={model.evidence.href}
-                target="_blank"
-                rel="noreferrer"
-                style={{ color: "var(--tm-accent)" }}
-              >
-                {model.evidence.label}
-              </a>
+              <SuggestionEvidence evidence={model.evidence} />
               {model.suggestionUnavailable ? (
                 <span style={{ color: "var(--tm-text-faint)" }}> · {model.suggestionUnavailable}</span>
               ) : null}

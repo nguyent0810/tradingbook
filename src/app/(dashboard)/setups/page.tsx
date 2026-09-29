@@ -15,7 +15,7 @@ import { fmtSessionDate, fmtSessionStamp } from "@/lib/format/vn";
 import { scanBehindMarketNotice } from "@/lib/terminal/scan-session-staleness";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
-import { loadScreenTradeSuggestions } from "./setups-trade-suggestions";
+import { loadScreenTradeSuggestions } from "@/lib/trades/load-screen-trade-suggestions";
 import {
   loadRsDiagnosticsForSetupsCached,
   loadRsNearMissWatchlistForSetupsCached,
@@ -63,7 +63,7 @@ async function SetupsContent() {
       : null,
   });
 
-  // Same loader as F1 and F7 (#16), so all three screens show one suggestion.
+  // Cùng bộ nạp với F1 và F7 (#16), nên ba màn hiện một gợi ý lệnh duy nhất.
   const [spark, suggestions] = await Promise.all([
     loadSparkHistory(candidatesWithHealth, base.expectedSession),
     loadScreenTradeSuggestions({

@@ -217,7 +217,13 @@ export type TradeSuggestionFailure =
   | "NO_REFERENCE_PRICE"
   | "DEGENERATE_ZONE"
   | "ZONE_OUTSIDE_BAND"
-  | "STOP_NOT_BELOW_ENTRY";
+  | "STOP_NOT_BELOW_ENTRY"
+  /**
+   * Never returned by the builder: the screen loader records it when a build
+   * throws unexpectedly, so that one row reads "không đủ dữ liệu" instead of
+   * the whole batch failing.
+   */
+  | "BUILD_FAILED";
 
 export type TradeSuggestionResult =
   | { ok: true; suggestion: TradeSuggestion }

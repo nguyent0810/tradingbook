@@ -8,7 +8,7 @@ import { loadSymbolAdvVndBatch } from "@/lib/trades/symbol-adv";
 import { POSITION_SIZING_DEFAULTS, openExposureVnd } from "@/lib/position-sizing";
 import type { OpenTradeRisk, TradeSuggestionSizingInput } from "@/lib/trades/trade-suggestion";
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
-import type { SizingUnavailable } from "@/lib/setups/terminal/f2-view-model";
+import type { SizingUnavailable } from "@/lib/trades/screen-trade-suggestions";
 
 export type PositionSizingDefaultsResult = {
   equityVnd: number | null;
@@ -95,7 +95,7 @@ export async function safeLoadPositionSizingDefaults(
     }
     return { equityVnd, positionSizingConfig, advBySymbolId: adv.map, advUnavailable: false, error: null };
   } catch (e) {
-    console.error("[setups] safeLoadPositionSizingDefaults failed:", e);
+    console.error("[trade-suggestion] safeLoadPositionSizingDefaults failed:", e);
     return {
       equityVnd: null,
       positionSizingConfig: EMPTY_POSITION_SIZING_CONFIG,

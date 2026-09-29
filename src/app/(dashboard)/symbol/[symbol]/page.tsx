@@ -9,7 +9,7 @@ import { buildF7ViewModel, type Bar } from "@/lib/symbol/terminal/f7-view-model"
 import { loadTerminalVerdict } from "@/lib/terminal/load-terminal-verdict";
 import { getMarketRegimeFromDb } from "@/lib/playbook/get-market-regime";
 import { readLiveGate1 } from "@/lib/terminal/gate1-live";
-import { loadScreenTradeSuggestions } from "@/app/(dashboard)/setups/setups-trade-suggestions";
+import { loadScreenTradeSuggestions } from "@/lib/trades/load-screen-trade-suggestions";
 import { loadRsDiagnosticUiForSymbols } from "@/lib/scanner/gate2/load-rs-diagnostics";
 import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-session";
 import { fmtSessionDate } from "@/lib/format/vn";
@@ -147,29 +147,31 @@ async function SymbolContent({ symbolKey }: { symbolKey: string }) {
   const bars: Bar[] = barRows.slice().reverse();
 
 
-  // Không có nến ⇒ không có phiên nào để đo RS. Lấy `new Date()` làm phiên là tự
-  // đặt ra một mốc không có thật; bỏ hẳn truy vấn và để RS20 là gap.
-  const rsMap =
-    bars.length > 0
-      ? await loadRsDiagnosticUiForSymbols(prisma, [stockSymbol.symbol], bars[bars.length - 1].date)
-          .catch(optional("loadRsDiagnosticUiForSymbols()", new Map()))
-      : new Map();
-
   const candidateRow = latestScan.candidate;
 
+  // RS20 và gợi ý lệnh không phụ thuộc nhau ⇒ nạp song song.
+  //
   // Gợi ý lệnh (#16) từ CÙNG bộ nạp với F1 và F2: ADV tại phiên của thiết lập
   // (đúng mốc server action dùng khi ghi lệnh), cài đặt size, lệnh đang mở và
   // phán quyết phiên. Nến được nạp tới phiên mới nhất của chính mã này — không
   // mã nào có nến mới hơn nến của chính nó, nên bộ nến giống hệt F2 nạp.
   // Vốn tài khoản cho phiếu ghi lệnh cũng lấy từ đây (cùng hàm, một lần đọc).
-  const suggestions = await loadScreenTradeSuggestions({
-    userId: session.userId,
-    candidates: candidateRow ? [candidateRow] : [],
-    latestSession: bars.length > 0 ? bars[bars.length - 1].date : null,
-    expectedSession: marketSession,
-    gate1Level: readLiveGate1(regime).level,
-    verdictLevel: verdict.level,
-  });
+  const [rsMap, suggestions] = await Promise.all([
+    // Không có nến ⇒ không có phiên nào để đo RS. Lấy `new Date()` làm phiên là
+    // tự đặt ra một mốc không có thật; bỏ hẳn truy vấn và để RS20 là gap.
+    bars.length > 0
+      ? loadRsDiagnosticUiForSymbols(prisma, [stockSymbol.symbol], bars[bars.length - 1].date)
+          .catch(optional("loadRsDiagnosticUiForSymbols()", new Map()))
+      : Promise.resolve(new Map()),
+    loadScreenTradeSuggestions({
+      userId: session.userId,
+      candidates: candidateRow ? [candidateRow] : [],
+      latestSession: bars.length > 0 ? bars[bars.length - 1].date : null,
+      expectedSession: marketSession,
+      gate1Level: readLiveGate1(regime).level,
+      verdictLevel: verdict.level,
+    }),
+  ]);
   errors.push(...suggestions.errors);
   const equityVnd = suggestions.sizingDefaults.equityVnd;
 

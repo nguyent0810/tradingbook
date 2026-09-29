@@ -12,9 +12,12 @@ import { healthShortLabel, healthTone, lifecycleShortLabel, lifecycleTone, rsTon
 import { gate1Color, gate1Label, verdictTokens } from "@/lib/terminal/verdict-tokens";
 import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
 import {
-  ADR_0001_HREF,
   RISK_SEVERITY_TOKENS,
-  evidenceStatusLabel,
+  SETUP_ROW_MISSING_REASON,
+  SUGGESTION_NOT_LOADED_REASON,
+  evidenceStatus,
+  suggestionUnavailableText,
+  type EvidenceStatus,
 } from "@/lib/terminal/trade-suggestion-display";
 
 /**
@@ -69,16 +72,16 @@ export type F1SetupRow = {
   rankScore: number;
   close: number | null;
   changePct: number | null;
-  /** Vùng vào of the Gợi ý lệnh; null when it could not be computed. */
+  /** Vùng vào của Gợi ý lệnh; `null` khi không tính được. */
   zoneLow: number | null;
   zoneHigh: number | null;
-  /** Bottom of the Vùng SL: where worst-case R ends. */
+  /** Đáy Vùng SL — nơi R xấu nhất kết thúc. */
   stop: number | null;
-  /** The 2R Mốc chốt price. */
+  /** Giá Mốc chốt 2R. */
   target2R: number | null;
-  /** The suggestion's highest-severity risk. */
+  /** Rủi ro mức nặng nhất của gợi ý. */
   topRisk: { label: string; text: string; color: Tone } | null;
-  /** "Không đủ dữ liệu — <lý do>" when there is no suggestion; null otherwise. */
+  /** "Không đủ dữ liệu — <lý do>" khi không có gợi ý; ngược lại `null`. */
   suggestionUnavailable: string | null;
   rs20: number | null;
   rsColor: Tone;
@@ -147,8 +150,8 @@ export type F1ViewModel = {
   gate1Note: string;
   setups: F1SetupRow[];
   setupsEmptyReason: string | null;
-  /** Trạng thái kiểm chứng of the suggestions in the table (ADR 0003). */
-  setupsEvidence: { label: string; href: string };
+  /** Trạng thái kiểm chứng của các gợi ý trong bảng (ADR 0003). */
+  setupsEvidence: EvidenceStatus;
   nearMiss: F1NearMissRow[];
   nearMissEmptyReason: string | null;
   funnel: F1FunnelRow[];
@@ -216,15 +219,18 @@ function funnelBarWidth(value: number | null, universe: number | null): number {
 
 export type F1ViewModelInput = {
   cockpit: DecisionCockpitDto;
-  /** Ứng viên đã kèm sức khoẻ — nguồn giá / vùng mua / cắt lỗ cho bảng A/B. */
+  /**
+   * Ứng viên đã kèm sức khoẻ — nguồn giá, sức khoẻ và id thiết lập cho bảng A/B.
+   * Vùng vào / SL / 2R KHÔNG lấy từ đây mà từ `suggestionBySetupId`.
+   */
   candidates: SurfacedCandidateHealthView[];
   rsDiagnosticsBySymbol: Record<string, RsDiagnosticUi> | undefined;
   /**
-   * Gợi ý lệnh by setup (candidate) id, from the same loader F2 uses. A missing
-   * entry means it could not be loaded and reads as "không đủ dữ liệu".
+   * Gợi ý lệnh theo id thiết lập, từ cùng bộ nạp với F2 và F7. Thiếu mục nghĩa
+   * là không nạp được nến/sàn — hiện "không đủ dữ liệu", không bao giờ là số thô.
    */
   suggestionBySetupId: Map<string, TradeSuggestionResult>;
-  /** Registry count; null = could not be read ("N không rõ"). */
+  /** Số quan sát prospective; `null` = không đọc được ("N không rõ"). */
   prospectiveN: number | null;
   /** Giá đóng 20 phiên theo symbolId, cho sparkline và cột +/-. */
   sparkBySymbolId: Map<string, number[]>;
@@ -366,26 +372,27 @@ type F1SuggestionSummary = Pick<
   "zoneLow" | "zoneHigh" | "stop" | "target2R" | "topRisk" | "suggestionUnavailable"
 >;
 
+function unavailableSummary(reason: string): F1SuggestionSummary {
+  return {
+    zoneLow: null,
+    zoneHigh: null,
+    stop: null,
+    target2R: null,
+    topRisk: null,
+    suggestionUnavailable: suggestionUnavailableText(reason),
+  };
+}
+
 /**
- * The compact Gợi ý lệnh of one row: the builder's numbers as they are, never
- * the raw scanner row, so F1 agrees with F2 and F7. Without a suggestion every
- * number is a gap and the row says why (#11 story 29).
+ * Tóm tắt Gợi ý lệnh của một hàng: số của bộ dựng giữ nguyên, không bao giờ lấy
+ * hàng thô của bộ quét, để F1 khớp F2 và F7. Không có gợi ý thì mọi ô số là gap
+ * và hàng nói rõ lý do (#11 story 29).
  */
 function summarizeSuggestion(result: TradeSuggestionResult | undefined): F1SuggestionSummary {
-  if (!result || !result.ok) {
-    return {
-      zoneLow: null,
-      zoneHigh: null,
-      stop: null,
-      target2R: null,
-      topRisk: null,
-      suggestionUnavailable: `Không đủ dữ liệu — ${
-        result ? result.detail : "chưa nạp được nến giá của mã này"
-      }`,
-    };
-  }
+  if (!result) return unavailableSummary(SUGGESTION_NOT_LOADED_REASON);
+  if (!result.ok) return unavailableSummary(result.detail);
   const s = result.suggestion;
-  // The builder returns risks sorted high → warn → info; the first is the worst.
+  // Bộ dựng trả rủi ro đã sắp cao → chú ý → thông tin; phần tử đầu là nặng nhất.
   const top = s.risks[0];
   return {
     zoneLow: s.entryZone.low,
@@ -418,7 +425,11 @@ function buildSetups(input: F1ViewModelInput): F1SetupRow[] {
       rankScore: candidate.rankScore,
       close: finite(row?.close),
       changePct: sessionChangePct(spark),
-      ...summarizeSuggestion(row ? input.suggestionBySetupId.get(row.id) : undefined),
+      // Không có hàng ứng viên thì không có id để tra gợi ý — lý do khác với nạp
+      // nến thất bại, nên nói riêng.
+      ...(row
+        ? summarizeSuggestion(input.suggestionBySetupId.get(row.id))
+        : unavailableSummary(SETUP_ROW_MISSING_REASON)),
       rs20,
       rsColor: rsTone(rs20),
       healthLabel: healthShortLabel(candidate.healthLevel),
@@ -551,10 +562,7 @@ export function buildF1ViewModel(input: F1ViewModelInput): F1ViewModel {
     setups: buildSetups(input),
     setupsEmptyReason:
       cockpit.opportunity.candidates.length === 0 ? cockpit.opportunity.emptyReason : null,
-    setupsEvidence: {
-      label: evidenceStatusLabel(input.prospectiveN, CHECKPOINT_N),
-      href: ADR_0001_HREF,
-    },
+    setupsEvidence: evidenceStatus(input.prospectiveN, CHECKPOINT_N),
     nearMiss: buildNearMiss(cockpit),
     nearMissEmptyReason:
       cockpit.opportunity.nearMiss.length === 0

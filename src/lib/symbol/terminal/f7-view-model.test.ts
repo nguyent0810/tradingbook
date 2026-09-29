@@ -23,9 +23,9 @@ function bar(i: number, close: number, over: Partial<Bar> = {}): Bar {
 }
 
 /**
- * A Gợi ý lệnh for HPG shaped as the builder returns it. Only the prices the
- * chart draws matter here: entry zone 26,9–27,4, stop zone 25,8–26,1, and the
- * 1R/2R/3R prices 29,0 / 30,6 / 32,2 (R = 27,4 − 25,8 = 1,6 gross).
+ * Gợi ý lệnh của HPG đúng hình dạng bộ dựng trả về. Ở đây chỉ các mức giá biểu
+ * đồ vẽ là quan trọng: vùng vào 26,9–27,4, vùng SL 25,8–26,1, và giá 1R/2R/3R
+ * 29,0 / 30,6 / 32,2 (R gộp = 27,4 − 25,8 = 1,6).
  */
 function suggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestionResult {
   return {
@@ -135,11 +135,11 @@ describe("bảng giá", () => {
     const model = buildF7ViewModel(input());
     // Phiên cuối là 25 + 29×0,1 = 27,9; phiên trước là 27,8.
     expect(quote(model, "THAM CHIẾU")?.value).toBe("27,80");
-    // Changed in #16 (follow-up from #14): the limits now go through
-    // `sessionBand`, so they are quotable prices on the HOSE tick (0,05 between
-    // 10.000 and 50.000 đ). Ceiling 27,8 × 1,07 = 29,746 rounds DOWN to 29,70
-    // (was the unsnapped 29,75); floor 27,8 × 0,93 = 25,854 rounds UP to 25,90
-    // (was 25,85, a price below the real floor).
+    // Đổi ở #16 (việc còn lại từ #14): trần/sàn nay đi qua `sessionBand`, nên là
+    // giá đặt được trên bước giá HOSE (0,05 từ 10.000 tới 50.000 đ). Trần
+    // 27,8 × 1,07 = 29,746 làm tròn XUỐNG thành 29,70 (trước là 29,75 chưa làm
+    // tròn); sàn 27,8 × 0,93 = 25,854 làm tròn LÊN thành 25,90 (trước là 25,85,
+    // một giá nằm dưới sàn thật).
     expect(quote(model, "TRẦN")?.value).toBe("29,70");
     expect(quote(model, "SÀN")?.value).toBe("25,90");
   });
@@ -216,8 +216,8 @@ describe("biểu đồ", () => {
   it("thang đo BAO cả vùng mua và cắt lỗ nằm ngoài dải nến", () => {
     // Cắt lỗ 20 nằm dưới đáy 64 phiên (≈24,6). Nếu thang đo chỉ lấy min/max của
     // nến, vạch cắt lỗ sẽ rơi xuống dải khối lượng hoặc bị cắt mất.
-    // #16: the stop is drawn from the suggestion's stop zone now, so the low
-    // stop is set there instead of on the raw scanner row.
+    // #16: cắt lỗ nay vẽ từ vùng SL của gợi ý, nên mức thấp đặt ở đó thay vì ở
+    // hàng thô của bộ quét.
     const model = buildF7ViewModel(
       input({
         suggestion: suggestion({
@@ -233,7 +233,7 @@ describe("biểu đồ", () => {
   });
 
   it("vùng mua nằm trên đỉnh nến cũng không bị cắt", () => {
-    // #16: the zone comes from the suggestion's entry zone (was the raw row).
+    // #16: vùng lấy từ vùng vào của gợi ý (trước là hàng thô).
     const model = buildF7ViewModel(
       input({
         suggestion: suggestion({
@@ -260,10 +260,10 @@ describe("biểu đồ", () => {
 });
 
 describe("gợi ý lệnh trên biểu đồ (#16)", () => {
-  // By hand. Bars: close 25,0 + 0,1i (i = 0..29), high = close + 0,3, low =
-  // close − 0,4 ⇒ lowest low 24,6, highest high 28,2. The 3R price 32,2 is above
-  // every candle, so the scale runs 24,6..32,2 (range 7,6) and the price area is
-  // the top 78% of the frame: y(v) = (32,2 − v) / 7,6 × 0,78.
+  // Tính tay. Nến: đóng cửa 25,0 + 0,1i (i = 0..29), cao = đóng + 0,3, thấp =
+  // đóng − 0,4 ⇒ đáy thấp nhất 24,6, đỉnh cao nhất 28,2. Giá 3R 32,2 nằm trên mọi
+  // nến, nên thang đo chạy 24,6..32,2 (khoảng 7,6) và vùng giá chiếm 78% trên của
+  // khung: y(v) = (32,2 − v) / 7,6 × 0,78.
   const y = (v: number) => ((32.2 - v) / 7.6) * 0.78;
 
   it("dải vùng vào lấy từ entryZone của gợi ý", () => {
@@ -280,7 +280,7 @@ describe("gợi ý lệnh trên biểu đồ (#16)", () => {
     // top = y(26,1) = 6,1/7,6 × 0,78 ≈ 0,62605; height = 0,3/7,6 × 0,78 ≈ 0,03079
     expect(model.stopZoneBand?.topY).toBeCloseTo(0.62605, 5);
     expect(model.stopZoneBand?.height).toBeCloseTo(0.03079, 5);
-    // The stop line is the bottom of the stop zone, where R ends: y(25,8) ≈ 0,65684.
+    // Vạch cắt lỗ là đáy vùng SL, nơi R kết thúc: y(25,8) ≈ 0,65684.
     expect(model.stop).toBe(25.8);
     expect(model.stopY).toBeCloseTo(0.65684, 5);
   });
@@ -292,11 +292,27 @@ describe("gợi ý lệnh trên biểu đồ (#16)", () => {
       [2, 30.6],
       [3, 32.2],
     ]);
-    // y(29,0) = 3,2/7,6 × 0,78 ≈ 0,32842; y(30,6) ≈ 0,16421; y(32,2) = 0 (top).
+    // y(29,0) = 3,2/7,6 × 0,78 ≈ 0,32842; y(30,6) ≈ 0,16421; y(32,2) = 0 (đỉnh).
     expect(model.rLines[0].y).toBeCloseTo(0.32842, 5);
     expect(model.rLines[1].y).toBeCloseTo(0.16421, 5);
     expect(model.rLines[2].y).toBeCloseTo(0, 9);
     expect(model.suggestionUnavailable).toBeNull();
+  });
+
+  it("mốc R có giá không hữu hạn thì bỏ, không vẽ vạch NaN", () => {
+    const model = buildF7ViewModel(
+      input({
+        suggestion: suggestion({
+          targets: [
+            { r: 1, price: 29.0, nearestResistance: null, resistanceBelow: false },
+            { r: 2, price: Number.NaN, nearestResistance: null, resistanceBelow: false },
+            { r: 3, price: Number.POSITIVE_INFINITY, nearestResistance: null, resistanceBelow: false },
+          ],
+        }),
+      })
+    );
+    expect(model.rLines.map((l) => l.r)).toEqual([1]);
+    for (const line of model.rLines) expect(Number.isFinite(line.y)).toBe(true);
   });
 
   it("gợi ý không tính được thì không vẽ đường nào và nêu 'Không đủ dữ liệu'", () => {
@@ -318,7 +334,7 @@ describe("gợi ý lệnh trên biểu đồ (#16)", () => {
     expect(model.suggestionUnavailable).toBe(
       "Không đủ dữ liệu — mức vô hiệu 27,50 không nằm dưới vùng vào 26,90–27,40"
     );
-    // The candles still draw; only the suggestion's lines are withheld.
+    // Nến vẫn vẽ; chỉ các đường của gợi ý bị giữ lại.
     expect(model.candles).toHaveLength(30);
     expect(model.setupId).toBe("cand1");
   });

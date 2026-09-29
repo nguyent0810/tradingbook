@@ -10,7 +10,12 @@ import {
 import { bandPct, resolveExchange, sessionBand, type SessionBand } from "@/lib/market/exchange-rules";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
-import { ADR_0001_HREF, evidenceStatusLabel } from "@/lib/terminal/trade-suggestion-display";
+import {
+  SUGGESTION_NOT_LOADED_REASON,
+  evidenceStatus,
+  suggestionUnavailableText,
+  type EvidenceStatus,
+} from "@/lib/terminal/trade-suggestion-display";
 
 /**
  * View model cho màn F7 Chi tiết mã.
@@ -52,28 +57,28 @@ export type F7ViewModel = {
   rankScore: number | null;
   /** Id ứng viên Cổng 2 mới nhất — có thì mới ghi lệnh được từ màn này. */
   setupId: string | null;
-  /** Vùng vào of the Gợi ý lệnh; null without a suggestion. */
+  /** Vùng vào của Gợi ý lệnh; `null` khi không có gợi ý. */
   zone: { low: number; high: number } | null;
-  /** Bottom of the Vùng SL, where worst-case R ends; null without a suggestion. */
+  /** Đáy Vùng SL — nơi R xấu nhất kết thúc; `null` khi không có gợi ý. */
   stop: number | null;
   candles: F7Candle[];
   /** Đường MA20 theo cùng hệ toạ độ 0..1; điểm chưa đủ dữ liệu là `null`. */
   ma20: (number | null)[];
-  /** Entry-zone band, from the suggestion. */
+  /** Dải vùng vào, lấy từ gợi ý. */
   zoneBand: { topY: number; height: number } | null;
-  /** Stop-zone band, stopZone.high down to stopZone.low. */
+  /** Dải vùng SL, từ `stopZone.high` xuống `stopZone.low`. */
   stopZoneBand: { topY: number; height: number } | null;
-  /** Line at the bottom of the stop zone. */
+  /** Vạch ở đáy vùng SL. */
   stopY: number | null;
-  /** The 1R/2R/3R Mốc chốt lines; empty without a suggestion. */
+  /** Các vạch Mốc chốt 1R/2R/3R; rỗng khi không có gợi ý. */
   rLines: { r: 1 | 2 | 3; price: number; y: number }[];
   /**
-   * "Không đủ dữ liệu — <lý do>" when the symbol is a setup but its suggestion
-   * could not be computed (nothing is drawn then); null otherwise.
+   * "Không đủ dữ liệu — <lý do>" khi mã là thiết lập nhưng không tính được gợi ý
+   * (khi đó không vẽ gì); ngược lại `null`.
    */
   suggestionUnavailable: string | null;
-  /** Trạng thái kiểm chứng shown next to the suggestion; null when there is no setup. */
-  evidence: { label: string; href: string } | null;
+  /** Trạng thái kiểm chứng hiện cạnh gợi ý; `null` khi mã không phải thiết lập. */
+  evidence: EvidenceStatus | null;
   chartEmptyReason: string | null;
   quote: F7QuoteCell[];
   tech: F7TechRow[];
@@ -89,10 +94,9 @@ export function priceBandPct(exchange: string | null): number | null {
 }
 
 /**
- * Trần/sàn of the displayed session through the exchange rules, so both are
- * quotable prices on the tick (ceiling rounded down, floor rounded up). Null
- * when the exchange is unknown (no guessing 7%) or the reference has no
- * quotable price below it.
+ * Trần/sàn của phiên đang hiển thị, đi qua luật sàn nên cả hai là giá đặt được
+ * trên bước giá (trần làm tròn xuống, sàn làm tròn lên). `null` khi không biết
+ * sàn (không đoán 7%) hoặc giá tham chiếu không còn bước giá nào bên dưới.
  */
 function quoteBand(ref: number | null, exchange: string | null): SessionBand | null {
   const resolved = resolveExchange(exchange);
@@ -181,12 +185,12 @@ export type F7ViewModelInput = {
     baseSessions: number | null;
   } | null;
   /**
-   * Gợi ý lệnh of the candidate, from the loader F1 and F2 use; null when there
-   * is no candidate or it could not be loaded. Every level the chart draws
-   * (zone, stop zone, R lines) comes from here, never from the raw setup.
+   * Gợi ý lệnh của ứng viên, từ cùng bộ nạp với F1 và F2; `null` khi không có
+   * ứng viên hoặc không nạp được. Mọi mức giá biểu đồ vẽ (vùng vào, vùng SL, các
+   * mốc R) đều lấy từ đây, không bao giờ từ hàng thô của bộ quét.
    */
   suggestion: TradeSuggestionResult | null;
-  /** Registry count; null = could not be read ("N không rõ"). */
+  /** Số quan sát prospective; `null` = không đọc được ("N không rõ"). */
   prospectiveN: number | null;
   /** Giá trị khớp bình quân 20 phiên (đồng) và tỉ lệ khối lượng so với MA20. */
   avgValue20Vnd: number | null;
@@ -288,15 +292,20 @@ export function buildF7ViewModel(input: F7ViewModelInput): F7ViewModel {
   const band = zone != null && chart != null ? bandBetween(zone.low, zone.high) : null;
   const stopZoneBand =
     stopZone != null && chart != null ? bandBetween(stopZone.low, stopZone.high) : null;
+  // Cùng bộ lọc hữu hạn với `extraLevels`: một giá NaN sẽ thành vạch NaN.
   const rLines =
-    chart != null ? targets.map((t) => ({ r: t.r, price: t.price, y: py(t.price) })) : [];
+    chart != null
+      ? targets
+          .filter((t) => finite(t.price) != null)
+          .map((t) => ({ r: t.r, price: t.price, y: py(t.price) }))
+      : [];
   const suggestionUnavailable =
     candidate && !suggested
-      ? `Không đủ dữ liệu — ${
+      ? suggestionUnavailableText(
           input.suggestion && !input.suggestion.ok
             ? input.suggestion.detail
-            : "chưa nạp được nến giá của mã này"
-        }`
+            : SUGGESTION_NOT_LOADED_REASON
+        )
       : null;
 
   // ── Bảng giá ─────────────────────────────────────────────────────────────
@@ -467,15 +476,8 @@ export function buildF7ViewModel(input: F7ViewModelInput): F7ViewModel {
     stopY: stop != null && chart != null ? py(stop) : null,
     rLines,
     suggestionUnavailable,
-    evidence: candidate
-      ? {
-          label: evidenceStatusLabel(
-            suggested?.evidence.prospectiveN ?? input.prospectiveN,
-            suggested?.evidence.checkpointN ?? CHECKPOINT_N
-          ),
-          href: ADR_0001_HREF,
-        }
-      : null,
+    // Đọc N giống hệt F1: số của bộ nạp, không lấy từ từng gợi ý.
+    evidence: candidate ? evidenceStatus(input.prospectiveN, CHECKPOINT_N) : null,
     chartEmptyReason:
       bars.length >= 2
         ? null
