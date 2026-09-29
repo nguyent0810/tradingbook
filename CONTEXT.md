@@ -62,15 +62,15 @@ Một setup của scanner được trình bày cho người đọc để tham kh
 _Avoid_: khuyến nghị, lệnh, tín hiệu mua
 
 **Vùng vào** (Entry zone):
-Khoảng giá mua tham khảo, làm tròn theo bước giá của sàn và nằm trong biên độ của phiên kế tiếp. (Định nghĩa đích của #11; code hiện tại chưa làm tròn.)
+Khoảng giá mua tham khảo, làm tròn tới bước giá gần nhất của sàn và cắt vào biên độ của phiên kế tiếp, tính từ giá đóng cửa của phiên mới nhất.
 
 **Vùng SL** (Stop zone):
 Khoảng giá mà setup bị coi là hỏng, nằm giữa mức vô hiệu theo cấu trúc giá và mức stop tối thiểu đủ xa khỏi nhiễu.
 _Avoid_: điểm cắt lỗ (khi ý là một vùng)
 
 **R**:
-Rủi ro trên mỗi cổ phiếu, tính từ đầu trên của vùng vào (mức khớp xấu nhất) tới đầu dưới của vùng SL. Các mốc chốt được biểu diễn bằng bội số của R. (Định nghĩa đích của #11.)
-_Avoid_: R:R tính từ giữa vùng vào, là cách tính cũ ở F2 và modal đặt lệnh
+Rủi ro trên mỗi cổ phiếu, tính từ đầu trên của vùng vào (mức khớp xấu nhất) tới đầu dưới của vùng SL; có bản gộp và bản sau phí môi giới hai chiều cộng thuế bán 0,1%. Các mốc chốt được biểu diễn bằng bội số của R.
+_Avoid_: R:R tính từ giữa vùng vào, là cách tính cũ mà modal đặt lệnh vẫn dùng tới #17 (F2 đã bỏ)
 
 **Mốc chốt** (Take-profit ladder):
 Các mức giá 1R, 2R, 3R tính từ vùng vào, kèm kháng cự gần nhất nếu có.
