@@ -135,8 +135,13 @@ describe("bảng giá", () => {
     const model = buildF7ViewModel(input());
     // Phiên cuối là 25 + 29×0,1 = 27,9; phiên trước là 27,8.
     expect(quote(model, "THAM CHIẾU")?.value).toBe("27,80");
-    expect(quote(model, "TRẦN")?.value).toBe("29,75"); // 27,8 × 1,07
-    expect(quote(model, "SÀN")?.value).toBe("25,85"); // 27,8 × 0,93
+    // Changed in #16 (follow-up from #14): the limits now go through
+    // `sessionBand`, so they are quotable prices on the HOSE tick (0,05 between
+    // 10.000 and 50.000 đ). Ceiling 27,8 × 1,07 = 29,746 rounds DOWN to 29,70
+    // (was the unsnapped 29,75); floor 27,8 × 0,93 = 25,854 rounds UP to 25,90
+    // (was 25,85, a price below the real floor).
+    expect(quote(model, "TRẦN")?.value).toBe("29,70");
+    expect(quote(model, "SÀN")?.value).toBe("25,90");
   });
 
   it("không biết sàn thì trần/sàn là gap, không tính bừa 7%", () => {

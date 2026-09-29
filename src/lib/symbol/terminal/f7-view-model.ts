@@ -7,7 +7,7 @@ import {
   priceToneVar,
   semanticTone,
 } from "@/lib/format/vn";
-import { bandPct, resolveExchange } from "@/lib/market/exchange-rules";
+import { bandPct, resolveExchange, sessionBand, type SessionBand } from "@/lib/market/exchange-rules";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
 import { ADR_0001_HREF, evidenceStatusLabel } from "@/lib/terminal/trade-suggestion-display";
@@ -86,6 +86,23 @@ export function priceBandPct(exchange: string | null): number | null {
   const resolved = resolveExchange(exchange);
   // Không biết sàn thì không suy ra biên độ — trần/sàn để gap.
   return resolved.assumed ? null : bandPct(resolved.exchange);
+}
+
+/**
+ * Trần/sàn of the displayed session through the exchange rules, so both are
+ * quotable prices on the tick (ceiling rounded down, floor rounded up). Null
+ * when the exchange is unknown (no guessing 7%) or the reference has no
+ * quotable price below it.
+ */
+function quoteBand(ref: number | null, exchange: string | null): SessionBand | null {
+  const resolved = resolveExchange(exchange);
+  if (ref == null || resolved.assumed) return null;
+  try {
+    return sessionBand(ref, resolved.exchange);
+  } catch (e) {
+    if (e instanceof RangeError) return null;
+    throw e;
+  }
 }
 
 function finite(value: number | null | undefined): number | null {
@@ -283,10 +300,10 @@ export function buildF7ViewModel(input: F7ViewModelInput): F7ViewModel {
       : null;
 
   // ── Bảng giá ─────────────────────────────────────────────────────────────
-  const bandPct = priceBandPct(input.exchange);
   const ref = prev ? prev.close : null;
-  const ceiling = ref != null && bandPct != null ? ref * (1 + bandPct / 100) : null;
-  const floor = ref != null && bandPct != null ? ref * (1 - bandPct / 100) : null;
+  const sessionLimits = quoteBand(ref, input.exchange);
+  const ceiling = sessionLimits?.ceiling ?? null;
+  const floor = sessionLimits?.floor ?? null;
   const turnoverVnd = last ? last.close * 1000 * last.volume : null;
 
   const quote: F7QuoteCell[] = [
