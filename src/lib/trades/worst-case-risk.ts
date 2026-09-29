@@ -56,3 +56,19 @@ export function worstCaseRiskPerShare(params: {
     worstCasePerShareKvnd: perShareNetKvnd + gapBufferKvnd,
   };
 }
+
+/**
+ * Rủi ro lệnh for the numbers on the ticket, VND, on the suggestion's basis:
+ * shares × (net R + Đệm gap). Null when the numbers cannot carry a risk.
+ */
+export function ticketWorstCaseLossVnd(p: {
+  entryKvnd: number;
+  stopKvnd: number;
+  exchange: Exchange;
+  shares: number;
+}): number | null {
+  if (![p.entryKvnd, p.stopKvnd, p.shares].every(Number.isFinite)) return null;
+  if (p.stopKvnd <= 0 || p.entryKvnd <= p.stopKvnd || p.shares < 0) return null;
+  const { worstCasePerShareKvnd } = worstCaseRiskPerShare(p);
+  return Math.round(p.shares * worstCasePerShareKvnd * 1000);
+}
