@@ -29,15 +29,22 @@ export type ResolvedExchange = {
 };
 
 export function resolveExchange(raw: string | null): ResolvedExchange {
-  const upper = (raw ?? "").trim().toUpperCase();
+  const upper = (raw ?? "").toUpperCase();
   if (upper === "HOSE" || upper === "HNX" || upper === "UPCOM") {
     return { exchange: upper, assumed: false };
   }
   return { exchange: "HOSE", assumed: true };
 }
 
-/** kVND -> whole VND, shedding float noise such as 23.4 + 0.05 = 23.450000000000003. */
+/**
+ * kVND -> whole VND, shedding float noise such as 23.4 + 0.05 = 23.450000000000003.
+ * A price that is not a positive finite number has no tick and no band, so it
+ * is rejected rather than turned into a non-quotable 0 or NaN.
+ */
 function toVnd(priceKvnd: number): number {
+  if (!Number.isFinite(priceKvnd) || priceKvnd <= 0) {
+    throw new RangeError(`Not a price: ${priceKvnd}`);
+  }
   return Math.round(priceKvnd * 1000 * 1000) / 1000;
 }
 
@@ -60,7 +67,8 @@ export function snapToTick(priceKvnd: number, exchange: Exchange, direction: Sna
   const steps = vnd / tick;
   const snapped =
     direction === "down" ? Math.floor(steps) : direction === "up" ? Math.ceil(steps) : Math.round(steps);
-  return (snapped * tick) / 1000;
+  // One tick is the smallest quotable price; a price below it never snaps to 0.
+  return (Math.max(1, snapped) * tick) / 1000;
 }
 
 const BAND_PCT: Record<Exchange, number> = { HOSE: 7, HNX: 10, UPCOM: 15 };
@@ -78,14 +86,21 @@ export type SessionBand = {
   ceiling: number;
 };
 
-/** Price band of the session whose reference price is `refKvnd` (normally the previous close). */
+/**
+ * Price band of the session whose reference price is `refKvnd` (normally the
+ * previous close). Per the HOSE trading rules, a limit that rounds onto the
+ * reference moves one tick away from it; only very low prices, where the band
+ * is narrower than a tick, hit this.
+ */
 export function sessionBand(refKvnd: number, exchange: Exchange): SessionBand {
   const pct = bandPct(exchange);
-  return {
-    bandPct: pct,
-    floor: snapToTick(refKvnd * (1 - pct / 100), exchange, "up"),
-    ceiling: snapToTick(refKvnd * (1 + pct / 100), exchange, "down"),
-  };
+  const refVnd = toVnd(refKvnd);
+  const tickVnd = tickSizeVnd(refVnd, exchange);
+  let floorVnd = toVnd(snapToTick(refKvnd * (1 - pct / 100), exchange, "up"));
+  let ceilingVnd = toVnd(snapToTick(refKvnd * (1 + pct / 100), exchange, "down"));
+  if (ceilingVnd <= refVnd) ceilingVnd = refVnd + tickVnd;
+  if (floorVnd >= refVnd) floorVnd = Math.max(tickVnd, refVnd - tickVnd);
+  return { bandPct: pct, floor: floorVnd / 1000, ceiling: ceilingVnd / 1000 };
 }
 
 /** Pull a price inside the session band; an out-of-band price becomes the band edge. */

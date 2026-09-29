@@ -60,6 +60,15 @@ describe("snapToTick", () => {
     expect(snapToTick(onTick, "HOSE", "up")).toBe(23.45);
   });
 
+  it("never snaps below the smallest quotable price (one tick)", () => {
+    expect(snapToTick(0.009, "HOSE", "down")).toBe(0.01);
+    expect(snapToTick(0.04, "HNX", "down")).toBe(0.1);
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])("rejects a price of %d", (price) => {
+    expect(() => snapToTick(price, "HOSE", "nearest")).toThrow(RangeError);
+  });
+
   it("uses the tick of the bracket the price lands in when crossing 50.000đ", () => {
     expect(snapToTick(49.99, "HOSE", "up")).toBe(50);
     expect(snapToTick(50.03, "HOSE", "down")).toBe(50);
@@ -70,12 +79,14 @@ describe("resolveExchange", () => {
   it.each([
     ["HOSE", "HOSE"],
     ["hnx", "HNX"],
-    [" UpCoM ", "UPCOM"],
+    ["UpCoM", "UPCOM"],
   ] as const)("recognises %j as %s", (raw, exchange) => {
     expect(resolveExchange(raw)).toEqual({ exchange, assumed: false });
   });
 
-  it.each([null, "", "XYZ"])("falls back to HOSE rules and says so for %j", (raw) => {
+  // Padded values are not trimmed: F7 returned no band for them before this
+  // module existed, and the stored exchange codes are never padded.
+  it.each([null, "", "XYZ", " HNX "])("falls back to HOSE rules and says so for %j", (raw) => {
     expect(resolveExchange(raw)).toEqual({ exchange: "HOSE", assumed: true });
   });
 });
@@ -95,6 +106,21 @@ describe("sessionBand", () => {
     ["HOSE", 9.5, 7, 8.84, 10.15],
   ] as const)("%s ref %d -> ±%d%%, floor %d, ceiling %d", (exchange, ref, bandPct, floor, ceiling) => {
     expect(sessionBand(ref, exchange)).toEqual({ bandPct, floor, ceiling });
+  });
+
+  // HOSE trading rules: when a rounded limit equals the reference price, it
+  // moves one tick away from it. Only very low prices hit this:
+  //   HOSE 100đ:  107đ -> 100đ = ref -> 110đ;  93đ -> 100đ = ref -> 90đ
+  //   UPCOM 200đ: 230đ -> 200đ = ref -> 300đ; 170đ -> 200đ = ref -> 100đ
+  it.each([
+    ["HOSE", 0.1, 0.09, 0.11],
+    ["UPCOM", 0.2, 0.1, 0.3],
+  ] as const)("moves a limit that rounds onto the reference one tick away (%s %d)", (exchange, ref, floor, ceiling) => {
+    expect(sessionBand(ref, exchange)).toMatchObject({ floor, ceiling });
+  });
+
+  it.each([0, -5, Number.NaN])("rejects a reference price of %d", (ref) => {
+    expect(() => sessionBand(ref, "HOSE")).toThrow(RangeError);
   });
 });
 
