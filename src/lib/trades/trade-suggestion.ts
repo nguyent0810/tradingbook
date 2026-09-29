@@ -15,7 +15,7 @@
  * one is a valid quote on the symbol's exchange.
  */
 import type { Gate1Level, Gate2BarInput } from "@/lib/scanner/gate2/types";
-import { fmtSessionDate } from "@/lib/format/vn";
+import { fmtNum, fmtSessionDate, fmtVndCompact } from "@/lib/format/vn";
 import { barsThroughSession, utcDayKey } from "@/lib/scanner/early-entry/bar-metrics";
 import { sortDedupeGate2Bars } from "@/lib/scanner/gate2/breakout-pullback";
 import { collectResistanceCandidates } from "@/lib/scanner/early-entry/risk-reward";
@@ -35,12 +35,15 @@ import {
 import { MIN_BARS_FOR_STRUCTURAL_SCAN, tightenEntryZone } from "./auto-populate-from-setup";
 import {
   ADV_ADJUSTED_PRICE_CAVEAT,
+  BANNED_IMPERATIVE_PATTERNS,
   RISK_CODES,
   RISK_COPY,
+  SETTLEMENT_BREACH_COPY,
   SETUP_REASON_CODES,
   SETUP_REASON_COPY,
   SETUP_REASON_PATTERNS,
   UNMAPPED_REASON_COPY,
+  UNMAPPED_REASON_GENERIC_COPY,
   type RiskCode,
   type RiskSeverity,
   type SetupReasonCode,
@@ -164,8 +167,8 @@ export type TradeSuggestionInput = {
     stopLevel: number;
     /** The scan session; bars after it are ignored. */
     barDate: Date;
-    /** `SetupCandidate.quality`. */
-    tier: "A" | "B";
+    /** `SetupCandidate.quality`; null when it is neither A nor B (no tier risk is raised). */
+    tier: "A" | "B" | null;
     /** `SetupCandidate.reasons` lines as the classifier wrote them. */
     reasons: readonly string[];
   };
@@ -187,8 +190,9 @@ export type TradeSuggestionInput = {
    */
   expectedSession: Date | null;
   /**
-   * 20-session average traded value in VND at the latest session
-   * (`symbol-adv`: close × 1000 × volMa20); null when there is none.
+   * 20-session average traded value in VND at the setup session, the same
+   * figure F2 sizes with (`symbol-adv`: close × 1000 × volMa20); null when
+   * there is none.
    */
   advVnd: number | null;
 };
@@ -211,15 +215,7 @@ function fmt(kvnd: number): string {
 }
 
 /** kVND price with two decimals, as F2 prints prices. */
-function price(kvnd: number): string {
-  return kvnd.toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function vndShort(vnd: number): string {
-  const billions = vnd >= 1_000_000_000;
-  const value = vnd / (billions ? 1_000_000_000 : 1_000_000);
-  return `${value.toLocaleString("vi-VN", { maximumFractionDigits: 1 })} ${billions ? "tỷ" : "tr"} ₫`;
-}
+const price = (kvnd: number) => fmtNum(kvnd, 2);
 
 /**
  * Floor of the session after one whose reference is `refKvnd`; null when the
@@ -246,6 +242,15 @@ function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole);
 }
 
+/**
+ * The scanner's stored reason lines in plain Vietnamese, in the scanner's order.
+ * Exported for screens that list a setup's reasons without a suggestion (F2's
+ * Cổng 2 criteria), so every screen shows the same copy.
+ */
+export function describeSetupReasons(lines: readonly string[]): TradeSuggestion["reasons"] {
+  return lines.filter((l) => l.trim() !== "").map(describeReason);
+}
+
 function describeReason(line: string): TradeSuggestion["reasons"][number] {
   for (const code of SETUP_REASON_CODES) {
     const { pattern, groups } = SETUP_REASON_PATTERNS[code];
@@ -258,7 +263,12 @@ function describeReason(line: string): TradeSuggestion["reasons"][number] {
     });
     return { code, text: fill(SETUP_REASON_COPY[code], values) };
   }
-  return { code: "unmapped", text: fill(UNMAPPED_REASON_COPY, { raw: line.trim() }) };
+  const raw = line.trim();
+  const echoable = !BANNED_IMPERATIVE_PATTERNS.some((p) => p.test(raw));
+  return {
+    code: "unmapped",
+    text: echoable ? fill(UNMAPPED_REASON_COPY, { raw }) : UNMAPPED_REASON_GENERIC_COPY,
+  };
 }
 
 export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggestionResult {
@@ -412,8 +422,7 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
     floors.push(floor);
     ref = floor;
   }
-  const inR = (loss: number) =>
-    (loss / perShareGross).toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const inR = (loss: number) => fmtNum(loss / perShareGross, 2);
   const oneFloor = floors[0];
   if (oneFloor != null && oneFloor < stopZone.low) {
     const loss = roundVnd(entryTop - oneFloor);
@@ -459,10 +468,11 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
     raise("liquidity_unknown", "warn");
   } else if (input.advVnd < LIQUIDITY_THIN_ADV_VND) {
     const lotVnd = entryTop * 1000 * 100;
+    const lots = Math.floor((input.advVnd * LIQUIDITY_REFERENCE_FRAC) / lotVnd);
     raise("liquidity_thin", "warn", {
-      adv: vndShort(input.advVnd),
-      threshold: vndShort(LIQUIDITY_THIN_ADV_VND),
-      lots: String(Math.floor((input.advVnd * LIQUIDITY_REFERENCE_FRAC) / lotVnd)),
+      adv: fmtVndCompact(input.advVnd),
+      threshold: fmtVndCompact(LIQUIDITY_THIN_ADV_VND),
+      lots: lots >= 1 ? `khoảng ${fmtNum(lots, 0)} lô` : "chưa tới 1 lô",
       entryTop: price(entryTop),
       caveat: ADV_ADJUSTED_PRICE_CAVEAT,
     });
@@ -470,12 +480,20 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
 
   if (assumed) raise("exchange_assumed", "warn");
 
+  // T+2.5 always applies to a buy (#11 story 14). It is a warning when the floor
+  // path can cross the stop before the shares arrive.
   const settlementFloor = floors[SETTLEMENT_FLOOR_SESSIONS - 1];
   if (settlementFloor != null && settlementFloor < stopZone.low) {
-    raise("settlement_lockup", "info", {
-      entryTop: price(entryTop),
-      price: price(settlementFloor),
+    risks.push({
+      code: "settlement_lockup",
+      severity: "warn",
+      text: `${RISK_COPY.settlement_lockup} ${fill(SETTLEMENT_BREACH_COPY, {
+        entryTop: price(entryTop),
+        price: price(settlementFloor),
+      })}`,
     });
+  } else {
+    raise("settlement_lockup", "info");
   }
 
   if (setup.tier === "B") raise("tier_b", "info");
@@ -499,7 +517,7 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
       r: { perShareGross, perShareNet },
       targets,
       size: null,
-      reasons: setup.reasons.filter((l) => l.trim() !== "").map(describeReason),
+      reasons: describeSetupReasons(setup.reasons),
       risks,
       evidence: {
         status: "UNVALIDATED",

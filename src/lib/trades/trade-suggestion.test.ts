@@ -5,8 +5,10 @@ import {
   ADV_ADJUSTED_PRICE_CAVEAT,
   BANNED_IMPERATIVE_PATTERNS,
   RISK_COPY,
+  SETTLEMENT_BREACH_COPY,
   SETUP_REASON_COPY,
   UNMAPPED_REASON_COPY,
+  UNMAPPED_REASON_GENERIC_COPY,
 } from "./trade-suggestion-copy";
 import {
   buildTradeSuggestion,
@@ -364,8 +366,18 @@ function classifierPath(volLast: number): Gate2BarInput[] {
   return out;
 }
 
-function scannerReasons(volLast: number): string[] {
-  const path = classifierPath(volLast);
+/**
+ * Same path, but no low after the breakout goes under the breakout level
+ * (200.00): the digestion dip only reaches 200.00, under the breakout-day close
+ * 201.00, and the last bar's low touches the zone ceiling at exactly 200.00.
+ * Depth is then 0, and the classifier writes its "no material dip" line.
+ */
+function classifierPathNoDip(volLast: number): Gate2BarInput[] {
+  const BASE = 200;
+  return classifierPath(volLast).map((b, i) => (i >= 60 ? { ...b, low: BASE } : b));
+}
+
+function scannerReasons(volLast: number, path = classifierPath(volLast)): string[] {
   const ev = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
   if (ev.quality === "INVALID") throw new Error(`fixture no longer qualifies: ${ev.reasons.at(-1)}`);
   return ev.reasons;
@@ -387,6 +399,13 @@ describe("buildTradeSuggestion — reasons in plain Vietnamese", () => {
       // Copy is Vietnamese, not the classifier's English.
       expect(r.text, r.code).not.toMatch(/\b(the|breakout level|median|session)\b/i);
     }
+  });
+
+  it("the no-dip variant from the real classifier has copy too", () => {
+    const lines = scannerReasons(2_000_000, classifierPathNoDip(2_000_000));
+    const s = ok(buildTradeSuggestion(input({}, { reasons: lines })));
+    expect(s.reasons.map((r) => r.code)).toContain("no_material_dip");
+    expect(s.reasons.filter((r) => r.code === "unmapped")).toEqual([]);
   });
 
   it("keeps the classifier's order and fills in its numbers in vi-VN format", () => {
@@ -413,7 +432,7 @@ describe("buildTradeSuggestion — reasons in plain Vietnamese", () => {
     ]);
   });
 
-  it("covers both depth lines: a measured dip and no material dip", () => {
+  it("maps both depth lines by their exact wording", () => {
     const s = ok(
       buildTradeSuggestion(
         input(
@@ -437,6 +456,16 @@ describe("buildTradeSuggestion — reasons in plain Vietnamese", () => {
       { code: "unmapped", text: "Lý do từ bộ quét, chưa có bản tiếng Việt: Some legacy line." },
     ]);
   });
+
+  it("an unrecognised line with banned wording is not echoed: a generic line replaces it", () => {
+    const s = ok(
+      buildTradeSuggestion(input({}, { reasons: ["Strong trend — buy the dip.", "MUA NGAY"] }))
+    );
+    expect(s.reasons).toEqual([
+      { code: "unmapped", text: UNMAPPED_REASON_GENERIC_COPY },
+      { code: "unmapped", text: UNMAPPED_REASON_GENERIC_COPY },
+    ]);
+  });
 });
 
 describe("copy tables — descriptive, never imperative (ADR 0003)", () => {
@@ -444,6 +473,8 @@ describe("copy tables — descriptive, never imperative (ADR 0003)", () => {
     ...Object.entries(SETUP_REASON_COPY),
     ...Object.entries(RISK_COPY),
     ["unmapped", UNMAPPED_REASON_COPY],
+    ["unmapped generic", UNMAPPED_REASON_GENERIC_COPY],
+    ["settlement breach", SETTLEMENT_BREACH_COPY],
     ["adv caveat", ADV_ADJUSTED_PRICE_CAVEAT],
   ];
 
@@ -506,6 +537,9 @@ describe("buildTradeSuggestion — risks", () => {
     it("does not fire for tier A", () => {
       expect(risk(base, "tier_b")).toBeUndefined();
     });
+    it("an unknown tier (a quality that is neither A nor B) is not read as B", () => {
+      expect(risk(ok(buildTradeSuggestion(input({}, { tier: null }))), "tier_b")).toBeUndefined();
+    });
   });
 
   describe("gap through the stop", () => {
@@ -543,16 +577,30 @@ describe("buildTradeSuggestion — risks", () => {
   });
 
   describe("T+2.5 lockup", () => {
-    it("fires when two floors from the worst fill (17.50) are below the stop (18.60)", () => {
-      expect(risk(base, "settlement_lockup")).toEqual({
+    const lockup =
+      "T+2,5: cổ phiếu khớp hôm nay khoảng 2,5 phiên sau mới về tài khoản và mới bán được; trong khoảng đó stop chưa bảo vệ được vị thế.";
+
+    it("is always shown, as info, when the floor path stays above the stop within the lockup", () => {
+      // Wide 15.00 stop: two floors from 20.20 are 18.80 → 17.50, both above it.
+      expect(risk(wide, "settlement_lockup")).toEqual({
         code: "settlement_lockup",
         severity: "info",
-        text: "T+2,5: cổ phiếu khớp hôm nay khoảng 2,5 phiên sau mới về tài khoản. Hai phiên giảm sàn từ 20,20 là 17,50, đã dưới vùng SL: giá có thể xuyên stop trước khi bán được.",
+        text: lockup,
       });
     });
 
-    it("does not fire when two floors stay above the stop", () => {
-      expect(risk(wide, "settlement_lockup")).toBeUndefined();
+    it("rises to warn, with the breach figure, when two floors (17.50) are below the stop (18.60)", () => {
+      expect(risk(base, "settlement_lockup")).toEqual({
+        code: "settlement_lockup",
+        severity: "warn",
+        text:
+          lockup +
+          " Hai phiên giảm sàn từ 20,20 là 17,50, đã dưới vùng SL: giá có thể xuyên stop trước khi bán được.",
+      });
+    });
+
+    it("the breach sentence does not appear when the floor path stays above the stop", () => {
+      expect(risk(wide, "settlement_lockup")?.text).not.toContain("Hai phiên giảm sàn");
     });
   });
 
@@ -565,9 +613,17 @@ describe("buildTradeSuggestion — risks", () => {
         code: "liquidity_thin",
         severity: "warn",
         text:
-          "Giá trị giao dịch bình quân 20 phiên khoảng 4,2 tỷ ₫, dưới mốc 10 tỷ ₫: 1% con số đó chỉ bằng khoảng 20 lô 100 cp ở 20,20, thoát vị thế lớn có thể khó, nhất là phiên giảm sàn. " +
+          "Giá trị giao dịch bình quân 20 phiên khoảng 4,20 tỷ ₫, dưới mốc 10,00 tỷ ₫: 1% con số đó chỉ bằng khoảng 20 lô 100 cp ở 20,20, thoát vị thế lớn có thể khó, nhất là phiên giảm sàn. " +
           ADV_ADJUSTED_PRICE_CAVEAT,
       });
+    });
+
+    it("says 'chưa tới 1 lô' when 1% of the average is less than one lot", () => {
+      // 1% of 150 tr = 1,500,000 đ < one lot at 20.20 (2,020,000 đ).
+      const s = ok(buildTradeSuggestion(input({ advVnd: 150_000_000 })));
+      expect(risk(s, "liquidity_thin")?.text).toContain(
+        "khoảng 150,0 tr ₫, dưới mốc 10,00 tỷ ₫: 1% con số đó chỉ bằng chưa tới 1 lô 100 cp ở 20,20"
+      );
     });
 
     it("an unknown average is its own warning, never read as liquid", () => {
@@ -666,7 +722,7 @@ describe("buildTradeSuggestion — risks", () => {
       ["warn", "resistance_below_2r"],
       ["warn", "liquidity_unknown"],
       ["warn", "exchange_assumed"],
-      ["info", "settlement_lockup"],
+      ["warn", "settlement_lockup"],
       ["info", "tier_b"],
     ]);
   });

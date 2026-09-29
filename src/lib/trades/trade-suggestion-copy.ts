@@ -92,6 +92,12 @@ export const SETUP_REASON_COPY: Record<SetupReasonCode, string> = {
 
 export const UNMAPPED_REASON_COPY = "Lý do từ bộ quét, chưa có bản tiếng Việt: {raw}";
 
+/**
+ * Shown instead of `UNMAPPED_REASON_COPY` when the raw line itself matches a
+ * banned pattern: echoing it would carry imperative wording past the ban.
+ */
+export const UNMAPPED_REASON_GENERIC_COPY = "Bộ quét ghi thêm một lý do chưa có bản tiếng Việt.";
+
 export type RiskSeverity = "info" | "warn" | "high";
 
 export const RISK_CODES = [
@@ -130,14 +136,18 @@ export const RISK_COPY: Record<RiskCode, string> = {
     "Mức vô hiệu theo cấu trúc {structural} sát hơn mức stop tối thiểu {minFeasible}: nhiễu một phiên có thể chạm tới nó. Vùng SL vì thế kéo xuống {low}.",
   resistance_below_2r: "Kháng cự {resistance} nằm dưới mốc 2R {target}: giá có thể gặp cản trước mốc.",
   liquidity_thin:
-    "Giá trị giao dịch bình quân 20 phiên khoảng {adv}, dưới mốc {threshold}: 1% con số đó chỉ bằng khoảng {lots} lô 100 cp ở {entryTop}, thoát vị thế lớn có thể khó, nhất là phiên giảm sàn. {caveat}",
+    "Giá trị giao dịch bình quân 20 phiên khoảng {adv}, dưới mốc {threshold}: 1% con số đó chỉ bằng {lots} 100 cp ở {entryTop}, thoát vị thế lớn có thể khó, nhất là phiên giảm sàn. {caveat}",
   liquidity_unknown: "Chưa có giá trị giao dịch bình quân 20 phiên của mã, thanh khoản chưa đánh giá được.",
   exchange_assumed:
     "Mã chưa có sàn trong dữ liệu: bước giá và biên độ đang giả định theo HOSE, sàn thật có thể khác.",
   settlement_lockup:
-    "T+2,5: cổ phiếu khớp hôm nay khoảng 2,5 phiên sau mới về tài khoản. Hai phiên giảm sàn từ {entryTop} là {price}, đã dưới vùng SL: giá có thể xuyên stop trước khi bán được.",
+    "T+2,5: cổ phiếu khớp hôm nay khoảng 2,5 phiên sau mới về tài khoản và mới bán được; trong khoảng đó stop chưa bảo vệ được vị thế.",
   tier_b: "Hạng B: khối lượng xác nhận hoặc vị trí giá so với MA20 yếu hơn hạng A.",
 };
+
+/** Appended to `settlement_lockup` when the floor path crosses the stop inside the lockup. */
+export const SETTLEMENT_BREACH_COPY =
+  "Hai phiên giảm sàn từ {entryTop} là {price}, đã dưới vùng SL: giá có thể xuyên stop trước khi bán được.";
 
 /** Caveat carried by every liquidity figure built on `symbol-adv` (close × 1000 × volMa20). */
 export const ADV_ADJUSTED_PRICE_CAVEAT =
@@ -147,6 +157,11 @@ export const ADV_ADJUSTED_PRICE_CAVEAT =
  * Imperative wording the copy must never contain (ADR 0003, audit F08). Case
  * sensitive where the word is only imperative as an all-caps label ("MUA"),
  * insensitive for phrases that are imperative in any case.
+ *
+ * "nên" ("should") is banned because it is advice. The match is a bare whole
+ * word, so it also catches descriptive uses such as "trở nên" or "vì vậy nên";
+ * copy uses alternatives ("vì thế", "vì vậy", "trở thành") rather than
+ * loosening the pattern.
  */
 // Built from strings: `\p{L}` (any letter, so Vietnamese diacritics count as
 // word characters) needs the `u` flag, which the TS target rejects in literals.

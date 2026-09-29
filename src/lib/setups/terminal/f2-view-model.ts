@@ -10,8 +10,12 @@ import { applyVerdictToShares, verdictTokens } from "@/lib/terminal/verdict-toke
 import { fmtSessionDate, semanticTone } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { sessionChangePct } from "@/lib/dashboard/candidate-spark-history";
-import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
-import type { RiskSeverity } from "@/lib/trades/trade-suggestion-copy";
+import {
+  CHECKPOINT_N,
+  describeSetupReasons,
+  type TradeSuggestionResult,
+} from "@/lib/trades/trade-suggestion";
+import type { RiskCode, RiskSeverity } from "@/lib/trades/trade-suggestion-copy";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -67,6 +71,7 @@ export type F2SuggestionRow = {
 };
 
 export type F2SuggestionRisk = {
+  code: RiskCode;
   severity: RiskSeverity;
   /** "CAO" / "CHÚ Ý" / "THÔNG TIN". */
   label: string;
@@ -88,8 +93,6 @@ export type F2Suggestion = {
   asOf: string | null;
   rows: F2SuggestionRow[];
   targets: F2SuggestionRow[];
-  /** Lý do của bộ quét bằng tiếng Việt, theo thứ tự của bộ quét. */
-  reasons: string[];
   /** Rủi ro, mức cao trước, rồi chú ý, rồi thông tin. */
   risks: F2SuggestionRisk[];
   evidence: { label: string; href: string };
@@ -204,7 +207,6 @@ function buildSuggestion(
       asOf: null,
       rows: [],
       targets: [],
-      reasons: [],
       risks: [],
       evidence: { label: evidenceLabel(prospectiveN), href: ADR_0001_HREF },
     };
@@ -246,12 +248,12 @@ function buildSuggestion(
             }`,
       color: t.resistanceBelow ? "var(--tm-accent)" : "var(--tm-up-soft)",
     })),
-    reasons: s.reasons.map((r) => r.text),
     // Sorted here as well as in the builder: the panel's order is F2's promise.
     // `sort` is stable, so equal severities keep the builder's order.
     risks: [...s.risks]
       .sort((a, b) => RISK_TOKENS[a.severity].rank - RISK_TOKENS[b.severity].rank)
       .map((r) => ({
+        code: r.code,
         severity: r.severity,
         label: RISK_TOKENS[r.severity].label,
         text: r.text,
@@ -456,17 +458,19 @@ function buildSizing(
 /**
  * Tiêu chí Cổng 2 của ứng viên.
  *
- * Bộ quét lưu lý do dưới dạng dòng chữ, không phải danh sách pass/fail có cấu
- * trúc — nên dòng lý do (điều kiện ứng viên đã đạt để lộ diện) mang dấu `✓`,
+ * Bộ quét lưu lý do dưới dạng dòng chữ tiếng Anh; mỗi dòng được dịch sang tiếng
+ * Việt bằng cùng bảng copy của gợi ý lệnh (`describeSetupReasons`), nên màn này
+ * không bao giờ hiện câu tiếng Anh của bộ quét cho một lý do đã có mã. Dòng lý
+ * do (điều kiện ứng viên đã đạt để lộ diện) mang dấu `✓`,
  * còn cờ sức khoẻ (cảnh báo sau khi quét) mang dấu `!`. Không bịa thêm tiêu chí.
  */
 function buildGate2Rows(
   candidate: SurfacedCandidateHealthView,
   reasonLines: string[]
 ): F2Gate2Row[] {
-  const rows: F2Gate2Row[] = reasonLines.map((line) => ({
+  const rows: F2Gate2Row[] = describeSetupReasons(reasonLines).map((reason) => ({
     mark: "✓" as const,
-    label: line,
+    label: reason.text,
     value: "ĐẠT",
     color: "var(--tm-up)",
   }));
@@ -485,7 +489,7 @@ function buildGate2Rows(
 
 export type F2ViewModelInput = {
   candidates: SurfacedCandidateHealthView[];
-  /** Dòng lý do Cổng 2 đã làm sạch, theo mã. */
+  /** Dòng lý do Cổng 2 NGUYÊN VĂN như bộ quét lưu, theo mã; view model dịch sang tiếng Việt. */
   reasonLinesBySymbol: Record<string, string[]>;
   rsBySymbol: Map<string, RsDiagnosticUi | null>;
   advBySymbolId: Map<string, number | null>;

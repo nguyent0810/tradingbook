@@ -192,24 +192,12 @@ function SuggestionBlock({ suggestion }: { suggestion: F2Suggestion }) {
               <div className="tm-eyebrow--dim" style={{ marginBottom: 4 }}>
                 RỦI RO
               </div>
-              {suggestion.risks.map((risk) => (
-                <div key={risk.text} style={{ display: "flex", gap: 6, fontSize: 10, padding: "2px 0" }}>
+              {suggestion.risks.map((risk, i) => (
+                <div key={`${i}-${risk.code}`} style={{ display: "flex", gap: 6, fontSize: 10, padding: "2px 0" }}>
                   <span className="tm-mono" style={{ color: risk.color, flex: "none", minWidth: 58 }}>
                     {risk.label}
                   </span>
                   <span style={{ color: "var(--tm-text-mute)" }}>{risk.text}</span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-          {suggestion.reasons.length > 0 ? (
-            <div style={{ marginTop: 8 }} aria-label="Lý do của bộ quét">
-              <div className="tm-eyebrow--dim" style={{ marginBottom: 4 }}>
-                LÝ DO
-              </div>
-              {suggestion.reasons.map((reason) => (
-                <div key={reason} style={{ fontSize: 10, padding: "2px 0", color: "var(--tm-text-mute)" }}>
-                  {reason}
                 </div>
               ))}
             </div>

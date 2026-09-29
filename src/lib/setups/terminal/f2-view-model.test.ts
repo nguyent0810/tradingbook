@@ -259,22 +259,6 @@ describe("gợi ý lệnh trên F2", () => {
     expect(JSON.stringify(detail.kpis)).not.toMatch(/NaN|"0,00"/);
   });
 
-  it("liệt kê lý do theo thứ tự của bộ quét", () => {
-    const withReasons = suggestion({
-      reasons: [
-        { code: "trend_ok", text: "Xu hướng thuận: giá đóng cửa trên MA50 và MA20 nằm trên MA50." },
-        { code: "tier_a", text: "Hạng A: khối lượng gấp 2,00 lần trung vị." },
-      ],
-    });
-    const s = buildF2ViewModel(
-      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: withReasons }) })
-    ).details.FPT.suggestion;
-    expect(s.reasons).toEqual([
-      "Xu hướng thuận: giá đóng cửa trên MA50 và MA20 nằm trên MA50.",
-      "Hạng A: khối lượng gấp 2,00 lần trung vị.",
-    ]);
-  });
-
   it("liệt kê rủi ro theo mức độ: cao, rồi chú ý, rồi thông tin", () => {
     // Handed over out of order on purpose: F2 must not rely on the builder's sort.
     const withRisks = suggestion({
@@ -289,6 +273,13 @@ describe("gợi ý lệnh trên F2", () => {
     const s = buildF2ViewModel(
       input({ suggestionBySetupId: suggestions({ ok: true, suggestion: withRisks }) })
     ).details.FPT.suggestion;
+    expect(s.risks.map((r) => r.code)).toEqual([
+      "regime_fail",
+      "stop_too_tight",
+      "exchange_assumed",
+      "settlement_lockup",
+      "tier_b",
+    ]);
     expect(s.risks.map((r) => [r.label, r.text])).toEqual([
       ["CAO", "Cổng 1 FAIL …"],
       ["CHÚ Ý", "Stop sát …"],
@@ -300,11 +291,10 @@ describe("gợi ý lệnh trên F2", () => {
     expect(colors.size).toBe(3);
   });
 
-  it("không tính được thì không có lý do hay rủi ro nào để liệt kê", () => {
+  it("không tính được thì không có rủi ro nào để liệt kê", () => {
     const s = buildF2ViewModel(
       input({ suggestionBySetupId: suggestions({ ok: false, reason: "TOO_FEW_BARS", detail: "x" }) })
     ).details.FPT.suggestion;
-    expect(s.reasons).toEqual([]);
     expect(s.risks).toEqual([]);
   });
 
@@ -408,6 +398,29 @@ describe("tiêu chí Cổng 2", () => {
     const warn = rows.find((r) => r.mark === "!");
     expect(warn?.label).toBe("Khối lượng cạn dần");
     expect(warn?.value).toBe("CẢNH BÁO");
+  });
+
+  it("dòng lý do của bộ quét hiện bằng tiếng Việt, theo thứ tự của bộ quét, không còn câu tiếng Anh", () => {
+    const english = [
+      "Trend OK for long-bias pullback: close above MA50 and MA20 ≥ MA50.",
+      "Fresh breakout: cleared prior resistance 200.00 at session offset 59 (10 bars ago).",
+      "Liquidity check passed—volume 2.00× the 20-day median.",
+      "Tier A — strong participation (2.00× median, ≥1.5×) and constructive close vs MA20.",
+    ];
+    const detail = buildF2ViewModel(input({ reasonLinesBySymbol: { FPT: english } })).details.FPT;
+    expect(detail.gate2.map((r) => [r.mark, r.label, r.value])).toEqual([
+      ["✓", "Xu hướng thuận: giá đóng cửa trên MA50 và MA20 nằm trên MA50.", "ĐẠT"],
+      ["✓", "Breakout mới: giá vượt kháng cự 200,00 cách đây 10 phiên.", "ĐẠT"],
+      ["✓", "Khối lượng phiên quét gấp 2,00 lần trung vị 20 phiên.", "ĐẠT"],
+      [
+        "✓",
+        "Hạng A: khối lượng gấp 2,00 lần trung vị (ngưỡng 1,5 lần) và giá đóng cửa không dưới MA20.",
+        "ĐẠT",
+      ],
+    ]);
+    const rendered = JSON.stringify(detail);
+    for (const line of english) expect(rendered).not.toContain(line);
+    expect(rendered).not.toMatch(/Trend OK|Fresh breakout|Liquidity check|Tier A —/);
   });
 
   it("không có dòng lý do nào thì trả mảng rỗng để panel hiện trạng thái rỗng", () => {
