@@ -94,10 +94,19 @@ export type SessionBand = {
  */
 export function sessionBand(refKvnd: number, exchange: Exchange): SessionBand {
   const pct = bandPct(exchange);
-  const refVnd = toVnd(refKvnd);
+  // Callers must pass the MOST RECENT session's close. Back-adjustment rewrites
+  // only bars before a corporate action, so that close is the raw traded price
+  // and equals the exchange's reference; an older stored close is synthetic and
+  // must not be used here. Snapping to the nearest tick only absorbs storage
+  // noise on that raw close.
+  const ref = snapToTick(refKvnd, exchange, "nearest");
+  const refVnd = toVnd(ref);
   const tickVnd = tickSizeVnd(refVnd, exchange);
-  let floorVnd = toVnd(snapToTick(refKvnd * (1 - pct / 100), exchange, "up"));
-  let ceilingVnd = toVnd(snapToTick(refKvnd * (1 + pct / 100), exchange, "down"));
+  if (refVnd <= tickVnd) {
+    throw new RangeError(`Reference ${refKvnd} has no quotable price below it on ${exchange}`);
+  }
+  let floorVnd = toVnd(snapToTick(ref * (1 - pct / 100), exchange, "up"));
+  let ceilingVnd = toVnd(snapToTick(ref * (1 + pct / 100), exchange, "down"));
   if (ceilingVnd <= refVnd) ceilingVnd = refVnd + tickVnd;
   if (floorVnd >= refVnd) floorVnd = Math.max(tickVnd, refVnd - tickVnd);
   return { bandPct: pct, floor: floorVnd / 1000, ceiling: ceilingVnd / 1000 };

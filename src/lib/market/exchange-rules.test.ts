@@ -119,10 +119,23 @@ describe("sessionBand", () => {
     expect(sessionBand(ref, exchange)).toMatchObject({ floor, ceiling });
   });
 
-  it.each([0, -5, Number.NaN])("rejects a reference price of %d", (ref) => {
-    expect(() => sessionBand(ref, "HOSE")).toThrow(RangeError);
+  it("treats an off-tick reference (e.g. a stored adjusted close) as its nearest tick", () => {
+    expect(sessionBand(23.47, "HOSE")).toEqual(sessionBand(23.45, "HOSE"));
+  });
+
+  // A reference of one tick has no lower quotable price, so it has no floor.
+  it.each([
+    [0, "HOSE"],
+    [-5, "HOSE"],
+    [Number.NaN, "HOSE"],
+    [0.01, "HOSE"],
+    [0.001, "HOSE"],
+    [0.1, "HNX"],
+  ] as const)("rejects a reference price of %d on %s", (ref, exchange) => {
+    expect(() => sessionBand(ref, exchange)).toThrow(RangeError);
   });
 });
+
 
 describe("clipToBand", () => {
   const band = { bandPct: 7, floor: 21.85, ceiling: 25.05 };
