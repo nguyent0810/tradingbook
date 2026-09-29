@@ -19,18 +19,9 @@ import { fmtNum, fmtSessionDate, fmtVndCompact } from "@/lib/format/vn";
 import { barsThroughSession, utcDayKey } from "@/lib/scanner/early-entry/bar-metrics";
 import { sortDedupeGate2Bars } from "@/lib/scanner/gate2/breakout-pullback";
 import { collectResistanceCandidates } from "@/lib/scanner/early-entry/risk-reward";
-import {
-  ROUND_TRIP_FEE_FRAC,
-  computeAtr,
-  computeMinStopFrac,
-} from "@/lib/scanner/stop-feasibility";
-import {
-  computePositionSizing,
-  qualityRiskMultiplier,
-  type PositionSizingCap,
-} from "@/lib/position-sizing";
+import { computeAtr, computeMinStopFrac } from "@/lib/scanner/stop-feasibility";
+import { qualityRiskMultiplier, type PositionSizingCap } from "@/lib/position-sizing";
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
-import { applyVerdictToShares } from "@/lib/terminal/verdict-tokens";
 import {
   bandPct,
   clipToBand,
@@ -42,6 +33,13 @@ import {
   type SessionBand,
 } from "@/lib/market/exchange-rules";
 import { MIN_BARS_FOR_STRUCTURAL_SCAN, tightenEntryZone } from "./auto-populate-from-setup";
+import {
+  BROKERAGE_PER_SIDE_FRAC,
+  SELL_TAX_FRAC,
+  roundToWholeVndInKvnd,
+  worstCaseRiskPerShare,
+} from "./worst-case-risk";
+import { referenceShares } from "./reference-size";
 import {
   ADV_ADJUSTED_PRICE_CAVEAT,
   BANNED_IMPERATIVE_PATTERNS,
@@ -60,14 +58,6 @@ import {
   type RiskSeverity,
   type SetupReasonCode,
 } from "./trade-suggestion-copy";
-
-/** 0.1% transfer tax on every sale. */
-const SELL_TAX_FRAC = 0.001;
-/**
- * Brokerage per side. `ROUND_TRIP_FEE_FRAC` is two sides of brokerage plus the
- * sell tax (see its doc), so one side is what remains halved: 0.15%.
- */
-const BROKERAGE_PER_SIDE_FRAC = (ROUND_TRIP_FEE_FRAC - SELL_TAX_FRAC) / 2;
 
 /** First validation checkpoint of ADR 0001 / PROSPECTIVE-REGISTRY-PLAN.md. */
 export const CHECKPOINT_N = 100;
@@ -319,10 +309,7 @@ function positive(x: number): boolean {
   return Number.isFinite(x) && x > 0;
 }
 
-/** kVND rounded to whole VND — sheds float noise from differences of quotes. */
-function roundVnd(kvnd: number): number {
-  return Math.round(kvnd * 1000) / 1000;
-}
+const roundVnd = roundToWholeVndInKvnd;
 
 function fmt(kvnd: number): string {
   return kvnd.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
@@ -400,32 +387,27 @@ function buildSize(params: {
   exchange: Exchange;
   entryTopKvnd: number;
   stopLowKvnd: number;
-  netRKvnd: number;
   advVnd: number | null;
 }): TradeSuggestionSize | null {
   const { sizing, entryTopKvnd } = params;
-  const gapBufferKvnd = params.stopLowKvnd * (bandPct(params.exchange) / 100);
-  const worstCasePerShareKvnd = params.netRKvnd + gapBufferKvnd;
-  // A setup outside tiers A/B is never sized at full risk.
-  const quality = params.tier === "A" ? "A" : "B";
-  const sized = computePositionSizing({
-    accountEquityVnd: sizing.equityVnd,
-    maxPortfolioExposurePct: sizing.maxPortfolioExposurePct,
-    currentPortfolioExposureVnd: sizing.currentExposureVnd,
+  // Same function the server's ceiling runs when a trade is logged (#17).
+  const ref = referenceShares({
+    equityVnd: sizing.equityVnd,
+    riskPerTradePct: sizing.riskPerTradePct,
     maxPerTradeExposurePct: sizing.maxPerTradeExposurePct,
-    baseRiskPerTradePct: sizing.riskPerTradePct,
-    quality,
-    entryKVnd: entryTopKvnd,
-    stopKVnd: params.stopLowKvnd,
+    maxPortfolioExposurePct: sizing.maxPortfolioExposurePct,
     liquidityCapPct: sizing.liquidityCapPct,
-    symbolAvgDailyValueVnd: params.advVnd,
-    perShareRiskVnd: worstCasePerShareKvnd * 1000,
+    currentExposureVnd: sizing.currentExposureVnd,
+    tier: params.tier,
+    exchange: params.exchange,
+    entryKvnd: entryTopKvnd,
+    stopKvnd: params.stopLowKvnd,
+    advVnd: params.advVnd,
+    verdictLevel: sizing.verdictLevel,
   });
-  if (!sized.ok) return null;
-  const v = sized.value;
-  const sharesBeforeVerdict = roundDownToLot(v.qFinalShares);
-  const verdict = sizing.verdictLevel ? applyVerdictToShares(sharesBeforeVerdict, sizing.verdictLevel) : null;
-  const shares = verdict ? verdict.shares : sharesBeforeVerdict;
+  if (!ref.ok) return null;
+  const { sized: v, quality, sharesBeforeVerdict, shares, verdict } = ref.value;
+  const { gapBufferKvnd, worstCasePerShareKvnd } = ref.value.worstCase;
   const worstCaseLossVnd = Math.round(shares * worstCasePerShareKvnd * 1000);
 
   let zeroShareReason: string | null = null;
@@ -575,13 +557,12 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
   };
 
   const entryTop = entryZone.high;
-  const perShareGross = roundVnd(entryTop - stopZone.low);
-  // Costs are fractions of a VND per share; they are kept, not rounded, so the
-  // targets below are solved against the exact figure.
-  const perShareNet =
-    perShareGross +
-    entryTop * BROKERAGE_PER_SIDE_FRAC +
-    stopZone.low * (BROKERAGE_PER_SIDE_FRAC + SELL_TAX_FRAC);
+  // Same function the order ticket and the server's ceiling use (#17).
+  const { perShareGrossKvnd: perShareGross, perShareNetKvnd: perShareNet } = worstCaseRiskPerShare({
+    entryKvnd: entryTop,
+    stopKvnd: stopZone.low,
+    exchange,
+  });
 
   const resistances = [
     ...new Set(
@@ -615,7 +596,6 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
         exchange,
         entryTopKvnd: entryTop,
         stopLowKvnd: stopZone.low,
-        netRKvnd: perShareNet,
         advVnd: input.advVnd,
       })
     : null;
