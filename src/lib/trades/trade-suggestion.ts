@@ -24,9 +24,12 @@ import {
   computeAtr,
   computeMinStopFrac,
 } from "@/lib/scanner/stop-feasibility";
+import { computePositionSizing, type PositionSizingCap } from "@/lib/position-sizing";
 import {
+  bandPct,
   clipToBand,
   resolveExchange,
+  roundDownToLot,
   sessionBand,
   snapToTick,
   type Exchange,
@@ -40,6 +43,8 @@ import {
   RISK_COPY,
   SETTLEMENT_BREACH_COPY,
   SETUP_REASON_CODES,
+  SIZE_ZERO_CAUSE_COPY,
+  SIZE_ZERO_COPY,
   SETUP_REASON_COPY,
   SETUP_REASON_PATTERNS,
   UNMAPPED_REASON_COPY,
@@ -82,6 +87,18 @@ export const LIQUIDITY_THIN_ADV_VND = 10_000_000_000;
 /** Share of the 20-session average the liquidity risk expresses in 100-share lots. */
 const LIQUIDITY_REFERENCE_FRAC = 0.01;
 
+/**
+ * Once a size exists, the liquidity risk fires when the position value is more
+ * than this share of the 20-session average traded value (#11 story 15). It
+ * sits well under the liquidity cap setting (10% by default), which only stops
+ * the size from being absurd; exiting 1% of a day's value on a limit-down
+ * session, when bids thin out, can already take more than one session.
+ */
+export const LIQUIDITY_POSITION_FRAC = 0.01;
+
+/** Tổng rủi ro mở above this percent of equity raises a warning (#11 story 20). */
+export const OPEN_RISK_LIMIT_PCT = 3;
+
 const SEVERITY_RANK: Record<RiskSeverity, number> = { high: 0, warn: 1, info: 2 };
 
 export type TradeSuggestionTarget = {
@@ -122,13 +139,8 @@ export type TradeSuggestion = {
    */
   r: { perShareGross: number; perShareNet: number };
   targets: TradeSuggestionTarget[];
-  /** Reference size — #15. Null until then. */
-  size: {
-    shares: number;
-    bindingCap: string | null;
-    worstCaseLossVnd: number;
-    tradeRiskPct: number;
-  } | null;
+  /** Size tham khảo (#15); null when the caller passed no sizing inputs. */
+  size: TradeSuggestionSize | null;
   /**
    * The scanner's reasons in plain Vietnamese, in the scanner's order. `code`
    * is a `SetupReasonCode`, or "unmapped" for a line no code recognises (the
@@ -145,6 +157,38 @@ export type TradeSuggestion = {
    * when the registry could not be read ("N không rõ").
    */
   evidence: { status: "UNVALIDATED"; prospectiveN: number | null; checkpointN: number };
+};
+
+export type TradeSuggestionSize = {
+  /** Rounded down to the 100-share lot; 0 is a result, explained by `zeroShareReason`. */
+  shares: number;
+  /** The cap that set the size; null when the risk budget did. */
+  bindingCap: PositionSizingCap | null;
+  /** Đệm gap: one full band of the exchange below the stop-zone low, kVND per share. */
+  gapBufferKvnd: number;
+  /** Net R plus the gap buffer, kVND per share: what the risk budget is divided by. */
+  worstCasePerShareKvnd: number;
+  /** Rủi ro lệnh in VND: `shares` × `worstCasePerShareKvnd`. */
+  worstCaseLossVnd: number;
+  /** Rủi ro lệnh as a percent of equity (1 = 1%). */
+  tradeRiskPct: number;
+  /** Position value at the top of the entry zone, VND. */
+  positionValueVnd: number;
+  /** Why the size is 0 cp; null when it is not. */
+  zeroShareReason: string | null;
+  /** Tổng rủi ro mở with this suggestion at `shares`. A warning only; it never cuts the size. */
+  openRisk: {
+    /** Sum of (entry − stop) × quantity over open trades that have a stop, VND. */
+    openTradesRiskVnd: number;
+    /** Open trades with no stop: their risk is unknown, not 0. */
+    tradesWithoutStop: number;
+    /** `openTradesRiskVnd` + `worstCaseLossVnd`; a lower bound when `tradesWithoutStop` > 0. */
+    totalVnd: number;
+    /** `totalVnd` as a percent of equity (1 = 1%). */
+    totalPct: number;
+    limitPct: number;
+    aboveLimit: boolean;
+  };
 };
 
 export type TradeSuggestionFailure =
@@ -195,6 +239,25 @@ export type TradeSuggestionInput = {
    * there is none.
    */
   advVnd: number | null;
+  /**
+   * The user's sizing settings and open journal trades, loaded by the caller;
+   * null when they could not be (no equity on record, a failed lookup), in
+   * which case `size` is null. Percentages are decimal fractions (0.01 = 1%).
+   */
+  sizing?: TradeSuggestionSizingInput | null;
+};
+
+export type TradeSuggestionSizingInput = {
+  equityVnd: number;
+  /** `UserTradingSettings.riskPerTradePct`, or the default. */
+  riskPerTradePct: number;
+  maxPerTradeExposurePct: number;
+  maxPortfolioExposurePct: number;
+  liquidityCapPct: number;
+  /** Exposure: sum of entry × quantity of open trades, VND. */
+  currentExposureVnd: number;
+  /** Open journal trades. Prices kVND; `stopKvnd` null when the trade has no stop. */
+  openTrades: readonly { entryKvnd: number; stopKvnd: number | null; quantity: number }[];
 };
 
 function fail(reason: TradeSuggestionFailure, detail: string): TradeSuggestionResult {
@@ -268,6 +331,105 @@ function describeReason(line: string): TradeSuggestion["reasons"][number] {
   return {
     code: "unmapped",
     text: echoable ? fill(UNMAPPED_REASON_COPY, { raw }) : UNMAPPED_REASON_GENERIC_COPY,
+  };
+}
+
+/** A decimal fraction as a vi-VN percent number without the sign: 0.001 → "0,1". */
+function fracPct(frac: number): string {
+  return (frac * 100).toLocaleString("vi-VN", { maximumFractionDigits: 2 });
+}
+
+/**
+ * Size tham khảo: the risk budget divided by net R plus the gap buffer, then the
+ * existing exposure and liquidity caps (`computePositionSizing`), then the lot.
+ */
+function buildSize(params: {
+  sizing: TradeSuggestionSizingInput;
+  tier: "A" | "B" | null;
+  exchange: Exchange;
+  entryTopKvnd: number;
+  stopLowKvnd: number;
+  netRKvnd: number;
+  advVnd: number | null;
+}): TradeSuggestionSize | null {
+  const { sizing, entryTopKvnd } = params;
+  const gapBufferKvnd = params.stopLowKvnd * (bandPct(params.exchange) / 100);
+  const worstCasePerShareKvnd = params.netRKvnd + gapBufferKvnd;
+  const sized = computePositionSizing({
+    accountEquityVnd: sizing.equityVnd,
+    maxPortfolioExposurePct: sizing.maxPortfolioExposurePct,
+    currentPortfolioExposureVnd: sizing.currentExposureVnd,
+    maxPerTradeExposurePct: sizing.maxPerTradeExposurePct,
+    baseRiskPerTradePct: sizing.riskPerTradePct,
+    // A setup outside tiers A/B is never sized at full risk.
+    quality: params.tier === "A" ? "A" : "B",
+    entryKVnd: entryTopKvnd,
+    stopKVnd: params.stopLowKvnd,
+    liquidityCapPct: sizing.liquidityCapPct,
+    symbolAvgDailyValueVnd: params.advVnd,
+    perShareRiskVnd: worstCasePerShareKvnd * 1000,
+  });
+  if (!sized.ok) return null;
+  const v = sized.value;
+  const shares = roundDownToLot(v.qFinalShares);
+  const worstCaseLossVnd = Math.round(shares * worstCasePerShareKvnd * 1000);
+
+  let zeroShareReason: string | null = null;
+  if (shares === 0) {
+    const cause =
+      v.bindingCap === "portfolio_exposure"
+        ? fill(SIZE_ZERO_CAUSE_COPY.portfolio_exposure, {
+            remaining: fmtVndCompact(v.remainingExposureVnd),
+            cap: fracPct(sizing.maxPortfolioExposurePct),
+          })
+        : v.bindingCap === "per_trade_exposure"
+          ? fill(SIZE_ZERO_CAUSE_COPY.per_trade_exposure, {
+              cap: fracPct(sizing.maxPerTradeExposurePct),
+              capVnd: fmtVndCompact(sizing.equityVnd * sizing.maxPerTradeExposurePct),
+            })
+          : v.bindingCap === "liquidity"
+            ? fill(SIZE_ZERO_CAUSE_COPY.liquidity, {
+                cap: fracPct(sizing.liquidityCapPct),
+                adv: fmtVndCompact(params.advVnd ?? 0),
+              })
+            : fill(SIZE_ZERO_CAUSE_COPY.risk, {
+                budget: fmtVndCompact(v.riskBudgetVnd),
+                perShare: fmtVndCompact(v.perShareRiskVnd),
+              });
+    zeroShareReason = fill(SIZE_ZERO_COPY, { shares: fmtNum(v.qFinalShares, 0), cause });
+  }
+
+  let openTradesRiskVnd = 0;
+  let tradesWithoutStop = 0;
+  for (const t of sizing.openTrades) {
+    if (t.stopKvnd == null || !Number.isFinite(t.stopKvnd)) {
+      tradesWithoutStop++;
+      continue;
+    }
+    // A stop at or above entry has no risk left; it must not offset other trades.
+    const riskKvndPerShare = Math.max(0, t.entryKvnd - t.stopKvnd);
+    openTradesRiskVnd += Math.round(riskKvndPerShare * 1000 * Math.max(0, t.quantity));
+  }
+  const totalVnd = openTradesRiskVnd + worstCaseLossVnd;
+
+  return {
+    shares,
+    bindingCap: v.bindingCap,
+    gapBufferKvnd,
+    worstCasePerShareKvnd,
+    worstCaseLossVnd,
+    tradeRiskPct: (worstCaseLossVnd * 100) / sizing.equityVnd,
+    positionValueVnd: Math.round(shares * entryTopKvnd * 1000),
+    zeroShareReason,
+    openRisk: {
+      openTradesRiskVnd,
+      tradesWithoutStop,
+      totalVnd,
+      totalPct: (totalVnd * 100) / sizing.equityVnd,
+      limitPct: OPEN_RISK_LIMIT_PCT,
+      // Compared in whole numbers so exactly 3% is not "above" through float noise.
+      aboveLimit: totalVnd * 100 > sizing.equityVnd * OPEN_RISK_LIMIT_PCT,
+    },
   };
 }
 
@@ -388,6 +550,18 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
     return { r, price, nearestResistance, resistanceBelow: resistances.some((l) => l < price) };
   });
 
+  const size = input.sizing
+    ? buildSize({
+        sizing: input.sizing,
+        tier: setup.tier,
+        exchange,
+        entryTopKvnd: entryTop,
+        stopLowKvnd: stopZone.low,
+        netRKvnd: perShareNet,
+        advVnd: input.advVnd,
+      })
+    : null;
+
   const asOfSession = utcDayKey(latestBar.date);
   const setupSession = utcDayKey(lastBar.date);
   const sessionsSinceSetup = allBars.length - 1 - idx;
@@ -411,6 +585,22 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
       setupSession: fmtSessionDate(setupSession),
       sessions: String(sessionsSinceSetup),
     });
+  }
+
+  if (size) {
+    const { openRisk } = size;
+    const totals = { total: fmtVndCompact(openRisk.totalVnd), pct: fmtNum(openRisk.totalPct, 2) };
+    if (openRisk.aboveLimit) {
+      raise("open_risk_high", "warn", {
+        ...totals,
+        limit: String(openRisk.limitPct),
+        open: fmtVndCompact(openRisk.openTradesRiskVnd),
+        thisLoss: fmtVndCompact(size.worstCaseLossVnd),
+      });
+    }
+    if (openRisk.tradesWithoutStop > 0) {
+      raise("open_risk_unknown", "warn", { ...totals, count: String(openRisk.tradesWithoutStop) });
+    }
   }
 
   // Floor path from the worst fill: the price after k limit-down sessions in a
@@ -466,6 +656,17 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
 
   if (input.advVnd == null || !Number.isFinite(input.advVnd) || input.advVnd <= 0) {
     raise("liquidity_unknown", "warn");
+  } else if (size && size.shares > 0) {
+    // With a position to compare, story 15's measure: position value vs the average.
+    if (size.positionValueVnd > input.advVnd * LIQUIDITY_POSITION_FRAC) {
+      raise("liquidity_position", "warn", {
+        value: fmtVndCompact(size.positionValueVnd),
+        pct: fmtNum((size.positionValueVnd * 100) / input.advVnd, 2),
+        adv: fmtVndCompact(input.advVnd),
+        threshold: fracPct(LIQUIDITY_POSITION_FRAC),
+        caveat: ADV_ADJUSTED_PRICE_CAVEAT,
+      });
+    }
   } else if (input.advVnd < LIQUIDITY_THIN_ADV_VND) {
     const lotVnd = entryTop * 1000 * 100;
     const lots = Math.floor((input.advVnd * LIQUIDITY_REFERENCE_FRAC) / lotVnd);
@@ -516,7 +717,7 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
       stopZone,
       r: { perShareGross, perShareNet },
       targets,
-      size: null,
+      size,
       reasons: describeSetupReasons(setup.reasons),
       risks,
       evidence: {

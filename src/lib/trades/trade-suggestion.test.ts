@@ -7,6 +7,9 @@ import {
   RISK_COPY,
   SETTLEMENT_BREACH_COPY,
   SETUP_REASON_COPY,
+  SIZE_BINDING_CAP_COPY,
+  SIZE_ZERO_CAUSE_COPY,
+  SIZE_ZERO_COPY,
   UNMAPPED_REASON_COPY,
   UNMAPPED_REASON_GENERIC_COPY,
 } from "./trade-suggestion-copy";
@@ -476,6 +479,9 @@ describe("copy tables — descriptive, never imperative (ADR 0003)", () => {
     ["unmapped generic", UNMAPPED_REASON_GENERIC_COPY],
     ["settlement breach", SETTLEMENT_BREACH_COPY],
     ["adv caveat", ADV_ADJUSTED_PRICE_CAVEAT],
+    ...Object.entries(SIZE_ZERO_CAUSE_COPY),
+    ...Object.entries(SIZE_BINDING_CAP_COPY),
+    ["size zero", SIZE_ZERO_COPY],
   ];
 
   it("the banned list catches the wording audit F08 flagged", () => {
@@ -725,5 +731,232 @@ describe("buildTradeSuggestion — risks", () => {
       ["warn", "settlement_lockup"],
       ["info", "tier_b"],
     ]);
+  });
+});
+
+/**
+ * Size tham khảo (#15). The worked HOSE example above gives entry top 20.20,
+ * stop-zone low 18.60 and net R 1.6768 kVND/cp. The Đệm gap is one full band of
+ * the exchange below the stop-zone low:
+ *   HOSE 18.60 × 7%  = 1.302 → worst case 1.6768 + 1.302 = 2.9788 kVND = 2,978.8 đ/cp
+ *   HNX  18.60 × 10% = 1.860 → 3.5368 kVND/cp
+ *   UPCOM 18.60 × 15% = 2.790 → 4.4668 kVND/cp
+ * With 1 tỷ equity and 1% risk, tier A: budget 10,000,000 đ.
+ *   10,000,000 / 2,978.8 = 3,357.05 → 3,357 cp → 3,300 cp on the 100-share lot.
+ *   Worst-case loss 3,300 × 2,978.8 = 9,830,040 đ = 0.983004% of equity.
+ */
+const SIZING: NonNullable<TradeSuggestionInput["sizing"]> = {
+  equityVnd: 1_000_000_000,
+  riskPerTradePct: 0.01,
+  maxPerTradeExposurePct: 1,
+  maxPortfolioExposurePct: 1,
+  liquidityCapPct: 0.1,
+  currentExposureVnd: 0,
+  openTrades: [],
+};
+
+function sized(
+  sizing: Partial<NonNullable<TradeSuggestionInput["sizing"]>> = {},
+  over: Partial<TradeSuggestionInput> = {},
+  setupOver: Partial<TradeSuggestionInput["setup"]> = {}
+) {
+  const s = ok(buildTradeSuggestion(input({ sizing: { ...SIZING, ...sizing }, ...over }, setupOver)));
+  if (!s.size) throw new Error("expected a size");
+  return { s, size: s.size };
+}
+
+describe("buildTradeSuggestion — size with gap buffer (#15)", () => {
+  it("has no size when no sizing inputs were given", () => {
+    expect(ok(buildTradeSuggestion(input())).size).toBeNull();
+  });
+
+  it("worked HOSE example: 3,300 cp, worst-case loss 9,830,040 đ, 0.983% of equity", () => {
+    const { size } = sized();
+    expect(size.gapBufferKvnd).toBeCloseTo(1.302, 9);
+    expect(size.worstCasePerShareKvnd).toBeCloseTo(2.9788, 9);
+    expect(size.shares).toBe(3300);
+    expect(size.bindingCap).toBeNull();
+    expect(size.worstCaseLossVnd).toBe(9_830_040);
+    expect(size.tradeRiskPct).toBeCloseTo(0.983004, 9);
+    expect(size.zeroShareReason).toBeNull();
+  });
+
+  it("gap buffer per exchange: HNX one 10% band, UPCOM one 15% band", () => {
+    // HNX: 10,000,000 / 3,536.8 = 2,827.4 → 2,800 cp. UPCOM: / 4,466.8 = 2,238.7 → 2,200 cp.
+    const hnx = sized({}, { exchange: "HNX" }).size;
+    expect(hnx.gapBufferKvnd).toBeCloseTo(1.86, 9);
+    expect(hnx.shares).toBe(2800);
+    const upcom = sized({}, { exchange: "UPCOM" }).size;
+    expect(upcom.gapBufferKvnd).toBeCloseTo(2.79, 9);
+    expect(upcom.shares).toBe(2200);
+  });
+
+  it("tier B sizes at half risk: 5,000,000 / 2,978.8 = 1,678.5 → 1,600 cp", () => {
+    expect(sized({}, {}, { tier: "B" }).size.shares).toBe(1600);
+  });
+
+  it("a setup with no A/B tier is sized like tier B, never at full risk", () => {
+    expect(sized({}, {}, { tier: null }).size.shares).toBe(1600);
+  });
+
+  it("rounds down to the lot, never up: 1% of 1,010,000,000 đ = 10,100,000 / 2,978.8 = 3,390.6 → 3,300", () => {
+    expect(sized({ equityVnd: 1_010_000_000 }).size.shares).toBe(3300);
+  });
+
+  describe("names the binding cap", () => {
+    it("per-trade: 5% of 1 tỷ = 50,000,000 / 20,200 = 2,475 → 2,400 cp", () => {
+      const { size } = sized({ maxPerTradeExposurePct: 0.05 });
+      expect(size.shares).toBe(2400);
+      expect(size.bindingCap).toBe("per_trade_exposure");
+      // 2,400 × 2,978.8 = 7,149,120 đ
+      expect(size.worstCaseLossVnd).toBe(7_149_120);
+    });
+
+    it("portfolio: 70% of 1 tỷ − 670,000,000 open = 30,000,000 / 20,200 = 1,485 → 1,400 cp", () => {
+      const { size } = sized({ maxPortfolioExposurePct: 0.7, currentExposureVnd: 670_000_000 });
+      expect(size.shares).toBe(1400);
+      expect(size.bindingCap).toBe("portfolio_exposure");
+    });
+
+    it("liquidity: 10% of 500,000,000 ADV = 50,000,000 / 20,200 = 2,475 → 2,400 cp", () => {
+      const { size } = sized({}, { advVnd: 500_000_000 });
+      expect(size.shares).toBe(2400);
+      expect(size.bindingCap).toBe("liquidity");
+    });
+  });
+
+  describe("a zero-share result is explained, not hidden", () => {
+    it("below one lot on the risk budget: 1% of 20,000,000 = 200,000 / 2,978.8 = 67 cp", () => {
+      const { size } = sized({ equityVnd: 20_000_000 });
+      expect(size.shares).toBe(0);
+      expect(size.worstCaseLossVnd).toBe(0);
+      expect(size.tradeRiskPct).toBe(0);
+      expect(size.zeroShareReason).toBe(
+        "Khối lượng tính được 67 cp, chưa tới 1 lô 100 cp: ngân sách rủi ro 200.000 ₫ chia cho 2.979 ₫/cp (R sau phí cộng đệm gap). Size tham khảo vì thế là 0 cp."
+      );
+    });
+
+    it("no room left under the portfolio cap", () => {
+      const { size } = sized({ maxPortfolioExposurePct: 0.7, currentExposureVnd: 700_000_000 });
+      expect(size.shares).toBe(0);
+      expect(size.bindingCap).toBe("portfolio_exposure");
+      expect(size.zeroShareReason).toBe(
+        "Khối lượng tính được 0 cp, chưa tới 1 lô 100 cp: exposure danh mục còn lại 0 ₫ dưới trần 70% vốn. Size tham khảo vì thế là 0 cp."
+      );
+    });
+
+    it("per-trade and liquidity caps each name themselves", () => {
+      // 0.1% of 1 tỷ = 1,000,000 / 20,200 = 49 cp. 10% of 10,000,000 ADV = 1,000,000 → 49 cp.
+      expect(sized({ maxPerTradeExposurePct: 0.001 }).size.zeroShareReason).toContain(
+        "trần giá trị mỗi lệnh 0,1% vốn là 1,0 tr ₫"
+      );
+      expect(sized({}, { advVnd: 10_000_000 }).size.zeroShareReason).toContain(
+        "trần thanh khoản 10% của giá trị giao dịch bình quân 20 phiên 10,0 tr ₫"
+      );
+    });
+  });
+});
+
+describe("buildTradeSuggestion — Tổng rủi ro mở (#15)", () => {
+  const risk = (s: TradeSuggestion, code: string) => s.risks.find((r) => r.code === code);
+  // This suggestion's worst case is 9,830,040 đ; the 3% line on 1 tỷ is 30,000,000 đ.
+  // (30 − 28) × 1000 × 10,000 = 20,000,000 đ; (12.01 − 12) × 1000 × 16,996 = 169,960 đ.
+  const twoTrades = [
+    { entryKvnd: 30, stopKvnd: 28, quantity: 10_000 },
+    { entryKvnd: 12.01, stopKvnd: 12, quantity: 16_996 },
+  ];
+
+  it("sums (entry − stop) × quantity of open trades plus this worst case", () => {
+    const { size } = sized({ openTrades: twoTrades });
+    expect(size.openRisk).toEqual({
+      openTradesRiskVnd: 20_169_960,
+      tradesWithoutStop: 0,
+      totalVnd: 30_000_000,
+      totalPct: 3,
+      limitPct: 3,
+      aboveLimit: false,
+    });
+  });
+
+  it("at exactly 3% there is no warning", () => {
+    expect(risk(sized({ openTrades: twoTrades }).s, "open_risk_high")).toBeUndefined();
+  });
+
+  it("below 3% there is no warning: 10,000,000 + 9,830,040 = 19,830,040 đ = 1.98%", () => {
+    const { s, size } = sized({ openTrades: [{ entryKvnd: 25, stopKvnd: 24, quantity: 10_000 }] });
+    expect(size.openRisk.totalVnd).toBe(19_830_040);
+    expect(size.openRisk.aboveLimit).toBe(false);
+    expect(risk(s, "open_risk_high")).toBeUndefined();
+  });
+
+  it("above 3% warns, and only warns: 20,170,000 + 9,830,040 = 30,000,040 đ", () => {
+    const { s, size } = sized({
+      openTrades: [
+        { entryKvnd: 30, stopKvnd: 28, quantity: 10_000 },
+        { entryKvnd: 12.01, stopKvnd: 12, quantity: 17_000 },
+      ],
+    });
+    expect(size.openRisk.aboveLimit).toBe(true);
+    expect(size.shares).toBe(3300); // the warning never cuts the size
+    expect(risk(s, "open_risk_high")).toEqual({
+      code: "open_risk_high",
+      severity: "warn",
+      text: "Tổng rủi ro mở 30,0 tr ₫ bằng 3,00% vốn, trên mốc 3%: 20,2 tr ₫ từ các lệnh đang mở cộng 9,8 tr ₫ lỗ xấu nhất của gợi ý này.",
+    });
+  });
+
+  it("a trade with no stop is unknown risk, never zero", () => {
+    const { s, size } = sized({
+      openTrades: [...twoTrades, { entryKvnd: 50, stopKvnd: null, quantity: 1000 }],
+    });
+    expect(size.openRisk.tradesWithoutStop).toBe(1);
+    expect(size.openRisk.openTradesRiskVnd).toBe(20_169_960);
+    expect(risk(s, "open_risk_unknown")).toEqual({
+      code: "open_risk_unknown",
+      severity: "warn",
+      text: "1 lệnh đang mở chưa có stop, vì thế rủi ro của chúng chưa biết: tổng rủi ro mở 30,0 tr ₫ (3,00% vốn) chỉ là phần đã biết, con số thật có thể cao hơn.",
+    });
+  });
+
+  it("a stop at or above entry adds no risk rather than offsetting other trades", () => {
+    const { size } = sized({
+      openTrades: [...twoTrades, { entryKvnd: 20, stopKvnd: 22, quantity: 5000 }],
+    });
+    expect(size.openRisk.openTradesRiskVnd).toBe(20_169_960);
+  });
+
+  it("a zero-share suggestion adds nothing to open risk", () => {
+    const { size } = sized({ equityVnd: 20_000_000, openTrades: [{ entryKvnd: 25, stopKvnd: 24, quantity: 100 }] });
+    // (25 − 24) × 1000 × 100 = 100,000 đ = 0.5% of 20,000,000.
+    expect(size.openRisk.totalVnd).toBe(100_000);
+    expect(size.openRisk.totalPct).toBeCloseTo(0.5, 9);
+  });
+});
+
+describe("buildTradeSuggestion — liquidity once a size exists (#15)", () => {
+  const risk = (s: TradeSuggestion, code: string) => s.risks.find((r) => r.code === code);
+
+  it("compares the position value with the 20-session average, with the adjusted-price caveat", () => {
+    // 3,300 cp × 20,200 đ = 66,660,000 đ; / 4,200,000,000 = 1.587% > 1%.
+    const { s } = sized({}, { advVnd: 4_200_000_000 });
+    expect(risk(s, "liquidity_thin")).toBeUndefined();
+    expect(risk(s, "liquidity_position")).toEqual({
+      code: "liquidity_position",
+      severity: "warn",
+      text:
+        "Giá trị vị thế tham khảo 66,7 tr ₫ bằng 1,59% giá trị giao dịch bình quân 20 phiên (4,20 tỷ ₫), trên mốc 1%: thoát vị thế có thể khó, nhất là phiên giảm sàn. " +
+        ADV_ADJUSTED_PRICE_CAVEAT,
+    });
+  });
+
+  it("does not fire at or under 1% of the average: 66,660,000 / 10 tỷ = 0.67%", () => {
+    const { s } = sized({}, { advVnd: 10_000_000_000 });
+    expect(s.risks.filter((r) => r.code.startsWith("liquidity"))).toEqual([]);
+  });
+
+  it("with no position to compare (0 cp), keeps the average-only check", () => {
+    const { s } = sized({ equityVnd: 20_000_000 }, { advVnd: 4_200_000_000 });
+    expect(risk(s, "liquidity_position")).toBeUndefined();
+    expect(risk(s, "liquidity_thin")).toBeDefined();
   });
 });

@@ -106,10 +106,13 @@ export const RISK_CODES = [
   "regime_unknown",
   "stale_data",
   "stale_setup",
+  "open_risk_high",
+  "open_risk_unknown",
   "gap_through_stop",
   "limit_down_run",
   "stop_too_tight",
   "resistance_below_2r",
+  "liquidity_position",
   "liquidity_thin",
   "liquidity_unknown",
   "exchange_assumed",
@@ -128,6 +131,10 @@ export const RISK_COPY: Record<RiskCode, string> = {
     "Nến mới nhất của mã là phiên {asOf}, cũ hơn phiên thị trường {expected}: vùng giá và biên độ có thể đã lệch.",
   stale_setup:
     "Thiết lập từ phiên {setupSession}, dữ liệu đã có thêm {sessions} phiên sau đó: cấu trúc chưa được quét lại.",
+  open_risk_high:
+    "Tổng rủi ro mở {total} bằng {pct}% vốn, trên mốc {limit}%: {open} từ các lệnh đang mở cộng {thisLoss} lỗ xấu nhất của gợi ý này.",
+  open_risk_unknown:
+    "{count} lệnh đang mở chưa có stop, vì thế rủi ro của chúng chưa biết: tổng rủi ro mở {total} ({pct}% vốn) chỉ là phần đã biết, con số thật có thể cao hơn.",
   gap_through_stop:
     "Gap xuyên stop: một phiên mở giảm sàn ({bandPct}%) từ {entryTop} về {floor}, dưới đáy vùng SL {stop}. Lỗ khi đó {loss}/cp, bằng {lossR}R.",
   limit_down_run:
@@ -135,6 +142,8 @@ export const RISK_COPY: Record<RiskCode, string> = {
   stop_too_tight:
     "Mức vô hiệu theo cấu trúc {structural} sát hơn mức stop tối thiểu {minFeasible}: nhiễu một phiên có thể chạm tới nó. Vùng SL vì thế kéo xuống {low}.",
   resistance_below_2r: "Kháng cự {resistance} nằm dưới mốc 2R {target}: giá có thể gặp cản trước mốc.",
+  liquidity_position:
+    "Giá trị vị thế tham khảo {value} bằng {pct}% giá trị giao dịch bình quân 20 phiên ({adv}), trên mốc {threshold}%: thoát vị thế có thể khó, nhất là phiên giảm sàn. {caveat}",
   liquidity_thin:
     "Giá trị giao dịch bình quân 20 phiên khoảng {adv}, dưới mốc {threshold}: 1% con số đó chỉ bằng {lots} 100 cp ở {entryTop}, thoát vị thế lớn có thể khó, nhất là phiên giảm sàn. {caveat}",
   liquidity_unknown: "Chưa có giá trị giao dịch bình quân 20 phiên của mã, thanh khoản chưa đánh giá được.",
@@ -148,6 +157,28 @@ export const RISK_COPY: Record<RiskCode, string> = {
 /** Appended to `settlement_lockup` when the floor path crosses the stop inside the lockup. */
 export const SETTLEMENT_BREACH_COPY =
   "Hai phiên giảm sàn từ {entryTop} là {price}, đã dưới vùng SL: giá có thể xuyên stop trước khi bán được.";
+
+/**
+ * Size tham khảo (issue #15). The cap that bound the size, as F2 names it.
+ * Keys match `PositionSizingCap` in lib/position-sizing.
+ */
+export const SIZE_BINDING_CAP_COPY = {
+  portfolio_exposure: "Trần exposure danh mục",
+  per_trade_exposure: "Trần giá trị mỗi lệnh",
+  liquidity: "Trần thanh khoản",
+} as const;
+
+/** Why a size rounds to 0 cp; `{cause}` is one of `SIZE_ZERO_CAUSE_COPY`. */
+export const SIZE_ZERO_COPY =
+  "Khối lượng tính được {shares} cp, chưa tới 1 lô 100 cp: {cause}. Size tham khảo vì thế là 0 cp.";
+
+/** The constraint behind a 0 cp size: the risk budget, or the cap that bound. */
+export const SIZE_ZERO_CAUSE_COPY = {
+  risk: "ngân sách rủi ro {budget} chia cho {perShare}/cp (R sau phí cộng đệm gap)",
+  portfolio_exposure: "exposure danh mục còn lại {remaining} dưới trần {cap}% vốn",
+  per_trade_exposure: "trần giá trị mỗi lệnh {cap}% vốn là {capVnd}",
+  liquidity: "trần thanh khoản {cap}% của giá trị giao dịch bình quân 20 phiên {adv}",
+} as const;
 
 /** Caveat carried by every liquidity figure built on `symbol-adv` (close × 1000 × volMa20). */
 export const ADV_ADJUSTED_PRICE_CAVEAT =
