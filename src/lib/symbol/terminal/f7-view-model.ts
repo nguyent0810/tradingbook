@@ -7,8 +7,8 @@ import {
   priceToneVar,
   semanticTone,
 } from "@/lib/format/vn";
-import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { bandPct, resolveExchange } from "@/lib/market/exchange-rules";
+import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 
 /**
  * View model cho màn F7 Chi tiết mã.

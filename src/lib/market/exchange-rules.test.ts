@@ -1,8 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { clipToBand, resolveExchange, roundDownToLot, sessionBand, snapToTick } from "./exchange-rules";
+import {
+  clipToBand,
+  resolveExchange,
+  roundDownToLot,
+  sessionBand,
+  snapToTick,
+  tickSize,
+} from "./exchange-rules";
 
 // Prices in kVND. Ticks: HOSE 10đ below 10.000đ, 50đ to 49.950đ, 100đ from
 // 50.000đ; HNX and UPCoM a flat 100đ.
+describe("tickSize", () => {
+  it.each([
+    // exchange, price (kVND), tick (kVND) — including both HOSE bracket edges
+    ["HOSE", 9.99, 0.01],
+    ["HOSE", 10, 0.05],
+    ["HOSE", 49.95, 0.05],
+    ["HOSE", 50, 0.1],
+    ["HOSE", 120, 0.1],
+    ["HNX", 9.5, 0.1],
+    ["HNX", 60, 0.1],
+    ["UPCOM", 5.5, 0.1],
+  ] as const)("%s %d -> tick %d", (exchange, price, tick) => {
+    expect(tickSize(price, exchange)).toBe(tick);
+  });
+});
+
 describe("snapToTick", () => {
   it.each([
     // exchange, price, nearest, down, up
@@ -15,6 +38,20 @@ describe("snapToTick", () => {
     expect(snapToTick(price, exchange, "nearest")).toBe(nearest);
     expect(snapToTick(price, exchange, "down")).toBe(down);
     expect(snapToTick(price, exchange, "up")).toBe(up);
+  });
+
+  it.each([
+    ["HOSE", 9.99],
+    ["HOSE", 10],
+    ["HOSE", 23.45],
+    ["HOSE", 50],
+    ["HOSE", 64.4],
+    ["HNX", 23.5],
+    ["UPCOM", 8.1],
+  ] as const)("leaves on-tick %s %d unchanged in every direction", (exchange, price) => {
+    for (const direction of ["nearest", "down", "up"] as const) {
+      expect(snapToTick(price, exchange, direction)).toBe(price);
+    }
   });
 
   it("leaves a price already on the tick unchanged, even with float noise", () => {
