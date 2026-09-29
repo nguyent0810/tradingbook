@@ -11,6 +11,7 @@ import { fmtSessionDate, semanticTone } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { sessionChangePct } from "@/lib/dashboard/candidate-spark-history";
 import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
+import type { RiskSeverity } from "@/lib/trades/trade-suggestion-copy";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -65,6 +66,14 @@ export type F2SuggestionRow = {
   color: string;
 };
 
+export type F2SuggestionRisk = {
+  severity: RiskSeverity;
+  /** "CAO" / "CHÚ Ý" / "THÔNG TIN". */
+  label: string;
+  text: string;
+  color: string;
+};
+
 /**
  * Gợi ý lệnh của ứng viên, dựng sẵn thành chữ. Chỉ để tham khảo (ADR 0003):
  * lời văn mô tả, không thúc giục.
@@ -79,6 +88,10 @@ export type F2Suggestion = {
   asOf: string | null;
   rows: F2SuggestionRow[];
   targets: F2SuggestionRow[];
+  /** Lý do của bộ quét bằng tiếng Việt, theo thứ tự của bộ quét. */
+  reasons: string[];
+  /** Rủi ro, mức cao trước, rồi chú ý, rồi thông tin. */
+  risks: F2SuggestionRisk[];
   evidence: { label: string; href: string };
 };
 
@@ -166,6 +179,12 @@ const ADR_0001_HREF =
 
 const FAINT = "var(--tm-text-faint)";
 
+const RISK_TOKENS: Record<RiskSeverity, { rank: number; label: string; color: string }> = {
+  high: { rank: 0, label: "CAO", color: "var(--tm-down)" },
+  warn: { rank: 1, label: "CHÚ Ý", color: "var(--tm-accent)" },
+  info: { rank: 2, label: "THÔNG TIN", color: "var(--tm-text-dim)" },
+};
+
 function evidenceLabel(prospectiveN: number | null, checkpointN = CHECKPOINT_N): string {
   return `Chưa kiểm chứng (${prospectiveN != null ? num(prospectiveN, 0) : "N không rõ"}/${num(
     checkpointN,
@@ -185,6 +204,8 @@ function buildSuggestion(
       asOf: null,
       rows: [],
       targets: [],
+      reasons: [],
+      risks: [],
       evidence: { label: evidenceLabel(prospectiveN), href: ADR_0001_HREF },
     };
   }
@@ -225,6 +246,17 @@ function buildSuggestion(
             }`,
       color: t.resistanceBelow ? "var(--tm-accent)" : "var(--tm-up-soft)",
     })),
+    reasons: s.reasons.map((r) => r.text),
+    // Sorted here as well as in the builder: the panel's order is F2's promise.
+    // `sort` is stable, so equal severities keep the builder's order.
+    risks: [...s.risks]
+      .sort((a, b) => RISK_TOKENS[a.severity].rank - RISK_TOKENS[b.severity].rank)
+      .map((r) => ({
+        severity: r.severity,
+        label: RISK_TOKENS[r.severity].label,
+        text: r.text,
+        color: RISK_TOKENS[r.severity].color,
+      })),
     evidence: { label: evidenceLabel(s.evidence.prospectiveN, s.evidence.checkpointN), href: ADR_0001_HREF },
   };
 }

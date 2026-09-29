@@ -259,6 +259,55 @@ describe("gợi ý lệnh trên F2", () => {
     expect(JSON.stringify(detail.kpis)).not.toMatch(/NaN|"0,00"/);
   });
 
+  it("liệt kê lý do theo thứ tự của bộ quét", () => {
+    const withReasons = suggestion({
+      reasons: [
+        { code: "trend_ok", text: "Xu hướng thuận: giá đóng cửa trên MA50 và MA20 nằm trên MA50." },
+        { code: "tier_a", text: "Hạng A: khối lượng gấp 2,00 lần trung vị." },
+      ],
+    });
+    const s = buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: withReasons }) })
+    ).details.FPT.suggestion;
+    expect(s.reasons).toEqual([
+      "Xu hướng thuận: giá đóng cửa trên MA50 và MA20 nằm trên MA50.",
+      "Hạng A: khối lượng gấp 2,00 lần trung vị.",
+    ]);
+  });
+
+  it("liệt kê rủi ro theo mức độ: cao, rồi chú ý, rồi thông tin", () => {
+    // Handed over out of order on purpose: F2 must not rely on the builder's sort.
+    const withRisks = suggestion({
+      risks: [
+        { code: "settlement_lockup", severity: "info", text: "T+2,5 …" },
+        { code: "stop_too_tight", severity: "warn", text: "Stop sát …" },
+        { code: "regime_fail", severity: "high", text: "Cổng 1 FAIL …" },
+        { code: "tier_b", severity: "info", text: "Hạng B …" },
+        { code: "exchange_assumed", severity: "warn", text: "Sàn giả định …" },
+      ],
+    });
+    const s = buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: withRisks }) })
+    ).details.FPT.suggestion;
+    expect(s.risks.map((r) => [r.label, r.text])).toEqual([
+      ["CAO", "Cổng 1 FAIL …"],
+      ["CHÚ Ý", "Stop sát …"],
+      ["CHÚ Ý", "Sàn giả định …"],
+      ["THÔNG TIN", "T+2,5 …"],
+      ["THÔNG TIN", "Hạng B …"],
+    ]);
+    const colors = new Set(s.risks.map((r) => r.color));
+    expect(colors.size).toBe(3);
+  });
+
+  it("không tính được thì không có lý do hay rủi ro nào để liệt kê", () => {
+    const s = buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: false, reason: "TOO_FEW_BARS", detail: "x" }) })
+    ).details.FPT.suggestion;
+    expect(s.reasons).toEqual([]);
+    expect(s.risks).toEqual([]);
+  });
+
   it("thiếu gợi ý cho ứng viên (nạp nến lỗi) cũng là không đủ dữ liệu", () => {
     const s = buildF2ViewModel(input({ suggestionBySetupId: new Map() })).details.FPT.suggestion;
     expect(s.unavailable).toBe("Không đủ dữ liệu — chưa nạp được nến giá của mã này");
