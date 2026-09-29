@@ -57,6 +57,27 @@ Phân loại lệnh đã đóng theo việc có đi đúng plan trước phiên 
 
 ### Tín hiệu và bằng chứng
 
+**Gợi ý lệnh** (Trade suggestion):
+Một setup của scanner được trình bày cho người đọc để tham khảo: lý do, rủi ro, vùng vào, vùng SL, các mốc chốt theo R, size tham khảo và trạng thái kiểm chứng. Nó là một dạng tín hiệu app, không phải lệnh hay lời khuyên đầu tư.
+_Avoid_: khuyến nghị, lệnh, tín hiệu mua
+
+**Vùng vào** (Entry zone):
+Khoảng giá mua tham khảo, làm tròn theo bước giá của sàn và nằm trong biên độ của phiên kế tiếp. (Định nghĩa đích của #11; code hiện tại chưa làm tròn.)
+
+**Vùng SL** (Stop zone):
+Khoảng giá mà setup bị coi là hỏng, nằm giữa mức vô hiệu theo cấu trúc giá và mức stop tối thiểu đủ xa khỏi nhiễu.
+_Avoid_: điểm cắt lỗ (khi ý là một vùng)
+
+**R**:
+Rủi ro trên mỗi cổ phiếu, tính từ đầu trên của vùng vào (mức khớp xấu nhất) tới đầu dưới của vùng SL. Các mốc chốt được biểu diễn bằng bội số của R. (Định nghĩa đích của #11.)
+_Avoid_: R:R tính từ giữa vùng vào, là cách tính cũ ở F2 và modal đặt lệnh
+
+**Mốc chốt** (Take-profit ladder):
+Các mức giá 1R, 2R, 3R tính từ vùng vào, kèm kháng cự gần nhất nếu có.
+
+**Trạng thái kiểm chứng** (Evidence status):
+Mức bằng chứng đứng sau một tín hiệu app. Hiện luôn là "Chưa kiểm chứng" kèm tiến độ tới checkpoint kiểm định (N/100).
+
 **Tín hiệu app** (App signal):
 Bất kỳ output nào của app gợi ý hành động: setup của scanner, điểm, tier, stance (TRADE/NORMAL/"Go"), hay phân bổ của Arena/Shadow Allocation. Chưa tín hiệu nào được kiểm chứng.
 _Avoid_: buy signal, khuyến nghị
