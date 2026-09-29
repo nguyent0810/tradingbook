@@ -10,6 +10,12 @@ import type { VnindexHistoryPoint } from "@/lib/market/fetch-vnindex-history";
 import { sessionChangePct } from "@/lib/dashboard/candidate-spark-history";
 import { healthShortLabel, healthTone, lifecycleShortLabel, lifecycleTone, rsTone } from "@/lib/terminal/labels";
 import { gate1Color, gate1Label, verdictTokens } from "@/lib/terminal/verdict-tokens";
+import { CHECKPOINT_N, type TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
+import {
+  ADR_0001_HREF,
+  RISK_SEVERITY_TOKENS,
+  evidenceStatusLabel,
+} from "@/lib/terminal/trade-suggestion-display";
 
 /**
  * View model cho màn F1 Điều khiển.
@@ -63,9 +69,17 @@ export type F1SetupRow = {
   rankScore: number;
   close: number | null;
   changePct: number | null;
+  /** Vùng vào of the Gợi ý lệnh; null when it could not be computed. */
   zoneLow: number | null;
   zoneHigh: number | null;
+  /** Bottom of the Vùng SL: where worst-case R ends. */
   stop: number | null;
+  /** The 2R Mốc chốt price. */
+  target2R: number | null;
+  /** The suggestion's highest-severity risk. */
+  topRisk: { label: string; text: string; color: Tone } | null;
+  /** "Không đủ dữ liệu — <lý do>" when there is no suggestion; null otherwise. */
+  suggestionUnavailable: string | null;
   rs20: number | null;
   rsColor: Tone;
   healthLabel: string;
@@ -133,6 +147,8 @@ export type F1ViewModel = {
   gate1Note: string;
   setups: F1SetupRow[];
   setupsEmptyReason: string | null;
+  /** Trạng thái kiểm chứng of the suggestions in the table (ADR 0003). */
+  setupsEvidence: { label: string; href: string };
   nearMiss: F1NearMissRow[];
   nearMissEmptyReason: string | null;
   funnel: F1FunnelRow[];
@@ -203,6 +219,13 @@ export type F1ViewModelInput = {
   /** Ứng viên đã kèm sức khoẻ — nguồn giá / vùng mua / cắt lỗ cho bảng A/B. */
   candidates: SurfacedCandidateHealthView[];
   rsDiagnosticsBySymbol: Record<string, RsDiagnosticUi> | undefined;
+  /**
+   * Gợi ý lệnh by setup (candidate) id, from the same loader F2 uses. A missing
+   * entry means it could not be loaded and reads as "không đủ dữ liệu".
+   */
+  suggestionBySetupId: Map<string, TradeSuggestionResult>;
+  /** Registry count; null = could not be read ("N không rõ"). */
+  prospectiveN: number | null;
   /** Giá đóng 20 phiên theo symbolId, cho sparkline và cột +/-. */
   sparkBySymbolId: Map<string, number[]>;
   /**
@@ -338,6 +361,48 @@ function buildGate1Note(cockpit: DecisionCockpitDto, liveGate1: LiveGate1Reading
   return `${note} Cảnh báo: ${liveGate1.error}`;
 }
 
+type F1SuggestionSummary = Pick<
+  F1SetupRow,
+  "zoneLow" | "zoneHigh" | "stop" | "target2R" | "topRisk" | "suggestionUnavailable"
+>;
+
+/**
+ * The compact Gợi ý lệnh of one row: the builder's numbers as they are, never
+ * the raw scanner row, so F1 agrees with F2 and F7. Without a suggestion every
+ * number is a gap and the row says why (#11 story 29).
+ */
+function summarizeSuggestion(result: TradeSuggestionResult | undefined): F1SuggestionSummary {
+  if (!result || !result.ok) {
+    return {
+      zoneLow: null,
+      zoneHigh: null,
+      stop: null,
+      target2R: null,
+      topRisk: null,
+      suggestionUnavailable: `Không đủ dữ liệu — ${
+        result ? result.detail : "chưa nạp được nến giá của mã này"
+      }`,
+    };
+  }
+  const s = result.suggestion;
+  // The builder returns risks sorted high → warn → info; the first is the worst.
+  const top = s.risks[0];
+  return {
+    zoneLow: s.entryZone.low,
+    zoneHigh: s.entryZone.high,
+    stop: s.stopZone.low,
+    target2R: s.targets.find((t) => t.r === 2)?.price ?? null,
+    topRisk: top
+      ? {
+          label: RISK_SEVERITY_TOKENS[top.severity].label,
+          text: top.text,
+          color: RISK_SEVERITY_TOKENS[top.severity].color,
+        }
+      : null,
+    suggestionUnavailable: null,
+  };
+}
+
 function buildSetups(input: F1ViewModelInput): F1SetupRow[] {
   const { cockpit, candidates, rsDiagnosticsBySymbol, sparkBySymbolId } = input;
   const bySymbol = new Map(candidates.map((c) => [c.symbolKey, c]));
@@ -353,9 +418,7 @@ function buildSetups(input: F1ViewModelInput): F1SetupRow[] {
       rankScore: candidate.rankScore,
       close: finite(row?.close),
       changePct: sessionChangePct(spark),
-      zoneLow: finite(row?.pullbackZoneLow),
-      zoneHigh: finite(row?.pullbackZoneHigh),
-      stop: finite(row?.stopLevel),
+      ...summarizeSuggestion(row ? input.suggestionBySetupId.get(row.id) : undefined),
       rs20,
       rsColor: rsTone(rs20),
       healthLabel: healthShortLabel(candidate.healthLevel),
@@ -488,6 +551,10 @@ export function buildF1ViewModel(input: F1ViewModelInput): F1ViewModel {
     setups: buildSetups(input),
     setupsEmptyReason:
       cockpit.opportunity.candidates.length === 0 ? cockpit.opportunity.emptyReason : null,
+    setupsEvidence: {
+      label: evidenceStatusLabel(input.prospectiveN, CHECKPOINT_N),
+      href: ADR_0001_HREF,
+    },
     nearMiss: buildNearMiss(cockpit),
     nearMissEmptyReason:
       cockpit.opportunity.nearMiss.length === 0

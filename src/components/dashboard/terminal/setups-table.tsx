@@ -28,12 +28,15 @@ export function SetupsTable({
   selected,
   onSelect,
   scanRunId,
+  evidence,
 }: {
   rows: F1SetupRow[];
   emptyReason: string | null;
   selected: string | null;
   onSelect: (symbol: string) => void;
   scanRunId: string | null;
+  /** Trạng thái kiểm chứng of the suggestions (ADR 0003). */
+  evidence: { label: string; href: string };
 }) {
   const sort = useTableSort<SortKey>("rankScore");
 
@@ -70,7 +73,16 @@ export function SetupsTable({
             className="tm-mono"
             style={{ fontSize: 9, letterSpacing: ".06em", color: "var(--tm-text-dim)" }}
           >
-            CLICK TIÊU ĐỀ ĐỂ SẮP XẾP
+            GỢI Ý THAM KHẢO ·{" "}
+            <a
+              href={evidence.href}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "var(--tm-accent)" }}
+            >
+              {evidence.label}
+            </a>{" "}
+            · CLICK TIÊU ĐỀ ĐỂ SẮP XẾP
           </span>
         ) : undefined
       }
@@ -106,8 +118,10 @@ export function SetupsTable({
                 GIÁ
               </SortTh>
               <th className="tm-t-num">+/-</th>
-              <th className="tm-t-num">VÙNG MUA</th>
-              <th className="tm-t-num">CẮT LỖ</th>
+              <th className="tm-t-num">VÙNG VÀO</th>
+              <th className="tm-t-num">SL</th>
+              <th className="tm-t-num">2R</th>
+              <th>RỦI RO CHÍNH</th>
               <SortTh sort={sort} columnKey="rs20" numeric>
                 RS20
               </SortTh>
@@ -152,15 +166,48 @@ export function SetupsTable({
                 <td className={`tm-t-num ${priceToneClass(row.changePct)}`}>
                   {fmtPctSigned(row.changePct)}
                 </td>
-                <td className="tm-t-num" style={{ fontSize: 11, color: "var(--tm-text-mute)" }}>
-                  {zoneLabel(row.zoneLow, row.zoneHigh)}
-                </td>
-                <td
-                  className="tm-t-num"
-                  style={{ fontSize: 11, color: semanticTone(row.stop, "var(--tm-down-soft)") }}
-                >
-                  {fmtNum(row.stop, 2)}
-                </td>
+                {row.suggestionUnavailable ? (
+                  <td
+                    colSpan={4}
+                    style={{ fontSize: 11, color: "var(--tm-text-faint)" }}
+                    title={row.suggestionUnavailable}
+                  >
+                    {row.suggestionUnavailable}
+                  </td>
+                ) : (
+                  <>
+                    <td className="tm-t-num" style={{ fontSize: 11, color: "var(--tm-text-mute)" }}>
+                      {zoneLabel(row.zoneLow, row.zoneHigh)}
+                    </td>
+                    <td
+                      className="tm-t-num"
+                      style={{ fontSize: 11, color: semanticTone(row.stop, "var(--tm-down-soft)") }}
+                    >
+                      {fmtNum(row.stop, 2)}
+                    </td>
+                    <td
+                      className="tm-t-num"
+                      style={{ fontSize: 11, color: semanticTone(row.target2R, "var(--tm-up-soft)") }}
+                    >
+                      {fmtNum(row.target2R, 2)}
+                    </td>
+                    <td
+                      style={{ fontSize: 11, maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                      title={row.topRisk?.text}
+                    >
+                      {row.topRisk ? (
+                        <>
+                          <span style={{ color: row.topRisk.color, fontWeight: 600 }}>
+                            {row.topRisk.label}
+                          </span>{" "}
+                          <span style={{ color: "var(--tm-text-mute)" }}>{row.topRisk.text}</span>
+                        </>
+                      ) : (
+                        GAP
+                      )}
+                    </td>
+                  </>
+                )}
                 <td className="tm-t-num" style={{ color: row.rsColor }}>
                   {fmtPctSigned(row.rs20, 1)}
                 </td>

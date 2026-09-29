@@ -45,6 +45,9 @@ const MODEL: F1ViewModel = {
       zoneLow: 133.5,
       zoneHigh: 136.8,
       stop: 129.4,
+      target2R: 153.6,
+      topRisk: { label: "CAO", text: "Một phiên giảm sàn đi xuyên vùng SL.", color: "var(--tm-down)" },
+      suggestionUnavailable: null,
       rs20: 18.6,
       rsColor: "var(--tm-up)",
       healthLabel: "TỐT",
@@ -55,6 +58,7 @@ const MODEL: F1ViewModel = {
     },
   ],
   setupsEmptyReason: null,
+  setupsEvidence: { label: "Chưa kiểm chứng (12/100)", href: "https://example.test/adr-0001" },
   nearMiss: [
     {
       symbol: "SSI",

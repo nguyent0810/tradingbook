@@ -4,6 +4,7 @@ import type {
   VerdictUxLevel,
 } from "@/lib/dashboard/decision-cockpit-dto";
 import type { SurfacedCandidateHealthView } from "@/lib/setup-health/prepare-surfaced-health-view";
+import type { TradeSuggestion, TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
 import { buildF1ViewModel, type F1ViewModelInput } from "./f1-view-model";
 
 function provenance<T>(value: T, p: "real" | "derived" | "gap" = "real") {
@@ -134,6 +135,7 @@ function cockpit(over: Partial<DecisionCockpitDto> = {}): DecisionCockpitDto {
 
 function candidate(over: Partial<SurfacedCandidateHealthView>): SurfacedCandidateHealthView {
   return {
+    id: "c1",
     symbolKey: "FPT",
     symbolId: "sym_fpt",
     close: 138.2,
@@ -145,13 +147,54 @@ function candidate(over: Partial<SurfacedCandidateHealthView>): SurfacedCandidat
   } as unknown as SurfacedCandidateHealthView;
 }
 
+/**
+ * A Gợi ý lệnh for FPT as the builder would return it. Its numbers differ on
+ * purpose from the raw scanner row (zone 133,5–136,8, stop 129,4), so a row
+ * that still read the raw setup would fail. By hand, HOSE tick 0,1 above 50k:
+ * entry zone 134,0–136,5 (tightened, snapped); stop zone 128,1 (minimum
+ * feasible) to 129,3 (structural 129,4 snapped down); gross R = 136,5 − 128,1
+ * = 8,4; the 2R price, gain after costs = 2 × net R, is 153,6.
+ */
+function fptSuggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestionResult {
+  return {
+    ok: true,
+    suggestion: {
+      asOfSession: "2026-08-25",
+      setupSession: "2026-08-25",
+      sessionsSinceSetup: 0,
+      exchange: "HOSE",
+      exchangeAssumed: false,
+      entryZone: { low: 134.0, high: 136.5 },
+      stopZone: { structural: 129.3, minFeasible: 128.1, low: 128.1, high: 129.3 },
+      r: { perShareGross: 8.4, perShareNet: 8.8 },
+      targets: [
+        { r: 1, price: 145.0, nearestResistance: 141.2, resistanceBelow: true },
+        { r: 2, price: 153.6, nearestResistance: 141.2, resistanceBelow: true },
+        { r: 3, price: 162.2, nearestResistance: 141.2, resistanceBelow: true },
+      ],
+      size: null,
+      reasons: [],
+      // Sorted high → warn → info, as the builder returns them.
+      risks: [
+        { code: "gap_through_stop", severity: "high", text: "Một phiên giảm sàn đi xuyên vùng SL." },
+        { code: "regime_warning", severity: "warn", text: "Cổng 1 đang ở mức cảnh báo." },
+        { code: "settlement_lockup", severity: "info", text: "T+2,5." },
+      ],
+      evidence: { status: "UNVALIDATED", prospectiveN: 12, checkpointN: 100 },
+      ...over,
+    },
+  };
+}
+
 function input(over: Partial<F1ViewModelInput> = {}): F1ViewModelInput {
   return {
     cockpit: cockpit(),
     candidates: [
       candidate({}),
-      candidate({ symbolKey: "VCB", symbolId: "sym_vcb", close: 91.5, healthScore: 76 }),
+      candidate({ id: "c2", symbolKey: "VCB", symbolId: "sym_vcb", close: 91.5, healthScore: 76 }),
     ],
+    suggestionBySetupId: new Map([["c1", fptSuggestion()]]),
+    prospectiveN: 12,
     rsDiagnosticsBySymbol: {
       FPT: { rs20SpreadPct: 18.6 } as never,
       VCB: { rs20SpreadPct: 3.1 } as never,
@@ -291,15 +334,18 @@ describe("Cổng 1", () => {
 });
 
 describe("bảng thiết lập A/B", () => {
-  it("ghép giá / vùng mua / cắt lỗ từ ứng viên đã kèm sức khoẻ", () => {
+  it("ghép giá / sức khoẻ từ ứng viên, vùng vào / SL từ gợi ý lệnh", () => {
+    // Changed in #16: zone and stop used to be the raw scanner row (133,5–136,8
+    // and 129,4). They now come from the Gợi ý lệnh, as on F2, so F1 shows the
+    // tick-snapped, band-clipped zone and the stop-zone bottom R is built on.
     const fpt = buildF1ViewModel(input()).setups.find((r) => r.symbol === "FPT");
     expect(fpt).toMatchObject({
       tier: "A",
       rankScore: 92.4,
       close: 138.2,
-      zoneLow: 133.5,
-      zoneHigh: 136.8,
-      stop: 129.4,
+      zoneLow: 134.0,
+      zoneHigh: 136.5,
+      stop: 128.1,
       rs20: 18.6,
       healthLabel: "TỐT",
       healthScore: 88,
@@ -335,6 +381,92 @@ describe("bảng thiết lập A/B", () => {
     const model = buildF1ViewModel(input());
     expect(model.setups.find((r) => r.symbol === "FPT")?.rsColor).toBe("var(--tm-up)");
     expect(model.setups.find((r) => r.symbol === "VCB")?.rsColor).toBe("var(--tm-ref)");
+  });
+});
+
+describe("tóm tắt gợi ý lệnh trên bảng A/B (#16)", () => {
+  it("vùng vào, stop, giá 2R và rủi ro nặng nhất đều bằng số của gợi ý", () => {
+    const result = fptSuggestion();
+    if (!result.ok) throw new Error("fixture");
+    const s = result.suggestion;
+    const fpt = buildF1ViewModel(input()).setups.find((r) => r.symbol === "FPT");
+
+    expect(fpt?.suggestionUnavailable).toBeNull();
+    expect(fpt?.zoneLow).toBe(s.entryZone.low); // 134,0
+    expect(fpt?.zoneHigh).toBe(s.entryZone.high); // 136,5
+    // The stop is the BOTTOM of the stop zone: R runs to it (worst case).
+    expect(fpt?.stop).toBe(s.stopZone.low); // 128,1
+    expect(fpt?.target2R).toBe(153.6);
+    expect(fpt?.target2R).toBe(s.targets.find((t) => t.r === 2)?.price);
+    // risks[0] is the highest severity: the gap through the stop (CAO, red).
+    expect(fpt?.topRisk).toEqual({
+      label: "CAO",
+      text: "Một phiên giảm sàn đi xuyên vùng SL.",
+      color: "var(--tm-down)",
+    });
+  });
+
+  it("rủi ro nặng nhất là rủi ro đầu tiên, kể cả khi gợi ý chỉ có mức chú ý", () => {
+    const fpt = buildF1ViewModel(
+      input({
+        suggestionBySetupId: new Map([
+          [
+            "c1",
+            fptSuggestion({
+              risks: [
+                { code: "regime_warning", severity: "warn", text: "Cổng 1 đang ở mức cảnh báo." },
+                { code: "settlement_lockup", severity: "info", text: "T+2,5." },
+              ],
+            }),
+          ],
+        ]),
+      })
+    ).setups.find((r) => r.symbol === "FPT");
+    expect(fpt?.topRisk).toEqual({
+      label: "CHÚ Ý",
+      text: "Cổng 1 đang ở mức cảnh báo.",
+      color: "var(--tm-accent)",
+    });
+  });
+
+  it("gợi ý không tính được thì hiện 'Không đủ dữ liệu' kèm lý do, không có số nào", () => {
+    const model = buildF1ViewModel(
+      input({
+        suggestionBySetupId: new Map<string, TradeSuggestionResult>([
+          [
+            "c1",
+            { ok: false, reason: "TOO_FEW_BARS", detail: "mới có 40 phiên giá, cần ít nhất 65" },
+          ],
+        ]),
+      })
+    );
+    const fpt = model.setups.find((r) => r.symbol === "FPT");
+    expect(fpt?.suggestionUnavailable).toBe(
+      "Không đủ dữ liệu — mới có 40 phiên giá, cần ít nhất 65"
+    );
+    // Never 0 and never the raw scanner zone in its place.
+    expect(fpt?.zoneLow).toBeNull();
+    expect(fpt?.zoneHigh).toBeNull();
+    expect(fpt?.stop).toBeNull();
+    expect(fpt?.target2R).toBeNull();
+    expect(fpt?.topRisk).toBeNull();
+  });
+
+  it("chưa nạp được gợi ý cho mã thì cũng là 'Không đủ dữ liệu', không phải số thô", () => {
+    // VCB has no entry in the map (its bars could not be loaded).
+    const vcb = buildF1ViewModel(input()).setups.find((r) => r.symbol === "VCB");
+    expect(vcb?.suggestionUnavailable).toBe(
+      "Không đủ dữ liệu — chưa nạp được nến giá của mã này"
+    );
+    expect(vcb?.stop).toBeNull();
+  });
+
+  it("bảng mang trạng thái kiểm chứng của gợi ý (ADR 0003)", () => {
+    expect(buildF1ViewModel(input()).setupsEvidence.label).toBe("Chưa kiểm chứng (12/100)");
+    expect(buildF1ViewModel(input({ prospectiveN: null })).setupsEvidence.label).toBe(
+      "Chưa kiểm chứng (N không rõ/100)"
+    );
+    expect(buildF1ViewModel(input()).setupsEvidence.href).toContain("0001-no-real-money");
   });
 });
 

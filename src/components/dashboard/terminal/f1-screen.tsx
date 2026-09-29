@@ -58,6 +58,7 @@ export function F1Screen({ model, stale, loadError }: F1ScreenProps) {
           selected={selected}
           onSelect={setSelected}
           scanRunId={model.scanRunId}
+          evidence={model.setupsEvidence}
         />
         <NearMissTable rows={model.nearMiss} emptyReason={model.nearMissEmptyReason} />
       </div>

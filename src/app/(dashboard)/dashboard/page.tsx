@@ -39,6 +39,9 @@ import { buildLatestCloseBySymbol } from "@/lib/dashboard/latest-close-by-symbol
 import { loadCandidateSparkHistory } from "@/lib/dashboard/candidate-spark-history";
 import { buildF1ViewModel } from "@/lib/dashboard/terminal/f1-view-model";
 import { readLiveGate1 } from "@/lib/terminal/gate1-live";
+import { resolveTerminalVerdict } from "@/lib/terminal/verdict-resolve";
+import type { Gate1Level } from "@/lib/scanner/gate2/types";
+import { loadScreenTradeSuggestions } from "@/app/(dashboard)/setups/setups-trade-suggestions";
 import { F1Screen } from "@/components/dashboard/terminal/f1-screen";
 import { fmtSessionDate } from "@/lib/format/vn";
 import "@/styles/terminal-f1.css";
@@ -310,11 +313,39 @@ export default async function DashboardPage() {
   const rsSession =
     marketSnapshot.benchmarkSessionDate ?? (rawCandidates.length > 0 ? evalDate : null);
 
+  // Gợi ý lệnh (#16) dùng CÙNG phán quyết phiên với F2 (`resolveTerminalVerdict`)
+  // để size và rủi ro của gợi ý giống hệt màn F2.
+  const liveGate1 = readLiveGate1(regime);
+  const verdict = resolveTerminalVerdict({
+    scanGate1: (latestScan?.gate1Level as Gate1Level | undefined) ?? null,
+    candidateCountA: latestScan?.candidateCountA ?? null,
+    candidateCountB: latestScan?.candidateCountB ?? null,
+    liveGate1,
+    scanNotes,
+    scan: latestScan
+      ? {
+          id: latestScan.id,
+          runAt: latestScan.runAt,
+          candidateCountSurfaced: latestScan.candidateCountSurfaced,
+        }
+      : null,
+  });
+
   // Tier 3 — cùng phụ thuộc candidatesWithHealth/rsSession, độc lập với nhau.
-  const [rsDiagnostics, rsNearMiss, spark] = await Promise.all([
+  const [rsDiagnostics, rsNearMiss, spark, suggestions] = await Promise.all([
     loadRsDiagnosticsBySymbol(candidatesWithHealth, scanNotes, rsSession),
     loadRsNearMiss(candidatesWithHealth, rsSession),
     loadSparkHistory(candidatesWithHealth, evalDate),
+    // Cùng bộ nạp với F2 và F7: mọi màn hiện một gợi ý lệnh duy nhất. Hai mốc
+    // phiên lấy từ snapshot đã đọc ở Tier 1 (cùng truy vấn F2 dùng).
+    loadScreenTradeSuggestions({
+      userId: session.userId,
+      candidates: candidatesWithHealth,
+      latestSession: marketSnapshot.latestEquityBarSessionDate,
+      expectedSession: marketSnapshot.benchmarkSessionDate,
+      gate1Level: liveGate1.level,
+      verdictLevel: verdict.level,
+    }),
   ]);
 
   // Gom MỌI đường lỗi: loader nào nuốt lỗi rồi trả rỗng thì panel tương ứng sẽ
@@ -331,6 +362,7 @@ export default async function DashboardPage() {
       rsDiagnostics.error,
       rsNearMiss.error,
       spark.error,
+      ...suggestions.errors,
     ]
       .filter(Boolean)
       .join(String.fromCharCode(10)) || null;
@@ -379,8 +411,10 @@ export default async function DashboardPage() {
     cockpit: cockpitDto,
     candidates: candidatesWithHealth,
     rsDiagnosticsBySymbol: rsDiagnostics.data,
+    suggestionBySetupId: suggestions.bySetupId,
+    prospectiveN: suggestions.prospectiveN,
     sparkBySymbolId: spark.data,
-    liveGate1: readLiveGate1(regime),
+    liveGate1,
     vnindexHistory: vnindexHistoryResult.points,
     vnindexHistoryError: vnindexHistoryResult.error,
     watchItems: activeWatchItems.map((item) => ({
