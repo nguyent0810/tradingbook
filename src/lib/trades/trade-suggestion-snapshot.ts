@@ -1,5 +1,4 @@
-import type { TradeSuggestion } from "./trade-suggestion";
-import type { TargetR } from "./order-ticket-prefill";
+import type { TargetR, TradeSuggestion } from "./trade-suggestion";
 
 /**
  * `Trade.suggestionSnapshot` (#17, #11 story 28): the Gợi ý lệnh as it stood

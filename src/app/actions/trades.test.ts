@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildScreenTradeSuggestions } from "@/lib/trades/screen-trade-suggestions";
 import type { TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
+import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
+import { ticketShareCeiling } from "@/lib/trades/order-ticket-prefill";
 import {
   WORKED_ADV_VND,
   WORKED_CANDIDATE,
@@ -45,14 +47,25 @@ vi.mock("@/lib/trades/load-screen-trade-suggestions", () => ({ loadSetupTradeSug
 
 const { previewTradeLevelsForSetup, createTradeFromSetup } = await import("./trades");
 
-function workedSuggestion(): TradeSuggestionResult {
+function workedSuggestion(verdictLevel: VerdictUxLevel | null = "TRADE"): TradeSuggestionResult {
   return buildScreenTradeSuggestions({
     candidates: [WORKED_CANDIDATE],
     barsBySymbolId: new Map([[WORKED_CANDIDATE.symbolId, workedBars()]]),
     exchangeBySymbolId: new Map([[WORKED_CANDIDATE.symbolId, "HOSE"]]),
     prospectiveN: 7,
-    market: workedMarket(),
+    market: workedMarket({ sizing: { ...workedMarket().sizing!, verdictLevel } }),
   }).get(WORKED_CANDIDATE.id)!;
+}
+
+/** What the loader returns for the worked setup, with the verdict the caller passed. */
+function loaded(verdictLevel: VerdictUxLevel | null = "TRADE") {
+  return {
+    result: workedSuggestion(verdictLevel),
+    sizingUnavailable: null,
+    sizingInput: { ...workedMarket().sizing!, verdictLevel },
+    advVnd: WORKED_ADV_VND,
+    errors: [],
+  };
 }
 
 function form(fields: Record<string, string>): FormData {
@@ -79,11 +92,7 @@ beforeEach(() => {
   getTradingAccountEquityVnd.mockResolvedValue(WORKED_EQUITY_VND);
   // 1% risk; per-trade cap 100% so the risk budget binds, as in the fixture.
   getPositionSizingConfig.mockResolvedValue({ riskPerTradePct: 0.01, maxPositionPct: 1, liquidityCapPct: 0.1 });
-  loadSetupTradeSuggestion.mockResolvedValue({
-    result: workedSuggestion(),
-    sizingUnavailable: null,
-    errors: [],
-  });
+  loadSetupTradeSuggestion.mockImplementation(async ({ verdictLevel }) => loaded(verdictLevel));
 });
 
 afterEach(() => {
@@ -120,6 +129,8 @@ describe("previewTradeLevelsForSetup — returns the suggestion's own numbers", 
     loadSetupTradeSuggestion.mockResolvedValue({
       result: { ok: false, reason: "TOO_FEW_BARS", detail: "mới có 30 phiên giá, cần ít nhất 65" },
       sizingUnavailable: null,
+      sizingInput: null,
+      advVnd: null,
       errors: [],
     });
     expect(await previewTradeLevelsForSetup(WORKED_CANDIDATE.id)).toEqual({
@@ -206,10 +217,70 @@ describe("createTradeFromSetup — logs what the ticket showed, checked by the s
     loadSetupTradeSuggestion.mockResolvedValue({
       result: { ok: false, reason: "TOO_FEW_BARS", detail: "mới có 30 phiên giá, cần ít nhất 65" },
       sizingUnavailable: null,
+      sizingInput: null,
+      advVnd: null,
       errors: [],
     });
     const state = await createTradeFromSetup(undefined, form(suggested));
     expect(state?.message).toContain("mới có 30 phiên giá");
+    expect(tradeCreate).not.toHaveBeenCalled();
+  });
+});
+
+describe("the ticket's live ceiling and the server agree (#17 follow-up)", () => {
+  async function ticket() {
+    const preview = await previewTradeLevelsForSetup(WORKED_CANDIDATE.id);
+    if (!preview.ok || !preview.ticket.ceiling) throw new Error("expected a ticket with a ceiling");
+    return preview.ticket;
+  }
+
+  it("entry raised to 20.50: the ticket shows 3,000 cp; the server accepts 3,000 and refuses 3,100", async () => {
+    // 1.90 + 20.50 × 0.0015 + 18.60 × 0.0025 + 18.60 × 7% = 3.27925 kVND
+    // → 10,000,000 / 3,279.25 = 3,049.5 → 3,000 cp.
+    const t = await ticket();
+    const ceiling = ticketShareCeiling(t.ceiling!, 20.5, 18.6);
+    expect(ceiling).toMatchObject({ ok: true, shares: 3000 });
+
+    const edited = { confirmedEntryPrice: "20.5", confirmedStopLoss: "18.6", confirmedTakeProfit: "23.65" };
+    const over = await createTradeFromSetup(undefined, form({ ...edited, confirmedQuantity: "3100" }));
+    expect(over?.errors?.confirmedQuantity?.[0]).toContain("3.000");
+    const at = await createTradeFromSetup(undefined, form({ ...edited, confirmedQuantity: "3000" }));
+    expect(at).toMatchObject({ success: true });
+  });
+
+  it("stop lowered to 18.00: the ticket shows 2,800 cp; the server accepts 2,800 and refuses 2,900", async () => {
+    // 2.20 + 0.0303 + 0.045 + 18.00 × 7% = 3.5353 kVND → 10,000,000 / 3,535.3 = 2,828.6 → 2,800 cp.
+    const t = await ticket();
+    expect(ticketShareCeiling(t.ceiling!, 20.2, 18)).toMatchObject({ ok: true, shares: 2800 });
+
+    const edited = { confirmedEntryPrice: "20.2", confirmedStopLoss: "18", confirmedTakeProfit: "23.65" };
+    const over = await createTradeFromSetup(undefined, form({ ...edited, confirmedQuantity: "2900" }));
+    expect(over?.errors?.confirmedQuantity).toBeTruthy();
+    const at = await createTradeFromSetup(undefined, form({ ...edited, confirmedQuantity: "2800" }));
+    expect(at).toMatchObject({ success: true });
+  });
+});
+
+describe("no session verdict: the ticket and the server both fail closed", () => {
+  const REASON = "Chưa dựng được phán quyết phiên nên không ghi lệnh mới. chưa đo được Cổng 1";
+
+  beforeEach(() => {
+    loadTerminalVerdict.mockResolvedValue({ level: null, blockedReason: "chưa đo được Cổng 1" });
+  });
+
+  it("the preview pre-fills no size and gives the server's reason", async () => {
+    const preview = await previewTradeLevelsForSetup(WORKED_CANDIDATE.id);
+    if (!preview.ok) throw new Error(preview.message);
+    expect(preview.ticket.shares).toBeNull();
+    expect(preview.ticket.sizeNote).toBe(REASON);
+  });
+
+  it("the server refuses with the same reason", async () => {
+    const state = await createTradeFromSetup(
+      undefined,
+      form({ confirmedEntryPrice: "20.2", confirmedStopLoss: "18.6", confirmedQuantity: "3300" })
+    );
+    expect(state?.message).toBe(REASON);
     expect(tradeCreate).not.toHaveBeenCalled();
   });
 });

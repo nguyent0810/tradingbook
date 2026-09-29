@@ -9,7 +9,11 @@ import { getExpectedLatestSessionFromIndexBars } from "@/lib/scanner/expected-se
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
 import type { OhlcvBar } from "@/lib/setup-health/types";
-import type { OpenTradeRisk, TradeSuggestionResult } from "@/lib/trades/trade-suggestion";
+import type {
+  OpenTradeRisk,
+  TradeSuggestionResult,
+  TradeSuggestionSizingInput,
+} from "@/lib/trades/trade-suggestion";
 import {
   safeLoadPositionSizingDefaults,
   suggestionSizingInput,
@@ -36,6 +40,8 @@ export type ScreenTradeSuggestions = {
   sizingDefaults: PositionSizingDefaultsResult;
   /** Why the suggestions carry no size; null when they do. */
   sizingUnavailable: SizingUnavailable | null;
+  /** The sizing inputs the suggestions were built from; null exactly when `sizingUnavailable` is set. */
+  sizingInput: TradeSuggestionSizingInput | null;
   /** Every lookup failure, verbatim, for the screen's error panel. */
   errors: string[];
 };
@@ -99,6 +105,7 @@ export async function loadScreenTradeSuggestions(params: {
     prospectiveN: inputs.prospectiveN,
     sizingDefaults,
     sizingUnavailable: sizing.unavailable,
+    sizingInput: sizing.input,
     errors: [sizingDefaults.error, openTrades.error, inputs.error].filter(
       (e): e is string => e != null
     ),
@@ -124,6 +131,10 @@ export async function loadSetupTradeSuggestion(params: {
 }): Promise<{
   result: TradeSuggestionResult | undefined;
   sizingUnavailable: SizingUnavailable | null;
+  /** The sizing inputs the suggestion was built from (the order ticket's ceiling reuses them). */
+  sizingInput: TradeSuggestionSizingInput | null;
+  /** The setup's 20-session average traded value the size used, VND. */
+  advVnd: number | null;
   errors: string[];
 }> {
   const { setup } = params;
@@ -149,6 +160,8 @@ export async function loadSetupTradeSuggestion(params: {
   return {
     result: loaded.bySetupId.get(setup.id),
     sizingUnavailable: loaded.sizingUnavailable,
+    sizingInput: loaded.sizingInput,
+    advVnd: loaded.sizingDefaults.advBySymbolId.get(setup.symbolId) ?? null,
     errors: loaded.errors,
   };
 }

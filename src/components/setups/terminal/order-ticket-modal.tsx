@@ -4,14 +4,15 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import {
   createTradeFromSetup,
   previewTradeLevelsForSetup,
-  type SetupLevelsPreview,
+  type OrderTicketPreview,
   type TradeActionState,
 } from "@/app/actions/trades";
 import { fmtNum, fmtPct, semanticTone } from "@/lib/format/vn";
 import { verdictTokens } from "@/lib/terminal/verdict-tokens";
 import { evidenceStatus } from "@/lib/terminal/trade-suggestion-display";
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
-import type { TargetR } from "@/lib/trades/order-ticket-prefill";
+import { ticketShareCeiling } from "@/lib/trades/order-ticket-prefill";
+import { DEFAULT_TARGET_R, findTargetByR, type TargetR } from "@/lib/trades/trade-suggestion";
 import { ticketWorstCaseLossVnd } from "@/lib/trades/worst-case-risk";
 import { SuggestionEvidence } from "@/components/terminal/suggestion-evidence";
 
@@ -32,7 +33,9 @@ const R_CHOICES: readonly TargetR[] = [1, 2, 3];
  * action `previewTradeLevelsForSetup`: giá vào = đầu trên vùng vào, cắt lỗ = đáy
  * vùng SL, chốt lời = mốc R đang chọn (mặc định 2R), khối lượng = size tham khảo
  * (đã tính đệm gap và phán quyết phiên). Người dùng sửa được mọi ô trước khi ghi;
- * server tự kiểm lại. Ô RỦI RO tính trên cùng cơ sở với F2: R sau phí + đệm gap.
+ * server tự kiểm lại. Ô RỦI RO LỆNH tính trên cùng cơ sở với F2: R sau phí + đệm gap.
+ * Trần khối lượng của server hiện ngay tại giá đang nhập, nên phiếu không bao giờ
+ * cho gửi một khối lượng mà server sẽ từ chối.
  */
 export function OrderTicketModal({
   target,
@@ -43,7 +46,7 @@ export function OrderTicketModal({
   verdict: VerdictUxLevel | null;
   onClose: () => void;
 }) {
-  const [preview, setPreview] = useState<SetupLevelsPreview | null>(null);
+  const [preview, setPreview] = useState<OrderTicketPreview | null>(null);
   // Giá trị điền sẵn là **giá trị dẫn xuất** từ `preview`; state chỉ giữ phần
   // người dùng đã sửa. Không cần effect đồng bộ ngược khi dữ liệu về.
   const [entryOverride, setEntryOverride] = useState<string | null>(null);
@@ -84,8 +87,8 @@ export function OrderTicketModal({
   const tokens = verdict ? verdictTokens(verdict) : null;
   const ticket = preview?.ok ? preview.ticket : null;
 
-  const chosenR = targetR ?? ticket?.defaultTargetR ?? 2;
-  const chosenTargetKvnd = ticket?.targets.find((t) => t.r === chosenR)?.priceKvnd ?? null;
+  const chosenR = targetR ?? ticket?.defaultTargetR ?? DEFAULT_TARGET_R;
+  const chosenTargetKvnd = ticket ? (findTargetByR(ticket.targets, chosenR)?.priceKvnd ?? null) : null;
 
   const entry = entryOverride ?? (ticket ? String(ticket.entryKvnd) : "");
   const stop = stopOverride ?? (ticket ? String(ticket.stopKvnd) : "");
@@ -102,6 +105,17 @@ export function OrderTicketModal({
   const worstCaseLossVnd = ticket
     ? ticketWorstCaseLossVnd({ entryKvnd, stopKvnd, exchange: ticket.exchange, shares: qtyShares })
     : null;
+
+  // Trần của server TẠI giá vào và cắt lỗ đang trên phiếu — cùng hàm, cùng đầu
+  // vào mà `createTradeFromSetup()` dùng. Sửa giá thì trần đổi theo ngay; khối
+  // lượng người dùng đã nhập KHÔNG bị tự sửa, chỉ bị đánh dấu khi vượt trần.
+  const ceiling =
+    ticket?.ceiling && Number.isFinite(entryKvnd) && Number.isFinite(stopKvnd)
+      ? ticketShareCeiling(ticket.ceiling, entryKvnd, stopKvnd)
+      : null;
+  const overCeiling =
+    ceiling != null && ceiling.ok && Number.isFinite(qtyShares) && qtyShares > ceiling.shares;
+  const ceilingBlocks = ceiling != null && !ceiling.ok;
 
   const removedShares =
     ticket?.sharesBeforeVerdict != null && ticket.shares != null
@@ -217,7 +231,7 @@ export function OrderTicketModal({
                     <div className="tm-field__note" id="ticket-target-note">
                       <span role="group" aria-label="Mốc chốt theo R">
                         {R_CHOICES.map((r) => {
-                          const price = ticket.targets.find((t) => t.r === r)?.priceKvnd;
+                          const price = findTargetByR(ticket.targets, r)?.priceKvnd;
                           return (
                             <button
                               key={r}
@@ -271,11 +285,31 @@ export function OrderTicketModal({
                     id="ticket-qty"
                     name="confirmedQuantity"
                     inputMode="numeric"
-                    aria-describedby="ticket-qty-note"
+                    aria-describedby="ticket-qty-note ticket-ceiling-note"
+                    aria-invalid={overCeiling ? "true" : undefined}
                     value={quantity}
                     onChange={(e) => setQuantityOverride(e.target.value)}
                   />
                 </div>
+
+                {ceiling ? (
+                  <div
+                    className="tm-note"
+                    id="ticket-ceiling-note"
+                    role={overCeiling || ceilingBlocks ? "alert" : undefined}
+                    style={{
+                      margin: "0 11px 9px",
+                      display: "block",
+                      color: overCeiling || ceilingBlocks ? "var(--tm-down)" : undefined,
+                    }}
+                  >
+                    {!ceiling.ok
+                      ? ceiling.message
+                      : overCeiling
+                        ? `Khối lượng ${fmtNum(qtyShares, 0)} cp vượt trần ${fmtNum(ceiling.shares, 0)} cp mà server áp tại giá vào và cắt lỗ này — server sẽ không ghi khối lượng này.`
+                        : `Trần server tại giá vào và cắt lỗ này: ${fmtNum(ceiling.shares, 0)} cp (rủi ro xấu nhất có đệm gap, phán quyết ${ceiling.verdictCode}).`}
+                  </div>
+                ) : null}
 
                 <div className="tm-kpis" style={{ gridTemplateColumns: "repeat(3, 1fr)", margin: 11 }}>
                   <div className="tm-kpi">
@@ -301,7 +335,7 @@ export function OrderTicketModal({
                     </div>
                   </div>
                   <div className="tm-kpi" title="R sau phí + đệm gap một biên độ, cùng cơ sở với F2">
-                    <div className="tm-kpi__k">RỦI RO XẤU NHẤT</div>
+                    <div className="tm-kpi__k">RỦI RO LỆNH</div>
                     <div
                       className="tm-kpi__v tm-kpi__v--sm"
                       style={{ color: semanticTone(worstCaseLossVnd, "var(--tm-accent)") }}
@@ -344,7 +378,9 @@ export function OrderTicketModal({
                 !Number.isFinite(stopKvnd) ||
                 stopKvnd >= entryKvnd ||
                 !Number.isFinite(qtyShares) ||
-                qtyShares <= 0
+                qtyShares <= 0 ||
+                overCeiling ||
+                ceilingBlocks
               }
             >
               {pending ? "ĐANG GHI…" : "GHI VÀO SỔ LỆNH"}

@@ -31,7 +31,7 @@ import {
   type Exchange,
   type SessionBand,
 } from "@/lib/market/exchange-rules";
-import { MIN_BARS_FOR_STRUCTURAL_SCAN, tightenEntryZone } from "./auto-populate-from-setup";
+import { MIN_BARS_FOR_STRUCTURAL_SCAN, tightenEntryZone } from "./entry-zone-tightening";
 import {
   BROKERAGE_PER_SIDE_FRAC,
   SELL_TAX_FRAC,
@@ -61,7 +61,18 @@ import {
 /** First validation checkpoint of ADR 0001 / PROSPECTIVE-REGISTRY-PLAN.md. */
 export const CHECKPOINT_N = 100;
 
-const R_MULTIPLES = [1, 2, 3] as const;
+/** A Mốc chốt, as a multiple of R. */
+export type TargetR = 1 | 2 | 3;
+
+const R_MULTIPLES: readonly TargetR[] = [1, 2, 3];
+
+/** The Mốc chốt a ticket and a logged trade default to. */
+export const DEFAULT_TARGET_R: TargetR = 2;
+
+/** The target at `r` in a Mốc chốt ladder; undefined when the ladder has none. */
+export function findTargetByR<T extends { r: TargetR }>(targets: readonly T[], r: TargetR): T | undefined {
+  return targets.find((t) => t.r === r);
+}
 
 /**
  * Kịch bản sàn liên tiếp: sessions at the floor in a row. Three covers the
@@ -98,7 +109,7 @@ export const OPEN_RISK_LIMIT_PCT = 3;
 const SEVERITY_RANK: Record<RiskSeverity, number> = { high: 0, warn: 1, info: 2 };
 
 export type TradeSuggestionTarget = {
-  r: 1 | 2 | 3;
+  r: TargetR;
   /** Price at which the gain NET of costs is r × net R, rounded up to the tick. */
   price: number;
   /** Resistance above the entry zone closest to `price`; null when none was found. */

@@ -25,7 +25,8 @@ import {
   suggestionUnavailableText,
   type EvidenceStatus,
 } from "@/lib/terminal/trade-suggestion-display";
-import { SIZING_UNAVAILABLE_COPY, type SizingUnavailable } from "@/lib/trades/screen-trade-suggestions";
+import type { SizingUnavailable } from "@/lib/trades/screen-trade-suggestions";
+import { SIZING_UNAVAILABLE_COPY } from "@/lib/terminal/trade-suggestion-display";
 import type { ScanLogRow } from "./scan-log";
 
 /**
@@ -318,7 +319,6 @@ export type SizingInput = {
   /** `null` khi trang đã giao đủ đầu vào định cỡ cho gợi ý lệnh. */
   unavailable: SizingUnavailable | null;
 };
-
 
 /** Rủi ro của gợi ý lệnh cũng thuộc về khối size: F2 nhắc lại chúng ở đó. */
 const SIZING_RISK_CODES: readonly RiskCode[] = ["open_risk_high", "open_risk_unknown"];

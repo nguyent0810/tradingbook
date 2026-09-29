@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { tightenEntryZone } from "./auto-populate-from-setup";
+import { tightenEntryZone } from "./entry-zone-tightening";
 
 /**
  * The midpoint levels this file used to test were retired in #17; the order

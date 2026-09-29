@@ -1,4 +1,5 @@
 import type { RiskSeverity } from "@/lib/trades/trade-suggestion-copy";
+import type { SizingUnavailable } from "@/lib/trades/screen-trade-suggestions";
 
 /**
  * Display tokens every screen uses for a Gợi ý lệnh, so F1, F2 and F7 label the
@@ -43,3 +44,14 @@ export const SETUP_ROW_MISSING_REASON =
 export function suggestionUnavailableText(reason: string): string {
   return `Không đủ dữ liệu — ${reason}`;
 }
+
+/** What a screen (F2, the order ticket) says in place of the size, per `SizingUnavailable`. */
+export const SIZING_UNAVAILABLE_COPY: Record<SizingUnavailable, string> = {
+  NO_EQUITY:
+    "Chưa đặt vốn tài khoản trong Cài đặt (F5) nên không tính được khối lượng. Không suy đoán từ giá trị mặc định.",
+  OPEN_TRADES_UNREADABLE:
+    "Không đọc được giá trị các vị thế đang mở nên không tính được khối lượng. " +
+    "Coi như 0 sẽ cho ra khối lượng CAO HƠN trần mà server áp khi ghi lệnh.",
+  LIQUIDITY_UNREADABLE:
+    "Không đọc được giá trị giao dịch bình quân 20 phiên nên không kiểm được trần thanh khoản: size tham khảo chưa tính được. Server cũng không ghi lệnh khi thiếu số này.",
+};

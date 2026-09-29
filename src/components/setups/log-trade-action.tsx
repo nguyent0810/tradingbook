@@ -4,10 +4,11 @@ import { useActionState, useEffect, useState, useTransition } from "react";
 import {
   createTradeFromSetup,
   previewTradeLevelsForSetup,
-  type SetupLevelsPreview,
+  type OrderTicketPreview,
   type TradeActionState,
 } from "@/app/actions/trades";
 import { Button } from "@/components/ui/button";
+import { findTargetByR } from "@/lib/trades/trade-suggestion";
 
 function fmt(n: number): string {
   return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -15,7 +16,7 @@ function fmt(n: number): string {
 
 export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbolKey: string }) {
   const [open, setOpen] = useState(false);
-  const [preview, setPreview] = useState<SetupLevelsPreview | null>(null);
+  const [preview, setPreview] = useState<OrderTicketPreview | null>(null);
   const [loading, startTransition] = useTransition();
   const [state, formAction, pending] = useActionState<TradeActionState, FormData>(
     createTradeFromSetup,
@@ -48,8 +49,8 @@ export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbol
     );
   }
 
-  const twoR = preview?.ok
-    ? (preview.ticket.targets.find((t) => t.r === preview.ticket.defaultTargetR)?.priceKvnd ?? null)
+  const defaultTargetKvnd = preview?.ok
+    ? (findTargetByR(preview.ticket.targets, preview.ticket.defaultTargetR)?.priceKvnd ?? null)
     : null;
 
   return (
@@ -97,7 +98,7 @@ export function LogTradeAction({ setupId, symbolKey }: { setupId: string; symbol
             </div>
             <div className="tosv3-setups-metric-card">
               <dt>Chốt lời {preview.ticket.defaultTargetR}R</dt>
-              <dd className="tabular-nums">{twoR != null ? fmt(twoR) : "—"}</dd>
+              <dd className="tabular-nums">{defaultTargetKvnd != null ? fmt(defaultTargetKvnd) : "—"}</dd>
             </div>
             <div className="tosv3-setups-metric-card">
               <dt>Size tham khảo</dt>

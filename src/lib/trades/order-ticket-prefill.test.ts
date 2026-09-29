@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
+import { buildScreenTradeSuggestions, type TradeSuggestionMarketFacts } from "./screen-trade-suggestions";
+import { SIZING_UNAVAILABLE_COPY } from "@/lib/terminal/trade-suggestion-display";
 import {
-  buildScreenTradeSuggestions,
-  SIZING_UNAVAILABLE_COPY,
-  type TradeSuggestionMarketFacts,
-} from "./screen-trade-suggestions";
-import { buildOrderTicketPrefill } from "./order-ticket-prefill";
+  buildOrderTicketPrefill,
+  ticketShareCeiling,
+  type OrderTicketPrefillInput,
+} from "./order-ticket-prefill";
+import { logTradeShareCeiling } from "./reference-size";
 import { ticketWorstCaseLossVnd } from "./worst-case-risk";
-import { WORKED_CANDIDATE as CANDIDATE, workedBars as bars, workedMarket as market } from "./trade-suggestion.fixture";
+import {
+  WORKED_ADV_VND,
+  WORKED_CANDIDATE as CANDIDATE,
+  workedBars as bars,
+  workedMarket as market,
+} from "./trade-suggestion.fixture";
 
 /**
  * The worked HOSE example (see trade-suggestion.fixture.ts), built through the
@@ -26,11 +33,28 @@ function suggestionFor(over: Partial<TradeSuggestionMarketFacts> = {}, candidate
   }).get(candidate.id)!;
 }
 
+/** The prefill's input as the preview action builds it from the loader and the verdict. */
+function prefillInput(
+  marketOver: Partial<TradeSuggestionMarketFacts> = {},
+  over: Partial<OrderTicketPrefillInput> = {}
+): OrderTicketPrefillInput {
+  const m = market(marketOver);
+  return {
+    result: suggestionFor(marketOver),
+    sizingUnavailable: null,
+    sizing: m.sizing,
+    advVnd: WORKED_ADV_VND,
+    tier: "A",
+    verdictBlockedReason: null,
+    ...over,
+  };
+}
+
 describe("buildOrderTicketPrefill — the ticket shows the suggestion's numbers (#17)", () => {
   const result = suggestionFor();
   if (!result.ok || !result.suggestion.size) throw new Error("fixture must build a sized suggestion");
   const s = result.suggestion;
-  const prefill = buildOrderTicketPrefill(result, null);
+  const prefill = buildOrderTicketPrefill(prefillInput());
   if (!prefill.ok) throw new Error(prefill.message);
   const t = prefill.ticket;
 
@@ -82,32 +106,99 @@ describe("ticketWorstCaseLossVnd — the readout follows the user's edits on the
   });
 });
 
+describe("ticketShareCeiling — the server's cap, live on the ticket as the user edits", () => {
+  const prefill = buildOrderTicketPrefill(prefillInput());
+  if (!prefill.ok || !prefill.ticket.ceiling) throw new Error("expected a ticket with a ceiling");
+  const ticket = prefill.ticket;
+  const ctx = ticket.ceiling!;
+
+  /** What `createTradeFromSetup` computes from its own reads for the same numbers. */
+  const server = (entryKvnd: number, stopKvnd: number) =>
+    logTradeShareCeiling({
+      equityVnd: 1_000_000_000,
+      riskPerTradePct: 0.01,
+      maxPerTradeExposurePct: 1,
+      maxPortfolioExposurePct: 1,
+      liquidityCapPct: 0.1,
+      currentExposureVnd: 0,
+      tier: "A",
+      exchange: "HOSE",
+      entryKvnd,
+      stopKvnd,
+      advVnd: WORKED_ADV_VND,
+      verdictLevel: "TRADE",
+      verdictBlockedReason: null,
+    });
+
+  it("at the pre-filled numbers it equals the pre-filled size: 3,300 cp", () => {
+    expect(ticketShareCeiling(ctx, ticket.entryKvnd, ticket.stopKvnd)).toMatchObject({ ok: true, shares: 3300 });
+  });
+
+  it("entry raised to 20.50: 1.90 + 0.03075 + 0.0465 + 1.302 = 3.27925 → 10,000,000 / 3,279.25 = 3,049 → 3,000 cp", () => {
+    const ticketCeiling = ticketShareCeiling(ctx, 20.5, 18.6);
+    expect(ticketCeiling).toMatchObject({ ok: true, shares: 3000 });
+    expect(ticketCeiling).toEqual(server(20.5, 18.6));
+  });
+
+  it("stop lowered to 18.00: 2.20 + 0.0303 + 0.045 + 18 × 7% = 3.5353 → 10,000,000 / 3,535.3 = 2,828 → 2,800 cp", () => {
+    const ticketCeiling = ticketShareCeiling(ctx, 20.2, 18);
+    expect(ticketCeiling).toMatchObject({ ok: true, shares: 2800 });
+    expect(ticketCeiling).toEqual(server(20.2, 18));
+  });
+
+  it("a stop at or above entry is refused, as the server refuses it", () => {
+    expect(ticketShareCeiling(ctx, 20.2, 20.2)).toMatchObject({ ok: false });
+  });
+});
+
 describe("buildOrderTicketPrefill — when the suggestion has no size or no numbers", () => {
-  it("no sizing inputs: prices still pre-filled, size empty with the page's reason", () => {
-    const prefill = buildOrderTicketPrefill(suggestionFor({ sizing: null }), "NO_EQUITY");
+  it("no sizing inputs: prices still pre-filled, size empty with the page's reason, no ceiling", () => {
+    const prefill = buildOrderTicketPrefill(
+      prefillInput({ sizing: null }, { sizing: null, sizingUnavailable: "NO_EQUITY" })
+    );
     if (!prefill.ok) throw new Error(prefill.message);
     expect(prefill.ticket.entryKvnd).toBe(20.2);
     expect(prefill.ticket.shares).toBeNull();
     expect(prefill.ticket.worstCaseLossVnd).toBeNull();
+    expect(prefill.ticket.ceiling).toBeNull();
     expect(prefill.ticket.sizeNote).toBe(SIZING_UNAVAILABLE_COPY.NO_EQUITY);
   });
 
-  it("a 0-share suggestion pre-fills 0 and says why", () => {
-    const result = suggestionFor({ sizing: { ...market().sizing!, verdictLevel: "NO_TRADE" } });
-    const prefill = buildOrderTicketPrefill(result, null);
-    if (!prefill.ok || !result.ok) throw new Error("expected a ticket");
-    expect(prefill.ticket.shares).toBe(0);
-    expect(prefill.ticket.sizeNote).toBe(result.suggestion.size!.zeroShareReason);
+  it("no session verdict: fails closed like the server — no size, the server's reason", () => {
+    // The suggestion itself sizes without a verdict (3,300 cp); the server refuses to log.
+    const sizing = { ...market().sizing!, verdictLevel: null };
+    const input = prefillInput({ sizing }, { sizing, verdictBlockedReason: "chưa đo được Cổng 1" });
+    const r = input.result;
+    if (!r?.ok) throw new Error("fixture");
+    expect(r.suggestion.size!.shares).toBe(3300);
+
+    const prefill = buildOrderTicketPrefill(input);
+    if (!prefill.ok) throw new Error(prefill.message);
+    expect(prefill.ticket.shares).toBeNull();
+    expect(prefill.ticket.worstCaseLossVnd).toBeNull();
+    expect(prefill.ticket.sizeNote).toBe(
+      "Chưa dựng được phán quyết phiên nên không ghi lệnh mới. chưa đo được Cổng 1"
+    );
+  });
+
+  it("NO-TRADE: no size, with the server's reason", () => {
+    const sizing = { ...market().sizing!, verdictLevel: "NO_TRADE" as const };
+    const prefill = buildOrderTicketPrefill(prefillInput({ sizing }, { sizing }));
+    if (!prefill.ok) throw new Error(prefill.message);
+    expect(prefill.ticket.shares).toBeNull();
+    expect(prefill.ticket.sizeNote).toMatch(/^Phán quyết phiên là NO-TRADE/);
   });
 
   it("cannot compute: the ticket says 'không đủ dữ liệu' with the builder's reason", () => {
-    const prefill = buildOrderTicketPrefill(suggestionFor({}, { ...CANDIDATE, stopLevel: 20.5 }), null);
+    const prefill = buildOrderTicketPrefill(
+      prefillInput({}, { result: suggestionFor({}, { ...CANDIDATE, stopLevel: 20.5 }) })
+    );
     expect(prefill.ok).toBe(false);
     if (prefill.ok) throw new Error("unreachable");
     expect(prefill.message).toMatch(/^Không đủ dữ liệu — mức vô hiệu 20,5 không nằm dưới vùng vào/);
   });
 
   it("no result at all (the lookup failed)", () => {
-    expect(buildOrderTicketPrefill(undefined, null)).toMatchObject({ ok: false });
+    expect(buildOrderTicketPrefill(prefillInput({}, { result: undefined }))).toMatchObject({ ok: false });
   });
 });

@@ -8,12 +8,31 @@
  * Pure. Prices kVND, money VND.
  */
 import type { Exchange } from "@/lib/market/exchange-rules";
-import type { TradeSuggestionResult } from "./trade-suggestion";
-import { SIZING_UNAVAILABLE_COPY, type SizingUnavailable } from "./screen-trade-suggestions";
+import {
+  DEFAULT_TARGET_R,
+  type TargetR,
+  type TradeSuggestionResult,
+  type TradeSuggestionSizingInput,
+} from "./trade-suggestion";
+import { SIZING_UNAVAILABLE_COPY, suggestionUnavailableText } from "@/lib/terminal/trade-suggestion-display";
+import type { SizingUnavailable } from "./screen-trade-suggestions";
+import { logTradeShareCeiling, type LogTradeCeiling, type LogTradeCeilingInput } from "./reference-size";
 
-export type TargetR = 1 | 2 | 3;
+/**
+ * Everything the server's ceiling needs except the two numbers the user edits.
+ * The ticket carries it so it can show the ceiling live, with the rule and the
+ * inputs `createTradeFromSetup` uses, before anything is sent.
+ */
+export type TicketCeilingContext = Omit<LogTradeCeilingInput, "entryKvnd" | "stopKvnd">;
 
-export const DEFAULT_TARGET_R: TargetR = 2;
+/** The server's share ceiling at the entry and stop on the ticket. */
+export function ticketShareCeiling(
+  ctx: TicketCeilingContext,
+  entryKvnd: number,
+  stopKvnd: number
+): LogTradeCeiling {
+  return logTradeShareCeiling({ ...ctx, entryKvnd, stopKvnd });
+}
 
 export type OrderTicketPrefill = {
   /** YYYY-MM-DD of the close the suggestion was built from. */
@@ -28,14 +47,20 @@ export type OrderTicketPrefill = {
   /** Mốc chốt 1R/2R/3R, kVND. */
   targets: { r: TargetR; priceKvnd: number }[];
   defaultTargetR: TargetR;
-  /** Size tham khảo; null when the suggestion carries no size. */
+  /**
+   * Size tham khảo; null when the suggestion carries no size OR the server
+   * would refuse to log at the pre-filled numbers (no verdict, NO-TRADE, under
+   * one lot): the ticket never pre-fills a size the server refuses.
+   */
   shares: number | null;
   /** The lot-rounded size before the session verdict; null without a size. */
   sharesBeforeVerdict: number | null;
-  /** Why there is no size, or why it is 0 cp; null otherwise. */
+  /** Why there is no size; null otherwise. */
   sizeNote: string | null;
   /** Rủi ro lệnh at the pre-filled numbers (net R + Đệm gap), VND; null without a size. */
   worstCaseLossVnd: number | null;
+  /** Inputs of the server's ceiling; null when the sizing inputs could not be read. */
+  ceiling: TicketCeilingContext | null;
   evidence: { prospectiveN: number | null; checkpointN: number };
 };
 
@@ -43,16 +68,55 @@ export type OrderTicketPrefillResult =
   | { ok: true; ticket: OrderTicketPrefill }
   | { ok: false; message: string };
 
-export function buildOrderTicketPrefill(
-  result: TradeSuggestionResult | undefined,
-  sizingUnavailable: SizingUnavailable | null
-): OrderTicketPrefillResult {
+export type OrderTicketPrefillInput = {
+  result: TradeSuggestionResult | undefined;
+  sizingUnavailable: SizingUnavailable | null;
+  /** The sizing inputs the suggestion was built from; null when unavailable. */
+  sizing: TradeSuggestionSizingInput | null;
+  /** 20-session average traded value at the setup session, VND. */
+  advVnd: number | null;
+  tier: "A" | "B";
+  /** Why the session verdict could not be built, when it could not. */
+  verdictBlockedReason: string | null;
+};
+
+export function buildOrderTicketPrefill(input: OrderTicketPrefillInput): OrderTicketPrefillResult {
+  const { result, sizing } = input;
   if (!result) {
-    return { ok: false, message: "Không đủ dữ liệu — không nạp được nến hoặc sàn của mã để dựng gợi ý lệnh." };
+    return {
+      ok: false,
+      message: suggestionUnavailableText("không nạp được nến hoặc sàn của mã để dựng gợi ý lệnh."),
+    };
   }
-  if (!result.ok) return { ok: false, message: `Không đủ dữ liệu — ${result.detail}` };
+  if (!result.ok) return { ok: false, message: suggestionUnavailableText(result.detail) };
   const s = result.suggestion;
-  const size = s.size;
+
+  const ceiling: TicketCeilingContext | null = sizing
+    ? {
+        equityVnd: sizing.equityVnd,
+        riskPerTradePct: sizing.riskPerTradePct,
+        maxPerTradeExposurePct: sizing.maxPerTradeExposurePct,
+        maxPortfolioExposurePct: sizing.maxPortfolioExposurePct,
+        liquidityCapPct: sizing.liquidityCapPct,
+        currentExposureVnd: sizing.currentExposureVnd,
+        tier: input.tier,
+        exchange: s.exchange,
+        advVnd: input.advVnd,
+        verdictLevel: sizing.verdictLevel,
+        verdictBlockedReason: input.verdictBlockedReason,
+      }
+    : null;
+
+  // Fail closed like the server: where it would refuse at the pre-filled
+  // numbers, the ticket shows no size and the server's own reason.
+  const atPrefill = ceiling ? ticketShareCeiling(ceiling, s.entryZone.high, s.stopZone.low) : null;
+  const size = s.size && atPrefill?.ok ? s.size : null;
+  const sizeNote = size
+    ? null
+    : atPrefill && !atPrefill.ok
+      ? atPrefill.message
+      : (s.size?.zeroShareReason ?? SIZING_UNAVAILABLE_COPY[input.sizingUnavailable ?? "NO_EQUITY"]);
+
   return {
     ok: true,
     ticket: {
@@ -66,10 +130,9 @@ export function buildOrderTicketPrefill(
       defaultTargetR: DEFAULT_TARGET_R,
       shares: size ? size.shares : null,
       sharesBeforeVerdict: size ? size.sharesBeforeVerdict : null,
-      sizeNote: size
-        ? size.zeroShareReason
-        : SIZING_UNAVAILABLE_COPY[sizingUnavailable ?? "NO_EQUITY"],
+      sizeNote,
       worstCaseLossVnd: size ? size.worstCaseLossVnd : null,
+      ceiling,
       evidence: { prospectiveN: s.evidence.prospectiveN, checkpointN: s.evidence.checkpointN },
     },
   };

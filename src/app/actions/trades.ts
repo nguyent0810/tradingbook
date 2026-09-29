@@ -6,11 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { loadSymbolAdvVnd } from "@/lib/trades/symbol-adv";
 import { getSession } from "@/lib/session";
 import { loadSetupTradeSuggestion } from "@/lib/trades/load-screen-trade-suggestions";
-import {
-  buildOrderTicketPrefill,
-  DEFAULT_TARGET_R,
-  type OrderTicketPrefillResult,
-} from "@/lib/trades/order-ticket-prefill";
+import { buildOrderTicketPrefill, type OrderTicketPrefillResult } from "@/lib/trades/order-ticket-prefill";
+import { DEFAULT_TARGET_R, findTargetByR } from "@/lib/trades/trade-suggestion";
 import { checkConfirmedQuantity, logTradeShareCeiling } from "@/lib/trades/reference-size";
 import type { TradeSuggestionSnapshot } from "@/lib/trades/trade-suggestion-snapshot";
 import { resolveExchange } from "@/lib/market/exchange-rules";
@@ -77,19 +74,23 @@ async function loadPositionSizingInputs(userId: string): Promise<PositionSizingI
   return { equityVnd, sizingConfig, currentPortfolioExposureVnd };
 }
 
-// ─── Order-ticket preview: the trade suggestion's own numbers (#17) ───
+// ─── Xem trước phiếu ghi lệnh: đúng số của gợi ý lệnh (#17) ───
 
-export type SetupLevelsPreview = OrderTicketPrefillResult;
+/** Nội dung phiếu ghi lệnh, hoặc lý do không dựng được phiếu. */
+export type OrderTicketPreview = OrderTicketPrefillResult;
 
 /**
- * Read-only preview for the order ticket — no trade is created here.
+ * Phiếu ghi lệnh điền sẵn cho một setup — chỉ đọc, không tạo lệnh nào. (Tên hàm
+ * giữ từ thời phiếu còn tự tính "mức lệnh"; nay nó trả phiếu dựng từ gợi ý lệnh.)
  *
- * It returns the SAME Gợi ý lệnh F1/F2/F7 show (one loader, one builder), so
- * the ticket pre-fills entry = entry-zone top, stop = stop-zone low, the
- * 1R/2R/3R targets and the reference size (net R + Đệm gap). The verdict is the
- * server's own, the one `createTradeFromSetup()` applies.
+ * Trả về CHÍNH gợi ý lệnh mà F1/F2/F7 hiện (một bộ nạp, một hàm dựng): giá vào =
+ * đầu trên vùng vào, cắt lỗ = đáy vùng SL, các mốc 1R/2R/3R và size tham khảo
+ * (R sau phí + đệm gap). Phán quyết là của server — đúng cái mà
+ * `createTradeFromSetup()` áp. Phiếu mang theo đầu vào trần của server để hiện
+ * trần ngay khi người dùng sửa giá vào hoặc cắt lỗ; nơi server sẽ từ chối
+ * (thiếu phán quyết, NO-TRADE, dưới 1 lô) thì phiếu không điền khối lượng.
  */
-export async function previewTradeLevelsForSetup(setupId: string): Promise<SetupLevelsPreview> {
+export async function previewTradeLevelsForSetup(setupId: string): Promise<OrderTicketPreview> {
   const session = await getSession();
   if (!session) {
     return { ok: false, message: "Phiên đăng nhập đã hết hạn — vui lòng đăng nhập lại." };
@@ -106,12 +107,20 @@ export async function previewTradeLevelsForSetup(setupId: string): Promise<Setup
     setup,
     verdictLevel: verdict.level,
   });
-  return buildOrderTicketPrefill(loaded.result, loaded.sizingUnavailable);
+  return buildOrderTicketPrefill({
+    result: loaded.result,
+    sizingUnavailable: loaded.sizingUnavailable,
+    sizing: loaded.sizingInput,
+    advVnd: loaded.advVnd,
+    // Cùng cách server xếp hạng khi ghi lệnh: khác A là B.
+    tier: setup.quality === "A" ? "A" : "B",
+    verdictBlockedReason: verdict.blockedReason ?? null,
+  });
 }
 
-// ─── Log trade from a setup (journal entry only; the app never places orders, ADR 0003) ───
+// ─── Ghi lệnh từ setup (chỉ ghi vào sổ; app không gửi lệnh, ADR 0003) ───
 
-/** Blank form fields read as "not given", not as 0. */
+/** Ô bỏ trống nghĩa là "không nhập", không phải 0. */
 const blankToUndefined = (v: unknown) =>
   v === null || v === undefined || String(v).trim() === "" ? undefined : v;
 
@@ -146,11 +155,11 @@ const ConfirmEntrySchema = z.object({
 });
 
 /**
- * Records a trade the user took from a setup's Gợi ý lệnh. The ticket sends the
- * entry, stop, target and quantity it showed (every one editable); the server
- * rebuilds the suggestion, re-reads every sizing input itself, checks the
- * quantity against its own worst-case ceiling, and saves the suggestion as it
- * stood, time-stamped, next to the setup snapshot. Creates the trade as OPEN.
+ * Ghi vào sổ một lệnh người dùng vào theo gợi ý lệnh của setup. Phiếu gửi giá
+ * vào, cắt lỗ, chốt lời và khối lượng nó đã hiện (ô nào cũng sửa được); server
+ * dựng lại gợi ý lệnh, tự đọc lại mọi đầu vào định cỡ, kiểm khối lượng theo trần
+ * rủi ro xấu nhất của chính nó, rồi lưu gợi ý lệnh lúc ghi — kèm thời điểm — cạnh
+ * bản chụp setup. Lệnh được tạo ở trạng thái OPEN.
  */
 export async function createTradeFromSetup(
   _prevState: TradeActionState,
@@ -224,7 +233,7 @@ export async function createTradeFromSetup(
   const suggestion = suggestionResult.suggestion;
 
   const stopKvnd = parsed.data.confirmedStopLoss ?? suggestion.stopZone.low;
-  const defaultTarget = suggestion.targets.find((t) => t.r === DEFAULT_TARGET_R);
+  const defaultTarget = findTargetByR(suggestion.targets, DEFAULT_TARGET_R);
   const takeProfitKvnd = parsed.data.confirmedTakeProfit ?? defaultTarget?.price ?? null;
   if (confirmedEntryPrice <= stopKvnd) {
     return { errors: { confirmedStopLoss: ["Cắt lỗ phải thấp hơn giá vào lệnh."] } };
@@ -265,7 +274,7 @@ export async function createTradeFromSetup(
         ? "BELOW_ZONE"
         : "IN_ZONE";
 
-  // Which Mốc chốt the target is, when it is one; a hand-typed target has none.
+  // Chốt lời trùng mốc nào thì ghi mốc đó; giá tự gõ thì không có mốc.
   const targetR = suggestion.targets.find((t) => t.price === takeProfitKvnd)?.r ?? null;
   const suggestionSnapshot: TradeSuggestionSnapshot = { schemaVersion: 1, targetR, suggestion };
 
