@@ -52,7 +52,7 @@ export type SetupLevelsInput = {
   barDate: Date;
 };
 
-const MIN_BARS_FOR_STRUCTURAL_SCAN = 65; // covers the 60-session resistance lookback + buffer
+export const MIN_BARS_FOR_STRUCTURAL_SCAN = 65; // covers the 60-session resistance lookback + buffer
 const ZONE_TIGHTEN_TRUE_RANGE_MULT = 1.5;
 const TIGHTENED_HALF_WIDTH_TRUE_RANGE_MULT = 0.5;
 
@@ -74,6 +74,34 @@ function barRowToInput(row: {
   };
 }
 
+/**
+ * The setup's pullback zone, tightened around the boundary nearest the last
+ * close when it is much wider than that session's true range, so it stays a
+ * realistic next-session limit range. Shared with the trade suggestion
+ * (`trade-suggestion.ts`), which snaps and band-clips the result.
+ */
+export function tightenEntryZone(
+  zone: { low: number; high: number },
+  lastBar: Pick<Gate2BarInput, "high" | "low" | "close">
+): { low: number; high: number } {
+  const trueRange = lastBar.high - lastBar.low;
+  let low = zone.low;
+  let high = zone.high;
+  if (trueRange > 0 && high - low > trueRange * ZONE_TIGHTEN_TRUE_RANGE_MULT) {
+    const nearBoundary =
+      Math.abs(lastBar.close - low) <= Math.abs(high - lastBar.close) ? low : high;
+    const halfWidth = trueRange * TIGHTENED_HALF_WIDTH_TRUE_RANGE_MULT;
+    low = Math.max(low, nearBoundary - halfWidth);
+    high = Math.min(high, nearBoundary + halfWidth);
+    if (low > high) {
+      // Degenerate tightening (shouldn't happen given the guards above) — fall back to the boundary itself.
+      low = nearBoundary;
+      high = nearBoundary;
+    }
+  }
+  return { low, high };
+}
+
 /** Pure — no DB access. Exposed separately so it's independently testable. */
 export function deriveAutoPopulatedTradeLevels(
   setup: SetupLevelsInput,
@@ -84,24 +112,10 @@ export function deriveAutoPopulatedTradeLevels(
   const { sorted, idx } = through;
   const lastBar = sorted[idx]!;
 
-  const trueRange = lastBar.high - lastBar.low;
-  let entryRangeLow = setup.pullbackZoneLow;
-  let entryRangeHigh = setup.pullbackZoneHigh;
-  const zoneWidth = entryRangeHigh - entryRangeLow;
-  if (trueRange > 0 && zoneWidth > trueRange * ZONE_TIGHTEN_TRUE_RANGE_MULT) {
-    const nearBoundary =
-      Math.abs(lastBar.close - entryRangeLow) <= Math.abs(entryRangeHigh - lastBar.close)
-        ? entryRangeLow
-        : entryRangeHigh;
-    const halfWidth = trueRange * TIGHTENED_HALF_WIDTH_TRUE_RANGE_MULT;
-    entryRangeLow = Math.max(entryRangeLow, nearBoundary - halfWidth);
-    entryRangeHigh = Math.min(entryRangeHigh, nearBoundary + halfWidth);
-    if (entryRangeLow > entryRangeHigh) {
-      // Degenerate tightening (shouldn't happen given the guards above) — fall back to the boundary itself.
-      entryRangeLow = nearBoundary;
-      entryRangeHigh = nearBoundary;
-    }
-  }
+  const { low: entryRangeLow, high: entryRangeHigh } = tightenEntryZone(
+    { low: setup.pullbackZoneLow, high: setup.pullbackZoneHigh },
+    lastBar
+  );
   const suggestedEntry = (entryRangeLow + entryRangeHigh) / 2;
 
   const atr14 = computeAtr14(sorted, idx);
