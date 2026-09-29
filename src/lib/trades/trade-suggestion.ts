@@ -14,7 +14,8 @@
  * Prices are kVND. Every price goes through `market/exchange-rules`, so each
  * one is a valid quote on the symbol's exchange.
  */
-import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
+import type { Gate1Level, Gate2BarInput } from "@/lib/scanner/gate2/types";
+import { fmtSessionDate } from "@/lib/format/vn";
 import { barsThroughSession, utcDayKey } from "@/lib/scanner/early-entry/bar-metrics";
 import { sortDedupeGate2Bars } from "@/lib/scanner/gate2/breakout-pullback";
 import { collectResistanceCandidates } from "@/lib/scanner/early-entry/risk-reward";
@@ -32,6 +33,18 @@ import {
   type SessionBand,
 } from "@/lib/market/exchange-rules";
 import { MIN_BARS_FOR_STRUCTURAL_SCAN, tightenEntryZone } from "./auto-populate-from-setup";
+import {
+  ADV_ADJUSTED_PRICE_CAVEAT,
+  RISK_CODES,
+  RISK_COPY,
+  SETUP_REASON_CODES,
+  SETUP_REASON_COPY,
+  SETUP_REASON_PATTERNS,
+  UNMAPPED_REASON_COPY,
+  type RiskCode,
+  type RiskSeverity,
+  type SetupReasonCode,
+} from "./trade-suggestion-copy";
 
 /** 0.1% transfer tax on every sale. */
 const SELL_TAX_FRAC = 0.001;
@@ -45,6 +58,28 @@ const BROKERAGE_PER_SIDE_FRAC = (ROUND_TRIP_FEE_FRAC - SELL_TAX_FRAC) / 2;
 export const CHECKPOINT_N = 100;
 
 const R_MULTIPLES = [1, 2, 3] as const;
+
+/**
+ * Kịch bản sàn liên tiếp: sessions at the floor in a row. Three covers the
+ * T+2.5 lockup (the session after the fill, the one after that, and the
+ * morning before the shares arrive) plus the first session they can be sold.
+ */
+export const LIMIT_DOWN_RUN_SESSIONS = 3;
+
+/** Floor sessions that can pass before bought shares arrive (T+2.5). */
+const SETTLEMENT_FLOOR_SESSIONS = 2;
+
+/**
+ * Below this 20-session average traded value the liquidity risk fires. Five
+ * times the scanner's tradability floor (2 tỷ): a symbol can pass tradability
+ * and still be thin for exiting on a bad day.
+ */
+export const LIQUIDITY_THIN_ADV_VND = 10_000_000_000;
+
+/** Share of the 20-session average the liquidity risk expresses in 100-share lots. */
+const LIQUIDITY_REFERENCE_FRAC = 0.01;
+
+const SEVERITY_RANK: Record<RiskSeverity, number> = { high: 0, warn: 1, info: 2 };
 
 export type TradeSuggestionTarget = {
   r: 1 | 2 | 3;
@@ -91,10 +126,17 @@ export type TradeSuggestion = {
     worstCaseLossVnd: number;
     tradeRiskPct: number;
   } | null;
-  /** Vietnamese reasons — #14. Empty until then. */
-  reasons: { code: string; text: string }[];
-  /** Risks — #14. Empty until then. */
-  risks: { code: string; severity: "info" | "warn" | "high"; text: string }[];
+  /**
+   * The scanner's reasons in plain Vietnamese, in the scanner's order. `code`
+   * is a `SetupReasonCode`, or "unmapped" for a line no code recognises (the
+   * raw line is then kept in the text rather than dropped).
+   */
+  reasons: { code: SetupReasonCode | "unmapped"; text: string }[];
+  /**
+   * Risks, ordered high → warn → info, and within a severity by `RISK_CODES`.
+   * Copy is descriptive (ADR 0003).
+   */
+  risks: { code: RiskCode; severity: RiskSeverity; text: string }[];
   /**
    * Always UNVALIDATED before the ADR 0001 checkpoint. `prospectiveN` is null
    * when the registry could not be read ("N không rõ").
@@ -122,6 +164,10 @@ export type TradeSuggestionInput = {
     stopLevel: number;
     /** The scan session; bars after it are ignored. */
     barDate: Date;
+    /** `SetupCandidate.quality`. */
+    tier: "A" | "B";
+    /** `SetupCandidate.reasons` lines as the classifier wrote them. */
+    reasons: readonly string[];
   };
   /**
    * Daily bars of the symbol, any order, through the LATEST stored session.
@@ -133,6 +179,18 @@ export type TradeSuggestionInput = {
   exchange: string | null;
   /** Eligible prospective observations so far; null when unknown. */
   prospectiveN: number | null;
+  /** Live Gate 1 market regime; null when it could not be evaluated. */
+  gate1Level: Gate1Level | null;
+  /**
+   * The session the market is on (the index's latest session). Stale data is a
+   * latest stock bar older than this; null when unknown (no stale check).
+   */
+  expectedSession: Date | null;
+  /**
+   * 20-session average traded value in VND at the latest session
+   * (`symbol-adv`: close × 1000 × volMa20); null when there is none.
+   */
+  advVnd: number | null;
 };
 
 function fail(reason: TradeSuggestionFailure, detail: string): TradeSuggestionResult {
@@ -150,6 +208,57 @@ function roundVnd(kvnd: number): number {
 
 function fmt(kvnd: number): string {
   return kvnd.toLocaleString("vi-VN", { maximumFractionDigits: 2 });
+}
+
+/** kVND price with two decimals, as F2 prints prices. */
+function price(kvnd: number): string {
+  return kvnd.toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function vndShort(vnd: number): string {
+  const billions = vnd >= 1_000_000_000;
+  const value = vnd / (billions ? 1_000_000_000 : 1_000_000);
+  return `${value.toLocaleString("vi-VN", { maximumFractionDigits: 1 })} ${billions ? "tỷ" : "tr"} ₫`;
+}
+
+/**
+ * Floor of the session after one whose reference is `refKvnd`; null when the
+ * reference has no quotable floor (a price of one tick).
+ */
+function nextFloor(refKvnd: number, exchange: Exchange): number | null {
+  try {
+    return sessionBand(refKvnd, exchange).floor;
+  } catch (e) {
+    if (e instanceof RangeError) return null;
+    throw e;
+  }
+}
+
+/** Re-print a number captured from an English line in vi-VN, keeping its decimals. */
+function viNumber(raw: string): string {
+  const n = Number.parseFloat(raw);
+  if (!Number.isFinite(n)) return raw;
+  const decimals = raw.includes(".") ? raw.length - raw.indexOf(".") - 1 : 0;
+  return n.toLocaleString("vi-VN", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
+function fill(template: string, values: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (whole, key: string) => values[key] ?? whole);
+}
+
+function describeReason(line: string): TradeSuggestion["reasons"][number] {
+  for (const code of SETUP_REASON_CODES) {
+    const { pattern, groups } = SETUP_REASON_PATTERNS[code];
+    const match = pattern.exec(line.trim());
+    if (!match) continue;
+    const values: Record<string, string> = {};
+    groups.forEach((key, i) => {
+      const raw = match[i + 1];
+      if (raw != null) values[key] = viNumber(raw);
+    });
+    return { code, text: fill(SETUP_REASON_COPY[code], values) };
+  }
+  return { code: "unmapped", text: fill(UNMAPPED_REASON_COPY, { raw: line.trim() }) };
 }
 
 export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggestionResult {
@@ -269,12 +378,120 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
     return { r, price, nearestResistance, resistanceBelow: resistances.some((l) => l < price) };
   });
 
+  const asOfSession = utcDayKey(latestBar.date);
+  const setupSession = utcDayKey(lastBar.date);
+  const sessionsSinceSetup = allBars.length - 1 - idx;
+
+  const risks: TradeSuggestion["risks"] = [];
+  const raise = (code: RiskCode, severity: RiskSeverity, values: Record<string, string> = {}) =>
+    risks.push({ code, severity, text: fill(RISK_COPY[code], values) });
+
+  if (input.gate1Level === "FAIL") raise("regime_fail", "high");
+  else if (input.gate1Level === "WARNING") raise("regime_warning", "warn");
+  else if (input.gate1Level == null) raise("regime_unknown", "warn");
+
+  if (input.expectedSession && asOfSession < utcDayKey(input.expectedSession)) {
+    raise("stale_data", "warn", {
+      asOf: fmtSessionDate(asOfSession),
+      expected: fmtSessionDate(utcDayKey(input.expectedSession)),
+    });
+  }
+  if (sessionsSinceSetup > 0) {
+    raise("stale_setup", "warn", {
+      setupSession: fmtSessionDate(setupSession),
+      sessions: String(sessionsSinceSetup),
+    });
+  }
+
+  // Floor path from the worst fill: the price after k limit-down sessions in a
+  // row, each band taken from the previous floor (the exchange's reference).
+  const floors: number[] = [];
+  for (let k = 0, ref = entryTop; k < LIMIT_DOWN_RUN_SESSIONS; k++) {
+    const floor = nextFloor(ref, exchange);
+    if (floor == null) break;
+    floors.push(floor);
+    ref = floor;
+  }
+  const inR = (loss: number) =>
+    (loss / perShareGross).toLocaleString("vi-VN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const oneFloor = floors[0];
+  if (oneFloor != null && oneFloor < stopZone.low) {
+    const loss = roundVnd(entryTop - oneFloor);
+    raise("gap_through_stop", "high", {
+      bandPct: String(band.bandPct),
+      entryTop: price(entryTop),
+      floor: price(oneFloor),
+      stop: price(stopZone.low),
+      loss: price(loss),
+      lossR: inR(loss),
+    });
+  }
+  const runFloor = floors[LIMIT_DOWN_RUN_SESSIONS - 1];
+  if (runFloor != null && runFloor < stopZone.low) {
+    const loss = roundVnd(entryTop - runFloor);
+    raise("limit_down_run", "warn", {
+      n: String(LIMIT_DOWN_RUN_SESSIONS),
+      entryTop: price(entryTop),
+      price: price(runFloor),
+      loss: price(loss),
+      lossR: inR(loss),
+    });
+  }
+
+  if (structural > minFeasible) {
+    raise("stop_too_tight", "warn", {
+      structural: price(structural),
+      minFeasible: price(minFeasible),
+      low: price(stopZone.low),
+    });
+  }
+
+  const twoR = targets.find((t) => t.r === 2);
+  if (twoR?.resistanceBelow && resistances.length > 0) {
+    // `resistances` is ascending, so the first is the first one price meets.
+    raise("resistance_below_2r", "warn", {
+      resistance: price(resistances[0]!),
+      target: price(twoR.price),
+    });
+  }
+
+  if (input.advVnd == null || !Number.isFinite(input.advVnd) || input.advVnd <= 0) {
+    raise("liquidity_unknown", "warn");
+  } else if (input.advVnd < LIQUIDITY_THIN_ADV_VND) {
+    const lotVnd = entryTop * 1000 * 100;
+    raise("liquidity_thin", "warn", {
+      adv: vndShort(input.advVnd),
+      threshold: vndShort(LIQUIDITY_THIN_ADV_VND),
+      lots: String(Math.floor((input.advVnd * LIQUIDITY_REFERENCE_FRAC) / lotVnd)),
+      entryTop: price(entryTop),
+      caveat: ADV_ADJUSTED_PRICE_CAVEAT,
+    });
+  }
+
+  if (assumed) raise("exchange_assumed", "warn");
+
+  const settlementFloor = floors[SETTLEMENT_FLOOR_SESSIONS - 1];
+  if (settlementFloor != null && settlementFloor < stopZone.low) {
+    raise("settlement_lockup", "info", {
+      entryTop: price(entryTop),
+      price: price(settlementFloor),
+    });
+  }
+
+  if (setup.tier === "B") raise("tier_b", "info");
+
+  risks.sort(
+    (a, b) =>
+      SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity] ||
+      RISK_CODES.indexOf(a.code) - RISK_CODES.indexOf(b.code)
+  );
+
   return {
     ok: true,
     suggestion: {
-      asOfSession: utcDayKey(latestBar.date),
-      setupSession: utcDayKey(lastBar.date),
-      sessionsSinceSetup: allBars.length - 1 - idx,
+      asOfSession,
+      setupSession,
+      sessionsSinceSetup,
       exchange,
       exchangeAssumed: assumed,
       entryZone,
@@ -282,8 +499,8 @@ export function buildTradeSuggestion(input: TradeSuggestionInput): TradeSuggesti
       r: { perShareGross, perShareNet },
       targets,
       size: null,
-      reasons: [],
-      risks: [],
+      reasons: setup.reasons.filter((l) => l.trim() !== "").map(describeReason),
+      risks,
       evidence: {
         status: "UNVALIDATED",
         prospectiveN:

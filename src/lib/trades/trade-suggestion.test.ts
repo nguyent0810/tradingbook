@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Gate2BarInput } from "@/lib/scanner/gate2/types";
+import { evaluateBreakoutPullbackCandidate } from "@/lib/scanner/gate2/breakout-pullback";
+import {
+  ADV_ADJUSTED_PRICE_CAVEAT,
+  BANNED_IMPERATIVE_PATTERNS,
+  RISK_COPY,
+  SETUP_REASON_COPY,
+  UNMAPPED_REASON_COPY,
+} from "./trade-suggestion-copy";
 import {
   buildTradeSuggestion,
   type TradeSuggestion,
@@ -44,11 +52,17 @@ function input(over: Partial<TradeSuggestionInput> = {}, setupOver: Partial<Trad
       pullbackZoneHigh: 20.2,
       stopLevel: 18.9,
       barDate: day(SETUP_IDX),
+      tier: "A",
+      reasons: [],
       ...setupOver,
     },
     bars: bars(),
     exchange: "HOSE",
     prospectiveN: 7,
+    // Quiet defaults: every market fact is benign, so each risk test flips one.
+    gate1Level: "PASS",
+    expectedSession: day(SETUP_IDX),
+    advVnd: 50_000_000_000,
     ...over,
   };
 }
@@ -257,11 +271,8 @@ describe("buildTradeSuggestion — exchange and evidence", () => {
     expect(s.evidence).toEqual({ status: "UNVALIDATED", prospectiveN: null, checkpointN: 100 });
   });
 
-  it("leaves reasons, risks and size to later slices", () => {
-    const s = ok(buildTradeSuggestion(input()));
-    expect(s.reasons).toEqual([]);
-    expect(s.risks).toEqual([]);
-    expect(s.size).toBeNull();
+  it("leaves size to #15", () => {
+    expect(ok(buildTradeSuggestion(input())).size).toBeNull();
   });
 });
 
@@ -328,5 +339,335 @@ describe("buildTradeSuggestion — cannot compute", () => {
       b[SETUP_IDX] = { ...b[SETUP_IDX]!, close };
       expect(failure(buildTradeSuggestion(input({ bars: b })))).toBe("NO_REFERENCE_PRICE");
     }
+  });
+});
+
+/**
+ * A path the frozen Gate 2 classifier qualifies (same shape as its own test):
+ * 70 bars around 200.00, breakout at index 59, a hold and a last bar that
+ * trades back into the zone. Last-bar volume decides the tier: 2.0× the
+ * median is A, 1.2× is B.
+ */
+function classifierPath(volLast: number): Gate2BarInput[] {
+  const BASE = 200;
+  const out: Gate2BarInput[] = [];
+  const at = (i: number, open: number, high: number, low: number, close: number, volume: number) =>
+    out.push({ date: day(i), open, high, low, close, volume });
+  for (let i = 0; i <= 69; i++) {
+    if (i < 59) at(i, BASE, BASE, BASE - 1, BASE - 1, 1_000_000);
+    else if (i === 59) at(i, BASE, BASE + 2, BASE, BASE + 1, 1_000_000);
+    else if (i === 60) at(i, BASE + 1, BASE + 1, BASE - 3, BASE + 0.5, 1_000_000);
+    else if (i < 68) at(i, BASE, BASE + 0.6, BASE - 0.2, BASE, 1_000_000);
+    else if (i === 68) at(i, BASE, BASE + 0.6, BASE - 0.2, BASE + 0.5, 1_000_000);
+    else at(i, BASE + 5, BASE + 7, BASE - 1, BASE + 6, volLast);
+  }
+  return out;
+}
+
+function scannerReasons(volLast: number): string[] {
+  const path = classifierPath(volLast);
+  const ev = evaluateBreakoutPullbackCandidate(path, path[path.length - 1]!.date);
+  if (ev.quality === "INVALID") throw new Error(`fixture no longer qualifies: ${ev.reasons.at(-1)}`);
+  return ev.reasons;
+}
+
+describe("buildTradeSuggestion — reasons in plain Vietnamese", () => {
+  it.each([
+    ["tier A", 2_000_000],
+    ["tier B", 1_200_000],
+  ])("every line the classifier emits for a %s setup has copy", (_tier, vol) => {
+    // If the scanner starts emitting a line no reason code recognises, it shows
+    // up as "unmapped" here and this test fails until copy is written for it.
+    const lines = scannerReasons(vol);
+    const s = ok(buildTradeSuggestion(input({}, { reasons: lines })));
+    expect(s.reasons).toHaveLength(lines.length);
+    expect(s.reasons.filter((r) => r.code === "unmapped")).toEqual([]);
+    for (const r of s.reasons) {
+      expect(r.text, r.code).not.toMatch(/[{}]|NaN|undefined/);
+      // Copy is Vietnamese, not the classifier's English.
+      expect(r.text, r.code).not.toMatch(/\b(the|breakout level|median|session)\b/i);
+    }
+  });
+
+  it("keeps the classifier's order and fills in its numbers in vi-VN format", () => {
+    const s = ok(
+      buildTradeSuggestion(
+        input(
+          {},
+          {
+            reasons: [
+              "Trend OK for long-bias pullback: close above MA50 and MA20 ≥ MA50.",
+              "Fresh breakout: cleared prior resistance 200.00 at session offset 59 (10 bars ago).",
+              "Price is interacting with the pullback zone floor–ceiling (194.00–200.00).",
+              "Liquidity check passed—volume 2.00× the 20-day median.",
+            ],
+          }
+        )
+      )
+    );
+    expect(s.reasons).toEqual([
+      { code: "trend_ok", text: "Xu hướng thuận: giá đóng cửa trên MA50 và MA20 nằm trên MA50." },
+      { code: "fresh_breakout", text: "Breakout mới: giá vượt kháng cự 200,00 cách đây 10 phiên." },
+      { code: "in_pullback_zone", text: "Giá đang nằm trong vùng pullback 194,00–200,00." },
+      { code: "volume_confirmed", text: "Khối lượng phiên quét gấp 2,00 lần trung vị 20 phiên." },
+    ]);
+  });
+
+  it("covers both depth lines: a measured dip and no material dip", () => {
+    const s = ok(
+      buildTradeSuggestion(
+        input(
+          {},
+          {
+            reasons: [
+              "Pullback depth under the breakout level: 1.50% (within 8%).",
+              "No dip materially below the breakout level—depth OK.",
+            ],
+          }
+        )
+      )
+    );
+    expect(s.reasons.map((r) => r.code)).toEqual(["pullback_depth_ok", "no_material_dip"]);
+    expect(s.reasons[0]!.text).toBe("Nhịp pullback sâu 1,50% dưới mức breakout, trong giới hạn 8%.");
+  });
+
+  it("an unrecognised line (e.g. from an older scanner) is kept, marked unmapped", () => {
+    const s = ok(buildTradeSuggestion(input({}, { reasons: ["Some legacy line."] })));
+    expect(s.reasons).toEqual([
+      { code: "unmapped", text: "Lý do từ bộ quét, chưa có bản tiếng Việt: Some legacy line." },
+    ]);
+  });
+});
+
+describe("copy tables — descriptive, never imperative (ADR 0003)", () => {
+  const copy = [
+    ...Object.entries(SETUP_REASON_COPY),
+    ...Object.entries(RISK_COPY),
+    ["unmapped", UNMAPPED_REASON_COPY],
+    ["adv caveat", ADV_ADJUSTED_PRICE_CAVEAT],
+  ];
+
+  it("the banned list catches the wording audit F08 flagged", () => {
+    for (const bad of ["MUA", "VÀO NGAY", "Mua ngay khi giá về vùng", "Hãy đặt stop", "Nên chốt lời", "BÁN"]) {
+      expect(BANNED_IMPERATIVE_PATTERNS.some((p) => p.test(bad)), bad).toBe(true);
+    }
+    // Descriptive uses of the same roots are allowed.
+    for (const fine of ["cổ phiếu khớp hôm nay", "trước khi bán được", "bối cảnh bất lợi cho setup mua"]) {
+      expect(BANNED_IMPERATIVE_PATTERNS.some((p) => p.test(fine)), fine).toBe(false);
+    }
+  });
+
+  it.each(copy)("%s contains no banned word", (_code, text) => {
+    for (const p of BANNED_IMPERATIVE_PATTERNS) expect(text).not.toMatch(p);
+  });
+});
+
+describe("buildTradeSuggestion — risks", () => {
+  const codes = (s: TradeSuggestion) => s.risks.map((r) => r.code);
+  const risk = (s: TradeSuggestion, code: string) => s.risks.find((r) => r.code === code);
+  const base = ok(buildTradeSuggestion(input()));
+  /**
+   * A wide structural stop, 15.00 on HOSE: no floor path in three sessions
+   * reaches it (see the limit-down run case), and it is looser than the
+   * minimum feasible 18.60, so it is not "too tight" either.
+   */
+  const wide = ok(buildTradeSuggestion(input({}, { stopLevel: 15 })));
+
+  it("the worked HOSE example carries exactly these risks", () => {
+    // Everything else in the default input is benign (PASS, tier A, fresh data,
+    // 50 tỷ ADV, exchange on record).
+    expect(codes(base)).toEqual([
+      "limit_down_run",
+      "stop_too_tight",
+      "resistance_below_2r",
+      "settlement_lockup",
+    ]);
+  });
+
+  describe("market regime (Gate 1)", () => {
+    it("FAIL is high, WARNING is warn, unknown is warn", () => {
+      const at = (gate1Level: "FAIL" | "WARNING" | null) =>
+        ok(buildTradeSuggestion(input({ gate1Level }))).risks[0];
+      expect(at("FAIL")).toMatchObject({ code: "regime_fail", severity: "high" });
+      expect(at("WARNING")).toMatchObject({ code: "regime_warning", severity: "warn" });
+      expect(at(null)).toMatchObject({ code: "regime_unknown", severity: "warn" });
+    });
+
+    it("PASS raises nothing", () => {
+      expect(codes(base).filter((c) => c.startsWith("regime_"))).toEqual([]);
+    });
+  });
+
+  describe("tier B", () => {
+    it("fires as info for a tier B setup", () => {
+      const s = ok(buildTradeSuggestion(input({}, { tier: "B" })));
+      expect(risk(s, "tier_b")?.severity).toBe("info");
+    });
+    it("does not fire for tier A", () => {
+      expect(risk(base, "tier_b")).toBeUndefined();
+    });
+  });
+
+  describe("gap through the stop", () => {
+    it("fires, high, when one limit-down open from the worst fill lands below the stop", () => {
+      // HNX ±10%: zone 19.60–20.20, stop zone 18.60–18.90 (min feasible 19.60 − ATR 1.00).
+      // Floor from 20.20: 20.20 × 0.90 = 18.18 → up to the 100 đ tick = 18.20 < 18.60.
+      // Loss 20.20 − 18.20 = 2.00/cp; R = 20.20 − 18.60 = 1.60 → 2.00 / 1.60 = 1.25R.
+      const s = ok(buildTradeSuggestion(input({ exchange: "HNX" })));
+      expect(risk(s, "gap_through_stop")).toEqual({
+        code: "gap_through_stop",
+        severity: "high",
+        text: "Gap xuyên stop: một phiên mở giảm sàn (10%) từ 20,20 về 18,20, dưới đáy vùng SL 18,60. Lỗ khi đó 2,00/cp, bằng 1,25R.",
+      });
+    });
+
+    it("does not fire when the floor stays above the stop (HOSE: 20.20 × 0.93 = 18.786 → 18.80 ≥ 18.60)", () => {
+      expect(risk(base, "gap_through_stop")).toBeUndefined();
+    });
+  });
+
+  describe("limit-down run (N = 3 floor sessions)", () => {
+    it("fires with the loss after three HOSE floors from the worst fill", () => {
+      // 20.20 → 18.786 → 18.80 → 17.484 → 17.50 → 16.275 → 16.30 (each up to the 50 đ tick).
+      // Loss 20.20 − 16.30 = 3.90/cp; 3.90 / 1.60 = 2.4375 → 2,44R.
+      expect(risk(base, "limit_down_run")).toEqual({
+        code: "limit_down_run",
+        severity: "warn",
+        text: "Kịch bản sàn liên tiếp: 3 phiên giảm sàn liền từ 20,20 đưa giá về 16,30, dưới vùng SL. Lỗ khi không thoát được 3,90/cp, bằng 2,44R.",
+      });
+    });
+
+    it("does not fire when three floors (16.30) stay above a 15.00 stop", () => {
+      expect(risk(wide, "limit_down_run")).toBeUndefined();
+    });
+  });
+
+  describe("T+2.5 lockup", () => {
+    it("fires when two floors from the worst fill (17.50) are below the stop (18.60)", () => {
+      expect(risk(base, "settlement_lockup")).toEqual({
+        code: "settlement_lockup",
+        severity: "info",
+        text: "T+2,5: cổ phiếu khớp hôm nay khoảng 2,5 phiên sau mới về tài khoản. Hai phiên giảm sàn từ 20,20 là 17,50, đã dưới vùng SL: giá có thể xuyên stop trước khi bán được.",
+      });
+    });
+
+    it("does not fire when two floors stay above the stop", () => {
+      expect(risk(wide, "settlement_lockup")).toBeUndefined();
+    });
+  });
+
+  describe("liquidity vs the 20-session average traded value", () => {
+    it("fires below 10 tỷ, sized per 100-share lot, with the adjusted-price caveat", () => {
+      // 1% of 4.2 tỷ = 42,000,000 đ; one lot at 20.20 = 20.20 × 1000 × 100 = 2,020,000 đ
+      // → 42,000,000 / 2,020,000 = 20.79 → 20 lots.
+      const s = ok(buildTradeSuggestion(input({ advVnd: 4_200_000_000 })));
+      expect(risk(s, "liquidity_thin")).toEqual({
+        code: "liquidity_thin",
+        severity: "warn",
+        text:
+          "Giá trị giao dịch bình quân 20 phiên khoảng 4,2 tỷ ₫, dưới mốc 10 tỷ ₫: 1% con số đó chỉ bằng khoảng 20 lô 100 cp ở 20,20, thoát vị thế lớn có thể khó, nhất là phiên giảm sàn. " +
+          ADV_ADJUSTED_PRICE_CAVEAT,
+      });
+    });
+
+    it("an unknown average is its own warning, never read as liquid", () => {
+      const s = ok(buildTradeSuggestion(input({ advVnd: null })));
+      expect(risk(s, "liquidity_unknown")?.severity).toBe("warn");
+      expect(risk(s, "liquidity_thin")).toBeUndefined();
+    });
+
+    it("does not fire at or above 10 tỷ", () => {
+      const s = ok(buildTradeSuggestion(input({ advVnd: 10_000_000_000 })));
+      expect(codes(s).filter((c) => c.startsWith("liquidity"))).toEqual([]);
+    });
+  });
+
+  describe("stale data", () => {
+    it("fires when the latest bar is older than the expected session", () => {
+      const s = ok(buildTradeSuggestion(input({ expectedSession: day(SETUP_IDX + 1) })));
+      expect(risk(s, "stale_data")).toEqual({
+        code: "stale_data",
+        severity: "warn",
+        text: "Nến mới nhất của mã là phiên 09/08/2026, cũ hơn phiên thị trường 10/08/2026: vùng giá và biên độ có thể đã lệch.",
+      });
+    });
+
+    it("does not fire when the latest bar is the expected session, or none is known", () => {
+      expect(risk(base, "stale_data")).toBeUndefined();
+      expect(risk(ok(buildTradeSuggestion(input({ expectedSession: null }))), "stale_data")).toBeUndefined();
+    });
+  });
+
+  describe("stale setup", () => {
+    it("fires when bars run past the setup session", () => {
+      const later = [
+        ...bars(),
+        { date: day(SETUP_IDX + 1), open: 20, high: 20.2, low: 19.8, close: 20, volume: 1 },
+      ];
+      const s = ok(buildTradeSuggestion(input({ bars: later, expectedSession: day(SETUP_IDX + 1) })));
+      expect(risk(s, "stale_setup")).toEqual({
+        code: "stale_setup",
+        severity: "warn",
+        text: "Thiết lập từ phiên 09/08/2026, dữ liệu đã có thêm 1 phiên sau đó: cấu trúc chưa được quét lại.",
+      });
+    });
+
+    it("does not fire when the setup is the latest session", () => {
+      expect(risk(base, "stale_setup")).toBeUndefined();
+    });
+  });
+
+  describe("exchange assumed", () => {
+    it("fires when the symbol has no exchange on record", () => {
+      expect(risk(ok(buildTradeSuggestion(input({ exchange: null }))), "exchange_assumed")?.severity).toBe("warn");
+    });
+    it("does not fire when the exchange is on record", () => {
+      expect(risk(base, "exchange_assumed")).toBeUndefined();
+    });
+  });
+
+  describe("stop too tight", () => {
+    it("fires when the structural stop (18.90) is tighter than the minimum feasible (18.60)", () => {
+      expect(risk(base, "stop_too_tight")).toEqual({
+        code: "stop_too_tight",
+        severity: "warn",
+        text: "Mức vô hiệu theo cấu trúc 18,90 sát hơn mức stop tối thiểu 18,60: nhiễu một phiên có thể chạm tới nó. Vùng SL vì thế kéo xuống 18,60.",
+      });
+    });
+    it("does not fire when the structural stop is the looser one", () => {
+      expect(risk(ok(buildTradeSuggestion(input({}, { stopLevel: 18 }))), "stop_too_tight")).toBeUndefined();
+    });
+  });
+
+  describe("resistance below 2R", () => {
+    it("fires when resistance (23.00) sits below the 2R mark (23.65)", () => {
+      expect(risk(base, "resistance_below_2r")).toEqual({
+        code: "resistance_below_2r",
+        severity: "warn",
+        text: "Kháng cự 23,00 nằm dưới mốc 2R 23,65: giá có thể gặp cản trước mốc.",
+      });
+    });
+    it("does not fire when the only resistance (a 30.00 spike) is above 2R", () => {
+      const s = ok(
+        buildTradeSuggestion(input({ bars: bars(SETUP_IDX + 1, { ...TWENTY, spike: 30 }) }))
+      );
+      expect(risk(s, "resistance_below_2r")).toBeUndefined();
+    });
+  });
+
+  it("orders risks by severity: high, then warn, then info", () => {
+    const s = ok(
+      buildTradeSuggestion(input({ gate1Level: "FAIL", exchange: null, advVnd: null }, { tier: "B" }))
+    );
+    expect(s.risks.map((r) => [r.severity, r.code])).toEqual([
+      ["high", "regime_fail"],
+      ["warn", "limit_down_run"],
+      ["warn", "stop_too_tight"],
+      ["warn", "resistance_below_2r"],
+      ["warn", "liquidity_unknown"],
+      ["warn", "exchange_assumed"],
+      ["info", "settlement_lockup"],
+      ["info", "tier_b"],
+    ]);
   });
 });
