@@ -36,7 +36,14 @@ export type PositionSizingComputed = {
   riskAtStopVnd: number;
   /** True when the liquidity-cap constraint (vs. remaining exposure / per-trade cap) was the binding one. */
   liquidityCapBinding: boolean;
+  /**
+   * The cap that set `qFinalShares`, or null when the risk budget did. Ties go
+   * to the first in the order portfolio → per-trade → liquidity.
+   */
+  bindingCap: PositionSizingCap | null;
 };
+
+export type PositionSizingCap = "portfolio_exposure" | "per_trade_exposure" | "liquidity";
 
 export type PositionSizingErrorCode =
   | "INVALID_INPUT"
@@ -80,6 +87,12 @@ export function computePositionSizing(params: {
   liquidityCapPct?: number | null;
   /** Symbol's average daily traded value (VND, e.g. 20-session ADV). */
   symbolAvgDailyValueVnd?: number | null;
+  /**
+   * VND per share the risk budget is divided by, in place of entry − stop.
+   * For callers whose loss per share is larger than the stop distance (a trade
+   * suggestion adds costs and a gap buffer). Exposure caps still use the entry.
+   */
+  perShareRiskVnd?: number | null;
 }): { ok: true; value: PositionSizingComputed } | { ok: false; code: PositionSizingErrorCode } {
   const {
     accountEquityVnd: E,
@@ -92,6 +105,7 @@ export function computePositionSizing(params: {
     stopKVnd,
     liquidityCapPct,
     symbolAvgDailyValueVnd,
+    perShareRiskVnd: perShareRiskOverrideVnd,
   } = params;
 
   if (!Number.isFinite(E) || !Number.isFinite(mPort) || !Number.isFinite(curExp) || !Number.isFinite(mTrade)) {
@@ -103,13 +117,19 @@ export function computePositionSizing(params: {
   if (liquidityCapPct != null && !Number.isFinite(liquidityCapPct)) {
     return { ok: false, code: "INVALID_INPUT" };
   }
+  if (
+    perShareRiskOverrideVnd != null &&
+    (!Number.isFinite(perShareRiskOverrideVnd) || perShareRiskOverrideVnd <= 0)
+  ) {
+    return { ok: false, code: "INVALID_INPUT" };
+  }
   if (E <= 0) return { ok: false, code: "ZERO_EQUITY" };
 
   const entryVnd = kVndToPerShareVnd(entryKVnd);
   const stopVnd = kVndToPerShareVnd(stopKVnd);
   if (entryVnd <= 0) return { ok: false, code: "ZERO_ENTRY" };
-  const perShareRisk = entryVnd - stopVnd;
-  if (perShareRisk <= 0) return { ok: false, code: "ENTRY_NOT_ABOVE_STOP" };
+  if (entryVnd - stopVnd <= 0) return { ok: false, code: "ENTRY_NOT_ABOVE_STOP" };
+  const perShareRisk = perShareRiskOverrideVnd ?? entryVnd - stopVnd;
 
   const portfolioCeilingVnd = E * Math.max(0, Math.min(1, mPort));
   const remainingExposureVnd = Math.max(0, portfolioCeilingVnd - Math.max(0, curExp));
@@ -129,6 +149,15 @@ export function computePositionSizing(params: {
   const qFinalShares = Math.max(0, qFloored);
   const liquidityCapBinding =
     capFromLiquidity < Infinity && capFromLiquidity <= capFromRemaining && capFromLiquidity <= capFromPerTrade && capFromLiquidity < qRaw;
+  const tightestCap = Math.min(capFromRemaining, capFromPerTrade, capFromLiquidity);
+  const bindingCap: PositionSizingCap | null =
+    tightestCap >= qRaw
+      ? null
+      : tightestCap === capFromRemaining
+        ? "portfolio_exposure"
+        : tightestCap === capFromPerTrade
+          ? "per_trade_exposure"
+          : "liquidity";
 
   const notionalVnd = qFinalShares * entryVnd;
   const positionPctOfAccount = E > 0 ? (notionalVnd / E) * 100 : 0;
@@ -154,6 +183,7 @@ export function computePositionSizing(params: {
       stopDistancePctOfEntry,
       riskAtStopVnd,
       liquidityCapBinding,
+      bindingCap,
     },
   };
 }
