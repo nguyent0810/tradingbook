@@ -14,11 +14,8 @@ import { F2Skeleton } from "@/components/setups/terminal/f2-skeleton";
 import { fmtSessionDate, fmtSessionStamp } from "@/lib/format/vn";
 import { scanBehindMarketNotice } from "@/lib/terminal/scan-session-staleness";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
-import {
-  safeLoadPositionSizingDefaults,
-  suggestionSizingInput,
-  type OpenTradeRisk,
-} from "./setups-position-sizing-defaults";
+import { safeLoadPositionSizingDefaults, suggestionSizingInput } from "./setups-position-sizing-defaults";
+import type { OpenTradeRisk } from "@/lib/trades/trade-suggestion";
 import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
 import { loadTradeSuggestions } from "./setups-trade-suggestions";
 import {
@@ -62,20 +59,6 @@ async function SetupsContent() {
       getMarketRegimeFromDb("VNINDEX"),
       loadOpenTrades(session.userId),
     ]);
-  const suggestionSizing = suggestionSizingInput(sizingDefaults, openTrades.value);
-
-  const [spark, suggestions] = await Promise.all([
-    loadSparkHistory(candidatesWithHealth, base.expectedSession),
-    loadTradeSuggestions(candidatesWithHealth, {
-      latestSession: base.latestEquityBarSession,
-      expectedSession: base.expectedSession,
-      gate1Level: readLiveGate1(regime).level,
-      advBySymbolId: sizingDefaults.advBySymbolId,
-      sizing: suggestionSizing,
-    }),
-  ]);
-  const closesBySymbolId = spark.data;
-
   const verdict = resolveTerminalVerdict({
     scanGate1: (base.latest?.gate1Level as Gate1Level | undefined) ?? null,
     candidateCountA: base.latest?.candidateCountA ?? null,
@@ -90,6 +73,22 @@ async function SetupsContent() {
         }
       : null,
   });
+
+  // The size carries the session verdict, so every figure F2 shows is on the
+  // share count it shows (PROBE 30%, NO-TRADE 0).
+  const suggestionSizing = suggestionSizingInput(sizingDefaults, openTrades.value, verdict.level);
+
+  const [spark, suggestions] = await Promise.all([
+    loadSparkHistory(candidatesWithHealth, base.expectedSession),
+    loadTradeSuggestions(candidatesWithHealth, {
+      latestSession: base.latestEquityBarSession,
+      expectedSession: base.expectedSession,
+      gate1Level: readLiveGate1(regime).level,
+      advBySymbolId: sizingDefaults.advBySymbolId,
+      sizing: suggestionSizing.input,
+    }),
+  ]);
+  const closesBySymbolId = spark.data;
 
   const reasonLinesBySymbol: Record<string, string[]> = {};
   for (const candidate of candidatesWithHealth) {
@@ -130,14 +129,7 @@ async function SetupsContent() {
     closesBySymbolId,
     suggestionBySetupId: suggestions.bySetupId,
     prospectiveN: suggestions.prospectiveN,
-    sizing: {
-      equityVnd: sizingDefaults.equityVnd,
-      baseRiskPct: sizingDefaults.positionSizingConfig.riskPerTradePct,
-      maxTradePct: sizingDefaults.positionSizingConfig.maxPositionPct,
-      liquidityCapPct: sizingDefaults.positionSizingConfig.liquidityCapPct,
-      // Null when equity is unset (F2 then says so first) or open trades failed to load.
-      currentExposureVnd: suggestionSizing?.currentExposureVnd ?? null,
-    },
+    sizing: { equityVnd: sizingDefaults.equityVnd, unavailable: suggestionSizing.unavailable },
     closest: base.notes?.closestToValidSymbols ?? [],
     rsWatchRows: rsWatch.panel.rows.map((r) => ({
       symbol: r.symbol,
@@ -223,9 +215,13 @@ async function SetupsContent() {
 }
 
 /**
- * Các lệnh đang mở trong sổ: giá vào, stop và khối lượng. Size tham khảo lấy
- * exposure (cùng công thức server dùng khi ghi lệnh) và Tổng rủi ro mở từ đây.
+ * Các lệnh đang mở trong sổ: giá vào, stop, khối lượng và sàn của mã. Size tham
+ * khảo lấy exposure (cùng công thức server dùng khi ghi lệnh) và Tổng rủi ro mở
+ * (có đệm gap theo sàn của từng lệnh) từ đây.
  * `value: null` = không đọc được, KHÔNG phải "không có lệnh nào".
+ *
+ * `Trade.symbol` là chuỗi, không có quan hệ tới `StockSymbol`, nên sàn đến từ
+ * MỘT truy vấn gộp theo danh sách mã (không N+1).
  */
 async function loadOpenTrades(
   userId: string
@@ -233,17 +229,32 @@ async function loadOpenTrades(
   try {
     const open = await prisma.trade.findMany({
       where: { userId, status: "OPEN" },
-      select: { entryPrice: true, stopLoss: true, quantity: true },
+      select: { symbol: true, entryPrice: true, stopLoss: true, quantity: true },
     });
+    const keys = [...new Set(open.flatMap((t) => [t.symbol, t.symbol.toUpperCase()]))];
+    const symbols =
+      keys.length > 0
+        ? await prisma.stockSymbol.findMany({
+            where: { symbol: { in: keys } },
+            select: { symbol: true, exchange: true },
+          })
+        : [];
+    const exchangeBySymbol = new Map(symbols.map((s) => [s.symbol.toUpperCase(), s.exchange]));
     return {
-      value: open.map((t) => ({ entryKvnd: t.entryPrice, stopKvnd: t.stopLoss, quantity: t.quantity })),
+      value: open.map((t) => ({
+        entryKvnd: t.entryPrice,
+        stopKvnd: t.stopLoss,
+        quantity: t.quantity,
+        exchange: exchangeBySymbol.get(t.symbol.toUpperCase()) ?? null,
+      })),
       error: null,
     };
   } catch (e) {
     console.error("[setups] open exposure lookup failed:", e);
     return {
       value: null,
-      error: "prisma.trade.findMany({ userId, status: OPEN }) that bai: " + String(e),
+      error:
+        "prisma.trade.findMany({ userId, status: OPEN }) / stockSymbol.findMany that bai: " + String(e),
     };
   }
 }

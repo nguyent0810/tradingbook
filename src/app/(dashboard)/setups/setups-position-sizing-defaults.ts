@@ -5,13 +5,20 @@ import {
   type PositionSizingConfigOverrides,
 } from "@/lib/trading-account-risk-config";
 import { loadSymbolAdvVndBatch } from "@/lib/trades/symbol-adv";
-import { POSITION_SIZING_DEFAULTS } from "@/lib/position-sizing";
-import type { TradeSuggestionSizingInput } from "@/lib/trades/trade-suggestion";
+import { POSITION_SIZING_DEFAULTS, openExposureVnd } from "@/lib/position-sizing";
+import type { OpenTradeRisk, TradeSuggestionSizingInput } from "@/lib/trades/trade-suggestion";
+import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
+import type { SizingUnavailable } from "@/lib/setups/terminal/f2-view-model";
 
 export type PositionSizingDefaultsResult = {
   equityVnd: number | null;
   positionSizingConfig: PositionSizingConfigOverrides;
   advBySymbolId: Map<string, number | null>;
+  /**
+   * True when the ADV lookup itself failed (not when a symbol simply has no
+   * row). The server refuses to log a trade then, so no size is shown either.
+   */
+  advUnavailable: boolean;
   error: string | null;
 };
 
@@ -21,33 +28,39 @@ export const EMPTY_POSITION_SIZING_CONFIG: PositionSizingConfigOverrides = {
   liquidityCapPct: null,
 };
 
-export type OpenTradeRisk = TradeSuggestionSizingInput["openTrades"][number];
-
 /**
  * Sizing inputs of the trade suggestion (#15): the user's settings with the same
- * defaults the server applies when a trade is logged, plus the open journal
- * trades. `null` when equity is not set or the open trades could not be read:
- * the suggestion then carries no size rather than one built on guesses.
+ * defaults the server applies when a trade is logged, the open journal trades
+ * and the session verdict. No input, with the reason, when the ADV lookup
+ * failed (checked first, as the server does), equity is not set or the open
+ * trades could not be read: the suggestion then carries no size rather than one
+ * built on guesses or one the server would refuse to log.
  */
 export function suggestionSizingInput(
-  defaults: Pick<PositionSizingDefaultsResult, "equityVnd" | "positionSizingConfig">,
-  openTrades: readonly OpenTradeRisk[] | null
-): TradeSuggestionSizingInput | null {
+  defaults: Pick<PositionSizingDefaultsResult, "equityVnd" | "positionSizingConfig" | "advUnavailable">,
+  openTrades: readonly OpenTradeRisk[] | null,
+  verdictLevel: VerdictUxLevel | null
+):
+  | { input: TradeSuggestionSizingInput; unavailable: null }
+  | { input: null; unavailable: SizingUnavailable } {
+  if (defaults.advUnavailable) return { input: null, unavailable: "LIQUIDITY_UNREADABLE" };
   const equityVnd = defaults.equityVnd;
-  if (equityVnd == null || !Number.isFinite(equityVnd) || equityVnd <= 0 || openTrades == null) {
-    return null;
+  if (equityVnd == null || !Number.isFinite(equityVnd) || equityVnd <= 0) {
+    return { input: null, unavailable: "NO_EQUITY" };
   }
+  if (openTrades == null) return { input: null, unavailable: "OPEN_TRADES_UNREADABLE" };
   const config = defaults.positionSizingConfig;
-  return {
+  const input: TradeSuggestionSizingInput = {
     equityVnd,
     riskPerTradePct: config.riskPerTradePct ?? POSITION_SIZING_DEFAULTS.baseRiskPerTradePct,
     maxPerTradeExposurePct: config.maxPositionPct ?? POSITION_SIZING_DEFAULTS.maxPerTradeExposurePct,
     maxPortfolioExposurePct: POSITION_SIZING_DEFAULTS.maxPortfolioExposurePct,
     liquidityCapPct: config.liquidityCapPct ?? POSITION_SIZING_DEFAULTS.liquidityCapPct,
-    // Exposure: same formula as the server action that logs a trade.
-    currentExposureVnd: openTrades.reduce((sum, t) => sum + t.entryKvnd * 1000 * t.quantity, 0),
+    currentExposureVnd: openExposureVnd(openTrades),
     openTrades,
+    verdictLevel,
   };
+  return { input, unavailable: null };
 }
 
 /**
@@ -76,16 +89,18 @@ export async function safeLoadPositionSizingDefaults(
         equityVnd,
         positionSizingConfig,
         advBySymbolId: new Map(),
+        advUnavailable: true,
         error: adv.error,
       };
     }
-    return { equityVnd, positionSizingConfig, advBySymbolId: adv.map, error: null };
+    return { equityVnd, positionSizingConfig, advBySymbolId: adv.map, advUnavailable: false, error: null };
   } catch (e) {
     console.error("[setups] safeLoadPositionSizingDefaults failed:", e);
     return {
       equityVnd: null,
       positionSizingConfig: EMPTY_POSITION_SIZING_CONFIG,
       advBySymbolId: new Map(),
+      advUnavailable: true,
       error:
         "safeLoadPositionSizingDefaults() thất bại " +
         "(getTradingAccountEquityVnd · getPositionSizingConfig · " +

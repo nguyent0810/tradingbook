@@ -4,8 +4,7 @@ import type { Gate2ClosestSymbolRow } from "@/lib/scanner/gate2-scan-diagnostics
 import type { VerdictUxLevel } from "@/lib/dashboard/decision-cockpit-dto";
 import { computeClosestExecutionStatus } from "@/lib/scanner/closest-execution-metrics";
 import { displayNearMissDiagnosticStatus } from "@/lib/trading-display-labels";
-import { POSITION_SIZING_DEFAULTS } from "@/lib/position-sizing";
-import { applyVerdictToShares, verdictTokens } from "@/lib/terminal/verdict-tokens";
+import { verdictTokens } from "@/lib/terminal/verdict-tokens";
 import { fmtSessionDate, semanticTone } from "@/lib/format/vn";
 import { healthShortLabel, healthTone, rsTone } from "@/lib/terminal/labels";
 import { sessionChangePct } from "@/lib/dashboard/candidate-spark-history";
@@ -155,10 +154,6 @@ const NEAR_MISS_COLOR: Record<string, string> = {
   WAIT: "var(--tm-accent)",
   INVALID: "var(--tm-ceil)",
 };
-
-/** Mặc định hệ thống cho định cỡ vị thế, khớp panel định cỡ hiện có. */
-/** Mặc định hệ thống — dùng CHUNG với server action ghi lệnh. */
-const SIZING_FALLBACK = POSITION_SIZING_DEFAULTS;
 
 function finite(value: number | null | undefined): number | null {
   return value != null && Number.isFinite(value) ? value : null;
@@ -325,20 +320,35 @@ function buildKpis(
   ];
 }
 
+/**
+ * Vì sao trang không có đầu vào định cỡ cho gợi ý lệnh. Mỗi trường hợp chặn
+ * tính size thay vì đoán, và khớp với chỗ server từ chối ghi lệnh.
+ */
+export type SizingUnavailable =
+  /** Chưa đặt vốn tài khoản. */
+  | "NO_EQUITY"
+  /**
+   * Không đọc được các lệnh đang mở. KHÔNG phải "không có vị thế nào": coi như 0
+   * sẽ cho khối lượng CAO HƠN trần mà server áp khi ghi lệnh.
+   */
+  | "OPEN_TRADES_UNREADABLE"
+  /** Không đọc được giá trị giao dịch bình quân 20 phiên: server cũng fail closed ở đây. */
+  | "LIQUIDITY_UNREADABLE";
+
 export type SizingInput = {
   equityVnd: number | null;
-  baseRiskPct: number | null;
-  maxTradePct: number | null;
-  liquidityCapPct: number | null;
-  /**
-   * Giá trị các vị thế đang mở. Phải truyền vào: server dùng số này khi ghi lệnh,
-   * nếu màn hình tính với 0 thì khối lượng đề xuất sẽ cao hơn mức server cho phép
-   * và người dùng chỉ biết khi phiếu báo lỗi.
-   *
-   * `null` = **không đọc được**, KHÔNG phải "không có vị thế nào". Hai trường hợp
-   * này cho ra khối lượng khác nhau nên không được gộp: đọc lỗi thì chặn định cỡ.
-   */
-  currentExposureVnd: number | null;
+  /** `null` khi trang đã giao đủ đầu vào định cỡ cho gợi ý lệnh. */
+  unavailable: SizingUnavailable | null;
+};
+
+const SIZING_UNAVAILABLE_COPY: Record<SizingUnavailable, string> = {
+  NO_EQUITY:
+    "Chưa đặt vốn tài khoản trong Cài đặt (F5) nên không tính được khối lượng. Không suy đoán từ giá trị mặc định.",
+  OPEN_TRADES_UNREADABLE:
+    "Không đọc được giá trị các vị thế đang mở nên không tính được khối lượng. " +
+    "Coi như 0 sẽ cho ra khối lượng CAO HƠN trần mà server áp khi ghi lệnh.",
+  LIQUIDITY_UNREADABLE:
+    "Không đọc được giá trị giao dịch bình quân 20 phiên nên không kiểm được trần thanh khoản: size tham khảo chưa tính được. Server cũng không ghi lệnh khi thiếu số này.",
 };
 
 /** Rủi ro của gợi ý lệnh cũng thuộc về khối size: F2 nhắc lại chúng ở đó. */
@@ -356,22 +366,12 @@ function buildSizing(
 ): Pick<F2Detail, "sizing" | "sizingNote" | "sizingBlocked" | "sizingWarnings" | "systemShares"> {
   const none = { sizing: [], sizingNote: null, systemShares: null };
   const equity = finite(sizingInput.equityVnd);
-  if (equity == null || equity <= 0) {
+  const unavailable = sizingInput.unavailable ?? (equity == null || equity <= 0 ? "NO_EQUITY" : null);
+  if (unavailable || equity == null) {
     return {
       ...none,
       sizingWarnings: [],
-      sizingBlocked:
-        "Chưa đặt vốn tài khoản trong Cài đặt (F5) nên không tính được khối lượng. Không suy đoán từ giá trị mặc định.",
-    };
-  }
-
-  if (sizingInput.currentExposureVnd == null) {
-    return {
-      ...none,
-      sizingWarnings: [],
-      sizingBlocked:
-        "Không đọc được giá trị các vị thế đang mở nên không tính được khối lượng. " +
-        "Coi như 0 sẽ cho ra khối lượng CAO HƠN trần mà server áp khi ghi lệnh.",
+      sizingBlocked: SIZING_UNAVAILABLE_COPY[unavailable ?? "NO_EQUITY"],
     };
   }
 
@@ -396,16 +396,20 @@ function buildSizing(
     };
   }
 
-  const baseRiskPct = sizingInput.baseRiskPct ?? SIZING_FALLBACK.baseRiskPerTradePct;
+  // The size already carries the session verdict (builder): every row below is
+  // on `size.shares`, the count shown as the suggestion.
   const tokens = verdictLevel ? verdictTokens(verdictLevel) : null;
-  const applied = verdictLevel ? applyVerdictToShares(size.shares, verdictLevel) : null;
-  const finalShares = applied ? applied.shares : size.shares;
-  const finalNotional = finalShares * s.entryZone.high * 1000;
+  const removedShares = size.sharesBeforeVerdict - size.shares;
   const openRisk = size.openRisk;
 
   const rows: F2SizingRow[] = [
     { key: "Vốn tài khoản", value: fmtVndShort(equity), color: "var(--tm-text-value)" },
-    { key: "Rủi ro mỗi lệnh", value: pct(baseRiskPct * 100, 2), color: "var(--tm-accent)" },
+    {
+      // Sau hệ số hạng (B = một nửa): đúng mức rủi ro mà size được tính trên đó.
+      key: "Rủi ro mỗi lệnh",
+      value: `${pct(size.riskPerTradePct * 100, 2)} · ${fmtVndShort(size.riskBudgetVnd)}`,
+      color: "var(--tm-accent)",
+    },
     {
       key: "Rủi ro / cp",
       value: `${fmtVndShort(size.worstCasePerShareKvnd * 1000)} · R sau phí ${num(
@@ -421,11 +425,11 @@ function buildSizing(
     },
   ];
 
-  if (tokens && applied) {
+  if (tokens) {
     rows.push({
-      key: `Khối lượng ${tokens.sizeLabel}`,
-      value: `${num(applied.shares, 0)} cp`,
-      color: tokens.color,
+      key: `Trước phán quyết ${tokens.code}`,
+      value: `${num(size.sharesBeforeVerdict, 0)} cp`,
+      color: "var(--tm-text-faint)",
     });
   }
 
@@ -446,10 +450,10 @@ function buildSizing(
       )} vốn`,
       color: openRisk.aboveLimit ? "var(--tm-accent)" : "var(--tm-text-value)",
     },
-    { key: "Giá trị vị thế", value: fmtVndShort(finalNotional), color: "var(--tm-text-value)" },
+    { key: "Giá trị vị thế", value: fmtVndShort(size.positionValueVnd), color: "var(--tm-text-value)" },
     {
       key: "% NAV",
-      value: pct((finalNotional / equity) * 100, 1),
+      value: pct((size.positionValueVnd / equity) * 100, 1),
       color: "var(--tm-floor)",
     }
   );
@@ -460,15 +464,21 @@ function buildSizing(
   ];
 
   const sizingNote = tokens
-    ? applied && applied.removedShares > 0
-      ? `Phán quyết ${tokens.code} — khối lượng đề xuất còn ${tokens.sizeLabel} size tham khảo (giảm ${num(
-          applied.removedShares,
+    ? removedShares > 0
+      ? `Phán quyết ${tokens.code} — size tham khảo còn ${tokens.sizeLabel} (giảm ${num(
+          removedShares,
           0
         )} cp). ${tokens.sizeReason}.`
       : `Phán quyết ${tokens.code} — giữ nguyên size tham khảo.`
     : null;
 
-  return { sizing: rows, sizingNote, sizingBlocked: null, sizingWarnings, systemShares: size.shares };
+  return {
+    sizing: rows,
+    sizingNote,
+    sizingBlocked: null,
+    sizingWarnings,
+    systemShares: size.sharesBeforeVerdict,
+  };
 }
 
 /**

@@ -4,12 +4,6 @@ import type { TradeSuggestion, TradeSuggestionResult } from "@/lib/trades/trade-
 import { buildF2ViewModel, type F2ViewModelInput } from "./f2-view-model";
 
 /**
- * A suggestion as the builder would hand it over. The numbers are deliberately
- * NOT what the old F2 formula gives (zone high × 1.12 = 153,22; R:R from the
- * zone high), so every assertion below proves F2 shows the suggestion rather
- * than computing its own.
- */
-/**
  * Size as the builder would hand it over (#15). Hand-worked on the fixture:
  * HOSE gap buffer 129.40 × 7% = 9.058; worst case 7.93 + 9.058 = 16.988 kVND/cp.
  * 1.2 tỷ × 1% = 12,000,000 / 16,988 = 706.4 → 700 cp; loss 700 × 16,988 =
@@ -18,6 +12,9 @@ import { buildF2ViewModel, type F2ViewModelInput } from "./f2-view-model";
  */
 const SIZE: NonNullable<TradeSuggestion["size"]> = {
   shares: 700,
+  sharesBeforeVerdict: 700,
+  riskPerTradePct: 0.01,
+  riskBudgetVnd: 12_000_000,
   bindingCap: null,
   gapBufferKvnd: 9.058,
   worstCasePerShareKvnd: 16.988,
@@ -35,6 +32,12 @@ const SIZE: NonNullable<TradeSuggestion["size"]> = {
   },
 };
 
+/**
+ * A suggestion as the builder would hand it over. The numbers are deliberately
+ * NOT what the old F2 formula gives (zone high × 1.12 = 153,22; R:R from the
+ * zone high), so every assertion below proves F2 shows the suggestion rather
+ * than computing its own.
+ */
 function suggestion(over: Partial<TradeSuggestion> = {}): TradeSuggestion {
   return {
     asOfSession: "2026-08-25",
@@ -92,13 +95,7 @@ function input(over: Partial<F2ViewModelInput> = {}): F2ViewModelInput {
     closesBySymbolId: new Map([["sym_fpt", [130, 132, 136, 138.2]]]),
     suggestionBySetupId: suggestions(),
     prospectiveN: 7,
-    sizing: {
-      equityVnd: 1_200_000_000,
-      baseRiskPct: 0.01,
-      maxTradePct: 0.12,
-      liquidityCapPct: 0.025,
-      currentExposureVnd: 0,
-    },
+    sizing: { equityVnd: 1_200_000_000, unavailable: null },
     closest: [
       {
         symbol: "SSI",
@@ -331,30 +328,48 @@ describe("gợi ý lệnh trên F2", () => {
 });
 
 describe("định cỡ vị thế theo phán quyết", () => {
-  it("PROBE cắt khối lượng còn 30% và nói rõ đã bớt bao nhiêu", () => {
-    const detail = buildF2ViewModel(input()).details.FPT;
+  /**
+   * The builder's size under PROBE: 30% of 700 = 210 → 200 cp. Every figure is
+   * on the 200: loss 200 × 16,988 = 3,397,600 đ = 0.28% of 1.2 tỷ; position
+   * 200 × 136,800 = 27,360,000 đ = 2.28% NAV.
+   */
+  const PROBE_SIZE: NonNullable<TradeSuggestion["size"]> = {
+    ...SIZE,
+    shares: 200,
+    sharesBeforeVerdict: 700,
+    worstCaseLossVnd: 3_397_600,
+    tradeRiskPct: 0.283133,
+    positionValueVnd: 27_360_000,
+    openRisk: { ...SIZE.openRisk, totalVnd: 3_397_600, totalPct: 0.283133 },
+  };
+  const withSize = (size: NonNullable<TradeSuggestion["size"]>, over: Partial<F2ViewModelInput> = {}) =>
+    buildF2ViewModel(
+      input({ suggestionBySetupId: suggestions({ ok: true, suggestion: suggestion({ size }) }), ...over })
+    ).details.FPT;
+
+  it("PROBE: one panel, one size — every row is on the reduced 200 cp", () => {
+    const detail = withSize(PROBE_SIZE);
     const rows = new Map(detail.sizing.map((r) => [r.key, r.value]));
-    expect(rows.has("Size tham khảo")).toBe(true);
-    expect(rows.has("Khối lượng 30%")).toBe(true);
+    expect(rows.get("Size tham khảo")).toBe("200 cp");
+    expect(rows.get("Trước phán quyết PROBE")).toBe("700 cp");
+    expect(rows.get("Lỗ xấu nhất")).toBe("3,4 tr ₫");
+    expect(rows.get("Rủi ro lệnh")).toBe("0,28% vốn");
+    expect(rows.get("Tổng rủi ro mở")).toBe("3,4 tr ₫ · 0,28% vốn");
+    expect(rows.get("Giá trị vị thế")).toBe("27,4 tr ₫");
+    expect(rows.get("% NAV")).toBe("2,3%");
     expect(detail.sizingNote).toContain("PROBE");
     expect(detail.sizingNote).toContain("30%");
+    expect(detail.sizingNote).toContain("giảm 500 cp");
   });
 
-  it("NO_TRADE đưa khối lượng đề xuất về 0", () => {
-    const detail = buildF2ViewModel(input({ verdictLevel: "NO_TRADE" })).details.FPT;
-    const row = detail.sizing.find((r) => r.key === "Khối lượng 0%");
-    expect(row?.value).toBe("0 cp");
-  });
-
-  it("TRADE giữ nguyên khối lượng chuẩn", () => {
-    const detail = buildF2ViewModel(input({ verdictLevel: "TRADE" })).details.FPT;
-    const standard = detail.sizing.find((r) => r.key === "Size tham khảo")?.value;
-    const applied = detail.sizing.find((r) => r.key === "Khối lượng 100%")?.value;
-    expect(applied).toBe(standard);
+  it("TRADE keeps the size and adds no reduction", () => {
+    const detail = withSize(SIZE, { verdictLevel: "TRADE" });
+    expect(detail.sizing.find((r) => r.key === "Size tham khảo")?.value).toBe("700 cp");
+    expect(detail.sizingNote).toContain("giữ nguyên");
   });
 
   it("hiện size của gợi ý lệnh, không tự tính lại từ giá thô của ứng viên", () => {
-    const detail = buildF2ViewModel(input()).details.FPT;
+    const detail = buildF2ViewModel(input({ verdictLevel: null, verdictAllocation: null })).details.FPT;
     const rows = new Map(detail.sizing.map((r) => [r.key, r.value]));
     expect(rows.get("Size tham khảo")).toBe("700 cp");
     expect(detail.systemShares).toBe(700);
@@ -364,31 +379,27 @@ describe("định cỡ vị thế theo phán quyết", () => {
     expect(rows.get("Rủi ro lệnh")).toBe("0,99% vốn");
     expect(rows.get("Ràng buộc")).toBe("Ngân sách rủi ro");
     expect(rows.get("Tổng rủi ro mở")).toBe("11,9 tr ₫ · 0,99% vốn");
+    // 95,760,000 / 1.2 tỷ = 7.98%
+    expect(rows.get("Giá trị vị thế")).toBe("95,8 tr ₫");
+    expect(rows.get("% NAV")).toBe("8,0%");
     expect(detail.sizingWarnings).toEqual([]);
   });
 
+  it("'Rủi ro mỗi lệnh' is the risk the size was built on, after the tier multiplier", () => {
+    // Tier A: 1% of 1.2 tỷ = 12,000,000 đ. Tier B: 0.5% → 6,000,000 đ.
+    expect(withSize(SIZE).sizing.find((r) => r.key === "Rủi ro mỗi lệnh")?.value).toBe("1,00% · 12,0 tr ₫");
+    const tierB = withSize({ ...SIZE, riskPerTradePct: 0.005, riskBudgetVnd: 6_000_000 });
+    expect(tierB.sizing.find((r) => r.key === "Rủi ro mỗi lệnh")?.value).toBe("0,50% · 6,0 tr ₫");
+  });
+
   it("nêu tên trần đang chặn size", () => {
-    const detail = buildF2ViewModel(
-      input({
-        suggestionBySetupId: suggestions({
-          ok: true,
-          suggestion: suggestion({ size: { ...SIZE, bindingCap: "liquidity" } }),
-        }),
-      })
-    ).details.FPT;
+    const detail = withSize({ ...SIZE, bindingCap: "liquidity" });
     expect(detail.sizing.find((r) => r.key === "Ràng buộc")?.value).toBe("Trần thanh khoản");
   });
 
   it("size 0 cp thì hiện lý do, không giấu", () => {
     const reason = "Khối lượng tính được 67 cp, chưa tới 1 lô 100 cp: …";
-    const detail = buildF2ViewModel(
-      input({
-        suggestionBySetupId: suggestions({
-          ok: true,
-          suggestion: suggestion({ size: { ...SIZE, shares: 0, zeroShareReason: reason } }),
-        }),
-      })
-    ).details.FPT;
+    const detail = withSize({ ...SIZE, shares: 0, sharesBeforeVerdict: 0, zeroShareReason: reason });
     expect(detail.sizing.find((r) => r.key === "Size tham khảo")?.value).toBe("0 cp");
     expect(detail.sizingWarnings).toEqual([reason]);
   });
@@ -421,15 +432,7 @@ describe("định cỡ vị thế theo phán quyết", () => {
 
   it("chưa có vốn tài khoản thì CHẶN tính, không rơi về giá trị mặc định", () => {
     const detail = buildF2ViewModel(
-      input({
-        sizing: {
-          equityVnd: null,
-          baseRiskPct: null,
-          maxTradePct: null,
-          liquidityCapPct: null,
-          currentExposureVnd: 0,
-        },
-      })
+      input({ sizing: { equityVnd: null, unavailable: "NO_EQUITY" } })
     ).details.FPT;
     expect(detail.sizing).toEqual([]);
     expect(detail.systemShares).toBeNull();
@@ -440,19 +443,23 @@ describe("định cỡ vị thế theo phán quyết", () => {
     // 0 nghĩa là "đang không giữ gì" và cho khối lượng lớn nhất có thể; nếu truy
     // vấn hỏng mà vẫn dùng 0 thì màn đề xuất khối lượng CAO HƠN trần server áp.
     const detail = buildF2ViewModel(
-      input({
-        sizing: {
-          equityVnd: 500_000_000,
-          baseRiskPct: null,
-          maxTradePct: null,
-          liquidityCapPct: null,
-          currentExposureVnd: null,
-        },
-      })
+      input({ sizing: { equityVnd: 500_000_000, unavailable: "OPEN_TRADES_UNREADABLE" } })
     ).details.FPT;
     expect(detail.sizing).toEqual([]);
     expect(detail.systemShares).toBeNull();
     expect(detail.sizingBlocked).toContain("vị thế đang mở");
+  });
+
+  it("không đọc được giá trị giao dịch bình quân thì CHẶN, như server khi ghi lệnh", () => {
+    // Size without the liquidity cap would be a number the server refuses to log.
+    const detail = buildF2ViewModel(
+      input({ sizing: { equityVnd: 500_000_000, unavailable: "LIQUIDITY_UNREADABLE" } })
+    ).details.FPT;
+    expect(detail.sizing).toEqual([]);
+    expect(detail.systemShares).toBeNull();
+    expect(detail.sizingBlocked).toBe(
+      "Không đọc được giá trị giao dịch bình quân 20 phiên nên không kiểm được trần thanh khoản: size tham khảo chưa tính được. Server cũng không ghi lệnh khi thiếu số này."
+    );
   });
 
   it("gợi ý không tính được thì không có size, và nói lý do", () => {
@@ -472,12 +479,12 @@ describe("định cỡ vị thế theo phán quyết", () => {
     ]);
   });
 
-  it("không có phán quyết thì không thêm hàng khối lượng theo phán quyết", () => {
+  it("không có phán quyết thì không thêm hàng trước phán quyết", () => {
     const detail = buildF2ViewModel(
       input({ verdictLevel: null, verdictAllocation: null })
     ).details.FPT;
     expect(detail.sizing.some((r) => r.key === "Size tham khảo")).toBe(true);
-    expect(detail.sizing.some((r) => /Khối lượng \d+%/.test(r.key))).toBe(false);
+    expect(detail.sizing.some((r) => r.key.startsWith("Trước phán quyết"))).toBe(false);
     expect(detail.sizingNote).toBeNull();
   });
 });

@@ -27,7 +27,7 @@ _Avoid_: exposure (khi ý là rủi ro), size
 Khoảng lỗ vượt quá mức stop, bằng một biên độ sàn của sàn niêm yết. Nó tồn tại vì ở VN giá thường mở gap xuyên qua stop.
 
 **Tổng rủi ro mở** (Open risk):
-Tổng rủi ro lệnh của mọi vị thế tiền thật đang mở.
+Tổng rủi ro lệnh của mọi vị thế tiền thật đang mở. Mỗi lệnh tính (giá vào − stop + đệm gap theo sàn của mã) × khối lượng, cùng cơ sở với gợi ý lệnh. Lệnh chưa có stop là rủi ro chưa biết, không phải 0.
 _Avoid_: exposure, tổng tỷ trọng
 
 **Exposure**:
