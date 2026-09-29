@@ -9,6 +9,19 @@ import type { PrismaClient } from "@/generated/prisma/client";
  *   • `{ ok: false }` — TRUY VẤN HỎNG. Coi đây là "không có ADV" thì server lặng
  *     lẽ bỏ trần trong khi màn hình vẫn áp ⇒ server LỎNG HƠN màn.
  */
+/**
+ * Hàng ADV cũ hơn phiên mốc quá số ngày lịch này thì không dùng (coi như không
+ * có ADV). `symbolMarketContextDaily` được ghi mỗi phiên, nên một hàng cũ hơn
+ * một tháng không còn là GTGD 20 phiên của phiên mốc; giới hạn này cũng giữ truy
+ * vấn batch không quét toàn bộ lịch sử. Áp CHUNG cho bản một mã và bản batch để
+ * màn hình và server action vẫn ra cùng một con số.
+ */
+export const ADV_ROW_MAX_AGE_DAYS = 30;
+
+function windowStart(sessionDate: Date): Date {
+  return new Date(sessionDate.getTime() - ADV_ROW_MAX_AGE_DAYS * 86_400_000);
+}
+
 export type AdvLookup = { ok: true; value: number | null } | { ok: false; error: string };
 
 /**
@@ -29,7 +42,7 @@ export async function loadSymbolAdvVnd(
 ): Promise<AdvLookup> {
   try {
     const row = await prisma.symbolMarketContextDaily.findFirst({
-      where: { symbolId, sessionDate: { lte: sessionDate } },
+      where: { symbolId, sessionDate: { lte: sessionDate, gte: windowStart(sessionDate) } },
       orderBy: { sessionDate: "desc" },
       select: { close: true, volMa20: true },
     });
@@ -64,11 +77,15 @@ export async function loadSymbolAdvVndBatch(
     (max, t) => (t.sessionDate > max ? t.sessionDate : max),
     targets[0]!.sessionDate
   );
+  const earliestTarget = targets.reduce(
+    (min, t) => (t.sessionDate < min ? t.sessionDate : min),
+    targets[0]!.sessionDate
+  );
   try {
     const rows = await prisma.symbolMarketContextDaily.findMany({
       where: {
         symbolId: { in: targets.map((t) => t.symbolId) },
-        sessionDate: { lte: latestCutoff },
+        sessionDate: { lte: latestCutoff, gte: windowStart(earliestTarget) },
       },
       orderBy: { sessionDate: "desc" },
       select: { symbolId: true, sessionDate: true, close: true, volMa20: true },
@@ -77,8 +94,12 @@ export async function loadSymbolAdvVndBatch(
     for (const target of targets) {
       // `rows` đã sắp giảm dần theo phiên nên hàng đầu tiên khớp là hàng mới nhất
       // không vượt mốc của mã đó.
+      const from = windowStart(target.sessionDate);
       const row = rows.find(
-        (r) => r.symbolId === target.symbolId && r.sessionDate <= target.sessionDate
+        (r) =>
+          r.symbolId === target.symbolId &&
+          r.sessionDate <= target.sessionDate &&
+          r.sessionDate >= from
       );
       map.set(
         target.symbolId,

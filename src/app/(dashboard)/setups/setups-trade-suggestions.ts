@@ -5,7 +5,6 @@ import { fetchStockBarsGroupedAscThroughDate } from "@/lib/setup-health/load-bar
 import { loadProspectiveCount } from "@/lib/evidence/prospective-count";
 import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
-import { loadSymbolAdvVndBatch } from "@/lib/trades/symbol-adv";
 import {
   buildTradeSuggestion,
   type TradeSuggestionResult,
@@ -36,23 +35,25 @@ export type TradeSuggestionMarketFacts = {
   expectedSession: Date | null;
   /** Live Gate 1 level; null when it could not be evaluated. */
   gate1Level: Gate1Level | null;
+  /**
+   * 20-session average traded value by symbol id, at each setup's own session,
+   * as the page already loads it for sizing (`safeLoadPositionSizingDefaults`).
+   * Reused rather than read again; a missing entry reads as "chưa đánh giá được".
+   */
+  advBySymbolId: ReadonlyMap<string, number | null>;
 };
 
 export type LoadedTradeSuggestions = {
   bySetupId: Map<string, TradeSuggestionResult>;
   /** Registry count; `null` = could not be read ("N không rõ"). */
   prospectiveN: number | null;
-  /**
-   * Bars/exchange lookup failure (candidates then show "không đủ dữ liệu"),
-   * and/or ADV lookup failure (the liquidity risk then reads "chưa đánh giá được").
-   */
+  /** Bars/exchange lookup failure. Candidates then show "không đủ dữ liệu". */
   error: string | null;
 };
 
 /**
- * Edge of the trade suggestion: loads bars, exchange, the 20-session average
- * traded value and the prospective count, then hands them with the market facts
- * to the pure builder. A failed lookup leaves the map empty
+ * Edge of the trade suggestion: loads bars, exchange and the prospective count,
+ * then hands them with the market facts and the ADV to the pure builder. A failed lookup leaves the map empty
  * rather than inventing inputs.
  *
  * Bars are loaded through `latestSession` (the newest stored bar), not just the
@@ -81,16 +82,8 @@ export async function loadTradeSuggestions(
   const from = new Date(oldestSetup.getTime() - BAR_LOOKBACK_DAYS * 86_400_000);
   const symbolIds = [...new Set(candidates.map((c) => c.symbolId))];
 
-  // ADV at the as-of session, the one the suggestion describes. A failed lookup
-  // is reported, and every symbol then carries the "liquidity unknown" risk.
-  const advPromise = loadSymbolAdvVndBatch(
-    prisma,
-    symbolIds.map((symbolId) => ({ symbolId, sessionDate: through }))
-  );
-
-  const [prospectiveN, adv, loaded] = await Promise.all([
+  const [prospectiveN, loaded] = await Promise.all([
     prospectiveNPromise,
-    advPromise,
     Promise.all([
       fetchStockBarsGroupedAscThroughDate(prisma, symbolIds, through, from),
       prisma.stockSymbol.findMany({
@@ -121,7 +114,8 @@ export async function loadTradeSuggestions(
             pullbackZoneHigh: c.pullbackZoneHigh,
             stopLevel: c.stopLevel,
             barDate: c.barDate,
-            tier: c.quality === "A" ? "A" : "B",
+            // Anything but A or B is not guessed as B: the tier risk is skipped.
+            tier: c.quality === "A" || c.quality === "B" ? c.quality : null,
             reasons: parseSetupCandidateReasons(c.reasons).lines,
           },
           bars: loaded.bars.get(c.symbolId) ?? [],
@@ -129,11 +123,10 @@ export async function loadTradeSuggestions(
           prospectiveN,
           gate1Level: market.gate1Level,
           expectedSession: market.expectedSession,
-          advVnd: adv.ok ? (adv.map.get(c.symbolId) ?? null) : null,
+          advVnd: market.advBySymbolId.get(c.symbolId) ?? null,
         })
       );
     }
   }
-  const errors = [loaded.error, adv.ok ? null : `GTGD 20 phiên cho gợi ý lệnh: ${adv.error}`];
-  return { bySetupId, prospectiveN, error: errors.filter(Boolean).join("\n") || null };
+  return { bySetupId, prospectiveN, error: loaded.error };
 }

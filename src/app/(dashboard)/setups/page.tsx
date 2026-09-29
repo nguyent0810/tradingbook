@@ -15,7 +15,7 @@ import { fmtSessionDate, fmtSessionStamp } from "@/lib/format/vn";
 import { scanBehindMarketNotice } from "@/lib/terminal/scan-session-staleness";
 import type { Gate1Level } from "@/lib/scanner/gate2/types";
 import { safeLoadPositionSizingDefaults } from "./setups-position-sizing-defaults";
-import { reasonsToStrings } from "./setups-shared-helpers";
+import { parseSetupCandidateReasons } from "@/lib/scanner/setup-candidate-reasons";
 import { loadTradeSuggestions } from "./setups-trade-suggestions";
 import {
   loadRsDiagnosticsForSetupsCached,
@@ -65,6 +65,7 @@ async function SetupsContent() {
       latestSession: base.latestEquityBarSession,
       expectedSession: base.expectedSession,
       gate1Level: readLiveGate1(regime).level,
+      advBySymbolId: sizingDefaults.advBySymbolId,
     }),
   ]);
   const closesBySymbolId = spark.data;
@@ -86,7 +87,7 @@ async function SetupsContent() {
 
   const reasonLinesBySymbol: Record<string, string[]> = {};
   for (const candidate of candidatesWithHealth) {
-    reasonLinesBySymbol[candidate.symbolKey] = reasonsToStrings(candidate.reasons);
+    reasonLinesBySymbol[candidate.symbolKey] = parseSetupCandidateReasons(candidate.reasons).lines;
   }
 
   const scanLog = base.latest
